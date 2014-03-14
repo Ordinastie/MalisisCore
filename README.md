@@ -1,4 +1,0 @@
-MalisisCore
-===========
-
-Rendering API
