@@ -13,7 +13,8 @@ import net.minecraftforge.common.ForgeDirection;
 
 import org.lwjgl.opengl.GL11;
 
-public class BaseRenderer {
+public class BaseRenderer
+{
 	protected static final int TYPE_WORLD = 0;
 	protected static final int TYPE_INVENTORY = 1;
 
@@ -31,12 +32,14 @@ public class BaseRenderer {
 	protected RenderParameters shapeParams;
 	protected RenderParameters params;
 
-	public BaseRenderer() {
+	public BaseRenderer()
+	{
 		this.t = Tessellator.instance;
 	}
 
 	//#region set()
-	public BaseRenderer reset() {
+	public BaseRenderer reset()
+	{
 		this.world = null;
 		this.block = null;
 		this.blockMetadata = 0;
@@ -46,8 +49,8 @@ public class BaseRenderer {
 		return this;
 	}
 
-	public BaseRenderer set(IBlockAccess world, Block block, int x, int y,
-			int z, int metadata) {
+	public BaseRenderer set(IBlockAccess world, Block block, int x, int y, int z, int metadata)
+	{
 		this.world = world;
 		this.block = block;
 		this.blockMetadata = metadata;
@@ -57,40 +60,48 @@ public class BaseRenderer {
 		return this;
 	}
 
-	public BaseRenderer set(Block block) {
+	public BaseRenderer set(Block block)
+	{
 		return set(world, block, x, y, z, blockMetadata);
 	}
 
-	public BaseRenderer set(int blockMetadata) {
+	public BaseRenderer set(int blockMetadata)
+	{
 		return set(world, block, x, y, z, blockMetadata);
 	}
 
-	public BaseRenderer set(Block block, int blockMetadata) {
+	public BaseRenderer set(Block block, int blockMetadata)
+	{
 		return set(world, block, x, y, z, blockMetadata);
 	}
 
-	public BaseRenderer set(int x, int y, int z) {
+	public BaseRenderer set(int x, int y, int z)
+	{
 		return set(world, block, x, y, z, blockMetadata);
 	}
 
-	//#end set()
+	//#end
 
 	//#region ISBRH
-	public void renderInventoryBlock() {
+	public void renderInventoryBlock()
+	{
 		renderInventoryBlock(null);
 	}
 
-	public void renderInventoryBlock(RenderParameters rp) {
+	public void renderInventoryBlock(RenderParameters rp)
+	{
 		prepare(TYPE_INVENTORY);
 		drawShape(Shape.Cube, rp);
 		clean();
 	}
 
-	public void renderWorldBlock() {
+	public void renderWorldBlock()
+	{
 		renderWorldBlock(null);
 	}
 
-	public void renderWorldBlock(RenderParameters rp) {
+	public void renderWorldBlock(RenderParameters rp)
+	{
 		prepare(TYPE_WORLD);
 		drawShape(Shape.Cube, rp);
 		clean();
@@ -99,31 +110,41 @@ public class BaseRenderer {
 	//#end ISBRH
 
 	//#region prepare()
-	public void prepare(int typeRender) {
+	public void prepare(int typeRender)
+	{
 		this.typeRender = typeRender;
-		if (typeRender == TYPE_WORLD) {
+		if (typeRender == TYPE_WORLD)
+		{
 			tessellatorShift();
-		} else if (typeRender == TYPE_INVENTORY) {
+		}
+		else if (typeRender == TYPE_INVENTORY)
+		{
 			GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
 			t.startDrawingQuads();
 		}
 	}
 
-	public void next() {
+	public void next()
+	{
 		t.draw();
 		t.startDrawingQuads();
 	}
 
-	public void clean() {
-		if (typeRender == TYPE_WORLD) {
+	public void clean()
+	{
+		if (typeRender == TYPE_WORLD)
+		{
 			tessellatorUnshift();
-		} else if (typeRender == TYPE_INVENTORY) {
+		}
+		else if (typeRender == TYPE_INVENTORY)
+		{
 			t.draw();
 			GL11.glTranslatef(0.5F, 0.5F, 0.5F);
 		}
 	}
 
-	public void tessellatorShift() {
+	public void tessellatorShift()
+	{
 		if (isShifted)
 			return;
 
@@ -131,7 +152,8 @@ public class BaseRenderer {
 		t.addTranslation(x, y, z);
 	}
 
-	public void tessellatorUnshift() {
+	public void tessellatorUnshift()
+	{
 		if (!isShifted)
 			return;
 
@@ -146,7 +168,8 @@ public class BaseRenderer {
 	 * 
 	 * @param renderer
 	 */
-	public void renderStandard(RenderBlocks renderer) {
+	public void renderStandard(RenderBlocks renderer)
+	{
 		if (renderer == null)
 			return;
 
@@ -164,7 +187,8 @@ public class BaseRenderer {
 	 * 
 	 * @param shape
 	 */
-	public void drawShape(Shape shape) {
+	public void drawShape(Shape shape)
+	{
 		drawShape(shape, shape.getParameters());
 	}
 
@@ -174,11 +198,13 @@ public class BaseRenderer {
 	 * @param shape
 	 * @param rp
 	 */
-	public void drawShape(Shape s, RenderParameters rp) {
+	public void drawShape(Shape s, RenderParameters rp)
+	{
 		shape = new Shape(s);
 		shapeParams = new RenderParameters(rp);
 
-		for (Face face : s.getFaces()) {
+		for (Face face : s.getFaces())
+		{
 			if (shouldRenderFace(face))
 				drawFace(face, face.getParameters());
 		}
@@ -189,7 +215,8 @@ public class BaseRenderer {
 	 * 
 	 * @param face
 	 */
-	public void drawFace(Face face) {
+	public void drawFace(Face face)
+	{
 		drawFace(face, face.getParameters());
 	}
 
@@ -199,20 +226,22 @@ public class BaseRenderer {
 	 * @param f
 	 * @param rp
 	 */
-	protected void drawFace(Face f, RenderParameters rp) {
+	protected void drawFace(Face f, RenderParameters rp)
+	{
 		face = new Face(f);
 		params = RenderParameters.merge(shapeParams, rp);
 
 		// icon
 		Icon icon = params.icon;
-		if (block != null && icon == null) {
+		if (block != null && icon == null)
+		{
 			int side = 0;
 			if (params.textureSide != null)
 				side = params.textureSide.ordinal();
 			icon = block.getIcon(side, blockMetadata);
 		}
 
-		if (params.interpolateUV)
+		if (params.interpolateUV && params.textureSide != null)
 			interpolateUV(getRenderBounds());
 
 		// texture
@@ -254,7 +283,8 @@ public class BaseRenderer {
 	 * 
 	 * @param vertexes
 	 */
-	protected void drawVertexes(Vertex[] vertexes) {
+	protected void drawVertexes(Vertex[] vertexes)
+	{
 		for (int i = 0; i < vertexes.length; i++)
 			drawVertex(vertexes[i]);
 	}
@@ -264,7 +294,8 @@ public class BaseRenderer {
 	 * 
 	 * @param vertex
 	 */
-	protected void drawVertex(Vertex vertex) {
+	protected void drawVertex(Vertex vertex)
+	{
 		t.setColorRGBA_I(vertex.getColor(), vertex.getAlpha());
 		t.setBrightness(vertex.getBrightness());
 
@@ -277,7 +308,8 @@ public class BaseRenderer {
 	 * 
 	 * @param side
 	 */
-	protected boolean shouldRenderFace(Face face) {
+	protected boolean shouldRenderFace(Face face)
+	{
 		if (typeRender == TYPE_INVENTORY || world == null || block == null)
 			return true;
 		if (shapeParams.renderAllFaces)
@@ -292,7 +324,8 @@ public class BaseRenderer {
 		return b;
 	}
 
-	protected void interpolateUV(double[][] bounds) {
+	protected void interpolateUV(double[][] bounds)
+	{
 		float x = (float) bounds[0][0];
 		float X = (float) bounds[1][0];
 		float Y = 1 - (float) bounds[0][1];
@@ -300,31 +333,33 @@ public class BaseRenderer {
 		float z = (float) bounds[0][2];
 		float Z = (float) bounds[1][2];
 
-		for (int i = 0; i < params.uvFactor.length; i++) {
+		for (int i = 0; i < params.uvFactor.length; i++)
+		{
 			float[] uv = params.uvFactor[i];
-			switch (params.textureSide) {
-			case NORTH:
-				uv[0] = limitUV(uv[0], 1 - X, 1 - x);
-				uv[1] = limitUV(uv[1], y, Y);
-				break;
-			case SOUTH:
-				uv[0] = limitUV(uv[0], x, X);
-				uv[1] = limitUV(uv[1], y, Y);
-				break;
-			case EAST:
-				uv[0] = limitUV(uv[0], 1 - Z, 1 - z);
-				uv[1] = limitUV(uv[1], y, Y);
-				break;
-			case WEST:
-				uv[0] = limitUV(uv[0], z, Z);
-				uv[1] = limitUV(uv[1], y, Y);
-				break;
-			case UP:
-			case DOWN:
-				uv[0] = limitUV(uv[0], x, X);
-				uv[1] = limitUV(uv[1], z, Z);
-			default:
-				break;
+			switch (params.textureSide)
+			{
+				case NORTH:
+					uv[0] = limitUV(uv[0], 1 - X, 1 - x);
+					uv[1] = limitUV(uv[1], y, Y);
+					break;
+				case SOUTH:
+					uv[0] = limitUV(uv[0], x, X);
+					uv[1] = limitUV(uv[1], y, Y);
+					break;
+				case EAST:
+					uv[0] = limitUV(uv[0], 1 - Z, 1 - z);
+					uv[1] = limitUV(uv[1], y, Y);
+					break;
+				case WEST:
+					uv[0] = limitUV(uv[0], z, Z);
+					uv[1] = limitUV(uv[1], y, Y);
+					break;
+				case UP:
+				case DOWN:
+					uv[0] = limitUV(uv[0], x, X);
+					uv[1] = limitUV(uv[1], z, Z);
+				default:
+					break;
 			}
 			params.uvFactor[i] = uv;
 		}
@@ -337,7 +372,8 @@ public class BaseRenderer {
 	 * @param min
 	 * @param max
 	 */
-	protected float limitUV(float f, float min, float max) {
+	protected float limitUV(float f, float min, float max)
+	{
 		if (max - min < 1)
 			return Math.max(Math.min(f, max), min);
 		else
@@ -348,12 +384,14 @@ public class BaseRenderer {
 	 * Calculate the ambient occlusion for each vertexes and also apply the side
 	 * dependent shade.
 	 */
-	protected void calcFaceColor() {
+	protected void calcFaceColor()
+	{
 		if (world == null)
 			return;
 
 		Vertex[] vertexes = face.getVertexes();
-		for (int i = 0; i < vertexes.length; i++) {
+		for (int i = 0; i < vertexes.length; i++)
+		{
 			calcVertexColor(vertexes[i], params.aoMatrix[i]);
 		}
 	}
@@ -368,7 +406,8 @@ public class BaseRenderer {
 	 * @param vertex
 	 * @param aoMatrix
 	 */
-	protected void calcVertexColor(Vertex vertex, int[][] aoMatrix) {
+	protected void calcVertexColor(Vertex vertex, int[][] aoMatrix)
+	{
 		float factor = getBlockAmbientOcclusion(world, x
 				+ params.direction.offsetX, y + params.direction.offsetY, z
 				+ params.direction.offsetZ);
@@ -379,8 +418,7 @@ public class BaseRenderer {
 
 		factor *= params.colorFactor;
 
-		int color = params.usePerVertexColor ? vertex.getColor()
-				: params.colorMultiplier;
+		int color = params.usePerVertexColor ? vertex.getColor() : params.colorMultiplier;
 
 		int r = (int) ((color >> 16 & 255) * factor / (aoMatrix.length + 1));
 		int g = (int) ((color >> 8 & 255) * factor / (aoMatrix.length + 1));
@@ -395,7 +433,8 @@ public class BaseRenderer {
 	 * Else, the brightness is determined base on <i>params.offset</i> and
 	 * <i>getBlockBounds()</i>
 	 */
-	protected int getBaseBrightness() {
+	protected int getBaseBrightness()
+	{
 		if (typeRender == TYPE_INVENTORY || world == null
 				|| !params.useBlockBrightness)
 			return params.brightness;
@@ -424,13 +463,15 @@ public class BaseRenderer {
 	/**
 	 * Calculate the ambient occlusion brightness for the face
 	 */
-	protected void calcFaceBrightness() {
+	protected void calcFaceBrightness()
+	{
 		if (world == null)
 			return;
 
 		Vertex[] vertexes = face.getVertexes();
 
-		for (int i = 0; i < vertexes.length; i++) {
+		for (int i = 0; i < vertexes.length; i++)
+		{
 			calcVertexBrightness(vertexes[i], getBaseBrightness(),
 					params.aoMatrix[i]);
 		}
@@ -445,8 +486,8 @@ public class BaseRenderer {
 	 * @param baseBrightness
 	 * @param aoMatrix
 	 */
-	protected void calcVertexBrightness(Vertex vertex, int baseBrightness,
-			int[][] aoMatrix) {
+	protected void calcVertexBrightness(Vertex vertex, int baseBrightness, int[][] aoMatrix)
+	{
 		int[] b = new int[Math.max(3, aoMatrix.length)];
 
 		for (int i = 0; i < aoMatrix.length; i++)
@@ -460,7 +501,8 @@ public class BaseRenderer {
 	 * Do the actual brightness calculation (copied from
 	 * net.minecraft.client.renderer.BlocksRenderer.java)
 	 */
-	protected int getAoBrightness(int b1, int b2, int b3, int base) {
+	protected int getAoBrightness(int b1, int b2, int b3, int base)
+	{
 		if (b1 == 0)
 			b1 = base;
 
@@ -484,8 +526,8 @@ public class BaseRenderer {
 	 * @param y
 	 * @param z
 	 */
-	protected float getBlockAmbientOcclusion(IBlockAccess world, int x, int y,
-			int z) {
+	protected float getBlockAmbientOcclusion(IBlockAccess world, int x, int y, int z)
+	{
 		Block block = Block.blocksList[world.getBlockId(x, y, z)];
 		if (block == null)
 			return 1.0F;
@@ -503,8 +545,8 @@ public class BaseRenderer {
 	 * @param y
 	 * @param z
 	 */
-	protected int getMixedBrightnessForBlock(IBlockAccess world, int x, int y,
-			int z) {
+	protected int getMixedBrightnessForBlock(IBlockAccess world, int x, int y, int z)
+	{
 		return world.getLightBrightnessForSkyBlocks(x, y, z, 0);
 	}
 
@@ -514,7 +556,8 @@ public class BaseRenderer {
 	 * 
 	 * @return
 	 */
-	protected double[][] getRenderBounds() {
+	protected double[][] getRenderBounds()
+	{
 		if (block == null || !params.useBlockBounds)
 			return params.renderBounds;
 
@@ -531,7 +574,8 @@ public class BaseRenderer {
 	 * 
 	 * @param bounds
 	 */
-	protected void calcVertexesPosition(double[][] bounds) {
+	protected void calcVertexesPosition(double[][] bounds)
+	{
 		for (Vertex v : face.getVertexes())
 			v.interpolateCoord(bounds);
 	}
