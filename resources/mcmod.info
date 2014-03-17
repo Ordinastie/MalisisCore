@@ -1,0 +1,18 @@
+[
+{
+  "modid": "malisiscore",
+  "name": "Malisis' Core",
+  "description": "Rendering API",
+  "version": "1.6.4-0.5",
+  "logoFile": "malisiscore.png",
+  "mcversion": "1.6.4",
+  "url": "http://github.com/ordinastie",
+  "updateUrl": "",
+  "authors": [ "Ordinastie" ],
+  "parent":"",
+  "screenshots": [],
+  "dependencies": [
+         "mod_MinecraftForge"
+]
+}
+]
