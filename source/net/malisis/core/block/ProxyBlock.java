@@ -57,7 +57,7 @@ public abstract class ProxyBlock extends Block
 			{
 				try
 				{
-					if (!Modifier.isStatic(f.getModifiers()) && (copyId || !f.getName().equals("blockID")))
+					if (!Modifier.isStatic(f.getModifiers()) && (copyId || (!f.getName().equals("blockID") && !f.getName().equals("field_71990_ca"))))
 					{
 						f.setAccessible(true);
 						f.set(this, f.get(block));

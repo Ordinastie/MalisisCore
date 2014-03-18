@@ -1,7 +1,9 @@
 package net.malisis.core;
 
+import net.minecraft.block.Block;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatMessageComponent;
+import net.minecraft.world.World;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.network.NetworkMod;
 
@@ -25,6 +27,13 @@ public class MalisisCore
 	{
 		ChatMessageComponent msg = new ChatMessageComponent().addText(text.toString());
 		MinecraftServer.getServer().getConfigurationManager().sendChatMsg(msg);
+	}
+	
+	public static String Block(World world, int x, int y, int z)
+	{
+		int id = world.getBlockId(x, y, z);
+		Block b = Block.blocksList[id];
+		return b.getUnlocalizedName() + " (" + id + "/" + b.blockID + ")";
 	}
 
 }
