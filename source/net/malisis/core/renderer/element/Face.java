@@ -2,70 +2,10 @@ package net.malisis.core.renderer.element;
 
 import java.util.HashMap;
 
-import net.malisis.core.renderer.preset.FaceData;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 
 public class Face
 {
-    /** order of vertexes IS important **/
-    //@formatter:off
-
-    //regular faces
-    public static Face Bottom = new Face(new Vertex[] { Vertex.BottomNorthEast, Vertex.BottomSouthEast, Vertex.BottomSouthWest, Vertex.BottomNorthWest});
-    public static Face Top = new Face(new Vertex[] { Vertex.TopNorthWest, Vertex.TopSouthWest, Vertex.TopSouthEast, Vertex.TopNorthEast});
-    public static Face West = new Face(new Vertex[] { Vertex.TopNorthWest, Vertex.BottomNorthWest, Vertex.BottomSouthWest, Vertex.TopSouthWest});
-    public static Face North = new Face(new Vertex[] { Vertex.TopNorthEast, Vertex.BottomNorthEast, Vertex.BottomNorthWest, Vertex.TopNorthWest});
-    public static Face East = new Face(new Vertex[] { Vertex.TopSouthEast, Vertex.BottomSouthEast, Vertex.BottomNorthEast, Vertex.TopNorthEast});
-    public static Face South = new Face(new Vertex[] { Vertex.TopSouthWest, Vertex.BottomSouthWest, Vertex.BottomSouthEast, Vertex.TopSouthEast});
-
-    //corners
-    public static Face NorthWest = new Face(new Vertex[] { Vertex.TopNorthEast, Vertex.BottomNorthEast, Vertex.BottomSouthWest, Vertex.TopSouthWest});
-    public static Face NorthEast = new Face(new Vertex[] { Vertex.TopSouthEast, Vertex.BottomSouthEast, Vertex.BottomNorthWest, Vertex.TopNorthWest});
-    public static Face SouthWest = new Face(new Vertex[] { Vertex.TopNorthWest, Vertex.BottomNorthWest, Vertex.BottomSouthEast, Vertex.TopSouthEast});
-    public static Face SouthEast = new Face(new Vertex[] { Vertex.TopSouthWest, Vertex.BottomSouthWest, Vertex.BottomNorthEast, Vertex.TopNorthEast});
-    //slopes
-    public static Face TopNorth = new Face(new Vertex[] { Vertex.TopSouthEast, Vertex.BottomNorthEast, Vertex.BottomNorthWest, Vertex.TopSouthWest});
-    public static Face TopEast = new Face(new Vertex[] { Vertex.TopSouthWest, Vertex.BottomSouthEast, Vertex.BottomNorthEast, Vertex.TopNorthWest});
-    public static Face TopSouth = new Face(new Vertex[] { Vertex.TopNorthWest, Vertex.BottomSouthWest, Vertex.BottomSouthEast, Vertex.TopNorthEast});
-    public static Face TopWest = new Face(new Vertex[] { Vertex.TopNorthEast, Vertex.BottomNorthWest, Vertex.BottomSouthWest, Vertex.TopSouthEast});
-    //corner slopes
-    public static Face TopSouthEast = new Face(new Vertex[] { Vertex.TopNorthWest, Vertex.BottomSouthWest, Vertex.BottomNorthEast, Vertex.TopNorthWest});
-    public static Face TopSouthWest = new Face(new Vertex[] { Vertex.TopNorthEast, Vertex.BottomNorthWest, Vertex.BottomSouthEast, Vertex.TopNorthEast});
-    public static Face TopNorthWest = new Face(new Vertex[] { Vertex.TopSouthEast, Vertex.BottomNorthEast, Vertex.BottomSouthWest, Vertex.TopSouthEast});
-    public static Face TopNorthEast = new Face(new Vertex[] { Vertex.TopSouthWest, Vertex.BottomSouthEast, Vertex.BottomNorthWest, Vertex.TopSouthWest});
-
-    //inverted corner slopes
-    public static Face InvTopSouthEast = new Face(new Vertex[] { Vertex.TopSouthWest, Vertex.BottomSouthEast, Vertex.BottomSouthEast, Vertex.TopNorthEast});
-    public static Face InvTopSouthWest = new Face(new Vertex[] { Vertex.TopNorthWest, Vertex.BottomSouthWest, Vertex.BottomSouthWest, Vertex.TopSouthEast});
-    public static Face InvTopNorthWest = new Face(new Vertex[] { Vertex.TopNorthEast, Vertex.BottomNorthWest, Vertex.BottomNorthWest, Vertex.TopSouthWest});
-    public static Face InvTopNorthEast = new Face(new Vertex[] { Vertex.TopSouthEast, Vertex.BottomNorthEast, Vertex.BottomNorthEast, Vertex.TopNorthWest});
-
-    //top triangles
-    public static Face TriangleTopSouthWest = new Face(new Vertex[] { Vertex.TopSouthEast, Vertex.TopNorthEast, Vertex.TopNorthWest, Vertex.TopNorthWest});
-    public static Face TriangleTopSouthEast = new Face(new Vertex[] { Vertex.TopNorthEast, Vertex.TopNorthWest, Vertex.TopSouthWest, Vertex.TopSouthWest});
-    public static Face TriangleTopNorthWest = new Face(new Vertex[] { Vertex.TopSouthWest, Vertex.TopSouthEast, Vertex.TopNorthEast, Vertex.TopNorthEast});
-    public static Face TriangleTopNorthEast = new Face(new Vertex[] { Vertex.TopNorthWest, Vertex.TopSouthWest, Vertex.TopSouthEast, Vertex.TopSouthEast});
-    // bottom triangles
-    public static Face TriangleBottomSouthEast = new Face(new Vertex[] { Vertex.BottomSouthWest, Vertex.BottomNorthWest, Vertex.BottomNorthEast, Vertex.BottomNorthEast});
-    public static Face TriangleBottomSouthWest = new Face(new Vertex[] { Vertex.BottomNorthWest, Vertex.BottomNorthEast, Vertex.BottomSouthEast, Vertex.BottomSouthEast});
-    public static Face TriangleBottomNorthWest = new Face(new Vertex[] { Vertex.BottomNorthEast, Vertex.BottomSouthEast, Vertex.BottomSouthWest, Vertex.BottomSouthWest});
-    public static Face TriangleBottomNorthEast = new Face(new Vertex[] { Vertex.BottomSouthEast, Vertex.BottomSouthWest, Vertex.BottomNorthWest, Vertex.BottomNorthWest});
-    //side triangles
-    public static Face TriangleWestTopSouth = new Face(new Vertex[] { Vertex.TopNorthWest, Vertex.BottomNorthWest, Vertex.BottomSouthWest, Vertex.BottomSouthWest});
-    public static Face TriangleEastTopSouth = new Face(new Vertex[] { Vertex.BottomSouthEast, Vertex.BottomNorthEast, Vertex.TopNorthEast, Vertex.TopNorthEast});
-    public static Face TriangleWestTopNorth = new Face(new Vertex[] { Vertex.BottomNorthWest, Vertex.BottomSouthWest, Vertex.TopSouthWest, Vertex.TopSouthWest});
-    public static Face TriangleEastTopNorth = new Face(new Vertex[] { Vertex.TopSouthEast, Vertex.BottomSouthEast, Vertex.BottomNorthEast, Vertex.BottomNorthEast});
-    public static Face TriangleNorthTopWest = new Face(new Vertex[] { Vertex.TopNorthEast, Vertex.BottomNorthEast, Vertex.BottomNorthWest, Vertex.BottomNorthWest});
-    public static Face TriangleSouthTopWest = new Face(new Vertex[] { Vertex.BottomSouthWest, Vertex.BottomSouthEast, Vertex.TopSouthEast, Vertex.TopSouthEast});
-    public static Face TriangleNorthTopEast = new Face(new Vertex[] { Vertex.BottomNorthEast, Vertex.BottomNorthWest, Vertex.TopNorthWest, Vertex.TopNorthWest});
-    public static Face TriangleSouthTopEast = new Face(new Vertex[] { Vertex.TopSouthWest, Vertex.BottomSouthWest, Vertex.BottomSouthEast, Vertex.BottomSouthEast});
-    //@formatter:on
-
-    static
-    {
-        FaceData.load();
-    }
-
     private Vertex[] vertexes;
     private RenderParameters params = new RenderParameters();
 
@@ -75,6 +15,8 @@ public class Face
         this.vertexes = new Vertex[vertexes.length];
         for (int i = 0; i < vertexes.length; i++)
             this.vertexes[i] = new Vertex(vertexes[i]);
+        if(params == null)
+        	params = RenderParameters.Default();
         this.params = new RenderParameters(params);
     }
 
@@ -98,7 +40,7 @@ public class Face
         return vertexes;
     }
 
-    public Face setParams(RenderParameters params)
+    public Face setParameters(RenderParameters params)
     {
         this.params = params;
         return this;
@@ -130,17 +72,17 @@ public class Face
         return this;
     }
 
-    public Face setTexture(Icon icon)
+    public Face setTexture(IIcon icon)
     {
         return setTexture(icon, params.uvFactor, params.flipU, params.flipV);
     }
 
-    public Face setTexture(Icon icon, float[][] uvFactor)
+    public Face setTexture(IIcon icon, float[][] uvFactor)
     {
         return setTexture(icon, uvFactor, params.flipU, params.flipV);
     }
 
-    public Face setTexture(Icon icon, float[][] uvFactor, boolean flippedU, boolean flippedV)
+    public Face setTexture(IIcon icon, float[][] uvFactor, boolean flippedU, boolean flippedV)
     {
     	if(uvFactor == null)
     		return this;

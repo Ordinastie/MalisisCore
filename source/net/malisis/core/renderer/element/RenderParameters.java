@@ -1,7 +1,7 @@
 package net.malisis.core.renderer.element;
 
-import net.minecraft.util.Icon;
-import net.minecraftforge.common.ForgeDirection;
+import net.minecraft.util.IIcon;
+import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * Defines a list of parameters available for rendering. Block Level means the
@@ -27,10 +27,11 @@ public class RenderParameters
 		defaultParameters.calculateBrightness = true;
 		defaultParameters.usePerVertexColor = false;
 		defaultParameters.usePerVertexAlpha = false;
-		defaultParameters.useBlockBrightness = false;
+		defaultParameters.useBlockBrightness = true;
 		defaultParameters.useNormals = false;
 		defaultParameters.colorMultiplier = 0xFFFFFF;
 		defaultParameters.colorFactor = 1.0F;
+		defaultParameters.dynLights = true;
 		defaultParameters.brightness = 15728640;
 		defaultParameters.alpha = 255;
 		defaultParameters.uvFactor = new float[][] { { 0, 0 }, { 0, 1 },
@@ -67,7 +68,7 @@ public class RenderParameters
 	 * Defines an icon to use for the block/face (will override textureSide)
 	 * (Block Level)
 	 */
-	public Icon icon;
+	public IIcon icon;
 	/**
 	 * Defines whether to calculate interpolated textures coordinates depending
 	 * on block bounds (Block Level)
@@ -110,6 +111,10 @@ public class RenderParameters
 	 */
 	public Float colorFactor;
 	/**
+	 * Defines whether to calculate dynamic lighting for the face
+	 */
+	public Boolean dynLights;
+	/**
 	 * Defines brightness of the face (only used if useBlockBrightness = false)
 	 * (Block Level)
 	 */
@@ -125,13 +130,13 @@ public class RenderParameters
 	 */
 	public ForgeDirection direction;
 	/**
-	 * Defines which direction will be used to get the block icon (Face Level)
+	 * Defines which direction will be used to get the block icon. If ForgeDirection.UNKNOWN, no texture will be used (Face Level)
 	 */
 	public ForgeDirection textureSide;
 	/**
 	 * Defines which block to take into account for AO calculation (Face Level)
 	 */
-	public int[][][] aoMatrix = new int[0][0][0];
+	public int[][][] aoMatrix;
 	/**
 	 * Defines UV factor for each vertex (Face Level)
 	 */
@@ -167,6 +172,7 @@ public class RenderParameters
 		useNormals = params.useNormals;
 		colorMultiplier = params.colorMultiplier;
 		colorFactor = params.colorFactor;
+		dynLights = params.dynLights;
 		brightness = params.brightness;
 		alpha = params.alpha;
 		direction = params.direction;
@@ -223,6 +229,8 @@ public class RenderParameters
 			newRp.usePerVertexColor = rp2.usePerVertexColor;
 		if (rp2.usePerVertexAlpha != null)
 			newRp.usePerVertexAlpha = rp2.usePerVertexAlpha;
+		if(rp2.dynLights != null)
+			newRp.dynLights = rp2.dynLights;
 		if (rp2.useBlockBrightness != null)
 			newRp.useBlockBrightness = rp2.useBlockBrightness;
 		if (rp2.useNormals != null)

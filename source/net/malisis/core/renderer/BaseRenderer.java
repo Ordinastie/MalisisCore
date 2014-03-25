@@ -1,22 +1,24 @@
 package net.malisis.core.renderer;
 
+import net.malisis.core.ColoredLight;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
+import net.malisis.core.renderer.preset.ShapePreset;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import org.lwjgl.opengl.GL11;
 
 public class BaseRenderer
 {
-	protected static final int TYPE_WORLD = 0;
-	protected static final int TYPE_INVENTORY = 1;
+	public static final int TYPE_WORLD = 0;
+	public static final int TYPE_INVENTORY = 1;
 
 	protected Tessellator t = Tessellator.instance;
 	protected IBlockAccess world;
@@ -32,12 +34,14 @@ public class BaseRenderer
 	protected RenderParameters shapeParams;
 	protected RenderParameters params;
 
+	protected int baseBrightness;
+
 	public BaseRenderer()
 	{
 		this.t = Tessellator.instance;
 	}
 
-	//#region set()
+	// #region set()
 	public BaseRenderer reset()
 	{
 		this.world = null;
@@ -80,9 +84,9 @@ public class BaseRenderer
 		return set(world, block, x, y, z, blockMetadata);
 	}
 
-	//#end
+	// #end
 
-	//#region ISBRH
+	// #region ISBRH
 	public void renderInventoryBlock()
 	{
 		renderInventoryBlock(null);
@@ -91,7 +95,7 @@ public class BaseRenderer
 	public void renderInventoryBlock(RenderParameters rp)
 	{
 		prepare(TYPE_INVENTORY);
-		drawShape(Shape.Cube, rp);
+		drawShape(ShapePreset.Cube(), rp);
 		clean();
 	}
 
@@ -103,13 +107,13 @@ public class BaseRenderer
 	public void renderWorldBlock(RenderParameters rp)
 	{
 		prepare(TYPE_WORLD);
-		drawShape(Shape.Cube, rp);
+		drawShape(ShapePreset.Cube(), rp);
 		clean();
 	}
 
-	//#end ISBRH
+	// #end ISBRH
 
-	//#region prepare()
+	// #region prepare()
 	public void prepare(int typeRender)
 	{
 		this.typeRender = typeRender;
@@ -161,7 +165,7 @@ public class BaseRenderer
 		t.addTranslation(-x, -y, -z);
 	}
 
-	//#end prepare()
+	// #end prepare()
 
 	/**
 	 * Render the block using the default Minecraft rendering system
@@ -200,13 +204,17 @@ public class BaseRenderer
 	 */
 	public void drawShape(Shape s, RenderParameters rp)
 	{
-		shape = new Shape(s);
+		shape = s;
 		shapeParams = new RenderParameters(rp);
 
 		for (Face face : s.getFaces())
 		{
 			if (shouldRenderFace(face))
+			{
 				drawFace(face, face.getParameters());
+				if (world != null && params.dynLights)
+					drawLightFace(face);
+			}
 		}
 	}
 
@@ -218,6 +226,8 @@ public class BaseRenderer
 	public void drawFace(Face face)
 	{
 		drawFace(face, face.getParameters());
+		if (world != null && params.dynLights)
+			drawLightFace(face);
 	}
 
 	/**
@@ -228,11 +238,11 @@ public class BaseRenderer
 	 */
 	protected void drawFace(Face f, RenderParameters rp)
 	{
-		face = new Face(f);
+		face = f;
 		params = RenderParameters.merge(shapeParams, rp);
 
 		// icon
-		Icon icon = params.icon;
+		IIcon icon = params.icon;
 		if (block != null && icon == null)
 		{
 			int side = 0;
@@ -248,25 +258,11 @@ public class BaseRenderer
 		if (icon != null)
 			face.setTexture(icon, params.uvFactor, params.flipU, params.flipV);
 
-		// color
-		if (typeRender == TYPE_WORLD && params.calculateAOColor)
-			calcFaceColor();
-		else
-			face.setColor(params.colorMultiplier);
-
-		// brightness
-		if (typeRender == TYPE_WORLD && params.calculateBrightness)
-			calcFaceBrightness();
-		else
-			face.setBrightness(getBaseBrightness());
-
-		// alpha
-		if (!params.usePerVertexAlpha)
-			face.setAlpha(params.alpha);
-
 		if (typeRender == TYPE_INVENTORY || params.useNormals)
-			t.setNormal(params.direction.offsetX, params.direction.offsetY,
-					params.direction.offsetZ);
+			t.setNormal(params.direction.offsetX, params.direction.offsetY, params.direction.offsetZ);
+
+		if (typeRender == TYPE_WORLD && params.calculateBrightness)
+			baseBrightness = getBaseBrightness();
 
 		// vertex position
 		if (params.vertexPositionRelativeToRenderBounds)
@@ -278,6 +274,42 @@ public class BaseRenderer
 		drawVertexes(face.getVertexes());
 	}
 
+	protected void drawLightFace(Face face)
+	{
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glDisable(GL11.GL_ALPHA_TEST);
+		
+		int vertexDrawn = 0;
+		
+		for(Vertex vertex : face.getVertexes())
+		{
+			int[] lights = ColoredLight.getLights(world, x + vertex.getX(), y + vertex.getY(), z + vertex.getZ());
+			int light = ColoredLight.computeLights(lights, 0* (baseBrightness >> 4) & 15);
+					
+			if (light != 0)
+				vertexDrawn++;
+			
+			vertex.setBrightness(14 << 4);
+			vertex.setAlpha((int)( ColoredLight.alpha(light) * 0.8F) );
+			vertex.setColor(light & 0xFFFFFF);
+		}
+		
+		
+		if(vertexDrawn != 0)
+		{
+			for(Vertex vertex : face.getVertexes())
+			{
+				t.setColorRGBA_I(vertex.getColor(), vertex.getAlpha());
+				t.setBrightness(vertex.getBrightness());
+		
+				t.addVertexWithUV(vertex.getX(), vertex.getY(), vertex.getZ(), vertex.getU(), vertex.getV());
+			}
+		}
+		
+	//	GL11.glDisable(GL11.GL_BLEND);
+	}
+
 	/***
 	 * Draw an array of vertexes (usually <i>Face.getVertexes()</i>)
 	 * 
@@ -286,7 +318,7 @@ public class BaseRenderer
 	protected void drawVertexes(Vertex[] vertexes)
 	{
 		for (int i = 0; i < vertexes.length; i++)
-			drawVertex(vertexes[i]);
+			drawVertex(vertexes[i], i);
 	}
 
 	/**
@@ -294,13 +326,28 @@ public class BaseRenderer
 	 * 
 	 * @param vertex
 	 */
-	protected void drawVertex(Vertex vertex)
+	protected void drawVertex(Vertex vertex, int count)
 	{
+		// brightness
+		int brightness = baseBrightness;
+		if (typeRender == TYPE_WORLD && params.calculateBrightness)
+			brightness = calcVertexBrightness(vertex, params.aoMatrix[count]);
+		vertex.setBrightness(brightness);
+
+		// color
+		int color = params.colorMultiplier;
+		if (typeRender == TYPE_WORLD && params.calculateAOColor)
+			color = calcVertexColor(vertex, params.aoMatrix[count]);
+		vertex.setColor(color);
+
+		// alpha
+		if (!params.usePerVertexAlpha)
+			vertex.setAlpha(params.alpha);
+
 		t.setColorRGBA_I(vertex.getColor(), vertex.getAlpha());
 		t.setBrightness(vertex.getBrightness());
 
-		t.addVertexWithUV(vertex.getX(), vertex.getY(), vertex.getZ(),
-				vertex.getU(), vertex.getV());
+		t.addVertexWithUV(vertex.getX(), vertex.getY(), vertex.getZ(), vertex.getU(), vertex.getV());
 	}
 
 	/**
@@ -312,14 +359,13 @@ public class BaseRenderer
 	{
 		if (typeRender == TYPE_INVENTORY || world == null || block == null)
 			return true;
-		if (shapeParams.renderAllFaces)
+		if (shapeParams != null && shapeParams.renderAllFaces != null && shapeParams.renderAllFaces)
 			return true;
 		RenderParameters p = face.getParameters();
 		if (p == null || p.direction == null)
 			return true;
 
-		boolean b = block.shouldSideBeRendered(world, x + p.direction.offsetX,
-				y + p.direction.offsetY, z + p.direction.offsetZ,
+		boolean b = block.shouldSideBeRendered(world, x + p.direction.offsetX, y + p.direction.offsetY, z + p.direction.offsetZ,
 				p.direction.ordinal());
 		return b;
 	}
@@ -381,22 +427,6 @@ public class BaseRenderer
 	}
 
 	/**
-	 * Calculate the ambient occlusion for each vertexes and also apply the side
-	 * dependent shade.
-	 */
-	protected void calcFaceColor()
-	{
-		if (world == null)
-			return;
-
-		Vertex[] vertexes = face.getVertexes();
-		for (int i = 0; i < vertexes.length; i++)
-		{
-			calcVertexColor(vertexes[i], params.aoMatrix[i]);
-		}
-	}
-
-	/**
 	 * Calculate the ambient occlusion for a vertex and also apply the side
 	 * dependent shade.<br />
 	 * <b>aoMatrix</b> is the list of block coordinates necessary to compute AO.
@@ -406,15 +436,13 @@ public class BaseRenderer
 	 * @param vertex
 	 * @param aoMatrix
 	 */
-	protected void calcVertexColor(Vertex vertex, int[][] aoMatrix)
+	protected int calcVertexColor(Vertex vertex, int[][] aoMatrix)
 	{
-		float factor = getBlockAmbientOcclusion(world, x
-				+ params.direction.offsetX, y + params.direction.offsetY, z
+		float factor = getBlockAmbientOcclusion(world, x + params.direction.offsetX, y + params.direction.offsetY, z
 				+ params.direction.offsetZ);
 
 		for (int i = 0; i < aoMatrix.length; i++)
-			factor += getBlockAmbientOcclusion(world, x + aoMatrix[i][0], y
-					+ aoMatrix[i][1], z + aoMatrix[i][2]);
+			factor += getBlockAmbientOcclusion(world, x + aoMatrix[i][0], y + aoMatrix[i][1], z + aoMatrix[i][2]);
 
 		factor *= params.colorFactor;
 
@@ -424,7 +452,9 @@ public class BaseRenderer
 		int g = (int) ((color >> 8 & 255) * factor / (aoMatrix.length + 1));
 		int b = (int) ((color & 255) * factor / (aoMatrix.length + 1));
 
-		vertex.setColor(r << 16 | g << 8 | b);
+		color = r << 16 | g << 8 | b;
+
+		return color;
 	}
 
 	/**
@@ -435,8 +465,7 @@ public class BaseRenderer
 	 */
 	protected int getBaseBrightness()
 	{
-		if (typeRender == TYPE_INVENTORY || world == null
-				|| !params.useBlockBrightness)
+		if (typeRender == TYPE_INVENTORY || world == null || !params.useBlockBrightness || params.direction == null)
 			return params.brightness;
 
 		double[][] bounds = getRenderBounds();
@@ -461,23 +490,6 @@ public class BaseRenderer
 	}
 
 	/**
-	 * Calculate the ambient occlusion brightness for the face
-	 */
-	protected void calcFaceBrightness()
-	{
-		if (world == null)
-			return;
-
-		Vertex[] vertexes = face.getVertexes();
-
-		for (int i = 0; i < vertexes.length; i++)
-		{
-			calcVertexBrightness(vertexes[i], getBaseBrightness(),
-					params.aoMatrix[i]);
-		}
-	}
-
-	/**
 	 * Calculate the ambient occlusion brightness for a vertex. <b>aoMatrix</b>
 	 * is the list of block coordinates necessary to compute AO. Only first 3
 	 * blocks are used.<br />
@@ -486,15 +498,18 @@ public class BaseRenderer
 	 * @param baseBrightness
 	 * @param aoMatrix
 	 */
-	protected void calcVertexBrightness(Vertex vertex, int baseBrightness, int[][] aoMatrix)
+	protected int calcVertexBrightness(Vertex vertex, int[][] aoMatrix)
 	{
 		int[] b = new int[Math.max(3, aoMatrix.length)];
 
 		for (int i = 0; i < aoMatrix.length; i++)
-			b[i] += getMixedBrightnessForBlock(world, x + aoMatrix[i][0], y
-					+ aoMatrix[i][1], z + aoMatrix[i][2]);
+			b[i] += getMixedBrightnessForBlock(world, x + aoMatrix[i][0], y + aoMatrix[i][1], z + aoMatrix[i][2]);
 
-		vertex.setBrightness(getAoBrightness(b[0], b[1], b[2], baseBrightness));
+		int brightness = getAoBrightness(b[0], b[1], b[2], baseBrightness);
+
+		
+
+		return brightness;
 	}
 
 	/**
@@ -528,11 +543,11 @@ public class BaseRenderer
 	 */
 	protected float getBlockAmbientOcclusion(IBlockAccess world, int x, int y, int z)
 	{
-		Block block = Block.blocksList[world.getBlockId(x, y, z)];
+		Block block = world.getBlock(x, y, z);
 		if (block == null)
 			return 1.0F;
 
-		return block.getAmbientOcclusionLightValue(world, x, y, z);
+		return block.getAmbientOcclusionLightValue();
 	}
 
 	/**
@@ -547,7 +562,8 @@ public class BaseRenderer
 	 */
 	protected int getMixedBrightnessForBlock(IBlockAccess world, int x, int y, int z)
 	{
-		return world.getLightBrightnessForSkyBlocks(x, y, z, 0);
+		// return world.getLightBrightnessForSkyBlocks(x, y, z, 0);
+		return world.getBlock(x, y, z).getMixedBrightnessForBlock(world, x, y, z);
 	}
 
 	/**
@@ -561,11 +577,8 @@ public class BaseRenderer
 		if (block == null || !params.useBlockBounds)
 			return params.renderBounds;
 
-		return new double[][] {
-				{ block.getBlockBoundsMinX(), block.getBlockBoundsMinY(),
-						block.getBlockBoundsMinZ() },
-				{ block.getBlockBoundsMaxX(), block.getBlockBoundsMaxY(),
-						block.getBlockBoundsMaxZ() } };
+		return new double[][] { { block.getBlockBoundsMinX(), block.getBlockBoundsMinY(), block.getBlockBoundsMinZ() },
+				{ block.getBlockBoundsMaxX(), block.getBlockBoundsMaxY(), block.getBlockBoundsMaxZ() } };
 	}
 
 	/**

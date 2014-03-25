@@ -4,13 +4,16 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Random;
 
+import javax.swing.Icon;
+
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.Icon;
+import net.minecraft.item.Item;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -26,25 +29,13 @@ public abstract class ProxyBlock extends Block
 	@SideOnly(Side.CLIENT)
 	private Icon iconGrassSideOverlay;
 
-	public ProxyBlock(int blockID, Block block)
+	public ProxyBlock(Block block, boolean replace)
 	{
-		super(blockID, block.blockMaterial);
+		super(block.getMaterial());
 		originalBlock = block;
-		copyFields(block, false);
+		copyFields(block, replace);
 	}
-	public ProxyBlock(Block block)
-	{
-		super(freeId(block.blockID), block.blockMaterial);
-		originalBlock = block;
-		copyFields(block, true);
-	}
-
-	private static int freeId(int id)
-	{
-		Block.blocksList[id] = null;
-		return id;
-	}
-
+	
 	@SuppressWarnings("rawtypes")
 	private void copyFields(Block block, boolean copyId)
 	{
@@ -76,30 +67,23 @@ public abstract class ProxyBlock extends Block
 	}
 
 	@Override
-	public boolean isBlockSolidOnSide(World world, int x, int y, int z, ForgeDirection side)
+	public boolean isSideSolid(IBlockAccess world, int x, int y, int z, ForgeDirection side)
 	{
-		return originalBlock.isBlockSolidOnSide(world, x, y, z, side);
+		return originalBlock.isSideSolid(world, x, y, z, side);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIcon(int side, int metadata)
+	public IIcon getIcon(int side, int metadata)
 	{
 		return originalBlock.getIcon(side, metadata);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getBlockTexture(IBlockAccess par1IBlockAccess, int par2, int par3, int par4, int par5)
+	public void registerBlockIcons(IIconRegister par1IconRegister)
 	{
-		return originalBlock.getBlockTexture(par1IBlockAccess, par2, par3, par4, par5);
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister par1IconRegister)
-	{
-		originalBlock.registerIcons(par1IconRegister);
+		originalBlock.registerBlockIcons(par1IconRegister);
 	}
 
 	@Override
@@ -124,15 +108,15 @@ public abstract class ProxyBlock extends Block
 	}
 
 	@Override
-	public int idDropped(int par1, Random par2Random, int par3)
+	public Item getItemDropped(int par1, Random par2Random, int par3)
 	{
-		return originalBlock.idDropped(par1, par2Random, par3);
+		return originalBlock.getItemDropped(par1, par2Random, par3);
 	}
 
 	@Override
-	public int idPicked(World world, int x, int y, int z)
+	public Item getItem(World world, int x, int y, int z)
 	{
-		return originalBlock.idPicked(world, x, y, z);
+		return originalBlock.getItem(world, x, y, z);
 	}
 
 	@Override
@@ -172,9 +156,9 @@ public abstract class ProxyBlock extends Block
 	}
 
 	@Override
-	public void onNeighborBlockChange(World world, int x, int y, int z, int metadata)
+	public void onNeighborBlockChange(World world, int x, int y, int z, Block block)
 	{
-		originalBlock.onNeighborBlockChange(world, x, y, z, metadata);
+		originalBlock.onNeighborBlockChange(world, x, y, z, block);
 	}
 
 	@Override
