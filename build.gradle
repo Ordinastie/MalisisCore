@@ -1,0 +1,70 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.0-SNAPSHOT'
+    }
+}
+
+repositories
+{
+	maven
+	{
+		name = "paleo"
+		url = "http://148.251.47.74:8081/nexus/content/repositories/forge-1.7/"
+	}
+}
+
+dependencies { compile 'de.mineformers:mfcore:1.0:deobf' }
+
+apply plugin: 'forge'
+
+version = "1.6.4-0.6"
+group= "net.malisis.malisiscore" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "malisiscore"
+libsDirName = "../releases"
+
+sourceSets
+{
+	main
+	{
+		java { srcDirs = ["$projectDir/source"] }
+		resources { srcDirs = ["$projectDir/resources"] }
+	}
+}
+
+
+
+
+minecraft {
+	version = "1.6.4-9.11.1.964"
+	if(file("../../run").exists())
+	{
+		assetDir = "../../run/assets"
+	}
+	else
+	{
+		assetDir = "assets"
+	}
+}
+
+processResources
+{
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod/info'
+                
+        // replace version and mcversion
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+        
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
