@@ -35,31 +35,30 @@ public abstract class ProxyBlock extends Block
 		originalBlock = block;
 		copyFields(block, replace);
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	private void copyFields(Block block, boolean copyId)
 	{
 		Class blockClass = block.getClass();
 
-		while(blockClass != null)
+		while (blockClass != null)
 		{
 			Field[] fields = blockClass.getDeclaredFields();
 			for (Field f : fields)
 			{
 				try
 				{
-					if (!Modifier.isStatic(f.getModifiers()) && (copyId || (!f.getName().equals("blockID") && !f.getName().equals("field_71990_ca"))))
+					if (!Modifier.isStatic(f.getModifiers())
+							&& (copyId || (!f.getName().equals("blockID") && !f.getName().equals("field_71990_ca"))))
 					{
 						f.setAccessible(true);
 						f.set(this, f.get(block));
 					}
 				}
 				catch (IllegalArgumentException e)
-				{
-				}
+				{}
 				catch (IllegalAccessException e)
-				{
-				}
+				{}
 			}
 
 			blockClass = blockClass.getSuperclass();

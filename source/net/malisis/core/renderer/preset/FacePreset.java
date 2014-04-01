@@ -17,7 +17,6 @@ import net.minecraftforge.common.util.ForgeDirection;
 public class FacePreset
 {
 	//@formatter:off
-
 	//regular faces
     private static Face Bottom = new Face(new Vertex[] { Vertex.BottomNorthEast, Vertex.BottomSouthEast, Vertex.BottomSouthWest, Vertex.BottomNorthWest});
     private static Face Top = new Face(new Vertex[] { Vertex.TopNorthWest, Vertex.TopSouthWest, Vertex.TopSouthEast, Vertex.TopNorthEast});
@@ -555,5 +554,26 @@ public class FacePreset
 		}
 
 		return a;
+	}
+
+	public static Face fromDirection(ForgeDirection dir)
+	{
+		switch (dir)
+		{
+			case DOWN:
+				return FacePreset.Bottom();
+			case UP:
+				return FacePreset.Top();
+			case NORTH:
+				return FacePreset.North();
+			case SOUTH:
+				return FacePreset.South();
+			case WEST:
+				return FacePreset.West();
+			case EAST:
+				return FacePreset.East();
+			default:
+				return null;
+		}
 	}
 }

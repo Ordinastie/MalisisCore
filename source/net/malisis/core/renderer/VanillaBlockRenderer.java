@@ -1,8 +1,6 @@
 package net.malisis.core.renderer;
 
-import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.RenderParameters;
-import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.preset.FacePreset;
 import net.malisis.core.renderer.preset.ShapePreset;
 import net.minecraft.block.BlockGrass;
@@ -17,76 +15,68 @@ public class VanillaBlockRenderer extends BaseRenderer
 	@SubscribeEvent
 	public boolean VanillaRenderEvent(RenderBlockEvent.Pre event)
 	{
-		if(event.renderType != 0 && event.renderType != 39)
+		// only render type 0 (standard blocks) and 39 (quartz)
+		if (event.renderType != 0 && event.renderType != 39)
 			return false;
-	
+
+		// set informations in the renderer
 		set(event.blockAccess, event.block, event.x, event.y, event.z, event.blockAccess.getBlockMetadata(event.x, event.y, event.z));
-		
-		if(event.block == Blocks.quartz_block)
-		{
-			set(event.blockAccess, event.block, event.x + (event.x % 2), event.y, event.z, event.blockAccess.getBlockMetadata(event.x, event.y, event.z));
-			Face f = FacePreset.South();
-			Vertex[] vs = f.getVertexes();
-			vs[0].setColor(0x0000FF);
-			vs[1].setColor(0x0000FF);
-			vs[2].setColor(0x0000FF);
-			vs[3].setColor(0x0000FF);
-			
-			prepare(BaseRenderer.TYPE_WORLD);
-			RenderParameters rp = new RenderParameters();
-			rp.usePerVertexColor = true;
-			drawFace(f, RenderParameters.merge(f.getParameters(), rp));
-			clean();
-			event.setCanceled(true);
-			return true;
-		}
-		
-		
-//		if(event.block != Blocks.wool)
-//			return true;
-		
-		
-		if(event.block == Blocks.grass)
+
+		// uncomment to render only wool (for debugging)
+		// if(event.block != Blocks.wool)
+		// return true;
+
+		// special case for grass
+		if (event.block == Blocks.grass)
 			return renderGrass(event);
-		
-//		
-//		if(event.block == Blocks.sandstone || event.block == Blocks.stone_slab)
-//			return true;
-		
-		if(event.block == Blocks.leaves)
-		{
-			prepare(BaseRenderer.TYPE_WORLD);
-			RenderParameters rp = new RenderParameters();
-			rp.colorMultiplier = event.block.colorMultiplier(event.blockAccess, event.x, event.y, event.z);
-			drawShape(ShapePreset.Cube(), rp);
-			clean();
-			event.setCanceled(true);
-			return true;
-		}
-		
-		//Message("" + Integer.toHexString(light.red()) + Integer.toHexString(light.green()) + Integer.toHexString(light.blue()));
+
+		// special case for leaves
+		if (event.block == Blocks.leaves)
+			return renderLeaves(event);
+
+		// Default rendering
 		renderWorldBlock();
 		event.setCanceled(true);
 		return true;
 	}
-	
-	
+
+	/**
+	 * Render Grass
+	 * 
+	 * @param event
+	 * @return
+	 */
 	private boolean renderGrass(RenderBlockEvent.Pre event)
 	{
+		prepare(BaseRenderer.TYPE_WORLD);
 		RenderParameters rp = new RenderParameters();
 		rp.colorMultiplier = event.block.colorMultiplier(event.blockAccess, event.x, event.y, event.z);
-		//Shape s = ShapePreset.Cube();
-		prepare(BaseRenderer.TYPE_WORLD);
 		drawShape(ShapePreset.Cube().setParameters(FacePreset.Top(), rp, true));
-		
-		if(RenderBlocks.fancyGrass)
+
+		if (RenderBlocks.fancyGrass)
 		{
 			rp.icon = BlockGrass.getIconSideOverlay();
-			drawShape(ShapePreset.CubeSides(), rp);			
+			drawShape(ShapePreset.CubeSides(), rp);
 		}
-		
+
 		clean();
-		
+		event.setCanceled(true);
+		return true;
+	}
+
+	/**
+	 * Render Leaves
+	 * 
+	 * @param event
+	 * @return
+	 */
+	private boolean renderLeaves(RenderBlockEvent.Pre event)
+	{
+		prepare(BaseRenderer.TYPE_WORLD);
+		RenderParameters rp = new RenderParameters();
+		rp.colorMultiplier = event.block.colorMultiplier(event.blockAccess, event.x, event.y, event.z);
+		drawShape(ShapePreset.Cube(), rp);
+		clean();
 		event.setCanceled(true);
 		return true;
 	}

@@ -1,5 +1,6 @@
 package net.malisis.core;
 
+import net.malisis.core.light.ColoredLight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;

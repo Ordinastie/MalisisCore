@@ -1,6 +1,6 @@
 package net.malisis.core.renderer;
 
-import net.malisis.core.ColoredLight;
+import net.malisis.core.light.Shadow;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
@@ -10,6 +10,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.IIcon;
+import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -17,23 +18,59 @@ import org.lwjgl.opengl.GL11;
 
 public class BaseRenderer
 {
+	/**
+	 * Set rendering for world
+	 */
 	public static final int TYPE_WORLD = 0;
+	/**
+	 * Set rendering for inventory
+	 */
 	public static final int TYPE_INVENTORY = 1;
 
 	protected Tessellator t = Tessellator.instance;
 	protected IBlockAccess world;
+	/**
+	 * Block to render
+	 */
 	protected Block block;
+	/**
+	 * Metadata of the block to render
+	 */
 	protected int blockMetadata;
+	/**
+	 * Position of the block
+	 */
 	protected int x, y, z;
+	/**
+	 * Type of rendering : <code>TYPE_WORLD</code> or
+	 * <code>TYPE_INVENTORY</code>
+	 */
 	protected int typeRender;
 
+	/**
+	 * Are render coordinates already shifted (<code>TYPE_WORLD</code> only)
+	 */
 	protected boolean isShifted = false;
 
+	/**
+	 * The shape to render
+	 */
 	protected Shape shape;
+	/**
+	 * Current face being rendered
+	 */
 	protected Face face;
+	/**
+	 * Global shapre parameters
+	 */
 	protected RenderParameters shapeParams;
+	/**
+	 * Current parameters for the face being rendered
+	 */
 	protected RenderParameters params;
-
+	/**
+	 * Base brightness of the block
+	 */
 	protected int baseBrightness;
 
 	public BaseRenderer()
@@ -212,7 +249,7 @@ public class BaseRenderer
 			if (shouldRenderFace(face))
 			{
 				drawFace(face, face.getParameters());
-				if (world != null && params.dynLights)
+				if (world != null && params.dynLights/* && renderPass == 1 */)
 					drawLightFace(face);
 			}
 		}
@@ -226,7 +263,7 @@ public class BaseRenderer
 	public void drawFace(Face face)
 	{
 		drawFace(face, face.getParameters());
-		if (world != null && params.dynLights)
+		if (world != null && params.dynLights /* && renderPass == 1 */)
 			drawLightFace(face);
 	}
 
@@ -274,40 +311,27 @@ public class BaseRenderer
 		drawVertexes(face.getVertexes());
 	}
 
+	/**
+	 * Draw the light over the face
+	 * 
+	 * @param face
+	 */
 	protected void drawLightFace(Face face)
 	{
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glDisable(GL11.GL_ALPHA_TEST);
-		
-		int vertexDrawn = 0;
-		
-		for(Vertex vertex : face.getVertexes())
+		GL11.glAlphaFunc(GL11.GL_GREATER, 0.0F);
+
+		new Shadow(new ChunkPosition(x, y, z), face);
+
+		for (Vertex v : face.getVertexes())
 		{
-			int[] lights = ColoredLight.getLights(world, x + vertex.getX(), y + vertex.getY(), z + vertex.getZ());
-			int light = ColoredLight.computeLights(lights, 0* (baseBrightness >> 4) & 15);
-					
-			if (light != 0)
-				vertexDrawn++;
-			
-			vertex.setBrightness(14 << 4);
-			vertex.setAlpha((int)( ColoredLight.alpha(light) * 0.8F) );
-			vertex.setColor(light & 0xFFFFFF);
+			t.setColorRGBA_I(v.getColor(), v.getAlpha());
+			t.setBrightness(v.getBrightness());
+
+			t.addVertexWithUV(v.getX(), v.getY(), v.getZ(), v.getU(), v.getV());
 		}
-		
-		
-		if(vertexDrawn != 0)
-		{
-			for(Vertex vertex : face.getVertexes())
-			{
-				t.setColorRGBA_I(vertex.getColor(), vertex.getAlpha());
-				t.setBrightness(vertex.getBrightness());
-		
-				t.addVertexWithUV(vertex.getX(), vertex.getY(), vertex.getZ(), vertex.getU(), vertex.getV());
-			}
-		}
-		
-	//	GL11.glDisable(GL11.GL_BLEND);
+
 	}
 
 	/***
@@ -506,8 +530,6 @@ public class BaseRenderer
 			b[i] += getMixedBrightnessForBlock(world, x + aoMatrix[i][0], y + aoMatrix[i][1], z + aoMatrix[i][2]);
 
 		int brightness = getAoBrightness(b[0], b[1], b[2], baseBrightness);
-
-		
 
 		return brightness;
 	}

@@ -18,8 +18,7 @@ public class RenderParameters
 		// block
 		defaultParameters.renderAllFaces = false;
 		defaultParameters.useBlockBounds = true;
-		defaultParameters.renderBounds = new double[][] { { 0, 0, 0 },
-				{ 1, 1, 1 } };
+		defaultParameters.renderBounds = new double[][] { { 0, 0, 0 }, { 1, 1, 1 } };
 		defaultParameters.vertexPositionRelativeToRenderBounds = true;
 		defaultParameters.scale = 1.0F;
 		defaultParameters.interpolateUV = true;
@@ -34,8 +33,7 @@ public class RenderParameters
 		defaultParameters.dynLights = true;
 		defaultParameters.brightness = 15728640;
 		defaultParameters.alpha = 255;
-		defaultParameters.uvFactor = new float[][] { { 0, 0 }, { 0, 1 },
-				{ 1, 1 }, { 1, 0 } };
+		defaultParameters.uvFactor = new float[][] { { 0, 0 }, { 0, 1 }, { 1, 1 }, { 1, 0 } };
 
 		// face
 		defaultParameters.flipU = false;
@@ -130,7 +128,8 @@ public class RenderParameters
 	 */
 	public ForgeDirection direction;
 	/**
-	 * Defines which direction will be used to get the block icon. If ForgeDirection.UNKNOWN, no texture will be used (Face Level)
+	 * Defines which direction will be used to get the block icon. If
+	 * ForgeDirection.UNKNOWN, no texture will be used (Face Level)
 	 */
 	public ForgeDirection textureSide;
 	/**
@@ -199,8 +198,7 @@ public class RenderParameters
 		}
 	}
 
-	public static RenderParameters merge(RenderParameters rp1,
-			RenderParameters rp2)
+	public static RenderParameters merge(RenderParameters rp1, RenderParameters rp2)
 	{
 		if (rp2 == null)
 			return new RenderParameters(rp1);
@@ -229,7 +227,7 @@ public class RenderParameters
 			newRp.usePerVertexColor = rp2.usePerVertexColor;
 		if (rp2.usePerVertexAlpha != null)
 			newRp.usePerVertexAlpha = rp2.usePerVertexAlpha;
-		if(rp2.dynLights != null)
+		if (rp2.dynLights != null)
 			newRp.dynLights = rp2.dynLights;
 		if (rp2.useBlockBrightness != null)
 			newRp.useBlockBrightness = rp2.useBlockBrightness;

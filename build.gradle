@@ -20,11 +20,11 @@ repositories
 	}
 }
 
-dependencies { compile 'de.mineformers:mfcore:1.0:deobf' }
+dependencies { compile 'de.mineformers:mfcore:1.1:deobf' }
 
 apply plugin: 'forge'
 
-version = "1.6.4-0.6"
+version = "1.7.2-0.7"
 group= "net.malisis.malisiscore" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "malisiscore"
 libsDirName = "../releases"
@@ -42,7 +42,7 @@ sourceSets
 
 
 minecraft {
-	version = "1.6.4-9.11.1.964"
+	version = "1.7.2-10.12.0.1047"
 	if(file("../../run").exists())
 	{
 		assetDir = "../../run/assets"

@@ -5,8 +5,8 @@ import net.malisis.core.renderer.element.Shape;
 
 public class ShapePreset
 {
-    /** order of vertexes IS important **/
-	
+	/** order of vertexes IS important **/
+	//@formatter:off
 	private static Shape Cube = new Shape(new Face[] { FacePreset.North(), FacePreset.South(), FacePreset.East(), FacePreset.West(), FacePreset.Top(), FacePreset.Bottom() });
 	private static Shape CubeSides = new Shape(new Face[] { FacePreset.North(), FacePreset.South(), FacePreset.East(), FacePreset.West() });
 	// corners
@@ -30,7 +30,6 @@ public class ShapePreset
 	private static Shape InvTopSouthWest = new Shape(new Face[] { FacePreset.InvTopSouthWest(), FacePreset.TriangleTopSouthWest() });
 	private static Shape InvTopSouthEast = new Shape(new Face[] { FacePreset.InvTopSouthEast(), FacePreset.TriangleTopSouthEast() });
 
-	//@formatter:off
 	public static Shape Cube() { return new Shape(Cube); }
 	public static Shape CubeSides() {  return new Shape(CubeSides); }
 	public static Shape NorthWest() { 	return new Shape(NorthWest); }
@@ -50,6 +49,5 @@ public class ShapePreset
 	public static Shape InvTopSouthWest() { return new Shape(InvTopSouthWest); }
 	public static Shape InvTopSouthEast() { return new Shape(InvTopSouthEast); }
 	//@formatter:on
-	
-	
+
 }
