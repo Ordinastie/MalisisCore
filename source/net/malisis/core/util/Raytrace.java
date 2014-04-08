@@ -75,16 +75,16 @@ public class Raytrace
 	 */
 	public int options = 0;
 
-	public Raytrace(Point src, Point dest, int options)
+	public Raytrace(Ray ray, int options)
 	{
 		this.world = Minecraft.getMinecraft().theWorld;
-		this.src = src;
-		this.dest = dest;
-		this.ray = new Ray(src, new Vector(src, dest));
+		this.src = ray.origin;
+		this.ray = ray;
 		this.options = options;
 
 		blockSrc = new ChunkPosition(src.toVec3());
-		blockDest = new ChunkPosition(dest.toVec3());
+		if (dest != null)
+			blockDest = new ChunkPosition(dest.toVec3());
 
 		int stepX = 1, stepY = 1, stepZ = 1;
 		if (ray.direction.x < 0)
@@ -100,14 +100,31 @@ public class Raytrace
 			blockPassed = new HashMap<ChunkPosition, MovingObjectPosition>();
 	}
 
-	public Raytrace(Point src, Point dest)
+	public Raytrace(Ray ray)
 	{
-		this(src, dest, 0);
+		this(ray, 0);
 	}
 
-	public Raytrace(double srcX, double srcY, double srcZ, double destX, double destY, double destZ)
+	public Raytrace(Point src, Vector v, int options)
 	{
-		this(new Point(srcX, srcY, srcZ), new Point(destX, destY, destZ), 0);
+		this(new Ray(src, v), options);
+	}
+
+	public Raytrace(Point src, Vector v)
+	{
+		this(new Ray(src, v), 0);
+	}
+
+	public Raytrace(Point src, Point dest, int options)
+	{
+		this(new Ray(src, new Vector(src, dest)), options);
+		this.dest = dest;
+	}
+
+	public Raytrace(Point src, Point dest)
+	{
+		this(new Ray(src, new Vector(src, dest)), 0);
+		this.dest = dest;
 	}
 
 	/**
@@ -151,41 +168,55 @@ public class Raytrace
 	public MovingObjectPosition trace()
 	{
 		MovingObjectPosition mop = null;
+		double tX, tY, tZ, min;
+		int count = 0;
+		boolean ret = false;
+
 		firstHit = null;
 		currentX = blockSrc.chunkPosX;
 		currentY = blockSrc.chunkPosY;
 		currentZ = blockSrc.chunkPosZ;
-		int count = 0;
-		Point exit = null;
-		boolean ret = false;
-		while (count++ <= MAX_BLOCKS)
+
+		while (!ret && count++ <= MAX_BLOCKS)
 		{
+			tX = ray.intersectX(currentX + (ray.direction.x > 0 ? 1 : 0));
+			tY = ray.intersectY(currentY + (ray.direction.y > 0 ? 1 : 0));
+			tZ = ray.intersectZ(currentZ + (ray.direction.z > 0 ? 1 : 0));
+
+			min = getMin(tX, tY, tZ);
+
 			// do not trace first block
 			if (count != 1 || !hasOption(Options.IGNORE_FIRST_BLOCK))
-				mop = rayTraceBlock(currentX, currentY, currentZ);
+				mop = rayTraceBlock(currentX, currentY, currentZ, ray.getPointAt(min));
 			if (firstHit == null)
 				firstHit = mop;
 			if (hasOption(Options.LOG_BLOCK_PASSED))
 				blockPassed.put(new ChunkPosition(currentX, currentY, currentZ), mop);
 
-			if (currentX == blockDest.chunkPosX && currentY == blockDest.chunkPosY && currentZ == blockDest.chunkPosZ)
+			if (dest != null && currentX == blockDest.chunkPosX && currentY == blockDest.chunkPosY && currentZ == blockDest.chunkPosZ)
 				ret = true;
 
 			if (!ret)
-				exit = nextBlock();
-
-			if (dest.equals(exit) || ret == true)
 			{
-				if (firstHit == null)
-					firstHit = new MovingObjectPosition(currentX, currentY, currentZ, -1, dest.toVec3(), false);
-
-				return firstHit;
+				if (min == tX)
+					currentX += step.x;
+				if (min == tY)
+					currentY += step.y;
+				if (min == tZ)
+					currentZ += step.z;
 			}
+
+			if (dest != null && dest.equals(ray.getPointAt(min)))
+				ret = true;
 
 		}
 
-		MalisisCore.Message("Trace fail : " + MAX_BLOCKS + " passed (" + currentX + "," + currentY + "," + currentZ + ")");
-		return null;
+		if (firstHit == null && dest != null)
+			firstHit = new MovingObjectPosition(currentX, currentY, currentZ, -1, dest.toVec3(), false);
+
+		if (dest != null)
+			MalisisCore.Message("Trace fail : " + MAX_BLOCKS + " passed (" + currentX + "," + currentY + "," + currentZ + ")");
+		return firstHit;
 	}
 
 	/**
@@ -220,28 +251,6 @@ public class Raytrace
 	}
 
 	/**
-	 * Calculate the next block the ray passes through
-	 * 
-	 * @return
-	 */
-	public Point nextBlock()
-	{
-		double tX = ray.intersectX(currentX + (ray.direction.x > 0 ? 1 : 0));
-		double tY = ray.intersectY(currentY + (ray.direction.y > 0 ? 1 : 0));
-		double tZ = ray.intersectZ(currentZ + (ray.direction.z > 0 ? 1 : 0));
-
-		double min = getMin(tX, tY, tZ);
-		if (min == tX)
-			currentX += step.x;
-		if (min == tY)
-			currentY += step.y;
-		if (min == tZ)
-			currentZ += step.z;
-
-		return ray.getPointAt(min);
-	}
-
-	/**
 	 * Ray trace inside an actual block area. Calls
 	 * <code>Block.collisionRayTrace()</code>
 	 * 
@@ -250,7 +259,7 @@ public class Raytrace
 	 * @param z
 	 * @return
 	 */
-	public MovingObjectPosition rayTraceBlock(int x, int y, int z)
+	public MovingObjectPosition rayTraceBlock(int x, int y, int z, Point exit)
 	{
 		Block block = world.getBlock(x, y, z);
 		int metadata = world.getBlockMetadata(x, y, z);
@@ -259,7 +268,7 @@ public class Raytrace
 		if (!block.canCollideCheck(metadata, hasOption(Options.HIT_LIQUIDS)))
 			return null;
 
-		return block.collisionRayTrace(world, x, y, z, src.toVec3(), dest.toVec3());
+		return block.collisionRayTrace(world, x, y, z, src.toVec3(), exit.toVec3());
 	}
 
 	public static class Options

@@ -1,5 +1,7 @@
 package net.malisis.core.util;
 
+import net.minecraft.util.Vec3;
+
 public class Vector
 {
 	public double x;
@@ -32,6 +34,13 @@ public class Vector
 		x = p2.x - p1.x;
 		y = p2.y - p1.y;
 		z = p2.z - p1.z;
+	}
+	
+	public Vector(Vec3 vec)
+	{
+		x = vec.xCoord;
+		y = vec.yCoord;
+		z = vec.zCoord;
 	}
 
 	/**

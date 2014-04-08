@@ -21,11 +21,21 @@ public class BaseRenderer
 	/**
 	 * Set rendering for world
 	 */
-	public static final int TYPE_WORLD = 0;
+	public static final int TYPE_WORLD = 1;
 	/**
 	 * Set rendering for inventory
 	 */
-	public static final int TYPE_INVENTORY = 1;
+	public static final int TYPE_INVENTORY = 2;
+	/**
+	 * Set rendering as polygons
+	 */
+	public static final int MODE_POLYGONS = 0;
+	/**
+	 * Set rendering as lines
+	 */
+	public static final int MODE_LINES = 1;
+	
+	
 
 	protected Tessellator t = Tessellator.instance;
 	protected IBlockAccess world;
@@ -46,6 +56,10 @@ public class BaseRenderer
 	 * <code>TYPE_INVENTORY</code>
 	 */
 	protected int typeRender;
+	/**
+	 * Mode of rendering
+	 */
+	protected int modeRender;
 
 	/**
 	 * Are render coordinates already shifted (<code>TYPE_WORLD</code> only)
@@ -61,7 +75,7 @@ public class BaseRenderer
 	 */
 	protected Face face;
 	/**
-	 * Global shapre parameters
+	 * Global shape parameters
 	 */
 	protected RenderParameters shapeParams;
 	/**
@@ -81,6 +95,8 @@ public class BaseRenderer
 	// #region set()
 	public BaseRenderer reset()
 	{
+		this.typeRender = 0;
+		this.modeRender = 0;
 		this.world = null;
 		this.block = null;
 		this.blockMetadata = 0;
@@ -151,6 +167,11 @@ public class BaseRenderer
 	// #end ISBRH
 
 	// #region prepare()
+	public void prepare(int typeRender, int modeRender)
+	{
+		this.modeRender = modeRender;
+		prepare(typeRender);
+	}
 	public void prepare(int typeRender)
 	{
 		this.typeRender = typeRender;
@@ -249,8 +270,8 @@ public class BaseRenderer
 			if (shouldRenderFace(face))
 			{
 				drawFace(face, face.getParameters());
-				if (world != null && params.dynLights/* && renderPass == 1 */)
-					drawLightFace(face);
+//				if (world != null && params.dynLights/* && renderPass == 1 */)
+//					drawLightFace(face);
 			}
 		}
 	}
@@ -263,8 +284,8 @@ public class BaseRenderer
 	public void drawFace(Face face)
 	{
 		drawFace(face, face.getParameters());
-		if (world != null && params.dynLights /* && renderPass == 1 */)
-			drawLightFace(face);
+//		if (world != null && params.dynLights /* && renderPass == 1 */)
+//			drawLightFace(face);
 	}
 
 	/**
@@ -322,14 +343,18 @@ public class BaseRenderer
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glAlphaFunc(GL11.GL_GREATER, 0.0F);
 
-		new Shadow(new ChunkPosition(x, y, z), face);
-
+		Shadow s = new Shadow(new ChunkPosition(x, y, z), face);
+		face = s.splitFace();
+		if(face == null)
+			return;
+		
 		for (Vertex v : face.getVertexes())
 		{
 			t.setColorRGBA_I(v.getColor(), v.getAlpha());
 			t.setBrightness(v.getBrightness());
 
 			t.addVertexWithUV(v.getX(), v.getY(), v.getZ(), v.getU(), v.getV());
+			//t.addVertex(v.getX(), v.getY(), v.getZ());
 		}
 
 	}
@@ -342,7 +367,13 @@ public class BaseRenderer
 	protected void drawVertexes(Vertex[] vertexes)
 	{
 		for (int i = 0; i < vertexes.length; i++)
+		{
 			drawVertex(vertexes[i], i);
+			if(modeRender == MODE_LINES)
+			{
+				drawVertex(vertexes[i == vertexes.length - 1 ? 0 : i + 1], i);
+			}
+		}
 	}
 
 	/**
@@ -354,13 +385,13 @@ public class BaseRenderer
 	{
 		// brightness
 		int brightness = baseBrightness;
-		if (typeRender == TYPE_WORLD && params.calculateBrightness)
+		if (modeRender == MODE_POLYGONS && typeRender == TYPE_WORLD && params.calculateBrightness)
 			brightness = calcVertexBrightness(vertex, params.aoMatrix[count]);
 		vertex.setBrightness(brightness);
 
 		// color
 		int color = params.colorMultiplier;
-		if (typeRender == TYPE_WORLD && params.calculateAOColor)
+		if (modeRender == MODE_POLYGONS && typeRender == TYPE_WORLD && params.calculateAOColor)
 			color = calcVertexColor(vertex, params.aoMatrix[count]);
 		vertex.setColor(color);
 
@@ -371,7 +402,10 @@ public class BaseRenderer
 		t.setColorRGBA_I(vertex.getColor(), vertex.getAlpha());
 		t.setBrightness(vertex.getBrightness());
 
-		t.addVertexWithUV(vertex.getX(), vertex.getY(), vertex.getZ(), vertex.getU(), vertex.getV());
+		if(modeRender == MODE_POLYGONS && params.useTexture)
+			t.addVertexWithUV(vertex.getX(), vertex.getY(), vertex.getZ(), vertex.getU(), vertex.getV());
+		else
+			t.addVertex(vertex.getX(), vertex.getY(), vertex.getZ());
 	}
 
 	/**
@@ -599,6 +633,8 @@ public class BaseRenderer
 		if (block == null || !params.useBlockBounds)
 			return params.renderBounds;
 
+		if(world != null)
+			block.setBlockBoundsBasedOnState(world, x, y, z);
 		return new double[][] { { block.getBlockBoundsMinX(), block.getBlockBoundsMinY(), block.getBlockBoundsMinZ() },
 				{ block.getBlockBoundsMaxX(), block.getBlockBoundsMaxY(), block.getBlockBoundsMaxZ() } };
 	}

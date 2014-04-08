@@ -1,31 +1,54 @@
 package net.malisis.core;
 
-import net.malisis.core.renderer.VanillaBlockRenderer;
+import java.util.Arrays;
+
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.common.MinecraftForge;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Mod;
+
+import com.google.common.eventbus.EventBus;
+
+import cpw.mods.fml.common.DummyModContainer;
+import cpw.mods.fml.common.LoadController;
 import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.relauncher.Side;
 
-@Mod(modid = MalisisCore.modid, name = MalisisCore.modname, version = MalisisCore.version)
-public class MalisisCore
+public class MalisisCore extends DummyModContainer
 {
 	public static final String modid = "malisiscore";
 	public static final String modname = "Malisis Core";
 	public static final String version = "1.7.2-0.7";
+	public static final String url = "http://github.com/Ordinastie/MalisisCore";
 
 	public static MalisisCore instance;
-	public static Debug debug = new Debug();
+	public static Debug debug;
+	
+	public static boolean isObfEnv = false;
 
 	public MalisisCore()
 	{
-		instance = this;
+		super(new ModMetadata());
+		ModMetadata meta = getMetadata();
+		meta.modId = modid;
+		meta.name = modname;
+		meta.version = version;
+		meta.authorList = Arrays.asList("Ordinastie");
+		meta.url = "";
+		meta.description = "Add hooks";
 
+		instance = this;
+		// debug = new Debug();
+	}
+
+	@Override
+	public boolean registerBus(EventBus bus, LoadController controller)
+	{
+		bus.register(this);
+		return true;
 	}
 
 	@EventHandler
@@ -33,8 +56,9 @@ public class MalisisCore
 	{
 		if (event.getSide() == Side.CLIENT)
 		{
-			FMLCommonHandler.instance().bus().register(new VanillaBlockRenderer());
-			MinecraftForge.EVENT_BUS.register(debug);
+		//	FMLCommonHandler.instance().bus().register(new VanillaBlockRenderer());
+			if (debug != null)
+				MinecraftForge.EVENT_BUS.register(debug);
 		}
 	}
 

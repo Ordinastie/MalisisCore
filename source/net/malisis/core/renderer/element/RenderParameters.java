@@ -21,6 +21,7 @@ public class RenderParameters
 		defaultParameters.renderBounds = new double[][] { { 0, 0, 0 }, { 1, 1, 1 } };
 		defaultParameters.vertexPositionRelativeToRenderBounds = true;
 		defaultParameters.scale = 1.0F;
+		defaultParameters.useTexture = true;
 		defaultParameters.interpolateUV = true;
 		defaultParameters.calculateAOColor = true;
 		defaultParameters.calculateBrightness = true;
@@ -67,6 +68,10 @@ public class RenderParameters
 	 * (Block Level)
 	 */
 	public IIcon icon;
+	/**
+	 * Defines whether to use a texture
+	 */
+	public Boolean useTexture;
 	/**
 	 * Defines whether to calculate interpolated textures coordinates depending
 	 * on block bounds (Block Level)
@@ -162,6 +167,7 @@ public class RenderParameters
 		vertexPositionRelativeToRenderBounds = params.vertexPositionRelativeToRenderBounds;
 		scale = params.scale;
 		icon = params.icon;
+		useTexture = params.useTexture;
 		interpolateUV = params.interpolateUV;
 		calculateAOColor = params.calculateAOColor;
 		calculateBrightness = params.calculateBrightness;
@@ -217,6 +223,8 @@ public class RenderParameters
 			newRp.scale = rp2.scale;
 		if (rp2.icon != null)
 			newRp.icon = rp2.icon;
+		if(rp2.useTexture != null)
+			newRp.useTexture = rp2.useTexture;
 		if (rp2.interpolateUV != null)
 			newRp.interpolateUV = rp2.interpolateUV;
 		if (rp2.calculateAOColor != null)

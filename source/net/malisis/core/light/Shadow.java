@@ -39,14 +39,27 @@ public class Shadow
 	 * Destination of the ray
 	 */
 	public Vec3 dest;
+	/**
+	 * Center vertex
+	 */
+	public Vertex[] center = new Vertex[4];
+	/**
+	 * Number of vertexes affected by a light
+	 */
+	public int vertexCount = 0;
 
 	public Shadow(ChunkPosition block, Face face)
 	{
 		this.block = block;
 		this.face = face;
 		this.side = face.getParameters().direction;
-
+		
+	
 		getFaceLights();
+		
+		if(vertexCount > 1)
+			getCenterVertexes();
+	
 	}
 
 	/**
@@ -54,19 +67,21 @@ public class Shadow
 	 */
 	public void getFaceLights()
 	{
+		vertexCount = 0;
 		for (Vertex v : face.getVertexes())
 		{
 			int[] lights = getVertexLights(v);
 			if (lights.length > 0)
 			{
-				int light = computeVertexLight(v, lights);
-				v.setBrightness(14 << 4);
-				v.setAlpha((int) (ColoredLight.alpha(light) * 0.6F));
+				int light = computeVertexLight(lights);
+				v.setBrightness(15 << 4);
+				v.setAlpha((int) (ColoredLight.alpha(light) * 0.8F));
 				v.setColor(light & 0xFFFFFF);
+				vertexCount++;
 			}
 			else
 				v.setAlpha(0);
-		}
+		}		
 	}
 
 	/**
@@ -107,7 +122,7 @@ public class Shadow
 		return Arrays.copyOf(tmp, count);
 	}
 
-	public int computeVertexLight(Vertex vertex, int[] lights)
+	public int computeVertexLight(int[] lights)
 	{
 		int color = lights[0];
 		for (int i = 1; i < lights.length; i++)
@@ -116,6 +131,71 @@ public class Shadow
 		}
 
 		return color;
+	}
+	
+	public void getCenterVertexes()
+	{
+		float x = 0.5F, y = 0.5F, z = 0.5F;
+		if(side == ForgeDirection.UP)
+			y = 1.001F;
+		else if (side == ForgeDirection.DOWN)
+			y = -0.001F;
+		else if(side == ForgeDirection.EAST)
+			x = 1.001F;
+		else if (side == ForgeDirection.WEST)
+			x = -0.001F;
+		else if(side == ForgeDirection.NORTH)
+			z = -0.001F;
+		else if (side == ForgeDirection.SOUTH)
+			z = 1.001F;
+		
+		float minU = 1, minV = 1, maxU = 0, maxV = 0;
+		for(Vertex v : face.getVertexes())
+		{
+			minU = Math.min(minU, v.getU());
+			maxU = Math.max(maxU, v.getU());
+			minV = Math.min(minV, v.getV());
+			maxV = Math.max(maxV, v.getV());
+		}
+		
+		for(int i = 0; i < 4; i ++)
+		{
+			center[i] = new Vertex(x, y, z);
+			center[i].setUV((minU + maxU) / 2, (minV + maxV) / 2);
+			center[i].setBrightness(14 << 4);
+		}
+		
+	
+	}
+	
+	public Face splitFace()
+	{
+		if(vertexCount <= 1)
+			return null;
+		
+		Vertex vertexes[] = new Vertex[16];
+		Vertex faceVertexes[] = face.getVertexes();
+		
+		for(int i = 0; i < faceVertexes.length; i++)
+		{
+			Vertex v1 = faceVertexes[i];
+			Vertex v2 = faceVertexes[i + 1 == 4 ? 0 : i + 1];
+			vertexes[4 * i + 0] = v1;
+			vertexes[4 * i + 1] = v2;
+						
+			int a = v1.getAlpha() + v2.getAlpha() / 2;
+			int centerLight[] = { (v1.getAlpha() << 24) + v1.getColor(), (v1.getAlpha() << 24) + v2.getColor()};
+			
+			center[i].setAlpha(a);
+			center[i].setColor(computeVertexLight(centerLight));
+			
+			vertexes[4 * i + 2] = center[i];
+			vertexes[4 * i + 3] = center[i];
+		}
+		
+		//vertexes = Arrays.copyOf(vertexes, 4);
+		
+		return new Face(vertexes, face.getParameters());
 	}
 
 }
