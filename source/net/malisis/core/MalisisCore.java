@@ -51,7 +51,7 @@ public class MalisisCore extends DummyModContainer
 		return true;
 	}
 
-	@EventHandler
+	 
 	public static void preInit(FMLPreInitializationEvent event)
 	{
 		if (event.getSide() == Side.CLIENT)

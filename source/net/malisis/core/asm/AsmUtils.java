@@ -8,6 +8,9 @@ import static org.objectweb.asm.tree.AbstractInsnNode.METHOD_INSN;
 import static org.objectweb.asm.tree.AbstractInsnNode.TYPE_INSN;
 import static org.objectweb.asm.tree.AbstractInsnNode.VAR_INSN;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -19,6 +22,9 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.util.Printer;
+import org.objectweb.asm.util.Textifier;
+import org.objectweb.asm.util.TraceMethodVisitor;
 
 public class AsmUtils
 {
@@ -161,5 +167,22 @@ public class AsmUtils
 
 		return node1.operand == node2.operand;
 	}
+	
+	
+	public static void printMethodNode(MethodNode methodNode)
+	{
+		Printer printer = new Textifier();
+		TraceMethodVisitor methodPrinter = new TraceMethodVisitor(printer);
+		
+		methodNode.accept(methodPrinter);
+
+		StringWriter sw = new StringWriter();
+		printer.print(new PrintWriter(sw));
+		printer.getText().clear();
+		String insnNodeAsString = sw.toString();
+
+		System.err.print(insnNodeAsString);
+	}
+
 
 }
