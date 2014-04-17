@@ -37,6 +37,8 @@ public abstract class MalisisClassTransformer implements IClassTransformer
 		if(hooks == null || hooks.size() == 0)
 			return bytes;
 		
+		System.out.println("Found hooks for " + name);
+		
 		ClassNode classNode = new ClassNode();
 		ClassReader classReader = new ClassReader(bytes);
 		classReader.accept(classNode, 0);
@@ -53,10 +55,14 @@ public abstract class MalisisClassTransformer implements IClassTransformer
 					AsmUtils.printMethodNode(methodNode);
 				}
 			}
+			else
+			{
+				System.err.println("Method not found : " + hook.getTargetClass()  + "#" + hook.getMethodName() + hook.getMethodDescriptor());
+			}
 					
 		}
 
-		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS /*| ClassWriter.COMPUTE_FRAMES*/);
 		classNode.accept(writer);
 		return writer.toByteArray();
 	}

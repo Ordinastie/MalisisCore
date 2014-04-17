@@ -4,7 +4,10 @@ import java.util.Map;
 
 import net.malisis.core.MalisisCore;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import cpw.mods.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
+@TransformerExclusions({"net.malisis.core.asm."})
+//@IFMLLoadingPlugin.SortingIndex(1001)
 public class MalisisCorePlugin implements IFMLLoadingPlugin
 {
 
