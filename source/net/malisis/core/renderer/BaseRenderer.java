@@ -319,8 +319,7 @@ public class BaseRenderer
 		if (typeRender == TYPE_INVENTORY || params.useNormals)
 			t.setNormal(params.direction.offsetX, params.direction.offsetY, params.direction.offsetZ);
 
-		if (typeRender == TYPE_WORLD && params.calculateBrightness)
-			baseBrightness = getBaseBrightness();
+		baseBrightness = getBaseBrightness();
 
 		// vertex position
 		if (params.vertexPositionRelativeToRenderBounds)
