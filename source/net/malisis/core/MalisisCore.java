@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
+import net.malisis.core.renderer.RenderLights;
 import net.minecraft.block.Block;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.init.Blocks;
@@ -13,6 +14,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.common.MinecraftForge;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 import cpw.mods.fml.common.DummyModContainer;
 import cpw.mods.fml.common.LoadController;
@@ -20,6 +22,7 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 
@@ -48,7 +51,7 @@ public class MalisisCore extends DummyModContainer
 
 		instance = this;
 		// debug = new Debug();
-		System.err.println("MalisisCore enabled!");
+		//System.err.println("MalisisCore enabled!");
 	}
 
 	@Override
@@ -57,7 +60,8 @@ public class MalisisCore extends DummyModContainer
 		bus.register(this);
 		return true;
 	}
-
+	
+	@Subscribe
 	public static void preInit(FMLPreInitializationEvent event)
 	{
 		if (event.getSide() == Side.CLIENT)
@@ -68,7 +72,7 @@ public class MalisisCore extends DummyModContainer
 		}
 	}
 
-	@EventHandler
+	@Subscribe
 	public void serverStart(FMLServerStartingEvent event)
 	{
 		MinecraftServer server = MinecraftServer.getServer();
@@ -79,16 +83,17 @@ public class MalisisCore extends DummyModContainer
 	{
 		try
 		{
-			Method method = Block.blockRegistry.getClass().getDeclaredMethod("addObjectRaw", Integer.TYPE, String.class, Object.class);
-			method.setAccessible(true);
-			method.invoke(Block.blockRegistry, id, name, block);		
-			
+			Class[] types = { Integer.TYPE, String.class, Object.class };
+			Method method = ReflectionHelper.findMethod(FMLControlledNamespacedRegistry.class, (FMLControlledNamespacedRegistry) null,
+					new String[] { "addObjectRaw" }, types);
+			method.invoke(Block.blockRegistry, id, name, block);
+
 			Field f = ReflectionHelper.findField(Blocks.class, name);
 			Field modifiers = Field.class.getDeclaredField("modifiers");
 			modifiers.setAccessible(true);
 			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
 			f.set(null, block);
-			
+
 		}
 		catch (ReflectiveOperationException e)
 		{

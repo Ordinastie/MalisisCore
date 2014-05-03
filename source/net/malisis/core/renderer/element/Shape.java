@@ -14,7 +14,7 @@ public class Shape
 		for (int i = 0; i < faces.length; i++)
 			this.faces[i] = new Face(faces[i]);
 		if (params == null)
-			params = RenderParameters.Default();
+			params = RenderParameters.setDefault();
 		this.params = new RenderParameters(params);
 	}
 

@@ -209,7 +209,7 @@ public class RenderParameters
 		if (rp2 == null)
 			return new RenderParameters(rp1);
 		if (rp2 == defaultParameters)
-			return Default();
+			return setDefault();
 
 		RenderParameters newRp = merge(defaultParameters, rp1);
 
@@ -279,7 +279,7 @@ public class RenderParameters
 		return newRp;
 	}
 
-	public static RenderParameters Default()
+	public static RenderParameters setDefault()
 	{
 		return new RenderParameters(defaultParameters);
 	}

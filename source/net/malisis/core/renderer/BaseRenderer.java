@@ -1,5 +1,8 @@
 package net.malisis.core.renderer;
 
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+
 import net.malisis.core.light.Shadow;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.RenderParameters;
@@ -9,23 +12,33 @@ import net.malisis.core.renderer.preset.ShapePreset;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import org.lwjgl.opengl.GL11;
 
-public class BaseRenderer
+import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
+import cpw.mods.fml.client.registry.RenderingRegistry;
+
+public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 {
 	/**
 	 * Set rendering for world
 	 */
 	public static final int TYPE_WORLD = 1;
 	/**
-	 * Set rendering for inventory
+	 * Set rendering for inventory with ISBRH 
 	 */
-	public static final int TYPE_INVENTORY = 2;
+	public static final int TYPE_ISBRH_INVENTORY = 2;
+	/**
+	 * Set rendering for inventory with IItemRenderer
+	 */
+	public static final int TYPE_ITEM_INVENTORY = 3;
 	/**
 	 * Set rendering as polygons
 	 */
@@ -34,11 +47,14 @@ public class BaseRenderer
 	 * Set rendering as lines
 	 */
 	public static final int MODE_LINES = 1;
-	
-	
 
+	private static HashMap<Class, BaseRenderer> instances = new HashMap<>();
 	protected Tessellator t = Tessellator.instance;
 	protected IBlockAccess world;
+	/**
+	 * Render id
+	 */
+	public int renderId;
 	/**
 	 * Block to render
 	 */
@@ -52,8 +68,7 @@ public class BaseRenderer
 	 */
 	protected int x, y, z;
 	/**
-	 * Type of rendering : <code>TYPE_WORLD</code> or
-	 * <code>TYPE_INVENTORY</code>
+	 * Type of rendering : <code>TYPE_WORLD</code> or <code>TYPE_INVENTORY</code>
 	 */
 	protected int typeRender;
 	/**
@@ -87,9 +102,23 @@ public class BaseRenderer
 	 */
 	protected int baseBrightness;
 
+	/**
+	 * Used for TESR
+	 */
 	public BaseRenderer()
 	{
 		this.t = Tessellator.instance;
+	}
+
+	/**
+	 * Used for ISBRH
+	 * 
+	 * @param renderId
+	 */
+	protected BaseRenderer(int renderId)
+	{
+		this.t = Tessellator.instance;
+		this.renderId = renderId;
 	}
 
 	// #region set()
@@ -136,35 +165,75 @@ public class BaseRenderer
 	{
 		return set(world, block, x, y, z, blockMetadata);
 	}
-
 	// #end
 
 	// #region ISBRH
-	public void renderInventoryBlock()
+	@Override
+	public void renderInventoryBlock(Block block, int metadata, int modelId, RenderBlocks renderer)
 	{
-		renderInventoryBlock(null);
+		renderInventoryBlock(block, metadata, modelId, renderer, null);
 	}
 
-	public void renderInventoryBlock(RenderParameters rp)
+	public void renderInventoryBlock(Block block, int metadata, int modelId, RenderBlocks renderer, RenderParameters rp)
 	{
-		prepare(TYPE_INVENTORY);
+		set(block, metadata);
+		prepare(TYPE_ISBRH_INVENTORY);
 		drawShape(ShapePreset.Cube(), rp);
 		clean();
 	}
 
-	public void renderWorldBlock()
+	@Override
+	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer)
 	{
-		renderWorldBlock(null);
+		return renderWorldBlock(world, x, y, z, block, modelId, renderer, null);
 	}
-
-	public void renderWorldBlock(RenderParameters rp)
+	
+	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer, RenderParameters rp)
 	{
+		set(world, block, x, y, z, world.getBlockMetadata(x, y, z));
 		prepare(TYPE_WORLD);
 		drawShape(ShapePreset.Cube(), rp);
 		clean();
+		return true;
 	}
 
+	@Override
+	public boolean shouldRender3DInInventory(int modelId)
+	{
+		return false;
+	}
 	// #end ISBRH
+
+	// #region IItemRenderer
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type)
+	{
+		return true;
+	}
+
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper)
+	{
+		return true;
+	}
+
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data)
+	{
+		renderItem(type, item, null, data);
+	}
+	
+	public void renderItem(ItemRenderType type, ItemStack item, RenderParameters rp, Object... data)
+	{
+		if(item.getItem() instanceof ItemBlock)
+			set(Block.getBlockFromItem(item.getItem()));
+		
+		prepare(TYPE_ITEM_INVENTORY);
+		drawShape(ShapePreset.Cube(), rp);
+		clean();
+	}
+	
+	// #end IItemRenderer
 
 	// #region prepare()
 	public void prepare(int typeRender, int modeRender)
@@ -172,6 +241,7 @@ public class BaseRenderer
 		this.modeRender = modeRender;
 		prepare(typeRender);
 	}
+
 	public void prepare(int typeRender)
 	{
 		this.typeRender = typeRender;
@@ -179,9 +249,13 @@ public class BaseRenderer
 		{
 			tessellatorShift();
 		}
-		else if (typeRender == TYPE_INVENTORY)
+		else if (typeRender == TYPE_ISBRH_INVENTORY)
 		{
 			GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
+			t.startDrawingQuads();
+		}
+		else if(typeRender == TYPE_ITEM_INVENTORY)
+		{
 			t.startDrawingQuads();
 		}
 	}
@@ -198,10 +272,14 @@ public class BaseRenderer
 		{
 			tessellatorUnshift();
 		}
-		else if (typeRender == TYPE_INVENTORY)
+		else if (typeRender == TYPE_ISBRH_INVENTORY)
 		{
 			t.draw();
 			GL11.glTranslatef(0.5F, 0.5F, 0.5F);
+		}
+		else if(typeRender == TYPE_ITEM_INVENTORY)
+		{
+			t.draw();
 		}
 	}
 
@@ -270,8 +348,8 @@ public class BaseRenderer
 			if (shouldRenderFace(face))
 			{
 				drawFace(face, face.getParameters());
-//				if (world != null && params.dynLights/* && renderPass == 1 */)
-//					drawLightFace(face);
+				// if (world != null && params.dynLights/* && renderPass == 1 */)
+				// drawLightFace(face);
 			}
 		}
 	}
@@ -284,8 +362,8 @@ public class BaseRenderer
 	public void drawFace(Face face)
 	{
 		drawFace(face, face.getParameters());
-//		if (world != null && params.dynLights /* && renderPass == 1 */)
-//			drawLightFace(face);
+		// if (world != null && params.dynLights /* && renderPass == 1 */)
+		// drawLightFace(face);
 	}
 
 	/**
@@ -316,7 +394,7 @@ public class BaseRenderer
 		if (icon != null)
 			face.setTexture(icon, params.uvFactor, params.flipU, params.flipV);
 
-		if (typeRender == TYPE_INVENTORY || params.useNormals)
+		if (typeRender != TYPE_WORLD || params.useNormals)
 			t.setNormal(params.direction.offsetX, params.direction.offsetY, params.direction.offsetZ);
 
 		baseBrightness = getBaseBrightness();
@@ -344,16 +422,16 @@ public class BaseRenderer
 
 		Shadow s = new Shadow(new ChunkPosition(x, y, z), face);
 		face = s.splitFace();
-		if(face == null)
+		if (face == null)
 			return;
-		
+
 		for (Vertex v : face.getVertexes())
 		{
 			t.setColorRGBA_I(v.getColor(), v.getAlpha());
 			t.setBrightness(v.getBrightness());
 
 			t.addVertexWithUV(v.getX(), v.getY(), v.getZ(), v.getU(), v.getV());
-			//t.addVertex(v.getX(), v.getY(), v.getZ());
+			// t.addVertex(v.getX(), v.getY(), v.getZ());
 		}
 
 	}
@@ -368,7 +446,7 @@ public class BaseRenderer
 		for (int i = 0; i < vertexes.length; i++)
 		{
 			drawVertex(vertexes[i], i);
-			if(modeRender == MODE_LINES)
+			if (modeRender == MODE_LINES)
 			{
 				drawVertex(vertexes[i == vertexes.length - 1 ? 0 : i + 1], i);
 			}
@@ -401,7 +479,7 @@ public class BaseRenderer
 		t.setColorRGBA_I(vertex.getColor(), vertex.getAlpha());
 		t.setBrightness(vertex.getBrightness());
 
-		if(modeRender == MODE_POLYGONS && params.useTexture)
+		if (modeRender == MODE_POLYGONS && params.useTexture)
 			t.addVertexWithUV(vertex.getX(), vertex.getY(), vertex.getZ(), vertex.getU(), vertex.getV());
 		else
 			t.addVertex(vertex.getX(), vertex.getY(), vertex.getZ());
@@ -414,7 +492,7 @@ public class BaseRenderer
 	 */
 	protected boolean shouldRenderFace(Face face)
 	{
-		if (typeRender == TYPE_INVENTORY || world == null || block == null)
+		if (typeRender != TYPE_WORLD || world == null || block == null)
 			return true;
 		if (shapeParams != null && shapeParams.renderAllFaces != null && shapeParams.renderAllFaces)
 			return true;
@@ -484,10 +562,8 @@ public class BaseRenderer
 	}
 
 	/**
-	 * Calculate the ambient occlusion for a vertex and also apply the side
-	 * dependent shade.<br />
-	 * <b>aoMatrix</b> is the list of block coordinates necessary to compute AO.
-	 * If it's empty, only the global face shade is applied.<br />
+	 * Calculate the ambient occlusion for a vertex and also apply the side dependent shade.<br />
+	 * <b>aoMatrix</b> is the list of block coordinates necessary to compute AO. If it's empty, only the global face shade is applied.<br />
 	 * Also, <i>params.colorMultiplier</i> is applied as well.
 	 * 
 	 * @param vertex
@@ -516,13 +592,12 @@ public class BaseRenderer
 
 	/**
 	 * Get the base brightness for the current face.<br />
-	 * If <i>params.useBlockBrightness</i> = false, <i>params.brightness</i>.
-	 * Else, the brightness is determined base on <i>params.offset</i> and
-	 * <i>getBlockBounds()</i>
+	 * If <i>params.useBlockBrightness</i> = false, <i>params.brightness</i>. Else, the brightness is determined base on
+	 * <i>params.offset</i> and <i>getBlockBounds()</i>
 	 */
 	protected int getBaseBrightness()
 	{
-		if (typeRender == TYPE_INVENTORY || world == null || !params.useBlockBrightness || params.direction == null)
+		if (typeRender != TYPE_WORLD || world == null || !params.useBlockBrightness || params.direction == null)
 			return params.brightness;
 
 		double[][] bounds = getRenderBounds();
@@ -547,9 +622,8 @@ public class BaseRenderer
 	}
 
 	/**
-	 * Calculate the ambient occlusion brightness for a vertex. <b>aoMatrix</b>
-	 * is the list of block coordinates necessary to compute AO. Only first 3
-	 * blocks are used.<br />
+	 * Calculate the ambient occlusion brightness for a vertex. <b>aoMatrix</b> is the list of block coordinates necessary to compute AO.
+	 * Only first 3 blocks are used.<br />
 	 * 
 	 * @param vertex
 	 * @param baseBrightness
@@ -568,8 +642,7 @@ public class BaseRenderer
 	}
 
 	/**
-	 * Do the actual brightness calculation (copied from
-	 * net.minecraft.client.renderer.BlocksRenderer.java)
+	 * Do the actual brightness calculation (copied from net.minecraft.client.renderer.BlocksRenderer.java)
 	 */
 	protected int getAoBrightness(int b1, int b2, int b3, int base)
 	{
@@ -586,10 +659,9 @@ public class BaseRenderer
 	}
 
 	/**
-	 * Get the block ambient occlusion value. Contrary to base Minecraft code,
-	 * it's the actual block at the <b>x</b>, <b>y</b> and <b>z</b> coordinates
-	 * which is used to get the value, and not value of the block drawn. This
-	 * allows to have different logic behaviors for AO values for a block.
+	 * Get the block ambient occlusion value. Contrary to base Minecraft code, it's the actual block at the <b>x</b>, <b>y</b> and <b>z</b>
+	 * coordinates which is used to get the value, and not value of the block drawn. This allows to have different logic behaviors for AO
+	 * values for a block.
 	 * 
 	 * @param world
 	 * @param x
@@ -606,9 +678,8 @@ public class BaseRenderer
 	}
 
 	/**
-	 * Get the mix brightness for a block (sky + block source) TODO: handle
-	 * block light value for light emitting block sources (as base Minecraft
-	 * does)
+	 * Get the mix brightness for a block (sky + block source) TODO: handle block light value for light emitting block sources (as base
+	 * Minecraft does)
 	 * 
 	 * @param world
 	 * @param x
@@ -622,8 +693,8 @@ public class BaseRenderer
 	}
 
 	/**
-	 * Get the rendering bounds. If <i>params.useBlockBounds</i> = false,
-	 * <i>params.renderBounds</i> is used instead of the actual block bounds.
+	 * Get the rendering bounds. If <i>params.useBlockBounds</i> = false, <i>params.renderBounds</i> is used instead of the actual block
+	 * bounds.
 	 * 
 	 * @return
 	 */
@@ -632,7 +703,7 @@ public class BaseRenderer
 		if (block == null || !params.useBlockBounds)
 			return params.renderBounds;
 
-		if(world != null)
+		if (world != null)
 			block.setBlockBoundsBasedOnState(world, x, y, z);
 		return new double[][] { { block.getBlockBoundsMinX(), block.getBlockBoundsMinY(), block.getBlockBoundsMinZ() },
 				{ block.getBlockBoundsMaxX(), block.getBlockBoundsMaxY(), block.getBlockBoundsMaxZ() } };
@@ -648,5 +719,31 @@ public class BaseRenderer
 	{
 		for (Vertex v : face.getVertexes())
 			v.interpolateCoord(bounds);
+	}
+
+	public static <T extends BaseRenderer> T create(Class<T> clazz)
+	{
+		try
+		{
+			Constructor<T> ctr = clazz.getConstructor(Integer.TYPE);
+			int nextId = RenderingRegistry.getNextAvailableRenderId();
+			T r = ctr.newInstance(nextId);
+			clazz.getField("renderId").set(null, nextId);
+			instances.put(clazz, r);
+
+			return r;
+		}
+		catch (ReflectiveOperationException e)
+		{
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	
+	@Override
+	public int getRenderId()
+	{
+		return renderId;
 	}
 }

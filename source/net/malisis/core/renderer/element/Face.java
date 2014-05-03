@@ -17,7 +17,7 @@ public class Face
 		for (int i = 0; i < vertexes.length; i++)
 			this.vertexes[i] = new Vertex(vertexes[i]);
 		if (params == null)
-			params = RenderParameters.Default();
+			params = RenderParameters.setDefault();
 		this.params = new RenderParameters(params);
 	}
 
