@@ -20,7 +20,7 @@ public class RenderParameters
 		defaultParameters.useBlockBounds = true;
 		defaultParameters.renderBounds = new double[][] { { 0, 0, 0 }, { 1, 1, 1 } };
 		defaultParameters.vertexPositionRelativeToRenderBounds = true;
-		defaultParameters.scale = 1.0F;
+		defaultParameters.useCustomTexture = false;
 		defaultParameters.useTexture = true;
 		defaultParameters.interpolateUV = true;
 		defaultParameters.calculateAOColor = true;
@@ -60,9 +60,10 @@ public class RenderParameters
 	 */
 	public Boolean vertexPositionRelativeToRenderBounds;
 	/**
-	 * Defines the scale factor to apply
+	 * Define whether a custom texture for drawing. It disable default icon behavior.
+	 * A ResourceLocation need to be bound. 
 	 */
-	public Float scale;
+	public Boolean useCustomTexture;
 	/**
 	 * Defines an icon to use for the block/face (will override textureSide)
 	 * (Block Level)
@@ -165,7 +166,7 @@ public class RenderParameters
 		renderAllFaces = params.renderAllFaces;
 		useBlockBounds = params.useBlockBounds;
 		vertexPositionRelativeToRenderBounds = params.vertexPositionRelativeToRenderBounds;
-		scale = params.scale;
+		useCustomTexture = params.useCustomTexture;
 		icon = params.icon;
 		useTexture = params.useTexture;
 		interpolateUV = params.interpolateUV;
@@ -219,8 +220,8 @@ public class RenderParameters
 			newRp.useBlockBounds = rp2.useBlockBounds;
 		if (rp2.vertexPositionRelativeToRenderBounds != null)
 			newRp.vertexPositionRelativeToRenderBounds = rp2.vertexPositionRelativeToRenderBounds;
-		if (rp2.scale != null)
-			newRp.scale = rp2.scale;
+		if (rp2.useCustomTexture != null)
+			newRp.useCustomTexture = rp2.useCustomTexture;
 		if (rp2.icon != null)
 			newRp.icon = rp2.icon;
 		if(rp2.useTexture != null)

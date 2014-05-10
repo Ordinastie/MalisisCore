@@ -1,21 +1,20 @@
 package net.malisis.core.renderer;
 
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-
-import net.malisis.core.light.Shadow;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
-import net.malisis.core.renderer.preset.ShapePreset;
+import net.malisis.core.test.TestRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -25,20 +24,24 @@ import org.lwjgl.opengl.GL11;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 
-public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
+public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 {
 	/**
 	 * Set rendering for world
 	 */
 	public static final int TYPE_WORLD = 1;
 	/**
-	 * Set rendering for inventory with ISBRH 
+	 * Set rendering for inventory with ISBRH
 	 */
 	public static final int TYPE_ISBRH_INVENTORY = 2;
 	/**
 	 * Set rendering for inventory with IItemRenderer
 	 */
 	public static final int TYPE_ITEM_INVENTORY = 3;
+	/**
+	 * Set rendering for TESR
+	 */
+	public static final int TYPE_TESR_WORLD = 4;
 	/**
 	 * Set rendering as polygons
 	 */
@@ -48,13 +51,12 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 	 */
 	public static final int MODE_LINES = 1;
 
-	private static HashMap<Class, BaseRenderer> instances = new HashMap<>();
 	protected Tessellator t = Tessellator.instance;
 	protected IBlockAccess world;
 	/**
 	 * Render id
 	 */
-	public int renderId;
+//	public int renderId;
 	/**
 	 * Block to render
 	 */
@@ -101,6 +103,18 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 	 * Base brightness of the block
 	 */
 	protected int baseBrightness;
+	/**
+	 * An override texture set by the renderer
+	 */
+	protected IIcon overrideTexture;
+	/**
+	 * TileEntity currently drawing (for TESR)
+	 */
+	protected TileEntity tileEntity;
+	/**
+	 * Partial tick time (for TESR)
+	 */
+	protected float partialTick = 0;
 
 	/**
 	 * Used for TESR
@@ -108,17 +122,6 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 	public BaseRenderer()
 	{
 		this.t = Tessellator.instance;
-	}
-
-	/**
-	 * Used for ISBRH
-	 * 
-	 * @param renderId
-	 */
-	protected BaseRenderer(int renderId)
-	{
-		this.t = Tessellator.instance;
-		this.renderId = renderId;
 	}
 
 	// #region set()
@@ -132,6 +135,7 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 		this.x = 0;
 		this.y = 0;
 		this.z = 0;
+		this.overrideTexture = null;
 		return this;
 	}
 
@@ -165,6 +169,7 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 	{
 		return set(world, block, x, y, z, blockMetadata);
 	}
+
 	// #end
 
 	// #region ISBRH
@@ -178,21 +183,18 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 	{
 		set(block, metadata);
 		prepare(TYPE_ISBRH_INVENTORY);
-		drawShape(ShapePreset.Cube(), rp);
+		render();
 		clean();
 	}
 
 	@Override
 	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer)
 	{
-		return renderWorldBlock(world, x, y, z, block, modelId, renderer, null);
-	}
-	
-	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer, RenderParameters rp)
-	{
 		set(world, block, x, y, z, world.getBlockMetadata(x, y, z));
 		prepare(TYPE_WORLD);
-		drawShape(ShapePreset.Cube(), rp);
+		if(renderer.hasOverrideBlockTexture())
+			overrideTexture = renderer.overrideBlockTexture;
+		render();
 		clean();
 		return true;
 	}
@@ -202,6 +204,7 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 	{
 		return false;
 	}
+
 	// #end ISBRH
 
 	// #region IItemRenderer
@@ -222,18 +225,37 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 	{
 		renderItem(type, item, null, data);
 	}
-	
+
 	public void renderItem(ItemRenderType type, ItemStack item, RenderParameters rp, Object... data)
 	{
-		if(item.getItem() instanceof ItemBlock)
+		if (item.getItem() instanceof ItemBlock)
 			set(Block.getBlockFromItem(item.getItem()));
-		
+
 		prepare(TYPE_ITEM_INVENTORY);
-		drawShape(ShapePreset.Cube(), rp);
+		render();
 		clean();
 	}
-	
+
 	// #end IItemRenderer
+
+	// #region TESR
+	@Override
+	public void renderTileEntityAt(TileEntity te, double x, double y, double z, float f)
+	{
+		renderTileEntityAt(te, x, y, z, f, null);
+	}
+
+	public void renderTileEntityAt(TileEntity te, double x, double y, double z, float f, RenderParameters rp)
+	{
+		set(te.getWorldObj(), te.getBlockType(), te.xCoord, te.yCoord, te.zCoord, te.getBlockMetadata());
+		prepare(TYPE_TESR_WORLD, x, y, z);
+		partialTick = f;
+		tileEntity = te;
+		render();
+		clean();
+	}
+
+	// #end TESR
 
 	// #region prepare()
 	public void prepare(int typeRender, int modeRender)
@@ -242,7 +264,7 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 		prepare(typeRender);
 	}
 
-	public void prepare(int typeRender)
+	public void prepare(int typeRender, double... data)
 	{
 		this.typeRender = typeRender;
 		if (typeRender == TYPE_WORLD)
@@ -254,8 +276,20 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 			GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
 			t.startDrawingQuads();
 		}
-		else if(typeRender == TYPE_ITEM_INVENTORY)
+		else if (typeRender == TYPE_ITEM_INVENTORY)
 		{
+			t.startDrawingQuads();
+		}
+		else if (typeRender == TYPE_TESR_WORLD)
+		{
+			RenderHelper.disableStandardItemLighting();
+			GL11.glPushMatrix();
+			GL11.glTranslated(data[0], data[1], data[2]);
+			GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+			GL11.glShadeModel(GL11.GL_SMOOTH);
+			bindTexture(TextureMap.locationBlocksTexture);
+
+			t = Tessellator.instance;
 			t.startDrawingQuads();
 		}
 	}
@@ -277,10 +311,16 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 			t.draw();
 			GL11.glTranslatef(0.5F, 0.5F, 0.5F);
 		}
-		else if(typeRender == TYPE_ITEM_INVENTORY)
+		else if (typeRender == TYPE_ITEM_INVENTORY)
 		{
 			t.draw();
 		}
+		else if (typeRender == TYPE_TESR_WORLD)
+		{
+			t.draw();
+			GL11.glPopMatrix();
+		}
+		reset();
 	}
 
 	public void tessellatorShift()
@@ -322,6 +362,11 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 			tessellatorShift();
 	}
 
+	public void render()
+	{
+
+	}
+
 	/**
 	 * Draw a shape with its own parameters
 	 * 
@@ -329,7 +374,7 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 	 */
 	public void drawShape(Shape shape)
 	{
-		drawShape(shape, shape.getParameters());
+		drawShape(shape, null);
 	}
 
 	/**
@@ -348,8 +393,6 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 			if (shouldRenderFace(face))
 			{
 				drawFace(face, face.getParameters());
-				// if (world != null && params.dynLights/* && renderPass == 1 */)
-				// drawLightFace(face);
 			}
 		}
 	}
@@ -362,8 +405,6 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 	public void drawFace(Face face)
 	{
 		drawFace(face, face.getParameters());
-		// if (world != null && params.dynLights /* && renderPass == 1 */)
-		// drawLightFace(face);
 	}
 
 	/**
@@ -379,7 +420,11 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 
 		// icon
 		IIcon icon = params.icon;
-		if (block != null && icon == null)
+		if(params.useCustomTexture)
+			icon = new BaseIcon();
+		else if(overrideTexture != null)
+			icon = overrideTexture;
+		else if (block != null && icon == null)
 		{
 			int side = 0;
 			if (params.textureSide != null)
@@ -394,7 +439,7 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 		if (icon != null)
 			face.setTexture(icon, params.uvFactor, params.flipU, params.flipV);
 
-		if (typeRender != TYPE_WORLD || params.useNormals)
+		if ((typeRender != TYPE_WORLD && typeRender != TYPE_TESR_WORLD)|| params.useNormals)
 			t.setNormal(params.direction.offsetX, params.direction.offsetY, params.direction.offsetZ);
 
 		baseBrightness = getBaseBrightness();
@@ -403,37 +448,7 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 		if (params.vertexPositionRelativeToRenderBounds)
 			calcVertexesPosition(getRenderBounds());
 
-		if (params.scale != 1)
-			face.scale(params.scale);
-
 		drawVertexes(face.getVertexes());
-	}
-
-	/**
-	 * Draw the light over the face
-	 * 
-	 * @param face
-	 */
-	protected void drawLightFace(Face face)
-	{
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glAlphaFunc(GL11.GL_GREATER, 0.0F);
-
-		Shadow s = new Shadow(new ChunkPosition(x, y, z), face);
-		face = s.splitFace();
-		if (face == null)
-			return;
-
-		for (Vertex v : face.getVertexes())
-		{
-			t.setColorRGBA_I(v.getColor(), v.getAlpha());
-			t.setBrightness(v.getBrightness());
-
-			t.addVertexWithUV(v.getX(), v.getY(), v.getZ(), v.getU(), v.getV());
-			// t.addVertex(v.getX(), v.getY(), v.getZ());
-		}
-
 	}
 
 	/***
@@ -597,7 +612,7 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 	 */
 	protected int getBaseBrightness()
 	{
-		if (typeRender != TYPE_WORLD || world == null || !params.useBlockBrightness || params.direction == null)
+		if ((typeRender != TYPE_WORLD && typeRender != TYPE_TESR_WORLD) || world == null || !params.useBlockBrightness || params.direction == null)
 			return params.brightness;
 
 		double[][] bounds = getRenderBounds();
@@ -725,11 +740,9 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 	{
 		try
 		{
-			Constructor<T> ctr = clazz.getConstructor(Integer.TYPE);
+			T r = clazz.newInstance();
 			int nextId = RenderingRegistry.getNextAvailableRenderId();
-			T r = ctr.newInstance(nextId);
 			clazz.getField("renderId").set(null, nextId);
-			instances.put(clazz, r);
 
 			return r;
 		}
@@ -740,10 +753,47 @@ public class BaseRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 
 	}
 
-	
 	@Override
 	public int getRenderId()
 	{
-		return renderId;
+		try
+		{
+			return (int) (this.getClass().getField("renderId")).get(null);
+		}
+		catch (ReflectiveOperationException e)
+		{
+			return -1;
+		}
+	}
+
+	private class BaseIcon implements IIcon
+	{
+		@Override
+		public int getIconWidth() {  return 0; }
+
+		@Override
+		public int getIconHeight() { return 0; }
+		
+		@Override
+		public float getMinU() { return 0; }
+		
+		@Override
+		public float getMaxU() { return 1; }
+
+		@Override
+		public float getInterpolatedU(double var1) { return (float) var1; }
+
+		@Override
+		public float getMinV() { return 0; }
+
+		@Override
+		public float getMaxV() { return 1; }
+
+		@Override
+		public float getInterpolatedV(double var1) { return (float) var1; }
+
+		@Override
+		public String getIconName() { return null; }
+
 	}
 }

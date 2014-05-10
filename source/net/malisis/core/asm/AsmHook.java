@@ -95,7 +95,10 @@ public class AsmHook
 					InsnList match = matches.remove(0);
 					AbstractInsnNode node = AsmUtils.findInstruction(methodNode, match);
 					if(node == null)
+					{
 						System.err.println("COULDN'T FIND INSTRUCTION LIST IN " + targetClass + ":" + targetMethod + targetMethodDescriptor);
+						return;
+					}
 					else
 						index = methodNode.instructions.indexOf(node);
 					break;

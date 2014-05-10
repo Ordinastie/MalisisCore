@@ -83,8 +83,6 @@ public class Raytrace
 		this.options = options;
 
 		blockSrc = new ChunkPosition(src.toVec3());
-		if (dest != null)
-			blockDest = new ChunkPosition(dest.toVec3());
 
 		int stepX = 1, stepY = 1, stepZ = 1;
 		if (ray.direction.x < 0)
@@ -119,12 +117,14 @@ public class Raytrace
 	{
 		this(new Ray(src, new Vector(src, dest)), options);
 		this.dest = dest;
+		blockDest = new ChunkPosition(dest.toVec3());
 	}
 
 	public Raytrace(Point src, Point dest)
 	{
 		this(new Ray(src, new Vector(src, dest)), 0);
 		this.dest = dest;
+		blockDest = new ChunkPosition(dest.toVec3());
 	}
 
 	/**

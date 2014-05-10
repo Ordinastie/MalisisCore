@@ -12,7 +12,7 @@ import org.objectweb.asm.tree.MethodNode;
 
 public abstract class MalisisClassTransformer implements IClassTransformer
 {
-	public HashMap<String, ArrayList<AsmHook>> listHooks = new HashMap<>();
+	public HashMap<String, ArrayList<AsmHook>> listHooks = new HashMap();
 	
 	public MalisisClassTransformer()
 	{

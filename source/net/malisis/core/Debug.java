@@ -2,10 +2,6 @@ package net.malisis.core;
 
 import java.util.Map.Entry;
 
-import net.malisis.core.light.ColoredLight;
-import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.Vertex;
-import net.malisis.core.renderer.preset.FacePreset;
 import net.malisis.core.util.Point;
 import net.malisis.core.util.Raytrace;
 import net.minecraft.client.Minecraft;
@@ -16,10 +12,8 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.ChunkPosition;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 import org.lwjgl.input.Keyboard;
@@ -29,7 +23,6 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class Debug
 {
-	public ColoredLight light;
 
 	public int[] debugBlock = new int[4];
 	public Point rts;
@@ -115,39 +108,10 @@ public class Debug
 
 	public void renderLightRays(RenderWorldLastEvent event)
 	{
-		EntityClientPlayerMP p = Minecraft.getMinecraft().thePlayer;
-		double pPos[] = { p.lastTickPosX + (p.posX - p.lastTickPosX) * (double) event.partialTicks,
-				p.lastTickPosY + (p.posY - p.lastTickPosY) * (double) event.partialTicks,
-				p.lastTickPosZ + (p.posZ - p.lastTickPosZ) * (double) event.partialTicks };
-
-		ColoredLight[] lights = ColoredLight.getLights();
-
-		if (debug && lights.length != 0)
-		{
-
-			Face f = FacePreset.fromDirection(ForgeDirection.getOrientation(debugBlock[3]));
-			for (ColoredLight l : lights)
-			{
-				if (l.emitting)
-				{
-					for (Vertex v : f.getVertexes())
-					{
-						// if (v.name().equals(Vertex.TopNorthEast.name()))
-						{
-							float[] bPos = { debugBlock[0] + v.getX(), debugBlock[1] + v.getY(), debugBlock[2] + v.getZ() };
-
-							Point p1 = new Point(l.x, l.y, l.z);
-							Point p2 = new Point(bPos[0], bPos[1], bPos[2]);
-
-							Raytrace rt = new Raytrace(p1, p2);
-							MovingObjectPosition mop = rt.trace();
-							drawLine(pPos, p1, p2, (mop == null || mop.typeOfHit == MovingObjectType.MISS) ? 0x00FF00 : 0xFF0000);
-						}
-					}
-				}
-			}
-		}
-
+//		EntityClientPlayerMP p = Minecraft.getMinecraft().thePlayer;
+//		double pPos[] = { p.lastTickPosX + (p.posX - p.lastTickPosX) * (double) event.partialTicks,
+//				p.lastTickPosY + (p.posY - p.lastTickPosY) * (double) event.partialTicks,
+//				p.lastTickPosZ + (p.posZ - p.lastTickPosZ) * (double) event.partialTicks };
 	}
 
 	public void renderRayTraceBlocks(RenderWorldLastEvent event)
@@ -197,13 +161,4 @@ public class Debug
 		t.addVertex(end.x - pPos[0], end.y - pPos[1], end.z - pPos[2]);
 		t.draw();
 	}
-
-	public void drawLine(double[] pPos, float[] bPos, ColoredLight l)
-	{
-		Tessellator t = Tessellator.instance;
-
-		t.addVertex(l.x - pPos[0], l.y - pPos[1], l.z - pPos[2]);
-		t.addVertex(bPos[0] - pPos[0], bPos[1] - pPos[1], bPos[2] - pPos[2]);
-	}
-
 }

@@ -49,5 +49,4 @@ public class ShapePreset
 	public static Shape InvTopSouthWest() { return new Shape(InvTopSouthWest); }
 	public static Shape InvTopSouthEast() { return new Shape(InvTopSouthEast); }
 	//@formatter:on
-
 }

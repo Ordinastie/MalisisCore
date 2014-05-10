@@ -113,11 +113,51 @@ public class Face
 		return min + (max - min) * factor;
 	}
 
+	public void translate(double x, double y, double z)
+	{
+		for(Vertex v : vertexes)
+			v.add(x, y, z);
+	}
+	
 	public void scale(float f)
 	{
-		for (Vertex v : vertexes)
-			v.factor(f);
+		scale(f, 0.5, 0.5, 0.5);
 	}
+	public void scale(float f, double x, double y, double z)
+	{
+		for (Vertex v : vertexes)
+			v.scale(f, x, y, z);
+	}
+	
+	public void rotateAroundX(double angle)
+	{
+		rotateAroundX(angle, 0.5, 0.5, 0.5);
+	}
+	public void rotateAroundX(double angle, double centerX, double centerY, double centerZ)
+	{
+		for (Vertex v : vertexes)
+			v.rotateAroundX(angle, centerX, centerY, centerZ);
+	}
+	
+	public void rotateAroundY(double angle)
+	{
+		rotateAroundY(angle, 0.5, 0.5, 0.5);
+	}
+	public void rotateAroundY(double angle, double centerX, double centerY, double centerZ)
+	{
+		for (Vertex v : vertexes)
+			v.rotateAroundY(angle, centerX, centerY, centerZ);
+	}
+	public void rotateAroundZ(double angle)
+	{
+		rotateAroundZ(angle, 0.5, 0.5, 0.5);
+	}
+	public void rotateAroundZ(double angle, double centerX, double centerY, double centerZ)
+	{
+		for (Vertex v : vertexes)
+			v.rotateAroundZ(angle, centerX, centerY, centerZ);
+	}
+	
 
 	public String name()
 	{

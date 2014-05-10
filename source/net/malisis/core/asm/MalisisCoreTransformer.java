@@ -1,10 +1,7 @@
 package net.malisis.core.asm;
 
 import static org.objectweb.asm.Opcodes.*;
-import net.malisis.core.renderer.RenderLights;
-import net.minecraft.client.renderer.RenderList;
 
-import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
@@ -15,50 +12,13 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 public class MalisisCoreTransformer extends MalisisClassTransformer
 {
-
-	private RenderList allRenderLists[];
-
-
-
 	@Override
 	public void registerHooks()
 	{
 		register(keyboardEventHook());
 		register(userAttackEntityEventHook());
-		register(renderLightsHook());
 	}
 	
-	public AsmHook renderLightsHook()
-	{
-		AsmHook ah = new AsmHook("net.minecraft.client.renderer.RenderGlobal", "renderSortedRenderers", "(IIID)I");
-		
-
-		//913 : Arrays.sort(this.allRenderLists, new RenderDistanceSorter());
-		InsnList match1 = new InsnList();
-		match1.add(new VarInsnNode(ALOAD, 0)); //this
-		match1.add(new FieldInsnNode(GETFIELD, "net/minecraft/client/renderer/RenderGlobal", "allRenderLists", "[Lnet/minecraft/client/renderer/RenderList;")); //.allRenderLists
-		match1.add(new TypeInsnNode(NEW, "net/minecraft/client/util/RenderDistanceSorter")); //new RenderDistanceSorter
-		match1.add(new InsnNode(DUP));
-		match1.add(new MethodInsnNode(INVOKESPECIAL, "net/minecraft/client/util/RenderDistanceSorter", "<init>", "()V"));
-		match1.add(new MethodInsnNode(INVOKESTATIC, "java/util/Arrays", "sort", "([Ljava/lang/Object;Ljava/util/Comparator;)V"));
-		
-	
-		//RenderLights.render(this, this.allRenderLists, d3, d1, d2);
-		InsnList insert1 = new InsnList();
-		insert1.add(new VarInsnNode(ALOAD, 0)); //this
-		insert1.add(new VarInsnNode(ALOAD, 0)); //this
-		insert1.add(new FieldInsnNode(GETFIELD, "net/minecraft/client/renderer/RenderGlobal", "allRenderLists", "[Lnet/minecraft/client/renderer/RenderList;")); //.allRenderLists
-		insert1.add(new VarInsnNode(DLOAD, 11)); //d3
-		insert1.add(new VarInsnNode(DLOAD, 13)); //d1
-		insert1.add(new VarInsnNode(DLOAD, 15)); //d2
-		insert1.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/renderer/RenderLights", "render", "(Lnet/minecraft/client/renderer/RenderGlobal;[Lnet/minecraft/client/renderer/RenderList;DDD)V"));
-	
-		
-		ah.jumpTo(match1).insert(insert1);
-		
-		return ah;
-	}
-
 	public AsmHook userAttackEntityEventHook()
 	{
 		AsmHook ah = new AsmHook("net.minecraft.client.multiplayer.PlayerControllerMP", "attackEntity", "(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/entity/Entity;)V");

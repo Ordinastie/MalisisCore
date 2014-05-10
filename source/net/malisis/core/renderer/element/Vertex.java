@@ -2,9 +2,12 @@ package net.malisis.core.renderer.element;
 
 import net.malisis.core.util.Point;
 
+import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector4f;
+
 public class Vertex
 {
-	public static final int BRIGHTNESS_MAX = 15728640;
+	public static final int BRIGHTNESS_MAX = 15728880;
 
 	public static final Vertex TopNorthWest = new Vertex(0, 1, 0);
 	public static final Vertex TopNorthEast = new Vertex(1, 1, 0);
@@ -15,16 +18,16 @@ public class Vertex
 	public static final Vertex BottomSouthWest = new Vertex(0, 0, 1);
 	public static final Vertex BottomSouthEast = new Vertex(1, 0, 1);
 
-	private float x = 0;
-	private float y = 0;
-	private float z = 0;
+	private double x = 0;
+	private double y = 0;
+	private double z = 0;
 	private int brightness = 0;
 	private int color = 0xFFFFFF;
 	private int alpha = 255;
-	private float u = 0.0F;
-	private float v = 0.0F;
+	private double u = 0.0F;
+	private double v = 0.0F;
 
-	public Vertex(float x, float y, float z, int rgba, int brightness, float u, float v)
+	public Vertex(double x, double y, double z, int rgba, int brightness, double u, double v)
 	{
 		this.x = x;
 		this.y = y;
@@ -36,12 +39,12 @@ public class Vertex
 		this.v = v;
 	}
 
-	public Vertex(float x, float y, float z, int rgba, int brightness)
+	public Vertex(double x, double y, double z, int rgba, int brightness)
 	{
 		this(x, y, z, rgba, brightness, 0, 0);
 	}
 
-	public Vertex(float x, float y, float z)
+	public Vertex(double x, double y, double z)
 	{
 		this(x, y, z, 0xFFFFFFFF, BRIGHTNESS_MAX, 0, 0);
 	}
@@ -61,82 +64,66 @@ public class Vertex
 		this(vertex.x, vertex.y, vertex.z, rgba, brightness, u, v);
 	}
 
-	public float getX()
+	public double getX()
 	{
 		return x;
 	}
-	
+
 	public int getIntX()
 	{
-		return Math.round(x);
+		return (int) Math.round(x);
 	}
 
-	public Vertex setX(float x)
+	public Vertex setX(double x)
 	{
 		this.x = x;
 		return this;
 	}
 
-	
-	public float getY()
+	public double getY()
 	{
 		return y;
 	}
 
 	public int getIntY()
 	{
-		return Math.round(y);
+		return (int) Math.round(y);
 	}
-	
-	public Vertex setY(float y)
+
+	public Vertex setY(double y)
 	{
 		this.y = y;
 		return this;
 	}
 
-	public float getZ()
+	public double getZ()
 	{
 		return z;
 	}
 
 	public int getIntZ()
 	{
-		return Math.round(z);
+		return (int) Math.round(z);
 	}
-	
-	public Vertex setZ(float z)
+
+	public Vertex setZ(double z)
 	{
 		this.z = z;
 		return this;
 	}
 
-	public void set(float x, float y, float z)
+	public void set(double x, double y, double z)
 	{
 		this.x = x;
 		this.y = y;
 		this.z = z;
 	}
-	
-	public void limit(float min, float max)
-	{
-		limitX(min, max);
-		limitY(min, max);
-		limitZ(min, max);
-	}
 
-	public void limitX(float min, float max)
+	public void limit(double min, double max)
 	{
-		x = Math.max(Math.min(x, max), min);
-	}
-
-	public void limitY(float min, float max)
-	{
-		y = Math.max(Math.min(y, max), min);
-	}
-
-	public void limitZ(float min, float max)
-	{
-		z = Math.max(Math.min(z, max), min);
+		x = clamp(x, min, max);
+		y = clamp(y, min, max);
+		z = clamp(z, min, max);
 	}
 
 	public void interpolateCoord(double[][] bounds)
@@ -145,12 +132,12 @@ public class Vertex
 		double fy = bounds[1][1] - bounds[0][1];
 		double fz = bounds[1][2] - bounds[0][2];
 
-		x = (float) (x * fx + bounds[0][0]);
-		y = (float) (y * fy + bounds[0][1]);
-		z = (float) (z * fz + bounds[0][2]);
+		x = x * fx + bounds[0][0];
+		y = y * fy + bounds[0][1];
+		z = z * fz + bounds[0][2];
 	}
 
-	public Vertex add(float x, float y, float z)
+	public Vertex add(double x, double y, double z)
 	{
 		this.x += x;
 		this.y += y;
@@ -158,11 +145,67 @@ public class Vertex
 		return this;
 	}
 
-	public Vertex factor(float f)
+	public Vertex scale(float f)
 	{
-		x = Math.max(Math.min((x - 0.5F) * f + 0.5F, 1), 0);
-		y = Math.max(Math.min((y - 0.5F) * f + 0.5F, 1), 0);
-		z = Math.max(Math.min((z - 0.5F) * f + 0.5F, 1), 0);
+		return scale(f, 0.5, 0.5, 0.5);
+	}
+
+	public Vertex scale(float f, double centerX, double centerY, double centerZ)
+	{
+		x = (x - centerX) * f + centerX;
+		y = (y - centerY) * f + centerY;
+		z = (z - centerZ) * f + centerZ;
+		return this;
+	}
+
+	public Vertex rotateAroundX(double angle)
+	{
+		return rotateAroundX(angle, 0.5, 0.5, 0.5);
+	}
+
+	public Vertex rotateAroundX(double angle, double centerX, double centerY, double centerZ)
+	{
+		angle = Math.toRadians(angle);
+		double ty = y - centerY;
+		double tz = z - centerZ;
+		y = ty * Math.cos(angle) - tz * Math.sin(angle);
+		z = ty * Math.sin(angle) + tz * Math.cos(angle);
+		y += centerY;
+		z += centerZ;
+		return this;
+	}
+
+	public Vertex rotateAroundY(double angle)
+	{
+		return rotateAroundY(angle, 0.5, 0.5, 0.5);
+	}
+
+	public Vertex rotateAroundY(double angle, double centerX, double centerY, double centerZ)
+	{
+		angle = Math.toRadians(angle);
+		double tx = x - centerX;
+		double tz = z - centerZ;
+		x = tx * Math.cos(angle) + tz * Math.sin(angle);
+		z = -tx * Math.sin(angle) + tz * Math.cos(angle);
+		x += centerX;
+		z += centerZ;
+		return this;
+	}
+
+	public Vertex rotateAroundZ(double angle)
+	{
+		return rotateAroundZ(angle, 0.5, 0.5, 0.5);
+	}
+
+	public Vertex rotateAroundZ(double angle, double centerX, double centerY, double centerZ)
+	{
+		angle = Math.toRadians(angle);
+		double tx = x - centerX;
+		double ty = y - centerY;
+		x = tx * Math.cos(angle) - ty * Math.sin(angle);
+		y = tx * Math.sin(angle) + ty * Math.cos(angle);
+		x += centerX;
+		y += centerY;
 		return this;
 	}
 
@@ -205,12 +248,12 @@ public class Vertex
 		this.v = v;
 	}
 
-	public float getU()
+	public double getU()
 	{
 		return this.u;
 	}
 
-	public float getV()
+	public double getV()
 	{
 		return this.v;
 	}
@@ -243,9 +286,32 @@ public class Vertex
 	{
 		return name() + " 0x" + Integer.toHexString(color) + " (a:" + alpha + ", b:" + brightness + ")";
 	}
-	
+
 	public Point toPoint()
 	{
 		return new Point(x, y, z);
+	}
+
+	public static double clamp(double value)
+	{
+		return clamp(value, 0, 1);
+	}
+
+	public static double clamp(double value, double min, double max)
+	{
+		if (value < min)
+			return min;
+		if (value > max)
+			return max;
+		return value;
+	}
+
+	public void applyMatrix(Matrix4f transformMatrix)
+	{
+		Vector4f vec = new Vector4f((float) x, (float) y, (float) z, 1F);
+		Matrix4f.transform(transformMatrix, vec, vec);
+		x = vec.x;
+		y = vec.y;
+		z = vec.z;		
 	}
 }

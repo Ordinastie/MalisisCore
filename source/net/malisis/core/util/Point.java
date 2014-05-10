@@ -67,13 +67,38 @@ public class Point
 	/**
 	 * Test if this is equal to p
 	 * 
-	 * @param v
+	 * @param
 	 */
 	public boolean equals(Point p)
 	{
 		if (p == null)
 			return false;
 		return ((x == p.x) && (y == p.y) && (z == p.z));
+	}
+
+	/**
+	 * Calculate the distance between two points squared
+	 * 
+	 * @param p1
+	 * @param p2
+	 */
+	public static double distanceSquared(Point p1, Point p2)
+	{
+		double x = p2.x - p1.x;
+		double y = p2.y - p1.y;
+		double z = p2.z - p1.z;
+		return x * x + y * y + z * z;
+	}
+
+	/**
+	 * Calculate the distance between two points
+	 */
+	public static double distance(Point p1, Point p2)
+	{
+		double x = p2.x - p1.x;
+		double y = p2.y - p1.y;
+		double z = p2.z - p1.z;
+		return Math.sqrt(x * x + y * y + z * z);
 	}
 
 	public String toString()
