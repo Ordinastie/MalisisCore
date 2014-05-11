@@ -1,5 +1,6 @@
 package net.malisis.core;
 
+import net.malisis.core.client.gui.component.container.UIWindow;
 import net.malisis.core.light.ColoredLight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
@@ -34,6 +35,9 @@ public class MalisisCommand extends CommandBase
 				case "render":
 					renderCommand(sender, params);
 					break;
+                case "gui":
+                    Minecraft.getMinecraft().displayGuiScreen(new UIWindow(100, 100).createScreenProxy());
+                    break;
 				default:
 					helpCommand(sender);
 					break;

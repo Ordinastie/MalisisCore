@@ -23,10 +23,10 @@ public class AsmHook
 	private String targetMethodDescriptor;
 	private boolean debug = false;
 	
-	private ArrayList<InsnList> inserts = new ArrayList<>();
-	private ArrayList<InsnList> matches = new ArrayList<>();
-	private ArrayList<Integer> jumps = new ArrayList<>();
-	private ArrayList<HookStep> steps = new ArrayList<>();
+	private ArrayList<InsnList> inserts = new ArrayList<InsnList>();
+	private ArrayList<InsnList> matches = new ArrayList<InsnList>();
+	private ArrayList<Integer> jumps = new ArrayList<Integer>();
+	private ArrayList<HookStep> steps = new ArrayList<HookStep>();
 	
 	
 	public AsmHook(String targetClass, String methodName, String methodDesc)

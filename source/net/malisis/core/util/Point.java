@@ -6,7 +6,7 @@ public class Point
 {
 	public double x;
 	public double y;
-	public double z;
+    public double z;
 
 	public Point(double x, double y, double z)
 	{
@@ -31,7 +31,7 @@ public class Point
 
 	/**
 	 * Set this point to x, y and z
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param z
@@ -45,7 +45,7 @@ public class Point
 
 	/**
 	 * Move point according to vector
-	 * 
+	 *
 	 * @param v
 	 */
 	public Point add(Vector v)
@@ -66,7 +66,7 @@ public class Point
 
 	/**
 	 * Test if this is equal to p
-	 * 
+	 *
 	 * @param v
 	 */
 	public boolean equals(Point p)

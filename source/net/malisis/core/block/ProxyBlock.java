@@ -55,10 +55,9 @@ public abstract class ProxyBlock extends Block
 						f.set(this, f.get(block));
 					}
 				}
-				catch (IllegalArgumentException e)
-				{}
-				catch (IllegalAccessException e)
-				{}
+				catch (ReflectiveOperationException e) {
+
+                }
 			}
 
 			blockClass = blockClass.getSuperclass();

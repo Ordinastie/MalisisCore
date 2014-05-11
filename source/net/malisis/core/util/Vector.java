@@ -62,7 +62,7 @@ public class Vector
 	 * 
 	 * @return
 	 */
-	public double lenghtSquared()
+	public double lengthSquared()
 	{
 		return x * x + y * y + z * z;
 	}
@@ -149,7 +149,7 @@ public class Vector
 	/**
 	 * Scale the vector by factor
 	 * 
-	 * @param s
+	 * @param factor
 	 */
 	public void scale(double factor)
 	{
