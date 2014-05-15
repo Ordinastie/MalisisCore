@@ -25,6 +25,7 @@ public class Shape
 	public Shape(Shape s)
 	{
 		this(s.faces);
+		copyMatrix(s);
 	}
 
 	public Face[] getFaces()
@@ -139,34 +140,46 @@ public class Shape
 		return this;
 	}
 
+	
 	public Shape rotate(float angle, float x, float y, float z)
 	{
+		return rotate(angle, x, y, z, 0, 0, 0);
+	}
+	
+	public Shape rotate(float angle, float x, float y, float z, float offsetX, float offsetY, float offsetZ)
+	{
+		translate(offsetX, offsetY, offsetZ);
 		matrix().rotate((float) Math.toRadians(angle), new Vector3f(x, y, z));
+		translate(offsetX, -offsetY, -offsetZ);
 		return this;
 	}
 	
 
 	public Shape rotateAroundX(float angle)
 	{
-		return rotate(angle, 1, 0, 0);
+		return rotate(angle, 1, 0, 0, 0, 0, 0);
 	}
 	public Shape rotateAroundX(float angle, float y, float z)
 	{
-		translate(0, y, z);
-		rotate(angle, 1, 0, 0);
-		translate(0, -y, -z);
-		return this;
+		return rotate(angle, 1, 0, 0, 0, y, z);
 	}
-	
 	public Shape rotateAroundY(float angle)
 	{
-		return rotate(angle, 0, 1, 0);
+		return rotate(angle, 0, 1, 0, 0, 0, 0);
 	}
-
+	public Shape rotateAroundY(float angle, float x, float z)
+	{
+		return rotate(angle, 0, 1, 0, x, 0, z);
+	}
 	public Shape rotateAroundZ(float angle)
 	{
-		return rotate(angle, 0, 0, 1);
+		return rotate(angle, 0, 0, 1, 0, 0, 0);
 	}
+	public Shape rotateAroundZ(float angle, float x, float y)
+	{
+		return rotate(angle, 0, 0, 1, x, y, 0);
+	}
+	
 	
 	
 	public Shape pivot(float angle, float x, float y, float z)
@@ -216,6 +229,8 @@ public class Shape
 			}
 		}
 		
+		transformMatrix = null;
+		selfRotationMatrix = null;
 		return this;
 	}
 	

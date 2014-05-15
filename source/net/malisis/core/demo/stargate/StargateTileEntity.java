@@ -1,4 +1,4 @@
-package net.malisis.core.test;
+package net.malisis.core.demo.stargate;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -18,4 +18,5 @@ public class StargateTileEntity extends TileEntity
 	{
 		return AxisAlignedBB.getBoundingBox(xCoord - 2, yCoord, zCoord -2, xCoord + 3, yCoord + 2, zCoord + 3);
 	}
+	
 }

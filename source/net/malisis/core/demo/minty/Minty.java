@@ -1,4 +1,4 @@
-package net.malisis.core.minty;
+package net.malisis.core.demo.minty;
 
 import net.malisis.core.renderer.BaseRenderer;
 import cpw.mods.fml.client.registry.RenderingRegistry;
@@ -13,11 +13,13 @@ public class Minty
 	{
 		ArmoryOre ore = new ArmoryOre();
 		GameRegistry.registerBlock(ore, ItemBlockArmoryOre.class, ore.getUnlocalizedName().substring(5));
-		
-		if(FMLCommonHandler.instance().getSide() == Side.CLIENT)
+	}
+	
+	public void init()
+	{
+		if(FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
 		{
 			RenderingRegistry.registerBlockHandler(BaseRenderer.create(MintyOreRenderer.class));
 		}
-		
 	}
 }

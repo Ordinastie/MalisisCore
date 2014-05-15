@@ -169,7 +169,7 @@ public class AsmUtils
 	}
 	
 	
-	public static void printMethodNode(MethodNode methodNode)
+	public static String getMethodNodeAsString(MethodNode methodNode)
 	{
 		Printer printer = new Textifier();
 		TraceMethodVisitor methodPrinter = new TraceMethodVisitor(printer);
@@ -179,9 +179,8 @@ public class AsmUtils
 		StringWriter sw = new StringWriter();
 		printer.print(new PrintWriter(sw));
 		printer.getText().clear();
-		String insnNodeAsString = sw.toString();
 
-		System.err.print(insnNodeAsString);
+		return sw.toString();
 	}
 
 

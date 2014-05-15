@@ -6,16 +6,18 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
-import net.malisis.core.minty.Minty;
-import net.malisis.core.test.Test;
+import net.malisis.core.demo.minty.Minty;
+import net.malisis.core.demo.stargate.Stargate;
+import net.malisis.core.demo.test.Test;
 import net.minecraft.block.Block;
-import net.minecraft.command.ServerCommandManager;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
+
+import org.apache.logging.log4j.Logger;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -25,26 +27,32 @@ import cpw.mods.fml.client.FMLFolderResourcePack;
 import cpw.mods.fml.common.DummyModContainer;
 import cpw.mods.fml.common.LoadController;
 import cpw.mods.fml.common.ModMetadata;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
 import cpw.mods.fml.relauncher.ReflectionHelper;
-import cpw.mods.fml.relauncher.Side;
 
 public class MalisisCore extends DummyModContainer
 {
 	public static final String modid = "malisiscore";
 	public static final String modname = "Malisis Core";
 	public static final String version = "1.7.2-0.7";
-	public static final String url = "http://github.com/Ordinastie/MalisisCore";
+	public static final String url = "";
 	public static File coremodLocation;
 
 	public static MalisisCore instance;
-	public static Debug debug;
+	public static Logger log;
+	public static Configuration config;
+	
+	//demos
+	private static boolean demosEnabled = false;
 	public static Test test;
 	public static Minty minty;
+	public static Stargate stargate;
 
 	public static boolean isObfEnv = false;
+	
 
 	public MalisisCore()
 	{
@@ -53,15 +61,12 @@ public class MalisisCore extends DummyModContainer
 		meta.modId = modid;
 		meta.name = modname;
 		meta.version = version;
-		meta.authorList = Arrays.asList("Ordinastie");
-		meta.url = "";
-		meta.description = "Add hooks";
+		meta.authorList = Arrays.asList("Ordinastie", "PaleoCrafter");
+		meta.url = "http://github.com/Ordinastie/MalisisCore";
+		meta.logoFile = "malisiscore.png";
+		meta.description = "API rendering and ASM transformations.";
 
 		instance = this;
-		test = new Test();
-		minty = new Minty();
-		// debug = new Debug();
-		//System.err.println("MalisisCore enabled!");
 	}
 
 	@Override
@@ -74,23 +79,51 @@ public class MalisisCore extends DummyModContainer
 	@Subscribe
 	public static void preInit(FMLPreInitializationEvent event)
 	{
-		test.preInit();
-		minty.preInit();
-		if (event.getSide() == Side.CLIENT)
+		log = event.getModLog();
+		
+		config = new Configuration(event.getSuggestedConfigurationFile());
+		config.load();
+		demosEnabled = config.get(Configuration.CATEGORY_GENERAL, "demosEnabled", false).getBoolean(false);
+		config.save();
+		
+		if(demosEnabled)
 		{
-			// FMLCommonHandler.instance().bus().register(new VanillaBlockRenderer());
-			if (debug != null)
-				MinecraftForge.EVENT_BUS.register(debug);
+			test = new Test();
+			minty = new Minty();
+			stargate = new Stargate();
+			
+			test.preInit();
+			minty.preInit();
+			stargate.preInit();
+		}
+		
+	}
+	
+	@Subscribe
+	public static void init(FMLInitializationEvent event)
+	{
+		if(demosEnabled)
+		{
+			test.init();
+			minty.init();
+			stargate.init();
 		}
 	}
 
 	@Subscribe
 	public void serverStart(FMLServerStartingEvent event)
 	{
-		MinecraftServer server = MinecraftServer.getServer();
-		((ServerCommandManager) server.getCommandManager()).registerCommand(new MalisisCommand());
+		event.registerServerCommand(new MalisisCommand());
 	}
 
+	public static boolean toggleDemos()
+	{
+		demosEnabled = !demosEnabled;
+		config.get(Configuration.CATEGORY_GENERAL, "demosEnabled", false).set(demosEnabled);
+		config.save();
+		return demosEnabled;
+	}
+	
 	public static void replaceVanillaBlock(int id, String name, Block block, Block vanilla)
 	{
 		try

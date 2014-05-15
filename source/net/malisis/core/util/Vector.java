@@ -62,7 +62,7 @@ public class Vector
 	 * 
 	 * @return
 	 */
-	public double lenghtSquared()
+	public double lengthSquared()
 	{
 		return x * x + y * y + z * z;
 	}

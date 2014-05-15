@@ -3,40 +3,32 @@ package net.malisis.core.asm;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.malisis.core.asm.mappings.McpMethodMapping;
+
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodNode;
-
 
 public class AsmHook
 {
 	private enum HookStep
 	{
-		FIND,
-		INSERT,
-		JUMP,
+		FIND, INSERT, JUMP,
 	}
-	
-	private String targetClass;
-	private String targetMethod;
-	private String targetMethodObf;
-	private String targetMethodDescriptor;
+
+	private McpMethodMapping mapping;
 	private boolean debug = false;
-	
+
 	private ArrayList<InsnList> inserts = new ArrayList<>();
 	private ArrayList<InsnList> matches = new ArrayList<>();
 	private ArrayList<Integer> jumps = new ArrayList<>();
 	private ArrayList<HookStep> steps = new ArrayList<>();
-	
-	
-	public AsmHook(String targetClass, String methodName, String methodDesc)
+
+	public AsmHook(McpMethodMapping mapping)
 	{
-		this.targetClass = targetClass; 
-		this.targetMethod = methodName;
-		this.targetMethodObf = getObfuscatedMethodName(methodName);
-		this.targetMethodDescriptor = methodDesc;
+		this.mapping = mapping;
 	}
-	
+
 	public AsmHook jumpTo(InsnList match)
 	{
 		this.steps.add(HookStep.FIND);
@@ -44,61 +36,63 @@ public class AsmHook
 		this.jump(-1);
 		return this;
 	}
+
 	public AsmHook jumpAfter(InsnList match)
 	{
 		this.jumpTo(match);
 		this.jump(match.size());
 		return this;
 	}
-	
-	
+
 	public AsmHook insert(AbstractInsnNode insert)
 	{
 		InsnList list = new InsnList();
 		list.add(insert);
-		return insert(list); 
+		return insert(list);
 	}
+
 	public AsmHook insert(InsnList insert)
 	{
 		this.steps.add(HookStep.INSERT);
 		this.inserts.add(insert);
 		return this;
 	}
+
 	public AsmHook jump(int jump)
 	{
 		this.steps.add(HookStep.JUMP);
 		this.jumps.add(jump);
 		return this;
 	}
+
 	public AsmHook previous()
 	{
 		return jump(-1);
 	}
+
 	public AsmHook next()
 	{
 		return jump(1);
 	}
+
 	public AsmHook debug()
 	{
 		this.debug = true;
 		return this;
 	}
-	
-	public void walkSteps(MethodNode methodNode)
+
+	public boolean walkSteps(MethodNode methodNode)
 	{
 		int index = 0;
-		for(HookStep step : steps)
+		for (HookStep step : steps)
 		{
 			switch (step)
 			{
 				case FIND:
 					InsnList match = matches.remove(0);
 					AbstractInsnNode node = AsmUtils.findInstruction(methodNode, match);
-					if(node == null)
-					{
-						System.err.println("COULDN'T FIND INSTRUCTION LIST IN " + targetClass + ":" + targetMethod + targetMethodDescriptor);
-						return;
-					}
+					if (node == null)
+						return false;
 					else
 						index = methodNode.instructions.indexOf(node);
 					break;
@@ -113,45 +107,38 @@ public class AsmHook
 				default:
 					break;
 			}
-		
 		}
 		
+		return true;
 	}
-	
 
 	public void register(HashMap<String, ArrayList<AsmHook>> listHooks)
 	{
-		ArrayList<AsmHook> hooks = listHooks.get(targetClass);
-		if(hooks == null)
+		ArrayList<AsmHook> hooks = listHooks.get(mapping.getTargetClass());
+		if (hooks == null)
 			hooks = new ArrayList<AsmHook>();
 		hooks.add(this);
-		listHooks.put(targetClass, hooks);
-	}
-	
-	
-	private String getObfuscatedMethodName(String methodName)
-	{
-		return targetMethodObf;
-	}
-
-	public String getMethodName()
-	{
-		return targetMethod;
-	}
-
-	public String getMethodDescriptor()
-	{
-		return targetMethodDescriptor;
-	}
-	
-	public boolean isDebug()
-	{
-		return debug;
+		listHooks.put(mapping.getTargetClass(), hooks);
 	}
 
 	public String getTargetClass()
 	{
-		return targetClass;
+		return mapping.getTargetClass();
+	}
+
+	public String getMethodName()
+	{
+		return mapping.getName();
+	}
+
+	public String getMethodDescriptor()
+	{
+		return mapping.getDescriptor();
+	}
+
+	public boolean isDebug()
+	{
+		return debug;
 	}
 
 }

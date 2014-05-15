@@ -4,7 +4,6 @@ import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
-import net.malisis.core.test.TestRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.RenderHelper;
@@ -114,7 +113,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	/**
 	 * Partial tick time (for TESR)
 	 */
-	protected float partialTick = 0;
+	public float partialTick = 0;
 
 	/**
 	 * Used for TESR
@@ -385,9 +384,12 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	public void drawShape(Shape s, RenderParameters rp)
 	{
+		if(s == null)
+			return;
+		
 		shape = s;
 		shapeParams = new RenderParameters(rp);
-
+		s.applyMatrix();
 		for (Face face : s.getFaces())
 		{
 			if (shouldRenderFace(face))

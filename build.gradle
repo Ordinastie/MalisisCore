@@ -22,11 +22,18 @@ targetCompatibility = 1.7
 version = "1.7.2-0.7"
 group = "net.malisis.malisiscore" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "malisiscore"
+libsDirName = "../releases"
 
 sourceSets {
     main {
         java { srcDirs = ["$projectDir/source"] }
         resources { srcDirs = ["$projectDir/resources"] }
+    }
+}
+
+jar {
+	manifest {
+        attributes 'FMLCorePlugin': 'net.malisis.core.asm.MalisisCorePlugin'
     }
 }
 

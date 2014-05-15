@@ -1,4 +1,4 @@
-package net.malisis.core.test;
+package net.malisis.core.demo.test;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;

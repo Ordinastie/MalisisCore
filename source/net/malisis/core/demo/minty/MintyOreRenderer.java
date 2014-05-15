@@ -1,4 +1,4 @@
-package net.malisis.core.minty;
+package net.malisis.core.demo.minty;
 
 import net.malisis.core.renderer.BaseRenderer;
 import net.malisis.core.renderer.element.RenderParameters;

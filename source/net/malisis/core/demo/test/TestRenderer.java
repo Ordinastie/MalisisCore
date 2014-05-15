@@ -1,7 +1,13 @@
-package net.malisis.core.test;
+package net.malisis.core.demo.test;
 
+import java.util.ArrayList;
+
+import net.malisis.core.demo.stargate.StargateBlock;
+import net.malisis.core.demo.stargate.StargateTileEntity;
 import net.malisis.core.renderer.BaseRenderer;
+import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.AnimationRenderer;
+import net.malisis.core.renderer.animation.Rotation;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
@@ -21,6 +27,173 @@ public class TestRenderer extends BaseRenderer
 	int slices = 5;
 	float sliceHeight = 1F / slices;
 
+	int deployTimer = StargateBlock.deployTimer;
+	int openTimer = (int) (deployTimer * 0.30F);
+	int rotationTimer = (int) (deployTimer * 0.30F);
+	int archTimer = (int) (deployTimer * 0.50F);
+	int fadeTimer = (int) (deployTimer * 0.20F);
+
+	AnimationRenderer ar = new AnimationRenderer(this);
+
+	public TestRenderer()
+	{
+		//make sure the renderer is register after pre init, otherwise you may
+		//not be able to retrieve block icons yet
+		createOpeningAnimation();
+		createUnrollingAnimation();
+		createArchAnimation();
+		createFloatingAnimation();
+	}
+
+	// #region Animations 
+	private void createOpeningAnimation()
+	{
+		int ot = openTimer / slices;
+		for (int i = 1; i < slices; i++)
+		{
+			int t = ot * i;
+			// opening towards west
+			Shape sW = ShapePreset.Cube().setBounds(0, 0, 0, 0.5F, sliceHeight, 1F);
+			sW.translate(0, sliceHeight * i, 0F);
+			//move west first, then down
+			ar.translate(-0.5F * i, 0, 0).forTicks(t).translate(0F, -sliceHeight * i, 0F).forTicks(t, ot).animate("openW" + i, sW);
+
+			// opening toward east
+			Shape sE = new Shape(sW).translate(0.5F, 0, 0);
+			//move east first, then down
+			ar.translate(0.5F * i, 0, 0).forTicks(t).translate(0F, -sliceHeight * i, 0F).forTicks(t, ot).animate("openE" + i, sE);
+		}
+	}
+
+	private void createUnrollingAnimation()
+	{
+		ar.globalDelay(openTimer);
+		RenderParameters rp = new RenderParameters();
+		rp.useBlockBrightness = false;
+
+		int rt = rotationTimer * 2 / 5;
+		int delay = rt / 2;
+		float y = -0.5F + sliceHeight / 2;
+
+		ArrayList<Animation> north = new ArrayList<>();
+		ArrayList<Animation> south = new ArrayList<>();
+
+		for (int row = 0; row < 4; row++)
+		{
+			// create the shapes
+			Shape[] shapesNorth = new Shape[slices];
+			Shape[] shapesSouth = new Shape[slices];
+			for (int i = 0; i < slices; i++)
+			{
+				Shape sN = ShapePreset.Cube().setBounds(0, 0, 0, 1, sliceHeight, 0.5F);
+				sN.translate(-2 + i, 0, 0);
+				shapesNorth[i] = sN;
+
+				Shape sS = new Shape(sN);
+				sS.translate(0, 0, 0.5F);
+				shapesSouth[i] = sS;
+			}
+
+			// create the animations
+			north.add(new Rotation(-180, 1F, 0, 0, 0, y, -0.5F).forTicks(rt, 0));
+			south.add(new Rotation(180, 1F, 0, 0, 0, y, 0).forTicks(rt, 0));
+			if (row > 0)
+			{
+				north.add(new Rotation(-180, 1F, 0, 0, 0, y, 0).forTicks(rt, delay));
+				south.add(new Rotation(180, 1F, 0, 0, 0, y, -0.5F).forTicks(rt, delay));
+			}
+			if (row > 1)
+			{
+				north.add(new Rotation(-180, 1F, 0, 0, 0, y, -0.5F).forTicks(rt, delay * 2));
+				south.add(new Rotation(180, 1F, 0, 0, 0, y, 0).forTicks(rt, delay * 2));
+			}
+			if (row > 2)
+			{
+				north.add(new Rotation(-180, 1F, 0, 0, 0, y, 0).forTicks(rt, delay * 3));
+				south.add(new Rotation(180, 1F, 0, 0, 0, y, -0.5F).forTicks(rt, delay * 3));
+			}
+
+			// link the shapes the the animations
+			for (Animation anim : north)
+				ar.add(anim);
+			ar.animate("unrollingN" + row, shapesNorth, rp);
+
+			for (Animation anim : south)
+				ar.add(anim);
+			ar.animate("unrollingS" + row, shapesSouth, rp);
+
+			north.clear();
+			south.clear();
+		}
+	}
+
+	private void createArchAnimation()
+	{
+		ar.globalDelay(openTimer /* + rotationTimer */);
+
+		// override rendering parameters for bottom face
+		RenderParameters rpFace = new RenderParameters();
+		rpFace.calculateAOColor = false;
+		rpFace.calculateBrightness = false;
+		rpFace.useBlockBrightness = false;
+		rpFace.brightness = 32;
+		rpFace.icon = Blocks.diamond_block.getIcon(0, 0);
+
+		// create the shape
+		Shape base = ShapePreset.Cube();
+		base.setParameters(FacePreset.Bottom(), rpFace, true);
+		base.translate(0, 3.0F, 0);
+		base.shrink(FacePreset.Bottom(), 0.69F);
+		base.shrink(FacePreset.Top(), 0.87F);
+
+		int totalArch = 13;
+		float angle = 10;
+		int at = archTimer / totalArch;
+		// at = 10;
+
+		RenderParameters rp = new RenderParameters();
+		rp.renderAllFaces = true;
+
+		for (int i = 0; i < totalArch; i++)
+		{
+			float archAngle = 130 - (angle * i + angle / 2);
+			int delay = (totalArch - i) * at;
+
+			Shape sW = new Shape(base);
+			sW.rotate(130, 0, 0, 1, 0, -2.2F, 0);
+
+			Shape sE = new Shape(base);
+			sE.rotate(-130, 0, 0, 1, 0, -2.2F, 0);
+
+			ar.rotate(-archAngle, 0, 0, 1, 0, -2.2F, 0).forTicks(at, delay).scaleFrom(0.5F, 0.3F, 0.2F).scaleTo(0.5F, 0.5F, 0.3F)
+					.forTicks(at / 2, delay + at).animate("archW" + i, sW, rp);
+
+			ar.rotate(archAngle, 0, 0, 1, 0, -2.2F, 0).forTicks(at, delay).scaleFrom(0.5F, 0.3F, 0.2F).scaleTo(0.5F, 0.5F, 0.3F)
+					.forTicks(at, delay + at).animate("archE" + i, sE, rp);
+		}
+	}
+
+	private void createFloatingAnimation()
+	{
+		ar.globalDelay(openTimer + rotationTimer + archTimer);
+
+		RenderParameters rp = new RenderParameters();
+		rp.icon = Blocks.gold_block.getIcon(0, 0);
+		rp.useBlockBrightness = false;
+		rp.brightness = Vertex.BRIGHTNESS_MAX;
+		rp.alpha = 175;
+
+		Shape s = ShapePreset.Cube();
+		s.scale(0.2F);
+		s.applyMatrix();
+		s.translate(-1.0F, 1.5F, 0);
+
+		ar.rotate(360, 0, 1, 0, 1.0F, 0, 0).forTicks(50).loop(-1).translate(0, 1, 0).forTicks(20).loop(-1, 0, 20).sinusoidal()
+				.translate(0, -1, 0).forTicks(20).loop(-1, 20, 0).sinusoidal().rotate(360, 1, 0, 0).forTicks(50).loop(-1)
+				.animate("floating", s, rp);
+	}
+	//#end Animations
+	
 	@Override
 	public void render()
 	{
@@ -52,175 +225,38 @@ public class TestRenderer extends BaseRenderer
 
 		int alpha = 255;
 		boolean drawTopFace = false;
+		ar.setTime(te.placedTimer);
 
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glAlphaFunc(GL11.GL_GREATER, 0.0F);
+		
 		if (blockMetadata == 0)
 		{
-			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			GL11.glAlphaFunc(GL11.GL_GREATER, 0.0F);
-
-			AnimationRenderer arL = new AnimationRenderer(this, te.placedTimer);
-			AnimationRenderer arR = new AnimationRenderer(this, te.placedTimer);
-
-			// Block opening
-			Shape[] shapesL = new Shape[slices - 1];
-			Shape[] shapesR = new Shape[slices - 1];
-			int deployTimer = ((StargateBlock) block).deployTimer;
-			int openTimer = (int) (deployTimer * 0.25F);
-			int rotationTimer = (int) (deployTimer * 0.25F);
-			int archTimer = (int) (deployTimer * 0.3F);
-			int fadeTimer = (int) (deployTimer * 0.20F);
-
-			for (int i = 0; i < shapesL.length; i++)
-			{
-				Shape sL = ShapePreset.Cube().setBounds(0, 0, 0, 0.5F, sliceHeight, 1F);
-				sL.translate(0, sliceHeight * (i + 1), 0F);
-				Shape sR = new Shape(sL).translate(0.5F, 0, 0);
-				shapesL[i] = sL;
-				shapesR[i] = sR;
-			}
-
-			int ot = openTimer / slices;
-			for (int i = 1; i <= shapesL.length; i++)
-			{
-				int t = ot * i;
-				arL.translate(-0.5F * i, 0, 0).forTicks(t).translate(0F, -sliceHeight * i, 0F).forTicks(t, ot).animate(shapesL[i - 1]);
-				arR.translate(0.5F * i, 0, 0).forTicks(t).translate(0F, -sliceHeight * i, 0F).forTicks(t, ot).animate(shapesR[i - 1]);
-			}
-
+			// 1st non moving cube at the bottom
 			drawShape(ShapePreset.Cube().setBounds(0, 0, 0, 1F, sliceHeight, 1F));
-			for (Shape s : shapesL)
-				drawShape(s);
-			for (Shape s : shapesR)
-				drawShape(s);
+			//render all animations but not the "floating" one 
+			ar.renderAllBut("floating");
 
-			// Platform unrolling
-			arL.nextAnimation(openTimer);
-			arR.nextAnimation(openTimer);
-			if (arL.animationReady())
+			//manually calculate the alpha of the top texture
+			float comp = Math.min((ar.getElapsedTime() - deployTimer + fadeTimer) / fadeTimer, 1);
+			if (comp > 0)
 			{
-
-				int rt = rotationTimer * 2 / 5;
-				int delay = rt / 2;
-				float y = -0.5F + sliceHeight / 2;
-
-				Shape[][] rowsL = new Shape[4][slices];
-				Shape[][] rowsR = new Shape[4][slices];
-
-				for (int row = 0; row < rowsL.length; row++)
-				{
-					for (int i = 0; i < rowsL[row].length; i++)
-					{
-						Shape sL = ShapePreset.Cube().setBounds(0, 0, 0, 1, sliceHeight, 0.5F);
-						sL.translate(-2 + i, 0, 0);
-						rowsL[row][i] = sL;
-
-						Shape sR = new Shape(sL);
-						sR.translate(0, 0, 0.5F);
-						rowsR[row][i] = sR;
-					}
-				}
-
-				for (int row = 0; row < rowsL.length; row++)
-				{
-					arL.rotate(-180, 1F, 0, 0, 0, y, -0.5F).forTicks(rt);
-					arR.rotate(180, 1F, 0, 0, 0, y, 0).forTicks(rt);
-
-					if (row > 0)
-					{
-						arL.rotate(-180, 1F, 0, 0, 0, y, 0).forTicks(rt, delay);
-						arR.rotate(180, 1F, 0, 0, 0, y, -0.5F).forTicks(rt, delay);
-					}
-					if (row > 1)
-					{
-						arL.rotate(-180, 1F, 0, 0, 0, y, -0.5F).forTicks(rt, delay * 2);
-						arR.rotate(180, 1F, 0, 0, 0, y, 0).forTicks(rt, delay * 2);
-					}
-					if (row > 2)
-					{
-						arL.rotate(-180, 1F, 0, 0, 0, y, 0).forTicks(rt, delay * 3);
-						arR.rotate(180, 1F, 0, 0, 0, y, -0.5F).forTicks(rt, delay * 3);
-					}
-
-					arL.animate(rowsL[row]);
-					arR.animate(rowsR[row]);
-				}
-
-				RenderParameters rp = RenderParameters.setDefault();
-				rp.useBlockBrightness = false;
-				for (Shape[] row : rowsL)
-					for (Shape s : row)
-						drawShape(s, rp);
-				for (Shape[] row : rowsR)
-					for (Shape s : row)
-						drawShape(s, rp);
-			}
-
-			// Arch appearance
-			arL.nextAnimation(rotationTimer);
-			if (arL.animationReady())
-			{
-				AnimationRenderer ar = new AnimationRenderer(this, te.placedTimer + openTimer + rotationTimer);
-				Shape base = ShapePreset.Cube();
-
-				RenderParameters rpFace = new RenderParameters();
-				rpFace.calculateAOColor = false;
-				rpFace.calculateBrightness = false;
-				rpFace.useBlockBrightness = false;
-				rpFace.brightness = 32;
-				rpFace.icon = Blocks.diamond_block.getIcon(0, 0);
-				base.setParameters(FacePreset.Bottom(), rpFace, true);
-				base.shrink(FacePreset.Bottom(), 0.69F);
-				base.shrink(FacePreset.Top(), 0.87F);
-
-				int totalArch = 12;
-				float angle = -240;
-				int at = archTimer / 6;
-				int offset = (int) ((-angle - 180) / 2);
-
-				RenderParameters rp = RenderParameters.setDefault();
-				rp.renderAllFaces = true;
-
-				for (int i = 0; i <= totalArch; i++)
-				{
-					float archAngle = (angle / (float) (totalArch) * i) + offset;
-					int delay = (totalArch / 2 - Math.abs(totalArch / 2 - i)) * at;
-					Shape s = new Shape(base);
-					s.pivotZ(90);
-					s.translate(0, 1.0F, 0);
-					s.rotateAroundZ(archAngle);
-					s.translate(-2.2F, 0, 0);
-
-					ar.scaleFrom(0).scaleTo(0.5F, 1F, 0.5F).forTicks(at, delay).animate(s);
-					drawShape(s, rp);
-				}
-			}
-
-			arL.nextAnimation(archTimer);
-			if (arL.animationReady())
-			{
-				float comp = Math.min(arL.getElapsedTime() / fadeTimer, 1);
 				alpha = (int) (255 * comp);
-				next();
 				drawTopFace = true;
 			}
 		}
-		
-
-		Shape s = ShapePreset.Cube();
-		s.translate(-1.5F, 2, 0);
-		AnimationRenderer ar = new AnimationRenderer(this, te.placedTimer);
-		ar//.globalDelay(50)
-		//.rotate(360, 0, 1, 0, 1.5F, 0, 0).forTicks(100, 100)//loop(50)
-		.translate(2.0F, 0, 0).forTicks(20).loop(5)
-		// .delay(20).translate(3, 0, 0).loop(20, 0)
-		.animate(s);
-		s.scale(0.2F);
-		drawShape(s);
 
 		if (blockMetadata == 1 || drawTopFace)
 		{
+			if (blockMetadata == 1)
+				ar.render("floating");
+			//next() needs to be called to trigger a draw before we bind another texture
+			//otherwise, all the blocks would use that new texture
+			next();
+
 			Shape topFace = new Shape(new Face[] { FacePreset.Top() });
+			//move the platform a bit higher than the block to avoid z-fighting
 			topFace.translate(0, -0.499F + sliceHeight / 2, 0);
 			topFace.scale(5F, sliceHeight, 5F);
 
@@ -428,7 +464,7 @@ public class TestRenderer extends BaseRenderer
 
 	private void renderStargateBlock()
 	{
-		if (blockMetadata == 0)
+		if (blockMetadata != 1)
 			return;
 
 		RenderParameters rpFace = new RenderParameters();
@@ -449,25 +485,32 @@ public class TestRenderer extends BaseRenderer
 		Shape base = ShapePreset.Cube();
 		rpFace.icon = Blocks.diamond_block.getIcon(0, 0);
 		base.setParameters(FacePreset.Bottom(), rpFace, true);
+		base.translate(0, 1.0F, 0);
 		base.shrink(FacePreset.Bottom(), 0.69F);
 		base.shrink(FacePreset.Top(), 0.87F);
 
-		RenderParameters rpArch = RenderParameters.setDefault();
-		rpArch.renderAllFaces = true;
+		int totalArch = 13;
+		float angle = 10;
 
-		int nbArch = 12;
-		float angle = -240;
-		int offset = (int) ((-angle - 180) / 2);
-		for (int i = 0; i <= nbArch; i++)
+		RenderParameters rp = new RenderParameters();
+		rp.renderAllFaces = true;
+
+		for (int i = 0; i < totalArch; i++)
 		{
-			Shape s = new Shape(base);
-			s.pivotZ(90);
-			s.translate(0, 1.0F, 0);
-			s.rotateAroundZ((angle / (float) (nbArch) * i) + offset);
-			s.translate(-2.2F, 0, 0);
-			s.scale(0.5F, 1, 0.5F);
+			float archAngle = angle * i + angle / 2;
 
-			drawShape(s, rpArch);
+			Shape s1 = new Shape(base);
+			s1.rotateAroundZ(archAngle);
+			s1.translate(0, 2.2F, 0);
+			s1.scale(0.5F, 0.5F, 0.3F);
+
+			Shape s2 = new Shape(base);
+			s2.rotateAroundZ(-archAngle);
+			s2.translate(0, 2.2F, 0);
+			s2.scale(0.5F, 0.5F, 0.3F);
+
+			drawShape(s1, rp);
+			drawShape(s2, rp);
 		}
 
 	}

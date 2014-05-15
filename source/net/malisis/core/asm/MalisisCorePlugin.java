@@ -4,6 +4,8 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+
 import net.malisis.core.MalisisCore;
 
 import com.google.common.base.Throwables;
@@ -12,7 +14,7 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
 @TransformerExclusions({"net.malisis.core.asm."})
-//@IFMLLoadingPlugin.SortingIndex(1001)
+@IFMLLoadingPlugin.SortingIndex(1001)
 public class MalisisCorePlugin implements IFMLLoadingPlugin
 {
 
@@ -25,7 +27,7 @@ public class MalisisCorePlugin implements IFMLLoadingPlugin
 	@Override
 	public String getModContainerClass()
 	{
-		return MalisisCore.class.getName();
+		return "net.malisis.core.MalisisCore";
 	}
 
 	@Override
@@ -37,8 +39,8 @@ public class MalisisCorePlugin implements IFMLLoadingPlugin
 	@Override
 	public void injectData(Map<String, Object> data)
 	{
-		MalisisCore.isObfEnv = !((boolean) data.get("runtimeDeobfuscationEnabled"));
-		
+		MalisisCore.isObfEnv = (boolean) data.get("runtimeDeobfuscationEnabled");
+
 		MalisisCore.coremodLocation = (File) data.get("coremodLocation");
 		if (MalisisCore.coremodLocation == null)
 		{ 
@@ -48,7 +50,7 @@ public class MalisisCorePlugin implements IFMLLoadingPlugin
 			}
 			catch (URISyntaxException e)
 			{
-				System.err.println("Failed to acquire source location for ControlPack!");
+				LogManager.getLogger("malisiscore").error("Failed to acquire source location for MalisisCore!");
 				throw Throwables.propagate(e);
 			}
 		}

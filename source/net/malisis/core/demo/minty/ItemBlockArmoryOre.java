@@ -1,4 +1,4 @@
-package net.malisis.core.minty;
+package net.malisis.core.demo.minty;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemBlock;
