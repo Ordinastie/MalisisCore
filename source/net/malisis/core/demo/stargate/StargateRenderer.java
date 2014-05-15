@@ -139,6 +139,7 @@ public class StargateRenderer extends BaseRenderer
 		// create the shape
 		Shape base = ShapePreset.Cube();
 		base.setParameters(FacePreset.Bottom(), rpFace, true);
+		base.translate(0, 3, 0);
 		base.shrink(FacePreset.Bottom(), 0.69F);
 		base.shrink(FacePreset.Top(), 0.87F);
 
@@ -222,7 +223,7 @@ public class StargateRenderer extends BaseRenderer
 		{
 			// 1st non moving cube at the bottom
 			drawShape(ShapePreset.Cube().setBounds(0, 0, 0, 1F, sliceHeight, 1F));
-			//render all animations but not the "floating" one 
+			//render all animations but not the "floating" one
 			ar.renderAllBut("floating");
 
 			//manually calculate the alpha of the top texture
