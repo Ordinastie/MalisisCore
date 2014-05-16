@@ -124,7 +124,7 @@ public class MalisisCore extends DummyModContainer
 		return demosEnabled;
 	}
 	
-	public static void replaceVanillaBlock(int id, String name, Block block, Block vanilla)
+	public static void replaceVanillaBlock(int id, String name, String srgFieldName, Block block, Block vanilla)
 	{
 		try
 		{
@@ -137,7 +137,7 @@ public class MalisisCore extends DummyModContainer
 			method.invoke(Block.blockRegistry, id, name, block);
 
 			//modify reference in Blocks class
-			Field f = ReflectionHelper.findField(Blocks.class, name);
+			Field f = ReflectionHelper.findField(Blocks.class, isObfEnv ? srgFieldName : name );
 			Field modifiers = Field.class.getDeclaredField("modifiers");
 			modifiers.setAccessible(true);
 			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);

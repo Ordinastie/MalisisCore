@@ -37,6 +37,12 @@ jar {
     }
 }
 
+// because the normal output has been made to be obfuscated
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    classifier = 'dev'
+}
+
 minecraft {
     version = "1.7.2-10.12.1.1060"
     if (file("../../run").exists()) {
