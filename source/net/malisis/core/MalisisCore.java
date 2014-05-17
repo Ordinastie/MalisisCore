@@ -134,7 +134,7 @@ public class MalisisCore extends DummyModContainer
 			Class[] types = { Integer.TYPE, String.class, Object.class };
 			Method method = ReflectionHelper.findMethod(FMLControlledNamespacedRegistry.class, (FMLControlledNamespacedRegistry) null,
 					new String[] { "addObjectRaw" }, types);
-			method.invoke(Block.blockRegistry, id, name, block);
+			method.invoke(Block.blockRegistry, id, "minecraft:" + name, block);
 
 			//modify reference in Blocks class
 			Field f = ReflectionHelper.findField(Blocks.class, isObfEnv ? srgFieldName : name );
