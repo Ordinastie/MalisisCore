@@ -111,4 +111,10 @@ public class Size
     {
         this.height = height;
     }
+
+    @Override
+    public String toString()
+    {
+        return this.getClass().getName() + "[ width=" + width + ", height=" + height + " ]";
+    }
 }

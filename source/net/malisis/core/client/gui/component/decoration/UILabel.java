@@ -3,6 +3,8 @@ package net.malisis.core.client.gui.component.decoration;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.util.RenderHelper;
 
+import java.util.Arrays;
+
 /**
  * UILabel
  *
@@ -54,7 +56,7 @@ public class UILabel extends UIComponent
         for (int i = 0; i < lines.length; i++)
         {
             String line = lines[i];
-            RenderHelper.drawString(line, getScreenX(), getScreenY() + i * (mc.fontRenderer.FONT_HEIGHT + 1), color, drawShadow, zIndex);
+            RenderHelper.drawString(line, getScreenX(), getScreenY() + i * (mc.fontRenderer.FONT_HEIGHT + 1), zIndex, color, drawShadow);
         }
     }
 
@@ -62,5 +64,11 @@ public class UILabel extends UIComponent
     public void update(int mouseX, int mouseY)
     {
 
+    }
+
+    @Override
+    public String toString()
+    {
+        return this.getClass().getName() + "[ text=" + Arrays.toString(lines) + ", color=0x" + Integer.toHexString(this.color) + ", " + this.getPropertyString() + " ]";
     }
 }

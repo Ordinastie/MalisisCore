@@ -24,6 +24,7 @@
 
 package net.malisis.core.client.gui.proxy;
 
+import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.event.GuiEvent;
 
 /**
@@ -54,5 +55,7 @@ public interface Context
      * @param object the listener to remove
      */
     public void unregister(Object object);
+
+    public UITooltip getTooltip();
 
 }

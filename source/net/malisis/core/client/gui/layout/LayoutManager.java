@@ -109,4 +109,6 @@ public abstract class LayoutManager<C extends Constraints>
      * @return the position for the specified component
      */
     public abstract Point getPositionForComponent(UIContainer container, UIComponent component);
+
+    public abstract int calculateHeight(UIContainer container);
 }

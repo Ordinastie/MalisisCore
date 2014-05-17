@@ -4,17 +4,17 @@ import net.malisis.core.client.gui.util.MouseButton;
 import net.malisis.core.client.gui.util.shape.Point;
 
 /**
- * MouseClickEvent
+ * MouseClickedEvent
  *
  * @author PaleoCrafter
  */
-public class MouseClickEvent extends GuiEvent
+public class MouseClickedEvent extends GuiEvent
 {
 
     private Point position;
     private int button;
 
-    public MouseClickEvent(int x, int y, int button)
+    public MouseClickedEvent(int x, int y, int button)
     {
         this.position = new Point(x, y);
         this.button = button;

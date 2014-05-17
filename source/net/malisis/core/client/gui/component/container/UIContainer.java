@@ -35,7 +35,6 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * UIContainer
@@ -48,7 +47,7 @@ public class UIContainer extends UIComponent
     /**
      * The list of {@link net.malisis.core.client.gui.component.UIComponent components}.
      */
-    private final LinkedList<UIComponent> components;
+    protected final LinkedList<UIComponent> components;
 
     /**
      * The {@link net.malisis.core.client.gui.layout.LayoutManager LayoutManager} to be used by this container.
@@ -105,7 +104,10 @@ public class UIContainer extends UIComponent
     {
         super.initComponent();
         for (UIComponent component : components)
+        {
+            component.setParent(this);
             component.initComponent();
+        }
     }
 
     @Override
@@ -153,6 +155,22 @@ public class UIContainer extends UIComponent
         }
     }
 
+    public void drawTooltip(int mouseX, int mouseY)
+    {
+        for (UIComponent component : components)
+        {
+            if (component.getTooltip() != null && !component.getTooltip().isEmpty() && !(component instanceof UIContainer) && component.isVisible() && component.isHovered(new Point(mouseX, mouseY)) && component.isEnabled())
+            {
+                getContext().getTooltip().setText(component.getTooltip());
+                getContext().getTooltip().draw(mouseX, mouseY);
+            }
+            else if (component instanceof UIContainer && component.isVisible() && component.isEnabled())
+            {
+                ((UIContainer) component).drawTooltip(mouseX, mouseY);
+            }
+        }
+    }
+
     @Override
     public void update(int mouseX, int mouseY)
     {
@@ -176,6 +194,34 @@ public class UIContainer extends UIComponent
         super.dispose();
         for (UIComponent component : components)
             component.dispose();
+    }
+
+    @Override
+    public void setEnabled(boolean enabled)
+    {
+        super.setEnabled(enabled);
+        for (UIComponent component : components)
+            component.setEnabled(enabled);
+    }
+
+    public int getContentHeight()
+    {
+        if (layoutManager != null)
+        {
+            return layoutManager.calculateHeight(this);
+        }
+        else
+        {
+            int height = 0;
+            for (UIComponent component : components)
+            {
+                if (component.getY() + component.getHeight() > height)
+                {
+                    height = component.getY() + component.getHeight();
+                }
+            }
+            return height;
+        }
     }
 
     public Drawable getBackground()
