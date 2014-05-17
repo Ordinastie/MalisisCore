@@ -2,7 +2,8 @@ package net.malisis.core.client.gui.component.interaction;
 
 import com.google.common.eventbus.Subscribe;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.event.MouseClickEvent;
+import net.malisis.core.client.gui.event.MouseClickedEvent;
+import net.malisis.core.client.gui.event.ValueChangedEvent;
 import net.malisis.core.client.gui.util.shape.Point;
 import net.malisis.core.util.RenderHelper;
 import net.minecraft.util.ResourceLocation;
@@ -46,10 +47,13 @@ public class UICheckBox extends UIComponent
     }
 
     @Subscribe
-    public void onMouseClick(MouseClickEvent event)
+    public void onMouseClick(MouseClickedEvent event)
     {
         if (this.isHovered(event.getPosition()) && event.getButton().isLeft())
+        {
             this.checked = !checked;
+            this.getContext().publish(new ValueChangedEvent(this));
+        }
     }
 
     public void setLabel(String label)
@@ -61,13 +65,19 @@ public class UICheckBox extends UIComponent
     @Override
     public void draw(int mouseX, int mouseY)
     {
-        RenderHelper.drawRectangle(checked ? CHECKED_TEXTURE : isHovered(new Point(mouseX, mouseY)) ? HOVERED_TEXTURE : DEFAULT_TEXTURE, getScreenX(), getScreenY(), zIndex, 0, 0, 14, 14, 14, 14);
-        RenderHelper.drawString(label, getScreenX() + 16, getScreenY() + (getHeight() - mc.fontRenderer.FONT_HEIGHT + 1) / 2, 0x404040, false, zIndex);
+        RenderHelper.drawRectangle(checked ? CHECKED_TEXTURE : isHovered(new Point(mouseX, mouseY)) ? HOVERED_TEXTURE : DEFAULT_TEXTURE, getScreenX(), getScreenY(), zIndex, 14, 14, 0, 0, 14, 14);
+        RenderHelper.drawString(label, getScreenX() + 16, getScreenY() + (getHeight() - mc.fontRenderer.FONT_HEIGHT + 1) / 2, zIndex, 0x404040, false);
     }
 
     @Override
     public void update(int mouseX, int mouseY)
     {
 
+    }
+
+    @Override
+    public String toString()
+    {
+        return this.getClass().getName() + "[ text=" + label + ", checked=" + this.checked + ", " + this.getPropertyString() + " ]";
     }
 }

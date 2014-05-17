@@ -3,9 +3,8 @@ package net.malisis.core.client.gui.component.interaction;
 import com.google.common.eventbus.Subscribe;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.event.ButtonPressedEvent;
-import net.malisis.core.client.gui.event.MouseClickEvent;
+import net.malisis.core.client.gui.event.MouseClickedEvent;
 import net.malisis.core.client.gui.renderer.DynamicTexture;
-import net.malisis.core.client.gui.util.MouseButton;
 import net.malisis.core.client.gui.util.shape.Point;
 import net.malisis.core.client.gui.util.shape.Rectangle;
 import net.malisis.core.util.RenderHelper;
@@ -45,7 +44,7 @@ public class UIButton extends UIComponent
     }
 
     @Subscribe
-    public void onMouseClick(MouseClickEvent event)
+    public void onMouseClick(MouseClickedEvent event)
     {
         if (this.isEnabled() && this.isHovered(event.getPosition()) && event.getButton().isLeft())
         {
@@ -76,12 +75,18 @@ public class UIButton extends UIComponent
         texture.setSize(this.getSize());
         texture.draw(getScreenX(), getScreenY());
 
-        RenderHelper.drawString(text, getScreenX(), getScreenY(), getWidth(), getHeight(), textColor, true, zIndex);
+        RenderHelper.drawString(text, getScreenX(), getScreenY(), zIndex, getWidth(), getHeight(), textColor, true);
     }
 
     @Override
     public void update(int mouseX, int mouseY)
     {
 
+    }
+
+    @Override
+    public String toString()
+    {
+        return this.getClass().getName() + "[ text=" + text + ", " + this.getPropertyString() + " ]";
     }
 }

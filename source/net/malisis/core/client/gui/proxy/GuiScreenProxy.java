@@ -25,11 +25,12 @@
 package net.malisis.core.client.gui.proxy;
 
 import com.google.common.eventbus.EventBus;
-import cpw.mods.fml.relauncher.ReflectionHelper;
 import net.malisis.core.client.gui.component.container.UIContainer;
+import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.event.GuiEvent;
-import net.malisis.core.client.gui.event.MouseClickEvent;
-import net.malisis.core.client.gui.util.MouseButton;
+import net.malisis.core.client.gui.event.KeyTypedEvent;
+import net.malisis.core.client.gui.event.MouseClickedEvent;
+import net.malisis.core.client.gui.event.MouseScrolledEvent;
 import net.malisis.core.client.gui.util.shape.Point;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
@@ -46,6 +47,8 @@ public class GuiScreenProxy extends GuiScreen implements Context
     private EventBus bus;
 
     private UIContainer container;
+
+    private UITooltip tooltip;
 
     public GuiScreenProxy()
     {
@@ -79,6 +82,12 @@ public class GuiScreenProxy extends GuiScreen implements Context
             int scaledHeight = scaledresolution.getScaledHeight();
             int x = Mouse.getX() * scaledWidth / this.mc.displayWidth;
             int y = scaledHeight - Mouse.getY() * scaledHeight / this.mc.displayHeight - 1;
+            int dWheel = Mouse.getDWheel() / 120;
+
+            if (dWheel != 0)
+            {
+                publish(new MouseScrolledEvent(dWheel, x, y));
+            }
             container.update(x, y);
         }
     }
@@ -95,6 +104,7 @@ public class GuiScreenProxy extends GuiScreen implements Context
             container.drawBackground(mouseX, mouseY);
             container.draw(mouseX, mouseY);
             container.drawForeground(mouseX, mouseY);
+            container.drawTooltip(mouseX, mouseY);
         }
     }
 
@@ -102,7 +112,14 @@ public class GuiScreenProxy extends GuiScreen implements Context
     protected void mouseClicked(int x, int y, int button)
     {
         super.mouseClicked(x, y, button);
-        publish(new MouseClickEvent(x, y, button));
+        publish(new MouseClickedEvent(x, y, button));
+    }
+
+    @Override
+    protected void keyTyped(char keyChar, int keyCode)
+    {
+        super.keyTyped(keyChar, keyCode);
+        publish(new KeyTypedEvent(keyChar, keyCode));
     }
 
     @Override
@@ -112,6 +129,14 @@ public class GuiScreenProxy extends GuiScreen implements Context
         if(container != null)
             container.dispose();
         GuiManager.setActiveContext(null);
+    }
+
+    @Override
+    public UITooltip getTooltip()
+    {
+        if(tooltip == null)
+            tooltip = new UITooltip();
+        return tooltip;
     }
 
     @Override

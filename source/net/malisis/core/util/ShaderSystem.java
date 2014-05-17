@@ -1,9 +1,9 @@
 package net.malisis.core.util;
 
-import org.lwjgl.opengl.GL11;
-
 import java.util.HashMap;
 
+import static org.lwjgl.opengl.GL11.GL_TRUE;
+import static org.lwjgl.opengl.GL11.glGetInteger;
 import static org.lwjgl.opengl.GL20.*;
 
 /**
@@ -16,7 +16,7 @@ public class ShaderSystem
 
     private HashMap<String, Integer> varLocations;
 
-    private int program = 0;
+    private int program, lastProgram = 0;
 
     private boolean initialized, active;
 
@@ -31,19 +31,23 @@ public class ShaderSystem
         glLinkProgram(program);
         glValidateProgram(program);
         initialized = true;
-        active = glGetProgrami(program, GL_LINK_STATUS) == GL11.GL_TRUE;
+        active = glGetProgrami(program, GL_LINK_STATUS) == GL_TRUE;
     }
 
     public void activate()
     {
         if (!initialized) init();
-        if (active) glUseProgram(program);
+        if (active)
+        {
+            lastProgram = glGetInteger(GL_CURRENT_PROGRAM);
+            glUseProgram(program);
+        }
     }
 
     public void deactivate()
     {
         if (!initialized) init();
-        if (active) glUseProgram(0);
+        if (active) glUseProgram(lastProgram);
     }
 
     public void addShader(String source, int type)

@@ -496,4 +496,8 @@ public abstract class UIComponent
         this.context = null;
     }
 
+    public String getPropertyString() {
+        return "size=" + this.getSize() + ", position=" + this.getPosition() + ", screenPosition=" + this.getScreenPosition();
+    }
+
 }

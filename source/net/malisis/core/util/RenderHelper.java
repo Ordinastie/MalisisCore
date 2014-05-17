@@ -67,18 +67,18 @@ public class RenderHelper
         return FMLClientHandler.instance().getClient();
     }
 
-    public static void drawString(String text, int x, int y, int canvasWidth, int canvasHeight, int color, boolean drawShadow, int zLevel)
+    public static void drawString(String text, int x, int y, int z, int canvasWidth, int canvasHeight, int color, boolean drawShadow)
     {
-        drawString(text, x + (canvasWidth - getStringWidth(text)) / 2, y + (canvasHeight - getMC().fontRenderer.FONT_HEIGHT) / 2, color, drawShadow, zLevel);
+        drawString(text, x + (canvasWidth - getStringWidth(text)) / 2, y + (canvasHeight - getMC().fontRenderer.FONT_HEIGHT) / 2, z, color, drawShadow);
     }
 
-    public static void drawString(String text, int x, int y, int color, boolean drawShadow, int zLevel)
+    public static void drawString(String text, int x, int y, int z, int color, boolean drawShadow)
     {
         GL11.glDisable(GL11.GL_DEPTH_TEST);
         GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-        GL11.glTranslatef(0, 0, zLevel);
+        GL11.glTranslatef(0, 0, z);
         getMC().fontRenderer.drawString(text, x, y, color, drawShadow);
-        GL11.glTranslatef(0, 0, -zLevel);
+        GL11.glTranslatef(0, 0, -z);
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
     }
@@ -141,18 +141,18 @@ public class RenderHelper
     public static void drawRectangle(Color color, int x, int y, int z, int width, int height)
     {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glColor4b((byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue(), (byte) color.getAlpha());
-        drawQuad(x, y, z, width, height, 0, 0, 0, 0);
+        GL11.glColor4f(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F, color.getAlpha() / 255F);
+        drawQuad(x, y, z, width, height, 0, 0, 1, 1);
         GL11.glColor4f(1F, 1F, 1F, 1F);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
 
-    public static void drawRectangle(ResourceLocation texture, int x, int y, int z, int u, int v, int width, int height)
+    public static void drawRectangle(ResourceLocation texture, int x, int y, int z, int width, int height, int u, int v)
     {
-        drawRectangle(texture, x, y, z, u, v, width, height, 256, 256);
+        drawRectangle(texture, x, y, z, width, height, u, v, 256, 256);
     }
 
-    public static void drawRectangle(ResourceLocation texture, int x, int y, int z, int u, int v, int width, int height, int textureWidth, int textureHeight)
+    public static void drawRectangle(ResourceLocation texture, int x, int y, int z, int width, int height, int u, int v, int textureWidth, int textureHeight)
     {
         bindTexture(texture);
         drawRectangle(x, y, z, width, height, u, v, textureWidth, textureHeight);
