@@ -38,9 +38,8 @@ public interface Context
      * Publish an event to this context's bus.
      *
      * @param event the {@link net.malisis.core.client.gui.event.GuiEvent event} to publish
-     * @return true, if the event was cancelled
      */
-    public boolean publish(GuiEvent event);
+    public void publish(GuiEvent event);
 
     /**
      * Register a listener to this context's bus.
@@ -55,12 +54,5 @@ public interface Context
      * @param object the listener to remove
      */
     public void unregister(Object object);
-
-    /**
-     * Unregister and remove all listeners from this context's bus.
-     *
-     * @see #unregister(Object)
-     */
-    public void removeAll();
 
 }

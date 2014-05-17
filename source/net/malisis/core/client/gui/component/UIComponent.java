@@ -123,6 +123,9 @@ public abstract class UIComponent
         this.mc = FMLClientHandler.instance().getClient();
         this.zIndex = 0;
         this.visible = true;
+        this.enabled = true;
+        this.size = new Size(0, 0);
+        this.position = new Point(0, 0);
     }
 
     /**
@@ -356,6 +359,24 @@ public abstract class UIComponent
     }
 
     /**
+     * @return the state of this component
+     */
+    public boolean isEnabled()
+    {
+        return enabled;
+    }
+
+    /**
+     * Set the state of this <code>UIComponent</code>.
+     *
+     * @param enabled true for the component to be enabled
+     */
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
+
+    /**
      * Checks the hovering state of this component.
      * Defaults to the region in between the rectangle at the screen
      * position with according size.
@@ -419,11 +440,10 @@ public abstract class UIComponent
      * Publish an event to all listeners of the active context.
      *
      * @param event the {@link net.malisis.core.client.gui.event.GuiEvent event} to publish
-     * @return true if the event was cancelled
      */
-    public boolean publish(GuiEvent event)
+    public void publish(GuiEvent event)
     {
-        return this.getContext().publish(event);
+        this.getContext().publish(event);
     }
 
     /**
@@ -472,7 +492,7 @@ public abstract class UIComponent
      */
     public void dispose()
     {
-        this.context.unregister(this);
+        this.getContext().unregister(this);
         this.context = null;
     }
 

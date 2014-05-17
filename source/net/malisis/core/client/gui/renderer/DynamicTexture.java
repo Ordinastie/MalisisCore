@@ -111,7 +111,7 @@ public class DynamicTexture implements Drawable
             float vMin = getScaledV(rect.getStart());
             float uMax = getScaledU(rect.getEnd());
             float vMax = getScaledV(rect.getEnd());
-            RenderHelper.drawRectangleStretched(tileX, tileY, uMin, vMin, rect.getWidth(), rect.getHeight(), uMax, vMax, 0);
+            RenderHelper.drawQuad(tileX, tileY, 0, rect.getWidth(), rect.getHeight(), uMin, vMin, uMax, vMax);
         }
 
         for (Sides side : Sides.values())
@@ -127,13 +127,17 @@ public class DynamicTexture implements Drawable
             int tileHeight = side.getHeight(size.height, rect, firstCorner, secondCorner);
             float uMax = getScaledU(rect.getEnd());
             float vMax = getScaledV(rect.getEnd());
-            RenderHelper.drawRectangleStretched(tileX, tileY, uMin, vMin, tileWidth, tileHeight, uMax, vMax, 0);
+            if (side.isVertical)
+                RenderHelper.drawRectangleYRepeated(tileX, tileY, 0, tileWidth, tileHeight, uMin, vMin, uMax, vMax, rect.getHeight());
+            else
+                RenderHelper.drawRectangleXRepeated(tileX, tileY, 0, tileWidth, tileHeight, uMin, vMin, uMax, vMax, rect.getWidth());
         }
 
-        RenderHelper.drawRectangleStretched(x + tlC.getWidth(), y + tlC.getHeight(),
-                content.getStart().x * scaleU, content.getStart().y * scaleV,
+        RenderHelper.drawRectangleRepeated(x + tlC.getWidth(), y + tlC.getHeight(), 0,
                 size.width - (tlC.getWidth() + brC.getWidth()), size.height - (tlC.getHeight() + brC.getHeight()),
-                content.getEnd().x * scaleU, content.getEnd().y * scaleV, 0);
+                content.getStart().x * scaleU, content.getStart().y * scaleV,
+                content.getEnd().x * scaleU, content.getEnd().y * scaleV,
+                content.getWidth(), content.getHeight());
     }
 
     private float getScaledU(Point p)

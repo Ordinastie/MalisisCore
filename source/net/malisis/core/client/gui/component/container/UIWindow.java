@@ -18,6 +18,7 @@ public class UIWindow extends UIContainer
     {
         super(width, height);
         this.setBackground(new DynamicTexture(TEXTURE, 15, 15, this.getWidth(), this.getHeight(), new Rectangle(0, 0, 5, 5), new Rectangle(5, 0, 5, 5), new Rectangle(5, 5, 5, 5)));
+        this.setPadding(5, 5);
     }
 
 }

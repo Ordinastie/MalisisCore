@@ -33,6 +33,7 @@ import net.malisis.core.client.gui.util.Size;
 import net.malisis.core.client.gui.util.shape.Point;
 import org.lwjgl.opengl.GL11;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class UIContainer extends UIComponent
     /**
      * The list of {@link net.malisis.core.client.gui.component.UIComponent components}.
      */
-    private final List<UIComponent> components;
+    private final LinkedList<UIComponent> components;
 
     /**
      * The {@link net.malisis.core.client.gui.layout.LayoutManager LayoutManager} to be used by this container.
@@ -57,6 +58,8 @@ public class UIContainer extends UIComponent
 
     private Drawable background;
 
+    private Point padding;
+
     /**
      * Default constructor, creates the components list.
      */
@@ -65,10 +68,12 @@ public class UIContainer extends UIComponent
         this(0, 0);
     }
 
-    public UIContainer(int width, int height) {
+    public UIContainer(int width, int height)
+    {
         super();
         this.setSize(width, height);
         components = new LinkedList<>();
+        padding = new Point(0, 0);
     }
 
     public LayoutManager<? extends Constraints> getLayout()
@@ -99,14 +104,14 @@ public class UIContainer extends UIComponent
     public void initComponent()
     {
         super.initComponent();
-        for(UIComponent component : components)
+        for (UIComponent component : components)
             component.initComponent();
     }
 
     @Override
     public void drawBackground(int mouseX, int mouseY)
     {
-        if(background != null)
+        if (background != null)
             background.draw(this.getScreenX(), this.getScreenY());
         for (UIComponent component : components)
         {
@@ -114,9 +119,9 @@ public class UIContainer extends UIComponent
             {
                 GL11.glColor4f(1F, 1F, 1F, 1F);
                 if (layoutManager != null)
-                    component.setScreenPosition(Point.add(screenPosition, layoutManager.getPositionForComponent(component)));
+                    component.setScreenPosition(Point.add(Point.add(screenPosition, layoutManager.getPositionForComponent(this, component)), padding));
                 else
-                    component.setScreenPosition(Point.add(screenPosition, component.getPosition()));
+                    component.setScreenPosition(Point.add(Point.add(screenPosition, component.getPosition()), padding));
                 component.drawBackground(mouseX, mouseY);
             }
         }
@@ -161,8 +166,21 @@ public class UIContainer extends UIComponent
     public void setSize(Size size)
     {
         super.setSize(size);
-        if(background != null)
+        if (background != null)
             background.setSize(size);
+    }
+
+    @Override
+    public void dispose()
+    {
+        super.dispose();
+        for (UIComponent component : components)
+            component.dispose();
+    }
+
+    public Drawable getBackground()
+    {
+        return background;
     }
 
     public void setBackground(Drawable background)
@@ -171,14 +189,29 @@ public class UIContainer extends UIComponent
         background.setSize(this.getSize());
     }
 
-    public Drawable getBackground()
+    public void setPadding(Point padding)
     {
-        return background;
+        this.padding = padding;
+    }
+
+    public void setPadding(int top, int left)
+    {
+        this.padding = new Point(left, top);
+    }
+
+
+    public Point getPadding()
+    {
+        return padding;
+    }
+
+    public Iterator<UIComponent> components()
+    {
+        return components.iterator();
     }
 
     public GuiScreenProxy createScreenProxy()
     {
         return new GuiScreenProxy(this);
     }
-
 }

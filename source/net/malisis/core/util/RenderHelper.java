@@ -2,11 +2,15 @@ package net.malisis.core.util;
 
 import cpw.mods.fml.client.FMLClientHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.Color;
+
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
 
 /**
  * RenderHelper
@@ -41,9 +45,31 @@ public class RenderHelper
         return getMC().fontRenderer.getStringWidth(text);
     }
 
+    public static String getLongestString(String... strings)
+    {
+        String s = "";
+        int longest = 0;
+
+        for (String string : strings)
+        {
+            if (longest < string.length())
+            {
+                s = string;
+                longest = string.length();
+            }
+        }
+
+        return s;
+    }
+
     public static Minecraft getMC()
     {
         return FMLClientHandler.instance().getClient();
+    }
+
+    public static void drawString(String text, int x, int y, int canvasWidth, int canvasHeight, int color, boolean drawShadow, int zLevel)
+    {
+        drawString(text, x + (canvasWidth - getStringWidth(text)) / 2, y + (canvasHeight - getMC().fontRenderer.FONT_HEIGHT) / 2, color, drawShadow, zLevel);
     }
 
     public static void drawString(String text, int x, int y, int color, boolean drawShadow, int zLevel)
@@ -85,210 +111,146 @@ public class RenderHelper
 
     public static void drawLine(Color color, int startX, int startY, int endX, int endY, float width, int zLevel)
     {
-        float colorMod = 1F / 255F;
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glColor4f(colorMod * color.getRed(), colorMod * color.getGreen(), colorMod * color.getBlue(), colorMod * color.getAlpha());
-        GL11.glLineWidth(width);
-        GL11.glBegin(GL11.GL_LINES);
-        GL11.glVertex3f(startX, startY, zLevel);
-        GL11.glVertex3f(endX, endY, zLevel);
-        GL11.glEnd();
-        GL11.glDisable(GL11.GL_BLEND);
-        GL11.glColor4f(1F, 1F, 1F, 1F);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        float multiplier = 1F / 255F;
+        glDisable(GL11.GL_TEXTURE_2D);
+        glEnable(GL11.GL_BLEND);
+        glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        glColor4f(multiplier * color.getRed(), multiplier * color.getGreen(), multiplier * color.getBlue(), multiplier * color.getAlpha());
+        glLineWidth(width);
+        glBegin(GL11.GL_LINES);
+        glVertex3f(startX, startY, zLevel);
+        glVertex3f(endX, endY, zLevel);
+        glEnd();
+        glDisable(GL11.GL_BLEND);
+        glColor4f(1F, 1F, 1F, 1F);
+        glEnable(GL11.GL_TEXTURE_2D);
     }
 
-    public static void drawRectangle(int color, int x, int y, int width, int height, int zLevel)
+    public static void drawRectangle(int color, int x, int y, int z, int width, int height)
     {
-        drawRectangle(color, 1F, x, y, width, height, zLevel);
+        drawRectangle(color, 1F, x, y, z, width, height);
     }
 
-    public static void drawRectangle(int color, float alpha, int x, int y, int width, int height, int zLevel)
+    public static void drawRectangle(int color, float alpha, int x, int y, int z, int width, int height)
     {
         Color rgb = RenderHelper.getRGBFromColor(color);
         rgb.setAlpha((int) (alpha * 255));
-        drawRectangle(rgb, x, y, width, height, zLevel);
+        drawRectangle(rgb, x, y, z, width, height);
     }
 
-    public static void drawRectangle(Color color, int x, int y, int width, int height, int zLevel)
+    public static void drawRectangle(Color color, int x, int y, int z, int width, int height)
     {
-        float colorMod = 1F / 255F;
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glColor4f(colorMod * color.getRed(), colorMod * color.getGreen(), colorMod * color.getBlue(), colorMod * color.getAlpha());
-        drawRectangle(x, y, 0, 0, width, height, zLevel);
-        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glColor4b((byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue(), (byte) color.getAlpha());
+        drawQuad(x, y, z, width, height, 0, 0, 0, 0);
         GL11.glColor4f(1F, 1F, 1F, 1F);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
 
-    public static void drawRectangle(ResourceLocation texture, int x, int y, float u, float v, int width, int height, int zLevel)
+    public static void drawRectangle(ResourceLocation texture, int x, int y, int z, int u, int v, int width, int height)
     {
-        RenderHelper.bindTexture(texture);
-        float scaleU = 0.00390625F;
-        float scaleV = 0.00390625F;
-        if (u % 1 != 0) scaleU = 1;
-        if (v % 1 != 0) scaleV = 1;
+        drawRectangle(texture, x, y, z, u, v, width, height, 256, 256);
+    }
+
+    public static void drawRectangle(ResourceLocation texture, int x, int y, int z, int u, int v, int width, int height, int textureWidth, int textureHeight)
+    {
+        bindTexture(texture);
+        drawRectangle(x, y, z, width, height, u, v, textureWidth, textureHeight);
+    }
+
+    public static void drawRectangle(int x, int y, int z, int width, int height, int u, int v)
+    {
+        drawRectangle(x, y, z, width, height, u, v, 256, 256);
+    }
+
+    public static void drawRectangle(int x, int y, int z, int width, int height, int u, int v, int textureWidth, int textureHeight)
+    {
+        drawQuad(x, y, z, width, height, (float) u / textureWidth, (float) v / textureHeight, (float) (u + width) / textureWidth, (float) (v + height) / textureHeight);
+    }
+
+    public static void drawQuad(int x, int y, int z, int width, int height, float u, float v, float uMax, float vMax)
+    {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         Tessellator tessellator = Tessellator.instance;
         tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV(x, y + height, zLevel, u * scaleU, (v + height) * scaleV);
-        tessellator.addVertexWithUV(x + width, y + height, zLevel, (u + width) * scaleU, (v + height) * scaleV);
-        tessellator.addVertexWithUV(x + width, y, zLevel, (u + width) * scaleU, v * scaleV);
-        tessellator.addVertexWithUV(x, y, zLevel, u * scaleU, v * scaleV);
+        tessellator.addVertexWithUV(x, y + height, z, u, vMax);
+        tessellator.addVertexWithUV(x + width, y + height, z, uMax, vMax);
+        tessellator.addVertexWithUV(x + width, y, z, uMax, v);
+        tessellator.addVertexWithUV(x, y, z, u, v);
         tessellator.draw();
+        glDisable(GL_BLEND);
     }
 
-    public static void drawRectangleStretched(ResourceLocation texture, int x, int y, float u, float v, int width, int height, float uOff, float vOff, int zLevel)
-    {
-        drawRectangleStretched(texture, x, y, u, v, width, height, u + uOff, v + vOff, true, zLevel);
-    }
-
-    public static void drawRectangleStretched(ResourceLocation texture, int x, int y, float u, float v, int width, int height, float uMax, float vMax, boolean max, int zLevel)
-    {
-        if (max)
-        {
-            bindTexture(texture);
-            drawRectangleStretched(x, y, u, v, width, height, uMax, vMax, zLevel);
-        }
-        else
-        {
-            drawRectangleStretched(texture, x, y, u, v, width, height, uMax, vMax, zLevel);
-        }
-    }
-
-    public static void drawRectangleStretched(int x, int y, float u, float v, int width, int height, float uMax, float vMax, int zLevel)
-    {
-        float scaleU = 0.00390625F;
-        float scaleV = 0.00390625F;
-        if (u % 1 != 0 || uMax % 1 != 0) scaleU = 1;
-        if (v % 1 != 0 || vMax % 1 != 0) scaleV = 1;
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV(x, y + height, zLevel, u * scaleU, vMax * scaleV);
-        tessellator.addVertexWithUV(x + width, y + height, zLevel, uMax * scaleU, vMax * scaleV);
-        tessellator.addVertexWithUV(x + width, y, zLevel, uMax * scaleU, v * scaleV);
-        tessellator.addVertexWithUV(x, y, zLevel, u * scaleU, v * scaleV);
-        tessellator.draw();
-    }
-
-    public static void drawRectangleRepeated(ResourceLocation texture, int x, int y, float u, float v, float uvWidth, float uvHeight, int width, int height, int zLevel)
-    {
-        drawRectangleRepeated(texture, x, y, u, v, uvWidth, uvHeight, width, height, (int) uvWidth, (int) uvHeight, zLevel);
-    }
-
-    public static void drawRectangleRepeated(ResourceLocation texture, int x, int y, float u, float v, float uMax, float vMax, int width, int height, int tileWidth, int tileHeight, int zLevel)
-    {
-        float uvHeight = v - vMax;
-        int numX = (int) Math.ceil((float) width / tileWidth);
-        int numY = (int) Math.ceil((float) height / tileHeight);
-
-        for (int y2 = 0; y2 < numY; ++y2)
-            for (int x2 = 0; x2 < numX; ++x2)
-            {
-                int w = tileWidth;
-                int h = tileHeight;
-
-                float tileMaxU = uMax;
-                float tileMaxV = vMax;
-
-                float tileV = v;
-
-                int tileX = w * x2;
-                int tileY = h * y2 + h;
-
-                if (tileWidth > width)
-                {
-                    w = width;
-                    tileMaxU -= 0.00390625F * (float) w / tileWidth;
-                    tileX = w * x2;
-                }
-                else if (x2 == numX - 1)
-                {
-                    if (tileWidth > width - x2 * tileWidth)
-                    {
-                        w = width - x2 * tileWidth;
-                        tileMaxU -= 0.00390625F * (float) w / tileWidth;
-                        tileX = tileWidth * x2;
-                    }
-                }
-
-                if (tileHeight > height)
-                {
-                    h = height;
-                    tileMaxV -= 0.00390625F * (float) h / tileHeight;
-                    tileY = h * y2 + h;
-                }
-                else if (y2 == numY - 1)
-                {
-                    if (tileHeight > height - (y2 - 1) * tileHeight)
-                    {
-                        h = height - (y2 - 1) * tileHeight;
-                        tileV += uvHeight - 0.00390625F * (float) h / tileHeight;
-                        tileY = tileHeight * y2 + h;
-                    }
-                }
-
-                drawRectangleStretched(texture, x + tileX, y + height - tileY, u, tileV, w, h, tileMaxU, tileMaxV, true, zLevel);
-            }
-    }
-
-    public static void drawRectangleXRepeated(ResourceLocation texture, int x, int y, float u, float v, float uvWidth, float uvHeight, int width, int height, int zLevel)
+    public static void drawRectangleRepeated(ResourceLocation texture, int x, int y, int z, int width, int height, float u, float v, float uMax, float vMax, int tileWidth, int tileHeight)
     {
         RenderHelper.bindTexture(texture);
-        float f = 0.00390625F;
-        float f1 = 0.00390625F;
-        if (u % 1 != 0) f = 1;
-        if (v % 1 != 0) f1 = 1;
-        Tessellator tessellator = Tessellator.instance;
+        drawRectangleRepeated(x, y, z, width, height, u, v, uMax, vMax, tileWidth, tileHeight);
+    }
 
-        boolean flipX = width < 0;
-        if (flipX) width *= -1;
+    public static void drawRectangleRepeated(int x, int y, int z, int width, int height, float u, float v, float uMax, float vMax, int tileWidth, int tileHeight)
+    {
+        loadShaders();
+        shaders.activate();
+        shaders.setUniform1i("tex", 0);
+        shaders.setUniform2f("iconOffset", u, v);
+        shaders.setUniform2f("iconSize", uMax - u, vMax - v);
+        drawQuad(x, y, z, width, height, 0, 0, (float) getScaledWidth(width) / tileWidth, (float) getScaledHeight(height) / tileHeight);
+        shaders.deactivate();
+    }
 
-        int numX = (int) Math.ceil((float) width / uvWidth);
+    public static void drawRectangleXRepeated(int x, int y, int z, int width, int height, float u, float v, float uMax, float vMax, int tileWidth)
+    {
+        loadShaders();
+        shaders.activate();
+        shaders.setUniform1i("tex", 0);
+        shaders.setUniform2f("iconOffset", u, 0);
+        shaders.setUniform2f("iconSize", uMax - u, 1);
+        drawQuad(x, y, z, width, height, 0, v, (float) getScaledWidth(width) / tileWidth, vMax);
+        shaders.deactivate();
+    }
 
-        for (int x2 = 0; x2 < numX; ++x2)
+    public static void drawRectangleYRepeated(int x, int y, int z, int width, int height, float u, float v, float uMax, float vMax, int tileHeight)
+    {
+        loadShaders();
+        shaders.activate();
+        shaders.setUniform1i("tex", 0);
+        shaders.setUniform2f("iconOffset", 0, v);
+        shaders.setUniform2f("iconSize", 1, vMax - v);
+        drawQuad(x, y, z, width, height, u, 0, uMax, (float) getScaledHeight(height) / tileHeight);
+        shaders.deactivate();
+    }
+
+    private static ShaderSystem shaders;
+
+    private static final String REPEAT_SHADER = "#version 120\n" +
+            "uniform sampler2D tex; uniform vec2 iconOffset; uniform vec2 iconSize;\n" +
+            "void main() {\n" +
+            "gl_FragColor = texture2D(tex, iconOffset + fract(gl_TexCoord[0].st) * iconSize);\n" +
+            "}";
+
+    public static void loadShaders()
+    {
+        if (shaders == null)
         {
-            float xOffset = x2 * uvWidth;
-            if (flipX) xOffset = width - (x2 + 1) * uvWidth;
-
-            tessellator.startDrawingQuads();
-            tessellator.addVertexWithUV(x + xOffset, y + height, zLevel, u * f, (v + uvHeight) * f1);
-            tessellator.addVertexWithUV(x + uvWidth + xOffset, y + height, zLevel, (u + uvWidth) * f, (v + uvHeight) * f1);
-            tessellator.addVertexWithUV(x + uvWidth + xOffset, y, zLevel, (u + uvWidth) * f, v * f1);
-            tessellator.addVertexWithUV(x + xOffset, y, zLevel, u * f, v * f1);
-            tessellator.draw();
+            shaders = new ShaderSystem();
+            shaders.addShader(REPEAT_SHADER, GL_FRAGMENT_SHADER);
         }
     }
 
-    public static void drawRectangleYRepeated(ResourceLocation texture, int x, int y, float u, float v, float uvWidth, float uvHeight, int width, int height, int zLevel)
+    public static ScaledResolution getScaledResolution()
     {
-        RenderHelper.bindTexture(texture);
-        float scaleU = 0.00390625F;
-        float scaleV = 0.00390625F;
-        if (u % 1 != 0) scaleU = 1;
-        if (v % 1 != 0) scaleV = 1;
-        Tessellator tessellator = Tessellator.instance;
+        return new ScaledResolution(getMC().gameSettings, getMC().displayWidth, getMC().displayHeight);
+    }
 
-        boolean flipY = height < 0;
-        if (flipY) height *= -1;
+    public static int getScaledWidth(int width)
+    {
+        return width / getScaledResolution().getScaleFactor();
+    }
 
-        int numY = (int) Math.ceil((float) height / uvHeight);
-
-        for (int y2 = 0; y2 < numY; ++y2)
-        {
-            float yOffset = y2 * uvHeight;
-            if (flipY) yOffset = height - (y2 + 1) * uvHeight;
-
-            tessellator.startDrawingQuads();
-            tessellator.addVertexWithUV(x, y + uvHeight + yOffset, zLevel, u * scaleU, (v + uvHeight) * scaleV);
-            tessellator.addVertexWithUV(x + width, y + uvHeight + yOffset, zLevel, (u + uvWidth) * scaleU, (v + uvHeight) * scaleV);
-            tessellator.addVertexWithUV(x + width, y + yOffset, zLevel, (u + uvWidth) * scaleU, v * scaleV);
-            tessellator.addVertexWithUV(x, y + yOffset, zLevel, u * scaleU, v * scaleV);
-            tessellator.draw();
-        }
+    public static int getScaledHeight(int height)
+    {
+        return height / getScaledResolution().getScaleFactor();
     }
 
     public static int computeGuiScale()

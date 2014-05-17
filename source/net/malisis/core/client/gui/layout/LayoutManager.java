@@ -25,9 +25,10 @@
 package net.malisis.core.client.gui.layout;
 
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.util.shape.Point;
 
-import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 
 /**
  * LayoutManager
@@ -41,14 +42,14 @@ public abstract class LayoutManager<C extends Constraints>
      * A table of {@link net.malisis.core.client.gui.component.UIComponent component} -> {@link C constraints} mappings.
      * Used for positioning components and determining the required width and height.
      */
-    private final IdentityHashMap<UIComponent, C> constraints;
+    protected final LinkedHashMap<UIComponent, C> constraints;
 
     /**
      * Default constructor, creates {@link #constraints constraints} table.
      */
     public LayoutManager()
     {
-        constraints = new IdentityHashMap<>();
+        constraints = new LinkedHashMap<>();
     }
 
     /**
@@ -85,7 +86,10 @@ public abstract class LayoutManager<C extends Constraints>
      */
     public void setConstraints(UIComponent component, Constraints constraints)
     {
-        this.constraints.put(component, (C) constraints.clone());
+        if (constraints != null)
+            this.constraints.put(component, (C) constraints.clone());
+        else
+            this.constraints.put(component, null);
     }
 
     /**
@@ -104,5 +108,5 @@ public abstract class LayoutManager<C extends Constraints>
      * @param component the component to get the position for
      * @return the position for the specified component
      */
-    public abstract Point getPositionForComponent(UIComponent component);
+    public abstract Point getPositionForComponent(UIContainer container, UIComponent component);
 }
