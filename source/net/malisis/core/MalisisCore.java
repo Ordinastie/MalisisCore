@@ -37,7 +37,7 @@ public class MalisisCore extends DummyModContainer
 {
 	public static final String modid = "malisiscore";
 	public static final String modname = "Malisis Core";
-	public static final String version = "1.7.2-0.7";
+	public static final String version = "1.7.2-0.7.1";
 	public static final String url = "";
 	public static File coremodLocation;
 
