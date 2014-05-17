@@ -24,8 +24,7 @@
 
 package net.malisis.core.client.gui.proxy;
 
-import cpw.mods.fml.common.eventhandler.EventBus;
-import cpw.mods.fml.common.eventhandler.IEventListener;
+import com.google.common.eventbus.EventBus;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.event.GuiEvent;
@@ -35,9 +34,6 @@ import net.malisis.core.client.gui.util.shape.Point;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import org.lwjgl.input.Mouse;
-
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * GuiScreenProxy
@@ -66,6 +62,7 @@ public class GuiScreenProxy extends GuiScreen implements Context
     public void initGui()
     {
         super.initGui();
+        GuiManager.setActiveContext(this);
         if (container != null)
         {
             container.initComponent();
@@ -105,13 +102,22 @@ public class GuiScreenProxy extends GuiScreen implements Context
     protected void mouseClicked(int x, int y, int button)
     {
         super.mouseClicked(x, y, button);
-        publish(new MouseClickEvent(x, y, MouseButton.getButton(button)));
+        publish(new MouseClickEvent(x, y, button));
     }
 
     @Override
-    public boolean publish(GuiEvent event)
+    public void onGuiClosed()
     {
-        return bus.post(event);
+        super.onGuiClosed();
+        if(container != null)
+            container.dispose();
+        GuiManager.setActiveContext(null);
+    }
+
+    @Override
+    public void publish(GuiEvent event)
+    {
+        bus.post(event);
     }
 
     @Override
@@ -124,14 +130,6 @@ public class GuiScreenProxy extends GuiScreen implements Context
     public void unregister(Object object)
     {
         bus.unregister(object);
-    }
-
-    @Override
-    public void removeAll()
-    {
-        ConcurrentHashMap<Object, ArrayList<IEventListener>> listeners = ReflectionHelper.getPrivateValue(EventBus.class, bus, "listeners");
-        for (Object o : listeners.keySet())
-            unregister(o);
     }
 
     @Override

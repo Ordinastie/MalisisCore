@@ -24,13 +24,11 @@
 
 package net.malisis.core.client.gui.event;
 
-import cpw.mods.fml.common.eventhandler.Event;
-
 /**
  * GuiEvent
  *
  * @author PaleoCrafter
  */
-public class GuiEvent extends Event
+public class GuiEvent
 {
 }
