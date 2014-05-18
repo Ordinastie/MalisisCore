@@ -30,7 +30,7 @@ public class MalisisCommand extends CommandBase
 					break;
 					
 				case "gui":
-				//	Minecraft.getMinecraft().displayGuiScreen(new UIWindow(100, 100).createScreenProxy());
+					//Minecraft.getMinecraft().displayGuiScreen(new UIWindow(100, 100).createScreenProxy());
 					break;
 					
 				default:

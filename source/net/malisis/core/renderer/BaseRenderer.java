@@ -738,6 +738,14 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			v.interpolateCoord(bounds);
 	}
 
+	public static <T extends BaseRenderer> T create(Class<T> clazz, IBaseRendering...blocks)
+	{
+		T r = create(clazz);
+		for(IBaseRendering b : blocks)
+			b.setRenderId(r.getRenderId());
+		return r;
+	}
+
 	public static <T extends BaseRenderer> T create(Class<T> clazz)
 	{
 		try

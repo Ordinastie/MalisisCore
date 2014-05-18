@@ -25,6 +25,7 @@ import com.google.common.eventbus.Subscribe;
 import cpw.mods.fml.client.FMLFileResourcePack;
 import cpw.mods.fml.client.FMLFolderResourcePack;
 import cpw.mods.fml.common.DummyModContainer;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.LoadController;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -32,12 +33,13 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
 import cpw.mods.fml.relauncher.ReflectionHelper;
+import cpw.mods.fml.relauncher.Side;
 
 public class MalisisCore extends DummyModContainer
 {
 	public static final String modid = "malisiscore";
 	public static final String modname = "Malisis Core";
-	public static final String version = "1.7.2-0.7.1";
+	public static final String version = "1.7.2-0.7.2";
 	public static final String url = "";
 	public static File coremodLocation;
 
@@ -86,6 +88,7 @@ public class MalisisCore extends DummyModContainer
 		demosEnabled = config.get(Configuration.CATEGORY_GENERAL, "demosEnabled", false).getBoolean(false);
 		config.save();
 		
+		demosEnabled &= FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT;
 		if(demosEnabled)
 		{
 			test = new Test();
@@ -106,7 +109,7 @@ public class MalisisCore extends DummyModContainer
 		{
 			test.init();
 			minty.init();
-			stargate.init();
+//			stargate.init();
 		}
 	}
 
