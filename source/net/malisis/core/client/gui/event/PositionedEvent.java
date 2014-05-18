@@ -22,26 +22,27 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.layout;
+package net.malisis.core.client.gui.event;
+
+import net.malisis.core.client.gui.util.shape.Point;
 
 /**
- * Constraints
+ * PositionedEvent
  *
  * @author PaleoCrafter
  */
-public class Constraints implements Cloneable
+public class PositionedEvent extends GuiEvent
 {
 
-    @Override
-    public final Object clone()
+    private final Point position;
+
+    public PositionedEvent(Point position)
     {
-        try
-        {
-            return super.clone();
-        }
-        catch (CloneNotSupportedException e)
-        {
-            throw new InternalError();
-        }
+        this.position = position;
+    }
+
+    public Point getPosition()
+    {
+        return position;
     }
 }

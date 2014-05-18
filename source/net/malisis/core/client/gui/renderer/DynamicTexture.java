@@ -1,30 +1,29 @@
-/*******************************************************************************
- The MIT License (MIT)
-
- Copyright (c) 2014 MineFormers
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- ******************************************************************************/
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 PaleoCrafter, Ordinastie
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
 package net.malisis.core.client.gui.renderer;
 
-import net.malisis.core.client.gui.util.Size;
 import net.malisis.core.client.gui.util.shape.Point;
 import net.malisis.core.client.gui.util.shape.Rectangle;
 import net.malisis.core.util.RenderHelper;
@@ -37,7 +36,7 @@ import java.util.Arrays;
  *
  * @author PaleoCrafter
  */
-public class DynamicTexture implements Drawable
+public class DynamicTexture extends Drawable
 {
 
     private final ResourceLocation resource;
@@ -51,8 +50,6 @@ public class DynamicTexture implements Drawable
     private final Rectangle[] sides;
 
     private final Rectangle content;
-
-    private Size size;
 
     public DynamicTexture(ResourceLocation resource, int width, int height, Rectangle topLeftCorner, Rectangle topSide, Rectangle content)
     {
@@ -76,6 +73,7 @@ public class DynamicTexture implements Drawable
 
     public DynamicTexture(ResourceLocation resource, int textureWidth, int textureHeight, int width, int height, Rectangle[] corners, Rectangle[] sides, Rectangle content)
     {
+        super(width, height);
         if (corners.length != 4)
             throw new IllegalArgumentException("You have to specify 4 corner rectangles!");
         if (sides.length != 4)
@@ -88,7 +86,6 @@ public class DynamicTexture implements Drawable
         this.content = content;
         scaleU = 1F / textureWidth;
         scaleV = 1F / textureHeight;
-        this.size = new Size(width, height);
     }
 
     public DynamicTexture(ResourceLocation resource, int width, int height, Rectangle[] corners, Rectangle[] sides, Rectangle content)
@@ -148,37 +145,6 @@ public class DynamicTexture implements Drawable
     private float getScaledV(Point p)
     {
         return p.y * scaleV;
-    }
-
-    /**
-     * @return the size of this <code>DynamicTexture</code>
-     * @see #size
-     */
-    public Size getSize()
-    {
-        return size;
-    }
-
-    /**
-     * Set the {@link net.malisis.core.client.gui.util.Size size} of this <code>DynamicTexture</code>.
-     *
-     * @param size the size for this <code>DynamicTexture</code>
-     * @see #size
-     */
-    public void setSize(Size size)
-    {
-        this.size = size;
-    }
-
-    /**
-     * Set the size to given width and height.
-     *
-     * @param width  the new width for this <code>DynamicTexture</code>
-     * @param height the new height for this <code>DynamicTexture</code>
-     */
-    public void setSize(int width, int height)
-    {
-        setSize(new Size(width, height));
     }
 
     @Override

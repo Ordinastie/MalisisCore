@@ -22,26 +22,41 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.layout;
+package net.malisis.core.client.gui.renderer;
+
+import net.malisis.core.util.RenderHelper;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.util.IIcon;
 
 /**
- * Constraints
+ * DrawableIcon
  *
  * @author PaleoCrafter
  */
-public class Constraints implements Cloneable
+public class DrawableIcon extends Drawable
 {
 
-    @Override
-    public final Object clone()
+    public static final int BLOCK_SHEET = 0;
+    public static final int ITEM_SHEET = 1;
+
+    private IIcon icon;
+    private int sheet;
+
+    public DrawableIcon(IIcon icon, int sheet)
     {
-        try
-        {
-            return super.clone();
-        }
-        catch (CloneNotSupportedException e)
-        {
-            throw new InternalError();
-        }
+        super(16, 16);
+        this.icon = icon;
+        this.sheet = sheet;
     }
+
+    @Override
+    public void draw(int x, int y)
+    {
+        if(sheet == BLOCK_SHEET)
+            RenderHelper.bindTexture(TextureMap.locationBlocksTexture);
+        else
+            RenderHelper.bindTexture(TextureMap.locationItemsTexture);
+        RenderHelper.drawIcon(icon, x, y, 0, size.width, size.height);
+    }
+
 }
