@@ -22,26 +22,24 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.layout;
+package net.malisis.core.client.gui.util;
 
 /**
- * Constraints
+ * Orientation
  *
  * @author PaleoCrafter
  */
-public class Constraints implements Cloneable
+public enum Orientation
 {
 
-    @Override
-    public final Object clone()
+    VERTICAL_TOP(0, 1), VERTICAL_BOTTOM(0, -1), HORIZONTAL_LEFT(1, 0), HORIZONTAL_RIGHT(-1, 0);
+
+    public int xOff, yOff;
+
+    private Orientation(int xOff, int yOff)
     {
-        try
-        {
-            return super.clone();
-        }
-        catch (CloneNotSupportedException e)
-        {
-            throw new InternalError();
-        }
+        this.xOff = xOff;
+        this.yOff = yOff;
     }
+
 }
