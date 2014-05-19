@@ -112,11 +112,24 @@ public class Face
 		}
 		return min + (max - min) * factor;
 	}
+	
+	public Face factor(float fx, float fy, float fz)
+	{
+		for(Vertex v : vertexes)
+		{
+			v.factorX(fx);
+			v.factorY(fy);
+			v.factorZ(fz);
+		}
+		return this;
+	}
+	
 
-	public void translate(double x, double y, double z)
+	public Face translate(double x, double y, double z)
 	{
 		for(Vertex v : vertexes)
 			v.add(x, y, z);
+		return this;
 	}
 	
 	public void scale(float f)

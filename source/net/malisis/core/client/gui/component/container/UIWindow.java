@@ -24,142 +24,187 @@
 
 package net.malisis.core.client.gui.component.container;
 
-import net.malisis.core.client.gui.renderer.DynamicTexture;
-import net.malisis.core.client.gui.util.Orientation;
-import net.malisis.core.client.gui.util.shape.Point;
-import net.malisis.core.client.gui.util.shape.Rectangle;
-import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
-
 import java.util.LinkedList;
 import java.util.List;
 
+import net.malisis.core.client.gui.renderer.DynamicTexture;
+import net.malisis.core.client.gui.renderer.GuiRenderer;
+import net.malisis.core.client.gui.util.Orientation;
+import net.malisis.core.client.gui.util.shape.Point;
+import net.malisis.core.client.gui.util.shape.Rectangle;
+import net.malisis.core.demo.test.GuiIcon;
+import net.malisis.core.renderer.element.Shape;
+import net.malisis.core.renderer.preset.ShapePreset;
+import net.minecraft.util.ResourceLocation;
+
+import org.lwjgl.opengl.GL11;
+
 /**
  * UIWindow
- *
+ * 
  * @author PaleoCrafter
  */
 public class UIWindow extends UIContainer
 {
 
-    private List<UIInfoTab> infoTabs;
+	private List<UIInfoTab> infoTabs;
 
-    private static final ResourceLocation TEXTURE = new ResourceLocation("malisiscore", "textures/gui/widgets/window.png");
+	private static final ResourceLocation TEXTURE = new ResourceLocation("malisiscore", "textures/gui/widgets/window.png");
 
-    public UIWindow(int width, int height)
+	public UIWindow(int width, int height)
+	{
+		super(width, height);
+		this.setBackground(new DynamicTexture(TEXTURE, 15, 15, this.getWidth(), this.getHeight(), new Rectangle(0, 0, 5, 5), new Rectangle(
+				5, 0, 5, 5), new Rectangle(5, 5, 5, 5)));
+		this.setPadding(5, 5);
+		infoTabs = new LinkedList<>();
+	}
+
+	@Override
+	public void initComponent()
+	{
+		super.initComponent();
+		for (UIInfoTab tab : infoTabs)
+		{
+			tab.initComponent();
+		}
+	}
+
+	@Override
+	public void drawBackground(int mouseX, int mouseY)
+	{
+		super.drawBackground(mouseX, mouseY);
+		int left = 0;
+		int right = 0;
+		for (UIInfoTab tab : infoTabs)
+		{
+			if (tab.getOrientation() == Orientation.HORIZONTAL_RIGHT)
+			{
+				tab.setScreenPosition(new Point(getScreenX() + getWidth(), getScreenY() + 5 + right));
+				right += tab.getHeight() + 2;
+			}
+			else
+			{
+				tab.setScreenPosition(new Point(getScreenX() - tab.getWidth(), getScreenY() + 5 + left));
+				left += tab.getHeight() + 2;
+			}
+			GL11.glColor4f(1, 1, 1, 1);
+			tab.drawBackground(mouseX, mouseY);
+		}
+	}
+
+	@Override
+	public void draw(int mouseX, int mouseY)
+	{
+		super.draw(mouseX, mouseY);
+		for (UIInfoTab tab : infoTabs)
+		{
+			GL11.glColor4f(1, 1, 1, 1);
+			tab.draw(mouseX, mouseY);
+		}
+	}
+
+	@Override
+	public void drawForeground(int mouseX, int mouseY)
+	{
+		super.drawForeground(mouseX, mouseY);
+		for (UIInfoTab tab : infoTabs)
+		{
+			GL11.glColor4f(1, 1, 1, 1);
+			tab.drawForeground(mouseX, mouseY);
+		}
+	}
+
+	@Override
+	public void drawTooltip(int mouseX, int mouseY)
+	{
+		super.drawTooltip(mouseX, mouseY);
+		for (UIInfoTab tab : infoTabs)
+		{
+			if (tab.isClosedAndHovered(new Point(mouseX, mouseY)))
+			{
+				getContext().getTooltip().setText(tab.getTitle());
+				getContext().getTooltip().draw(mouseX, mouseY);
+			}
+		}
+	}
+
+	@Override
+	public void update(int mouseX, int mouseY)
+	{
+		super.update(mouseX, mouseY);
+		for (UIInfoTab tab : infoTabs)
+		{
+			tab.update(mouseX, mouseY);
+		}
+	}
+
+	/**
+	 * Adds a new info tab to this window. The side will be determined by the tab's orientation.
+	 * 
+	 * @param tab an {@link net.malisis.core.client.gui.component.container.UIInfoTab UIInfoTab} object to be added to this window as info
+	 *            tab
+	 */
+	public void addInfoTab(UIInfoTab tab)
+	{
+		this.infoTabs.add(tab);
+		tab.setParent(this);
+	}
+
+	/**
+	 * Closes all info tabs on the specified side.
+	 * 
+	 * @param orientation the orientation of the tabs to close
+	 */
+	public void closeAllInfoTabs(Orientation orientation)
+	{
+		for (UIInfoTab tab : infoTabs)
+		{
+			if (tab.getOrientation() == orientation && tab.isOpen())
+			{
+				tab.close();
+			}
+		}
+	}
+
+	/**
+	 * V2 Ordinastie
+	 */
+	//@formatter:off
+	protected GuiIcon[] icons = new GuiIcon[] { 
+		new GuiIcon(0, 		0, 		0.33F, 	0.33F),
+		new GuiIcon(0.33F, 	0, 		0.66F, 	0.33F),
+		new GuiIcon(0.66F, 	0, 		1F, 	0.33F),
+		new GuiIcon(0, 		0.33F, 	0.33F, 	0.66F),
+		new GuiIcon(0.33F, 	0.33F, 	0.66F, 	0.66F),
+		new GuiIcon(0.66F, 	0.33F, 	1.0F, 	0.66F),
+		new GuiIcon(0, 		0.66F, 	0.33F, 	1.0F),
+		new GuiIcon(0.33F, 	0.66F, 	0.66F, 	1.0F),
+		new GuiIcon(0.66F, 	0.66F, 	1.0F, 	1.0F)};
+	//@formatter:on
+
+	@Override
+	public GuiIcon getIcon(int face)
     {
-        super(width, height);
-        this.setBackground(new DynamicTexture(TEXTURE, 15, 15, this.getWidth(), this.getHeight(), new Rectangle(0, 0, 5, 5), new Rectangle(5, 0, 5, 5), new Rectangle(5, 5, 5, 5)));
-        this.setPadding(5, 5);
-        infoTabs = new LinkedList<>();
+    	if(face < 0 || face > icons.length)
+    		return null;
+    	
+    	return icons[face];
     }
 
-    @Override
-    public void initComponent()
-    {
-        super.initComponent();
-        for (UIInfoTab tab : infoTabs)
-        {
-            tab.initComponent();
-        }
-    }
+	
+	@Override
+	public ResourceLocation getTexture(int mouseX, int mouseY)
+	{
+		return TEXTURE;
+	}
 
-    @Override
-    public void drawBackground(int mouseX, int mouseY)
-    {
-        super.drawBackground(mouseX, mouseY);
-        int left = 0;
-        int right = 0;
-        for (UIInfoTab tab : infoTabs)
-        {
-            if (tab.getOrientation() == Orientation.HORIZONTAL_RIGHT)
-            {
-                tab.setScreenPosition(new Point(getScreenX() + getWidth(), getScreenY() + 5 + right));
-                right += tab.getHeight() + 2;
-            }
-            else
-            {
-                tab.setScreenPosition(new Point(getScreenX() - tab.getWidth(), getScreenY() + 5 + left));
-                left += tab.getHeight() + 2;
-            }
-            GL11.glColor4f(1, 1, 1, 1);
-            tab.drawBackground(mouseX, mouseY);
-        }
-    }
+	@Override
+	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		Shape shape = ShapePreset.GuiXYResizable(this.size.width, this.size.height);
+		renderer.drawShape(shape);
+	}
 
-    @Override
-    public void draw(int mouseX, int mouseY)
-    {
-        super.draw(mouseX, mouseY);
-        for (UIInfoTab tab : infoTabs)
-        {
-            GL11.glColor4f(1, 1, 1, 1);
-            tab.draw(mouseX, mouseY);
-        }
-    }
-
-    @Override
-    public void drawForeground(int mouseX, int mouseY)
-    {
-        super.drawForeground(mouseX, mouseY);
-        for (UIInfoTab tab : infoTabs)
-        {
-            GL11.glColor4f(1, 1, 1, 1);
-            tab.drawForeground(mouseX, mouseY);
-        }
-    }
-
-    @Override
-    public void drawTooltip(int mouseX, int mouseY)
-    {
-        super.drawTooltip(mouseX, mouseY);
-        for (UIInfoTab tab : infoTabs)
-        {
-            if (tab.isClosedAndHovered(new Point(mouseX, mouseY)))
-            {
-                getContext().getTooltip().setText(tab.getTitle());
-                getContext().getTooltip().draw(mouseX, mouseY);
-            }
-        }
-    }
-
-    @Override
-    public void update(int mouseX, int mouseY)
-    {
-        super.update(mouseX, mouseY);
-        for (UIInfoTab tab : infoTabs)
-        {
-            tab.update(mouseX, mouseY);
-        }
-    }
-
-    /**
-     * Adds a new info tab to this window. The side
-     * will be determined by the tab's orientation.
-     *
-     * @param tab an {@link net.malisis.core.client.gui.component.container.UIInfoTab UIInfoTab} object
-     *            to be added to this window as info tab
-     */
-    public void addInfoTab(UIInfoTab tab)
-    {
-        this.infoTabs.add(tab);
-        tab.setParent(this);
-    }
-
-    /**
-     * Closes all info tabs on the specified side.
-     *
-     * @param orientation the orientation of the tabs to close
-     */
-    public void closeAllInfoTabs(Orientation orientation)
-    {
-        for (UIInfoTab tab : infoTabs)
-        {
-            if (tab.getOrientation() == orientation && tab.isOpen())
-            {
-                tab.close();
-            }
-        }
-    }
-
+	
 }

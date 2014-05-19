@@ -23,6 +23,7 @@ public class Test
 		{
 			TestRenderer r = BaseRenderer.create(TestRenderer.class);
 			RenderingRegistry.registerBlockHandler(r);
+			
 		}		
 	}
 

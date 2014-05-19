@@ -89,6 +89,7 @@ public class MalisisCore extends DummyModContainer
 		config.save();
 		
 		demosEnabled &= FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT;
+//		demosEnabled = false;
 		if(demosEnabled)
 		{
 			test = new Test();

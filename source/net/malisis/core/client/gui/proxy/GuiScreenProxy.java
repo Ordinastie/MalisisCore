@@ -46,7 +46,7 @@ public class GuiScreenProxy extends GuiScreen implements Context
 
     private EventBus bus;
 
-    private UIContainer container;
+    protected UIContainer container;
 
     private UITooltip tooltip;
 

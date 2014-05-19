@@ -24,14 +24,18 @@
 
 package net.malisis.core.client.gui.component;
 
-import cpw.mods.fml.client.FMLClientHandler;
+import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.event.GuiEvent;
 import net.malisis.core.client.gui.proxy.Context;
 import net.malisis.core.client.gui.proxy.GuiManager;
+import net.malisis.core.client.gui.renderer.GuiRenderer;
 import net.malisis.core.client.gui.util.Size;
 import net.malisis.core.client.gui.util.shape.Point;
 import net.malisis.core.client.gui.util.shape.Rectangle;
+import net.malisis.core.demo.test.GuiIcon;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
+import cpw.mods.fml.client.FMLClientHandler;
 
 /**
  * UIComponent
@@ -502,4 +506,47 @@ public abstract class UIComponent
         return "size=" + this.getSize() + ", position=" + this.getPosition() + ", screenPosition=" + this.getScreenPosition();
     }
 
+    
+    /***
+     * V2 Ordinastie
+     */
+    public abstract ResourceLocation getTexture(int mouseX, int mouseY);
+    public abstract GuiIcon getIcon(int face);
+   
+    public void draw(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+    {
+    	renderer.currentComponent = this;
+    	renderer.bindTexture(getTexture(mouseX, mouseY));
+    	drawBackground(renderer, mouseX, mouseY, partialTick);
+    	renderer.next();
+    	drawForeground(renderer, mouseX, mouseY, partialTick);
+    	renderer.next();
+    }
+    
+    public abstract void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
+    public abstract void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
+    
+    
+    public int screenX()
+    {
+    	int x = position.x;
+    	if(parent != null)
+    	{
+    		x += parent.screenX();
+    		if(parent instanceof UIContainer)
+    			x += ((UIContainer) parent).getPadding().x;
+    	}
+    	return x;
+    }
+    public int screenY()
+    {
+    	int y = position.y;
+    	if(parent != null)
+    	{
+    		y += parent.screenY();
+    		if(parent instanceof UIContainer)
+    			y += ((UIContainer) parent).getPadding().y;
+    	}
+    	return y;
+    }
 }

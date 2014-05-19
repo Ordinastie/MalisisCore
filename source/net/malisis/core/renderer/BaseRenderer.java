@@ -441,7 +441,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		if (icon != null)
 			face.setTexture(icon, params.uvFactor, params.flipU, params.flipV);
 
-		if ((typeRender != TYPE_WORLD && typeRender != TYPE_TESR_WORLD)|| params.useNormals)
+		if (typeRender == TYPE_ITEM_INVENTORY || typeRender == TYPE_ISBRH_INVENTORY || params.useNormals)
 			t.setNormal(params.direction.offsetX, params.direction.offsetY, params.direction.offsetZ);
 
 		baseBrightness = getBaseBrightness();

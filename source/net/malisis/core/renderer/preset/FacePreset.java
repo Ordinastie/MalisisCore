@@ -68,6 +68,9 @@ public class FacePreset
     private static Face TriangleSouthTopEast = new Face(new Vertex[] { Vertex.TopSouthWest, Vertex.BottomSouthWest, Vertex.BottomSouthEast, Vertex.BottomSouthEast});
    
     
+    private static Face Gui = new Face(new Vertex[] { Vertex.TopSouthEast, Vertex.BottomSouthEast, Vertex.BottomSouthWest, Vertex.TopSouthWest});
+    
+  
     public static Face Bottom() { return new Face(Bottom); }
     public static Face Top() { return new Face(Top); }
     public static Face West() { return new Face(West); }
@@ -116,6 +119,12 @@ public class FacePreset
     public static Face TriangleSouthTopWest() { return new Face(TriangleSouthTopWest); }
     public static Face TriangleNorthTopEast() { return new Face(TriangleNorthTopEast); }
     public static Face TriangleSouthTopEast() { return new Face(TriangleSouthTopEast); }
+    
+    public static Face Gui() 
+    {
+    	Vertex[] vertexes = new Vertex[] { Vertex.BottomSouthWest, Vertex.TopSouthWest, Vertex.TopSouthEast, Vertex.BottomSouthEast };
+    	return new Face(vertexes); 
+    }
     //@formatter:on    
 
 	private static HashMap<String, int[]> aom = new HashMap<String, int[]>();

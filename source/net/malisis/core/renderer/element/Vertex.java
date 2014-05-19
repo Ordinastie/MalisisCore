@@ -145,6 +145,30 @@ public class Vertex
 		return this;
 	}
 
+	
+	public Vertex factorX(float f)
+	{
+		x *= f;
+		return this;
+	}
+	public Vertex factorY(float f)
+	{
+		y *= f;
+		return this;
+	}
+	public Vertex factorZ(float f)
+	{
+		z *= f;
+		return this;
+	}
+	public Vertex factor(float f)
+	{
+		factorX(f);
+		factorY(f);
+		factorZ(f);
+		return this;
+	}
+	
 	public Vertex scale(float f)
 	{
 		return scale(f, 0.5, 0.5, 0.5);
