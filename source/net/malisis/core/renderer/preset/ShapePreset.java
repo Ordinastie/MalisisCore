@@ -1,3 +1,27 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Ordinastie
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package net.malisis.core.renderer.preset;
 
 import net.malisis.core.renderer.element.Face;
@@ -52,12 +76,16 @@ public class ShapePreset
 	//@formatter:on
 
 	// GUI
+	public static Shape GuiElement(int width, int height)
+	{
+		return new Shape(new Face[] { FacePreset.Gui().factor(width, height, 0) });
+	}
+
 	public static Shape GuiXYResizable(int width, int height, int cornerWidth, int cornerHeight)
 	{
-		width -= (2 * cornerWidth);
-		height -= (2 * cornerHeight);
-		Face[] faces = new Face[] { 
-				FacePreset.Gui().factor(cornerWidth, cornerHeight, 0),
+		width = Math.max(width - 2 * cornerWidth, 0);
+		height = Math.max(height - 2 * cornerHeight, 0);
+		Face[] faces = new Face[] { FacePreset.Gui().factor(cornerWidth, cornerHeight, 0),
 				FacePreset.Gui().factor(width, cornerHeight, 0).translate(cornerWidth, 0, 0),
 				FacePreset.Gui().factor(cornerWidth, cornerHeight, 0).translate(cornerWidth + width, 0, 0),
 				FacePreset.Gui().factor(cornerWidth, height, 0).translate(0, cornerHeight, 0),
@@ -77,14 +105,14 @@ public class ShapePreset
 
 	public static Shape GuiXResizable(int width, int height, int sideWidth)
 	{
-		width -= (2 * sideWidth);
-		Face[] faces = new Face[] { 
-				FacePreset.Gui().factor(sideWidth, height, 0),
+		width = Math.max(width - 2 * sideWidth, 0);
+		Face[] faces = new Face[] { FacePreset.Gui().factor(sideWidth, height, 0),
 				FacePreset.Gui().factor(width, height, 0).translate(sideWidth, 0, 0),
 				FacePreset.Gui().factor(sideWidth, height, 0).translate(sideWidth + width, 0, 0) };
 
 		return new Shape(faces);
 	}
+
 	public static Shape GuiXResizable(int width, int height)
 	{
 		return GuiXResizable(width, height, 5);

@@ -24,11 +24,28 @@
 
 package net.malisis.core.client.gui.event;
 
+
 /**
  * GuiEvent
- *
+ * 
  * @author PaleoCrafter
  */
 public class GuiEvent
 {
+	private boolean cancelled = false;
+
+	public GuiEvent()
+	{
+	}
+
+	public boolean cancel()
+	{
+		cancelled = true;
+		return true;
+	}
+
+	public boolean isCancelled()
+	{
+		return cancelled;
+	}
 }

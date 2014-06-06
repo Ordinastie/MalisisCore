@@ -215,7 +215,7 @@ public class Raytrace
 			firstHit = new MovingObjectPosition(currentX, currentY, currentZ, -1, dest.toVec3(), false);
 
 		if (dest != null)
-			MalisisCore.Message("Trace fail : " + MAX_BLOCKS + " passed (" + currentX + "," + currentY + "," + currentZ + ")");
+			MalisisCore.message("Trace fail : " + MAX_BLOCKS + " passed (" + currentX + "," + currentY + "," + currentZ + ")");
 		return firstHit;
 	}
 

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import net.malisis.core.demo.minty.Minty;
 import net.malisis.core.demo.stargate.Stargate;
 import net.malisis.core.demo.test.Test;
+import net.malisis.core.packet.MalisisPacket;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -25,7 +26,6 @@ import com.google.common.eventbus.Subscribe;
 import cpw.mods.fml.client.FMLFileResourcePack;
 import cpw.mods.fml.client.FMLFolderResourcePack;
 import cpw.mods.fml.common.DummyModContainer;
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.LoadController;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -33,13 +33,12 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
 import cpw.mods.fml.relauncher.ReflectionHelper;
-import cpw.mods.fml.relauncher.Side;
 
 public class MalisisCore extends DummyModContainer
 {
 	public static final String modid = "malisiscore";
 	public static final String modname = "Malisis Core";
-	public static final String version = "1.7.2-0.7.2";
+	public static final String version = "1.7.2-0.7.3";
 	public static final String url = "";
 	public static File coremodLocation;
 
@@ -88,7 +87,7 @@ public class MalisisCore extends DummyModContainer
 		demosEnabled = config.get(Configuration.CATEGORY_GENERAL, "demosEnabled", false).getBoolean(false);
 		config.save();
 		
-		demosEnabled &= FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT;
+//		demosEnabled &= FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT;
 //		demosEnabled = false;
 		if(demosEnabled)
 		{
@@ -106,6 +105,8 @@ public class MalisisCore extends DummyModContainer
 	@Subscribe
 	public static void init(FMLInitializationEvent event)
 	{
+		MalisisPacket.init(modid);		
+		
 		if(demosEnabled)
 		{
 			test.init();
@@ -163,12 +164,14 @@ public class MalisisCore extends DummyModContainer
 		}
 	}
 
-	public static void Message(Object text)
+	public static void message(Object text)
 	{
 		if (text != null)
 		{
 			ChatComponentText msg = new ChatComponentText(text.toString());
-			MinecraftServer.getServer().getConfigurationManager().sendChatMsg(msg);
+			MinecraftServer server = MinecraftServer.getServer();
+			if(server != null)
+				server.getConfigurationManager().sendChatMsg(msg);
 		}
 	}
 	

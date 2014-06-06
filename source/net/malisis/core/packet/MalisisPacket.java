@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 PaleoCrafter, Ordinastie
+ * Copyright (c) 2014 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,26 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.util;
+package net.malisis.core.packet;
 
-/**
- * Orientation
- *
- * @author PaleoCrafter
- */
-public enum Orientation
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import cpw.mods.fml.relauncher.Side;
+
+public class MalisisPacket
 {
+	public static int OPENINVENTORY = 1;
+	public static int UPDATEINVENTORYSLOTS = 2;
+	public static int INVENTORYACTION = 3;
 
-    VERTICAL_TOP(0, 1), VERTICAL_BOTTOM(0, -1), HORIZONTAL_LEFT(1, 0), HORIZONTAL_RIGHT(-1, 0);
+	public static SimpleNetworkWrapper network;
 
-    public int xOff, yOff;
+	public static void init(String channelName)
+	{
+		network = new SimpleNetworkWrapper(channelName);
 
-    private Orientation(int xOff, int yOff)
-    {
-        this.xOff = xOff;
-        this.yOff = yOff;
-    }
-
+		network.registerMessage(OpenIventoryMessage.class, OpenIventoryMessage.Packet.class, OPENINVENTORY, Side.CLIENT);
+		network.registerMessage(UpdateInventorySlotsMessage.class, UpdateInventorySlotsMessage.Packet.class, UPDATEINVENTORYSLOTS,
+				Side.CLIENT);
+		network.registerMessage(InventoryActionMessage.class, InventoryActionMessage.Packet.class, INVENTORYACTION, Side.SERVER);
+	}
 }

@@ -52,10 +52,8 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	protected Tessellator t = Tessellator.instance;
 	protected IBlockAccess world;
-	/**
-	 * Render id
-	 */
-//	public int renderId;
+	protected RenderBlocks renderBlocks;
+
 	/**
 	 * Block to render
 	 */
@@ -180,6 +178,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	public void renderInventoryBlock(Block block, int metadata, int modelId, RenderBlocks renderer, RenderParameters rp)
 	{
+		renderBlocks = renderer;
 		set(block, metadata);
 		prepare(TYPE_ISBRH_INVENTORY);
 		render();
@@ -189,6 +188,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	@Override
 	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer)
 	{
+		renderBlocks = renderer;
 		set(world, block, x, y, z, world.getBlockMetadata(x, y, z));
 		prepare(TYPE_WORLD);
 		if(renderer.hasOverrideBlockTexture())

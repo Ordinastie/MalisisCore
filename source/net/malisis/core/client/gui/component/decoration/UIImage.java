@@ -24,15 +24,13 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
+import net.malisis.core.client.gui.GuiIcon;
+import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.util.Size;
-import net.malisis.core.util.RenderHelper;
+import net.malisis.core.renderer.preset.ShapePreset;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * UIImage
@@ -41,81 +39,49 @@ import java.util.Arrays;
  */
 public class UIImage extends UIComponent
 {
-
-    private float scale;
-    private Size baseSize;
+    public static final ResourceLocation BLOCKS_TEXTURE = TextureMap.locationBlocksTexture;
+    public static final ResourceLocation ITEMS_TEXTURE = TextureMap.locationItemsTexture;
+    
+    /**
+     * Resource location for the texture to use
+     */
     private ResourceLocation texture;
+    /**
+     * IIcon to use for the texture
+     */
+    private IIcon icon = null;
 
-    public UIImage()
+    public UIImage(IIcon icon, ResourceLocation rl)
     {
-        this(1F, new ResourceLocation("minecraft", "null"));
+    	this.icon = icon;
+    	this.texture = rl;
+    	this.width = 16;
+    	this.height = 16;
     }
 
-    public UIImage(float scale, ResourceLocation texture)
-    {
-        this.scale = scale;
-        this.texture = texture;
-        try
-        {
-            BufferedImage temp = ImageIO.read(mc.getResourceManager().getResource(texture).getInputStream());
-            this.baseSize = new Size(temp.getWidth(), temp.getHeight());
-            if (texture.getResourcePath().toLowerCase().contains("textures/blocks") && texture.getResourcePath().toLowerCase().contains("textures/items"))
-                this.setSize((int) (16 * scale), (int) (16 * scale));
-            else
-                this.setSize((int) (temp.getWidth() * scale), (int) (temp.getHeight() * scale));
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
+	@Override
+	public IIcon getIcon(int face)
+	{
+		return icon != null ? icon : GuiIcon.iconFixedSized;
+	}
 
-    public void setScale(float scale)
-    {
-        this.scale = scale;
-        this.setSize((int) (baseSize.getWidth() * scale), (int) (baseSize.getHeight() * scale));
-    }
+	@Override
+	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+	}
 
-    public void setTexture(ResourceLocation texture)
-    {
-        this.texture = texture;
-        try
-        {
-            BufferedImage temp = ImageIO.read(mc.getResourceManager().getResource(texture).getInputStream());
-            this.baseSize = new Size(temp.getWidth(), temp.getHeight());
-            if (texture.getResourcePath().toLowerCase().contains("textures/blocks") && texture.getResourcePath().toLowerCase().contains("textures/items"))
-                this.setSize((int) (16 * scale), (int) (16 * scale));
-            else
-                this.setSize((int) (temp.getWidth() * scale), (int) (temp.getHeight() * scale));
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void draw(int mouseX, int mouseY)
-    {
-        if (texture.getResourcePath().toLowerCase().contains("textures/blocks") && texture.getResourcePath().toLowerCase().contains("textures/items"))
-        {
-            RenderHelper.drawRectangle(texture, getScreenX(), getScreenY(), zIndex, this.getWidth(), this.getHeight(), 0, 0);
-        }
-        else
-        {
-            RenderHelper.drawRectangle(texture, getScreenX(), getScreenY(), zIndex, this.getWidth(), this.getHeight(), 0, 0, this.getWidth(), this.getHeight());
-        }
-    }
-
-    @Override
-    public void update(int mouseX, int mouseY)
-    {
-
-    }
-
+	@Override
+	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		renderer.bindTexture(texture);		
+		renderer.drawShape(ShapePreset.GuiElement(width, height));		
+	}
+	
+    
     @Override
     public String toString()
     {
-        return this.getClass().getName() + "[ scale=" + scale + ", texture=" + this.texture + ", " + this.getPropertyString() + " ]";
+        return this.getClass().getName() + "[ texture=" + this.texture + ", " + this.getPropertyString() + " ]";
     }
+    
 }

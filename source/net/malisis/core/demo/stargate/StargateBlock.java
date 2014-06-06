@@ -24,27 +24,17 @@
 
 package net.malisis.core.demo.stargate;
 
-import net.malisis.core.client.gui.component.container.UIInfoTab;
-import net.malisis.core.client.gui.component.container.UIScrollPanel;
-import net.malisis.core.client.gui.component.container.UIWindow;
-import net.malisis.core.client.gui.component.decoration.UILabel;
-import net.malisis.core.client.gui.component.interaction.UIButton;
-import net.malisis.core.client.gui.layout.FlowLayoutManager;
-import net.malisis.core.client.gui.renderer.DrawableIcon;
-import net.malisis.core.client.gui.util.Orientation;
+import java.util.Random;
+
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
-
-import java.util.Random;
 
 public class StargateBlock extends BlockContainer
 {
@@ -102,7 +92,7 @@ public class StargateBlock extends BlockContainer
     {
         if (p_149727_1_.isRemote)
         {
-            UIWindow window = new UIWindow(100, 100);
+/*            UIWindow window = new UIWindow(100, 100);
             UIInfoTab tab = new UIInfoTab("Test", new DrawableIcon(Items.apple.getIconFromDamage(0), DrawableIcon.ITEM_SHEET), Orientation.HORIZONTAL_LEFT, 0x0060ff);
             window.addInfoTab(tab);
             tab.setLayout(new FlowLayoutManager(1, 1));
@@ -125,13 +115,13 @@ public class StargateBlock extends BlockContainer
             panel.add(button);
             window.add(panel);
             Minecraft.getMinecraft().displayGuiScreen(window.createScreenProxy());
-        }
+ */       }
         return true;
     }
 
     @Override
     public int getRenderType()
     {
-        return StargateRenderer.renderId;
+        return 0;//StargateRenderer.renderId;
     }
 }

@@ -24,75 +24,154 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
+import net.malisis.core.client.gui.GuiIcon;
+import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.util.RenderHelper;
-
-import java.util.Arrays;
 
 /**
  * UILabel
- *
+ * 
  * @author PaleoCrafter
  */
 public class UILabel extends UIComponent
 {
+	/**
+	 * Text of this <code>UILabel</code>.
+	 */
+	private String text;
+	/**
+	 * Color to use to draw the text of this <code>UILabel</code>.
+	 */
+	private int color;
+	/**
+	 * Determines if the text is drawn with drop shadow.
+	 */
+	private boolean drawShadow;
+	/**
+	 * Determines if the width of this <code>UILabel</code> is dependent of the text
+	 */
+	private boolean autoWidth = true;
+	/**
+	 * Width of the text
+	 */
+	private int textWidth;
+	/**
+	 * Height of the text
+	 */
+	private int textHeight;
 
-    private String[] lines;
-    private int color;
-    private boolean drawShadow;
+	public UILabel()
+	{
+		this("", 0, 0x404040);
+	}
 
-    public UILabel()
-    {
-        this("");
-    }
+	public UILabel(String text)
+	{
+		this(text, 0, 0x404040);
+	}
 
-    public UILabel(String text)
-    {
-        this(text, 0x404040);
-    }
+	public UILabel(String text, int width, int color)
+	{
+		this.color = color;
+		this.setText(text);
+		this.setSize(0);
+	}
 
-    public UILabel(String text, int color)
-    {
-        this.color = color;
-        this.lines = text.split("\\n");
-        this.setSize(RenderHelper.getStringWidth(RenderHelper.getLongestString(lines)), lines.length * mc.fontRenderer.FONT_HEIGHT + (lines.length - 1));
-    }
+	// #region getters/setters
+	/**
+	 * Sets the text of this <code>UILabel</code>. If no width was previously set, it will be recalculated for this text.
+	 * 
+	 * @param text
+	 * @return this <code>UILabel</code>
+	 */
+	public UILabel setText(String text)
+	{
+		this.text = text;
+		this.textWidth = GuiRenderer.getStringWidth(text);
+		this.textHeight = GuiRenderer.FONT_HEIGHT;
+		if (autoWidth)
+			setSize(0);
+		return this;
+	}
 
-    public void setText(String text)
-    {
-        lines = text.split("\\n");
-        this.setSize(RenderHelper.getStringWidth(RenderHelper.getLongestString(lines)), lines.length * (mc.fontRenderer.FONT_HEIGHT + 1));
-    }
+	/**
+	 * @return text of this <code>UILabel</code>
+	 */
+	public String getText()
+	{
+		return this.text;
+	}
 
-    public void setColor(int color)
-    {
-        this.color = color;
-    }
+	/**
+	 * Sets the width of this <code>UILabel</code>. Height is defined by text height.
+	 * 
+	 * @param width
+	 * @return this <code>UILabel</code>
+	 */
+	public UIComponent setSize(int width)
+	{
+		this.autoWidth = width == 0;
+		this.width = autoWidth ? textWidth : width;
+		this.height = textHeight;
+		return this;
+	}
 
-    public void setDrawShadow(boolean drawShadow)
-    {
-        this.drawShadow = drawShadow;
-    }
+	/**
+	 * Sets the width of this <code>UILabel</code>. Height parameter is ignored and defined by text height.
+	 * 
+	 * @param width
+	 * @param height ignored
+	 * @return this <code>UILabel</code>
+	 */
+	@Override
+	public UIComponent setSize(int width, int height)
+	{
+		return setSize(width);
+	}
 
-    @Override
-    public void draw(int mouseX, int mouseY)
-    {
-        for (int i = 0; i < lines.length; i++)
-        {
-            String line = lines[i];
-            RenderHelper.drawString(line, getScreenX(), getScreenY() + i * (mc.fontRenderer.FONT_HEIGHT + 1), zIndex, color, drawShadow);
-        }
-    }
+	/**
+	 * Set the color of the text of this <code>UILabel</code>.
+	 * 
+	 * @param color
+	 */
+	public void setColor(int color)
+	{
+		this.color = color;
+	}
 
-    @Override
-    public void update(int mouseX, int mouseY)
-    {
+	/**
+	 * Set the drop shadow for the text of this <code>UILabel</code>.
+	 * 
+	 * @param drawShadow
+	 */
+	public void setDrawShadow(boolean drawShadow)
+	{
+		this.drawShadow = drawShadow;
+	}
 
-    }
+	// #end getters/setters
 
-    @Override
-    public String toString()
-    {
-        return this.getClass().getName() + "[ text=" + Arrays.toString(lines) + ", color=0x" + Integer.toHexString(this.color) + ", " + this.getPropertyString() + " ]";
-    }
+	@Override
+	public GuiIcon getIcon(int face)
+	{
+		return null;
+	}
+
+	@Override
+	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{}
+
+	@Override
+	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		renderer.drawString(text, screenX(), screenY(), color, drawShadow);
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.getClass().getName() + "[ text=" + text + ", color=0x" + Integer.toHexString(this.color) + ", "
+				+ this.getPropertyString() + " ]";
+	}
+
 }

@@ -24,82 +24,119 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
-import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.renderer.DynamicTexture;
-import net.malisis.core.client.gui.util.shape.Rectangle;
-import net.malisis.core.util.RenderHelper;
-import net.minecraft.util.ResourceLocation;
+import java.util.Arrays;
+import java.util.List;
 
-import java.lang.reflect.Array;
+import net.malisis.core.client.gui.GuiIcon;
+import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.renderer.element.RenderParameters;
+import net.malisis.core.renderer.element.Shape;
+import net.malisis.core.renderer.preset.ShapePreset;
+import net.minecraft.util.IIcon;
 
 /**
  * UITooltip
- *
+ * 
  * @author PaleoCrafter
  */
 public class UITooltip extends UIComponent
 {
+	//@formatter:off
+	public static GuiIcon[] icons = new GuiIcon[] { new GuiIcon(227, 	31, 	5, 	5),
+													new GuiIcon(232, 	31, 	5, 	5),
+													new GuiIcon(237, 	31, 	5, 	5),
+													new GuiIcon(227, 	36, 	5, 	5),
+													new GuiIcon(232, 	36, 	5, 	5),
+													new GuiIcon(237, 	36,  	5, 	5),
+													new GuiIcon(227, 	41, 	5, 	5),
+													new GuiIcon(232, 	41, 	5, 	5),
+													new GuiIcon(237, 	41, 	5, 	5)};
+	//@formatter:on
 
-    private static final DynamicTexture TEXTURE = new DynamicTexture(new ResourceLocation("malisiscore", "textures/gui/widgets/tooltip.png"), 15, 15, 0, 0, new Rectangle(0, 0, 5, 5), new Rectangle(5, 0, 5, 5), new Rectangle(5, 5, 5, 5));
+	protected List<String> lines;
+	protected int padding = 4;
 
-    private String[] lines;
+	public UITooltip()
+	{
+		width = 16;
+		height = 16;
+	}
 
-    public UITooltip()
-    {
-        this.zIndex = 301;
-    }
+	public UITooltip(String text)
+	{
+		setText(text);
+	}
 
-    @Override
-    public void draw(int mouseX, int mouseY)
-    {
-        this.setSize(mc.fontRenderer.getStringWidth(RenderHelper.getLongestString(lines)) + 8, lines.length * (2 + mc.fontRenderer.FONT_HEIGHT) + 6);
-        TEXTURE.setSize(this.getSize());
-        TEXTURE.draw(mouseX + 6, mouseY + 6);
-        int startX = mouseX + 10;
-        int startY = mouseY + 10;
-        for (int i = 0; i < lines.length; i++)
-        {
-            String line = lines[i];
-            RenderHelper.drawString(line, startX, startY + i * (2 + mc.fontRenderer.FONT_HEIGHT), zIndex, 0xEEEEEE, false);
-        }
-    }
+	public UITooltip setText(String text)
+	{
+		lines = Arrays.asList(text.split("\\n"));
+		calcSize();
+		return this;
 
-    @Override
-    public void update(int mouseX, int mouseY)
-    {
+	}
 
-    }
+	public UITooltip setText(List<String> lines)
+	{
+		this.lines = lines;
+		calcSize();
+		return this;
+	}
 
-    public void addLine(String text)
-    {
-        lines = concatenate(lines, new String[] {text});
-    }
+	protected void calcSize()
+	{
+		width = 16;
+		height = lines.size() > 1 ? (GuiRenderer.FONT_HEIGHT + 1) * (lines.size()) : 8;
+		height += padding * 2;
+		for (String s : lines)
+		{
+			width = Math.max(width, GuiRenderer.getStringWidth(s));
+		}
+		width += padding * 2;
+	}
 
-    public void setText(String text)
-    {
-        reset();
-        lines = text.split("\\n");
-    }
+	@Override
+	public IIcon getIcon(int face)
+	{
+		if (face < 0 || face > icons.length)
+			return null;
 
-    public <T> T[] concatenate(T[] A, T[] B)
-    {
-        int aLen = A.length;
-        int bLen = B.length;
+		return icons[face];
+	}
 
-        @SuppressWarnings("unchecked")
-        T[] C = (T[]) Array.newInstance(A.getClass().getComponentType(), aLen + bLen);
-        System.arraycopy(A, 0, C, 0, aLen);
-        System.arraycopy(B, 0, C, aLen, bLen);
+	protected int getOffsetX()
+	{
+		return 8;
+	}
 
-        return C;
-    }
+	protected int getOffsetY()
+	{
+		return -16;
+	}
 
-    /**
-     * Resets all the lines of this tooltip.
-     */
-    public void reset()
-    {
-        lines = new String[0];
-    }
+	@Override
+	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		Shape shape = ShapePreset.GuiXYResizable(width, height);
+		shape.translate(mouseX + getOffsetX(), mouseY + getOffsetY(), 300);
+		RenderParameters rp = new RenderParameters();
+		rp.alpha = 255;
+		renderer.drawShape(shape, rp);
+	}
 
+	@Override
+	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		int x = mouseX + getOffsetX() + padding;
+		int y = mouseY + getOffsetY() + padding;
+		int i = 0;
+		for (String s : lines)
+		{
+			int sy = y;
+			if (i > 0)
+				sy += 2;
+			renderer.drawString(s, x, sy + (GuiRenderer.FONT_HEIGHT + 1) * i, 0xFFFFFF, true);
+			i++;
+		}
+	}
 }

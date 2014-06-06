@@ -24,22 +24,12 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
+import net.malisis.core.client.gui.GuiIcon;
+import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.event.ButtonPressedEvent;
-import net.malisis.core.client.gui.event.MouseClickedEvent;
-import net.malisis.core.client.gui.renderer.DynamicTexture;
-import net.malisis.core.client.gui.renderer.GuiRenderer;
-import net.malisis.core.client.gui.util.Size;
-import net.malisis.core.client.gui.util.shape.Point;
-import net.malisis.core.client.gui.util.shape.Rectangle;
-import net.malisis.core.demo.test.GuiIcon;
+import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.preset.ShapePreset;
-import net.malisis.core.util.RenderHelper;
-import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraft.util.ResourceLocation;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * UIButton
@@ -48,119 +38,110 @@ import com.google.common.eventbus.Subscribe;
  */
 public class UIButton extends UIComponent
 {
+	//@formatter:off
+	public static GuiIcon[] iconButton = new GuiIcon[] { 			new GuiIcon(0,		20, 	5, 		20),
+																	new GuiIcon(5,		20, 	15, 	20),
+																	new GuiIcon(195, 	20, 	5, 		20)};
+	public static GuiIcon[] iconButtonHovered = new GuiIcon[] { 	iconButton[0].offset(0,  20),
+																	iconButton[1].offset(0,  20),
+																	iconButton[2].offset(0,  20) };
+	public static GuiIcon[] iconButtonDisabled = new GuiIcon[] { 	iconButton[0].offset(0,  -20),
+																	iconButton[1].offset(0,  -20),
+																	iconButton[2].offset(0,  -20) };
+	//@formatter:on
+	private UILabel label = new UILabel();
+	private boolean autoWidth = true;
 
-	private static final DynamicTexture TEXTURE_NORMAL = new DynamicTexture(new ResourceLocation("malisiscore",
-			"textures/gui/widgets/button.png"), 15, 15, 0, 0, new Rectangle(0, 0, 5, 5), new Rectangle(5, 0, 5, 5), new Rectangle(5, 5, 5,
-			5));
-	private static final DynamicTexture TEXTURE_HOVERED = new DynamicTexture(new ResourceLocation("malisiscore",
-			"textures/gui/widgets/button_hovered.png"), 15, 15, 0, 0, new Rectangle(0, 0, 5, 5), new Rectangle(5, 0, 5, 5), new Rectangle(
-			5, 5, 5, 5));
-	private static final DynamicTexture TEXTURE_DISABLED = new DynamicTexture(new ResourceLocation("malisiscore",
-			"textures/gui/widgets/button_disabled.png"), 15, 15, 0, 0, new Rectangle(0, 0, 5, 5), new Rectangle(5, 0, 5, 5), new Rectangle(
-			5, 5, 5, 5));
+	// this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
+	public UIButton(String text, int width)
+	{
+		setText(text);
+		label.setColor(0xFFFFFF);
+		label.setDrawShadow(true);
+		setSize(width);
+	}
 
-	private String text;
+	public UIButton(String text)
+	{
+		this(text, 60);
+	}
 
 	public UIButton()
 	{
-		this("", 0, 0);
+		this(null, 60);
 	}
 
-	public UIButton(String text, int width, int height)
-	{
-		this.text = text;
-		this.setSize(width, height);
-	}
-
-	@Subscribe
-	public void onMouseClick(MouseClickedEvent event)
-	{
-		if (this.isEnabled() && this.isHovered(event.getPosition()) && event.getButton().isLeft())
-		{
-			this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
-			this.getContext().publish(new ButtonPressedEvent(this));
-		}
-	}
-
-	@Override
-	public void draw(int mouseX, int mouseY)
-	{
-		int textColor = 0xe0e0e0;
-		DynamicTexture texture = TEXTURE_NORMAL;
-		if (this.isEnabled())
-		{
-			if (this.isHovered(new Point(mouseX, mouseY)))
-			{
-				textColor = 0xffffa0;
-				texture = TEXTURE_HOVERED;
-			}
-		}
-		else
-		{
-			textColor = 0xa0a0a0;
-			texture = TEXTURE_DISABLED;
-		}
-
-		texture.setSize(this.getSize());
-		texture.draw(getScreenX(), getScreenY());
-
-		RenderHelper.drawString(text, getScreenX(), getScreenY(), zIndex, getWidth(), getHeight(), textColor, true);
-	}
-
-	@Override
-	public void update(int mouseX, int mouseY)
-	{
-
-	}
-
-	@Override
-	public String toString()
-	{
-		return this.getClass().getName() + "[ text=" + text + ", " + this.getPropertyString() + " ]";
-	}
-
-	/***
-	 * V2 Ordinastie
+	/**
+	 * Sets the text of this <code>UIButton</code>. If a width of 0 was previously set, it will be recalculated for this text.
+	 * 
+	 * @param text
+	 * @return this <code>UIButton</code>
 	 */
-	private ResourceLocation texture = new ResourceLocation("malisiscore", "textures/gui/widgets/button.png");
-	//@formatter:off
-	public GuiIcon[] icons = new GuiIcon[] { 
-		new GuiIcon(0, 		0, 		0.33F, 	1.0F),
-		new GuiIcon(0.33F, 	0, 		0.66F, 	1.0F),
-		new GuiIcon(0.66F, 	0, 		1.0F, 	1.0F)};
-	//@formatter:on
-	
+	public UIButton setText(String text)
+	{
+		label.setText(text);
+		setSize(autoWidth ? 0 : width);
+		return this;
+	}
+
+	/**
+	 * Sets the width of this <code>UIButton</code>. Height is fixed 20.
+	 * 
+	 * @param width
+	 * @return this <code>UIButton</code>
+	 */
+	public UIButton setSize(int width)
+	{
+		autoWidth = width == 0;
+		int extraWidth = label.getWidth() % 2 == 0 ? 6 : 7; 
+		this.width = Math.max(width, label.getWidth() + extraWidth);
+		this.height = 20;
+		return this;
+	}
+
+	/**
+	 * Sets the width of this <code>UIButton</code>. Height parameter is ignored as it's fixed 20.
+	 * 
+	 * @param width
+	 * @param height ignored
+	 * @return this <code>UILabel</code>
+	 */
+	@Override
+	public UIComponent setSize(int width, int height)
+	{
+		return setSize(width);
+	}
+
 	@Override
 	public GuiIcon getIcon(int face)
-    {
-    	if(face < 0 || face > icons.length)
-    		return null;
-    	
-    	return icons[face];
-    }
-	
-	@Override
-	public ResourceLocation getTexture(int mouseX, int mouseY)
 	{
-		return texture;
+		if (face < 0 || face > iconButton.length)
+			return null;
+
+		return hovered ? iconButtonHovered[face] : iconButton[face];
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiXResizable(this.size.width, this.size.height);
+		Shape shape = ShapePreset.GuiXResizable(width, height);
 		renderer.drawShape(shape);
-
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Size textSize = renderer.textRenderSize(text);
-		int x = (size.width - textSize.width) / 2;
-		int y = (size.height - textSize.height) / 2;
-				
-		renderer.drawString(text, screenX() +  x, screenY() + y, 0, 0xFFFFFF, true);		
+		int x = (width - label.getWidth()) / 2;
+		int y = (height - label.getHeight() + 2) / 2;
+
+		label.setPosition(screenX() + x, screenY() + y );
+		label.draw(renderer, mouseX, mouseY, partialTick);
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.getClass().getName() + "[ text=" + label.getText() + ", " + this.getPropertyString() + " ]";
 	}
 
 }

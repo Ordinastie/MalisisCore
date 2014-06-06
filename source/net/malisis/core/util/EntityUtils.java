@@ -1,7 +1,12 @@
 package net.malisis.core.util;
 
+import java.util.List;
+import java.util.UUID;
+
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 
 public class EntityUtils
@@ -21,6 +26,17 @@ public class EntityUtils
 		entityItem.motionZ = world.rand.nextGaussian() * factor;
 		world.spawnEntityInWorld(entityItem);
 		
+	}
+	
+	public static EntityPlayerMP findPlayerFromUUID(UUID uuid)
+	{
+		List<EntityPlayerMP> listPlayers = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
+		
+		for(EntityPlayerMP player : listPlayers)
+			if(player.getUniqueID().equals(uuid))
+				return player;
+		
+		return null;
 	}
 
 }

@@ -24,24 +24,21 @@
 
 package net.malisis.core.client.gui.component.container;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.malisis.core.client.gui.Anchor;
+import net.malisis.core.client.gui.ClipArea;
+import net.malisis.core.client.gui.GuiIcon;
+import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.layout.Constraints;
-import net.malisis.core.client.gui.layout.LayoutManager;
-import net.malisis.core.client.gui.proxy.GuiScreenProxy;
-import net.malisis.core.client.gui.renderer.Drawable;
-import net.malisis.core.client.gui.renderer.GuiRenderer;
-import net.malisis.core.client.gui.util.Size;
-import net.malisis.core.client.gui.util.shape.Point;
-import net.malisis.core.demo.test.GuiIcon;
-import net.minecraft.util.ResourceLocation;
+import net.malisis.core.client.gui.event.KeyboardEvent;
+import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.renderer.element.RenderParameters;
+import net.malisis.core.renderer.element.Shape;
+import net.malisis.core.renderer.preset.ShapePreset;
 
 import org.lwjgl.opengl.GL11;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * UIContainer
@@ -50,21 +47,26 @@ import com.google.common.eventbus.EventBus;
  */
 public class UIContainer extends UIComponent
 {
-
 	/**
 	 * The list of {@link net.malisis.core.client.gui.component.UIComponent components}.
 	 */
 	protected final List<UIComponent> components;
-
 	/**
-	 * The {@link net.malisis.core.client.gui.layout.LayoutManager LayoutManager} to be used by this container. Is <code>null</code> by
-	 * default, such that absolute positions are used.
+	 * Horizontal padding to apply to this <code>UIContainer</code>
 	 */
-	private LayoutManager<? extends Constraints> layoutManager;
-
-	private Drawable background;
-
-	private Point padding;
+	protected int horizontalPadding;
+	/**
+	 * Vertical padding to apply to this <code>UIContainer</code>
+	 */
+	protected int verticalPadding;
+	/**
+	 * Determines whether this <code>UIContainer</code> should clip its contents to its drawn area.
+	 */
+	public boolean clipContent = true;
+	/**
+	 * Currently hovered child component
+	 */
+	private UIComponent hoveredComponent;
 
 	/**
 	 * Default constructor, creates the components list.
@@ -77,278 +79,104 @@ public class UIContainer extends UIComponent
 	public UIContainer(int width, int height)
 	{
 		super();
-		this.setSize(width, height);
+		setSize(width, height);
 		components = new LinkedList<>();
-		padding = new Point(0, 0);
 	}
 
-	public LayoutManager<? extends Constraints> getLayout()
+	// #region getters/setters
+	/**
+	 * Set the padding for this <code>UIContainer</code>.
+	 * 
+	 * @param horizontal
+	 * @param vertical
+	 */
+	public void setPadding(int horizontal, int vertical)
 	{
-		return layoutManager;
+		this.horizontalPadding = horizontal;
+		this.verticalPadding = vertical;
 	}
 
-	public void setLayout(LayoutManager<? extends Constraints> layoutManager)
+	/**
+	 * @return horizontal padding of this <code>UIContainer</code>.
+	 */
+	public int getHorizontalPadding()
 	{
-		this.layoutManager = layoutManager;
+		return horizontalPadding;
+	}
+
+	/**
+	 * @return horizontal padding of this <code>UIContainer</code>.
+	 */
+	public int getVerticalPadding()
+	{
+		return verticalPadding;
+	}
+
+	@Override
+	public void setHovered(boolean hovered)
+	{
+		this.hovered = hovered;
+		if (!hovered)
+		{
+			if (hoveredComponent != null)
+				hoveredComponent.setHovered(false);
+			hoveredComponent = null;
+		}
+	}
+
+	@Override
+	public void setFocused(boolean focused)
+	{
+		this.focused = focused;
+		for (UIComponent c : components)
+			c.setFocused(c == hoveredComponent);
+	}
+
+	public int componentX(UIComponent component)
+	{
+		int x = component.getX();
+		if (Anchor.horizontal(component.getAnchor()) == Anchor.CENTER)
+			x += (width - component.getWidth()) / 2;
+		else if (Anchor.horizontal(component.getAnchor()) == Anchor.RIGHT)
+			x += width - component.getWidth() - getHorizontalPadding();
+		else
+			x += getHorizontalPadding();
+
+		return x;
+	}
+
+	public int componentY(UIComponent component)
+	{
+		int y = component.getY();
+		if (Anchor.vertical(component.getAnchor()) == Anchor.MIDDLE)
+			y += (height - component.getHeight()) / 2;
+		else if (Anchor.vertical(component.getAnchor()) == Anchor.BOTTOM)
+			y += height - component.getHeight() - getVerticalPadding();
+		else
+			y += getVerticalPadding();
+
+		return y;
+	}
+
+	// #end getters/setters
+
+	public void onContentUpdate()
+	{}
+
+	/**
+	 * Get the clipping area delimited by this <code>UIContainer</code>
+	 * 
+	 * @return
+	 */
+	public ClipArea getClipArea()
+	{
+		return new ClipArea(this);
 	}
 
 	public void add(UIComponent component)
 	{
 		components.add(component);
-		if (layoutManager != null)
-			layoutManager.setConstraints(component, layoutManager.createDefaultConstraints());
-	}
-
-	public void add(UIComponent component, Constraints constraints)
-	{
-		components.add(component);
-		if (layoutManager != null)
-			layoutManager.setConstraints(component, constraints);
-	}
-
-	@Override
-	public void initComponent()
-	{
-		super.initComponent();
-		for (UIComponent component : components)
-		{
-			component.setParent(this);
-			component.initComponent();
-		}
-	}
-
-	@Override
-	public void drawBackground(int mouseX, int mouseY)
-	{
-		if (background != null)
-			background.draw(this.getScreenX(), this.getScreenY());
-		for (UIComponent component : components)
-		{
-			if (component.isVisible())
-			{
-				GL11.glColor4f(1F, 1F, 1F, 1F);
-				if (layoutManager != null)
-					component.setScreenPosition(Point.add(
-							Point.add(screenPosition, layoutManager.getPositionForComponent(this, component)), padding));
-				else
-					component.setScreenPosition(Point.add(Point.add(screenPosition, component.getPosition()), padding));
-				component.drawBackground(mouseX, mouseY);
-			}
-		}
-	}
-
-	@Override
-	public void draw(int mouseX, int mouseY)
-	{
-		for (UIComponent component : components)
-		{
-			if (component.isVisible())
-			{
-				GL11.glColor4f(1F, 1F, 1F, 1F);
-				component.draw(mouseX, mouseY);
-			}
-		}
-	}
-
-	@Override
-	public void drawForeground(int mouseX, int mouseY)
-	{
-		for (UIComponent component : components)
-		{
-			if (component.isVisible())
-			{
-				GL11.glColor4f(1F, 1F, 1F, 1F);
-				component.drawForeground(mouseX, mouseY);
-			}
-		}
-	}
-
-	public void drawTooltip(int mouseX, int mouseY)
-	{
-		for (UIComponent component : components)
-		{
-			if (component.getTooltip() != null && !component.getTooltip().isEmpty() && !(component instanceof UIContainer)
-					&& component.isVisible() && component.isHovered(new Point(mouseX, mouseY)) && component.isEnabled())
-			{
-				getContext().getTooltip().setText(component.getTooltip());
-				getContext().getTooltip().draw(mouseX, mouseY);
-			}
-			else if (component instanceof UIContainer && component.isVisible() && component.isEnabled())
-			{
-				((UIContainer) component).drawTooltip(mouseX, mouseY);
-			}
-		}
-	}
-
-	@Override
-	public void update(int mouseX, int mouseY)
-	{
-		for (UIComponent component : components)
-		{
-			component.update(mouseX, mouseY);
-		}
-	}
-
-	@Override
-	public void setSize(Size size)
-	{
-		super.setSize(size);
-		if (background != null)
-			background.setSize(size);
-	}
-
-	@Override
-	public void dispose()
-	{
-		super.dispose();
-		for (UIComponent component : components)
-			component.dispose();
-	}
-
-	@Override
-	public void setEnabled(boolean enabled)
-	{
-		super.setEnabled(enabled);
-		for (UIComponent component : components)
-			component.setEnabled(enabled);
-	}
-
-	public void registerChildrenTo(EventBus bus)
-	{
-		for (UIComponent component : components)
-		{
-			bus.register(component);
-			if (component instanceof UIContainer)
-			{
-				((UIContainer) component).registerChildrenTo(bus);
-			}
-		}
-	}
-
-	public void registerChildren()
-	{
-		for (UIComponent component : components)
-		{
-			if (component instanceof UIContainer)
-				((UIContainer) component).registerChildren();
-			else
-				getContext().register(component);
-		}
-	}
-
-	public void unregisterChildren()
-	{
-		for (UIComponent component : components)
-		{
-			if (component instanceof UIContainer)
-				((UIContainer) component).unregisterChildren();
-			else
-				getContext().unregister(component);
-		}
-	}
-
-	public void registerAll()
-	{
-		getContext().register(this);
-		for (UIComponent component : components)
-		{
-			if (component instanceof UIContainer)
-				((UIContainer) component).registerAll();
-			else
-				getContext().register(component);
-		}
-	}
-
-	public void unregisterAll()
-	{
-		getContext().unregister(this);
-		for (UIComponent component : components)
-		{
-			if (component instanceof UIContainer)
-				((UIContainer) component).unregisterAll();
-			else
-				getContext().unregister(component);
-		}
-	}
-
-	public int getContentWidth()
-	{
-		if (layoutManager != null)
-			return layoutManager.calculateWidth(this);
-		else
-		{
-			int width = 0;
-			for (UIComponent component : components)
-			{
-				if (component.getX() + component.getWidth() > width)
-				{
-					width = component.getX() + component.getWidth();
-				}
-			}
-			return width;
-		}
-	}
-
-	public int getContentHeight()
-	{
-		if (layoutManager != null)
-			return layoutManager.calculateHeight(this);
-		else
-		{
-			int height = 0;
-			for (UIComponent component : components)
-			{
-				if (component.getY() + component.getHeight() > height)
-				{
-					height = component.getY() + component.getHeight();
-				}
-			}
-			return height;
-		}
-	}
-
-	public Drawable getBackground()
-	{
-		return background;
-	}
-
-	public void setBackground(Drawable background)
-	{
-		this.background = background;
-		background.setSize(this.getSize());
-	}
-
-	public void setPadding(Point padding)
-	{
-		this.padding = padding;
-	}
-
-	public void setPadding(int top, int left)
-	{
-		this.padding = new Point(left, top);
-	}
-
-	public Point getPadding()
-	{
-		return padding;
-	}
-
-	public Iterator<UIComponent> components()
-	{
-		return components.iterator();
-	}
-
-	public GuiScreenProxy createScreenProxy()
-	{
-		return new GuiScreenProxy(this);
-	}
-
-	/*****
-	 * V2 Ordinastie
-	 */
-	public ResourceLocation getTexture(int mouseX, int mouseY)
-	{
-		return null;
+		component.setParent(this);
 	}
 
 	@Override
@@ -364,8 +192,82 @@ public class UIContainer extends UIComponent
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		ClipArea area = getClipArea();
+		renderer.startClipping(area);
+
 		for (UIComponent c : components)
 			c.draw(renderer, mouseX, mouseY, partialTick);
+
+		if (disabled)
+		{
+			renderer.currentComponent = this;
+			GL11.glDisable(GL11.GL_TEXTURE_2D);
+			GL11.glEnable(GL11.GL_BLEND);
+			Shape shape = ShapePreset.GuiElement(width, height);
+			RenderParameters rp = new RenderParameters();
+			rp.alpha = 200;
+			rp.colorMultiplier = 0x333333;
+			renderer.drawShape(shape, rp);
+			renderer.next();
+			GL11.glDisable(GL11.GL_BLEND);
+			GL11.glEnable(GL11.GL_TEXTURE_2D);
+		}
+
+		renderer.endClipping(area);
+	}
+
+	@Override
+	public boolean fireMouseEvent(MouseEvent event)
+	{
+		boolean propagate = true;
+		UIComponent childHovered = getComponentAt(event.getX(), event.getY());
+		if (childHovered != hoveredComponent)
+		{
+			if (hoveredComponent != null)
+			{
+				hoveredComponent.setHovered(false);
+				hoveredComponent.fireMouseEvent(new MouseEvent.HoveredStateChange(event.getX(), event.getY()));
+			}
+			if (childHovered != null)
+			{
+				childHovered.setHovered(true);
+				childHovered.fireMouseEvent(new MouseEvent.HoveredStateChange(event.getX(), event.getY()));
+			}
+		}
+
+		hoveredComponent = childHovered;
+
+		if (event instanceof MouseEvent.Press)
+			setFocused(true);
+		else if (event instanceof MouseEvent.Drag)
+		{
+			for (UIComponent c : components)
+				if (c.isFocused() && !c.isHovered())
+					c.fireMouseEvent(event);
+		}
+
+		if (hoveredComponent != null)
+			propagate = hoveredComponent.fireMouseEvent(event);
+
+		if (propagate)
+			propagate = super.fireMouseEvent(event);
+		return propagate;
+	}
+
+	@Override
+	public boolean fireKeyboardEvent(KeyboardEvent event)
+	{
+		for (UIComponent c : components)
+			c.fireKeyboardEvent(event);
+		return true;
+	}
+
+	public UIComponent getComponentAt(int x, int y)
+	{
+		for (UIComponent c : components)
+			if (c.isInsideBounds(x, y))
+				return c;
+		return null;
 	}
 
 }

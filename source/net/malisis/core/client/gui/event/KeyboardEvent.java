@@ -22,26 +22,34 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.layout;
+package net.malisis.core.client.gui.event;
+
+
 
 /**
- * Constraints
+ * KeyTypedEvent
  *
  * @author PaleoCrafter
  */
-public class Constraints implements Cloneable
+public class KeyboardEvent extends GuiEvent
 {
 
-    @Override
-    public final Object clone()
+    private final char keyChar;
+    private final int keyCode;
+
+    public KeyboardEvent(char keyChar, int keyCode)
     {
-        try
-        {
-            return super.clone();
-        }
-        catch (CloneNotSupportedException e)
-        {
-            throw new InternalError();
-        }
+        this.keyChar = keyChar;
+        this.keyCode = keyCode;
+    }
+
+    public char getKeyChar()
+    {
+        return keyChar;
+    }
+
+    public int getKeyCode()
+    {
+        return keyCode;
     }
 }

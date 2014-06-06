@@ -15,6 +15,7 @@ public class Test
 		(testBlock = new TestBlock()).setBlockName("testBlock");
 		GameRegistry.registerBlock(testBlock, testBlock.getUnlocalizedName().substring(5));
 
+		GameRegistry.registerTileEntity(TestTileEntity.class, "testTileEntity");
 	}
 	
 	public void init()

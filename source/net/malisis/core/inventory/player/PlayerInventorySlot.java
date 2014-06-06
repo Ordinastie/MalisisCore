@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 PaleoCrafter, Ordinastie
+ * Copyright (c) 2014 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,41 +22,27 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.renderer;
+package net.malisis.core.inventory.player;
 
-import net.malisis.core.util.RenderHelper;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.util.IIcon;
+import net.malisis.core.inventory.MalisisSlot;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 
-/**
- * DrawableIcon
- *
- * @author PaleoCrafter
- */
-public class DrawableIcon extends Drawable
+public class PlayerInventorySlot extends MalisisSlot
 {
+	private EntityPlayer player;
 
-    public static final int BLOCK_SHEET = 0;
-    public static final int ITEM_SHEET = 1;
+	public PlayerInventorySlot(PlayerInventory inventory, EntityPlayer p, int index)
+	{
+		super(inventory, p.inventory.getStackInSlot(index), index);
+		player = p;
+	}
 
-    private IIcon icon;
-    private int sheet;
-
-    public DrawableIcon(IIcon icon, int sheet)
-    {
-        super(16, 16);
-        this.icon = icon;
-        this.sheet = sheet;
-    }
-
-    @Override
-    public void draw(int x, int y)
-    {
-        if(sheet == BLOCK_SHEET)
-            RenderHelper.bindTexture(TextureMap.locationBlocksTexture);
-        else
-            RenderHelper.bindTexture(TextureMap.locationItemsTexture);
-        RenderHelper.drawIcon(icon, x, y, 0, size.width, size.height);
-    }
+	@Override
+	public void setItemStack(ItemStack itemStack)
+	{
+		super.setItemStack(itemStack);
+		player.inventory.setInventorySlotContents(slotNumber, itemStack);
+	}
 
 }

@@ -21,7 +21,6 @@ public class ArmoryOre extends Block
 	public static final String SMITHING_ANVIL_NAME = "smithing_anvil";
 	public static final String SMITHING_FURNACE_NAME = "smithing_furnace";
 
-	@SideOnly(Side.CLIENT)
 	public IIcon[] overlays = new IIcon[4];
 	public String[] iconNames = { "Lava_Overlay",  "Azurite_Overlay", "Crimsonite_Overlay", "Titanium_Overlay" };
 	public int[] colors = { 0xFFFFFF, 0x123456, 0xFF0000, 0xFFFFFF };

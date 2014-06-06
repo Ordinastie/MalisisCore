@@ -24,77 +24,135 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
-import com.google.common.eventbus.Subscribe;
+import org.lwjgl.input.Keyboard;
+
+import net.malisis.core.client.gui.GuiIcon;
+import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.event.MouseClickedEvent;
-import net.malisis.core.client.gui.event.ValueChangedEvent;
-import net.malisis.core.client.gui.util.shape.Point;
-import net.malisis.core.util.RenderHelper;
-import net.minecraft.util.ResourceLocation;
+import net.malisis.core.client.gui.component.container.UIContainer;
+import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.event.KeyboardEvent;
+import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.renderer.element.RenderParameters;
+import net.malisis.core.renderer.element.Shape;
+import net.malisis.core.renderer.preset.ShapePreset;
+import net.malisis.core.util.MouseButton;
+
+import com.google.common.eventbus.Subscribe;
 
 /**
  * UICheckBox
- *
+ * 
  * @author PaleoCrafter
  */
 public class UICheckBox extends UIComponent
 {
 
-    private static final ResourceLocation DEFAULT_TEXTURE = new ResourceLocation("malisiscore", "textures/gui/widgets/checkbox.png");
-    private static final ResourceLocation CHECKED_TEXTURE = new ResourceLocation("malisiscore", "textures/gui/widgets/checkbox_checked.png");
-    private static final ResourceLocation HOVERED_TEXTURE = new ResourceLocation("malisiscore", "textures/gui/widgets/checkbox_hovered.png");
-    private String label;
-    private boolean checked;
+	private GuiIcon checkboxBackground = new GuiIcon(180, 0, 10, 10);
+	private GuiIcon checkBoxChecked = new GuiIcon(200, 10, 12, 10);
+	private GuiIcon checkBoxHovered = checkBoxChecked.offset(0, 10);
+	private UILabel label;
+	private boolean checked;
 
-    public UICheckBox()
-    {
-        this("");
-    }
 
-    public UICheckBox(String label)
-    {
-        this.label = label;
-        this.setSize(16 + RenderHelper.getStringWidth(label), 14);
-    }
+	public UICheckBox(String label)
+	{
+		if(label != null && !label.equals(""))
+		{
+			this.label = new UILabel(label);
+			this.label.setPosition(x + 14, y + 2);
+			width = this.label.getWidth() + 2;
+		}
+			
+		width += 11;
+		height = 10;
+	}
+	
+	public UICheckBox()
+	{
+		this(null);
+	}
+	
+	@Override
+	public void setParent(UIContainer parent)
+	{
+		super.setParent(parent);
+		if (label != null)
+			label.setParent(parent);
+	}
 
-    @Override
-    public boolean isHovered(Point mousePosition)
-    {
-        return getScreenBounds().resize(14, 14).contains(mousePosition);
-    }
+	@Override
+	public UIComponent setPosition(int x, int y)
+	{
+		super.setPosition(x, y);
+		if (label != null)
+			label.setPosition(x + 12, y);
+		return this;
+	}
+	
+	public boolean isChecked()
+	{
+		return this.checked;
+	}
 
-    @Subscribe
-    public void onMouseClick(MouseClickedEvent event)
-    {
-        if (this.isHovered(event.getPosition()) && event.getButton().isLeft())
-        {
-            this.checked = !checked;
-            this.getContext().publish(new ValueChangedEvent(this));
-        }
-    }
+	@Override
+	public GuiIcon getIcon(int face)
+	{
+		return null;
+	}
 
-    public void setLabel(String label)
-    {
-        this.label = label;
-        this.setSize(16 + RenderHelper.getStringWidth(label), 14);
-    }
+	@Override
+	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		RenderParameters rp = new RenderParameters();
+		checkboxBackground = new GuiIcon(200, 0, 10, 10);
+		rp.icon = checkboxBackground;
+		Shape shape = ShapePreset.GuiElement(10, 10).translate(1, 0, 0);
+		renderer.drawShape(shape, rp);
 
-    @Override
-    public void draw(int mouseX, int mouseY)
-    {
-        RenderHelper.drawRectangle(checked ? CHECKED_TEXTURE : isHovered(new Point(mouseX, mouseY)) ? HOVERED_TEXTURE : DEFAULT_TEXTURE, getScreenX(), getScreenY(), zIndex, 14, 14, 0, 0, 14, 14);
-        RenderHelper.drawString(label, getScreenX() + 16, getScreenY() + (getHeight() - mc.fontRenderer.FONT_HEIGHT + 1) / 2, zIndex, 0x404040, false);
-    }
+		if (label != null)
+		{
+			label.drawBackground(renderer, mouseX, mouseY, partialTick);
+			renderer.next();
+			label.drawForeground(renderer, mouseX, mouseY, partialTick);
+		}
+	}
 
-    @Override
-    public void update(int mouseX, int mouseY)
-    {
+	@Override
+	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		if(checked)
+		{
+			RenderParameters rp = new RenderParameters();
+			checkBoxChecked = new GuiIcon(200, 10, 12, 10);
+			rp.icon = hovered || label.isHovered() ? checkBoxHovered : checkBoxChecked;
+			Shape shape = ShapePreset.GuiElement(12, 10);
+			renderer.drawShape(shape, rp);
+		}
+	}
+	
+	@Subscribe
+	public void onButtonRelease(MouseEvent.Release event)
+	{
+		if(event.getButton() == MouseButton.LEFT)
+			checked = !checked;
+	}
 
-    }
+	@Subscribe 
+	public void onKeyTyped(KeyboardEvent event)
+	{
+		if(!this.focused)
+			return;
+		
+		if(event.getKeyCode() == Keyboard.KEY_SPACE)
+			checked = !checked;
+	}
 
-    @Override
-    public String toString()
-    {
-        return this.getClass().getName() + "[ text=" + label + ", checked=" + this.checked + ", " + this.getPropertyString() + " ]";
-    }
+
+	@Override
+	public String toString()
+	{
+		return this.getClass().getName() + "[ text=" + label + ", checked=" + this.checked + ", " + this.getPropertyString() + " ]";
+	}
+
 }

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 PaleoCrafter, Ordinastie
+ * Copyright (c) 2014 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,40 +22,51 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.proxy;
+package net.malisis.core.inventory;
 
-import net.malisis.core.client.gui.component.decoration.UITooltip;
-import net.malisis.core.client.gui.event.GuiEvent;
-
-/**
- * Context
- *
- * @author PaleoCrafter
- */
-public interface Context
+public abstract class InventoryEvent
 {
+	private MalisisInventory inventory;
 
-    /**
-     * Publish an event to this context's bus.
-     *
-     * @param event the {@link net.malisis.core.client.gui.event.GuiEvent event} to publish
-     */
-    public void publish(GuiEvent event);
+	public InventoryEvent(MalisisInventory inventory)
+	{
+		this.inventory = inventory;
+	}
 
-    /**
-     * Register a listener to this context's bus.
-     *
-     * @param listener the listener to register
-     */
-    public void register(Object listener);
+	public MalisisInventory getInventory()
+	{
+		return this.inventory;
+	}
 
-    /**
-     * Unregister a listener from this context's bus.
-     *
-     * @param object the listener to remove
-     */
-    public void unregister(Object object);
+	/**
+	 * Event fired when a {@link MalisisSlot} has its itemStack changed.
+	 */
+	public static class SlotChanged extends InventoryEvent
+	{
+		private MalisisSlot slot;
 
-    public UITooltip getTooltip();
+		public SlotChanged(MalisisInventory inventory, MalisisSlot slot)
+		{
+			super(inventory);
+			this.slot = slot;
+		}
+
+		public MalisisSlot getSlot()
+		{
+			return this.slot;
+		}
+	}
+
+	/**
+	 * Event fired when a {@link MalisisInventory} is opened.
+	 */
+	public static class Open extends InventoryEvent
+	{
+		public Open(MalisisInventory inventory)
+		{
+			super(inventory);
+		}
+
+	}
 
 }

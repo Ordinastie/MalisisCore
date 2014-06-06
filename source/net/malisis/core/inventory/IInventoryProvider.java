@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 PaleoCrafter, Ordinastie
+ * Copyright (c) 2014 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,27 +22,37 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.event;
+package net.malisis.core.inventory;
 
-import net.malisis.core.client.gui.util.shape.Point;
+import net.malisis.core.client.gui.MalisisGui;
+import net.minecraft.entity.player.EntityPlayer;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
-/**
- * PositionedEvent
- *
- * @author PaleoCrafter
- */
-public class PositionedEvent extends GuiEvent
+public interface IInventoryProvider
 {
+	/**
+	 * Gets the {@link MalisisInventory} instance.
+	 * 
+	 * @return
+	 */
+	public MalisisInventory getInventory();
 
-    private final Point position;
+	/**
+	 * Gets the size for the {@link MalisisInventory}.
+	 * 
+	 * @return
+	 */
+	public int getInventorySize();
 
-    public PositionedEvent(Point position)
-    {
-        this.position = position;
-    }
+	/**
+	 * Get the GUI associated with the the {@link MalisisInventory}.
+	 * 
+	 * @param container
+	 * @param player
+	 * @return
+	 */
+	@SideOnly(Side.CLIENT)
+	public MalisisGui getGui(MalisisInventoryContainer container, EntityPlayer player);
 
-    public Point getPosition()
-    {
-        return position;
-    }
 }

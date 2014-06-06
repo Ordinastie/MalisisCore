@@ -26,7 +26,7 @@ public class MalisisCommand extends CommandBase
 			switch (params[0])
 			{
 				case "demos":
-					MalisisCore.Message("Demos will be " +  (MalisisCore.toggleDemos() ? "activated" : "deactivated") + " for the next launch."); 
+					MalisisCore.message("Demos will be " +  (MalisisCore.toggleDemos() ? "activated" : "deactivated") + " for the next launch."); 
 					break;
 					
 				case "gui":

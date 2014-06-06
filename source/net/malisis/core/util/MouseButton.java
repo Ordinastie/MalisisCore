@@ -22,32 +22,47 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.event;
+package net.malisis.core.util;
 
 /**
- * KeyTypedEvent
+ * MouseButton
  *
  * @author PaleoCrafter
  */
-public class KeyTypedEvent extends GuiEvent
+public enum MouseButton
 {
 
-    private final char keyChar;
-    private final int keyCode;
+    LEFT, RIGHT, MIDDLE, UNKNOWN;
 
-    public KeyTypedEvent(char keyChar, int keyCode)
+    public static MouseButton[] DEFAULT = {
+            LEFT, RIGHT, MIDDLE
+    };
+
+    public static MouseButton getButton(int id)
     {
-        this.keyChar = keyChar;
-        this.keyCode = keyCode;
+        if (id < DEFAULT.length && id >= 0)
+            return DEFAULT[id];
+        return UNKNOWN;
     }
 
-    public char getKeyChar()
+    public boolean isLeft()
     {
-        return keyChar;
+        return this == LEFT;
     }
 
-    public int getKeyCode()
+    public boolean isRight()
     {
-        return keyCode;
+        return this == RIGHT;
     }
+
+    public boolean isMiddle()
+    {
+        return this == MIDDLE;
+    }
+    
+    public boolean isLeftOrRight()
+    {
+    	return this == LEFT || this == RIGHT;
+    }
+
 }

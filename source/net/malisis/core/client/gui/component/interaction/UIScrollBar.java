@@ -24,98 +24,176 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
-import com.google.common.eventbus.Subscribe;
+import net.malisis.core.client.gui.GuiIcon;
+import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.event.MouseClickedEvent;
-import net.malisis.core.client.gui.event.MouseScrolledEvent;
-import net.malisis.core.client.gui.renderer.Drawable;
-import net.malisis.core.client.gui.renderer.DynamicTexture;
-import net.malisis.core.client.gui.util.MouseButton;
-import net.malisis.core.client.gui.util.shape.Rectangle;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.ResourceLocation;
-import org.lwjgl.input.Mouse;
+import net.malisis.core.client.gui.component.container.UIContainer;
+import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.renderer.element.RenderParameters;
+import net.malisis.core.renderer.element.Shape;
+import net.malisis.core.renderer.preset.ShapePreset;
+import net.malisis.core.util.MouseButton;
+import net.minecraft.util.IIcon;
+
+import com.google.common.eventbus.Subscribe;
 
 /**
  * UIScrollBar
- *
- * @author PaleoCrafter
+ * 
+ * @author Ordinastie
  */
 public class UIScrollBar extends UIComponent
 {
+	public static final int VERTICAL = 0;
+	public static final int HORIZONTAL = 1;
 
-    private Drawable bar;
-    private int barY;
-    private int barHeight;
-    private int step;
-    private int initialClickY;
+	public static final int SCROLL_THICKNESS = 10;
+	public static final int SCROLLER_HEIGHT = 15;
 
-    public UIScrollBar(int width, int height)
-    {
-        this.setSize(width, height);
-        this.barHeight = height / 4;
-        this.step = 10;
-        this.bar = new DynamicTexture(new ResourceLocation("malisiscore", "textures/gui/widgets/scrollbar.png"), 4, 4, width, barHeight, new Rectangle(0, 0, 1, 1), new Rectangle(1, 0, 2, 1), new Rectangle(1, 1, 2, 2));
-    }
+	private int type;
+	public IScrollable scrollable;
+	public int length;
+	public int scrollableLength;
+	public float offset;
 
-    public void clamp()
-    {
-        this.barY = MathHelper.clamp_int(this.barY, 0, this.getHeight() - this.barHeight);
-    }
+	//@formatter:off
+	public GuiIcon[] icons = new GuiIcon[] { 	new GuiIcon(200, 	0, 	1, 	1),
+												new GuiIcon(201, 	0, 	1, 	1),
+												new GuiIcon(209, 	0, 	1, 	1),
+												new GuiIcon(200, 	1, 	1, 	1),
+												new GuiIcon(201, 	1, 	1, 	1),
+												new GuiIcon(209, 	1, 	1, 	1),
+												new GuiIcon(200, 	9, 	1, 	1),
+												new GuiIcon(201, 	9, 	1, 	1),
+												new GuiIcon(209, 	9, 	1, 	1)};
+	//@formatter:on
+	public GuiIcon verticalIcon = new GuiIcon(227, 0, 8, 15);
+	public GuiIcon verticalDisabledIcon = verticalIcon.offset(8, 0);
+	public GuiIcon horizontalIcon = new GuiIcon(227, 15, 15, 8);
+	public GuiIcon horizontalDisabledIcon = horizontalIcon.offset(0, 8);
 
-    @Override
-    public void draw(int mouseX, int mouseY)
-    {
-        bar.draw(getScreenX(), getScreenY() + barY);
-    }
+	public <T extends UIContainer & IScrollable> UIScrollBar(T scrollable, int length, int type)
+	{
+		super();
+		this.setParent(scrollable);
+		this.scrollable = scrollable;
+		this.type = type;
+		this.length = length;
+		if (type == HORIZONTAL)
+		{
+			width = length;
+			height = SCROLL_THICKNESS;
+		}
+		else
+		{
+			width = SCROLL_THICKNESS;
+			height = length;
+		}
+		horizontalDisabledIcon = horizontalIcon.offset(0, 8);
+	}
 
-    @Override
-    public void update(int mouseX, int mouseY)
-    {
-        if (Mouse.isButtonDown(MouseButton.LEFT.ordinal()))
-        {
-            if (initialClickY >= 0)
-            {
-                barY = ((mouseY - getScreenY()) - initialClickY);
-            }
-        }
-        else
-        {
-            initialClickY = -1;
-        }
-        clamp();
-    }
+	@Override
+	public UIComponent setPosition(int x, int y, int anchor)
+	{
+		this.x = x;
+		this.y = y;
+		this.anchor = anchor;
+		return this;
+	}
 
-    public int getBarHeight()
-    {
-        return barHeight;
-    }
+	public int getLength()
+	{
+		return length;
+	}
 
-    public void setBarHeight(int barHeight)
-    {
-        bar.setSize(getWidth(), barHeight);
-        this.barHeight = barHeight;
-    }
+	public UIScrollBar setLength(int length)
+	{
+		this.length = length;
+		if (type == HORIZONTAL)
+			width = length;
+		else
+			height = length;
+		offset = Math.max(0, Math.min(offset, length - SCROLLER_HEIGHT - 2));
+		return this;
+	}
 
-    public int getOffset()
-    {
-        return barY;
-    }
+	public void setScrollableLength(int length)
+	{
+		this.scrollableLength = length;
+		this.disabled = scrollableLength <= this.length;
+	}
 
-    @Subscribe
-    public void mouseClick(MouseClickedEvent event)
-    {
-        if (this.isHovered(event.getPosition()) && event.getButton().isLeft())
-        {
-            initialClickY = event.getPosition().y - (getScreenY() + barY);
-            barY = ((event.getPosition().y - getScreenY()) - initialClickY);
-        }
-    }
+	public void scrollTo(float offset)
+	{
+		this.offset = offset;
+		int l = length - SCROLLER_HEIGHT - 2;
+		int amount = offset == 0 ? 0 : (int) ((scrollableLength - l) * offset);
+		if (type == HORIZONTAL)
+			scrollable.setOffsetX(amount);
+		else
+			scrollable.setOffsetY(amount);
+	}
 
-    @Subscribe
-    public void mouseScroll(MouseScrolledEvent event)
-    {
-        barY -= event.getDir() * step;
-        clamp();
-    }
+	@Subscribe
+	public void onClick(MouseEvent.Press event)
+	{
+		int l = length - SCROLLER_HEIGHT - 2;
+		int pos = type == HORIZONTAL ? componentX(event.getX()) : componentY(event.getY());
+		pos = Math.max(0, Math.min(pos - SCROLLER_HEIGHT / 2, l));
+		scrollTo((float) pos / l);
+	}
+	
+	@Subscribe
+	public void onDrag(MouseEvent.Drag event)
+	{
+		if(event.getButton() != MouseButton.LEFT)
+			return;
+	
+		int l = length - SCROLLER_HEIGHT - 2;
+		int pos = type == HORIZONTAL ? componentX(event.getX()) : componentY(event.getY());
+		pos = Math.max(0, Math.min(pos - SCROLLER_HEIGHT / 2, l));
+		scrollTo((float) pos / l);
+	}
+
+	@Override
+	public IIcon getIcon(int face)
+	{
+		if (face < 0 || face > icons.length)
+			return null;
+
+		return icons[face];
+	}
+
+	@Override
+	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		Shape shape = ShapePreset.GuiXYResizable(width, height, 1, 1);
+		renderer.drawShape(shape);
+	}
+
+	@Override
+	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		RenderParameters rp = new RenderParameters();
+		int w, h, ox = 0, oy = 0;
+		int l = length - SCROLLER_HEIGHT - 2;
+		if (type == HORIZONTAL)
+		{
+			rp.icon = disabled ? horizontalDisabledIcon : horizontalIcon;
+			w = SCROLLER_HEIGHT;
+			h = SCROLL_THICKNESS - 2;
+			ox = (int) (offset * l);
+		}
+		else
+		{
+			rp.icon = disabled ? verticalDisabledIcon : verticalIcon;
+			w = SCROLL_THICKNESS - 2;
+			h = SCROLLER_HEIGHT;
+			oy = (int) (offset * l);
+		}
+		Shape shape = ShapePreset.GuiElement(w, h);
+		shape.translate(1, 1, 0).translate(ox, oy, 0);
+
+		renderer.drawShape(shape, rp);
+	}
 }
