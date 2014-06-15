@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import net.malisis.core.renderer.BaseRenderer;
-import net.malisis.core.renderer.element.RenderParameters;
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.minecraft.client.Minecraft;
 
@@ -29,7 +29,7 @@ public class AnimationRenderer
 		this.renderer = renderer;
 	}
 
-	public void setTime(long start)
+	public void setStartTime(long start)
 	{
 		this.startTime = start;
 		this.worldTotalTime = Minecraft.getMinecraft().theWorld.getTotalWorldTime();
@@ -66,12 +66,13 @@ public class AnimationRenderer
 	{
 		listAnimations.remove(name);
 	}
+
 	public void clearAnimations()
 	{
 		listAnimations.clear();
 		globalDelay = 0;
 	}
-	
+
 	public AnimationRenderer nextAnimation(int delay)
 	{
 		startTime += delay;
@@ -196,25 +197,24 @@ public class AnimationRenderer
 		return this;
 	}
 
-	
-	public void renderAllBut(String...names)
+	public void renderAllBut(String... names)
 	{
 		excludeRenderList = new ArrayList(Arrays.asList(names));
 		render();
 		excludeRenderList.clear();
 	}
 
-	public void render(String...names)
+	public void render(String... names)
 	{
-		if(names.length == 0)
+		if (names.length == 0)
 			names = listAnimations.keySet().toArray(new String[0]);
 
-		for(String name : names)
+		for (String name : names)
 		{
-			if(!excludeRenderList.contains(name))
+			if (!excludeRenderList.contains(name))
 			{
 				AnimElement el = listAnimations.get(name);
-				if(el != null)
+				if (el != null)
 				{
 					for (Shape s : el.getTransformedShapes(elapsedTime))
 					{
@@ -223,7 +223,7 @@ public class AnimationRenderer
 				}
 			}
 		}
-		
+
 	}
 
 	private class AnimElement
@@ -240,20 +240,20 @@ public class AnimationRenderer
 			renderParameters = param;
 			delay = d;
 		}
-		
+
 		public Shape[] getTransformedShapes(float elapsed)
 		{
-			if(animation == null || elapsed < delay)
+			if (animation == null || elapsed < delay)
 				return new Shape[0];
-			
+
 			Shape[] transformedShapes = new Shape[shapes.length];
 			int i = 0;
-			for(Shape s : shapes)
+			for (Shape s : shapes)
 			{
-				if(s != null)
+				if (s != null)
 				{
 					Shape ts = new Shape(s);
-					if(animation != null)
+					if (animation != null)
 						animation.transformAll(ts, elapsed - delay);
 					transformedShapes[i++] = ts;
 				}

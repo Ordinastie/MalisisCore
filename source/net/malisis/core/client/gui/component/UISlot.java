@@ -12,7 +12,7 @@ import net.malisis.core.inventory.InventoryEvent;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
-import net.malisis.core.renderer.element.RenderParameters;
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.preset.ShapePreset;
 import net.malisis.core.util.MouseButton;
@@ -113,6 +113,8 @@ public class UISlot extends UIComponent
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
+		if (container == null)
+			return;
 
 		ItemStack itemStack = slot.getItemStack() != null ? slot.getItemStack().copy() : null;
 		ItemStack draggedItemStack = container.getDraggedItemstack(slot);
@@ -141,9 +143,9 @@ public class UISlot extends UIComponent
 			GL11.glShadeModel(GL11.GL_SMOOTH);
 
 			RenderParameters rp = new RenderParameters();
-			rp.colorMultiplier = 0xFFFFFF;
-			rp.alpha = 80;
-			rp.useTexture = false;
+			rp.colorMultiplier.set(0xFFFFFF);
+			rp.alpha.set(80);
+			rp.useTexture.set(false);
 
 			Shape shape = ShapePreset.GuiElement(16, 16).translate(1, 1, 100);
 			renderer.drawShape(shape, rp);

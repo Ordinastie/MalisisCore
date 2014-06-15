@@ -1,5 +1,6 @@
 package net.malisis.core.demo.test;
 
+import net.malisis.core.renderer.IBaseRendering;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
@@ -12,8 +13,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
-public class TestBlock extends Block implements ITileEntityProvider
+public class TestBlock extends Block implements ITileEntityProvider, IBaseRendering
 {
+	private int renderId;
+
 	public TestBlock()
 	{
 		super(Material.ground);
@@ -28,7 +31,7 @@ public class TestBlock extends Block implements ITileEntityProvider
 	@Override
 	public IIcon getIcon(int side, int metadata)
 	{
-		return Blocks.piston.getIcon(side, metadata);
+		return Blocks.lit_pumpkin.getIcon(side, metadata);
 	}
 
 	@Override
@@ -59,13 +62,20 @@ public class TestBlock extends Block implements ITileEntityProvider
 	@Override
 	public int getRenderType()
 	{
-		return 0;
+		return renderId;
 	}
 
 	@Override
 	public TileEntity createNewTileEntity(World var1, int var2)
 	{
 		return new TestTileEntity();
+	}
+
+	@Override
+	public void setRenderId(int id)
+	{
+		renderId = id;
+
 	}
 
 }

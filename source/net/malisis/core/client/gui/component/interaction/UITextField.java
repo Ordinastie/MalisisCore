@@ -24,12 +24,16 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.renderer.element.RenderParameters;
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.preset.ShapePreset;
 import net.malisis.core.util.MouseButton;
@@ -47,7 +51,7 @@ import com.google.common.eventbus.Subscribe;
  * 
  * @author Ordinastie
  */
-public class UITextField extends UIComponent
+public class UITextField extends UIComponent<UITextField>
 {
 	//@formatter:off
 	public static GuiIcon[] iconTextfield = new GuiIcon[] { 		new GuiIcon(200,	30, 	3, 		12),
@@ -79,6 +83,10 @@ public class UITextField extends UIComponent
 	 */
 	private long startTimer;
 
+	private Pattern filter;
+
+	private boolean selectAllOnRelease = false;
+
 	/**
 	 * Color of the text for this <code>UITextField</code>
 	 */
@@ -89,7 +97,8 @@ public class UITextField extends UIComponent
 		super();
 		this.width = width;
 		this.height = 12;
-		this.text.append(text);
+		if (text != null)
+			this.text.append(text);
 		iconTextfield = new GuiIcon[] { new GuiIcon(200, 30, 3, 12), new GuiIcon(203, 30, 3, 12), new GuiIcon(206, 30, 3, 12) };
 	}
 
@@ -123,11 +132,11 @@ public class UITextField extends UIComponent
 		{
 			int w = GuiRenderer.getCharWidth(text.charAt(i));
 			if (width + ((float) w / 2) > x)
-				return pos;
+				return pos + charOffset;
 			width += w;
 			pos++;
 		}
-		return pos;
+		return pos + charOffset;
 	}
 
 	/**
@@ -138,8 +147,15 @@ public class UITextField extends UIComponent
 		if (selectionPosition != -1)
 			deleteSelectedText();
 
+		StringBuilder temp = new StringBuilder(this.text.toString());
+		temp.insert(cursorPosition, text);
+
+		if (!validateText(temp.toString()))
+			return;
+
 		this.text.insert(cursorPosition, text);
 		setCursorPosition(cursorPosition + text.length());
+		fireEvent(new TextChanged(this));
 	}
 
 	private int stringWidth(int start, int end)
@@ -148,6 +164,15 @@ public class UITextField extends UIComponent
 			return 0;
 
 		return GuiRenderer.getStringWidth(text.substring(clamp(start), clamp(end)));
+	}
+
+	private boolean validateText(String text)
+	{
+		if (filter == null)
+			return true;
+
+		Matcher matcher = filter.matcher(text);
+		return matcher.matches();
 	}
 
 	// #region getters/setters
@@ -164,10 +189,28 @@ public class UITextField extends UIComponent
 	 */
 	public void setText(String text)
 	{
+		if (!validateText(text))
+			return;
+
 		this.text.setLength(0);
 		this.text.append(text);
 		unselectText();
-		this.jumpToEnd();
+		if (focused)
+			this.jumpToEnd();
+		// fireEvent(new TextChanged(this));
+	}
+
+	@Override
+	public void setFocused(boolean focused)
+	{
+		if (isDisabled())
+			return;
+
+		this.focused = focused;
+		if (this.focused)
+			selectAllOnRelease = true;
+		else
+			unselectText();
 	}
 
 	/**
@@ -210,6 +253,15 @@ public class UITextField extends UIComponent
 	public int getTextColor()
 	{
 		return textColor;
+	}
+
+	public UITextField setFilter(String regex)
+	{
+		if (regex == null || regex.length() == 0)
+			filter = null;
+		else
+			filter = Pattern.compile(regex);
+		return this;
 	}
 
 	// #end getters/setters
@@ -340,7 +392,7 @@ public class UITextField extends UIComponent
 		if (face < 0 || face > iconTextfield.length)
 			return null;
 
-		return iconTextfield[face];
+		return isDisabled() ? iconTextfieldDisabled[face] : iconTextfield[face];
 	}
 
 	@Override
@@ -366,7 +418,7 @@ public class UITextField extends UIComponent
 		int end = text.length();
 		while (stringWidth(charOffset, end) > width - 2)
 			end--;
-		renderer.drawString(text.substring(charOffset, end), screenX() + 2, screenY() + 2, disabled ? 0x707070 : textColor, true);
+		renderer.drawString(text.substring(charOffset, end), screenX() + 2, screenY() + 2, isDisabled() ? 0xAAAAAA : textColor, true);
 	}
 
 	public void drawCursor(GuiRenderer renderer)
@@ -382,8 +434,8 @@ public class UITextField extends UIComponent
 		shape.translate(offset + 1, 1, 0);
 
 		RenderParameters rp = new RenderParameters();
-		rp.useTexture = false;
-		rp.colorMultiplier = 0xD0D0D0;
+		rp.useTexture.set(false);
+		rp.colorMultiplier.set(0xD0D0D0);
 
 		renderer.drawShape(shape, rp);
 		renderer.next();
@@ -406,8 +458,8 @@ public class UITextField extends UIComponent
 		shape.translate(start + 1, 1, 0);
 
 		RenderParameters rp = new RenderParameters();
-		rp.useTexture = false;
-		rp.colorMultiplier = 0x0000FF;
+		rp.useTexture.set(false);
+		rp.colorMultiplier.set(0x0000FF);
 
 		renderer.drawShape(shape, rp);
 		renderer.next();
@@ -419,7 +471,6 @@ public class UITextField extends UIComponent
 	@Subscribe
 	public void onClick(MouseEvent.Press event)
 	{
-		focused = true;
 		int pos = cursorPositionFromX(componentX(event.getX()));
 		if (GuiScreen.isShiftKeyDown())
 			setSelectionPosition(pos);
@@ -428,6 +479,20 @@ public class UITextField extends UIComponent
 			unselectText();
 			setCursorPosition(pos);
 		}
+
+		// selectAllOnRelease = false;
+	}
+
+	@Subscribe
+	public void onClick(MouseEvent.Release event)
+	{
+		if (!selectAllOnRelease)
+			return;
+
+		setCursorPosition(0);
+		setSelectionPosition(text.length());
+
+		selectAllOnRelease = false;
 	}
 
 	@Subscribe
@@ -437,6 +502,7 @@ public class UITextField extends UIComponent
 			return;
 		int pos = cursorPositionFromX(componentX(event.getX()));
 		setSelectionPosition(pos);
+		selectAllOnRelease = false;
 	}
 
 	@Subscribe
@@ -447,6 +513,11 @@ public class UITextField extends UIComponent
 
 		char keyChar = event.getKeyChar();
 		int keyCode = event.getKeyCode();
+
+		if (keyCode == Keyboard.KEY_ESCAPE)
+			return;
+
+		event.cancel();
 
 		if (handleCtrlKeyDown(keyCode))
 			return;
@@ -513,6 +584,14 @@ public class UITextField extends UIComponent
 				return true;
 			default:
 				return false;
+		}
+	}
+
+	public static class TextChanged extends ComponentEvent<UITextField>
+	{
+		public TextChanged(UITextField component)
+		{
+			super(component);
 		}
 	}
 }

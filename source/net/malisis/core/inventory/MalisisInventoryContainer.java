@@ -426,7 +426,7 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
-	 * Drops one of the full itemStack currently picked up
+	 * Drops one or the full itemStack currently picked up
 	 * 
 	 * @param fullStack
 	 * @return
@@ -459,21 +459,14 @@ public class MalisisInventoryContainer extends Container
 		// already picked up an itemStack
 		if (pickedItemStack != null)
 		{
-			int amount = 1;
-			if (fullStack) // left click
-			{
-				if (slotStack == null)
-					amount = slot.getSlotStackLimit();
-				else
-					amount = Math.min(slot.getSlotStackLimit(), slotStack.getMaxStackSize()) - slotStack.stackSize;
-			}
+			int amount = fullStack ? ItemUtils.FULL_STACK : 1;
 			ItemUtils.ItemStacksMerger ism = new ItemUtils.ItemStacksMerger(pickedItemStack, slotStack);
-			if (ism.merge(amount))
+			if (ism.merge(amount, slot.getSlotStackLimit()))
 			{
 				slot.setItemStack(ism.into);
 				setPickedItemStack(ism.merge);
 			}
-			else
+			else if (pickedItemStack.stackSize <= slot.getSlotStackLimit())
 			// couldn't merge, swap the itemStacks
 			{
 				slot.setItemStack(ism.merge);
@@ -518,6 +511,7 @@ public class MalisisInventoryContainer extends Container
 		ItemStack itemStack = targetInventory.transferInto(slot.getItemStack());
 
 		slot.setItemStack(itemStack);
+		slot.onSlotChanged();
 
 		stackMoved.stackSize = stackMoved.stackSize - (itemStack == null ? 0 : itemStack.stackSize);
 		return itemStack;
@@ -536,11 +530,15 @@ public class MalisisInventoryContainer extends Container
 		boolean fromPlayerInv = slot instanceof PlayerInventorySlot;
 		MalisisSlot destSlot = playerInventory.getSlot(num);
 
-		if (fromPlayerInv) // slot from player's inventory, swap itemStacks
+		if (fromPlayerInv || slot.getItemStack() == null) // slot from player's inventory, swap itemStacks
 		{
-			ItemStack itemStack = destSlot.getItemStack();
-			destSlot.setItemStack(slot.getItemStack());
-			slot.setItemStack(itemStack);
+			ItemUtils.ItemStacksMerger ism = new ItemUtils.ItemStacksMerger(destSlot.getItemStack(), slot.getItemStack());
+			ism.merge(ItemUtils.FULL_STACK, slot.getSlotStackLimit());
+
+			destSlot.setItemStack(ism.merge);
+			destSlot.onSlotChanged();
+			slot.setItemStack(ism.into);
+			slot.onSlotChanged();
 			return null;
 		}
 		else
@@ -550,8 +548,12 @@ public class MalisisInventoryContainer extends Container
 			ism.merge();
 
 			destSlot.setItemStack(ism.into);
+			destSlot.onSlotChanged();
+
 			ItemStack itemStack = playerInventory.transferInto(ism.merge, false);
 			slot.setItemStack(itemStack);
+			slot.onSlotChanged();
+
 		}
 
 		return destSlot.getItemStack();
@@ -576,10 +578,7 @@ public class MalisisInventoryContainer extends Container
 		owner.dropPlayerItemWithRandomChoice(iss.split, true);
 
 		if (iss.amount != 0)
-		{
 			slot.onPickupFromSlot(owner, iss.split);
-			slot.onSlotChanged();
-		}
 
 		return iss.split;
 	}
@@ -604,6 +603,7 @@ public class MalisisInventoryContainer extends Container
 				ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(s.getItemStack(), pickedItemStack);
 				ism.merge();
 				s.setItemStack(ism.merge);
+				s.onSlotChanged();
 				pickedItemStack = ism.into;
 				i++;
 			}
@@ -619,11 +619,13 @@ public class MalisisInventoryContainer extends Container
 				{
 					ItemStack itemStack = targetInventory.transferInto(s.getItemStack());
 					s.setItemStack(itemStack);
+					s.onSlotChanged();
 					if (itemStack != null)
 						return pickedItemStack;
 				}
 			}
 		}
+		lastShiftClicked = null;
 		return pickedItemStack;
 	}
 
@@ -692,6 +694,7 @@ public class MalisisInventoryContainer extends Container
 				ism.merge();
 				amountMerged += ism.nbMerged;
 				s.setItemStack(ism.into);
+				s.onSlotChanged();
 			}
 
 			resetDrag();
@@ -720,6 +723,7 @@ public class MalisisInventoryContainer extends Container
 
 			setPickedItemStack(ism.into);
 			slot.setItemStack(ism.merge);
+			slot.onSlotChanged();
 
 			return pickedItemStack;
 		}
@@ -744,6 +748,7 @@ public class MalisisInventoryContainer extends Container
 		HashMap<Integer, MalisisSlot> draggedSlots = getDraggedSlots();
 		for (Entry<Integer, ItemStack> entry : draggedItemStacks.entrySet())
 		{
+			// work on a copy because we alter pickedItemStack only in the end
 			ItemStack itemStack = pickedItemStack.copy();
 			itemStack.stackSize = draggedAmount;
 			ItemStack slotStack = draggedSlots.get(entry.getKey()).getItemStack();
@@ -751,7 +756,7 @@ public class MalisisInventoryContainer extends Container
 				slotStack = slotStack.copy();
 
 			ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(itemStack, slotStack);
-			ism.merge(amountPerSlot);
+			ism.merge(amountPerSlot, draggedSlots.get(entry.getKey()).getSlotStackLimit());
 
 			itemStack.stackSize = ism.nbMerged;
 			amountTotal += ism.nbMerged;

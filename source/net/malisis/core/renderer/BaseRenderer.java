@@ -1,7 +1,6 @@
 package net.malisis.core.renderer;
 
 import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
 import net.minecraft.block.Block;
@@ -112,10 +111,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * Partial tick time (for TESR)
 	 */
 	public float partialTick = 0;
-
 	/**
-	 * Used for TESR
+	 * Is at least one vertex been drawn
 	 */
+	protected boolean vertexDrawn = false;
+
 	public BaseRenderer()
 	{
 		this.t = Tessellator.instance;
@@ -189,13 +189,14 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer)
 	{
 		renderBlocks = renderer;
+		vertexDrawn = false;
 		set(world, block, x, y, z, world.getBlockMetadata(x, y, z));
 		prepare(TYPE_WORLD);
-		if(renderer.hasOverrideBlockTexture())
+		if (renderer.hasOverrideBlockTexture())
 			overrideTexture = renderer.overrideBlockTexture;
 		render();
 		clean();
-		return true;
+		return vertexDrawn;
 	}
 
 	@Override
@@ -281,11 +282,14 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		}
 		else if (typeRender == TYPE_TESR_WORLD)
 		{
+			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
 			RenderHelper.disableStandardItemLighting();
-			GL11.glPushMatrix();
-			GL11.glTranslated(data[0], data[1], data[2]);
 			GL11.glEnable(GL11.GL_COLOR_MATERIAL);
 			GL11.glShadeModel(GL11.GL_SMOOTH);
+
+			GL11.glPushMatrix();
+			GL11.glTranslated(data[0], data[1], data[2]);
+
 			bindTexture(TextureMap.locationBlocksTexture);
 
 			t = Tessellator.instance;
@@ -318,6 +322,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		{
 			t.draw();
 			GL11.glPopMatrix();
+			GL11.glPopAttrib();
 		}
 		reset();
 	}
@@ -347,6 +352,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * 
 	 * @param renderer
 	 */
+	public void renderStandard()
+	{
+		renderStandard(renderBlocks);
+	}
+
 	public void renderStandard(RenderBlocks renderer)
 	{
 		if (renderer == null)
@@ -355,8 +365,8 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		boolean b = isShifted;
 		if (b)
 			tessellatorUnshift();
-		renderer.setRenderBoundsFromBlock((Block) block);
-		renderer.renderStandardBlock((Block) block, x, y, z);
+		renderer.setRenderBoundsFromBlock(block);
+		renderer.renderStandardBlock(block, x, y, z);
 		if (b)
 			tessellatorShift();
 	}
@@ -384,19 +394,18 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	public void drawShape(Shape s, RenderParameters rp)
 	{
-		if(s == null)
+		if (s == null)
 			return;
-		
+
 		shape = s;
-		shapeParams = new RenderParameters(rp);
+		shapeParams = rp != null ? rp : new RenderParameters();
 		s.applyMatrix();
+
+		if (shapeParams.applyTexture.get())
+			applyTexture(s, shapeParams);
+
 		for (Face face : s.getFaces())
-		{
-			if (shouldRenderFace(face))
-			{
-				drawFace(face, face.getParameters());
-			}
-		}
+			drawFace(face, face.getParameters());
 	}
 
 	/**
@@ -417,37 +426,22 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected void drawFace(Face f, RenderParameters rp)
 	{
+		if (f == null)
+			return;
+
 		face = f;
 		params = RenderParameters.merge(shapeParams, rp);
 
-		// icon
-		IIcon icon = params.icon;
-		if(params.useCustomTexture)
-			icon = new BaseIcon();
-		else if(overrideTexture != null)
-			icon = overrideTexture;
-		else if (block != null && icon == null)
-		{
-			int side = 0;
-			if (params.textureSide != null)
-				side = params.textureSide.ordinal();
-			icon = block.getIcon(side, blockMetadata);
-		}
+		if (!shouldRenderFace(face))
+			return;
 
-		if (params.interpolateUV && params.textureSide != null)
-			interpolateUV(getRenderBounds());
-
-		// texture
-		if (icon != null)
-			face.setTexture(icon, params.uvFactor, params.flipU, params.flipV);
-
-		if (typeRender == TYPE_ITEM_INVENTORY || typeRender == TYPE_ISBRH_INVENTORY || params.useNormals)
-			t.setNormal(params.direction.offsetX, params.direction.offsetY, params.direction.offsetZ);
+		if (typeRender == TYPE_ITEM_INVENTORY || typeRender == TYPE_ISBRH_INVENTORY || params.useNormals.get())
+			t.setNormal(params.direction.get().offsetX, params.direction.get().offsetY, params.direction.get().offsetZ);
 
 		baseBrightness = getBaseBrightness();
 
 		// vertex position
-		if (params.vertexPositionRelativeToRenderBounds)
+		if (params.vertexPositionRelativeToRenderBounds.get())
 			calcVertexesPosition(getRenderBounds());
 
 		drawVertexes(face.getVertexes());
@@ -479,27 +473,47 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	{
 		// brightness
 		int brightness = baseBrightness;
-		if (modeRender == MODE_POLYGONS && typeRender == TYPE_WORLD && params.calculateBrightness)
-			brightness = calcVertexBrightness(vertex, params.aoMatrix[count]);
+		if (modeRender == MODE_POLYGONS && (typeRender == TYPE_WORLD || typeRender == TYPE_TESR_WORLD) && params.calculateBrightness.get())
+			brightness = calcVertexBrightness(vertex, params.aoMatrix.get()[count]);
 		vertex.setBrightness(brightness);
 
 		// color
-		int color = params.colorMultiplier;
-		if (modeRender == MODE_POLYGONS && typeRender == TYPE_WORLD && params.calculateAOColor)
-			color = calcVertexColor(vertex, params.aoMatrix[count]);
+		int color = params.colorMultiplier.get();
+		if (modeRender == MODE_POLYGONS && (typeRender == TYPE_WORLD || typeRender == TYPE_TESR_WORLD) && params.calculateAOColor.get())
+			color = calcVertexColor(vertex, params.aoMatrix.get()[count]);
 		vertex.setColor(color);
 
 		// alpha
-		if (!params.usePerVertexAlpha)
-			vertex.setAlpha(params.alpha);
+		if (!params.usePerVertexAlpha.get())
+			vertex.setAlpha(params.alpha.get());
 
 		t.setColorRGBA_I(vertex.getColor(), vertex.getAlpha());
 		t.setBrightness(vertex.getBrightness());
 
-		if (modeRender == MODE_POLYGONS && params.useTexture)
+		if (modeRender == MODE_POLYGONS && params.useTexture.get())
 			t.addVertexWithUV(vertex.getX(), vertex.getY(), vertex.getZ(), vertex.getU(), vertex.getV());
 		else
 			t.addVertex(vertex.getX(), vertex.getY(), vertex.getZ());
+
+		vertexDrawn = true;
+	}
+
+	private IIcon getIcon(RenderParameters params)
+	{
+		IIcon icon = params.icon.get();
+		if (params.useCustomTexture.get())
+			icon = new BaseIcon();
+		else if (overrideTexture != null)
+			icon = overrideTexture;
+		else if (block != null && icon == null)
+		{
+			int side = 0;
+			if (params.textureSide != null)
+				side = params.textureSide.get().ordinal();
+			icon = block.getIcon(side, blockMetadata);
+		}
+
+		return icon;
 	}
 
 	/**
@@ -511,55 +525,31 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	{
 		if (typeRender != TYPE_WORLD || world == null || block == null)
 			return true;
-		if (shapeParams != null && shapeParams.renderAllFaces != null && shapeParams.renderAllFaces)
+		if (shapeParams != null && shapeParams.renderAllFaces.get())
 			return true;
 		RenderParameters p = face.getParameters();
-		if (p == null || p.direction == null)
+		if (p.direction.get() == null)
 			return true;
 
-		boolean b = block.shouldSideBeRendered(world, x + p.direction.offsetX, y + p.direction.offsetY, z + p.direction.offsetZ,
-				p.direction.ordinal());
+		boolean b = block.shouldSideBeRendered(world, x + p.direction.get().offsetX, y + p.direction.get().offsetY, z
+				+ p.direction.get().offsetZ, p.direction.get().ordinal());
 		return b;
 	}
 
-	protected void interpolateUV(double[][] bounds)
+	public void applyTexture(Shape shape)
 	{
-		float x = (float) bounds[0][0];
-		float X = (float) bounds[1][0];
-		float Y = 1 - (float) bounds[0][1];
-		float y = 1 - (float) bounds[1][1];
-		float z = (float) bounds[0][2];
-		float Z = (float) bounds[1][2];
+		applyTexture(shape, null);
+	}
 
-		for (int i = 0; i < params.uvFactor.length; i++)
+	public void applyTexture(Shape shape, RenderParameters rp)
+	{
+		shape.applyMatrix();
+		for (Face f : shape.getFaces())
 		{
-			float[] uv = params.uvFactor[i];
-			switch (params.textureSide)
-			{
-				case NORTH:
-					uv[0] = limitUV(uv[0], 1 - X, 1 - x);
-					uv[1] = limitUV(uv[1], y, Y);
-					break;
-				case SOUTH:
-					uv[0] = limitUV(uv[0], x, X);
-					uv[1] = limitUV(uv[1], y, Y);
-					break;
-				case EAST:
-					uv[0] = limitUV(uv[0], 1 - Z, 1 - z);
-					uv[1] = limitUV(uv[1], y, Y);
-					break;
-				case WEST:
-					uv[0] = limitUV(uv[0], z, Z);
-					uv[1] = limitUV(uv[1], y, Y);
-					break;
-				case UP:
-				case DOWN:
-					uv[0] = limitUV(uv[0], x, X);
-					uv[1] = limitUV(uv[1], z, Z);
-				default:
-					break;
-			}
-			params.uvFactor[i] = uv;
+			RenderParameters params = RenderParameters.merge(f.getParameters(), rp);
+			IIcon icon = getIcon(params);
+			if (icon != null)
+				f.setTexture(icon, params.flipU.get(), params.flipV.get(), params.interpolateUV.get());
 		}
 	}
 
@@ -588,15 +578,15 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected int calcVertexColor(Vertex vertex, int[][] aoMatrix)
 	{
-		float factor = getBlockAmbientOcclusion(world, x + params.direction.offsetX, y + params.direction.offsetY, z
-				+ params.direction.offsetZ);
+		float factor = getBlockAmbientOcclusion(world, x + params.direction.get().offsetX, y + params.direction.get().offsetY, z
+				+ params.direction.get().offsetZ);
 
 		for (int i = 0; i < aoMatrix.length; i++)
 			factor += getBlockAmbientOcclusion(world, x + aoMatrix[i][0], y + aoMatrix[i][1], z + aoMatrix[i][2]);
 
-		factor *= params.colorFactor;
+		factor *= params.colorFactor.get();
 
-		int color = params.usePerVertexColor ? vertex.getColor() : params.colorMultiplier;
+		int color = params.usePerVertexColor.get() ? vertex.getColor() : params.colorMultiplier.get();
 
 		int r = (int) ((color >> 16 & 255) * factor / (aoMatrix.length + 1));
 		int g = (int) ((color >> 8 & 255) * factor / (aoMatrix.length + 1));
@@ -614,25 +604,27 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected int getBaseBrightness()
 	{
-		if ((typeRender != TYPE_WORLD && typeRender != TYPE_TESR_WORLD) || world == null || !params.useBlockBrightness || params.direction == null)
-			return params.brightness;
+		if ((typeRender != TYPE_WORLD && typeRender != TYPE_TESR_WORLD) || world == null || !params.useBlockBrightness.get()
+				|| params.direction == null)
+			return params.brightness.get();
 
 		double[][] bounds = getRenderBounds();
-		int ox = x + params.direction.offsetX;
-		int oy = y + params.direction.offsetY;
-		int oz = z + params.direction.offsetZ;
+		ForgeDirection dir = params.direction.get();
+		int ox = x + dir.offsetX;
+		int oy = y + dir.offsetY;
+		int oz = z + dir.offsetZ;
 
-		if (params.direction == ForgeDirection.WEST && bounds[0][0] > 0)
+		if (dir == ForgeDirection.WEST && bounds[0][0] > 0)
 			ox += 1;
-		else if (params.direction == ForgeDirection.EAST && bounds[1][0] < 1)
+		else if (dir == ForgeDirection.EAST && bounds[1][0] < 1)
 			ox -= 1;
-		else if (params.direction == ForgeDirection.NORTH && bounds[0][1] > 0)
+		else if (dir == ForgeDirection.NORTH && bounds[0][2] > 0)
 			oz += 1;
-		else if (params.direction == ForgeDirection.SOUTH && bounds[1][1] < 1)
+		else if (dir == ForgeDirection.SOUTH && bounds[1][2] < 1)
 			oz -= 1;
-		else if (params.direction == ForgeDirection.DOWN && bounds[0][2] > 0)
+		else if (dir == ForgeDirection.DOWN && bounds[0][1] > 0)
 			oy += 1;
-		else if (params.direction == ForgeDirection.UP && bounds[1][2] < 1)
+		else if (dir == ForgeDirection.UP && bounds[1][1] < 1)
 			oy -= 1;
 
 		return getMixedBrightnessForBlock(world, ox, oy, oz);
@@ -717,8 +709,8 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected double[][] getRenderBounds()
 	{
-		if (block == null || !params.useBlockBounds)
-			return params.renderBounds;
+		if (block == null || !params.useBlockBounds.get())
+			return params.renderBounds.get();
 
 		if (world != null)
 			block.setBlockBoundsBasedOnState(world, x, y, z);
@@ -738,11 +730,14 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			v.interpolateCoord(bounds);
 	}
 
-	public static <T extends BaseRenderer> T create(Class<T> clazz, IBaseRendering...blocks)
+	public static <T extends BaseRenderer> T create(Class<T> clazz, IBaseRendering... blocks)
 	{
 		T r = create(clazz);
-		for(IBaseRendering b : blocks)
-			b.setRenderId(r.getRenderId());
+		for (IBaseRendering b : blocks)
+		{
+			if (b != null)
+				b.setRenderId(r.getRenderId());
+		}
 		return r;
 	}
 
@@ -779,31 +774,58 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	private class BaseIcon implements IIcon
 	{
 		@Override
-		public int getIconWidth() {  return 0; }
+		public int getIconWidth()
+		{
+			return 0;
+		}
 
 		@Override
-		public int getIconHeight() { return 0; }
-		
-		@Override
-		public float getMinU() { return 0; }
-		
-		@Override
-		public float getMaxU() { return 1; }
+		public int getIconHeight()
+		{
+			return 0;
+		}
 
 		@Override
-		public float getInterpolatedU(double var1) { return (float) var1; }
+		public float getMinU()
+		{
+			return 0;
+		}
 
 		@Override
-		public float getMinV() { return 0; }
+		public float getMaxU()
+		{
+			return 1;
+		}
 
 		@Override
-		public float getMaxV() { return 1; }
+		public float getInterpolatedU(double var1)
+		{
+			return (float) var1;
+		}
 
 		@Override
-		public float getInterpolatedV(double var1) { return (float) var1; }
+		public float getMinV()
+		{
+			return 0;
+		}
 
 		@Override
-		public String getIconName() { return null; }
+		public float getMaxV()
+		{
+			return 1;
+		}
+
+		@Override
+		public float getInterpolatedV(double var1)
+		{
+			return (float) var1;
+		}
+
+		@Override
+		public String getIconName()
+		{
+			return null;
+		}
 
 	}
 }

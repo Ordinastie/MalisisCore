@@ -28,8 +28,8 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.renderer.BaseRenderer;
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -38,6 +38,7 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -175,18 +176,21 @@ public class GuiRenderer extends BaseRenderer
 		if (s == null)
 			return;
 
-		s.translate(currentComponent.screenX(), currentComponent.screenY(), 0);
 		shape = s;
-		rp = new RenderParameters(rp);
-		boolean getFaceIcon = rp.icon == null;
-		shapeParams = rp;
+		// move the shape at the right coord on screen
+		shape.translate(currentComponent.screenX(), currentComponent.screenY(), 0);
+		shapeParams = rp != null ? rp : new RenderParameters();
+		boolean getFaceIcon = shapeParams.icon.get() == null;
 		s.applyMatrix();
+
+		if (shapeParams.applyTexture.get())
+			applyTexture(s, shapeParams);
 
 		Face[] faces = s.getFaces();
 		for (int i = 0; i < faces.length; i++)
 		{
 			if (getFaceIcon)
-				rp.icon = currentComponent.getIcon(i);
+				faces[i].setTexture(currentComponent.getIcon(i), false, false, false);
 			drawFace(faces[i], rp);
 		}
 	}
@@ -204,6 +208,8 @@ public class GuiRenderer extends BaseRenderer
 	{
 		if (fontRenderer == null)
 			return;
+
+		text = StatCollector.translateToLocal(text);
 
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
@@ -264,7 +270,7 @@ public class GuiRenderer extends BaseRenderer
 	 */
 	public void startClipping(ClipArea area)
 	{
-		if (area.noClip)
+		if (area.noClip || area.width() <= 0 || area.height() <= 0)
 			return;
 
 		GL11.glPushAttrib(GL11.GL_SCISSOR_BIT);
@@ -284,7 +290,7 @@ public class GuiRenderer extends BaseRenderer
 	 */
 	public void endClipping(ClipArea area)
 	{
-		if (area.noClip)
+		if (area.noClip || area.width() <= 0 || area.height() <= 0)
 			return;
 
 		GL11.glDisable(GL11.GL_SCISSOR_TEST);

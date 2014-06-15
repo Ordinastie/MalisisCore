@@ -227,14 +227,19 @@ public class MalisisGui extends GuiScreen
 	@Override
 	protected void keyTyped(char keyChar, int keyCode)
 	{
+		KeyboardEvent event = new KeyboardEvent(keyChar, keyCode);
+		container.fireKeyboardEvent(event);
+
+		if (event.isCancelled())
+			return;
+
 		if (keyCode == Keyboard.KEY_ESCAPE || inventoryContainer != null && keyCode == this.mc.gameSettings.keyBindInventory.getKeyCode())
 		{
 			this.mc.thePlayer.closeScreen();
 			this.mc.displayGuiScreen((GuiScreen) null);
 			this.mc.setIngameFocus();
+			return;
 		}
-
-		container.fireKeyboardEvent(new KeyboardEvent(keyChar, keyCode));
 	}
 
 	@Override
@@ -249,6 +254,8 @@ public class MalisisGui extends GuiScreen
 	public void drawScreen(int mouseX, int mouseY, float partialTicks)
 	{
 		elaspedTime = System.currentTimeMillis() - startTime;
+
+		update(mouseX, mouseY, partialTicks);
 
 		if (guiscreenBackground)
 			drawWorldBackground(1);
@@ -277,6 +284,11 @@ public class MalisisGui extends GuiScreen
 
 		lastMouseX = mouseX;
 		lastMouseY = mouseY;
+	}
+
+	public void update(int mouseX, int mouseY, float partialTick)
+	{
+
 	}
 
 	@Override

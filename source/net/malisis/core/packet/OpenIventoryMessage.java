@@ -83,7 +83,7 @@ public class OpenIventoryMessage implements IMessageHandler<OpenIventoryMessage.
 	public static void send(IInventoryProvider container, EntityPlayerMP player, int windowId)
 	{
 		Packet packet = new Packet(container, windowId);
-		MalisisPacket.network.sendTo(packet, player);
+		NetworkHandler.network.sendTo(packet, player);
 	}
 
 	public static class Packet implements IMessage

@@ -28,21 +28,21 @@ import net.malisis.core.client.gui.component.UIComponent;
 
 /**
  * ComponentEvent
- *
+ * 
  * @author PaleoCrafter
  */
-public class ComponentEvent extends GuiEvent
+public class ComponentEvent<T extends UIComponent> extends GuiEvent
 {
 
-    private UIComponent component;
+	private T component;
 
-    public ComponentEvent(UIComponent component)
-    {
-        this.component = component;
-    }
+	public ComponentEvent(T component)
+	{
+		this.component = component;
+	}
 
-    public UIComponent getComponent()
-    {
-        return component;
-    }
+	public T getComponent()
+	{
+		return component;
+	}
 }

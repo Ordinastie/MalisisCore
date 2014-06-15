@@ -2,18 +2,43 @@ package net.malisis.core.renderer.animation;
 
 import net.malisis.core.renderer.element.Shape;
 
-public class Translation extends Animation
+public class Translation extends Animation<Translation>
 {
-	protected Translation(float x, float y, float z)
+	protected float fromX, fromY, fromZ;
+	protected float toX, toY, toZ;
+
+	public Translation(float x, float y, float z)
 	{
-		super(x, y, z);
+		to(x, y, z);
+	}
+
+	public Translation(float fromX, float fromY, float fromZ, float toX, float toY, float toZ)
+	{
+		from(fromX, fromY, fromZ);
+		to(toX, toY, toZ);
+	}
+
+	public Translation from(float x, float y, float z)
+	{
+		fromX = x;
+		fromY = y;
+		fromZ = z;
+		return this;
+	}
+
+	public Translation to(float x, float y, float z)
+	{
+		toX = x;
+		toY = y;
+		toZ = z;
+		return this;
 	}
 
 	@Override
 	protected void animate(Shape s, float comp)
 	{
 		if (comp >= 0)
-			s.translate(x * comp, y * comp, z * comp);
+			s.translate(fromX + (toX - fromX) * comp, fromY + (toY - fromY) * comp, fromZ + (toZ - fromZ) * comp);
 	}
 
 }

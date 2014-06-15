@@ -29,7 +29,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.renderer.element.RenderParameters;
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.preset.ShapePreset;
 import net.malisis.core.util.MouseButton;
@@ -57,19 +57,28 @@ public class UIScrollBar extends UIComponent
 	public float offset;
 
 	//@formatter:off
-	public GuiIcon[] icons = new GuiIcon[] { 	new GuiIcon(200, 	0, 	1, 	1),
-												new GuiIcon(201, 	0, 	1, 	1),
-												new GuiIcon(209, 	0, 	1, 	1),
-												new GuiIcon(200, 	1, 	1, 	1),
-												new GuiIcon(201, 	1, 	1, 	1),
-												new GuiIcon(209, 	1, 	1, 	1),
-												new GuiIcon(200, 	9, 	1, 	1),
-												new GuiIcon(201, 	9, 	1, 	1),
-												new GuiIcon(209, 	9, 	1, 	1)};
+	public GuiIcon[] icons = new GuiIcon[] { 	new GuiIcon(215, 	0, 	1, 	1),
+												new GuiIcon(220, 	0, 	1, 	1),
+												new GuiIcon(225, 	0, 	1, 	1),
+												new GuiIcon(215, 	1, 	1, 	1),
+												new GuiIcon(220, 	1, 	1, 	1),
+												new GuiIcon(225, 	1, 	1, 	1),
+												new GuiIcon(215, 	9, 	1, 	1),
+												new GuiIcon(220, 	9, 	1, 	1),
+												new GuiIcon(225, 	9, 	1, 	1)};
+	public GuiIcon[] disabledIcons = new GuiIcon[] { 	icons[0].offset(0,  15),
+														icons[1].offset(0,  15),
+														icons[2].offset(0,  15),
+														icons[3].offset(0,  15),
+														icons[4].offset(0,  15),
+														icons[5].offset(0,  15),
+														icons[6].offset(0,  15),
+														icons[7].offset(0,  15),
+														icons[8].offset(0,  15)};
 	//@formatter:on
-	public GuiIcon verticalIcon = new GuiIcon(227, 0, 8, 15);
+	public GuiIcon verticalIcon = new GuiIcon(230, 0, 8, 15);
 	public GuiIcon verticalDisabledIcon = verticalIcon.offset(8, 0);
-	public GuiIcon horizontalIcon = new GuiIcon(227, 15, 15, 8);
+	public GuiIcon horizontalIcon = new GuiIcon(230, 15, 15, 8);
 	public GuiIcon horizontalDisabledIcon = horizontalIcon.offset(0, 8);
 
 	public <T extends UIContainer & IScrollable> UIScrollBar(T scrollable, int length, int type)
@@ -89,7 +98,6 @@ public class UIScrollBar extends UIComponent
 			width = SCROLL_THICKNESS;
 			height = length;
 		}
-		horizontalDisabledIcon = horizontalIcon.offset(0, 8);
 	}
 
 	@Override
@@ -142,13 +150,13 @@ public class UIScrollBar extends UIComponent
 		pos = Math.max(0, Math.min(pos - SCROLLER_HEIGHT / 2, l));
 		scrollTo((float) pos / l);
 	}
-	
+
 	@Subscribe
 	public void onDrag(MouseEvent.Drag event)
 	{
-		if(event.getButton() != MouseButton.LEFT)
+		if (event.getButton() != MouseButton.LEFT)
 			return;
-	
+
 		int l = length - SCROLLER_HEIGHT - 2;
 		int pos = type == HORIZONTAL ? componentX(event.getX()) : componentY(event.getY());
 		pos = Math.max(0, Math.min(pos - SCROLLER_HEIGHT / 2, l));
@@ -161,7 +169,7 @@ public class UIScrollBar extends UIComponent
 		if (face < 0 || face > icons.length)
 			return null;
 
-		return icons[face];
+		return isDisabled() ? disabledIcons[face] : icons[face];
 	}
 
 	@Override
@@ -179,14 +187,14 @@ public class UIScrollBar extends UIComponent
 		int l = length - SCROLLER_HEIGHT - 2;
 		if (type == HORIZONTAL)
 		{
-			rp.icon = disabled ? horizontalDisabledIcon : horizontalIcon;
+			rp.icon.set(isDisabled() ? horizontalDisabledIcon : horizontalIcon);
 			w = SCROLLER_HEIGHT;
 			h = SCROLL_THICKNESS - 2;
 			ox = (int) (offset * l);
 		}
 		else
 		{
-			rp.icon = disabled ? verticalDisabledIcon : verticalIcon;
+			rp.icon.set(disabled ? verticalDisabledIcon : verticalIcon);
 			w = SCROLL_THICKNESS - 2;
 			h = SCROLLER_HEIGHT;
 			oy = (int) (offset * l);

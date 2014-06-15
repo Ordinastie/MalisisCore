@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 PaleoCrafter, Ordinastie
+ * Copyright (c) 2014 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,6 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
-import java.util.Arrays;
-import java.util.List;
-
 import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -36,107 +33,79 @@ import net.malisis.core.renderer.preset.ShapePreset;
 import net.minecraft.util.IIcon;
 
 /**
- * UITooltip
+ * @author Ordinastie
  * 
- * @author PaleoCrafter
  */
-public class UITooltip extends UIComponent
+public class UIProgressBar extends UIComponent
 {
-	//@formatter:off
-	public static GuiIcon[] icons = new GuiIcon[] { new GuiIcon(227, 	31, 	5, 	5),
-													new GuiIcon(232, 	31, 	5, 	5),
-													new GuiIcon(237, 	31, 	5, 	5),
-													new GuiIcon(227, 	36, 	5, 	5),
-													new GuiIcon(232, 	36, 	5, 	5),
-													new GuiIcon(237, 	36,  	5, 	5),
-													new GuiIcon(227, 	41, 	5, 	5),
-													new GuiIcon(232, 	41, 	5, 	5),
-													new GuiIcon(237, 	41, 	5, 	5)};
-	//@formatter:on
+	private GuiIcon barIcon = new GuiIcon(246, 0, 22, 16);
+	private GuiIcon barFilledIcon = barIcon.offset(0, 16);
 
-	protected List<String> lines;
-	protected int padding = 4;
+	protected float progress = 0;
+	protected boolean reversed = false;
 
-	public UITooltip()
+	public UIProgressBar()
 	{
-		width = 16;
+		width = 22;
 		height = 16;
 	}
 
-	public UITooltip(String text)
+	public float getProgress()
 	{
-		setText(text);
+		return progress;
 	}
 
-	public UITooltip setText(String text)
+	public void setReversed()
 	{
-		lines = Arrays.asList(text.split("\\n"));
-		calcSize();
-		return this;
-
+		barIcon = barIcon.getIconFlipped(true, false);
+		barFilledIcon = barFilledIcon.getIconFlipped(true, false);
+		reversed = true;
 	}
 
-	public UITooltip setText(List<String> lines)
+	public void setProgress(float progress)
 	{
-		this.lines = lines;
-		calcSize();
-		return this;
-	}
-
-	protected void calcSize()
-	{
-		width = 16;
-		height = lines.size() > 1 ? (GuiRenderer.FONT_HEIGHT + 1) * (lines.size()) : 8;
-		height += padding * 2;
-		for (String s : lines)
-		{
-			width = Math.max(width, GuiRenderer.getStringWidth(s));
-		}
-		width += padding * 2;
+		if (progress < 0)
+			progress = 0;
+		if (progress > 1)
+			progress = 1;
+		this.progress = progress;
 	}
 
 	@Override
 	public IIcon getIcon(int face)
 	{
-		if (face < 0 || face > icons.length)
-			return null;
-
-		return icons[face];
-	}
-
-	protected int getOffsetX()
-	{
-		return 8;
-	}
-
-	protected int getOffsetY()
-	{
-		return -16;
+		return null;
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiXYResizable(width, height);
-		shape.translate(mouseX + getOffsetX(), mouseY + getOffsetY(), 300);
+		Shape shape = ShapePreset.GuiElement(22, 16);
 		RenderParameters rp = new RenderParameters();
-		rp.alpha.set(255);
+		rp.icon.set(barIcon);
 		renderer.drawShape(shape, rp);
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int x = mouseX + getOffsetX() + padding;
-		int y = mouseY + getOffsetY() + padding;
-		int i = 0;
-		for (String s : lines)
+		int width = (int) (this.width * progress);
+		int xOffset = 0;
+		GuiIcon icon = barFilledIcon.clip(0, 0, width, 16);
+
+		if (reversed)
 		{
-			int sy = y;
-			if (i > 0)
-				sy += 2;
-			renderer.drawString(s, x, sy + (GuiRenderer.FONT_HEIGHT + 1) * i, 0xFFFFFF, true);
-			i++;
+			xOffset = this.width - width;
+			icon = barFilledIcon.clip(width - 22, 0, -width, 16);
 		}
+
+		Shape shape = ShapePreset.GuiElement(width, 16);
+		shape.translate(xOffset, 0, 0);
+
+		RenderParameters rp = new RenderParameters();
+		rp.icon.set(icon);
+		// rp.uvFactor.set(uvFactors);
+
+		renderer.drawShape(shape, rp);
 	}
 }

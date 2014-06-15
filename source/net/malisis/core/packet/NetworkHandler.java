@@ -22,30 +22,26 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.inventory;
+package net.malisis.core.packet;
 
-import net.malisis.core.client.gui.MalisisGui;
-import net.minecraft.entity.player.EntityPlayer;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-public interface IInventoryProvider
+public class NetworkHandler
 {
-	/**
-	 * Gets the {@link MalisisInventory} instance.
-	 * 
-	 * @return
-	 */
-	public MalisisInventory getInventory();
+	public static int OPENINVENTORY = 1;
+	public static int UPDATEINVENTORYSLOTS = 2;
+	public static int INVENTORYACTION = 3;
 
-	/**
-	 * Get the GUI associated with the the {@link MalisisInventory}.
-	 * 
-	 * @param container
-	 * @param player
-	 * @return
-	 */
-	@SideOnly(Side.CLIENT)
-	public MalisisGui getGui(MalisisInventoryContainer container, EntityPlayer player);
+	public static SimpleNetworkWrapper network;
 
+	public static void init(String channelName)
+	{
+		network = new SimpleNetworkWrapper(channelName);
+
+		network.registerMessage(OpenIventoryMessage.class, OpenIventoryMessage.Packet.class, OPENINVENTORY, Side.CLIENT);
+		network.registerMessage(UpdateInventorySlotsMessage.class, UpdateInventorySlotsMessage.Packet.class, UPDATEINVENTORYSLOTS,
+				Side.CLIENT);
+		network.registerMessage(InventoryActionMessage.class, InventoryActionMessage.Packet.class, INVENTORYACTION, Side.SERVER);
+	}
 }

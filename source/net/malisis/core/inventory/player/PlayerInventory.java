@@ -34,7 +34,7 @@ public class PlayerInventory extends MalisisInventory
 
 	public PlayerInventory(EntityPlayer p)
 	{
-		super(null);
+		super(null, 0);
 		this.size = 36;
 		this.slots = new MalisisSlot[size];
 		for (int i = 0; i < size; i++)

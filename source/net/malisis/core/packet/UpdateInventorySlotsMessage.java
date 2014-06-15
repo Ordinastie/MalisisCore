@@ -96,9 +96,7 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 			Integer slotNumber = entry.getKey();
 			ItemStack itemStack = entry.getValue();
 
-			MalisisSlot slot = inventory.getSlot(slotNumber);
-			if (slot != null)
-				slot.setItemStack(itemStack);
+			inventory.setItemStack(slotNumber, itemStack);
 		}
 	}
 
@@ -113,7 +111,7 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 	{
 		Packet packet = new Packet(SlotType.TYPE_PICKEDITEM, windowId);
 		packet.draggedItemStack(itemStack);
-		MalisisPacket.network.sendTo(packet, player);
+		NetworkHandler.network.sendTo(packet, player);
 	}
 
 	/**
@@ -129,7 +127,7 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 		Packet packet = new Packet(type, windowId);
 		for (MalisisSlot slot : slots)
 			packet.addSlot(slot);
-		MalisisPacket.network.sendTo(packet, player);
+		NetworkHandler.network.sendTo(packet, player);
 	}
 
 	/**
@@ -143,7 +141,7 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 	{
 		Packet packet = new Packet(SlotType.TYPE_DRAGGEDITEMS, windowId);
 		packet.setSlots(slots);
-		MalisisPacket.network.sendTo(packet, player);
+		NetworkHandler.network.sendTo(packet, player);
 	}
 
 	public static class Packet implements IMessage

@@ -25,17 +25,10 @@
 package net.malisis.core.packet;
 
 import io.netty.buffer.ByteBuf;
-
-import java.util.UUID;
-
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
-import net.malisis.core.util.EntityUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
-import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
@@ -53,8 +46,7 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 		if (ctx.side != Side.SERVER)
 			return null;
 
-		EntityPlayerMP player = EntityUtils.findPlayerFromUUID(message.uuid);
-		Container c = player.openContainer;
+		Container c = ctx.getServerHandler().playerEntity.openContainer;
 		if (message.windowId != c.windowId || !(c instanceof MalisisInventoryContainer))
 			return null;
 
@@ -76,10 +68,9 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 	@SideOnly(Side.CLIENT)
 	public static void sendAction(ActionType action, int slotNumber, int code, boolean playerInventory)
 	{
-		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
-		int windowId = player.openContainer.windowId;
-		Packet packet = new Packet(action, slotNumber, code, player.getUniqueID(), playerInventory, windowId);
-		MalisisPacket.network.sendToServer(packet);
+		int windowId = Minecraft.getMinecraft().thePlayer.openContainer.windowId;
+		Packet packet = new Packet(action, slotNumber, code, playerInventory, windowId);
+		NetworkHandler.network.sendToServer(packet);
 	}
 
 	public static class Packet implements IMessage
@@ -87,19 +78,17 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 		private ActionType action;
 		private int slotNumber;
 		private int code;
-		private UUID uuid;
 		private boolean playerInventory;
 		private int windowId;
 
 		public Packet()
 		{}
 
-		public Packet(ActionType action, int slotNumber, int code, UUID uuid, boolean playerInventory, int windowId)
+		public Packet(ActionType action, int slotNumber, int code, boolean playerInventory, int windowId)
 		{
 			this.action = action;
 			this.slotNumber = slotNumber;
 			this.code = code;
-			this.uuid = uuid;
 			this.playerInventory = playerInventory;
 			this.windowId = windowId;
 		}
@@ -110,7 +99,6 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 			action = ActionType.values()[buf.readByte()];
 			slotNumber = buf.readInt();
 			code = buf.readInt();
-			uuid = UUID.fromString(ByteBufUtils.readUTF8String(buf));
 			playerInventory = buf.readBoolean();
 			windowId = buf.readInt();
 		}
@@ -121,7 +109,6 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 			buf.writeByte(action.ordinal());
 			buf.writeInt(slotNumber);
 			buf.writeInt(code);
-			ByteBufUtils.writeUTF8String(buf, uuid.toString());
 			buf.writeBoolean(playerInventory);
 			buf.writeInt(windowId);
 		}

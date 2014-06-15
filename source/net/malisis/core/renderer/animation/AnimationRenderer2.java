@@ -22,30 +22,53 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.inventory;
+package net.malisis.core.renderer.animation;
 
-import net.malisis.core.client.gui.MalisisGui;
-import net.minecraft.entity.player.EntityPlayer;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.malisis.core.renderer.BaseRenderer;
+import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.element.Shape;
+import net.minecraft.client.Minecraft;
 
-public interface IInventoryProvider
+/**
+ * @author Ordinastie
+ * 
+ */
+public class AnimationRenderer2
 {
-	/**
-	 * Gets the {@link MalisisInventory} instance.
-	 * 
-	 * @return
-	 */
-	public MalisisInventory getInventory();
+	private BaseRenderer renderer;
+	private long startTime;
+	private long worldTotalTime;
+	private int globalDelay;
+	private float partialTick;
+	private float elapsedTime;
 
-	/**
-	 * Get the GUI associated with the the {@link MalisisInventory}.
-	 * 
-	 * @param container
-	 * @param player
-	 * @return
-	 */
-	@SideOnly(Side.CLIENT)
-	public MalisisGui getGui(MalisisInventoryContainer container, EntityPlayer player);
+	public AnimationRenderer2(BaseRenderer renderer)
+	{
+		this.renderer = renderer;
+	}
+
+	public void setStartTime(long start)
+	{
+		this.startTime = start;
+		this.worldTotalTime = Minecraft.getMinecraft().theWorld.getTotalWorldTime();
+		this.partialTick = this.renderer.partialTick;
+		this.elapsedTime = worldTotalTime - startTime + partialTick;
+	}
+
+	public long getStartTime()
+	{
+		return startTime;
+	}
+
+	public float getElapsedTime()
+	{
+		return elapsedTime;
+	}
+
+	public void render(Animation animation, Shape shape, RenderParameters rp)
+	{
+		if (animation != null)
+			animation.transform(shape, elapsedTime);
+	}
 
 }

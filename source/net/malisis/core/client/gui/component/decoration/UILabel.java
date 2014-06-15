@@ -60,9 +60,16 @@ public class UILabel extends UIComponent
 	 */
 	private int textHeight;
 
+	public UILabel(String text, int width, int color)
+	{
+		this.color = color;
+		this.setText(text);
+		this.setSize(0);
+	}
+
 	public UILabel()
 	{
-		this("", 0, 0x404040);
+		this(null, 0, 0x404040);
 	}
 
 	public UILabel(String text)
@@ -70,11 +77,9 @@ public class UILabel extends UIComponent
 		this(text, 0, 0x404040);
 	}
 
-	public UILabel(String text, int width, int color)
+	public UILabel(String text, int width)
 	{
-		this.color = color;
-		this.setText(text);
-		this.setSize(0);
+		this(text, width, 0x404040);
 	}
 
 	// #region getters/setters
@@ -110,7 +115,7 @@ public class UILabel extends UIComponent
 	 */
 	public UIComponent setSize(int width)
 	{
-		this.autoWidth = width == 0;
+		this.autoWidth = width <= 0;
 		this.width = autoWidth ? textWidth : width;
 		this.height = textHeight;
 		return this;

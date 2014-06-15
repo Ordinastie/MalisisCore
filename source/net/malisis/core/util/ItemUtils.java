@@ -26,6 +26,16 @@ public class ItemUtils
 
 		public boolean merge(int amount)
 		{
+			int max = 64;
+			if (into != null)
+				max = into.getMaxStackSize();
+			else if (merge != null)
+				max = merge.getMaxStackSize();
+			return merge(amount, max);
+		}
+
+		public boolean merge(int amount, int intoMaxStackSize)
+		{
 			nbMerged = 0;
 			if (!canMerge())
 				return false;
@@ -38,16 +48,16 @@ public class ItemUtils
 
 			if (into == null)
 			{
-				nbMerged = amount;
+				nbMerged = Math.min(amount, intoMaxStackSize);
 				into = merge.copy();
-				into.stackSize = amount;
-				merge.stackSize -= amount;
+				into.stackSize = nbMerged;
+				merge.stackSize -= into.stackSize;
 				if (merge.stackSize <= 0)
 					merge = null;
 				return true;
 			}
 
-			nbMerged = into.getMaxStackSize() - into.stackSize;
+			nbMerged = intoMaxStackSize - into.stackSize;
 			if (nbMerged == 0)
 				return false;
 			nbMerged = Math.min(nbMerged, amount);

@@ -15,7 +15,7 @@ public class MalisisCommand extends CommandBase
 	@Override
 	public String getCommandUsage(ICommandSender sender)
 	{
-		return null;
+		return "";
 	}
 
 	@Override
@@ -26,13 +26,14 @@ public class MalisisCommand extends CommandBase
 			switch (params[0])
 			{
 				case "demos":
-					MalisisCore.message("Demos will be " +  (MalisisCore.toggleDemos() ? "activated" : "deactivated") + " for the next launch."); 
+					MalisisCore.message("Demos will be " + (MalisisCore.toggleDemos() ? "activated" : "deactivated")
+							+ " for the next launch.");
 					break;
-					
+
 				case "gui":
-					//Minecraft.getMinecraft().displayGuiScreen(new UIWindow(100, 100).createScreenProxy());
+					// Minecraft.getMinecraft().displayGuiScreen(new UIWindow(100, 100).createScreenProxy());
 					break;
-					
+
 				default:
 					helpCommand(sender);
 					break;

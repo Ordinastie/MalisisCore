@@ -45,7 +45,7 @@ public class MalisisSlot
 	public MalisisSlot(MalisisInventory inventory, ItemStack itemStack, int index)
 	{
 		this.inventory = inventory;
-		slotNumber = index;
+		this.slotNumber = index;
 		this.itemStack = itemStack;
 	}
 
@@ -70,7 +70,6 @@ public class MalisisSlot
 			return;
 
 		this.itemStack = itemStack;
-		onSlotChanged();
 	}
 
 	/**

@@ -22,26 +22,51 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.packet;
+package net.malisis.core.renderer;
 
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import cpw.mods.fml.relauncher.Side;
-
-public class MalisisPacket
+/**
+ * @author Ordinastie
+ * 
+ */
+public class Parameter<T>
 {
-	public static int OPENINVENTORY = 1;
-	public static int UPDATEINVENTORYSLOTS = 2;
-	public static int INVENTORYACTION = 3;
+	private T defaultValue;
+	private T value;
 
-	public static SimpleNetworkWrapper network;
-
-	public static void init(String channelName)
+	public Parameter(T defaultValue)
 	{
-		network = new SimpleNetworkWrapper(channelName);
-
-		network.registerMessage(OpenIventoryMessage.class, OpenIventoryMessage.Packet.class, OPENINVENTORY, Side.CLIENT);
-		network.registerMessage(UpdateInventorySlotsMessage.class, UpdateInventorySlotsMessage.Packet.class, UPDATEINVENTORYSLOTS,
-				Side.CLIENT);
-		network.registerMessage(InventoryActionMessage.class, InventoryActionMessage.Packet.class, INVENTORYACTION, Side.SERVER);
+		this.defaultValue = defaultValue;
 	}
+
+	public T getDefault()
+	{
+		return defaultValue;
+	}
+
+	public T getValue()
+	{
+		return value;
+	}
+
+	public void reset()
+	{
+		value = null;
+	}
+
+	public T get()
+	{
+		return value != null ? value : defaultValue;
+	}
+
+	public void set(T value)
+	{
+		this.value = value;
+	}
+
+	public void merge(Parameter<T> parameter)
+	{
+		if (value == null)
+			value = parameter.getValue();
+	}
+
 }

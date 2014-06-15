@@ -2,6 +2,7 @@ package net.malisis.core.renderer.element;
 
 import java.util.HashMap;
 
+import net.malisis.core.renderer.RenderParameters;
 import net.minecraft.util.IIcon;
 
 public class Face
@@ -16,9 +17,8 @@ public class Face
 		this.vertexes = new Vertex[vertexes.length];
 		for (int i = 0; i < vertexes.length; i++)
 			this.vertexes[i] = new Vertex(vertexes[i]);
-		if (params == null)
-			params = RenderParameters.setDefault();
-		this.params = new RenderParameters(params);
+
+		this.params = params != null ? params : new RenderParameters();
 	}
 
 	public Face(Vertex[] vertexes)
@@ -43,7 +43,7 @@ public class Face
 
 	public Face setParameters(RenderParameters params)
 	{
-		this.params = params;
+		this.params = params != null ? params : new RenderParameters();
 		return this;
 	}
 
@@ -75,17 +75,21 @@ public class Face
 
 	public Face setTexture(IIcon icon)
 	{
-		return setTexture(icon, params.uvFactor, params.flipU, params.flipV);
+		return setTexture(icon, params.flipU.get(), params.flipV.get(), false);
 	}
 
-	public Face setTexture(IIcon icon, float[][] uvFactor)
+	public Face setStandardUV()
 	{
-		return setTexture(icon, uvFactor, params.flipU, params.flipV);
+		vertexes[0].setUV(0, 0);
+		vertexes[1].setUV(0, 1);
+		vertexes[2].setUV(1, 1);
+		vertexes[3].setUV(1, 0);
+		return this;
 	}
 
-	public Face setTexture(IIcon icon, float[][] uvFactor, boolean flippedU, boolean flippedV)
+	public Face setTexture(IIcon icon, boolean flippedU, boolean flippedV, boolean interpolate)
 	{
-		if (uvFactor == null)
+		if (icon == null)
 			return this;
 
 		float u = icon.getMinU();
@@ -93,16 +97,67 @@ public class Face
 		float U = icon.getMaxU();
 		float V = icon.getMaxV();
 
-		for (int i = 0; i < vertexes.length; i++)
+		double factorU, factorV;
+
+		for (Vertex vertex : vertexes)
 		{
-			vertexes[i].setUV(interpolate(u, U, uvFactor[i][0], flippedU), interpolate(v, V, uvFactor[i][1], flippedV));
+			factorU = interpolate ? getFactorU(vertex) : vertex.getU();
+			factorV = interpolate ? getFactorV(vertex) : vertex.getV();
+			vertex.setUV(interpolate(u, U, factorU, flippedU), interpolate(v, V, factorV, flippedV));
+
 		}
 
 		return this;
 	}
 
-	private float interpolate(float min, float max, float factor, boolean flipped)
+	private double getFactorU(Vertex vertex)
 	{
+		if (params.textureSide.get() == null)
+			return vertex.getU();
+
+		switch (params.textureSide.get())
+		{
+			case EAST:
+				return vertex.getZ();
+			case WEST:
+				return vertex.getZ();
+			case NORTH:
+				return vertex.getX();
+			case SOUTH:
+			case UP:
+			case DOWN:
+				return vertex.getX();
+			default:
+				return 0;
+		}
+	}
+
+	private double getFactorV(Vertex vertex)
+	{
+		if (params.textureSide.get() == null)
+			return vertex.getV();
+
+		switch (params.textureSide.get())
+		{
+			case EAST:
+			case WEST:
+			case NORTH:
+			case SOUTH:
+				return 1 - vertex.getY();
+			case UP:
+			case DOWN:
+				return vertex.getZ();
+			default:
+				return 0;
+		}
+	}
+
+	private float interpolate(float min, float max, double factor, boolean flipped)
+	{
+		if (factor > 1)
+			factor = 1;
+		if (factor < 0)
+			factor = 0;
 		if (flipped)
 		{
 			factor = 1 - factor;
@@ -110,12 +165,12 @@ public class Face
 			max = min;
 			min = t;
 		}
-		return min + (max - min) * factor;
+		return min + (max - min) * (float) factor;
 	}
-	
+
 	public Face factor(float fx, float fy, float fz)
 	{
-		for(Vertex v : vertexes)
+		for (Vertex v : vertexes)
 		{
 			v.factorX(fx);
 			v.factorY(fy);
@@ -123,54 +178,57 @@ public class Face
 		}
 		return this;
 	}
-	
 
 	public Face translate(double x, double y, double z)
 	{
-		for(Vertex v : vertexes)
+		for (Vertex v : vertexes)
 			v.add(x, y, z);
 		return this;
 	}
-	
+
 	public void scale(float f)
 	{
 		scale(f, 0.5, 0.5, 0.5);
 	}
+
 	public void scale(float f, double x, double y, double z)
 	{
 		for (Vertex v : vertexes)
 			v.scale(f, x, y, z);
 	}
-	
+
 	public void rotateAroundX(double angle)
 	{
 		rotateAroundX(angle, 0.5, 0.5, 0.5);
 	}
+
 	public void rotateAroundX(double angle, double centerX, double centerY, double centerZ)
 	{
 		for (Vertex v : vertexes)
 			v.rotateAroundX(angle, centerX, centerY, centerZ);
 	}
-	
+
 	public void rotateAroundY(double angle)
 	{
 		rotateAroundY(angle, 0.5, 0.5, 0.5);
 	}
+
 	public void rotateAroundY(double angle, double centerX, double centerY, double centerZ)
 	{
 		for (Vertex v : vertexes)
 			v.rotateAroundY(angle, centerX, centerY, centerZ);
 	}
+
 	public void rotateAroundZ(double angle)
 	{
 		rotateAroundZ(angle, 0.5, 0.5, 0.5);
 	}
+
 	public void rotateAroundZ(double angle, double centerX, double centerY, double centerZ)
 	{
 		for (Vertex v : vertexes)
 			v.rotateAroundZ(angle, centerX, centerY, centerZ);
 	}
-	
 
 	public String name()
 	{
@@ -190,6 +248,7 @@ public class Face
 		return "";
 	}
 
+	@Override
 	public String toString()
 	{
 		String s = name() + "[";

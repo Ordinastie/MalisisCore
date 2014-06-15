@@ -19,19 +19,14 @@ public class TestTileEntity extends TileEntity implements IInventoryProvider
 
 	public TestTileEntity()
 	{
-		inventory = new MalisisInventory(this);
+		inventory = new MalisisInventory(this, 5);
+		inventory.setInventoryStackLimit(5);
 	}
 
 	@Override
 	public MalisisInventory getInventory()
 	{
 		return inventory;
-	}
-
-	@Override
-	public int getInventorySize()
-	{
-		return 5;
 	}
 
 	@SideOnly(Side.CLIENT)

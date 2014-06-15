@@ -3,11 +3,11 @@ package net.malisis.core.demo.stargate;
 import java.util.ArrayList;
 
 import net.malisis.core.renderer.BaseRenderer;
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.AnimationRenderer;
 import net.malisis.core.renderer.animation.Rotation;
 import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.preset.FacePreset;
@@ -34,15 +34,15 @@ public class StargateRenderer extends BaseRenderer
 
 	public StargateRenderer()
 	{
-		//make sure the renderer is register after pre init, otherwise you may
-		//not be able to retrieve block icons yet
+		// make sure the renderer is register after pre init, otherwise you may
+		// not be able to retrieve block icons yet
 		createOpeningAnimation();
 		createUnrollingAnimation();
 		createArchAnimation();
 		createFloatingAnimation();
 	}
 
-	// #region Animations 
+	// #region Animations
 	private void createOpeningAnimation()
 	{
 		int ot = openTimer / slices;
@@ -52,12 +52,12 @@ public class StargateRenderer extends BaseRenderer
 			// opening towards west
 			Shape sW = ShapePreset.Cube().setBounds(0, 0, 0, 0.5F, sliceHeight, 1F);
 			sW.translate(0, sliceHeight * i, 0F);
-			//move west first, then down
+			// move west first, then down
 			ar.translate(-0.5F * i, 0, 0).forTicks(t).translate(0F, -sliceHeight * i, 0F).forTicks(t, ot).animate("openW" + i, sW);
 
 			// opening toward east
 			Shape sE = new Shape(sW).translate(0.5F, 0, 0);
-			//move east first, then down
+			// move east first, then down
 			ar.translate(0.5F * i, 0, 0).forTicks(t).translate(0F, -sliceHeight * i, 0F).forTicks(t, ot).animate("openE" + i, sE);
 		}
 	}
@@ -66,7 +66,7 @@ public class StargateRenderer extends BaseRenderer
 	{
 		ar.globalDelay(openTimer);
 		RenderParameters rp = new RenderParameters();
-		rp.useBlockBrightness = false;
+		rp.useBlockBrightness.set(false);
 
 		int rt = rotationTimer * 2 / 5;
 		int delay = rt / 2;
@@ -130,11 +130,11 @@ public class StargateRenderer extends BaseRenderer
 
 		// override rendering parameters for bottom face
 		RenderParameters rpFace = new RenderParameters();
-		rpFace.calculateAOColor = false;
-		rpFace.calculateBrightness = false;
-		rpFace.useBlockBrightness = false;
-		rpFace.brightness = 32;
-		rpFace.icon = Blocks.diamond_block.getIcon(0, 0);
+		rpFace.calculateAOColor.set(false);
+		rpFace.calculateBrightness.set(false);
+		rpFace.useBlockBrightness.set(false);
+		rpFace.brightness.set(32);
+		rpFace.icon.set(Blocks.diamond_block.getIcon(0, 0));
 
 		// create the shape
 		Shape base = ShapePreset.Cube();
@@ -149,7 +149,7 @@ public class StargateRenderer extends BaseRenderer
 		// at = 10;
 
 		RenderParameters rp = new RenderParameters();
-		rp.renderAllFaces = true;
+		rp.renderAllFaces.set(true);
 
 		for (int i = 0; i < totalArch; i++)
 		{
@@ -161,11 +161,11 @@ public class StargateRenderer extends BaseRenderer
 
 			Shape sE = new Shape(base);
 			sE.rotate(-130, 0, 0, 1, 0, -2.2F, 0);
-			
-			//rotation then scaling of the western blocks of the arch 
+
+			// rotation then scaling of the western blocks of the arch
 			ar.rotate(-archAngle, 0, 0, 1, 0, -2.2F, 0).forTicks(at, delay).scaleFrom(0.5F, 0.3F, 0.2F).scaleTo(0.5F, 0.5F, 0.3F)
 					.forTicks(at / 2, delay + at).animate("archW" + i, sW, rp);
-			//rotation then scaling of the eastern blocks of the arch
+			// rotation then scaling of the eastern blocks of the arch
 			ar.rotate(archAngle, 0, 0, 1, 0, -2.2F, 0).forTicks(at, delay).scaleFrom(0.5F, 0.3F, 0.2F).scaleTo(0.5F, 0.5F, 0.3F)
 					.forTicks(at, delay + at).animate("archE" + i, sE, rp);
 		}
@@ -176,10 +176,10 @@ public class StargateRenderer extends BaseRenderer
 		ar.globalDelay(openTimer + rotationTimer + archTimer);
 
 		RenderParameters rp = new RenderParameters();
-		rp.icon = Blocks.gold_block.getIcon(0, 0);
-		rp.useBlockBrightness = false;
-		rp.brightness = Vertex.BRIGHTNESS_MAX;
-		rp.alpha = 175;
+		rp.icon.set(Blocks.gold_block.getIcon(0, 0));
+		rp.useBlockBrightness.set(false);
+		rp.brightness.set(Vertex.BRIGHTNESS_MAX);
+		rp.alpha.set(175);
 
 		Shape s = ShapePreset.Cube();
 		s.scale(0.2F);
@@ -190,8 +190,9 @@ public class StargateRenderer extends BaseRenderer
 				.translate(0, -1, 0).forTicks(20).loop(-1, 20, 0).sinusoidal().rotate(360, 1, 0, 0).forTicks(50).loop(-1)
 				.animate("floating", s, rp);
 	}
-	//#end Animations
-	
+
+	// #end Animations
+
 	@Override
 	public void render()
 	{
@@ -201,8 +202,8 @@ public class StargateRenderer extends BaseRenderer
 			renderStargateBlock();
 		else if (typeRender == TYPE_ISBRH_INVENTORY)
 		{
-			RenderParameters rp = RenderParameters.setDefault();
-			rp.colorMultiplier = 0x6666AA;
+			RenderParameters rp = new RenderParameters();
+			rp.colorMultiplier.set(0x6666AA);
 			drawShape(ShapePreset.Cube());
 		}
 	}
@@ -213,20 +214,20 @@ public class StargateRenderer extends BaseRenderer
 
 		int alpha = 255;
 		boolean drawTopFace = false;
-		ar.setTime(te.placedTimer);
+		ar.setStartTime(te.placedTimer);
 
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glAlphaFunc(GL11.GL_GREATER, 0.0F);
-		
+
 		if (blockMetadata == 0)
 		{
 			// 1st non moving cube at the bottom
 			drawShape(ShapePreset.Cube().setBounds(0, 0, 0, 1F, sliceHeight, 1F));
-			//render all animations but not the "floating" one
+			// render all animations but not the "floating" one
 			ar.renderAllBut("floating");
 
-			//manually calculate the alpha of the top texture
+			// manually calculate the alpha of the top texture
 			float comp = Math.min((ar.getElapsedTime() - deployTimer + fadeTimer) / fadeTimer, 1);
 			if (comp > 0)
 			{
@@ -239,19 +240,19 @@ public class StargateRenderer extends BaseRenderer
 		{
 			if (blockMetadata == 1)
 				ar.render("floating");
-			//next() needs to be called to trigger a draw before we bind another texture
-			//otherwise, all the blocks would use that new texture
+			// next() needs to be called to trigger a draw before we bind another texture
+			// otherwise, all the blocks would use that new texture
 			next();
 
 			Shape topFace = new Shape(new Face[] { FacePreset.Top() });
-			//move the platform a bit higher than the block to avoid z-fighting
+			// move the platform a bit higher than the block to avoid z-fighting
 			topFace.translate(0, -0.499F + sliceHeight / 2, 0);
 			topFace.scale(5F, sliceHeight, 5F);
 
 			bindTexture(rlPlatform);
-			RenderParameters rp = RenderParameters.setDefault();
-			rp.useCustomTexture = true;
-			rp.alpha = alpha;
+			RenderParameters rp = new RenderParameters();
+			rp.useCustomTexture.set(true);
+			rp.alpha.set(alpha);
 			drawShape(topFace, rp);
 		}
 
@@ -263,12 +264,12 @@ public class StargateRenderer extends BaseRenderer
 			return;
 
 		RenderParameters rpFace = new RenderParameters();
-		rpFace.calculateAOColor = false;
-		rpFace.calculateBrightness = false;
-		rpFace.brightness = Vertex.BRIGHTNESS_MAX;
-		rpFace.useBlockBrightness = false;
-		rpFace.icon = Blocks.lava.getIcon(0, 0);
-		rpFace.colorFactor = 1F;
+		rpFace.calculateAOColor.set(false);
+		rpFace.calculateBrightness.set(false);
+		rpFace.brightness.set(Vertex.BRIGHTNESS_MAX);
+		rpFace.useBlockBrightness.set(false);
+		rpFace.icon.set(Blocks.lava.getIcon(0, 0));
+		rpFace.colorFactor.set(1F);
 
 		Shape platform = ShapePreset.Cube();
 		platform.setParameters(FacePreset.Top(), rpFace, true);
@@ -278,7 +279,7 @@ public class StargateRenderer extends BaseRenderer
 		drawShape(platform);
 
 		Shape base = ShapePreset.Cube();
-		rpFace.icon = Blocks.diamond_block.getIcon(0, 0);
+		rpFace.icon.set(Blocks.diamond_block.getIcon(0, 0));
 		base.setParameters(FacePreset.Bottom(), rpFace, true);
 		base.translate(0, 3, 0);
 		base.shrink(FacePreset.Bottom(), 0.69F);
@@ -288,7 +289,7 @@ public class StargateRenderer extends BaseRenderer
 		float angle = 10;
 
 		RenderParameters rp = new RenderParameters();
-		rp.renderAllFaces = true;
+		rp.renderAllFaces.set(true);
 
 		for (int i = 0; i < totalArch; i++)
 		{

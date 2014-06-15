@@ -32,9 +32,10 @@ import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.renderer.element.RenderParameters;
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.preset.ShapePreset;
 
@@ -45,7 +46,7 @@ import org.lwjgl.opengl.GL11;
  * 
  * @author PaleoCrafter
  */
-public class UIContainer extends UIComponent
+public class UIContainer extends UIComponent<UIContainer>
 {
 	/**
 	 * The list of {@link net.malisis.core.client.gui.component.UIComponent components}.
@@ -67,20 +68,32 @@ public class UIContainer extends UIComponent
 	 * Currently hovered child component
 	 */
 	private UIComponent hoveredComponent;
+	/**
+	 * 
+	 */
+	private int backgroundColor = 0x404040;
 
 	/**
 	 * Default constructor, creates the components list.
 	 */
-	public UIContainer()
-	{
-		this(0, 0);
-	}
 
-	public UIContainer(int width, int height)
+	public UIContainer(String title, int width, int height)
 	{
 		super();
 		setSize(width, height);
 		components = new LinkedList<>();
+		if (title != null && !title.equals(""))
+			add(new UILabel(title));
+	}
+
+	public UIContainer(int width, int height)
+	{
+		this(null, width, height);
+	}
+
+	public UIContainer()
+	{
+		this(null, 16, 16);
 	}
 
 	// #region getters/setters
@@ -129,7 +142,10 @@ public class UIContainer extends UIComponent
 	{
 		this.focused = focused;
 		for (UIComponent c : components)
-			c.setFocused(c == hoveredComponent);
+		{
+			if (c.isFocused() != (c == hoveredComponent))
+				c.setFocused(c == hoveredComponent);
+		}
 	}
 
 	public int componentX(UIComponent component)
@@ -156,6 +172,17 @@ public class UIContainer extends UIComponent
 			y += getVerticalPadding();
 
 		return y;
+	}
+
+	public UIContainer setBackgroundColor(int color)
+	{
+		this.backgroundColor = color;
+		return this;
+	}
+
+	public int getBackgroundColor()
+	{
+		return backgroundColor;
 	}
 
 	// #end getters/setters
@@ -187,7 +214,19 @@ public class UIContainer extends UIComponent
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{}
+	{
+		if (backgroundColor == 0x404040)
+			return;
+
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+
+		Shape s = ShapePreset.GuiXYResizable(width, height, 0, 0);
+		RenderParameters rp = new RenderParameters();
+		rp.colorMultiplier.set(backgroundColor);
+		renderer.drawShape(s, rp);
+		renderer.next();
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
@@ -198,20 +237,20 @@ public class UIContainer extends UIComponent
 		for (UIComponent c : components)
 			c.draw(renderer, mouseX, mouseY, partialTick);
 
-		if (disabled)
-		{
-			renderer.currentComponent = this;
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glEnable(GL11.GL_BLEND);
-			Shape shape = ShapePreset.GuiElement(width, height);
-			RenderParameters rp = new RenderParameters();
-			rp.alpha = 200;
-			rp.colorMultiplier = 0x333333;
-			renderer.drawShape(shape, rp);
-			renderer.next();
-			GL11.glDisable(GL11.GL_BLEND);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-		}
+		// if (disabled)
+		// {
+		// renderer.currentComponent = this;
+		// GL11.glDisable(GL11.GL_TEXTURE_2D);
+		// GL11.glEnable(GL11.GL_BLEND);
+		// Shape shape = ShapePreset.GuiElement(width, height);
+		// RenderParameters rp = new RenderParameters();
+		// rp.alpha = 100;
+		// rp.colorMultiplier = 0x666666;
+		// renderer.drawShape(shape, rp);
+		// renderer.next();
+		// GL11.glDisable(GL11.GL_BLEND);
+		// GL11.glEnable(GL11.GL_TEXTURE_2D);
+		// }
 
 		renderer.endClipping(area);
 	}
@@ -219,6 +258,9 @@ public class UIContainer extends UIComponent
 	@Override
 	public boolean fireMouseEvent(MouseEvent event)
 	{
+		if (isDisabled())
+			return false;
+
 		boolean propagate = true;
 		UIComponent childHovered = getComponentAt(event.getX(), event.getY());
 		if (childHovered != hoveredComponent)

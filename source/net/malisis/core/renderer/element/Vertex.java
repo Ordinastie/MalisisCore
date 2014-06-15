@@ -18,6 +18,7 @@ public class Vertex
 	public static final Vertex BottomSouthWest = new Vertex(0, 0, 1);
 	public static final Vertex BottomSouthEast = new Vertex(1, 0, 1);
 
+	private String baseName;
 	private double x = 0;
 	private double y = 0;
 	private double z = 0;
@@ -37,6 +38,7 @@ public class Vertex
 		this.brightness = brightness;
 		this.u = u;
 		this.v = v;
+		this.baseName = name();
 	}
 
 	public Vertex(double x, double y, double z, int rgba, int brightness)
@@ -145,22 +147,24 @@ public class Vertex
 		return this;
 	}
 
-	
 	public Vertex factorX(float f)
 	{
 		x *= f;
 		return this;
 	}
+
 	public Vertex factorY(float f)
 	{
 		y *= f;
 		return this;
 	}
+
 	public Vertex factorZ(float f)
 	{
 		z *= f;
 		return this;
 	}
+
 	public Vertex factor(float f)
 	{
 		factorX(f);
@@ -168,7 +172,7 @@ public class Vertex
 		factorZ(f);
 		return this;
 	}
-	
+
 	public Vertex scale(float f)
 	{
 		return scale(f, 0.5, 0.5, 0.5);
@@ -297,18 +301,26 @@ public class Vertex
 		return (x == 1 || x == 0) && (y == 1 || y == 0) && (z == 1 || z == 0);
 	}
 
-	public String name()
+	public String baseName()
 	{
-		String s = "";
-		if (isCorner())
-			s += (y == 1 ? "Top" : "Bottom") + (z == 1 ? "South" : "North") + (x == 1 ? "East" : "West") + " ";
-
-		return s + "[" + x + ", " + y + ", " + z + "]";
+		if (baseName == null)
+		{
+			baseName = "";
+			if (isCorner())
+				baseName = (y == 1 ? "Top" : "Bottom") + (z == 1 ? "South" : "North") + (x == 1 ? "East" : "West");
+		}
+		return baseName;
 	}
 
+	public String name()
+	{
+		return baseName() + " [" + x + ", " + y + ", " + z + "]";
+	}
+
+	@Override
 	public String toString()
 	{
-		return name() + " 0x" + Integer.toHexString(color) + " (a:" + alpha + ", b:" + brightness + ")";
+		return baseName + " 0x" + Integer.toHexString(color) + " (a:" + alpha + ", b:" + brightness + ")";
 	}
 
 	public Point toPoint()
@@ -336,6 +348,6 @@ public class Vertex
 		Matrix4f.transform(transformMatrix, vec, vec);
 		x = vec.x;
 		y = vec.y;
-		z = vec.z;		
+		z = vec.z;
 	}
 }

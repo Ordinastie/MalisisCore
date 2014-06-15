@@ -30,6 +30,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.component.interaction.IScrollable;
+import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.GuiEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
@@ -42,7 +43,7 @@ import com.google.common.eventbus.EventBus;
  * 
  * @author PaleoCrafter
  */
-public abstract class UIComponent
+public abstract class UIComponent<T extends UIComponent>
 {
 	/**
 	 * Position of this <code>UIComponent</code>
@@ -104,10 +105,16 @@ public abstract class UIComponent
 	 * 
 	 * @param object object whose handler methods should be registered
 	 */
-	public UIComponent register(Object object)
+	public T register(Object object)
 	{
 		bus.register(object);
-		return this;
+		return (T) this;
+	}
+
+	public boolean fireEvent(ComponentEvent event)
+	{
+		bus.post(event);
+		return !event.isCancelled();
 	}
 
 	/**
@@ -118,7 +125,7 @@ public abstract class UIComponent
 	 */
 	public boolean fireMouseEvent(MouseEvent event)
 	{
-		if (disabled)
+		if (isDisabled())
 			return false;
 
 		bus.post(event);
@@ -127,7 +134,7 @@ public abstract class UIComponent
 
 	public boolean fireKeyboardEvent(KeyboardEvent event)
 	{
-		if (disabled)
+		if (isDisabled())
 			return false;
 
 		bus.post(event);
@@ -142,7 +149,7 @@ public abstract class UIComponent
 	 * @param y
 	 * @return this <code>UIComponent</code>
 	 */
-	public UIComponent setPosition(int x, int y)
+	public T setPosition(int x, int y)
 	{
 		return setPosition(x, y, Anchor.NONE);
 	}
@@ -155,14 +162,14 @@ public abstract class UIComponent
 	 * @param anchor
 	 * @return this <code>UIComponent</code>
 	 */
-	public UIComponent setPosition(int x, int y, int anchor)
+	public T setPosition(int x, int y, int anchor)
 	{
 		this.x = x;
 		this.y = y;
 		this.anchor = anchor;
 		if (parent != null)
 			parent.onContentUpdate();
-		return this;
+		return (T) this;
 	}
 
 	/**
@@ -187,10 +194,10 @@ public abstract class UIComponent
 	 * @param anchor
 	 * @return
 	 */
-	public UIComponent setAnchor(int anchor)
+	public T setAnchor(int anchor)
 	{
 		this.anchor = anchor;
-		return this;
+		return (T) this;
 	}
 
 	/**
@@ -208,13 +215,13 @@ public abstract class UIComponent
 	 * @param height
 	 * @return this <code>UIComponent</code>
 	 */
-	public UIComponent setSize(int width, int height)
+	public T setSize(int width, int height)
 	{
 		this.width = width;
 		this.height = height;
 		if (parent != null)
 			parent.onContentUpdate();
-		return this;
+		return (T) this;
 	}
 
 	/**
@@ -261,6 +268,9 @@ public abstract class UIComponent
 	 */
 	public void setFocused(boolean focused)
 	{
+		if (isDisabled())
+			return;
+
 		this.focused = focused;
 	}
 
@@ -319,7 +329,7 @@ public abstract class UIComponent
 	 */
 	public boolean isDisabled()
 	{
-		return disabled;
+		return disabled || (parent != null && parent.isDisabled());
 	}
 
 	/**
@@ -327,9 +337,12 @@ public abstract class UIComponent
 	 * 
 	 * @param enabled true for the component to be enabled
 	 */
-	public void setDisabled(boolean disabled)
+	public T setDisabled(boolean disabled)
 	{
 		this.disabled = disabled;
+		if (disabled)
+			setFocused(false);
+		return (T) this;
 	}
 
 	/**
@@ -367,10 +380,10 @@ public abstract class UIComponent
 	 * @param tooltip the tooltip for this <code>UIComponent</code>
 	 * @see #tooltip
 	 */
-	public UIComponent setTooltip(UITooltip tooltip)
+	public T setTooltip(UITooltip tooltip)
 	{
 		this.tooltip = tooltip;
-		return this;
+		return (T) this;
 	}
 
 	/**
@@ -378,10 +391,10 @@ public abstract class UIComponent
 	 * 
 	 * @param text
 	 */
-	public UIComponent setTooltip(String text)
+	public T setTooltip(String text)
 	{
 		this.tooltip = new UITooltip(text);
-		return this;
+		return (T) this;
 	}
 
 	// #end getters/setters

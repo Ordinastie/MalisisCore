@@ -55,10 +55,11 @@ public class TestGui extends MalisisGui
 
 		tt = "Some cb ptas O!!";
 
-		cb = (UICheckBox) new UICheckBox("CheckBox with label").setTooltip(tt).register(this);
+		cb = new UICheckBox("CheckBox with label").setTooltip(tt).register(this);
 
-		UITextField tf = new UITextField(180, "Some blob text | s.");
-		tf.setPosition(0, 50);
+		UITextField tf = new UITextField(180, "Some blob text.");
+		tf.setFilter("\\d+");
+		tf.setPosition(0, 40);
 
 		UIContainer inv = setInventoryContainer(inventoryContainer.getContainerInventory());
 
@@ -86,10 +87,14 @@ public class TestGui extends MalisisGui
 		addToScreen(window);
 	}
 
+	@Override
+	public void update(int mouseX, int mouseY, float partialTick)
+	{}
+
 	private UIContainer setInventoryContainer(MalisisInventory inventory)
 	{
 		UIContainer c = new UIContainer(100, 30);
-		c.setPosition(0, 65);
+		c.setPosition(0, 55);
 
 		for (int i = 0; i < inventory.getSizeInventory(); i++)
 		{

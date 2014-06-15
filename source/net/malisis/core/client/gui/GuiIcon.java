@@ -21,11 +21,11 @@ public class GuiIcon implements IIcon
 																new GuiIcon(0.33F, 	0, 		0.66F, 	1.0F),
 																new GuiIcon(0.66F, 	0, 		1.0F, 	1.0F)};
 	//@formatter:on
-	
-	//TODO: dynamic load
+
+	// TODO: dynamic load
 	private static final int GUI_TEXTURE_WIDTH = 300;
 	private static final int GUI_TEXTURE_HEIGHT = 100;
-	
+
 	private int x, y, width, height;
 	private float u, v, U, V;
 
@@ -36,11 +36,11 @@ public class GuiIcon implements IIcon
 		this.U = U;
 		this.V = V;
 		this.x = (int) (u * GUI_TEXTURE_WIDTH);
-		this.y = (int) (v * GUI_TEXTURE_WIDTH);
+		this.y = (int) (v * GUI_TEXTURE_HEIGHT);
 		this.width = (int) (U * GUI_TEXTURE_WIDTH) - x;
-		this.height = (int) (V * GUI_TEXTURE_WIDTH) - y;
+		this.height = (int) (V * GUI_TEXTURE_HEIGHT) - y;
 	}
-	
+
 	public GuiIcon(int x, int y, int width, int height)
 	{
 		this.x = x;
@@ -50,7 +50,7 @@ public class GuiIcon implements IIcon
 		this.u = (float) x / GUI_TEXTURE_WIDTH;
 		this.U = (float) (x + width) / GUI_TEXTURE_WIDTH;
 		this.v = (float) y / GUI_TEXTURE_HEIGHT;
-		this.V = (float) (y + height) / GUI_TEXTURE_HEIGHT;		
+		this.V = (float) (y + height) / GUI_TEXTURE_HEIGHT;
 	}
 
 	@Override
@@ -101,16 +101,26 @@ public class GuiIcon implements IIcon
 		return (float) (v * f);
 	}
 
+	public GuiIcon getIconFlipped(boolean horizontal, boolean vertical)
+	{
+		return new GuiIcon(horizontal ? U : u, vertical ? V : v, horizontal ? u : U, vertical ? v : V);
+	}
+
 	@Override
 	public String getIconName()
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	public GuiIcon offset(int offsetX, int offsetY)
 	{
 		return new GuiIcon(x + offsetX, y + offsetY, width, height);
 	}
-	
+
+	public GuiIcon clip(int offsetX, int offsetY, int width, int height)
+	{
+		return new GuiIcon(x + offsetX, y + offsetY, width, height);
+	}
+
 }

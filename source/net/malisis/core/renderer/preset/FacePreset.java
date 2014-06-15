@@ -28,8 +28,8 @@ import static net.minecraftforge.common.util.ForgeDirection.*;
 
 import java.util.HashMap;
 
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.RenderParameters;
 import net.malisis.core.renderer.element.Vertex;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -149,87 +149,105 @@ public class FacePreset
 		buildDirectionMatrix();
 		RenderParameters rp;
 
+		Gui.setStandardUV();
+
 		/**
 		 * Regular faces
 		 */
 		// Bottom
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = DOWN;
-		rp.colorFactor = 0.5F;
-		rp.aoMatrix = calculateAoMatrix(Bottom, rp.direction);
+		rp.direction.set(DOWN);
+		rp.textureSide.set(DOWN);
+		rp.colorFactor.set(0.5F);
+		rp.aoMatrix.set(calculateAoMatrix(Bottom, rp.direction.get()));
 		Bottom.setParameters(rp);
+		Bottom.setStandardUV();
 		// Top
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 1.0F;
-		rp.aoMatrix = calculateAoMatrix(Top, rp.direction);
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(1.0F);
+		rp.aoMatrix.set(calculateAoMatrix(Top, rp.direction.get()));
 		Top.setParameters(rp);
+		Top.setStandardUV();
 		// West
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = WEST;
-		rp.colorFactor = 0.6F;
-		rp.aoMatrix = calculateAoMatrix(West, rp.direction);
+		rp.direction.set(WEST);
+		rp.textureSide.set(WEST);
+		rp.colorFactor.set(0.6F);
+		rp.aoMatrix.set(calculateAoMatrix(West, rp.direction.get()));
 		West.setParameters(rp);
+		West.setStandardUV();
 		// North
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = NORTH;
-		rp.colorFactor = 0.8F;
-		rp.aoMatrix = calculateAoMatrix(North, rp.direction);
+		rp.direction.set(NORTH);
+		rp.textureSide.set(NORTH);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(calculateAoMatrix(North, rp.direction.get()));
 		North.setParameters(rp);
+		North.setStandardUV();
 		// East
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = EAST;
-		rp.colorFactor = 0.6F;
-		rp.aoMatrix = calculateAoMatrix(East, rp.direction);
+		rp.direction.set(EAST);
+		rp.textureSide.set(EAST);
+		rp.colorFactor.set(0.6F);
+		rp.aoMatrix.set(calculateAoMatrix(East, rp.direction.get()));
 		East.setParameters(rp);
+		East.setStandardUV();
 		// South
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = SOUTH;
-		rp.colorFactor = 0.8F;
-		rp.aoMatrix = calculateAoMatrix(South, rp.direction);
+		rp.direction.set(SOUTH);
+		rp.textureSide.set(SOUTH);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(calculateAoMatrix(South, rp.direction.get()));
 		South.setParameters(rp);
+		South.setStandardUV();
 
 		/**
 		 * Corners
 		 */
 		// NorthWest
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = NORTH;
-		rp.colorFactor = 0.7F;
-		rp.aoMatrix = new int[][][] { { aom("Top"), aom("TopEast"), aom("TopNorthEast"), aom("NorthEast") },
+		rp.direction.set(NORTH);
+		rp.textureSide.set(NORTH);
+		rp.colorFactor.set(0.7F);
+		rp.aoMatrix.set(new int[][][] { { aom("Top"), aom("TopEast"), aom("TopNorthEast"), aom("NorthEast") },
 				{ aom("Bottom"), aom("BottomEast"), aom("BottomNorthEast"), aom("NorthEast") },
 				{ aom("Bottom"), aom("BottomSouth"), aom("BottomSouthWest"), aom("SouthWest") },
-				{ aom("Top"), aom("TopSouth"), aom("TopSouthWest"), aom("SouthWest") } };
+				{ aom("Top"), aom("TopSouth"), aom("TopSouthWest"), aom("SouthWest") } });
 		NorthWest.setParameters(rp);
 
 		// NorthEast
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = EAST;
-		rp.colorFactor = 0.7F;
-		rp.aoMatrix = new int[][][] { { aom("Top"), aom("TopSouth"), aom("TopSouthEast"), aom("SouthEast") },
+		rp.direction.set(EAST);
+		rp.textureSide.set(EAST);
+		rp.colorFactor.set(0.7F);
+		rp.aoMatrix.set(new int[][][] { { aom("Top"), aom("TopSouth"), aom("TopSouthEast"), aom("SouthEast") },
 				{ aom("Bottom"), aom("BottomSouth"), aom("BottomSouthEast"), aom("SouthEast") },
 				{ aom("Bottom"), aom("BottomWest"), aom("BottomNorthWest"), aom("NorthWest") },
-				{ aom("Top"), aom("TopWest"), aom("TopNorthWest"), aom("NorthWest") } };
+				{ aom("Top"), aom("TopWest"), aom("TopNorthWest"), aom("NorthWest") } });
 		NorthEast.setParameters(rp);
 
 		// SouthWest
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = WEST;
-		rp.colorFactor = 0.7F;
-		rp.aoMatrix = new int[][][] { { aom("Top"), aom("TopNorth"), aom("TopNorthWest"), aom("NorthWest") },
+		rp.direction.set(WEST);
+		rp.textureSide.set(WEST);
+		rp.colorFactor.set(0.7F);
+		rp.aoMatrix.set(new int[][][] { { aom("Top"), aom("TopNorth"), aom("TopNorthWest"), aom("NorthWest") },
 				{ aom("Bottom"), aom("BottomNorth"), aom("BottomNorthWest"), aom("NorthWest") },
 				{ aom("Bottom"), aom("BottomEast"), aom("BottomSouthEast"), aom("SouthEast") },
-				{ aom("Top"), aom("TopEast"), aom("TopSouthEast"), aom("SouthEast") } };
+				{ aom("Top"), aom("TopEast"), aom("TopSouthEast"), aom("SouthEast") } });
 		SouthWest.setParameters(rp);
 
 		// SouthEast
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = SOUTH;
-		rp.colorFactor = 0.7F;
-		rp.aoMatrix = new int[][][] { { aom("Top"), aom("TopWest"), aom("TopSouthWest"), aom("SouthWest") },
+		rp.direction.set(SOUTH);
+		rp.textureSide.set(SOUTH);
+		rp.colorFactor.set(0.7F);
+		rp.aoMatrix.set(new int[][][] { { aom("Top"), aom("TopWest"), aom("TopSouthWest"), aom("SouthWest") },
 				{ aom("Bottom"), aom("BottomWest"), aom("BottomSouthWest"), aom("SouthWest") },
 				{ aom("Bottom"), aom("BottomNorth"), aom("BottomNorthEast"), aom("NorthEast") },
-				{ aom("Top"), aom("TopNorth"), aom("TopNortEastWest"), aom("NorthEast") } };
+				{ aom("Top"), aom("TopNorth"), aom("TopNortEastWest"), aom("NorthEast") } });
 		SouthEast.setParameters(rp);
 
 		/**
@@ -237,39 +255,43 @@ public class FacePreset
 		 */
 		// TopNorth
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 0.9F;
-		rp.aoMatrix = new int[][][] { { aom("TopSouth"), aom("TopSouthEast"), aom("TopEast"), aom("East") },
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(0.9F);
+		rp.aoMatrix.set(new int[][][] { { aom("TopSouth"), aom("TopSouthEast"), aom("TopEast"), aom("East") },
 				{ aom("East"), aom("NorthEast"), aom("BottomNorthEast"), aom("BottomNorth") },
 				{ aom("BottomNorth"), aom("BottomNorthWest"), aom("NorthWest"), aom("West") },
-				{ aom("West"), aom("TopWest"), aom("TopSouthWest"), aom("TopSouth") } };
+				{ aom("West"), aom("TopWest"), aom("TopSouthWest"), aom("TopSouth") } });
 		TopNorth.setParameters(rp);
 		// TopEast
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 0.8F;
-		rp.aoMatrix = new int[][][] { { aom("TopWest"), aom("TopSouthWest"), aom("TopSouth"), aom("South") },
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(new int[][][] { { aom("TopWest"), aom("TopSouthWest"), aom("TopSouth"), aom("South") },
 				{ aom("South"), aom("SouthEast"), aom("BottomSouthEast"), aom("BottomEast") },
 				{ aom("BottomEast"), aom("BottomNorthEast"), aom("NorthEast"), aom("East") },
-				{ aom("North"), aom("TopNorth"), aom("TopNorthWest"), aom("TopWest") } };
+				{ aom("North"), aom("TopNorth"), aom("TopNorthWest"), aom("TopWest") } });
 		TopEast.setParameters(rp);
 		// TopSouth
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 0.9F;
-		rp.aoMatrix = new int[][][] { { aom("TopNorth"), aom("TopNorthWest"), aom("TopWest"), aom("West") },
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(0.9F);
+		rp.aoMatrix.set(new int[][][] { { aom("TopNorth"), aom("TopNorthWest"), aom("TopWest"), aom("West") },
 				{ aom("West"), aom("SouthWest"), aom("BottomSouthWest"), aom("BottomSouth") },
 				{ aom("BottomSouth"), aom("BottomSouthEast"), aom("SouthEast"), aom("East") },
-				{ aom("East"), aom("TopEast"), aom("TopNorthEast"), aom("TopNorth") } };
+				{ aom("East"), aom("TopEast"), aom("TopNorthEast"), aom("TopNorth") } });
 		TopSouth.setParameters(rp);
 		// TopWest
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 0.8F;
-		rp.aoMatrix = new int[][][] { { aom("TopEast"), aom("TopNorthEast"), aom("TopNorth"), aom("North") },
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(new int[][][] { { aom("TopEast"), aom("TopNorthEast"), aom("TopNorth"), aom("North") },
 				{ aom("North"), aom("NorthWest"), aom("BottomNorthWest"), aom("BottomWest") },
 				{ aom("BottomWest"), aom("BottomSouthWest"), aom("SouthWest"), aom("South") },
-				{ aom("South"), aom("TopSouth"), aom("TopSouthEast"), aom("TopEast") } };
+				{ aom("South"), aom("TopSouth"), aom("TopSouthEast"), aom("TopEast") } });
 		TopWest.setParameters(rp);
 
 		/**
@@ -277,47 +299,46 @@ public class FacePreset
 		 */
 		// TopSouthEast
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 0.8F;
-		rp.uvFactor = new float[][] { { 0.5F, 0 }, { 0, 1 }, { 1, 1 }, { 0.5F, 0 } };
-		rp.aoMatrix = new int[][][] { { aom("TopNorthWest"), aom("TopNorth"), aom("TopWest") },
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(new int[][][] { { aom("TopNorthWest"), aom("TopNorth"), aom("TopWest") },
 				{ aom("West"), aom("SouthWest"), aom("Bottom"), aom("BottomSouth") },
 				{ aom("North"), aom("NorthEast"), aom("Bottom"), aom("BottomEast") },
-				{ aom("TopNorthWest"), aom("TopNorth"), aom("TopWest") } };
+				{ aom("TopNorthWest"), aom("TopNorth"), aom("TopWest") } });
 		TopSouthEast.setParameters(rp);
 
 		// TopSouthWest
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 0.8F;
-		rp.uvFactor = new float[][] { { 0.5F, 0 }, { 0, 1 }, { 1, 1 }, { 0.5F, 0 } };
-		rp.aoMatrix = new int[][][] { { aom("TopNorthEast"), aom("TopNorth"), aom("TopEast") },
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(new int[][][] { { aom("TopNorthEast"), aom("TopNorth"), aom("TopEast") },
 				{ aom("North"), aom("NorthWest"), aom("Bottom"), aom("BottomWest") },
 				{ aom("East"), aom("SouthEast"), aom("Bottom"), aom("BottomSouth") },
-				{ aom("TopNorthEast"), aom("TopNorth"), aom("TopEast") } };
+				{ aom("TopNorthEast"), aom("TopNorth"), aom("TopEast") } });
 		TopSouthWest.setParameters(rp);
 
 		// TopNorthWest
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 0.8F;
-		rp.uvFactor = new float[][] { { 0.5F, 0 }, { 0, 1 }, { 1, 1 }, { 0.5F, 0 } };
-		rp.aoMatrix = new int[][][] { { aom("TopSouthEast"), aom("TopSouth"), aom("TopEast") },
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(new int[][][] { { aom("TopSouthEast"), aom("TopSouth"), aom("TopEast") },
 				{ aom("West"), aom("NorthWest"), aom("Bottom"), aom("BottomNorth") },
 				{ aom("South"), aom("SouthWest"), aom("Bottom"), aom("BottomWest") },
-				{ aom("TopSouthEast"), aom("TopSouth"), aom("TopEast") } };
+				{ aom("TopSouthEast"), aom("TopSouth"), aom("TopEast") } });
 		TopNorthWest.setParameters(rp);
 
 		// TopNorthEast
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 0.8F;
-		rp.uvFactor = new float[4][2];
-		rp.uvFactor = new float[][] { { 0.5F, 0 }, { 0, 1 }, { 1, 1 }, { 0.5F, 0 } };
-		rp.aoMatrix = new int[][][] { { aom("TopSouthWest"), aom("TopSouth"), aom("TopWest") },
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(new int[][][] { { aom("TopSouthWest"), aom("TopSouth"), aom("TopWest") },
 				{ aom("South"), aom("SouthEast"), aom("Bottom"), aom("BottomEast") },
 				{ aom("West"), aom("NorthWest"), aom("Bottom"), aom("BottomNorth") },
-				{ aom("TopSouthWest"), aom("TopSouth"), aom("TopWest") } };
+				{ aom("TopSouthWest"), aom("TopSouth"), aom("TopWest") } });
 		TopNorthEast.setParameters(rp);
 
 		/**
@@ -325,42 +346,42 @@ public class FacePreset
 		 */
 		// InvTopSouthEast
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 0.8F;
-		rp.uvFactor = new float[][] { { 0, 0 }, { 0.5F, 1 }, { 0.5F, 1 }, { 1, 0 } };
-		rp.aoMatrix = new int[][][] { { aom("TopWest"), aom("TopSouthWest"), aom("TopSouth"), aom("South") },
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(new int[][][] { { aom("TopWest"), aom("TopSouthWest"), aom("TopSouth"), aom("South") },
 				{ aom("BottomSouth"), aom("SouthEast"), aom("BottomEast") }, { aom("BottomSouth"), aom("SouthEast"), aom("BottomEast") },
-				{ aom("TopNorth"), aom("TopNorthEast"), aom("TopEast"), aom("East") } };
+				{ aom("TopNorth"), aom("TopNorthEast"), aom("TopEast"), aom("East") } });
 		InvTopSouthEast.setParameters(rp);
 
 		// InvTopSouthWest
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 0.8F;
-		rp.uvFactor = new float[][] { { 0, 0 }, { 0.5F, 1 }, { 0.5F, 1 }, { 1, 0 } };
-		rp.aoMatrix = new int[][][] { { aom("TopNorth"), aom("TopNorthWest"), aom("TopWest"), aom("West") },
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(new int[][][] { { aom("TopNorth"), aom("TopNorthWest"), aom("TopWest"), aom("West") },
 				{ aom("BottomSouth"), aom("SouthWest"), aom("BottomWest") }, { aom("BottomSouth"), aom("SouthWest"), aom("BottomWest") },
-				{ aom("TopEast"), aom("TopSouthEast"), aom("TopSouth"), aom("South") } };
+				{ aom("TopEast"), aom("TopSouthEast"), aom("TopSouth"), aom("South") } });
 		InvTopSouthWest.setParameters(rp);
 
 		// InvTopNorthWest
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 0.8F;
-		rp.uvFactor = new float[][] { { 0, 0 }, { 0.5F, 1 }, { 0.5F, 1 }, { 1, 0 } };
-		rp.aoMatrix = new int[][][] { { aom("TopWest"), aom("TopNorthWest"), aom("East") },
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(new int[][][] { { aom("TopWest"), aom("TopNorthWest"), aom("East") },
 				{ aom("BottomNorth"), aom("NorthWest"), aom("BottomWest") }, { aom("BottomNorth"), aom("NorthWest"), aom("BottomWest") },
-				{ aom("TopSouth"), aom("TopSouthWest"), aom("West") } };
+				{ aom("TopSouth"), aom("TopSouthWest"), aom("West") } });
 		InvTopNorthWest.setParameters(rp);
 
 		// InvTopNorthEast
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.colorFactor = 0.8F;
-		rp.uvFactor = new float[][] { { 0, 0 }, { 0.5F, 1 }, { 0.5F, 1 }, { 1, 0 } };
-		rp.aoMatrix = new int[][][] { { aom("TopSouth"), aom("TopSouthEast"), aom("East") },
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(new int[][][] { { aom("TopSouth"), aom("TopSouthEast"), aom("East") },
 				{ aom("BottomWest"), aom("BottomNortWest"), aom("BottomNorth") },
-				{ aom("BottomWest"), aom("BottomNortWest"), aom("BottomNorth") }, { aom("TopWest"), aom("TopNorthWest"), aom("North") } };
+				{ aom("BottomWest"), aom("BottomNortWest"), aom("BottomNorth") }, { aom("TopWest"), aom("TopNorthWest"), aom("North") } });
 
 		InvTopNorthEast.setParameters(rp);
 
@@ -369,59 +390,59 @@ public class FacePreset
 		 */
 		// TriangleWestTopSouth
 		rp = new RenderParameters();
-		rp.textureSide = UP;
-		rp.direction = WEST;
-		rp.colorFactor = 0.6F;
-		rp.aoMatrix = calculateAoMatrix(South, rp.direction);
+		rp.textureSide.set(UP);
+		rp.direction.set(WEST);
+		rp.colorFactor.set(0.6F);
+		rp.aoMatrix.set(calculateAoMatrix(South, rp.direction.get()));
 		TriangleWestTopSouth.setParameters(rp);
 		// TriangleEastTopSouth
 		rp = new RenderParameters();
-		rp.textureSide = UP;
-		rp.direction = EAST;
-		rp.colorFactor = 0.6F;
-		rp.aoMatrix = calculateAoMatrix(South, rp.direction);
+		rp.textureSide.set(UP);
+		rp.direction.set(EAST);
+		rp.colorFactor.set(0.6F);
+		rp.aoMatrix.set(calculateAoMatrix(South, rp.direction.get()));
 		TriangleEastTopSouth.setParameters(rp);
 		// TriangleWestTopNorth
 		rp = new RenderParameters();
-		rp.textureSide = UP;
-		rp.direction = WEST;
-		rp.colorFactor = 0.6F;
-		rp.aoMatrix = calculateAoMatrix(South, rp.direction);
+		rp.textureSide.set(UP);
+		rp.direction.set(WEST);
+		rp.colorFactor.set(0.6F);
+		rp.aoMatrix.set(calculateAoMatrix(South, rp.direction.get()));
 		TriangleWestTopNorth.setParameters(rp);
 		// TriangleEastTopNorth
 		rp = new RenderParameters();
-		rp.textureSide = UP;
-		rp.direction = EAST;
-		rp.colorFactor = 0.6F;
-		rp.aoMatrix = calculateAoMatrix(South, rp.direction);
+		rp.textureSide.set(UP);
+		rp.direction.set(EAST);
+		rp.colorFactor.set(0.6F);
+		rp.aoMatrix.set(calculateAoMatrix(South, rp.direction.get()));
 		TriangleEastTopNorth.setParameters(rp);
 		// TriangleNorthTopWest
 		rp = new RenderParameters();
-		rp.textureSide = UP;
-		rp.direction = NORTH;
-		rp.colorFactor = 0.8F;
-		rp.aoMatrix = calculateAoMatrix(South, rp.direction);
+		rp.textureSide.set(UP);
+		rp.direction.set(NORTH);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(calculateAoMatrix(South, rp.direction.get()));
 		TriangleNorthTopWest.setParameters(rp);
 		// TriangleSouthTopWest
 		rp = new RenderParameters();
-		rp.textureSide = UP;
-		rp.direction = SOUTH;
-		rp.colorFactor = 0.8F;
-		rp.aoMatrix = calculateAoMatrix(South, rp.direction);
+		rp.textureSide.set(UP);
+		rp.direction.set(SOUTH);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(calculateAoMatrix(South, rp.direction.get()));
 		TriangleSouthTopWest.setParameters(rp);
 		// TriangleNorthTopEast
 		rp = new RenderParameters();
-		rp.textureSide = UP;
-		rp.direction = NORTH;
-		rp.colorFactor = 0.8F;
-		rp.aoMatrix = calculateAoMatrix(South, rp.direction);
+		rp.textureSide.set(UP);
+		rp.direction.set(NORTH);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(calculateAoMatrix(South, rp.direction.get()));
 		TriangleNorthTopEast.setParameters(rp);
 		// TriangleSouthTopEast
 		rp = new RenderParameters();
-		rp.textureSide = UP;
-		rp.direction = SOUTH;
-		rp.colorFactor = 0.8F;
-		rp.aoMatrix = calculateAoMatrix(South, rp.direction);
+		rp.textureSide.set(UP);
+		rp.direction.set(SOUTH);
+		rp.colorFactor.set(0.8F);
+		rp.aoMatrix.set(calculateAoMatrix(South, rp.direction.get()));
 		TriangleSouthTopEast.setParameters(rp);
 
 		/**
@@ -429,23 +450,27 @@ public class FacePreset
 		 */
 		// TriangleTopSouthWest
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.aoMatrix = calculateAoMatrix(TriangleTopSouthWest, rp.direction);
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.aoMatrix.set(calculateAoMatrix(TriangleTopSouthWest, rp.direction.get()));
 		TriangleTopSouthWest.setParameters(rp);
 		// TriangleTopSouthEast
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.aoMatrix = calculateAoMatrix(TriangleTopSouthEast, rp.direction);
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.aoMatrix.set(calculateAoMatrix(TriangleTopSouthEast, rp.direction.get()));
 		TriangleTopSouthEast.setParameters(rp);
 		// TriangleTopSouthWest
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.aoMatrix = calculateAoMatrix(TriangleTopNorthWest, rp.direction);
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.aoMatrix.set(calculateAoMatrix(TriangleTopNorthWest, rp.direction.get()));
 		TriangleTopNorthWest.setParameters(rp);
 		// TriangleTopNorthEast
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = UP;
-		rp.aoMatrix = calculateAoMatrix(TriangleTopNorthEast, rp.direction);
+		rp.direction.set(UP);
+		rp.textureSide.set(UP);
+		rp.aoMatrix.set(calculateAoMatrix(TriangleTopNorthEast, rp.direction.get()));
 		TriangleTopNorthEast.setParameters(rp);
 
 		/**
@@ -453,27 +478,31 @@ public class FacePreset
 		 */
 		// TriangleBottomSouthEast
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = DOWN;
-		rp.colorFactor = 0.5F;
-		rp.aoMatrix = calculateAoMatrix(TriangleBottomSouthEast, rp.direction);
+		rp.direction.set(DOWN);
+		rp.textureSide.set(DOWN);
+		rp.colorFactor.set(0.5F);
+		rp.aoMatrix.set(calculateAoMatrix(TriangleBottomSouthEast, rp.direction.get()));
 		TriangleBottomSouthEast.setParameters(rp);
 		// TriangleBottomSouthWest
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = DOWN;
-		rp.colorFactor = 0.5F;
-		rp.aoMatrix = calculateAoMatrix(TriangleBottomSouthWest, rp.direction);
+		rp.direction.set(DOWN);
+		rp.textureSide.set(DOWN);
+		rp.colorFactor.set(0.5F);
+		rp.aoMatrix.set(calculateAoMatrix(TriangleBottomSouthWest, rp.direction.get()));
 		TriangleBottomSouthWest.setParameters(rp);
 		// TriangleBottomNorthWest
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = DOWN;
-		rp.colorFactor = 0.5F;
-		rp.aoMatrix = calculateAoMatrix(TriangleBottomNorthWest, rp.direction);
+		rp.direction.set(DOWN);
+		rp.textureSide.set(DOWN);
+		rp.colorFactor.set(0.5F);
+		rp.aoMatrix.set(calculateAoMatrix(TriangleBottomNorthWest, rp.direction.get()));
 		TriangleBottomNorthWest.setParameters(rp);
 		// TriangleBottomNorthEast
 		rp = new RenderParameters();
-		rp.direction = rp.textureSide = DOWN;
-		rp.colorFactor = 0.5F;
-		rp.aoMatrix = calculateAoMatrix(TriangleBottomNorthEast, rp.direction);
+		rp.direction.set(DOWN);
+		rp.textureSide.set(DOWN);
+		rp.colorFactor.set(0.5F);
+		rp.aoMatrix.set(calculateAoMatrix(TriangleBottomNorthEast, rp.direction.get()));
 		TriangleBottomNorthEast.setParameters(rp);
 
 	}

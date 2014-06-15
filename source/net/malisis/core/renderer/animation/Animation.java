@@ -2,61 +2,50 @@ package net.malisis.core.renderer.animation;
 
 import net.malisis.core.renderer.element.Shape;
 
-public abstract class Animation
+public abstract class Animation<T extends Animation>
 {
 	public static final int LINEAR = 0, SINUSOIDAL = 1;
-	
+
 	public int movement = LINEAR;
-	protected float x, y, z;
 	protected int duration, delay = 0;
 	protected int loops = 1, loopStartDelay = 0, loopResetDelay = 0;
-	protected Animation prev, next;
-	
-	protected Animation(float x, float y, float z)
-	{
-		this.x = x;
-		this.y = y;
-		this.z = z;
-	}
 
-	public Animation movement(int movement)
+	public T movement(int movement)
 	{
 		this.movement = movement;
-		return this; 
-	}
-	
-	public Animation delay(int delay)
-	{
-		this.delay = delay;
-		return this;
+		return (T) this;
 	}
 
-	public Animation forTicks(int duration, int delay)
+	public T delay(int delay)
+	{
+		this.delay = delay;
+		return (T) this;
+	}
+
+	public T forTicks(int duration, int delay)
 	{
 		if (this.duration == 0)
 		{
 			this.duration = duration;
 			this.delay = delay;
 		}
-		return this;
+		return (T) this;
 	}
 
-	public Animation loop(int loops, int startDelay, int resetDelay)
+	public T loop(int loops, int startDelay, int resetDelay)
 	{
-		if(loops == 0)
-			return this;
-		
+		if (loops == 0)
+			return (T) this;
+
 		this.loops = loops;
 		this.loopStartDelay = startDelay;
 		this.loopResetDelay = resetDelay;
-		return this;
+		return (T) this;
 	}
 
-	public void transformAll(Shape s, float elapsedTime)
+	public void transform(Shape s, float elapsedTime)
 	{
 		animate(s, completion(elapsedTime));
-		if (next != null)
-			next.transformAll(s, elapsedTime);
 	}
 
 	protected float completion(float elapsedTime)
@@ -67,11 +56,11 @@ public abstract class Animation
 		float comp = 0;
 		int loopDuration = duration + loopStartDelay + loopResetDelay;
 		float elapsed = elapsedTime - delay;
-		
-		if(loops != -1 && elapsed > loops * loopDuration)
+
+		if (loops != -1 && elapsed > loops * loopDuration)
 			return 1;
-				
-		if(loops != 1)
+
+		if (loops != 1)
 		{
 			elapsed %= loopDuration;
 			if (elapsed < loopStartDelay)

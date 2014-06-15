@@ -15,15 +15,15 @@ import net.malisis.core.renderer.preset.ShapePreset;
 public class UIPanel extends UIContainer implements IScrollable
 {
 	//@formatter:off
-	public static GuiIcon[] icons = new GuiIcon[] { new GuiIcon(212, 	15, 	5, 	5),
-													new GuiIcon(217, 	15, 	5, 	5),
-													new GuiIcon(222, 	15, 	5, 	5),
-													new GuiIcon(212, 	20, 	5, 	5),
-													new GuiIcon(217, 	20, 	5, 	5),
-													new GuiIcon(222, 	20, 	5, 	5),
-													new GuiIcon(212, 	25, 	5, 	5),
-													new GuiIcon(217, 	25, 	5, 	5),
-													new GuiIcon(222, 	25, 	5, 	5)};
+	public static GuiIcon[] icons = new GuiIcon[] { new GuiIcon(200, 	15, 	5, 	5),
+													new GuiIcon(205, 	15, 	5, 	5),
+													new GuiIcon(210, 	15, 	5, 	5),
+													new GuiIcon(200, 	20, 	5, 	5),
+													new GuiIcon(205, 	20, 	5, 	5),
+													new GuiIcon(210, 	20, 	5, 	5),
+													new GuiIcon(200, 	25, 	5, 	5),
+													new GuiIcon(205, 	25, 	5, 	5),
+													new GuiIcon(210, 	25, 	5, 	5)};
 	//@formatter:on
 
 	protected boolean allowVerticalScroll = false;
@@ -51,9 +51,11 @@ public class UIPanel extends UIContainer implements IScrollable
 	@Override
 	public boolean fireMouseEvent(MouseEvent event)
 	{
-		if (allowVerticalScroll && (verticalScroll.isInsideBounds(event.getX(), event.getY()) || (verticalScroll.isFocused() && event instanceof MouseEvent.Drag)))
+		if (allowVerticalScroll
+				&& (verticalScroll.isInsideBounds(event.getX(), event.getY()) || (verticalScroll.isFocused() && event instanceof MouseEvent.Drag)))
 			return verticalScroll.fireMouseEvent(event);
-		if (allowHorizontalScroll && (horizontalScroll.isInsideBounds(event.getX(), event.getY()) || (horizontalScroll.isFocused() && event instanceof MouseEvent.Drag)))
+		if (allowHorizontalScroll
+				&& (horizontalScroll.isInsideBounds(event.getX(), event.getY()) || (horizontalScroll.isFocused() && event instanceof MouseEvent.Drag)))
 			return horizontalScroll.fireMouseEvent(event);
 
 		if (isInsideBounds(event.getX(), event.getY()))
@@ -113,12 +115,14 @@ public class UIPanel extends UIContainer implements IScrollable
 		horizontalScroll.setPosition(-verticalPadding - xOffset, horizontalPadding - yOffset, Anchor.BOTTOM);
 	}
 
+	@Override
 	public void setOffsetX(int offset)
 	{
 		this.xOffset = -offset;
 		setScrollBarsPosition();
 	}
 
+	@Override
 	public void setOffsetY(int offset)
 	{
 		this.yOffset = -offset;

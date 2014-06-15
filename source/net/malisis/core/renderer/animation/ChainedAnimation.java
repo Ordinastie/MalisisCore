@@ -22,30 +22,60 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.inventory;
+package net.malisis.core.renderer.animation;
 
-import net.malisis.core.client.gui.MalisisGui;
-import net.minecraft.entity.player.EntityPlayer;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import java.util.Iterator;
+import java.util.LinkedList;
 
-public interface IInventoryProvider
+import net.malisis.core.renderer.element.Shape;
+
+/**
+ * @author -
+ * 
+ */
+public class ChainedAnimation extends Animation<ChainedAnimation>
 {
-	/**
-	 * Gets the {@link MalisisInventory} instance.
-	 * 
-	 * @return
-	 */
-	public MalisisInventory getInventory();
+	protected LinkedList<Animation> listAnimations = new LinkedList<>();
 
-	/**
-	 * Get the GUI associated with the the {@link MalisisInventory}.
-	 * 
-	 * @param container
-	 * @param player
-	 * @return
-	 */
-	@SideOnly(Side.CLIENT)
-	public MalisisGui getGui(MalisisInventoryContainer container, EntityPlayer player);
+	public ChainedAnimation(Animation... animations)
+	{
+		addAnimations();
+	}
+
+	public ChainedAnimation addAnimations(Animation... animations)
+	{
+		for (Animation animation : animations)
+		{
+			if (duration < animation.duration)
+				duration = animation.duration;
+
+			listAnimations.add(animation);
+		}
+
+		return this;
+	}
+
+	@Override
+	public void transform(Shape s, float elapsedTime)
+	{
+		if (listAnimations.size() == 0)
+			return;
+
+		Iterator<Animation> iterator = listAnimations.iterator();
+		Animation animation = iterator.next();
+		while (animation != null && elapsedTime > animation.duration)
+		{
+			elapsedTime -= animation.duration;
+			animation = iterator.next();
+		}
+
+		animation.animate(s, animation.completion(elapsedTime));
+	}
+
+	@Override
+	protected void animate(Shape s, float comp)
+	{
+
+	}
 
 }

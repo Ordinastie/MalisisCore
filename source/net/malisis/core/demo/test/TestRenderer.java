@@ -10,11 +10,9 @@ public class TestRenderer extends BaseRenderer
 	@Override
 	public void render()
 	{
-		if (typeRender != TYPE_WORLD)
-			drawShape(ShapePreset.Cube());
-		else
-			drawShape(ShapePreset.Cube());
-	
+
+		drawShape(ShapePreset.Cube());
+
 	}
 
 	@Override

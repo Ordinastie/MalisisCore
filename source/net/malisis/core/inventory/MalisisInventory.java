@@ -34,6 +34,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraftforge.common.util.Constants.NBT;
 
 import com.google.common.eventbus.EventBus;
 
@@ -46,7 +47,7 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Object containing this <code>MalisisInventory</code>.
 	 */
-	protected IInventoryProvider container;
+	protected IInventoryProvider inventoryProvider;
 	/**
 	 * Slots for this <code>MalisisInventory</code>.
 	 */
@@ -55,16 +56,36 @@ public class MalisisInventory implements IInventory
 	 * Size of this <code>MalisisInventory</code>.
 	 */
 	protected int size;
+	/**
+	 * Maximum stack size for the slots
+	 */
+	protected int slotMaxStackSize = 64;
+
 	protected EventBus bus = new EventBus();
 
-	public MalisisInventory(IInventoryProvider container)
+	public MalisisInventory(IInventoryProvider provider, int size)
 	{
-		this.container = container;
-		if (container != null)
-			this.size = container.getInventorySize();
-		this.slots = new MalisisSlot[size];
+		this.inventoryProvider = provider;
+		this.size = size;
+		MalisisSlot[] slots = new MalisisSlot[size];
 		for (int i = 0; i < size; i++)
 			slots[i] = new MalisisSlot(this, i);
+
+		setSlots(slots);
+	}
+
+	public void setSlots(MalisisSlot[] slots)
+	{
+		this.size = slots.length;
+		this.slots = slots;
+	}
+
+	public void overrideSlot(MalisisSlot slot, int slotNumber)
+	{
+		if (slotNumber < 0 || slotNumber >= getSizeInventory())
+			return;
+
+		slots[slotNumber] = slot;
 	}
 
 	public void register(Object object)
@@ -122,6 +143,7 @@ public class MalisisInventory implements IInventory
 		if (itemStack != null && itemStack.stackSize > this.getInventoryStackLimit())
 			itemStack.stackSize = this.getInventoryStackLimit();
 		slot.setItemStack(itemStack);
+		slot.onSlotChanged();
 	}
 
 	/**
@@ -163,7 +185,12 @@ public class MalisisInventory implements IInventory
 	@Override
 	public int getInventoryStackLimit()
 	{
-		return 64;
+		return slotMaxStackSize;
+	}
+
+	public void setInventoryStackLimit(int limit)
+	{
+		slotMaxStackSize = limit;
 	}
 
 	// #end getters/setters
@@ -242,10 +269,11 @@ public class MalisisInventory implements IInventory
 			if (slot.isItemValid(itemStack) && (emptySlot || slot.getItemStack() != null))
 			{
 				ItemUtils.ItemStacksMerger ism = new ItemUtils.ItemStacksMerger(itemStack, slot.getItemStack());
-				if (ism.merge())
+				if (ism.merge(ItemUtils.FULL_STACK, slot.getSlotStackLimit()))
 				{
 					itemStack = ism.merge;
 					slot.setItemStack(ism.into);
+					slot.onSlotChanged();
 				}
 			}
 			current += step;
@@ -261,12 +289,14 @@ public class MalisisInventory implements IInventory
 	 */
 	public void readFromNBT(NBTTagCompound tagCompound)
 	{
-		NBTTagList nbttaglist = tagCompound.getTagList("Items", 10);
+		NBTTagList nbttaglist = tagCompound.getTagList("Items", NBT.TAG_COMPOUND);
 		for (int i = 0; i < nbttaglist.tagCount(); ++i)
 		{
 			NBTTagCompound stackTag = nbttaglist.getCompoundTagAt(i);
-			int slot = stackTag.getByte("Slot") & 255;
-			setItemStack(slot, ItemStack.loadItemStackFromNBT(stackTag));
+			int slotNumber = stackTag.getByte("Slot") & 255;
+			MalisisSlot slot = getSlot(slotNumber);
+			if (slot != null)
+				slot.setItemStack(ItemStack.loadItemStackFromNBT(stackTag));
 		}
 	}
 
@@ -301,13 +331,11 @@ public class MalisisInventory implements IInventory
 	 */
 	public MalisisInventoryContainer open(EntityPlayerMP player)
 	{
-		if (container == null)
+		if (inventoryProvider == null)
 			return null;
 
 		MalisisInventoryContainer c = new MalisisInventoryContainer(this, player, 0);
-		if (player.getHeldItem() != null && slots[1].getItemStack() == null)
-			slots[1].setItemStack(player.getHeldItem().copy());
-		OpenIventoryMessage.send(container, player, c.windowId);
+		OpenIventoryMessage.send(inventoryProvider, player, c.windowId);
 		c.sendInventoryContent();
 
 		openInventory();
@@ -326,14 +354,15 @@ public class MalisisInventory implements IInventory
 	@SideOnly(Side.CLIENT)
 	public MalisisInventoryContainer open(EntityClientPlayerMP player, int windowId)
 	{
-		if (container == null)
+		if (inventoryProvider == null)
 			return null;
 
 		MalisisInventoryContainer c = new MalisisInventoryContainer(this, player, windowId);
 		if (FMLCommonHandler.instance().getSide().isClient())
 		{
-			MalisisGui gui = container.getGui(c, player);
-			gui.display();
+			MalisisGui gui = inventoryProvider.getGui(c, player);
+			if (gui != null)
+				gui.display();
 		}
 
 		openInventory();

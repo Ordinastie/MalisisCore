@@ -42,37 +42,42 @@ import com.google.common.eventbus.Subscribe;
 public class UIWindow extends UIContainer
 {
 	//@formatter:off
-	public static GuiIcon[] icons = new GuiIcon[] { new GuiIcon(212, 	0, 		5, 	5),
-													new GuiIcon(217, 	0, 		5, 	5),
-													new GuiIcon(222, 	0, 		5, 	5),
-													new GuiIcon(212, 	5, 		5, 	5),
-													new GuiIcon(217, 	5, 		5, 	5),
-													new GuiIcon(222, 	5, 		5, 	5),
-													new GuiIcon(212, 	10, 	5, 	5),
-													new GuiIcon(217, 	10, 	5, 	5),
-													new GuiIcon(222, 	10, 	5, 	5)};
+	public static GuiIcon[] icons = new GuiIcon[] { new GuiIcon(200, 	0, 		5, 	5),
+													new GuiIcon(205, 	0, 		5, 	5),
+													new GuiIcon(210, 	0, 		5, 	5),
+													new GuiIcon(200, 	5, 		5, 	5),
+													new GuiIcon(205, 	5, 		5, 	5),
+													new GuiIcon(210, 	5, 		5, 	5),
+													new GuiIcon(200, 	10, 	5, 	5),
+													new GuiIcon(205, 	10, 	5, 	5),
+													new GuiIcon(210, 	10, 	5, 	5)};
 	//@formatter:on
-	
-	public UIWindow(int width, int height)
+
+	public UIWindow(String title, int width, int height, int anchor)
 	{
-		this(width, height,  Anchor.CENTER | Anchor.MIDDLE);
-	}
-	
-	public UIWindow(int width, int height, int anchor)
-	{
-		super(width, height);
+		super(title, width, height);
 		setPadding(5, 5);
 		this.anchor = anchor;
 	}
-	
+
+	public UIWindow(String title, int width, int height)
+	{
+		this(title, width, height, Anchor.CENTER | Anchor.MIDDLE);
+	}
+
+	public UIWindow(int width, int height)
+	{
+		this(null, width, height, Anchor.CENTER | Anchor.MIDDLE);
+	}
+
 	@Override
 	public GuiIcon getIcon(int face)
-    {
-    	if(face < 0 || face > icons.length)
-    		return null;
-    	
-    	return icons[face];
-    }
+	{
+		if (face < 0 || face > icons.length)
+			return null;
+
+		return icons[face];
+	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
@@ -84,13 +89,13 @@ public class UIWindow extends UIContainer
 	@Subscribe
 	public void onMouseMove(MouseEvent.Move event)
 	{
-		//MalisisCore.Message(event.getX() + ", " + event.getY());
+		// MalisisCore.Message(event.getX() + ", " + event.getY());
 	}
-	
+
 	@Override
 	public ClipArea getClipArea()
 	{
 		return new ClipArea(this, 3);
 	}
-	
+
 }
