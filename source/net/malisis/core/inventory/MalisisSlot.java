@@ -54,9 +54,20 @@ public class MalisisSlot
 		this(inventory, null, index);
 	}
 
+	public MalisisSlot(int index)
+	{
+		this(null, null, index);
+	}
+
 	public void register(Object object)
 	{
-		inventory.register(object);
+		if (inventory != null)
+			inventory.register(object);
+	}
+
+	public void setInventory(MalisisInventory inventory)
+	{
+		this.inventory = inventory;
 	}
 
 	/**
@@ -66,9 +77,6 @@ public class MalisisSlot
 	 */
 	public void setItemStack(ItemStack itemStack)
 	{
-		if (ItemStack.areItemStacksEqual(this.itemStack, itemStack))
-			return;
-
 		this.itemStack = itemStack;
 	}
 
@@ -87,6 +95,9 @@ public class MalisisSlot
 	 */
 	public boolean isItemValid(ItemStack itemStack)
 	{
+		if (inventory == null)
+			return true;
+
 		return inventory.itemValidForSlot(this, itemStack);
 	}
 
@@ -109,17 +120,43 @@ public class MalisisSlot
 		onSlotChanged();
 	}
 
+	public int setItemStackSize(int stackSize)
+	{
+		if (itemStack == null)
+			return 0;
+		int start = itemStack.stackSize;
+		if (stackSize <= 0)
+		{
+			itemStack = null;
+			return start;
+		}
+
+		itemStack.stackSize = Math.min(stackSize, Math.min(itemStack.getMaxStackSize(), getSlotStackLimit()));
+		return itemStack.stackSize - start;
+	}
+
+	public int addItemStackSize(int stackSize)
+	{
+		if (itemStack == null)
+			return 0;
+
+		return setItemStackSize(itemStack.stackSize + stackSize);
+	}
+
 	/**
 	 * @return the maximum stackSize available for this slot. Gets the value from this {@link MalisisInventory inventory}.
 	 */
 	public int getSlotStackLimit()
 	{
+		if (inventory != null)
+			return 64;
+
 		return this.inventory.getInventoryStackLimit();
 	}
 
 	@Override
 	public String toString()
 	{
-		return slotNumber + "/" + inventory.getSizeInventory() + " > " + itemStack;
+		return slotNumber + (inventory != null ? "/" + inventory.getSizeInventory() : "") + " > " + itemStack;
 	}
 }

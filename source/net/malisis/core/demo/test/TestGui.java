@@ -15,7 +15,6 @@ import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisInventoryContainer;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
@@ -31,7 +30,7 @@ public class TestGui extends MalisisGui
 
 	ResourceLocation bulletRl = new ResourceLocation("malisiscore", "textures/gui/bullet.png");
 
-	public TestGui(MalisisInventoryContainer inventoryContainer, EntityPlayer player)
+	public TestGui(MalisisInventoryContainer inventoryContainer)
 	{
 		super();
 		setInventoryContainer(inventoryContainer);
@@ -98,7 +97,7 @@ public class TestGui extends MalisisGui
 
 		for (int i = 0; i < inventory.getSizeInventory(); i++)
 		{
-			UISlot slot = (UISlot) new UISlot(inventory.getSlot(i)).setPosition(i * 18, 0);
+			UISlot slot = new UISlot(inventory.getSlot(i)).setPosition(i * 18, 0);
 			c.add(slot);
 		}
 

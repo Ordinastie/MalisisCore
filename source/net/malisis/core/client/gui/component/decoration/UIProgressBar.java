@@ -36,7 +36,7 @@ import net.minecraft.util.IIcon;
  * @author Ordinastie
  * 
  */
-public class UIProgressBar extends UIComponent
+public class UIProgressBar extends UIComponent<UIProgressBar>
 {
 	private GuiIcon barIcon = new GuiIcon(246, 0, 22, 16);
 	private GuiIcon barFilledIcon = barIcon.offset(0, 16);
@@ -55,11 +55,12 @@ public class UIProgressBar extends UIComponent
 		return progress;
 	}
 
-	public void setReversed()
+	public UIProgressBar setReversed()
 	{
 		barIcon = barIcon.getIconFlipped(true, false);
 		barFilledIcon = barFilledIcon.getIconFlipped(true, false);
 		reversed = true;
+		return this;
 	}
 
 	public void setProgress(float progress)

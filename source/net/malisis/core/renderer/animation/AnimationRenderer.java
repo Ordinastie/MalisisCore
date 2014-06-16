@@ -56,8 +56,8 @@ public class AnimationRenderer
 		}
 		else
 		{
-			lastAnimation.next = animation;
-			animation.prev = lastAnimation;
+			// lastAnimation.next = animation;
+			// animation.prev = lastAnimation;
 			lastAnimation = animation;
 		}
 	}
@@ -120,8 +120,8 @@ public class AnimationRenderer
 
 	public AnimationRenderer scaleTo(float x, float y, float z)
 	{
-		if (lastAnimation instanceof Scale)
-			((Scale) lastAnimation).scaleTo(x, y, z);
+		// if (lastAnimation instanceof Scale)
+		// ((Scale) lastAnimation).scaleTo(x, y, z);
 		return this;
 	}
 
@@ -253,8 +253,8 @@ public class AnimationRenderer
 				if (s != null)
 				{
 					Shape ts = new Shape(s);
-					if (animation != null)
-						animation.transformAll(ts, elapsed - delay);
+					// if (animation != null)
+					// animation.transformAll(ts, elapsed - delay);
 					transformedShapes[i++] = ts;
 				}
 			}

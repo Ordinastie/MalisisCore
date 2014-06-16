@@ -66,7 +66,6 @@ public class MalisisInventory implements IInventory
 	public MalisisInventory(IInventoryProvider provider, int size)
 	{
 		this.inventoryProvider = provider;
-		this.size = size;
 		MalisisSlot[] slots = new MalisisSlot[size];
 		for (int i = 0; i < size; i++)
 			slots[i] = new MalisisSlot(this, i);
@@ -74,10 +73,18 @@ public class MalisisInventory implements IInventory
 		setSlots(slots);
 	}
 
+	public MalisisInventory(IInventoryProvider provider, MalisisSlot[] slots)
+	{
+		this.inventoryProvider = provider;
+		setSlots(slots);
+	}
+
 	public void setSlots(MalisisSlot[] slots)
 	{
 		this.size = slots.length;
 		this.slots = slots;
+		for (MalisisSlot slot : slots)
+			slot.setInventory(this);
 	}
 
 	public void overrideSlot(MalisisSlot slot, int slotNumber)
@@ -360,7 +367,7 @@ public class MalisisInventory implements IInventory
 		MalisisInventoryContainer c = new MalisisInventoryContainer(this, player, windowId);
 		if (FMLCommonHandler.instance().getSide().isClient())
 		{
-			MalisisGui gui = inventoryProvider.getGui(c, player);
+			MalisisGui gui = inventoryProvider.getGui(c);
 			if (gui != null)
 				gui.display();
 		}

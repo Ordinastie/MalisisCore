@@ -4,7 +4,6 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.inventory.IInventoryProvider;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisInventoryContainer;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -31,9 +30,9 @@ public class TestTileEntity extends TileEntity implements IInventoryProvider
 
 	@SideOnly(Side.CLIENT)
 	@Override
-	public MalisisGui getGui(MalisisInventoryContainer container, EntityPlayer player)
+	public MalisisGui getGui(MalisisInventoryContainer container)
 	{
-		return new TestGui(container, player);
+		return new TestGui(container);
 	}
 
 	@Override

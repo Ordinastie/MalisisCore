@@ -25,7 +25,6 @@
 package net.malisis.core.inventory;
 
 import net.malisis.core.client.gui.MalisisGui;
-import net.minecraft.entity.player.EntityPlayer;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -41,11 +40,10 @@ public interface IInventoryProvider
 	/**
 	 * Get the GUI associated with the the {@link MalisisInventory}.
 	 * 
-	 * @param container
 	 * @param player
 	 * @return
 	 */
 	@SideOnly(Side.CLIENT)
-	public MalisisGui getGui(MalisisInventoryContainer container, EntityPlayer player);
+	public MalisisGui getGui(MalisisInventoryContainer container);
 
 }

@@ -28,7 +28,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.google.common.eventbus.Subscribe;
 
-public class UISlot extends UIComponent
+public class UISlot extends UIComponent<UISlot>
 {
 	/**
 	 * Whether the mouse button has been released at least once.

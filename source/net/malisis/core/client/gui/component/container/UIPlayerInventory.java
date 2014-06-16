@@ -1,5 +1,6 @@
 package net.malisis.core.client.gui.component.container;
 
+import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.player.PlayerInventorySlot;
@@ -16,6 +17,8 @@ public class UIPlayerInventory extends UIContainer
 
 		for (int i = 0; i < inventory.getSizeInventory(); i++)
 			addSlot((PlayerInventorySlot) inventory.getSlot(i), i);
+
+		setPosition(0, 0, Anchor.BOTTOM | Anchor.CENTER);
 	}
 
 	protected void addSlot(PlayerInventorySlot slot, int number)
