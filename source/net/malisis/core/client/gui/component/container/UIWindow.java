@@ -71,19 +71,10 @@ public class UIWindow extends UIContainer
 	}
 
 	@Override
-	public GuiIcon getIcon(int face)
-	{
-		if (face < 0 || face > icons.length)
-			return null;
-
-		return icons[face];
-	}
-
-	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		Shape shape = ShapePreset.GuiXYResizable(width, height);
-		renderer.drawShape(shape);
+		renderer.drawShape(shape, icons);
 	}
 
 	@Subscribe

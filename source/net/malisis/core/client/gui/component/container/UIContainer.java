@@ -24,17 +24,16 @@
 
 package net.malisis.core.client.gui.component.container;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.event.KeyboardEvent;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.preset.ShapePreset;
@@ -65,11 +64,7 @@ public class UIContainer extends UIComponent<UIContainer>
 	 */
 	public boolean clipContent = true;
 	/**
-	 * Currently hovered child component
-	 */
-	private UIComponent hoveredComponent;
-	/**
-	 * 
+	 * Background color multiplier
 	 */
 	private int backgroundColor = 0x404040;
 
@@ -97,6 +92,36 @@ public class UIContainer extends UIComponent<UIContainer>
 	}
 
 	// #region getters/setters
+	@Override
+	public UIContainer setVisible(boolean visible)
+	{
+		super.setVisible(visible);
+		if (!visible)
+		{
+			for (UIComponent c : components)
+			{
+				c.setHovered(false);
+				c.setFocused(false);
+			}
+		}
+		return this;
+	}
+
+	@Override
+	public UIContainer setDisabled(boolean disabled)
+	{
+		super.setDisabled(disabled);
+		if (disabled)
+		{
+			for (UIComponent c : components)
+			{
+				c.setHovered(false);
+				c.setFocused(false);
+			}
+		}
+		return this;
+	}
+
 	/**
 	 * Set the padding for this <code>UIContainer</code>.
 	 * 
@@ -123,29 +148,6 @@ public class UIContainer extends UIComponent<UIContainer>
 	public int getVerticalPadding()
 	{
 		return verticalPadding;
-	}
-
-	@Override
-	public void setHovered(boolean hovered)
-	{
-		this.hovered = hovered;
-		if (!hovered)
-		{
-			if (hoveredComponent != null)
-				hoveredComponent.setHovered(false);
-			hoveredComponent = null;
-		}
-	}
-
-	@Override
-	public void setFocused(boolean focused)
-	{
-		this.focused = focused;
-		for (UIComponent c : components)
-		{
-			if (c.isFocused() != (c == hoveredComponent))
-				c.setFocused(c == hoveredComponent);
-		}
 	}
 
 	public int componentX(UIComponent component)
@@ -204,12 +206,8 @@ public class UIContainer extends UIComponent<UIContainer>
 	{
 		components.add(component);
 		component.setParent(this);
-	}
-
-	@Override
-	public GuiIcon getIcon(int face)
-	{
-		return null;
+		if (component.getZIndex() == INHERITED)
+			component.setZIndex(zIndex);
 	}
 
 	@Override
@@ -237,64 +235,31 @@ public class UIContainer extends UIComponent<UIContainer>
 		for (UIComponent c : components)
 			c.draw(renderer, mouseX, mouseY, partialTick);
 
-		// if (disabled)
-		// {
-		// renderer.currentComponent = this;
-		// GL11.glDisable(GL11.GL_TEXTURE_2D);
-		// GL11.glEnable(GL11.GL_BLEND);
-		// Shape shape = ShapePreset.GuiElement(width, height);
-		// RenderParameters rp = new RenderParameters();
-		// rp.alpha = 100;
-		// rp.colorMultiplier = 0x666666;
-		// renderer.drawShape(shape, rp);
-		// renderer.next();
-		// GL11.glDisable(GL11.GL_BLEND);
-		// GL11.glEnable(GL11.GL_TEXTURE_2D);
-		// }
-
 		renderer.endClipping(area);
 	}
 
-	@Override
-	public boolean fireMouseEvent(MouseEvent event)
-	{
-		if (isDisabled())
-			return false;
-
-		boolean propagate = true;
-		UIComponent childHovered = getComponentAt(event.getX(), event.getY());
-		if (childHovered != hoveredComponent)
-		{
-			if (hoveredComponent != null)
-			{
-				hoveredComponent.setHovered(false);
-				hoveredComponent.fireMouseEvent(new MouseEvent.HoveredStateChange(event.getX(), event.getY()));
-			}
-			if (childHovered != null)
-			{
-				childHovered.setHovered(true);
-				childHovered.fireMouseEvent(new MouseEvent.HoveredStateChange(event.getX(), event.getY()));
-			}
-		}
-
-		hoveredComponent = childHovered;
-
-		if (event instanceof MouseEvent.Press)
-			setFocused(true);
-		else if (event instanceof MouseEvent.Drag)
-		{
-			for (UIComponent c : components)
-				if (c.isFocused() && !c.isHovered())
-					c.fireMouseEvent(event);
-		}
-
-		if (hoveredComponent != null)
-			propagate = hoveredComponent.fireMouseEvent(event);
-
-		if (propagate)
-			propagate = super.fireMouseEvent(event);
-		return propagate;
-	}
+	// @Override
+	// public boolean fireMouseEvent(MouseEvent event)
+	// {
+	// if (isDisabled() || !isVisible())
+	// return false;
+	//
+	// boolean propagate = true;
+	// UIComponent childHovered = getComponentAt(event.getX(), event.getY());
+	// if (childHovered != null)
+	// childHovered.setHovered(true);
+	//
+	// if (event instanceof MouseEvent.Press && childHovered != null)
+	// childHovered.setFocused(true);
+	//
+	// if (childHovered != null && childHovered != this)
+	// propagate = childHovered.fireMouseEvent(event);
+	//
+	// if (propagate)
+	// propagate = super.fireMouseEvent(event);
+	//
+	// return propagate;
+	// }
 
 	@Override
 	public boolean fireKeyboardEvent(KeyboardEvent event)
@@ -304,12 +269,28 @@ public class UIContainer extends UIComponent<UIContainer>
 		return true;
 	}
 
+	@Override
 	public UIComponent getComponentAt(int x, int y)
 	{
+		ArrayList<UIComponent> list = new ArrayList<>();
 		for (UIComponent c : components)
-			if (c.isInsideBounds(x, y))
-				return c;
-		return null;
+		{
+			UIComponent component = c.getComponentAt(x, y);
+			if (component != null)
+				list.add(component);
+		}
+
+		if (list.size() == 0)
+			return super.getComponentAt(x, y);
+
+		UIComponent component = null;
+		for (UIComponent c : list)
+		{
+			if (component == null || component.getZIndex() <= c.getZIndex())
+				component = c;
+		}
+
+		return component;
 	}
 
 }

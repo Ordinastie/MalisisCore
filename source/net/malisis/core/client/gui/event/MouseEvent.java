@@ -130,6 +130,22 @@ public abstract class MouseEvent extends GuiEvent
 		}
 	}
 
+	public static class ScrollWheel extends MouseEvent
+	{
+		private final int delta;
+
+		public ScrollWheel(int x, int y, int delta)
+		{
+			super(x, y);
+			this.delta = delta;
+		}
+
+		public int getDelta()
+		{
+			return delta;
+		}
+	}
+
 	public static class HoveredStateChange extends MouseEvent
 	{
 		public HoveredStateChange(int x, int y)

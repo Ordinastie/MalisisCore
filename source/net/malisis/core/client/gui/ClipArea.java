@@ -10,15 +10,20 @@ public class ClipArea
 	public int X;
 	public int Y;
 	public int clipPadding;
-	
+
 	public ClipArea(UIContainer container)
 	{
-		this(container, 0);
+		this(container, 0, true);
 	}
-	
+
 	public ClipArea(UIContainer container, int clipPadding)
 	{
-		if(!container.clipContent)
+		this(container, clipPadding, true);
+	}
+
+	public ClipArea(UIContainer container, int clipPadding, boolean intersect)
+	{
+		if (!container.clipContent)
 			this.noClip = true;
 		else
 		{
@@ -28,22 +33,22 @@ public class ClipArea
 			this.Y = this.y + container.getHeight() - clipPadding * 2;
 			this.clipPadding = clipPadding;
 		}
-		
-		if(container.getParent() != null)
+
+		if (intersect && container.getParent() != null)
 			this.intersect(container.getParent().getClipArea());
 	}
-	
+
 	public void intersect(ClipArea area)
 	{
-		if(this.noClip)
+		if (this.noClip)
 		{
 			x = area.x;
 			y = area.y;
 			X = area.X;
 			Y = area.Y;
-			this.clipPadding = area.clipPadding; 
+			this.clipPadding = area.clipPadding;
 		}
-		else if(!area.noClip)
+		else if (!area.noClip)
 		{
 			x = Math.max(x, area.x);
 			y = Math.max(y, area.y);
@@ -51,20 +56,21 @@ public class ClipArea
 			Y = Math.min(Y, area.Y);
 		}
 	}
-	
+
 	public int width()
 	{
 		return X - x;
 	}
-	
+
 	public int height()
 	{
 		return Y - y;
 	}
-	
+
+	@Override
 	public String toString()
 	{
 		return x + "->" + X + " , " + y + "->" + Y + " (" + width() + "," + height() + ")";
 	}
-	
+
 }

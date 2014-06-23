@@ -24,7 +24,6 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 
@@ -33,7 +32,7 @@ import net.malisis.core.client.gui.component.UIComponent;
  * 
  * @author PaleoCrafter
  */
-public class UILabel extends UIComponent
+public class UILabel extends UIComponent<UILabel>
 {
 	/**
 	 * Text of this <code>UILabel</code>.
@@ -113,7 +112,7 @@ public class UILabel extends UIComponent
 	 * @param width
 	 * @return this <code>UILabel</code>
 	 */
-	public UIComponent setSize(int width)
+	public UILabel setSize(int width)
 	{
 		this.autoWidth = width <= 0;
 		this.width = autoWidth ? textWidth : width;
@@ -129,7 +128,7 @@ public class UILabel extends UIComponent
 	 * @return this <code>UILabel</code>
 	 */
 	@Override
-	public UIComponent setSize(int width, int height)
+	public UILabel setSize(int width, int height)
 	{
 		return setSize(width);
 	}
@@ -144,24 +143,26 @@ public class UILabel extends UIComponent
 		this.color = color;
 	}
 
+	@Override
+	public void setFocused(boolean focused)
+	{
+		// Labels can't take focus
+		if (parent != null)
+			parent.setFocused(focused);
+	}
+
 	/**
 	 * Set the drop shadow for the text of this <code>UILabel</code>.
 	 * 
 	 * @param drawShadow
 	 */
-	public void setDrawShadow(boolean drawShadow)
+	public UILabel setDrawShadow(boolean drawShadow)
 	{
 		this.drawShadow = drawShadow;
+		return this;
 	}
 
 	// #end getters/setters
-
-	@Override
-	public GuiIcon getIcon(int face)
-	{
-		return null;
-	}
-
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{}
@@ -169,7 +170,7 @@ public class UILabel extends UIComponent
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawString(text, screenX(), screenY(), color, drawShadow);
+		renderer.drawText(text, color, drawShadow);
 	}
 
 	@Override

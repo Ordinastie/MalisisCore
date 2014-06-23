@@ -30,7 +30,6 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.preset.ShapePreset;
-import net.minecraft.util.IIcon;
 
 /**
  * @author Ordinastie
@@ -73,12 +72,6 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	}
 
 	@Override
-	public IIcon getIcon(int face)
-	{
-		return null;
-	}
-
-	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		Shape shape = ShapePreset.GuiElement(22, 16);
@@ -102,11 +95,6 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 
 		Shape shape = ShapePreset.GuiElement(width, 16);
 		shape.translate(xOffset, 0, 0);
-
-		RenderParameters rp = new RenderParameters();
-		rp.icon.set(icon);
-		// rp.uvFactor.set(uvFactors);
-
-		renderer.drawShape(shape, rp);
+		renderer.drawShape(shape, icon);
 	}
 }

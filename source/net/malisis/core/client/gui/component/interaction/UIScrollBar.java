@@ -29,11 +29,10 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.preset.ShapePreset;
 import net.malisis.core.util.MouseButton;
-import net.minecraft.util.IIcon;
+import net.minecraft.client.gui.GuiScreen;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -57,15 +56,15 @@ public class UIScrollBar extends UIComponent
 	public float offset;
 
 	//@formatter:off
-	public GuiIcon[] icons = new GuiIcon[] { 	new GuiIcon(215, 	0, 	1, 	1),
-												new GuiIcon(220, 	0, 	1, 	1),
-												new GuiIcon(225, 	0, 	1, 	1),
-												new GuiIcon(215, 	1, 	1, 	1),
-												new GuiIcon(220, 	1, 	1, 	1),
-												new GuiIcon(225, 	1, 	1, 	1),
-												new GuiIcon(215, 	9, 	1, 	1),
-												new GuiIcon(220, 	9, 	1, 	1),
-												new GuiIcon(225, 	9, 	1, 	1)};
+	public GuiIcon[] icons = new GuiIcon[] { 	new GuiIcon(215, 	0, 		1, 	1),
+												new GuiIcon(220, 	0, 		1, 	1),
+												new GuiIcon(229, 	0, 		1, 	1),
+												new GuiIcon(215, 	1, 		1, 	1),
+												new GuiIcon(220, 	1, 		1, 	1),
+												new GuiIcon(229, 	1, 		1, 	1),
+												new GuiIcon(215, 	14, 	1, 	1),
+												new GuiIcon(220, 	14, 	1, 	1),
+												new GuiIcon(229, 	14, 	1, 	1)};
 	public GuiIcon[] disabledIcons = new GuiIcon[] { 	icons[0].offset(0,  15),
 														icons[1].offset(0,  15),
 														icons[2].offset(0,  15),
@@ -133,22 +132,43 @@ public class UIScrollBar extends UIComponent
 
 	public void scrollTo(float offset)
 	{
+		if (isDisabled())
+			return;
+
+		if (offset < 0)
+			offset = 0;
+		if (offset > 1)
+			offset = 1;
 		this.offset = offset;
-		int l = length - SCROLLER_HEIGHT - 2;
-		int amount = offset == 0 ? 0 : (int) ((scrollableLength - l) * offset);
+		int amount = (int) ((scrollableLength - length) * offset);
 		if (type == HORIZONTAL)
 			scrollable.setOffsetX(amount);
 		else
 			scrollable.setOffsetY(amount);
 	}
 
+	public void scrollBy(float amount)
+	{
+		amount *= -1 / (float) (scrollableLength - length);
+		scrollTo(offset + amount);
+	}
+
 	@Subscribe
 	public void onClick(MouseEvent.Press event)
 	{
+		if (event.getButton() != MouseButton.LEFT)
+			return;
+
 		int l = length - SCROLLER_HEIGHT - 2;
 		int pos = type == HORIZONTAL ? componentX(event.getX()) : componentY(event.getY());
 		pos = Math.max(0, Math.min(pos - SCROLLER_HEIGHT / 2, l));
 		scrollTo((float) pos / l);
+	}
+
+	@Subscribe
+	public void onScrollWheel(MouseEvent.ScrollWheel event)
+	{
+		scrollBy(event.getDelta() * (GuiScreen.isCtrlKeyDown() ? 15 : 5));
 	}
 
 	@Subscribe
@@ -164,37 +184,28 @@ public class UIScrollBar extends UIComponent
 	}
 
 	@Override
-	public IIcon getIcon(int face)
-	{
-		if (face < 0 || face > icons.length)
-			return null;
-
-		return isDisabled() ? disabledIcons[face] : icons[face];
-	}
-
-	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		Shape shape = ShapePreset.GuiXYResizable(width, height, 1, 1);
-		renderer.drawShape(shape);
+		renderer.drawShape(shape, isDisabled() ? disabledIcons : icons);
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		RenderParameters rp = new RenderParameters();
+		GuiIcon icon;
 		int w, h, ox = 0, oy = 0;
 		int l = length - SCROLLER_HEIGHT - 2;
 		if (type == HORIZONTAL)
 		{
-			rp.icon.set(isDisabled() ? horizontalDisabledIcon : horizontalIcon);
+			icon = isDisabled() ? horizontalDisabledIcon : horizontalIcon;
 			w = SCROLLER_HEIGHT;
 			h = SCROLL_THICKNESS - 2;
 			ox = (int) (offset * l);
 		}
 		else
 		{
-			rp.icon.set(disabled ? verticalDisabledIcon : verticalIcon);
+			icon = isDisabled() ? verticalDisabledIcon : verticalIcon;
 			w = SCROLL_THICKNESS - 2;
 			h = SCROLLER_HEIGHT;
 			oy = (int) (offset * l);
@@ -202,6 +213,6 @@ public class UIScrollBar extends UIComponent
 		Shape shape = ShapePreset.GuiElement(w, h);
 		shape.translate(1, 1, 0).translate(ox, oy, 0);
 
-		renderer.drawShape(shape, rp);
+		renderer.drawShape(shape, icon);
 	}
 }

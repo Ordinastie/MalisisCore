@@ -21,7 +21,6 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -38,6 +37,8 @@ public class UISlot extends UIComponent<UISlot>
 	 * Icon to use for the background of this <code>UISlot</code>
 	 */
 	private GuiIcon icon = new GuiIcon(209, 30, 18, 18);
+	private GuiIcon iconLeft = new GuiIcon(209, 30, 1, 18);
+	private GuiIcon iconTop = new GuiIcon(209, 30, 18, 1);
 	/**
 	 * Slot to draw containing the itemStack
 	 */
@@ -57,18 +58,10 @@ public class UISlot extends UIComponent<UISlot>
 	}
 
 	@Override
-	public IIcon getIcon(int face)
-	{
-		return icon;
-	}
-
-	@Override
 	public void setHovered(boolean hovered)
 	{
-		updateTooltip();
 		super.setHovered(hovered);
-
-		MalisisGui.setHoveredItemStack(hovered ? slot.getItemStack() : null);
+		updateTooltip();
 
 		if (hovered && MalisisGui.currentGui().getInventoryContainer().isDraggingItemStack())
 		{
@@ -93,20 +86,14 @@ public class UISlot extends UIComponent<UISlot>
 			lines.set(i, EnumChatFormatting.GRAY + lines.get(i));
 
 		tooltip = new UITooltip().setText(lines);
-
-		if (hovered)
-			MalisisGui.setTooltip(tooltip);
-
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		Shape shape = ShapePreset.GuiElement(18, 18);
-		renderer.drawShape(shape);
+		renderer.drawShape(shape, icon);
 		renderer.next();
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
 	}
 
 	@Override
@@ -131,7 +118,11 @@ public class UISlot extends UIComponent<UISlot>
 		}
 
 		if (itemStack != null)
+		{
+
 			renderer.drawItemStack(itemStack, screenX() + 1, screenY() + 1, format);
+
+		}
 
 		// draw the white shade over the slot
 		if (hovered || draggedItemStack != null)
@@ -156,6 +147,13 @@ public class UISlot extends UIComponent<UISlot>
 			GL11.glEnable(GL11.GL_ALPHA_TEST);
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
+
+		// Dirty fix because Mojang can't count and masks overflow the slots
+		Shape shape = ShapePreset.GuiElement(1, 18).translate(0, 0, 50);
+		renderer.drawShape(shape, iconLeft);
+		shape = ShapePreset.GuiElement(18, 1).translate(0, 0, 50);
+		renderer.drawShape(shape, iconTop);
+
 	}
 
 	@Subscribe

@@ -24,9 +24,10 @@
 
 package net.malisis.core.client.gui;
 
+import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.component.decoration.UITooltip;
+import net.malisis.core.client.gui.event.GuiEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.inventory.MalisisInventoryContainer;
@@ -40,6 +41,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -78,9 +80,14 @@ public class MalisisGui extends GuiScreen
 	 */
 	protected MalisisInventoryContainer inventoryContainer;
 	/**
-	 * Currently hovered itemStack.
+	 * Currently hovered child component
 	 */
-	protected ItemStack hoveredItemStack;
+	protected UIComponent hoveredComponent;
+	/**
+	 * Currently Focus child component
+	 */
+	protected UIComponent focusedComponent;
+
 	/**
 	 * Time when the GUI was opened.
 	 */
@@ -145,6 +152,45 @@ public class MalisisGui extends GuiScreen
 		screen.add(container);
 	}
 
+	protected boolean fireEvent(GuiEvent event)
+	{
+		if (event instanceof MouseEvent)
+		{
+			MouseEvent me = (MouseEvent) event;
+			UIComponent component = container.getComponentAt(me.getX(), me.getY());
+			if (component != null)
+			{
+				if (me instanceof MouseEvent.Press)
+					component.setFocused(true);
+				else if (me instanceof MouseEvent.Move)
+					component.setHovered(true);
+				component.fireMouseEvent(me);
+			}
+		}
+		else if (event instanceof KeyboardEvent)
+			container.fireKeyboardEvent((KeyboardEvent) event);
+		return !event.isCancelled();
+	}
+
+	@Override
+	public void handleMouseInput()
+	{
+		super.handleMouseInput();
+
+		int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
+		int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
+
+		int delta = Mouse.getEventDWheel();
+		if (delta == 0)
+			return;
+		else if (delta > 1)
+			delta = 1;
+		else if (delta < -1)
+			delta = -1;
+
+		fireEvent(new MouseEvent.ScrollWheel(mouseX, mouseY, delta));
+	}
+
 	/**
 	 * Called when a mouse button is pressed down.
 	 */
@@ -160,7 +206,7 @@ public class MalisisGui extends GuiScreen
 		}
 
 		if (container.isInsideBounds(x, y))
-			container.fireMouseEvent(new MouseEvent.Press(x, y, button));
+			fireEvent(new MouseEvent.Press(x, y, button));
 		else if (inventoryContainer != null)
 		{
 			if (inventoryContainer.getPickedItemStack() != null)
@@ -179,8 +225,8 @@ public class MalisisGui extends GuiScreen
 	@Override
 	protected void mouseClickMove(int x, int y, int button, long timer)
 	{
-		if (container.isInsideBounds(x, y))
-			container.fireMouseEvent(new MouseEvent.Drag(lastMouseX, lastMouseY, x, y, button));
+		if (focusedComponent != null)
+			focusedComponent.fireMouseEvent(new MouseEvent.Drag(lastMouseX, lastMouseY, x, y, button));
 	}
 
 	/**
@@ -205,7 +251,7 @@ public class MalisisGui extends GuiScreen
 		}
 
 		if (container.isInsideBounds(x, y))
-			container.fireMouseEvent(new MouseEvent.Release(x, y, button));
+			fireEvent(new MouseEvent.Release(x, y, button));
 	}
 
 	/**
@@ -218,7 +264,7 @@ public class MalisisGui extends GuiScreen
 	protected void doubleClick(int x, int y, int button)
 	{
 		if (container.isInsideBounds(x, y))
-			container.fireMouseEvent(new MouseEvent.DoubleClick(x, y, button));
+			fireEvent(new MouseEvent.DoubleClick(x, y, button));
 	}
 
 	/**
@@ -235,10 +281,7 @@ public class MalisisGui extends GuiScreen
 
 		if (keyCode == Keyboard.KEY_ESCAPE || inventoryContainer != null && keyCode == this.mc.gameSettings.keyBindInventory.getKeyCode())
 		{
-			this.mc.thePlayer.closeScreen();
-			this.mc.displayGuiScreen((GuiScreen) null);
-			this.mc.setIngameFocus();
-			return;
+			close();
 		}
 	}
 
@@ -260,13 +303,15 @@ public class MalisisGui extends GuiScreen
 		if (guiscreenBackground)
 			drawWorldBackground(1);
 
+		if (container == null)
+			return;
+
 		if (container.isInsideBounds(mouseX, mouseY) && (lastMouseX != mouseX || lastMouseY != mouseY))
-			container.fireMouseEvent(new MouseEvent.Move(lastMouseX, lastMouseY, mouseX, mouseY));
+			fireEvent(new MouseEvent.Move(lastMouseX, lastMouseY, mouseX, mouseY));
 
 		RenderHelper.enableGUIStandardItemLighting();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_LIGHTING);
-		GL11.glDisable(GL11.GL_DEPTH_TEST);
 
 		renderer.drawScreen(container, mouseX, mouseY, partialTicks);
 
@@ -275,8 +320,9 @@ public class MalisisGui extends GuiScreen
 			ItemStack itemStack = inventoryContainer.getPickedItemStack();
 			if (itemStack != null)
 				renderer.renderPickedItemStack(itemStack);
-			else
-				renderer.drawTooltip();
+			else if (hoveredComponent != null)
+				renderer.drawTooltip(hoveredComponent.getTooltip());
+
 		}
 
 		GL11.glEnable(GL11.GL_LIGHTING);
@@ -298,7 +344,7 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Display this <code>MalisisGui</code>
+	 * Displays this <code>MalisisGui</code>
 	 */
 	public void display()
 	{
@@ -306,7 +352,18 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Get the current <code>MalisisGui</code> displayed.
+	 * Closes this <code>MalisisGui</code>
+	 */
+	public void close()
+	{
+		this.mc.thePlayer.closeScreen();
+		this.mc.displayGuiScreen((GuiScreen) null);
+		this.mc.setIngameFocus();
+		return;
+	}
+
+	/**
+	 * Gets the current <code>MalisisGui</code> displayed.
 	 * 
 	 * @return null if no GUI being displayed or if not a <code>MalisisGui</code>
 	 */
@@ -337,23 +394,55 @@ public class MalisisGui extends GuiScreen
 		InventoryActionMessage.sendAction(action, slotNumber, code, playerInv);
 	}
 
-	/**
-	 * Set the itemStack currently hovered by the cursor.
-	 * 
-	 * @param itemStack
-	 */
-	public static void setHoveredItemStack(ItemStack itemStack)
+	public static boolean setHoveredComponent(UIComponent component, boolean hovered)
 	{
-		currentGui().hoveredItemStack = itemStack;
+		MalisisGui gui = currentGui();
+		if (gui == null)
+			return false;
+
+		if (gui.hoveredComponent == component)
+		{
+			if (!hovered)
+			{
+				gui.hoveredComponent = null;
+				return true;
+			}
+			return false;
+		}
+
+		if (gui.hoveredComponent != null)
+			gui.hoveredComponent.setHovered(false);
+
+		gui.hoveredComponent = component;
+		return true;
 	}
 
-	/**
-	 * Set the tooltip to be drawn
-	 * 
-	 * @param tooltip
-	 */
-	public static void setTooltip(UITooltip tooltip)
+	public static UIComponent getFocusedComponent()
 	{
-		currentGui().renderer.setTooltip(tooltip);
+		return currentGui() != null ? currentGui().focusedComponent : null;
 	}
+
+	public static boolean setFocusedComponent(UIComponent component, boolean focused)
+	{
+		MalisisGui gui = currentGui();
+		if (gui == null)
+			return false;
+
+		if (gui.focusedComponent == component)
+		{
+			if (!focused)
+			{
+				gui.focusedComponent = null;
+				return true;
+			}
+			return false;
+		}
+
+		if (gui.focusedComponent != null && component != null)
+			gui.focusedComponent.setFocused(false);
+
+		gui.focusedComponent = component;
+		return true;
+	}
+
 }

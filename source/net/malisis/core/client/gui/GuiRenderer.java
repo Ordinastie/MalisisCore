@@ -37,6 +37,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
@@ -91,10 +92,6 @@ public class GuiRenderer extends BaseRenderer
 	 * Determines whether the texture has been changed.
 	 */
 	private boolean defaultTexture = true;
-	/**
-	 * 
-	 */
-	protected UITooltip tooltip;
 
 	public GuiRenderer()
 	{
@@ -127,16 +124,6 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Sets the tooltip to be rendered
-	 * 
-	 * @param tooltip
-	 */
-	public void setTooltip(UITooltip tooltip)
-	{
-		this.tooltip = tooltip;
-	}
-
-	/**
 	 * Draws the component to the screen.
 	 * 
 	 * @param container
@@ -157,7 +144,7 @@ public class GuiRenderer extends BaseRenderer
 		}
 	}
 
-	public void drawTooltip()
+	public void drawTooltip(UITooltip tooltip)
 	{
 		if (tooltip != null)
 		{
@@ -173,14 +160,23 @@ public class GuiRenderer extends BaseRenderer
 	@Override
 	public void drawShape(Shape s, RenderParameters rp)
 	{
+		drawShape(s, rp, (IIcon) null);
+	}
+
+	public void drawShape(Shape s, IIcon... icons)
+	{
+		drawShape(s, null, icons);
+	}
+
+	public void drawShape(Shape s, RenderParameters rp, IIcon... icons)
+	{
 		if (s == null)
 			return;
 
 		shape = s;
 		// move the shape at the right coord on screen
-		shape.translate(currentComponent.screenX(), currentComponent.screenY(), 0);
+		shape.translate(currentComponent.screenX(), currentComponent.screenY(), currentComponent.getZIndex());
 		shapeParams = rp != null ? rp : new RenderParameters();
-		boolean getFaceIcon = shapeParams.icon.get() == null;
 		s.applyMatrix();
 
 		if (shapeParams.applyTexture.get())
@@ -189,33 +185,77 @@ public class GuiRenderer extends BaseRenderer
 		Face[] faces = s.getFaces();
 		for (int i = 0; i < faces.length; i++)
 		{
-			if (getFaceIcon)
-				faces[i].setTexture(currentComponent.getIcon(i), false, false, false);
+			if (icons != null && i < icons.length && icons[i] != null)
+				faces[i].setTexture(icons[i], false, false, false);
 			drawFace(faces[i], rp);
 		}
 	}
 
+	public String clipString(String text, int width)
+	{
+		StringBuilder ret = new StringBuilder();
+		int strWidth = 0;
+		int index = 0;
+		while (index < text.length())
+		{
+			char c = text.charAt(index);
+			strWidth += getCharWidth(c);
+			if (strWidth < width)
+				ret.append(c);
+			else
+				return ret.toString();
+			index++;
+		}
+
+		return ret.toString();
+	}
+
+	public void drawText(String text)
+	{
+		drawText(text, 0, 0, 0, 0xFFFFFF, false);
+	}
+
+	public void drawText(String text, int color, boolean shadow)
+	{
+		drawText(text, 0, 0, 0, color, shadow);
+	}
+
+	public void drawText(String text, int x, int y, int color, boolean shadow)
+	{
+		drawText(text, x, y, 0, color, shadow);
+	}
+
 	/**
-	 * Draws a string in the GUI. Uses FontRenderer.drawString().
+	 * Draws a string in the currently drawn component. x, y, and zIndex are relatives to that component Uses FontRenderer.drawString().
 	 * 
 	 * @param text
 	 * @param x
 	 * @param y
+	 * @param zIndex
 	 * @param color
 	 * @param shadow
 	 */
-	public void drawString(String text, int x, int y, int color, boolean shadow)
+	public void drawText(String text, int x, int y, int zIndex, int color, boolean shadow)
+	{
+		drawString(text, currentComponent.screenX() + x, currentComponent.screenY() + y, currentComponent.getZIndex() + zIndex, color,
+				shadow);
+	}
+
+	public void drawString(String text, int x, int y, int z, int color, boolean shadow)
 	{
 		if (fontRenderer == null)
 			return;
 
 		text = StatCollector.translateToLocal(text);
 
-		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glPushMatrix();
+		GL11.glTranslatef(0, 0, z);
+		// GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
 		fontRenderer.drawString(text, x, y, color, shadow);
+		GL11.glPopMatrix();
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		// GL11.glEnable(GL11.GL_DEPTH_TEST);
 		setDefaultTexture();
 	}
 
@@ -338,6 +378,7 @@ public class GuiRenderer extends BaseRenderer
 	 */
 	public static int getStringWidth(String str)
 	{
+		str = StatCollector.translateToLocal(str);
 		return fontRenderer.getStringWidth(str);
 	}
 

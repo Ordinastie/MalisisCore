@@ -108,18 +108,10 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	}
 
 	@Override
-	public GuiIcon getIcon(int face)
-	{
-		return null;
-	}
-
-	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		RenderParameters rp = new RenderParameters();
-		rp.icon.set(isDisabled() ? checkboxBackgroundDisabled : checkboxBackground);
 		Shape shape = ShapePreset.GuiElement(10, 10).translate(1, 0, 0);
-		renderer.drawShape(shape, rp);
+		renderer.drawShape(shape, isDisabled() ? checkboxBackgroundDisabled : checkboxBackground);
 
 		renderer.next();
 
@@ -132,7 +124,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 			OpenGlHelper.glBlendFunc(770, 771, 1, 0);
 			GL11.glShadeModel(GL11.GL_SMOOTH);
 
-			rp = new RenderParameters();
+			RenderParameters rp = new RenderParameters();
 			rp.colorMultiplier.set(0xFFFFFF);
 			rp.alpha.set(80);
 			rp.useTexture.set(false);
@@ -149,9 +141,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 
 		if (label != null)
 		{
-			label.drawBackground(renderer, mouseX, mouseY, partialTick);
-			renderer.next();
-			label.drawForeground(renderer, mouseX, mouseY, partialTick);
+			label.draw(renderer, mouseX, mouseY, partialTick);
 		}
 	}
 
@@ -161,14 +151,9 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		if (checked)
 		{
 			GL11.glEnable(GL11.GL_BLEND);
-			RenderParameters rp = new RenderParameters();
-			rp.icon.set(checkBoxChecked);
-			if (isDisabled())
-				rp.icon.set(checkBoxDisabled);
-			else if (hovered || (label != null && label.isHovered()))
-				rp.icon.set(checkBoxHovered);
+			GuiIcon icon = isDisabled() ? checkBoxDisabled : (hovered || (label != null && label.isHovered()) ? checkBoxHovered : checkBoxChecked);
 			Shape shape = ShapePreset.GuiElement(12, 10);
-			renderer.drawShape(shape, rp);
+			renderer.drawShape(shape, icon);
 		}
 	}
 
@@ -177,7 +162,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	{
 		if (event.getButton() == MouseButton.LEFT)
 		{
-			if (fireEvent(new CheckedEvent(this, !this.checked)))
+			if (fireEvent(new ComponentEvent.ValueChanged(this, this.checked, !this.checked)))
 				checked = !checked;
 		}
 	}
@@ -190,7 +175,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 
 		if (event.getKeyCode() == Keyboard.KEY_SPACE)
 		{
-			if (fireEvent(new CheckedEvent(this, !this.checked)))
+			if (fireEvent(new ComponentEvent.ValueChanged(this, this.checked, !this.checked)))
 				checked = !checked;
 		}
 	}
@@ -200,23 +185,6 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	{
 		return this.getClass().getName() + "[ text=" + (label != null ? label.getText() : "") + ", checked=" + this.checked + ", "
 				+ this.getPropertyString() + " ]";
-	}
-
-	public class CheckedEvent extends ComponentEvent<UICheckBox>
-	{
-		private boolean checked;
-
-		public CheckedEvent(UICheckBox component, boolean checked)
-		{
-			super(component);
-			this.checked = checked;
-		}
-
-		public boolean getNewState()
-		{
-			return checked;
-		}
-
 	}
 
 }

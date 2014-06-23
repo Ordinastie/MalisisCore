@@ -33,7 +33,6 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.preset.ShapePreset;
-import net.minecraft.util.IIcon;
 
 /**
  * UITooltip
@@ -61,10 +60,12 @@ public class UITooltip extends UIComponent
 	{
 		width = 16;
 		height = 16;
+		zIndex = 300;
 	}
 
 	public UITooltip(String text)
 	{
+		this();
 		setText(text);
 	}
 
@@ -95,15 +96,6 @@ public class UITooltip extends UIComponent
 		width += padding * 2;
 	}
 
-	@Override
-	public IIcon getIcon(int face)
-	{
-		if (face < 0 || face > icons.length)
-			return null;
-
-		return icons[face];
-	}
-
 	protected int getOffsetX()
 	{
 		return 8;
@@ -118,10 +110,10 @@ public class UITooltip extends UIComponent
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		Shape shape = ShapePreset.GuiXYResizable(width, height);
-		shape.translate(mouseX + getOffsetX(), mouseY + getOffsetY(), 300);
+		shape.translate(mouseX + getOffsetX(), mouseY + getOffsetY(), 0);
 		RenderParameters rp = new RenderParameters();
 		rp.alpha.set(255);
-		renderer.drawShape(shape, rp);
+		renderer.drawShape(shape, rp, icons);
 	}
 
 	@Override
@@ -135,7 +127,7 @@ public class UITooltip extends UIComponent
 			int sy = y;
 			if (i > 0)
 				sy += 2;
-			renderer.drawString(s, x, sy + (GuiRenderer.FONT_HEIGHT + 1) * i, 0xFFFFFF, true);
+			renderer.drawString(s, x, sy + (GuiRenderer.FONT_HEIGHT + 1) * i, zIndex + 1, 0xFFFFFF, true);
 			i++;
 		}
 	}

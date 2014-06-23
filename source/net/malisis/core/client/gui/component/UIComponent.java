@@ -31,10 +31,11 @@ import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.component.interaction.IScrollable;
 import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.event.ComponentEvent.FocusStateChanged;
+import net.malisis.core.client.gui.event.ComponentEvent.HoveredStateChanged;
 import net.malisis.core.client.gui.event.GuiEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.minecraft.util.IIcon;
 
 import com.google.common.eventbus.EventBus;
 
@@ -45,10 +46,15 @@ import com.google.common.eventbus.EventBus;
  */
 public abstract class UIComponent<T extends UIComponent>
 {
+	public final static int INHERITED = Integer.MIN_VALUE;
 	/**
 	 * Position of this <code>UIComponent</code>
 	 */
 	protected int x, y;
+	/**
+	 * Z index of the component
+	 */
+	protected int zIndex = INHERITED;
 	/**
 	 * Position anchor for this <code>UIComponent</code>. See {@link net.malisis.core.client.gui.Anchor Anchor}
 	 */
@@ -65,7 +71,7 @@ public abstract class UIComponent<T extends UIComponent>
 	 * The parent <code>UIContainer</code> of this <code>UIComponent</code>. Can be used to pass through things or manipulate the parent's
 	 * other children.
 	 */
-	private UIContainer parent;
+	protected UIContainer parent;
 	/**
 	 * The name of this <code>UIComponent</code>. Can be used to retrieve this back from a container.
 	 */
@@ -111,6 +117,12 @@ public abstract class UIComponent<T extends UIComponent>
 		return (T) this;
 	}
 
+	public T unregister(Object object)
+	{
+		bus.unregister(object);
+		return (T) this;
+	}
+
 	public boolean fireEvent(ComponentEvent event)
 	{
 		bus.post(event);
@@ -125,7 +137,7 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public boolean fireMouseEvent(MouseEvent event)
 	{
-		if (isDisabled())
+		if (isDisabled() || !isVisible())
 			return false;
 
 		bus.post(event);
@@ -188,6 +200,17 @@ public abstract class UIComponent<T extends UIComponent>
 		return y;
 	}
 
+	public T setZIndex(int zIndex)
+	{
+		this.zIndex = zIndex;
+		return (T) this;
+	}
+
+	public int getZIndex()
+	{
+		return zIndex == INHERITED ? 0 : zIndex;
+	}
+
 	/**
 	 * Set the anchor for this <code>UIComponent</code>'s position
 	 * 
@@ -247,8 +270,13 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public void setHovered(boolean hovered)
 	{
+		boolean flag = this.hovered != hovered;
+		flag |= MalisisGui.setHoveredComponent(this, hovered);
+		if (!flag)
+			return;
+
 		this.hovered = hovered;
-		MalisisGui.setTooltip(hovered ? tooltip : null);
+		fireEvent(new HoveredStateChanged(this, hovered));
 	}
 
 	/**
@@ -271,7 +299,13 @@ public abstract class UIComponent<T extends UIComponent>
 		if (isDisabled())
 			return;
 
+		boolean flag = this.focused != focused;
+		flag |= MalisisGui.setFocusedComponent(this, focused);
+		if (!flag)
+			return;
+
 		this.focused = focused;
+		fireEvent(new FocusStateChanged(this, focused));
 	}
 
 	/**
@@ -317,11 +351,19 @@ public abstract class UIComponent<T extends UIComponent>
 	 * 
 	 * @param visible the visibility for this component
 	 */
-	public void setVisible(boolean visible)
+	public T setVisible(boolean visible)
 	{
 		this.visible = visible;
+		if (!visible)
+		{
+			this.setHovered(false);
+			this.setFocused(false);
+		}
+
 		if (parent != null)
 			parent.onContentUpdate();
+
+		return (T) this;
 	}
 
 	/**
@@ -341,7 +383,10 @@ public abstract class UIComponent<T extends UIComponent>
 	{
 		this.disabled = disabled;
 		if (disabled)
+		{
+			setHovered(false);
 			setFocused(false);
+		}
 		return (T) this;
 	}
 
@@ -408,7 +453,17 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public boolean isInsideBounds(int x, int y)
 	{
+		if (!isVisible())
+			return false;
 		return x >= screenX() && x <= screenX() + width && y >= screenY() && y <= screenY() + height;
+	}
+
+	/**
+	 * 
+	 */
+	public UIComponent getComponentAt(int x, int y)
+	{
+		return isInsideBounds(x, y) ? this : null;
 	}
 
 	/**
@@ -499,12 +554,13 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public void draw(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (!visible)
+		if (!isVisible())
 			return;
 
 		renderer.currentComponent = this;
 		drawBackground(renderer, mouseX, mouseY, partialTick);
 		renderer.next();
+		renderer.currentComponent = this;
 		drawForeground(renderer, mouseX, mouseY, partialTick);
 		renderer.next();
 	}
@@ -520,14 +576,6 @@ public abstract class UIComponent<T extends UIComponent>
 		return "size=" + width + "," + height + " | position=" + x + "," + y + " | container=" + containerX() + "," + containerY()
 				+ " | screen=" + screenX() + "," + screenY();
 	}
-
-	/**
-	 * Get the icon for the <code>face</code>. Called by the {@link GuiRenderer} from <code>drawShape()</code>.
-	 * 
-	 * @param face
-	 * @return IIcon to be used for the face
-	 */
-	public abstract IIcon getIcon(int face);
 
 	/**
 	 * Called first when drawing this <code>UIComponent</code>.
@@ -548,4 +596,5 @@ public abstract class UIComponent<T extends UIComponent>
 	 * @param partialTick
 	 */
 	public abstract void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
+
 }

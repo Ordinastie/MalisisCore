@@ -148,7 +148,7 @@ public class MalisisSlot
 	 */
 	public int getSlotStackLimit()
 	{
-		if (inventory != null)
+		if (inventory == null)
 			return 64;
 
 		return this.inventory.getInventoryStackLimit();

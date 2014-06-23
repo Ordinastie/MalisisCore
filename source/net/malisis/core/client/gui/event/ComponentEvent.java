@@ -31,9 +31,8 @@ import net.malisis.core.client.gui.component.UIComponent;
  * 
  * @author PaleoCrafter
  */
-public class ComponentEvent<T extends UIComponent> extends GuiEvent
+public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 {
-
 	private T component;
 
 	public ComponentEvent(T component)
@@ -44,5 +43,60 @@ public class ComponentEvent<T extends UIComponent> extends GuiEvent
 	public T getComponent()
 	{
 		return component;
+	}
+
+	public abstract static class StateChanged<T extends UIComponent> extends ComponentEvent<T>
+	{
+		private boolean state;
+
+		public StateChanged(T component, boolean state)
+		{
+			super(component);
+			this.state = state;
+		}
+
+		public boolean getState()
+		{
+			return state;
+		}
+	}
+
+	public static class HoveredStateChanged<T extends UIComponent> extends StateChanged<T>
+	{
+		public HoveredStateChanged(T component, boolean hovered)
+		{
+			super(component, hovered);
+		}
+	}
+
+	public static class FocusStateChanged<T extends UIComponent> extends StateChanged<T>
+	{
+		public FocusStateChanged(T component, boolean focused)
+		{
+			super(component, focused);
+		}
+	}
+
+	public static class ValueChanged<T extends UIComponent, S> extends ComponentEvent<T>
+	{
+		private S oldValue;
+		private S newValue;
+
+		public ValueChanged(T component, S oldValue, S newValue)
+		{
+			super(component);
+			this.oldValue = oldValue;
+			this.newValue = newValue;
+		}
+
+		public S getOldValue()
+		{
+			return oldValue;
+		}
+
+		public S getNewValue()
+		{
+			return newValue;
+		}
 	}
 }

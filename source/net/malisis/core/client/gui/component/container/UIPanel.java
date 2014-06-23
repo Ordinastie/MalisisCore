@@ -11,6 +11,9 @@ import net.malisis.core.client.gui.component.interaction.UIScrollBar;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.preset.ShapePreset;
+import net.minecraft.client.gui.GuiScreen;
+
+import com.google.common.eventbus.Subscribe;
 
 public class UIPanel extends UIContainer implements IScrollable
 {
@@ -62,12 +65,6 @@ public class UIPanel extends UIContainer implements IScrollable
 			return super.fireMouseEvent(event);
 
 		return false;
-	}
-
-	@Override
-	public boolean isInsideBounds(int x, int y)
-	{
-		return super.isInsideBounds(x, y);
 	}
 
 	public boolean isInsideBounds(int x, int y, boolean scrolls)
@@ -172,21 +169,29 @@ public class UIPanel extends UIContainer implements IScrollable
 			}
 		}
 
-		this.contentHeight = contentHeight;
+		this.contentHeight = contentHeight + verticalPadding;
 		if (verticalScroll != null)
 		{
-			verticalScroll.setScrollableLength(contentHeight);
-			if (contentHeight == h)
+			verticalScroll.setScrollableLength(this.contentHeight);
+			if (this.contentHeight == h)
 				verticalScroll.scrollTo(0);
 		}
 
-		this.contentWidth = contentWidth;
+		this.contentWidth = contentWidth + horizontalPadding;
 		if (horizontalScroll != null)
 		{
-			horizontalScroll.setScrollableLength(contentWidth);
-			if (contentWidth == w)
+			horizontalScroll.setScrollableLength(this.contentWidth);
+			if (this.contentWidth == w)
 				horizontalScroll.scrollTo(0);
 		}
+	}
+
+	@Subscribe
+	public void onScrollWheel(MouseEvent.ScrollWheel event)
+	{
+		UIScrollBar sb = GuiScreen.isShiftKeyDown() ? horizontalScroll : verticalScroll;
+		if (GuiScreen.isShiftKeyDown() ? allowHorizontalScroll : allowVerticalScroll)
+			sb.scrollBy(event.getDelta() * (GuiScreen.isCtrlKeyDown() ? 15 : 5));
 	}
 
 	@Override
@@ -207,16 +212,7 @@ public class UIPanel extends UIContainer implements IScrollable
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		Shape shape = ShapePreset.GuiXYResizable(width, height);
-		renderer.drawShape(shape);
-	}
-
-	@Override
-	public GuiIcon getIcon(int face)
-	{
-		if (face < 0 || face > icons.length)
-			return null;
-
-		return icons[face];
+		renderer.drawShape(shape, icons);
 	}
 
 	@Override

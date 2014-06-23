@@ -39,7 +39,6 @@ import net.malisis.core.renderer.preset.ShapePreset;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
-import net.minecraft.util.IIcon;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -86,6 +85,8 @@ public class UITextField extends UIComponent<UITextField>
 	private Pattern filter;
 
 	private boolean selectAllOnRelease = false;
+
+	protected boolean autoSelectOnFocus = false;
 
 	/**
 	 * Color of the text for this <code>UITextField</code>
@@ -147,15 +148,20 @@ public class UITextField extends UIComponent<UITextField>
 		if (selectionPosition != -1)
 			deleteSelectedText();
 
-		StringBuilder temp = new StringBuilder(this.text.toString());
+		String oldValue = this.text.toString();
+		StringBuilder temp = new StringBuilder(oldValue);
 		temp.insert(cursorPosition, text);
+		String newValue = temp.toString();
 
 		if (!validateText(temp.toString()))
 			return;
 
+		if (!fireEvent(new ComponentEvent.ValueChanged(this, oldValue, newValue)))
+			return;
+
 		this.text.insert(cursorPosition, text);
 		setCursorPosition(cursorPosition + text.length());
-		fireEvent(new TextChanged(this));
+
 	}
 
 	private int stringWidth(int start, int end)
@@ -203,14 +209,14 @@ public class UITextField extends UIComponent<UITextField>
 	@Override
 	public void setFocused(boolean focused)
 	{
-		if (isDisabled())
+		if (isDisabled() || !isVisible())
 			return;
 
-		this.focused = focused;
-		if (this.focused)
+		if (!this.focused)
 			selectAllOnRelease = true;
 		else
 			unselectText();
+		super.setFocused(focused);
 	}
 
 	/**
@@ -261,6 +267,12 @@ public class UITextField extends UIComponent<UITextField>
 			filter = null;
 		else
 			filter = Pattern.compile(regex);
+		return this;
+	}
+
+	public UITextField setAutoSelectOnFocus(boolean auto)
+	{
+		autoSelectOnFocus = auto;
 		return this;
 	}
 
@@ -387,19 +399,10 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	@Override
-	public IIcon getIcon(int face)
-	{
-		if (face < 0 || face > iconTextfield.length)
-			return null;
-
-		return isDisabled() ? iconTextfieldDisabled[face] : iconTextfield[face];
-	}
-
-	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		Shape shape = ShapePreset.GuiXResizable(width, height, 3);
-		renderer.drawShape(shape);
+		renderer.drawShape(shape, isDisabled() ? iconTextfieldDisabled : iconTextfield);
 	}
 
 	@Override
@@ -418,7 +421,7 @@ public class UITextField extends UIComponent<UITextField>
 		int end = text.length();
 		while (stringWidth(charOffset, end) > width - 2)
 			end--;
-		renderer.drawString(text.substring(charOffset, end), screenX() + 2, screenY() + 2, isDisabled() ? 0xAAAAAA : textColor, true);
+		renderer.drawText(text.substring(charOffset, end), 2, 2, isDisabled() ? 0xAAAAAA : textColor, true);
 	}
 
 	public void drawCursor(GuiRenderer renderer)
@@ -486,7 +489,7 @@ public class UITextField extends UIComponent<UITextField>
 	@Subscribe
 	public void onClick(MouseEvent.Release event)
 	{
-		if (!selectAllOnRelease)
+		if (!autoSelectOnFocus || !selectAllOnRelease)
 			return;
 
 		setCursorPosition(0);
@@ -584,14 +587,6 @@ public class UITextField extends UIComponent<UITextField>
 				return true;
 			default:
 				return false;
-		}
-	}
-
-	public static class TextChanged extends ComponentEvent<UITextField>
-	{
-		public TextChanged(UITextField component)
-		{
-			super(component);
 		}
 	}
 }

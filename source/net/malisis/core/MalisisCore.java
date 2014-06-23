@@ -8,16 +8,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import net.malisis.core.configuration.ConfigurationGui;
+import net.malisis.core.configuration.Settings;
 import net.malisis.core.demo.minty.Minty;
 import net.malisis.core.demo.stargate.Stargate;
 import net.malisis.core.demo.test.Test;
 import net.malisis.core.packet.NetworkHandler;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.StatCollector;
+import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -30,6 +36,7 @@ import com.google.common.eventbus.Subscribe;
 import cpw.mods.fml.client.FMLFileResourcePack;
 import cpw.mods.fml.client.FMLFolderResourcePack;
 import cpw.mods.fml.common.DummyModContainer;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.LoadController;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -38,8 +45,10 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
 import cpw.mods.fml.relauncher.ReflectionHelper;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
-public class MalisisCore extends DummyModContainer
+public class MalisisCore extends DummyModContainer implements IMalisisMod
 {
 	public static final String modid = "malisiscore";
 	public static final String modname = "Malisis Core";
@@ -51,6 +60,8 @@ public class MalisisCore extends DummyModContainer
 	public static Logger log;
 	public static Configuration config;
 
+	private HashMap<String, IMalisisMod> registeredMods = new HashMap<>();
+
 	// demos
 	private static boolean demosEnabled = false;
 	public static Test test;
@@ -60,6 +71,7 @@ public class MalisisCore extends DummyModContainer
 	public static boolean isObfEnv = false;
 
 	private HashMap<Block, Block> originals = new HashMap<>();
+	private boolean keepConfigurationGuiOpen;
 
 	public MalisisCore()
 	{
@@ -74,6 +86,40 @@ public class MalisisCore extends DummyModContainer
 		meta.description = "API rendering and ASM transformations.";
 
 		instance = this;
+	}
+
+	@Override
+	public String getModId()
+	{
+		return modid;
+	}
+
+	@Override
+	public String getName()
+	{
+		return modname;
+	}
+
+	@Override
+	public String getVersion()
+	{
+		return version;
+	}
+
+	@Override
+	public Settings getSettings()
+	{
+		return null;
+	}
+
+	public static void registerMod(IMalisisMod mod)
+	{
+		instance.registeredMods.put(mod.getModId(), mod);
+	}
+
+	public static IMalisisMod getMod(String id)
+	{
+		return instance.registeredMods.get(id);
 	}
 
 	@Override
@@ -126,9 +172,10 @@ public class MalisisCore extends DummyModContainer
 	@Subscribe
 	public void serverStart(FMLServerStartingEvent event)
 	{
-		event.registerServerCommand(new MalisisCommand());
+		ClientCommandHandler.instance.registerCommand(new MalisisCommand());
 	}
 
+	@SideOnly(Side.CLIENT)
 	@SubscribeEvent
 	public void onTextureStitchEvent(TextureStitchEvent.Pre event)
 	{
@@ -142,12 +189,35 @@ public class MalisisCore extends DummyModContainer
 		}
 	}
 
+	@SubscribeEvent
+	public void onGuiClose(GuiOpenEvent event)
+	{
+		if (!keepConfigurationGuiOpen || event.gui != null)
+			return;
+
+		keepConfigurationGuiOpen = false;
+		event.setCanceled(true);
+	}
+
 	public static boolean toggleDemos()
 	{
 		demosEnabled = !demosEnabled;
 		config.get(Configuration.CATEGORY_GENERAL, "demosEnabled", false).set(demosEnabled);
 		config.save();
 		return demosEnabled;
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static boolean openConfigurationGui(IMalisisMod mod, boolean keepOpen)
+	{
+		Settings settings = mod.getSettings();
+		if (settings == null)
+			return false;
+
+		instance.keepConfigurationGuiOpen = keepOpen;
+		(new ConfigurationGui(settings)).display();
+
+		return true;
 	}
 
 	public static void replaceVanillaBlock(int id, String name, String srgFieldName, Block block, Block vanilla)
@@ -192,14 +262,21 @@ public class MalisisCore extends DummyModContainer
 		return instance.originals.get(block);
 	}
 
-	public static void message(Object text)
+	public static void message(Object text, Object... data)
 	{
-		if (text != null)
+		if (text == null)
+			return;
+
+		ChatComponentText msg = new ChatComponentText(StatCollector.translateToLocalFormatted(text.toString(), data));
+		if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
 		{
-			ChatComponentText msg = new ChatComponentText(text.toString());
 			MinecraftServer server = MinecraftServer.getServer();
 			if (server != null)
 				server.getConfigurationManager().sendChatMsg(msg);
+		}
+		else
+		{
+			Minecraft.getMinecraft().thePlayer.addChatMessage(msg);
 		}
 	}
 

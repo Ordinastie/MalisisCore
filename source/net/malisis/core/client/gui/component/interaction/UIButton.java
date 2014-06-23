@@ -28,15 +28,20 @@ import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.preset.ShapePreset;
+import net.malisis.core.util.MouseButton;
+
+import com.google.common.eventbus.Subscribe;
 
 /**
  * UIButton
  * 
  * @author PaleoCrafter
  */
-public class UIButton extends UIComponent
+public class UIButton extends UIComponent<UIButton>
 {
 	//@formatter:off
 	public static GuiIcon[] iconButton = new GuiIcon[] { 			new GuiIcon(0,		20, 	5, 		20),
@@ -93,7 +98,7 @@ public class UIButton extends UIComponent
 	public UIButton setSize(int width)
 	{
 		autoWidth = width == 0;
-		int extraWidth = label.getWidth() % 2 == 0 ? 6 : 7; 
+		int extraWidth = label.getWidth() % 2 == 0 ? 6 : 7;
 		this.width = Math.max(width, label.getWidth() + extraWidth);
 		this.height = 20;
 		return this;
@@ -107,25 +112,25 @@ public class UIButton extends UIComponent
 	 * @return this <code>UILabel</code>
 	 */
 	@Override
-	public UIComponent setSize(int width, int height)
+	public UIButton setSize(int width, int height)
 	{
 		return setSize(width);
 	}
 
 	@Override
-	public GuiIcon getIcon(int face)
+	public UIButton setZIndex(int zIndex)
 	{
-		if (face < 0 || face > iconButton.length)
-			return null;
-
-		return hovered ? iconButtonHovered[face] : iconButton[face];
+		super.setZIndex(zIndex);
+		label.setZIndex(zIndex + 1);
+		return this;
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		GuiIcon[] icons = isDisabled() ? iconButtonDisabled : (hovered ? iconButtonHovered : iconButton);
 		Shape shape = ShapePreset.GuiXResizable(width, height);
-		renderer.drawShape(shape);
+		renderer.drawShape(shape, icons);
 	}
 
 	@Override
@@ -134,14 +139,58 @@ public class UIButton extends UIComponent
 		int x = (width - label.getWidth()) / 2;
 		int y = (height - label.getHeight() + 2) / 2;
 
-		label.setPosition(screenX() + x, screenY() + y );
+		label.setPosition(screenX() + x, screenY() + y);
 		label.draw(renderer, mouseX, mouseY, partialTick);
+	}
+
+	@Subscribe
+	public void onClick(MouseEvent.Release event)
+	{
+		if (event.getButton() == MouseButton.LEFT)
+			fireEvent(new ClickedEvent(this, event));
 	}
 
 	@Override
 	public String toString()
 	{
 		return this.getClass().getName() + "[ text=" + label.getText() + ", " + this.getPropertyString() + " ]";
+	}
+
+	public static class ClickedEvent extends ComponentEvent<UIButton>
+	{
+		private int x, y;
+		private MouseButton button;
+		private int buttonCode;
+
+		public ClickedEvent(UIButton component, MouseEvent.Release mouseEvent)
+		{
+			super(component);
+			this.x = mouseEvent.getX();
+			this.y = mouseEvent.getY();
+			this.button = mouseEvent.getButton();
+			this.buttonCode = mouseEvent.getButtonCode();
+		}
+
+		public int getX()
+		{
+			return x;
+		}
+
+		public int getY()
+		{
+			return y;
+		}
+
+		public MouseButton getButton()
+		{
+			return button;
+		}
+
+		public int getButtonCode()
+		{
+			return buttonCode;
+		}
+
 	}
 
 }

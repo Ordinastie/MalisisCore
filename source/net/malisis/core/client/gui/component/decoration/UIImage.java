@@ -34,54 +34,46 @@ import net.minecraft.util.ResourceLocation;
 
 /**
  * UIImage
- *
+ * 
  * @author PaleoCrafter
  */
 public class UIImage extends UIComponent
 {
-    public static final ResourceLocation BLOCKS_TEXTURE = TextureMap.locationBlocksTexture;
-    public static final ResourceLocation ITEMS_TEXTURE = TextureMap.locationItemsTexture;
-    
-    /**
-     * Resource location for the texture to use
-     */
-    private ResourceLocation texture;
-    /**
-     * IIcon to use for the texture
-     */
-    private IIcon icon = null;
+	public static final ResourceLocation BLOCKS_TEXTURE = TextureMap.locationBlocksTexture;
+	public static final ResourceLocation ITEMS_TEXTURE = TextureMap.locationItemsTexture;
 
-    public UIImage(IIcon icon, ResourceLocation rl)
-    {
-    	this.icon = icon;
-    	this.texture = rl;
-    	this.width = 16;
-    	this.height = 16;
-    }
+	/**
+	 * Resource location for the texture to use
+	 */
+	private ResourceLocation texture;
+	/**
+	 * IIcon to use for the texture
+	 */
+	private IIcon icon = null;
 
-	@Override
-	public IIcon getIcon(int face)
+	public UIImage(IIcon icon, ResourceLocation rl)
 	{
-		return icon != null ? icon : GuiIcon.iconFixedSized;
+		this.icon = icon;
+		this.texture = rl;
+		this.width = 16;
+		this.height = 16;
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-	}
+	{}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.bindTexture(texture);		
-		renderer.drawShape(ShapePreset.GuiElement(width, height));		
+		renderer.bindTexture(texture);
+		renderer.drawShape(ShapePreset.GuiElement(width, height), icon != null ? icon : GuiIcon.iconFixedSized);
 	}
-	
-    
-    @Override
-    public String toString()
-    {
-        return this.getClass().getName() + "[ texture=" + this.texture + ", " + this.getPropertyString() + " ]";
-    }
-    
+
+	@Override
+	public String toString()
+	{
+		return this.getClass().getName() + "[ texture=" + this.texture + ", " + this.getPropertyString() + " ]";
+	}
+
 }

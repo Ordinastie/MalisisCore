@@ -196,11 +196,11 @@ public class StargateRenderer extends BaseRenderer
 	@Override
 	public void render()
 	{
-		if (typeRender == TYPE_TESR_WORLD)
+		if (renderType == TYPE_TESR_WORLD)
 			renderStargateTileEntity();
-		else if (typeRender == TYPE_WORLD)
+		else if (renderType == TYPE_ISBRH_WORLD)
 			renderStargateBlock();
-		else if (typeRender == TYPE_ISBRH_INVENTORY)
+		else if (renderType == TYPE_ISBRH_INVENTORY)
 		{
 			RenderParameters rp = new RenderParameters();
 			rp.colorMultiplier.set(0x6666AA);

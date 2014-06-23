@@ -27,7 +27,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	/**
 	 * Set rendering for world
 	 */
-	public static final int TYPE_WORLD = 1;
+	public static final int TYPE_ISBRH_WORLD = 1;
 	/**
 	 * Set rendering for inventory with ISBRH
 	 */
@@ -66,9 +66,19 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected int x, y, z;
 	/**
+	 * ItemStack to render
+	 */
+	protected ItemStack itemStack;
+	/**
+	 * Type of item rendering.
+	 * 
+	 * @see {@link ItemRenderType}
+	 */
+	protected ItemRenderType itemRenderType;
+	/**
 	 * Type of rendering : <code>TYPE_WORLD</code> or <code>TYPE_INVENTORY</code>
 	 */
-	protected int typeRender;
+	protected int renderType;
 	/**
 	 * Mode of rendering
 	 */
@@ -122,9 +132,9 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	// #region set()
-	public BaseRenderer reset()
+	public void reset()
 	{
-		this.typeRender = 0;
+		this.renderType = 0;
 		this.modeRender = 0;
 		this.world = null;
 		this.block = null;
@@ -133,10 +143,9 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		this.y = 0;
 		this.z = 0;
 		this.overrideTexture = null;
-		return this;
 	}
 
-	public BaseRenderer set(IBlockAccess world, Block block, int x, int y, int z, int metadata)
+	public void set(IBlockAccess world, Block block, int x, int y, int z, int metadata)
 	{
 		this.world = world;
 		this.block = block;
@@ -144,27 +153,41 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		return this;
 	}
 
-	public BaseRenderer set(Block block)
+	public void set(Block block)
 	{
-		return set(world, block, x, y, z, blockMetadata);
+		set(world, block, x, y, z, blockMetadata);
 	}
 
-	public BaseRenderer set(int blockMetadata)
+	public void set(int blockMetadata)
 	{
-		return set(world, block, x, y, z, blockMetadata);
+		set(world, block, x, y, z, blockMetadata);
 	}
 
-	public BaseRenderer set(Block block, int blockMetadata)
+	public void set(Block block, int blockMetadata)
 	{
-		return set(world, block, x, y, z, blockMetadata);
+		set(world, block, x, y, z, blockMetadata);
 	}
 
-	public BaseRenderer set(int x, int y, int z)
+	public void set(int x, int y, int z)
 	{
-		return set(world, block, x, y, z, blockMetadata);
+		set(world, block, x, y, z, blockMetadata);
+	}
+
+	public void set(TileEntity te, float partialTick)
+	{
+		set(te.getWorldObj(), te.getBlockType(), te.xCoord, te.yCoord, te.zCoord, te.getBlockMetadata());
+		this.partialTick = partialTick;
+		this.tileEntity = te;
+	}
+
+	public void set(ItemRenderType type, ItemStack itemStack)
+	{
+		if (itemStack.getItem() instanceof ItemBlock)
+			set(Block.getBlockFromItem(itemStack.getItem()));
+		this.itemStack = itemStack;
+		this.itemRenderType = type;
 	}
 
 	// #end
@@ -178,8 +201,8 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	public void renderInventoryBlock(Block block, int metadata, int modelId, RenderBlocks renderer, RenderParameters rp)
 	{
-		renderBlocks = renderer;
 		set(block, metadata);
+		renderBlocks = renderer;
 		prepare(TYPE_ISBRH_INVENTORY);
 		render();
 		clean();
@@ -188,10 +211,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	@Override
 	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer)
 	{
+		set(world, block, x, y, z, world.getBlockMetadata(x, y, z));
 		renderBlocks = renderer;
 		vertexDrawn = false;
-		set(world, block, x, y, z, world.getBlockMetadata(x, y, z));
-		prepare(TYPE_WORLD);
+
+		prepare(TYPE_ISBRH_WORLD);
 		if (renderer.hasOverrideBlockTexture())
 			overrideTexture = renderer.overrideBlockTexture;
 		render();
@@ -223,14 +247,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data)
 	{
-		renderItem(type, item, null, data);
-	}
-
-	public void renderItem(ItemRenderType type, ItemStack item, RenderParameters rp, Object... data)
-	{
-		if (item.getItem() instanceof ItemBlock)
-			set(Block.getBlockFromItem(item.getItem()));
-
+		set(type, item);
 		prepare(TYPE_ITEM_INVENTORY);
 		render();
 		clean();
@@ -240,17 +257,10 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	// #region TESR
 	@Override
-	public void renderTileEntityAt(TileEntity te, double x, double y, double z, float f)
+	public void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTick)
 	{
-		renderTileEntityAt(te, x, y, z, f, null);
-	}
-
-	public void renderTileEntityAt(TileEntity te, double x, double y, double z, float f, RenderParameters rp)
-	{
-		set(te.getWorldObj(), te.getBlockType(), te.xCoord, te.yCoord, te.zCoord, te.getBlockMetadata());
+		set(te, partialTick);
 		prepare(TYPE_TESR_WORLD, x, y, z);
-		partialTick = f;
-		tileEntity = te;
 		render();
 		clean();
 	}
@@ -266,8 +276,8 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	public void prepare(int typeRender, double... data)
 	{
-		this.typeRender = typeRender;
-		if (typeRender == TYPE_WORLD)
+		this.renderType = typeRender;
+		if (typeRender == TYPE_ISBRH_WORLD)
 		{
 			tessellatorShift();
 		}
@@ -278,6 +288,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		}
 		else if (typeRender == TYPE_ITEM_INVENTORY)
 		{
+			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
 			t.startDrawingQuads();
 		}
 		else if (typeRender == TYPE_TESR_WORLD)
@@ -292,7 +303,6 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 			bindTexture(TextureMap.locationBlocksTexture);
 
-			t = Tessellator.instance;
 			t.startDrawingQuads();
 		}
 	}
@@ -305,20 +315,21 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	public void clean()
 	{
-		if (typeRender == TYPE_WORLD)
+		if (renderType == TYPE_ISBRH_WORLD)
 		{
 			tessellatorUnshift();
 		}
-		else if (typeRender == TYPE_ISBRH_INVENTORY)
+		else if (renderType == TYPE_ISBRH_INVENTORY)
 		{
 			t.draw();
 			GL11.glTranslatef(0.5F, 0.5F, 0.5F);
 		}
-		else if (typeRender == TYPE_ITEM_INVENTORY)
+		else if (renderType == TYPE_ITEM_INVENTORY)
 		{
 			t.draw();
+			GL11.glPopAttrib();
 		}
-		else if (typeRender == TYPE_TESR_WORLD)
+		else if (renderType == TYPE_TESR_WORLD)
 		{
 			t.draw();
 			GL11.glPopMatrix();
@@ -435,7 +446,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		if (!shouldRenderFace(face))
 			return;
 
-		if (typeRender == TYPE_ITEM_INVENTORY || typeRender == TYPE_ISBRH_INVENTORY || params.useNormals.get())
+		if (renderType == TYPE_ITEM_INVENTORY || renderType == TYPE_ISBRH_INVENTORY || params.useNormals.get())
 			t.setNormal(params.direction.get().offsetX, params.direction.get().offsetY, params.direction.get().offsetZ);
 
 		baseBrightness = getBaseBrightness();
@@ -473,13 +484,15 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	{
 		// brightness
 		int brightness = baseBrightness;
-		if (modeRender == MODE_POLYGONS && (typeRender == TYPE_WORLD || typeRender == TYPE_TESR_WORLD) && params.calculateBrightness.get())
+		if (modeRender == MODE_POLYGONS && (renderType == TYPE_ISBRH_WORLD || renderType == TYPE_TESR_WORLD)
+				&& params.calculateBrightness.get())
 			brightness = calcVertexBrightness(vertex, params.aoMatrix.get()[count]);
 		vertex.setBrightness(brightness);
 
 		// color
 		int color = params.colorMultiplier.get();
-		if (modeRender == MODE_POLYGONS && (typeRender == TYPE_WORLD || typeRender == TYPE_TESR_WORLD) && params.calculateAOColor.get())
+		if (modeRender == MODE_POLYGONS && (renderType == TYPE_ISBRH_WORLD || renderType == TYPE_TESR_WORLD)
+				&& params.calculateAOColor.get())
 			color = calcVertexColor(vertex, params.aoMatrix.get()[count]);
 		vertex.setColor(color);
 
@@ -523,9 +536,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected boolean shouldRenderFace(Face face)
 	{
-		if (typeRender != TYPE_WORLD || world == null || block == null)
+		if (renderType != TYPE_ISBRH_WORLD || world == null || block == null)
 			return true;
 		if (shapeParams != null && shapeParams.renderAllFaces.get())
+			return true;
+		if (renderBlocks != null && renderBlocks.renderAllFaces == true)
 			return true;
 		RenderParameters p = face.getParameters();
 		if (p.direction.get() == null)
@@ -604,7 +619,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected int getBaseBrightness()
 	{
-		if ((typeRender != TYPE_WORLD && typeRender != TYPE_TESR_WORLD) || world == null || !params.useBlockBrightness.get()
+		if ((renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD) || world == null || !params.useBlockBrightness.get()
 				|| params.direction == null)
 			return params.brightness.get();
 

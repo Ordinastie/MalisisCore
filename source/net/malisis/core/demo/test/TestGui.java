@@ -11,6 +11,7 @@ import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UIButton;
 import net.malisis.core.client.gui.component.interaction.UICheckBox;
+import net.malisis.core.client.gui.component.interaction.UISelect;
 import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.inventory.MalisisInventory;
@@ -23,8 +24,8 @@ import com.google.common.eventbus.Subscribe;
 
 public class TestGui extends MalisisGui
 {
-	UIPanel cbPanel, bulletsPanel, inner;
-	UIButton btn1, btn2;
+	public static UIPanel cbPanel, bulletsPanel, inner;
+	UIButton btn1, btn2, btnOver;
 	UILabel label;
 	UICheckBox cb;
 
@@ -43,34 +44,43 @@ public class TestGui extends MalisisGui
 		cbPanel.setVerticalScroll(true).register(this);
 		cbPanel.setName("cbPanel");
 
-		btn1 = (UIButton) new UIButton("Horizontal", 80).setPosition(-42, 0, Anchor.BOTTOM | Anchor.CENTER).register(this);
-		btn2 = (UIButton) new UIButton("Vertical", 80).setPosition(42, 0, Anchor.BOTTOM | Anchor.CENTER).register(this);
-		label = (UILabel) new UILabel().setPosition(0, -25, Anchor.BOTTOM | Anchor.CENTER);
+		label = new UILabel().setPosition(0, -25, Anchor.BOTTOM | Anchor.CENTER);
 
 		String tt = EnumChatFormatting.AQUA + "Diamond Sword" + "\n";
 		tt += EnumChatFormatting.WHITE + "Sharpness X" + "\n";
 		tt += "\n";
 		tt += EnumChatFormatting.BLUE + "+7 Attack Damage";
 
-		tt = "Some cb ptas O!!";
-
 		cb = new UICheckBox("CheckBox with label").setTooltip(tt).register(this);
 
 		UITextField tf = new UITextField(180, "Some blob text.");
 		tf.setFilter("\\d+");
 		tf.setPosition(0, 40);
+		tf.setAutoSelectOnFocus(true);
 
 		UIContainer inv = setInventoryContainer(inventoryContainer.getContainerInventory());
+
+		UISelect select = new UISelect(100, new String[] { "Option 1", "Option 2", "Very ultra longer option 3", "Shorty", "Moar options",
+				"Even more", "Even steven", "And marc too" });
+		select.setPosition(0, 55);
+		select.maxExpandedWidth(120);
+		// select.maxDisplayedOptions(5);
+		select.select(2);
+
+		btn1 = new UIButton("Horizontal", 80).setPosition(0, 90, Anchor.CENTER).register(this);
+		btn2 = new UIButton("Vertical", 80).setPosition(0, 120, Anchor.CENTER).register(this);
+		btnOver = new UIButton("Over the top").setPosition(0, 170, Anchor.CENTER);
 
 		cbPanel.add(cb);
 		cbPanel.add(new UIImage(Items.diamond_axe.getIconFromDamage(0), UIImage.ITEMS_TEXTURE).setPosition(0, 10));
 		cbPanel.add(new UILabel("This is LABEL!").setPosition(20, 15));
-		// cbPanel.add(new UIButton("Random", 200).setPosition(0, 25).register(this));
 		cbPanel.add(tf);
 		cbPanel.add(inv);
+		cbPanel.add(select);
+
 		cbPanel.add(btn1);
 		cbPanel.add(btn2);
-		cbPanel.add(label);
+		cbPanel.add(btnOver);
 
 		bulletsPanel = (UIPanel) new UIPanel(100, 250).setPosition(0, 0, Anchor.RIGHT);
 		bulletsPanel.register(this);
@@ -93,7 +103,7 @@ public class TestGui extends MalisisGui
 	private UIContainer setInventoryContainer(MalisisInventory inventory)
 	{
 		UIContainer c = new UIContainer(100, 30);
-		c.setPosition(0, 55);
+		c.setPosition(0, 70);
 
 		for (int i = 0; i < inventory.getSizeInventory(); i++)
 		{
