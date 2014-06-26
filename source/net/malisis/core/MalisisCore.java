@@ -195,6 +195,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		}
 	}
 
+	@SideOnly(Side.CLIENT)
 	@SubscribeEvent
 	public void onGuiClose(GuiOpenEvent event)
 	{

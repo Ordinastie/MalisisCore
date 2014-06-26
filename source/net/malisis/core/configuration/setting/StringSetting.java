@@ -28,6 +28,8 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UITextField;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
@@ -54,6 +56,7 @@ public class StringSetting extends Setting<String>
 		return value;
 	}
 
+	@SideOnly(Side.CLIENT)
 	@Override
 	public UIComponent getComponent()
 	{
@@ -67,6 +70,7 @@ public class StringSetting extends Setting<String>
 		return container;
 	}
 
+	@SideOnly(Side.CLIENT)
 	@Override
 	public String getValueFromComponent()
 	{

@@ -31,6 +31,9 @@ import net.minecraftforge.common.config.Property;
 
 import com.google.common.base.Preconditions;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+
 /**
  * @author Ordinastie
  * 
@@ -97,7 +100,9 @@ public abstract class Setting<T>
 
 	public abstract String writeValue(T value);
 
+	@SideOnly(Side.CLIENT)
 	public abstract UIComponent getComponent();
 
+	@SideOnly(Side.CLIENT)
 	public abstract T getValueFromComponent();
 }

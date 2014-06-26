@@ -29,6 +29,8 @@ import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.minecraftforge.common.config.Property;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
@@ -42,25 +44,6 @@ public class DoubleSetting extends Setting<Double>
 	{
 		super(key, defaultValue);
 		type = Property.Type.DOUBLE;
-	}
-
-	@Override
-	public UIComponent getComponent()
-	{
-		UILabel label = new UILabel(key);
-		textField = new UITextField(50, writeValue(value)).setPosition(label.getWidth() + 2, 0);
-
-		UIContainer container = new UIContainer(label.getWidth() + 54, 12);
-		container.add(label);
-		container.add(textField);
-
-		return container;
-	}
-
-	@Override
-	public Double getValueFromComponent()
-	{
-		return readValue(textField.getText());
 	}
 
 	@Override
@@ -82,4 +65,24 @@ public class DoubleSetting extends Setting<Double>
 		return value.toString();
 	}
 
+	@SideOnly(Side.CLIENT)
+	@Override
+	public UIComponent getComponent()
+	{
+		UILabel label = new UILabel(key);
+		textField = new UITextField(50, writeValue(value)).setPosition(label.getWidth() + 2, 0);
+
+		UIContainer container = new UIContainer(label.getWidth() + 54, 12);
+		container.add(label);
+		container.add(textField);
+
+		return container;
+	}
+
+	@SideOnly(Side.CLIENT)
+	@Override
+	public Double getValueFromComponent()
+	{
+		return readValue(textField.getText());
+	}
 }

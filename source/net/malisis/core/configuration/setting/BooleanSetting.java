@@ -27,6 +27,8 @@ package net.malisis.core.configuration.setting;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.interaction.UICheckBox;
 import net.minecraftforge.common.config.Property;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
@@ -54,6 +56,7 @@ public class BooleanSetting extends Setting<Boolean>
 		return value.toString();
 	}
 
+	@SideOnly(Side.CLIENT)
 	@Override
 	public UIComponent getComponent()
 	{
@@ -61,6 +64,7 @@ public class BooleanSetting extends Setting<Boolean>
 		return checkbox;
 	}
 
+	@SideOnly(Side.CLIENT)
 	@Override
 	public Boolean getValueFromComponent()
 	{
