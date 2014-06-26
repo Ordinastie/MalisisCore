@@ -25,6 +25,7 @@
 package net.malisis.core.configuration.setting;
 
 import net.malisis.core.client.gui.component.UIComponent;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
@@ -40,7 +41,7 @@ public abstract class Setting<T>
 	protected Property.Type type;
 	protected String category = "General";
 	protected String key;
-	protected String comment;
+	protected String[] comments = new String[0];
 	protected T defaultValue;
 	protected T value;
 
@@ -56,9 +57,9 @@ public abstract class Setting<T>
 		this.category = category;
 	}
 
-	public void setComment(String comment)
+	public void setComment(String... comment)
 	{
-		this.comment = comment;
+		this.comments = comment;
 	}
 
 	public void set(T value)
@@ -73,6 +74,9 @@ public abstract class Setting<T>
 
 	public void load(Configuration config)
 	{
+		String comment = null;
+		for (String c : comments)
+			comment += StatCollector.translateToLocal(c) + " ";
 		property = config.get(category, key, writeValue(defaultValue), comment, type);
 		value = readValue(property.getString());
 		if (value == null)
@@ -84,6 +88,11 @@ public abstract class Setting<T>
 		property.set(writeValue(value));
 	}
 
+	public String[] getComments()
+	{
+		return comments;
+	}
+
 	public abstract T readValue(String stringValue);
 
 	public abstract String writeValue(T value);
@@ -91,5 +100,4 @@ public abstract class Setting<T>
 	public abstract UIComponent getComponent();
 
 	public abstract T getValueFromComponent();
-	
 }

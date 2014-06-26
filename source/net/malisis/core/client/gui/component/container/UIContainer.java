@@ -45,7 +45,7 @@ import org.lwjgl.opengl.GL11;
  * 
  * @author PaleoCrafter
  */
-public class UIContainer extends UIComponent<UIContainer>
+public class UIContainer<T extends UIContainer> extends UIComponent<T>
 {
 	/**
 	 * The list of {@link net.malisis.core.client.gui.component.UIComponent components}.
@@ -93,7 +93,7 @@ public class UIContainer extends UIComponent<UIContainer>
 
 	// #region getters/setters
 	@Override
-	public UIContainer setVisible(boolean visible)
+	public T setVisible(boolean visible)
 	{
 		super.setVisible(visible);
 		if (!visible)
@@ -104,11 +104,11 @@ public class UIContainer extends UIComponent<UIContainer>
 				c.setFocused(false);
 			}
 		}
-		return this;
+		return (T) this;
 	}
 
 	@Override
-	public UIContainer setDisabled(boolean disabled)
+	public T setDisabled(boolean disabled)
 	{
 		super.setDisabled(disabled);
 		if (disabled)
@@ -119,7 +119,7 @@ public class UIContainer extends UIComponent<UIContainer>
 				c.setFocused(false);
 			}
 		}
-		return this;
+		return (T) this;
 	}
 
 	/**

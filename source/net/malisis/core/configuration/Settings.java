@@ -53,6 +53,7 @@ public class Settings
 	{
 		this.config = config;
 		config.load();
+		initSettings();
 		getSettingFields();
 		config.save();
 	}
@@ -70,6 +71,11 @@ public class Settings
 	public List<Setting> getSettings(String category)
 	{
 		return categorySettings.get(category);
+	}
+
+	protected void initSettings()
+	{
+
 	}
 
 	private void getSettingFields()

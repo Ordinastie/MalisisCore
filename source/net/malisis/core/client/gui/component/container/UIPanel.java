@@ -9,13 +9,14 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.interaction.IScrollable;
 import net.malisis.core.client.gui.component.interaction.UIScrollBar;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.preset.ShapePreset;
 import net.minecraft.client.gui.GuiScreen;
 
 import com.google.common.eventbus.Subscribe;
 
-public class UIPanel extends UIContainer implements IScrollable
+public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 {
 	//@formatter:off
 	public static GuiIcon[] icons = new GuiIcon[] { new GuiIcon(200, 	15, 	5, 	5),
@@ -40,6 +41,8 @@ public class UIPanel extends UIContainer implements IScrollable
 
 	protected int xOffset;
 	protected int yOffset;
+
+	protected int color = -1;
 
 	public UIPanel(int width, int height)
 	{
@@ -138,6 +141,16 @@ public class UIPanel extends UIContainer implements IScrollable
 		return yOffset;
 	}
 
+	public void setColor(int color)
+	{
+		this.color = color;
+	}
+
+	public int getColor()
+	{
+		return color;
+	}
+
 	// #end getters/setters
 
 	@Override
@@ -212,7 +225,10 @@ public class UIPanel extends UIContainer implements IScrollable
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		Shape shape = ShapePreset.GuiXYResizable(width, height);
-		renderer.drawShape(shape, icons);
+		RenderParameters rp = new RenderParameters();
+		if (color != -1)
+			rp.colorMultiplier.set(color);
+		renderer.drawShape(shape, rp, icons);
 	}
 
 	@Override

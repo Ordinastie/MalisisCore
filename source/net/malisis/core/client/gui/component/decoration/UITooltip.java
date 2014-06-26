@@ -86,14 +86,10 @@ public class UITooltip extends UIComponent
 
 	protected void calcSize()
 	{
-		width = 16;
+		width = Math.max(16, GuiRenderer.getMaxStringWidth(lines));
+		width += padding * 2;
 		height = lines.size() > 1 ? (GuiRenderer.FONT_HEIGHT + 1) * (lines.size()) : 8;
 		height += padding * 2;
-		for (String s : lines)
-		{
-			width = Math.max(width, GuiRenderer.getStringWidth(s));
-		}
-		width += padding * 2;
 	}
 
 	protected int getOffsetX()

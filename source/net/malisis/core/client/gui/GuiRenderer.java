@@ -24,6 +24,10 @@
 
 package net.malisis.core.client.gui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
@@ -210,6 +214,49 @@ public class GuiRenderer extends BaseRenderer
 		return ret.toString();
 	}
 
+	public static List<String> wrapText(String text, int maxWidth)
+	{
+		List<String> lines = new ArrayList<>();
+		StringBuilder line = new StringBuilder();
+		StringBuilder word = new StringBuilder();
+
+		int lineWidth = 0;
+		int wordWidth = 0;
+		int index = 0;
+		while (index < text.length())
+		{
+			char c = text.charAt(index);
+			int w = getCharWidth(c);
+			lineWidth += w;
+			wordWidth += w;
+			word.append(c);
+			if (c == ' ' || c == '-' || c == '.')
+			{
+				line.append(word);
+				word.setLength(0);
+				wordWidth = 0;
+			}
+			if (lineWidth >= maxWidth)
+			{
+				if (line.length() == 0)
+				{
+					line.append(word);
+					word.setLength(0);
+					wordWidth = 0;
+				}
+				lines.add(line.toString());
+				line.setLength(0);
+				lineWidth = wordWidth;
+			}
+			index++;
+		}
+
+		line.append(word);
+		lines.add(line.toString());
+
+		return lines;
+	}
+
 	public void drawText(String text)
 	{
 		drawText(text, 0, 0, 0, 0xFFFFFF, false);
@@ -380,6 +427,22 @@ public class GuiRenderer extends BaseRenderer
 	{
 		str = StatCollector.translateToLocal(str);
 		return fontRenderer.getStringWidth(str);
+	}
+
+	/**
+	 * Gets max rendering width of an array of string
+	 */
+	public static int getMaxStringWidth(List<String> strings)
+	{
+		int width = 0;
+		for (String str : strings)
+			width = Math.max(width, getStringWidth(str));
+		return width;
+	}
+
+	public static int getMaxStringWidth(String[] strings)
+	{
+		return getMaxStringWidth(Arrays.asList(strings));
 	}
 
 	/**

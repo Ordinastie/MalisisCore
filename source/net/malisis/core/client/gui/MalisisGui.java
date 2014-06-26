@@ -84,7 +84,7 @@ public class MalisisGui extends GuiScreen
 	 */
 	protected UIComponent hoveredComponent;
 	/**
-	 * Currently Focus child component
+	 * Currently focused child component
 	 */
 	protected UIComponent focusedComponent;
 
@@ -322,8 +322,9 @@ public class MalisisGui extends GuiScreen
 				renderer.renderPickedItemStack(itemStack);
 			else if (hoveredComponent != null)
 				renderer.drawTooltip(hoveredComponent.getTooltip());
-
 		}
+		else if (hoveredComponent != null)
+			renderer.drawTooltip(hoveredComponent.getTooltip());
 
 		GL11.glEnable(GL11.GL_LIGHTING);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);

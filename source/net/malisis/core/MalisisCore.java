@@ -7,6 +7,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import net.malisis.core.configuration.ConfigurationGui;
 import net.malisis.core.configuration.Settings;
@@ -120,6 +121,11 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	public static IMalisisMod getMod(String id)
 	{
 		return instance.registeredMods.get(id);
+	}
+
+	public static Set<String> listModId()
+	{
+		return instance.registeredMods.keySet();
 	}
 
 	@Override

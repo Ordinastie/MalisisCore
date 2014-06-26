@@ -25,15 +25,19 @@
 package net.malisis.core.configuration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UIPanel;
 import net.malisis.core.client.gui.component.container.UIWindow;
+import net.malisis.core.client.gui.component.decoration.UIMultiLineLabel;
 import net.malisis.core.client.gui.component.interaction.UIButton;
+import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.configuration.setting.Setting;
 
 import com.google.common.eventbus.Subscribe;
@@ -46,10 +50,12 @@ public class ConfigurationGui extends MalisisGui
 {
 	private Settings settings;
 	protected ArrayList<UIPanel> pannels = new ArrayList<>();
+	protected HashMap<UIComponent, Setting> componentSettings = new HashMap<>();
 
-	protected int windowWidth = 250;
+	protected int windowWidth = 400;
 	protected int windowHeight = 120;
 
+	protected UIMultiLineLabel comment;
 	protected UIButton btnCancel;
 	protected UIButton btnSave;
 
@@ -61,41 +67,64 @@ public class ConfigurationGui extends MalisisGui
 
 		if (categories.size() > 1)
 		{
-			//build tabs
+			//TODO: build tabs
 		}
 
 		UIWindow window = new UIWindow("config.title", windowWidth, windowHeight);
 
 		for (String category : categories)
 		{
-			window.add(createSettingPannel(category));
+			window.add(createSettingContainer(category));
 		}
+
+		comment = new UIMultiLineLabel(136, windowHeight - 41);
+		comment.setColor(0xFFFFFF);
+		comment.setDrawShadow(true);
+		UIPanel panelComment = new UIPanel(140, windowHeight - 35).setPosition(0, 0, Anchor.RIGHT);
+		panelComment.setColor(0xCCCCCC);
+		panelComment.add(comment);
 
 		btnCancel = new UIButton("gui.cancel").setPosition(-32, 0, Anchor.BOTTOM | Anchor.CENTER).register(this);
 		btnSave = new UIButton("gui.done").setPosition(32, 0, Anchor.BOTTOM | Anchor.CENTER).register(this);
 
+		window.add(panelComment);
 		window.add(btnCancel);
 		window.add(btnSave);
 
 		addToScreen(window);
 	}
 
-	private UIPanel createSettingPannel(String category)
+	private UIContainer createSettingContainer(String category)
 	{
 		List<Setting> categorySettings = settings.getSettings(category);
-		UIPanel panel = new UIPanel(windowWidth - 10, windowHeight - 35);
+		UIContainer container = (UIContainer) new UIContainer(windowWidth - 105, windowHeight - 35).setPosition(5, 12);
 
 		int y = 0;
 		for (Setting setting : categorySettings)
 		{
 			UIComponent component = setting.getComponent();
 			component.setPosition(0, y);
-			panel.add(component);
+			component.register(this);
+			container.add(component);
+			componentSettings.put(component, setting);
 
 			y += component.getHeight() + 2;
 		}
 
-		return panel;
+		return container;
+	}
+
+	@Subscribe
+	public void onMouseOver(ComponentEvent.HoveredStateChanged event)
+	{
+		if (event.getState() == true)
+		{
+			Setting setting = componentSettings.get(event.getComponent());
+			if (setting != null)
+				comment.setText(setting.getComments());
+		}
+		else
+			comment.setText("");
 	}
 
 	@Subscribe

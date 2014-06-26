@@ -82,10 +82,12 @@ public class MalisisCommand extends CommandBase
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender icommandsender, String[] astring)
+	public List addTabCompletionOptions(ICommandSender icommandsender, String[] params)
 	{
-		if (astring.length == 1)
-			return getListOfStringsMatchingLastWord(astring, parameters.toArray(new String[0]));
+		if (params.length == 1)
+			return getListOfStringsFromIterableMatchingLastWord(params, parameters);
+		else if (params.length == 2)
+			return getListOfStringsFromIterableMatchingLastWord(params, MalisisCore.listModId());
 		else
 			return null;
 	}

@@ -37,48 +37,42 @@ public class UILabel extends UIComponent<UILabel>
 	/**
 	 * Text of this <code>UILabel</code>.
 	 */
-	private String text;
+	protected String text;
 	/**
 	 * Color to use to draw the text of this <code>UILabel</code>.
 	 */
-	private int color;
+	protected int color = 0x404040;
 	/**
 	 * Determines if the text is drawn with drop shadow.
 	 */
-	private boolean drawShadow;
+	protected boolean drawShadow;
 	/**
 	 * Determines if the width of this <code>UILabel</code> is dependent of the text
 	 */
-	private boolean autoWidth = true;
+	protected boolean autoWidth = true;
 	/**
 	 * Width of the text
 	 */
-	private int textWidth;
+	protected int textWidth;
 	/**
 	 * Height of the text
 	 */
-	private int textHeight;
+	protected int textHeight;
 
-	public UILabel(String text, int width, int color)
+	public UILabel(String text, int width)
 	{
-		this.color = color;
 		this.setText(text);
 		this.setSize(0);
 	}
 
 	public UILabel()
 	{
-		this(null, 0, 0x404040);
+		this(null, 0);
 	}
 
 	public UILabel(String text)
 	{
-		this(text, 0, 0x404040);
-	}
-
-	public UILabel(String text, int width)
-	{
-		this(text, width, 0x404040);
+		this(text, 0);
 	}
 
 	// #region getters/setters

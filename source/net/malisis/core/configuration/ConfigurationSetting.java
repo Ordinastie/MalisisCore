@@ -42,4 +42,6 @@ import java.lang.annotation.Target;
 public @interface ConfigurationSetting
 {
 	String category() default "General";
+
+	boolean requireRestart() default false;
 }
