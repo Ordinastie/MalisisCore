@@ -135,32 +135,7 @@ public class RenderParameters
 
 	public RenderParameters(RenderParameters params)
 	{
-		if (params == null)
-			return;
-
-		renderAllFaces.set(params.renderAllFaces.getDefault());
-		useBlockBounds.set(params.useBlockBounds.getDefault());
-		vertexPositionRelativeToRenderBounds.set(params.vertexPositionRelativeToRenderBounds.getDefault());
-		useCustomTexture.set(params.useCustomTexture.getDefault());
-		applyTexture.set(params.applyTexture.getDefault());
-		icon.set(params.icon.getDefault());
-		useTexture.set(params.useTexture.getDefault());
-		interpolateUV.set(params.interpolateUV.getDefault());
-		calculateAOColor.set(params.calculateAOColor.getDefault());
-		calculateBrightness.set(params.calculateBrightness.getDefault());
-		usePerVertexColor.set(params.usePerVertexColor.getDefault());
-		usePerVertexAlpha.set(params.usePerVertexAlpha.getDefault());
-		useBlockBrightness.set(params.useBlockBrightness.getDefault());
-		useNormals.set(params.useNormals.getDefault());
-		colorMultiplier.set(params.colorMultiplier.getDefault());
-		colorFactor.set(params.colorFactor.getDefault());
-		brightness.set(params.brightness.getDefault());
-		alpha.set(params.alpha.getDefault());
-		direction.set(params.direction.getDefault());
-		textureSide.set(params.textureSide.getDefault());
-		aoMatrix.set(params.aoMatrix.getDefault());
-		flipU.set(params.flipU.getDefault());
-		flipV.set(params.flipV.getDefault());
+		merge(params);
 	}
 
 	public void merge(RenderParameters params)

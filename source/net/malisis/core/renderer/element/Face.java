@@ -28,7 +28,7 @@ public class Face
 
 	public Face(Face face)
 	{
-		this(face, face.params);
+		this(face, new RenderParameters(face.params));
 	}
 
 	public Face(Face face, RenderParameters params)

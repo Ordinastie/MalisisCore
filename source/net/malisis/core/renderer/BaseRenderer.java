@@ -521,7 +521,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		else if (block != null && icon == null)
 		{
 			int side = 0;
-			if (params.textureSide != null)
+			if (params.textureSide.get() != null)
 				side = params.textureSide.get().ordinal();
 			icon = block.getIcon(side, blockMetadata);
 		}

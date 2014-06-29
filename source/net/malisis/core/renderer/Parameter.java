@@ -65,8 +65,13 @@ public class Parameter<T>
 
 	public void merge(Parameter<T> parameter)
 	{
-		if (value == null)
+		if (parameter.getValue() != null)
 			value = parameter.getValue();
 	}
 
+	@Override
+	public String toString()
+	{
+		return value.toString() + " [" + defaultValue.toString() + "]";
+	}
 }
