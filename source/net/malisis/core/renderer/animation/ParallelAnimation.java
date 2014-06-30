@@ -24,51 +24,55 @@
 
 package net.malisis.core.renderer.animation;
 
-import net.malisis.core.renderer.BaseRenderer;
-import net.malisis.core.renderer.RenderParameters;
+import java.util.LinkedList;
+
 import net.malisis.core.renderer.element.Shape;
-import net.minecraft.client.Minecraft;
 
 /**
  * @author Ordinastie
  * 
  */
-public class AnimationRenderer2
+public class ParallelAnimation extends Animation<ParallelAnimation>
 {
-	private BaseRenderer renderer;
-	private long startTime;
-	private long worldTotalTime;
-	private int globalDelay;
-	private float partialTick;
-	private float elapsedTime;
+	protected LinkedList<Animation> listAnimations = new LinkedList<>();
 
-	public AnimationRenderer2(BaseRenderer renderer)
+	public ParallelAnimation(Animation... animations)
 	{
-		this.renderer = renderer;
+		addAnimations(animations);
+
 	}
 
-	public void setStartTime(long start)
+	public ParallelAnimation addAnimations(Animation... animations)
 	{
-		this.startTime = start;
-		this.worldTotalTime = Minecraft.getMinecraft().theWorld.getTotalWorldTime();
-		this.partialTick = this.renderer.partialTick;
-		this.elapsedTime = worldTotalTime - startTime + partialTick;
+		for (Animation animation : animations)
+		{
+			duration = Math.max(duration, animation.duration + animation.delay);
+			listAnimations.add(animation);
+		}
+
+		return this;
 	}
 
-	public long getStartTime()
+	@Override
+	protected void animate(Shape s, float comp)
 	{
-		return startTime;
+		if (listAnimations.size() == 0)
+			return;
+
+		for (Animation animation : listAnimations)
+			animation.transform(s, elapsedTimeCurrentLoop);
 	}
 
-	public float getElapsedTime()
+	@Override
+	public ParallelAnimation reversed(boolean reversed)
 	{
-		return elapsedTime;
-	}
+		if (!reversed)
+			return this;
 
-	public void render(Animation animation, Shape shape, RenderParameters rp)
-	{
-		if (animation != null)
-			animation.transform(shape, elapsedTime);
-	}
+		//Collections.reverse(listAnimations);
+		for (Animation animation : listAnimations)
+			animation.reversed(true);
 
+		return this;
+	}
 }

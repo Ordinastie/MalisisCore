@@ -68,4 +68,16 @@ public class Rotation extends Animation<Rotation>
 		if (comp >= 0)
 			s.rotate(fromAngle + (toAngle - fromAngle) * comp, axisX, axisY, axisZ, offsetX, offsetY, offsetZ);
 	}
+
+	@Override
+	public Rotation reversed(boolean reversed)
+	{
+		if (!reversed)
+			return this;
+
+		float tmpAngle = fromAngle;
+		fromAngle = toAngle;
+		toAngle = tmpAngle;
+		return this;
+	}
 }

@@ -43,4 +43,23 @@ public class Scale extends Animation<Scale>
 		comp = Math.max(comp, 0);
 		s.scale(fromX + (toX - fromX) * comp, fromY + (toY - fromY) * comp, fromZ + (toZ - fromZ) * comp);
 	}
+
+	@Override
+	public Scale reversed(boolean reversed)
+	{
+		if (!reversed)
+			return this;
+
+		float tmpX = fromX;
+		float tmpY = fromY;
+		float tmpZ = fromZ;
+		fromX = toX;
+		fromY = toY;
+		fromZ = toZ;
+		toX = tmpX;
+		toY = tmpY;
+		toZ = tmpZ;
+		return this;
+	}
+
 }

@@ -24,7 +24,6 @@
 
 package net.malisis.core.renderer.animation;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import net.malisis.core.renderer.element.Shape;
@@ -36,19 +35,19 @@ import net.malisis.core.renderer.element.Shape;
 public class ChainedAnimation extends Animation<ChainedAnimation>
 {
 	protected LinkedList<Animation> listAnimations = new LinkedList<>();
+	private boolean reversed = false;
 
 	public ChainedAnimation(Animation... animations)
 	{
-		addAnimations();
+		addAnimations(animations);
 	}
 
 	public ChainedAnimation addAnimations(Animation... animations)
 	{
+		duration = 0;
 		for (Animation animation : animations)
 		{
-			if (duration < animation.duration)
-				duration = animation.duration;
-
+			duration += animation.duration + animation.delay;
 			listAnimations.add(animation);
 		}
 
@@ -56,26 +55,24 @@ public class ChainedAnimation extends Animation<ChainedAnimation>
 	}
 
 	@Override
-	public void transform(Shape s, float elapsedTime)
+	protected void animate(Shape s, float comp)
 	{
 		if (listAnimations.size() == 0)
 			return;
 
-		Iterator<Animation> iterator = listAnimations.iterator();
-		Animation animation = iterator.next();
-		while (animation != null && elapsedTime > animation.duration)
+		if (reversed)
+			elapsedTimeCurrentLoop = Math.max(0, duration - elapsedTimeCurrentLoop);
+		for (Animation animation : listAnimations)
 		{
-			elapsedTime -= animation.duration;
-			animation = iterator.next();
+			animation.transform(s, elapsedTimeCurrentLoop);
+			elapsedTimeCurrentLoop -= animation.duration;
 		}
-
-		animation.animate(s, animation.completion(elapsedTime));
 	}
 
 	@Override
-	protected void animate(Shape s, float comp)
+	public ChainedAnimation reversed(boolean reversed)
 	{
-
+		this.reversed = reversed;
+		return this;
 	}
-
 }

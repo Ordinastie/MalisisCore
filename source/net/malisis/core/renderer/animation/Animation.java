@@ -9,6 +9,7 @@ public abstract class Animation<T extends Animation>
 	public int movement = LINEAR;
 	protected int duration, delay = 0;
 	protected int loops = 1, loopStartDelay = 0, loopResetDelay = 0;
+	protected float elapsedTimeCurrentLoop;
 
 	public T movement(int movement)
 	{
@@ -55,22 +56,22 @@ public abstract class Animation<T extends Animation>
 
 		float comp = 0;
 		int loopDuration = duration + loopStartDelay + loopResetDelay;
-		float elapsed = elapsedTime - delay;
+		elapsedTimeCurrentLoop = elapsedTime - delay;
 
-		if (loops != -1 && elapsed > loops * loopDuration)
+		if (loops != -1 && elapsedTimeCurrentLoop > loops * loopDuration)
 			return 1;
 
 		if (loops != 1)
 		{
-			elapsed %= loopDuration;
-			if (elapsed < loopStartDelay)
+			elapsedTimeCurrentLoop %= loopDuration;
+			if (elapsedTimeCurrentLoop < loopStartDelay)
 				return 0;
-			if (elapsed - loopResetDelay > loopDuration)
+			if (elapsedTimeCurrentLoop - loopResetDelay > loopDuration)
 				return 1;
-			elapsed -= loopStartDelay;
+			elapsedTimeCurrentLoop -= loopStartDelay;
 		}
 
-		comp = Math.min(elapsed / duration, 1);
+		comp = Math.min(elapsedTimeCurrentLoop / duration, 1);
 		if (movement == SINUSOIDAL)
 		{
 			comp = (float) (1 - Math.cos(comp * Math.PI)) / 2;
@@ -80,4 +81,6 @@ public abstract class Animation<T extends Animation>
 	}
 
 	protected abstract void animate(Shape s, float comp);
+
+	public abstract T reversed(boolean reversed);
 }
