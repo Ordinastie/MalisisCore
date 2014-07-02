@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.animation;
+package net.malisis.core.renderer.animation.transformation;
 
 import java.util.LinkedList;
 
@@ -32,19 +32,19 @@ import net.malisis.core.renderer.element.Shape;
  * @author Ordinastie
  * 
  */
-public class ParallelAnimation extends Animation<ParallelAnimation>
+public class ParallelTransformation extends Transformation<ParallelTransformation>
 {
-	protected LinkedList<Animation> listAnimations = new LinkedList<>();
+	protected LinkedList<Transformation> listAnimations = new LinkedList<>();
 
-	public ParallelAnimation(Animation... animations)
+	public ParallelTransformation(Transformation... animations)
 	{
 		addAnimations(animations);
 
 	}
 
-	public ParallelAnimation addAnimations(Animation... animations)
+	public ParallelTransformation addAnimations(Transformation... animations)
 	{
-		for (Animation animation : animations)
+		for (Transformation animation : animations)
 		{
 			duration = Math.max(duration, animation.duration + animation.delay);
 			listAnimations.add(animation);
@@ -54,23 +54,23 @@ public class ParallelAnimation extends Animation<ParallelAnimation>
 	}
 
 	@Override
-	protected void animate(Shape s, float comp)
+	protected void doTransform(Shape s, float comp)
 	{
 		if (listAnimations.size() == 0)
 			return;
 
-		for (Animation animation : listAnimations)
+		for (Transformation animation : listAnimations)
 			animation.transform(s, elapsedTimeCurrentLoop);
 	}
 
 	@Override
-	public ParallelAnimation reversed(boolean reversed)
+	public ParallelTransformation reversed(boolean reversed)
 	{
 		if (!reversed)
 			return this;
 
 		//Collections.reverse(listAnimations);
-		for (Animation animation : listAnimations)
+		for (Transformation animation : listAnimations)
 			animation.reversed(true);
 
 		return this;

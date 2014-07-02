@@ -1,8 +1,8 @@
-package net.malisis.core.renderer.animation;
+package net.malisis.core.renderer.animation.transformation;
 
 import net.malisis.core.renderer.element.Shape;
 
-public class Rotation extends Animation<Rotation>
+public class Rotation extends Transformation<Rotation>
 {
 	protected float fromAngle;
 	protected float toAngle;
@@ -63,7 +63,7 @@ public class Rotation extends Animation<Rotation>
 	}
 
 	@Override
-	protected void animate(Shape s, float comp)
+	protected void doTransform(Shape s, float comp)
 	{
 		if (comp >= 0)
 			s.rotate(fromAngle + (toAngle - fromAngle) * comp, axisX, axisY, axisZ, offsetX, offsetY, offsetZ);

@@ -2,8 +2,8 @@
 {
   "modid": "malisiscore",
   "name": "Malisis' Core",
-  "description": "Rendering API",
-  "version": "1.7.2-0.7",
+  "description": "Framework over Forge",
+  "version": "1.7.2-0.7.3",
   "logoFile": "malisiscore.png",
   "mcversion": "1.7.2",
   "url": "http://github.com/ordinastie",

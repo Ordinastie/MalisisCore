@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.animation;
+package net.malisis.core.renderer.animation.transformation;
 
 import java.util.LinkedList;
 
@@ -32,20 +32,20 @@ import net.malisis.core.renderer.element.Shape;
  * @author -
  * 
  */
-public class ChainedAnimation extends Animation<ChainedAnimation>
+public class ChainedTransformation extends Transformation<ChainedTransformation>
 {
-	protected LinkedList<Animation> listAnimations = new LinkedList<>();
+	protected LinkedList<Transformation> listAnimations = new LinkedList<>();
 	private boolean reversed = false;
 
-	public ChainedAnimation(Animation... animations)
+	public ChainedTransformation(Transformation... animations)
 	{
 		addAnimations(animations);
 	}
 
-	public ChainedAnimation addAnimations(Animation... animations)
+	public ChainedTransformation addAnimations(Transformation... animations)
 	{
 		duration = 0;
-		for (Animation animation : animations)
+		for (Transformation animation : animations)
 		{
 			duration += animation.duration + animation.delay;
 			listAnimations.add(animation);
@@ -55,14 +55,14 @@ public class ChainedAnimation extends Animation<ChainedAnimation>
 	}
 
 	@Override
-	protected void animate(Shape s, float comp)
+	protected void doTransform(Shape s, float comp)
 	{
 		if (listAnimations.size() == 0)
 			return;
 
 		if (reversed)
 			elapsedTimeCurrentLoop = Math.max(0, duration - elapsedTimeCurrentLoop);
-		for (Animation animation : listAnimations)
+		for (Transformation animation : listAnimations)
 		{
 			animation.transform(s, elapsedTimeCurrentLoop);
 			elapsedTimeCurrentLoop -= animation.duration;
@@ -70,7 +70,7 @@ public class ChainedAnimation extends Animation<ChainedAnimation>
 	}
 
 	@Override
-	public ChainedAnimation reversed(boolean reversed)
+	public ChainedTransformation reversed(boolean reversed)
 	{
 		this.reversed = reversed;
 		return this;

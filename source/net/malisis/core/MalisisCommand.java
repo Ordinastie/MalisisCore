@@ -60,10 +60,6 @@ public class MalisisCommand extends CommandBase
 				if (mod != null)
 					MalisisCore.message("malisiscore.commands.modversion", mod.getName(), mod.getVersion());
 				break;
-			case "demos":
-				MalisisCore.message("Demos will be " + (MalisisCore.toggleDemos() ? "activated" : "deactivated") + " for the next launch.");
-				break;
-
 			case "gui":
 				// Minecraft.getMinecraft().displayGuiScreen(new UIWindow(100, 100).createScreenProxy());
 				break;

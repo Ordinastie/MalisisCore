@@ -24,8 +24,10 @@
 
 package net.malisis.core.renderer.animation;
 
+import java.util.LinkedList;
+
 import net.malisis.core.renderer.BaseRenderer;
-import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.animation.transformation.Transformation;
 import net.malisis.core.renderer.element.Shape;
 import net.minecraft.client.Minecraft;
 
@@ -40,6 +42,7 @@ public class AnimationRenderer
 	private long worldTotalTime;
 	private float partialTick;
 	private float elapsedTime;
+	private LinkedList<Animation> animations = new LinkedList<>();
 
 	public AnimationRenderer(BaseRenderer renderer)
 	{
@@ -64,10 +67,35 @@ public class AnimationRenderer
 		return elapsedTime;
 	}
 
-	public void render(Animation animation, Shape shape, RenderParameters rp)
+	public void addAnimation(Animation animation)
 	{
-		if (animation != null)
-			animation.transform(shape, elapsedTime);
+		animations.add(animation);
+	}
+
+	public void clearAnimations()
+	{
+		animations.clear();
+	}
+
+	public void animate()
+	{
+		for (Animation animation : animations)
+		{
+			animation.animate(elapsedTime);
+		}
+	}
+
+	public void render(BaseRenderer renderer)
+	{
+		for (Animation animation : animations)
+		{
+			animation.render(renderer);
+		}
+	}
+
+	public void animate(Shape shape, Transformation animation)
+	{
+		animation.transform(shape, elapsedTime);
 	}
 
 }

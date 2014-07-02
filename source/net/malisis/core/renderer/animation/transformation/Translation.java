@@ -1,8 +1,8 @@
-package net.malisis.core.renderer.animation;
+package net.malisis.core.renderer.animation.transformation;
 
 import net.malisis.core.renderer.element.Shape;
 
-public class Translation extends Animation<Translation>
+public class Translation extends Transformation<Translation>
 {
 	protected float fromX, fromY, fromZ;
 	protected float toX, toY, toZ;
@@ -35,7 +35,7 @@ public class Translation extends Animation<Translation>
 	}
 
 	@Override
-	protected void animate(Shape s, float comp)
+	protected void doTransform(Shape s, float comp)
 	{
 		if (comp >= 0)
 			s.translate(fromX + (toX - fromX) * comp, fromY + (toY - fromY) * comp, fromZ + (toZ - fromZ) * comp);

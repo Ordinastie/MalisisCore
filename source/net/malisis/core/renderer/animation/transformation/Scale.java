@@ -1,8 +1,8 @@
-package net.malisis.core.renderer.animation;
+package net.malisis.core.renderer.animation.transformation;
 
 import net.malisis.core.renderer.element.Shape;
 
-public class Scale extends Animation<Scale>
+public class Scale extends Transformation<Scale>
 {
 	protected float fromX = 1, fromY = 1, fromZ = 1;
 	protected float toX = 1, toY = 1, toZ = 1;
@@ -38,7 +38,7 @@ public class Scale extends Animation<Scale>
 	}
 
 	@Override
-	protected void animate(Shape s, float comp)
+	protected void doTransform(Shape s, float comp)
 	{
 		comp = Math.max(comp, 0);
 		s.scale(fromX + (toX - fromX) * comp, fromY + (toY - fromY) * comp, fromZ + (toZ - fromZ) * comp);

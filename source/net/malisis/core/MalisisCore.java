@@ -11,9 +11,6 @@ import java.util.Set;
 
 import net.malisis.core.configuration.ConfigurationGui;
 import net.malisis.core.configuration.Settings;
-import net.malisis.core.demo.minty.Minty;
-import net.malisis.core.demo.stargate.Stargate;
-import net.malisis.core.demo.test.Test;
 import net.malisis.core.packet.NetworkHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -27,7 +24,6 @@ import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
 
 import org.apache.logging.log4j.Logger;
 
@@ -59,15 +55,8 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 
 	public static MalisisCore instance;
 	public static Logger log;
-	public static Configuration config;
 
 	private HashMap<String, IMalisisMod> registeredMods = new HashMap<>();
-
-	// demos
-	private static boolean demosEnabled = false;
-	public static Test test;
-	public static Minty minty;
-	public static Stargate stargate;
 
 	public static boolean isObfEnv = false;
 
@@ -139,40 +128,13 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	public static void preInit(FMLPreInitializationEvent event)
 	{
 		MinecraftForge.EVENT_BUS.register(instance);
-
 		log = event.getModLog();
-
-		config = new Configuration(event.getSuggestedConfigurationFile());
-		config.load();
-		demosEnabled = config.get(Configuration.CATEGORY_GENERAL, "demosEnabled", false).getBoolean(false);
-		config.save();
-
-		// demosEnabled &= FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT;
-		// demosEnabled = false;
-		if (demosEnabled)
-		{
-			test = new Test();
-			minty = new Minty();
-			stargate = new Stargate();
-
-			test.preInit();
-			minty.preInit();
-			stargate.preInit();
-		}
-
 	}
 
 	@Subscribe
 	public static void init(FMLInitializationEvent event)
 	{
 		NetworkHandler.init(modid);
-
-		if (demosEnabled)
-		{
-			test.init();
-			minty.init();
-			// stargate.init();
-		}
 	}
 
 	@Subscribe
@@ -204,14 +166,6 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 
 		keepConfigurationGuiOpen = false;
 		event.setCanceled(true);
-	}
-
-	public static boolean toggleDemos()
-	{
-		demosEnabled = !demosEnabled;
-		config.get(Configuration.CATEGORY_GENERAL, "demosEnabled", false).set(demosEnabled);
-		config.save();
-		return demosEnabled;
 	}
 
 	@SideOnly(Side.CLIENT)
