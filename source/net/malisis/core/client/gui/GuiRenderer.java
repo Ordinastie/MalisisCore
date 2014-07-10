@@ -142,9 +142,9 @@ public class GuiRenderer extends BaseRenderer
 		if (container != null)
 		{
 			setDefaultTexture();
-			t.startDrawingQuads();
+			startDrawing();
 			container.draw(this, mouseX, mouseY, partialTick);
-			t.draw();
+			draw();
 		}
 	}
 
