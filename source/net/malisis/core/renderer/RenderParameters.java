@@ -120,7 +120,7 @@ public class RenderParameters
 	/**
 	 * Defines which block to take into account for AO calculation (Face Level)
 	 */
-	public Parameter<int[][][]> aoMatrix = new Parameter<>(new int[0][0][0]);
+	public Parameter<int[][][]> aoMatrix = new Parameter<>(null);
 	/**
 	 * Defines whether to flip the texture on the U coordinates (Face Level)
 	 */

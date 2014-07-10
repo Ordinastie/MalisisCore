@@ -24,6 +24,8 @@
 
 package net.malisis.core.renderer;
 
+import java.lang.reflect.Array;
+
 /**
  * @author Ordinastie
  * 
@@ -56,6 +58,20 @@ public class Parameter<T>
 	public T get()
 	{
 		return value != null ? value : defaultValue;
+	}
+
+	public Object get(int index)
+	{
+		if (value == null)
+			return value;
+		if (value != null && !(value instanceof Object[]))
+			throw new IllegalStateException("Trying to access indexed element of non-array Parameter");
+
+		Object[] v = (Object[]) value;
+		if (index < 0 || index >= v.length)
+			return null;
+
+		return Array.get(value, index);
 	}
 
 	public void set(T value)

@@ -38,7 +38,7 @@ public class Vertex
 		this.brightness = brightness;
 		this.u = u;
 		this.v = v;
-		this.baseName = name();
+		this.baseName();
 	}
 
 	public Vertex(double x, double y, double z, int rgba, int brightness)
@@ -320,7 +320,7 @@ public class Vertex
 	@Override
 	public String toString()
 	{
-		return baseName + " 0x" + Integer.toHexString(color) + " (a:" + alpha + ", b:" + brightness + ")";
+		return name() + " 0x" + Integer.toHexString(color) + " (a:" + alpha + ", b:" + brightness + ")";
 	}
 
 	public Point toPoint()

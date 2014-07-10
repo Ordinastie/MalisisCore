@@ -24,7 +24,7 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import net.malisis.core.renderer.element.Shape;
 
@@ -34,21 +34,21 @@ import net.malisis.core.renderer.element.Shape;
  */
 public class ChainedTransformation extends Transformation<ChainedTransformation>
 {
-	protected LinkedList<Transformation> listAnimations = new LinkedList<>();
+	protected ArrayList<Transformation> listTransformations = new ArrayList<>();
 	private boolean reversed = false;
 
-	public ChainedTransformation(Transformation... animations)
+	public ChainedTransformation(Transformation... transformations)
 	{
-		addAnimations(animations);
+		addTransformations(transformations);
 	}
 
-	public ChainedTransformation addAnimations(Transformation... animations)
+	public ChainedTransformation addTransformations(Transformation... transformations)
 	{
 		duration = 0;
-		for (Transformation animation : animations)
+		for (Transformation transformation : transformations)
 		{
-			duration += animation.duration + animation.delay;
-			listAnimations.add(animation);
+			duration += transformation.totalDuration();
+			listTransformations.add(transformation);
 		}
 
 		return this;
@@ -57,15 +57,15 @@ public class ChainedTransformation extends Transformation<ChainedTransformation>
 	@Override
 	protected void doTransform(Shape s, float comp)
 	{
-		if (listAnimations.size() == 0)
+		if (listTransformations.size() == 0)
 			return;
 
 		if (reversed)
 			elapsedTimeCurrentLoop = Math.max(0, duration - elapsedTimeCurrentLoop);
-		for (Transformation animation : listAnimations)
+		for (Transformation transformation : listTransformations)
 		{
-			animation.transform(s, elapsedTimeCurrentLoop);
-			elapsedTimeCurrentLoop -= animation.duration;
+			transformation.transform(s, elapsedTimeCurrentLoop);
+			elapsedTimeCurrentLoop -= transformation.totalDuration();
 		}
 	}
 

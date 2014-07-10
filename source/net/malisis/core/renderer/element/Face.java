@@ -1,6 +1,7 @@
 package net.malisis.core.renderer.element;
 
 import java.util.HashMap;
+import java.util.List;
 
 import net.malisis.core.renderer.RenderParameters;
 import net.minecraft.util.IIcon;
@@ -24,6 +25,11 @@ public class Face
 	public Face(Vertex[] vertexes)
 	{
 		this(vertexes, null);
+	}
+
+	public Face(List<Vertex> vertexes)
+	{
+		this(vertexes.toArray(new Vertex[0]), null);
 	}
 
 	public Face(Face face)

@@ -1,5 +1,6 @@
 package net.malisis.core.renderer;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
@@ -40,14 +41,6 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * Set rendering for TESR
 	 */
 	public static final int TYPE_TESR_WORLD = 4;
-	/**
-	 * Set rendering as polygons
-	 */
-	public static final int MODE_POLYGONS = 0;
-	/**
-	 * Set rendering as lines
-	 */
-	public static final int MODE_LINES = 1;
 
 	protected Tessellator t = Tessellator.instance;
 	protected IBlockAccess world;
@@ -82,7 +75,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	/**
 	 * Mode of rendering
 	 */
-	protected int modeRender;
+	protected int drawMode;
 
 	/**
 	 * Are render coordinates already shifted (<code>TYPE_WORLD</code> only)
@@ -135,7 +128,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	public void reset()
 	{
 		this.renderType = 0;
-		this.modeRender = 0;
+		this.drawMode = 0;
 		this.world = null;
 		this.block = null;
 		this.blockMetadata = 0;
@@ -270,7 +263,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	// #region prepare()
 	public void prepare(int typeRender, int modeRender)
 	{
-		this.modeRender = modeRender;
+		this.drawMode = modeRender;
 		prepare(typeRender);
 	}
 
@@ -284,12 +277,12 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		else if (typeRender == TYPE_ISBRH_INVENTORY)
 		{
 			GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
-			t.startDrawingQuads();
+			startDrawing();
 		}
 		else if (typeRender == TYPE_ITEM_INVENTORY)
 		{
 			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
-			t.startDrawingQuads();
+			startDrawing();
 		}
 		else if (typeRender == TYPE_TESR_WORLD)
 		{
@@ -303,14 +296,35 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 			bindTexture(TextureMap.locationBlocksTexture);
 
-			t.startDrawingQuads();
+			startDrawing();
 		}
+	}
+
+	public void startDrawing()
+	{
+		startDrawing(GL11.GL_QUADS);
+	}
+
+	public void startDrawing(int drawMode)
+	{
+		t.startDrawing(drawMode);
+		this.drawMode = drawMode;
 	}
 
 	public void next()
 	{
+		next(drawMode);
+	}
+
+	public void next(int drawMode)
+	{
+		draw();
+		startDrawing(drawMode);
+	}
+
+	public void draw()
+	{
 		t.draw();
-		t.startDrawingQuads();
 	}
 
 	public void clean()
@@ -321,17 +335,17 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		}
 		else if (renderType == TYPE_ISBRH_INVENTORY)
 		{
-			t.draw();
+			draw();
 			GL11.glTranslatef(0.5F, 0.5F, 0.5F);
 		}
 		else if (renderType == TYPE_ITEM_INVENTORY)
 		{
-			t.draw();
+			draw();
 			GL11.glPopAttrib();
 		}
 		else if (renderType == TYPE_TESR_WORLD)
 		{
-			t.draw();
+			draw();
 			GL11.glPopMatrix();
 			GL11.glPopAttrib();
 		}
@@ -440,6 +454,13 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		if (f == null)
 			return;
 
+		int vertexCount = f.getVertexes().length;
+		if (vertexCount != 4 && renderType == TYPE_ISBRH_WORLD)
+		{
+			MalisisCore.log.error("[BaseRenderer] Attempting to render a face containing {} vertexes in ISBRH. Ignored", vertexCount);
+			return;
+		}
+
 		face = f;
 		params = RenderParameters.merge(shapeParams, rp);
 
@@ -456,6 +477,9 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			calcVertexesPosition(getRenderBounds());
 
 		drawVertexes(face.getVertexes());
+
+		if (drawMode == GL11.GL_POLYGON)
+			next();
 	}
 
 	/***
@@ -468,10 +492,8 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		for (int i = 0; i < vertexes.length; i++)
 		{
 			drawVertex(vertexes[i], i);
-			if (modeRender == MODE_LINES)
-			{
+			if (drawMode == GL11.GL_LINE_STRIP)
 				drawVertex(vertexes[i == vertexes.length - 1 ? 0 : i + 1], i);
-			}
 		}
 	}
 
@@ -483,17 +505,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	protected void drawVertex(Vertex vertex, int count)
 	{
 		// brightness
-		int brightness = baseBrightness;
-		if (modeRender == MODE_POLYGONS && (renderType == TYPE_ISBRH_WORLD || renderType == TYPE_TESR_WORLD)
-				&& params.calculateBrightness.get())
-			brightness = calcVertexBrightness(vertex, params.aoMatrix.get()[count]);
+		int brightness = calcVertexBrightness(vertex, (int[][]) params.aoMatrix.get(count));
 		vertex.setBrightness(brightness);
 
 		// color
-		int color = params.colorMultiplier.get();
-		if (modeRender == MODE_POLYGONS && (renderType == TYPE_ISBRH_WORLD || renderType == TYPE_TESR_WORLD)
-				&& params.calculateAOColor.get())
-			color = calcVertexColor(vertex, params.aoMatrix.get()[count]);
+		int color = calcVertexColor(vertex, (int[][]) params.aoMatrix.get(count));
 		vertex.setColor(color);
 
 		// alpha
@@ -503,7 +519,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		t.setColorRGBA_I(vertex.getColor(), vertex.getAlpha());
 		t.setBrightness(vertex.getBrightness());
 
-		if (modeRender == MODE_POLYGONS && params.useTexture.get())
+		if (drawMode != GL11.GL_LINE && params.useTexture.get())
 			t.addVertexWithUV(vertex.getX(), vertex.getY(), vertex.getZ(), vertex.getU(), vertex.getV());
 		else
 			t.addVertex(vertex.getX(), vertex.getY(), vertex.getZ());
@@ -593,6 +609,15 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected int calcVertexColor(Vertex vertex, int[][] aoMatrix)
 	{
+		int color = params.usePerVertexColor.get() ? vertex.getColor() : params.colorMultiplier.get();
+
+		if (drawMode == GL11.GL_LINE)
+			return color;
+		if (renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD)
+			return color;
+		if (!params.calculateAOColor.get() || aoMatrix == null)
+			return color;
+
 		float factor = getBlockAmbientOcclusion(world, x + params.direction.get().offsetX, y + params.direction.get().offsetY, z
 				+ params.direction.get().offsetZ);
 
@@ -600,8 +625,6 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			factor += getBlockAmbientOcclusion(world, x + aoMatrix[i][0], y + aoMatrix[i][1], z + aoMatrix[i][2]);
 
 		factor *= params.colorFactor.get();
-
-		int color = params.usePerVertexColor.get() ? vertex.getColor() : params.colorMultiplier.get();
 
 		int r = (int) ((color >> 16 & 255) * factor / (aoMatrix.length + 1));
 		int g = (int) ((color >> 8 & 255) * factor / (aoMatrix.length + 1));
@@ -620,7 +643,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	protected int getBaseBrightness()
 	{
 		if ((renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD) || world == null || !params.useBlockBrightness.get()
-				|| params.direction == null)
+				|| params.direction.get() == null)
 			return params.brightness.get();
 
 		double[][] bounds = getRenderBounds();
@@ -655,6 +678,13 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected int calcVertexBrightness(Vertex vertex, int[][] aoMatrix)
 	{
+		if (drawMode == GL11.GL_LINE)
+			return baseBrightness;
+		if (renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD)
+			return baseBrightness;
+		if (!params.calculateBrightness.get() || aoMatrix == null)
+			return baseBrightness;
+
 		int[] b = new int[Math.max(3, aoMatrix.length)];
 
 		for (int i = 0; i < aoMatrix.length; i++)

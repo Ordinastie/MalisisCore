@@ -84,7 +84,7 @@ public class Animation
 	{
 		float elapsed = elapsedTime - delay;
 		started = elapsed > tranformation.getDelay();
-		finished = elapsed > tranformation.getDelay() + tranformation.getDuration();
+		finished = elapsed > tranformation.totalDuration() && tranformation.getLoops() != -1;
 
 		transformedShape = new Shape(shape);
 		tranformation.transform(transformedShape, elapsed);

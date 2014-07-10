@@ -48,6 +48,29 @@ public abstract class Transformation<T extends Transformation>
 		return delay;
 	}
 
+	public int getLoops()
+	{
+		return loops;
+	}
+
+	public int totalDuration()
+	{
+		if (loops == -1)
+			return Integer.MAX_VALUE;
+
+		return delay + loops * getLoopDuration();
+	}
+
+	public int getLoopDuration()
+	{
+		return duration + loopStartDelay + loopResetDelay;
+	}
+
+	public T loop(int loops)
+	{
+		return loop(loops, 0, 0);
+	}
+
 	public T loop(int loops, int startDelay, int resetDelay)
 	{
 		if (loops == 0)
@@ -61,7 +84,7 @@ public abstract class Transformation<T extends Transformation>
 
 	public void transform(Shape s, float elapsedTime)
 	{
-		doTransform(s, completion(elapsedTime));
+		doTransform(s, completion(Math.max(0, elapsedTime)));
 	}
 
 	protected float completion(float elapsedTime)
@@ -70,7 +93,7 @@ public abstract class Transformation<T extends Transformation>
 			return 0;
 
 		float comp = 0;
-		int loopDuration = duration + loopStartDelay + loopResetDelay;
+		int loopDuration = getLoopDuration();
 		elapsedTimeCurrentLoop = elapsedTime - delay;
 
 		if (loops != -1 && elapsedTimeCurrentLoop > loops * loopDuration)
@@ -91,6 +114,8 @@ public abstract class Transformation<T extends Transformation>
 		{
 			comp = (float) (1 - Math.cos(comp * Math.PI)) / 2;
 		}
+
+		comp = Math.max(0, Math.min(1, comp));
 
 		return comp;
 	}

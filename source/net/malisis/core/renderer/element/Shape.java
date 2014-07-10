@@ -1,6 +1,7 @@
 package net.malisis.core.renderer.element;
 
 import java.util.HashMap;
+import java.util.List;
 
 import net.malisis.core.renderer.RenderParameters;
 import net.minecraft.util.AxisAlignedBB;
@@ -22,6 +23,11 @@ public class Shape
 		this.faces = new Face[faces.length];
 		for (int i = 0; i < faces.length; i++)
 			this.faces[i] = new Face(faces[i]);
+	}
+
+	public Shape(List<Face> faces)
+	{
+		this(faces.toArray(new Face[0]));
 	}
 
 	public Shape(Shape s)

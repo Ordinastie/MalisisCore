@@ -24,7 +24,7 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import net.malisis.core.renderer.element.Shape;
 
@@ -34,20 +34,20 @@ import net.malisis.core.renderer.element.Shape;
  */
 public class ParallelTransformation extends Transformation<ParallelTransformation>
 {
-	protected LinkedList<Transformation> listAnimations = new LinkedList<>();
+	protected ArrayList<Transformation> listTransformations = new ArrayList<>();
 
-	public ParallelTransformation(Transformation... animations)
+	public ParallelTransformation(Transformation... transformations)
 	{
-		addAnimations(animations);
+		addTransformations(transformations);
 
 	}
 
-	public ParallelTransformation addAnimations(Transformation... animations)
+	public ParallelTransformation addTransformations(Transformation... transformations)
 	{
-		for (Transformation animation : animations)
+		for (Transformation transformation : transformations)
 		{
-			duration = Math.max(duration, animation.duration + animation.delay);
-			listAnimations.add(animation);
+			duration = Math.max(duration, transformation.totalDuration());
+			listTransformations.add(transformation);
 		}
 
 		return this;
@@ -56,11 +56,11 @@ public class ParallelTransformation extends Transformation<ParallelTransformatio
 	@Override
 	protected void doTransform(Shape s, float comp)
 	{
-		if (listAnimations.size() == 0)
+		if (listTransformations.size() == 0)
 			return;
 
-		for (Transformation animation : listAnimations)
-			animation.transform(s, elapsedTimeCurrentLoop);
+		for (Transformation transformation : listTransformations)
+			transformation.transform(s, elapsedTimeCurrentLoop);
 	}
 
 	@Override
@@ -69,9 +69,8 @@ public class ParallelTransformation extends Transformation<ParallelTransformatio
 		if (!reversed)
 			return this;
 
-		//Collections.reverse(listAnimations);
-		for (Transformation animation : listAnimations)
-			animation.reversed(true);
+		for (Transformation transformation : listTransformations)
+			transformation.reversed(true);
 
 		return this;
 	}
