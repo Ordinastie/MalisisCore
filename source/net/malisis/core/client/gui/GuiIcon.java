@@ -1,8 +1,8 @@
 package net.malisis.core.client.gui;
 
-import net.minecraft.util.IIcon;
+import net.malisis.core.renderer.MalisisIcon;
 
-public class GuiIcon implements IIcon
+public class GuiIcon extends MalisisIcon
 {
 	//@formatter:off
 	public static GuiIcon iconFixedSized = new GuiIcon(0F, 0F, 1F, 1F);
@@ -25,9 +25,6 @@ public class GuiIcon implements IIcon
 	// TODO: dynamic load
 	private static final int GUI_TEXTURE_WIDTH = 300;
 	private static final int GUI_TEXTURE_HEIGHT = 100;
-
-	private int x, y, width, height;
-	private float u, v, U, V;
 
 	public GuiIcon(float u, float v, float U, float V)
 	{
@@ -53,72 +50,17 @@ public class GuiIcon implements IIcon
 		this.V = (float) (y + height) / GUI_TEXTURE_HEIGHT;
 	}
 
-	@Override
-	public int getIconWidth()
-	{
-		return width;
-	}
-
-	@Override
-	public int getIconHeight()
-	{
-		return height;
-	}
-
-	@Override
-	public float getMinU()
-	{
-		return u;
-	}
-
-	@Override
-	public float getMaxU()
-	{
-		return U;
-	}
-
-	@Override
-	public float getInterpolatedU(double f)
-	{
-		return (float) (U * f);
-	}
-
-	@Override
-	public float getMinV()
-	{
-		return v;
-	}
-
-	@Override
-	public float getMaxV()
-	{
-		return V;
-	}
-
-	@Override
-	public float getInterpolatedV(double f)
-	{
-		return (float) (v * f);
-	}
-
 	public GuiIcon getIconFlipped(boolean horizontal, boolean vertical)
 	{
 		return new GuiIcon(horizontal ? U : u, vertical ? V : v, horizontal ? u : U, vertical ? v : V);
 	}
 
-	@Override
-	public String getIconName()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public GuiIcon offset(int offsetX, int offsetY)
+	public GuiIcon offsetCopy(int offsetX, int offsetY)
 	{
 		return new GuiIcon(x + offsetX, y + offsetY, width, height);
 	}
 
-	public GuiIcon clip(int offsetX, int offsetY, int width, int height)
+	public GuiIcon clippedCopy(int offsetX, int offsetY, int width, int height)
 	{
 		return new GuiIcon(x + offsetX, y + offsetY, width, height);
 	}

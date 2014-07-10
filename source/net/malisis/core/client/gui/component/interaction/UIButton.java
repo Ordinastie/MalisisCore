@@ -47,12 +47,12 @@ public class UIButton extends UIComponent<UIButton>
 	public static GuiIcon[] iconButton = new GuiIcon[] { 			new GuiIcon(0,		20, 	5, 		20),
 																	new GuiIcon(5,		20, 	15, 	20),
 																	new GuiIcon(195, 	20, 	5, 		20)};
-	public static GuiIcon[] iconButtonHovered = new GuiIcon[] { 	iconButton[0].offset(0,  20),
-																	iconButton[1].offset(0,  20),
-																	iconButton[2].offset(0,  20) };
-	public static GuiIcon[] iconButtonDisabled = new GuiIcon[] { 	iconButton[0].offset(0,  -20),
-																	iconButton[1].offset(0,  -20),
-																	iconButton[2].offset(0,  -20) };
+	public static GuiIcon[] iconButtonHovered = new GuiIcon[] { 	iconButton[0].offsetCopy(0,  20),
+																	iconButton[1].offsetCopy(0,  20),
+																	iconButton[2].offsetCopy(0,  20) };
+	public static GuiIcon[] iconButtonDisabled = new GuiIcon[] { 	iconButton[0].offsetCopy(0,  -20),
+																	iconButton[1].offsetCopy(0,  -20),
+																	iconButton[2].offsetCopy(0,  -20) };
 	//@formatter:on
 	private UILabel label = new UILabel();
 	private boolean autoWidth = true;

@@ -3,6 +3,7 @@ package net.malisis.core.renderer.element;
 import java.util.HashMap;
 import java.util.List;
 
+import net.malisis.core.renderer.MalisisIcon;
 import net.malisis.core.renderer.RenderParameters;
 import net.minecraft.util.IIcon;
 
@@ -105,13 +106,24 @@ public class Face
 
 		double factorU, factorV;
 
-		for (Vertex vertex : vertexes)
+		float uvs[][] = new float[vertexes.length][2];
+		for (int i = 0; i < vertexes.length; i++)
 		{
+			Vertex vertex = vertexes[i];
+
 			factorU = interpolate ? getFactorU(vertex) : vertex.getU();
 			factorV = interpolate ? getFactorV(vertex) : vertex.getV();
-			vertex.setUV(interpolate(u, U, factorU, flippedU), interpolate(v, V, factorV, flippedV));
 
+			int k = i;
+			if (icon instanceof MalisisIcon)
+			{
+				k = (i + ((MalisisIcon) icon).getRotation()) % vertexes.length;
+			}
+			uvs[k] = new float[] { interpolate(u, U, factorU, flippedU), interpolate(v, V, factorV, flippedV) };
 		}
+
+		for (int i = 0; i < vertexes.length; i++)
+			vertexes[i].setUV(uvs[i][0], uvs[i][1]);
 
 		return this;
 	}

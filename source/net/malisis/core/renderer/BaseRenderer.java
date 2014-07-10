@@ -574,7 +574,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	public void applyTexture(Shape shape, RenderParameters rp)
 	{
-		shape.applyMatrix();
+		//shape.applyMatrix();
 		for (Face f : shape.getFaces())
 		{
 			RenderParameters params = RenderParameters.merge(f.getParameters(), rp);

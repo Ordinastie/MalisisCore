@@ -56,9 +56,9 @@ public class UITextField extends UIComponent<UITextField>
 	public static GuiIcon[] iconTextfield = new GuiIcon[] { 		new GuiIcon(200,	30, 	3, 		12),
 																	new GuiIcon(203,	30, 	3, 		12),
 																	new GuiIcon(206, 	30, 	3, 		12)};
-	public static GuiIcon[] iconTextfieldDisabled = new GuiIcon[] { iconTextfield[0].offset(0,  12),
-																	iconTextfield[1].offset(0,  12),
-																	iconTextfield[2].offset(0,  12) };
+	public static GuiIcon[] iconTextfieldDisabled = new GuiIcon[] { iconTextfield[0].offsetCopy(0,  12),
+																	iconTextfield[1].offsetCopy(0,  12),
+																	iconTextfield[2].offsetCopy(0,  12) };
 	//@formatter:on
 
 	/**

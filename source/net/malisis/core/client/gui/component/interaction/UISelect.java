@@ -55,9 +55,9 @@ public class UISelect extends UIComponent<UISelect>
 	public static GuiIcon[] iconsSelect = new GuiIcon[] { 		new GuiIcon(200,	30, 	3, 		12),
 																new GuiIcon(203,	30, 	3, 		12),
 																new GuiIcon(206, 	30, 	3, 		12)};
-	public static GuiIcon[] iconsSelectDisabled = new GuiIcon[] { 	iconsSelect[0].offset(0,  12),
-																	iconsSelect[1].offset(0,  12),
-																	iconsSelect[2].offset(0,  12) };
+	public static GuiIcon[] iconsSelectDisabled = new GuiIcon[] { 	iconsSelect[0].offsetCopy(0,  12),
+																	iconsSelect[1].offsetCopy(0,  12),
+																	iconsSelect[2].offsetCopy(0,  12) };
 	public GuiIcon[] iconsExpanded = new GuiIcon[] { 			new GuiIcon(200,	30, 	3, 		3),
 																new GuiIcon(203,	30, 	3, 		3),
 																new GuiIcon(206, 	30, 	3, 		3),

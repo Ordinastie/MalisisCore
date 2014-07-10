@@ -65,20 +65,20 @@ public class UIScrollBar extends UIComponent
 												new GuiIcon(215, 	14, 	1, 	1),
 												new GuiIcon(220, 	14, 	1, 	1),
 												new GuiIcon(229, 	14, 	1, 	1)};
-	public GuiIcon[] disabledIcons = new GuiIcon[] { 	icons[0].offset(0,  15),
-														icons[1].offset(0,  15),
-														icons[2].offset(0,  15),
-														icons[3].offset(0,  15),
-														icons[4].offset(0,  15),
-														icons[5].offset(0,  15),
-														icons[6].offset(0,  15),
-														icons[7].offset(0,  15),
-														icons[8].offset(0,  15)};
+	public GuiIcon[] disabledIcons = new GuiIcon[] { 	icons[0].offsetCopy(0,  15),
+														icons[1].offsetCopy(0,  15),
+														icons[2].offsetCopy(0,  15),
+														icons[3].offsetCopy(0,  15),
+														icons[4].offsetCopy(0,  15),
+														icons[5].offsetCopy(0,  15),
+														icons[6].offsetCopy(0,  15),
+														icons[7].offsetCopy(0,  15),
+														icons[8].offsetCopy(0,  15)};
 	//@formatter:on
 	public GuiIcon verticalIcon = new GuiIcon(230, 0, 8, 15);
-	public GuiIcon verticalDisabledIcon = verticalIcon.offset(8, 0);
+	public GuiIcon verticalDisabledIcon = verticalIcon.offsetCopy(8, 0);
 	public GuiIcon horizontalIcon = new GuiIcon(230, 15, 15, 8);
-	public GuiIcon horizontalDisabledIcon = horizontalIcon.offset(0, 8);
+	public GuiIcon horizontalDisabledIcon = horizontalIcon.offsetCopy(0, 8);
 
 	public <T extends UIContainer & IScrollable> UIScrollBar(T scrollable, int length, int type)
 	{

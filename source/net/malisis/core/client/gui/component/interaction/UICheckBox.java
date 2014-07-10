@@ -51,10 +51,10 @@ import com.google.common.eventbus.Subscribe;
 public class UICheckBox extends UIComponent<UICheckBox>
 {
 	private GuiIcon checkboxBackground = new GuiIcon(242, 32, 10, 10);
-	private GuiIcon checkboxBackgroundDisabled = checkboxBackground.offset(10, 0);
+	private GuiIcon checkboxBackgroundDisabled = checkboxBackground.offsetCopy(10, 0);
 	private GuiIcon checkBoxDisabled = new GuiIcon(242, 42, 12, 10);
-	private GuiIcon checkBoxChecked = checkBoxDisabled.offset(0, 10);
-	private GuiIcon checkBoxHovered = checkBoxDisabled.offset(12, 0);
+	private GuiIcon checkBoxChecked = checkBoxDisabled.offsetCopy(0, 10);
+	private GuiIcon checkBoxHovered = checkBoxDisabled.offsetCopy(12, 0);
 	private UILabel label;
 	private boolean checked;
 

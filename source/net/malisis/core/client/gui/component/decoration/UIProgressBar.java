@@ -38,7 +38,7 @@ import net.malisis.core.renderer.preset.ShapePreset;
 public class UIProgressBar extends UIComponent<UIProgressBar>
 {
 	private GuiIcon barIcon = new GuiIcon(246, 0, 22, 16);
-	private GuiIcon barFilledIcon = barIcon.offset(0, 16);
+	private GuiIcon barFilledIcon = barIcon.offsetCopy(0, 16);
 
 	protected float progress = 0;
 	protected boolean reversed = false;
@@ -85,12 +85,12 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	{
 		int width = (int) (this.width * progress);
 		int xOffset = 0;
-		GuiIcon icon = barFilledIcon.clip(0, 0, width, 16);
+		GuiIcon icon = barFilledIcon.clippedCopy(0, 0, width, 16);
 
 		if (reversed)
 		{
 			xOffset = this.width - width;
-			icon = barFilledIcon.clip(width - 22, 0, -width, 16);
+			icon = barFilledIcon.clippedCopy(width - 22, 0, -width, 16);
 		}
 
 		Shape shape = ShapePreset.GuiElement(width, 16);

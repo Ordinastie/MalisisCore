@@ -38,7 +38,7 @@ import net.minecraftforge.client.model.obj.WavefrontObject;
 public class WavefrontObjectImporter
 {
 	private MalisisModel model;
-	private WavefrontObject wfo;
+	public WavefrontObject wfo;
 
 	public WavefrontObjectImporter(WavefrontObject wfo)
 	{
@@ -51,7 +51,7 @@ public class WavefrontObjectImporter
 		return model;
 	}
 
-	public void fromWavefromObject(WavefrontObject wfo)
+	public void load()
 	{
 		for (GroupObject go : wfo.groupObjects)
 		{

@@ -201,7 +201,6 @@ public class ObjFileImporter
 		matcher = facePattern.matcher(data);
 
 		List<Vertex> faceVertex = new ArrayList<>();
-		int i = 0;
 		int v = 0, t = 0;
 		String strV, strT;
 		Vertex vertex;
@@ -231,8 +230,6 @@ public class ObjFileImporter
 			{
 				MalisisCore.log.error("[ObjFileImporter] Wrong vertex reference {} for face at line {} :\n{}", v, lineNumber, currentLine);
 			}
-
-			i++;
 		}
 
 		faces.add(new Face(faceVertex));
