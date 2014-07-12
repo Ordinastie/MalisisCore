@@ -1,11 +1,21 @@
 package net.malisis.core.renderer;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.DestroyBlockProgress;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -22,6 +32,7 @@ import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 import cpw.mods.fml.client.registry.RenderingRegistry;
+import cpw.mods.fml.relauncher.ReflectionHelper;
 
 public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
 {
@@ -41,6 +52,10 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * Set rendering for TESR
 	 */
 	public static final int TYPE_TESR_WORLD = 4;
+
+	//Reference to Minecraft.renderGlobal.damagedBlocks (lazy loaded)
+	private static Map damagedBlocks;
+	protected static IIcon[] damagedIcons;
 
 	protected Tessellator t = Tessellator.instance;
 	protected IBlockAccess world;
@@ -113,7 +128,16 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	/**
 	 * Partial tick time (for TESR)
 	 */
-	public float partialTick = 0;
+	protected float partialTick = 0;
+	/**
+	 * Get the damage for the block (for TESR)
+	 */
+	protected boolean getBlockDamage = false;
+	/**
+	 * Current block destroy progression (for TESR)
+	 */
+	protected DestroyBlockProgress destroyBlockProgress = null;
+
 	/**
 	 * Is at least one vertex been drawn
 	 */
@@ -122,6 +146,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	public BaseRenderer()
 	{
 		this.t = Tessellator.instance;
+	}
+
+	public float getPartialTick()
+	{
+		return partialTick;
 	}
 
 	// #region set()
@@ -136,6 +165,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		this.y = 0;
 		this.z = 0;
 		this.overrideTexture = null;
+		this.destroyBlockProgress = null;
 	}
 
 	public void set(IBlockAccess world, Block block, int x, int y, int z, int metadata)
@@ -255,6 +285,24 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		set(te, partialTick);
 		prepare(TYPE_TESR_WORLD, x, y, z);
 		render();
+		if (getBlockDamage)
+		{
+			destroyBlockProgress = getBlockDestroyProgress();
+			if (destroyBlockProgress != null)
+			{
+				next();
+
+				GL11.glEnable(GL11.GL_BLEND);
+				OpenGlHelper.glBlendFunc(GL11.GL_DST_COLOR, GL11.GL_SRC_COLOR, GL11.GL_ONE, GL11.GL_ZERO);
+				GL11.glAlphaFunc(GL11.GL_GREATER, 0);
+				GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
+
+				t.disableColor();
+				renderDestroyProgress();
+				next();
+				GL11.glDisable(GL11.GL_BLEND);
+			}
+		}
 		clean();
 	}
 
@@ -397,6 +445,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	public void render()
+	{
+
+	}
+
+	public void renderDestroyProgress()
 	{
 
 	}
@@ -773,6 +826,58 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	{
 		for (Vertex v : face.getVertexes())
 			v.interpolateCoord(bounds);
+	}
+
+	protected Map getDamagedBlocks()
+	{
+		if (damagedBlocks != null)
+			return damagedBlocks;
+
+		try
+		{
+			Field modifiers = Field.class.getDeclaredField("modifiers");
+			modifiers.setAccessible(true);
+
+			Field f = ReflectionHelper.findField(RenderGlobal.class, MalisisCore.isObfEnv ? "field_94141_F" : "destroyBlockIcons");
+			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
+			damagedIcons = (IIcon[]) f.get(Minecraft.getMinecraft().renderGlobal);
+
+			f = ReflectionHelper.findField(RenderGlobal.class, MalisisCore.isObfEnv ? "field_72738_E" : "damagedBlocks");
+
+			modifiers.setInt(f, f.getModifiers());
+			damagedBlocks = (HashMap) f.get(Minecraft.getMinecraft().renderGlobal);
+
+			return damagedBlocks;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	protected DestroyBlockProgress getBlockDestroyProgress()
+	{
+		if (renderType != TYPE_TESR_WORLD)
+			return null;
+		Map damagedBlocks = getDamagedBlocks();
+		if (damagedBlocks == null || damagedBlocks.isEmpty())
+			return null;
+
+		Iterator iterator = damagedBlocks.values().iterator();
+		while (iterator.hasNext())
+		{
+			DestroyBlockProgress dbp = (DestroyBlockProgress) iterator.next();
+			if (isCurrentBlockDestroyProgress(dbp))
+				return dbp;
+		}
+		return null;
+
+	}
+
+	protected boolean isCurrentBlockDestroyProgress(DestroyBlockProgress dbp)
+	{
+		return dbp.getPartialBlockX() == x && dbp.getPartialBlockY() == y && dbp.getPartialBlockZ() == z;
 	}
 
 	public static <T extends BaseRenderer> T create(Class<T> clazz, IBaseRendering... blocks)

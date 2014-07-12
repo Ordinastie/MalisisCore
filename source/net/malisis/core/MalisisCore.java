@@ -38,7 +38,6 @@ import cpw.mods.fml.common.LoadController;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
 import cpw.mods.fml.relauncher.ReflectionHelper;
@@ -135,11 +134,6 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	public static void init(FMLInitializationEvent event)
 	{
 		NetworkHandler.init(modid);
-	}
-
-	@Subscribe
-	public void serverStart(FMLServerStartingEvent event)
-	{
 		ClientCommandHandler.instance.registerCommand(new MalisisCommand());
 	}
 

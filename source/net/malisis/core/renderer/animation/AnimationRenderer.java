@@ -53,7 +53,7 @@ public class AnimationRenderer
 	{
 		this.startTime = start;
 		this.worldTotalTime = Minecraft.getMinecraft().theWorld.getTotalWorldTime();
-		this.partialTick = this.renderer.partialTick;
+		this.partialTick = this.renderer.getPartialTick();
 		this.elapsedTime = worldTotalTime - startTime + partialTick;
 	}
 
