@@ -219,11 +219,6 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	@Override
 	public void renderInventoryBlock(Block block, int metadata, int modelId, RenderBlocks renderer)
 	{
-		renderInventoryBlock(block, metadata, modelId, renderer, null);
-	}
-
-	public void renderInventoryBlock(Block block, int metadata, int modelId, RenderBlocks renderer, RenderParameters rp)
-	{
 		set(block, metadata);
 		renderBlocks = renderer;
 		prepare(TYPE_ISBRH_INVENTORY);
@@ -416,6 +411,19 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 		isShifted = false;
 		t.addTranslation(-x, -y, -z);
+	}
+
+	public void enableBlending()
+	{
+		if (renderType == TYPE_ISBRH_WORLD)
+			return;
+
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+		GL11.glShadeModel(GL11.GL_SMOOTH);
+		OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
+		GL11.glAlphaFunc(GL11.GL_GREATER, 0.0F);
+
 	}
 
 	// #end prepare()
