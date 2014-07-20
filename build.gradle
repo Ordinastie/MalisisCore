@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
-version = "1.7.2-0.7.3"
+version = "1.7.2-0.8"
 group = "net.malisis.malisiscore" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "malisiscore"
 libsDirName = "../releases"
@@ -50,9 +50,9 @@ artifacts {
 minecraft {
     version = "1.7.2-10.12.1.1112"
     if (file("../../run").exists()) {
-        assetDir = "../../run/assets"
+        runDir = "../../run/assets"
     } else {
-        assetDir = "assets"
+        runDir = "assets"
     }
 }
 
