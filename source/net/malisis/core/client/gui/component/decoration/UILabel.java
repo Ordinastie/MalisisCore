@@ -157,6 +157,7 @@ public class UILabel extends UIComponent<UILabel>
 	}
 
 	// #end getters/setters
+
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{}

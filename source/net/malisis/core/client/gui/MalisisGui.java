@@ -334,6 +334,9 @@ public class MalisisGui extends GuiScreen
 	}
 
 	public void update(int mouseX, int mouseY, float partialTick)
+	{}
+
+	public void updateGui()
 	{
 
 	}

@@ -588,7 +588,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		vertexDrawn = true;
 	}
 
-	private IIcon getIcon(RenderParameters params)
+	protected IIcon getIcon(RenderParameters params)
 	{
 		IIcon icon = params.icon.get();
 		if (params.useCustomTexture.get())

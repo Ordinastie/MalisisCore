@@ -27,8 +27,6 @@ package net.malisis.core.client.gui.component.interaction;
 import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
@@ -55,45 +53,24 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	private GuiIcon checkBoxDisabled = new GuiIcon(242, 42, 12, 10);
 	private GuiIcon checkBoxChecked = checkBoxDisabled.offsetCopy(0, 10);
 	private GuiIcon checkBoxHovered = checkBoxDisabled.offsetCopy(12, 0);
-	private UILabel label;
+	private String label;
 	private boolean checked;
 
 	public UICheckBox(String label)
 	{
 		if (label != null && !label.equals(""))
 		{
-			this.label = new UILabel(label);
-			this.label.setPosition(x + 14, y + 2);
-			width = this.label.getWidth() + 2;
+			this.label = label;
+			width = GuiRenderer.getStringWidth(label);
 		}
 
 		width += 11;
 		height = 10;
-
-		checkboxBackground = new GuiIcon(242, 32, 10, 10);
-		checkBoxDisabled = new GuiIcon(242, 42, 12, 10);
 	}
 
 	public UICheckBox()
 	{
 		this(null);
-	}
-
-	@Override
-	public void setParent(UIContainer parent)
-	{
-		super.setParent(parent);
-		if (label != null)
-			label.setParent(parent);
-	}
-
-	@Override
-	public UICheckBox setPosition(int x, int y)
-	{
-		super.setPosition(x, y);
-		if (label != null)
-			label.setPosition(x + 14, y + 2);
-		return this;
 	}
 
 	public boolean isChecked()
@@ -141,7 +118,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 
 		if (label != null)
 		{
-			label.draw(renderer, mouseX, mouseY, partialTick);
+			renderer.drawText(label, 14, 2, 0x404040, false);
 		}
 	}
 
@@ -151,7 +128,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		if (checked)
 		{
 			GL11.glEnable(GL11.GL_BLEND);
-			GuiIcon icon = isDisabled() ? checkBoxDisabled : (hovered || (label != null && label.isHovered()) ? checkBoxHovered : checkBoxChecked);
+			GuiIcon icon = isDisabled() ? checkBoxDisabled : (isHovered() ? checkBoxHovered : checkBoxChecked);
 			Shape shape = ShapePreset.GuiElement(12, 10);
 			renderer.drawShape(shape, icon);
 		}
@@ -183,8 +160,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	@Override
 	public String toString()
 	{
-		return this.getClass().getName() + "[ text=" + (label != null ? label.getText() : "") + ", checked=" + this.checked + ", "
-				+ this.getPropertyString() + " ]";
+		return this.getClass().getName() + "[ text=" + label + ", checked=" + this.checked + ", " + this.getPropertyString() + " ]";
 	}
 
 }

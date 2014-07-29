@@ -25,6 +25,9 @@
 package net.malisis.core.client.gui.component.interaction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiIcon;
@@ -77,7 +80,7 @@ public class UISelect extends UIComponent<UISelect>
 	protected int maxDisplayedOptions = -1;
 	protected boolean expanded = false;
 
-	public UISelect(int width, String[] options)
+	public UISelect(int width, HashMap<Integer, Option> options)
 	{
 		this.width = width;
 		this.height = 12;
@@ -119,28 +122,40 @@ public class UISelect extends UIComponent<UISelect>
 		return this;
 	}
 
-	public UISelect setOptions(String[] options)
+	public UISelect setOptions(HashMap<Integer, Option> options)
 	{
 		optionsContainer.setOptions(options);
 		return this;
 	}
 
-	public String select(int index)
+	public void setSelectedOption(int index)
 	{
-		String oldValue = getOption(selectedOption);
-		String newValue = getOption(index);
+		selectedOption = index;
+	}
+
+	public Option select(int index)
+	{
+		Option oldValue = getOption(selectedOption);
+		Option newValue = getOption(index);
+
+		selectedOption = newValue != null ? newValue.index : -1;
 
 		if (!fireEvent(new ComponentEvent.ValueChanged(this, oldValue, newValue)))
+		{
+			selectedOption = oldValue.index;
 			return oldValue;
-
-		if (newValue != null)
-			selectedOption = index;
+		}
 		return newValue;
 	}
 
-	public String getOption(int index)
+	public Option getOption(int index)
 	{
 		return optionsContainer.getOption(index);
+	}
+
+	public Option getSelectedOption()
+	{
+		return optionsContainer.getOption(selectedOption);
 	}
 
 	@Override
@@ -178,7 +193,7 @@ public class UISelect extends UIComponent<UISelect>
 
 		if (selectedOption != -1)
 		{
-			String text = getOption(selectedOption);
+			String text = getOption(selectedOption).label;
 			if (text != null && text.length() != 0)
 				renderer.drawText(renderer.clipString(text, width - 15), 2, 2, 0xFFFFFF, true);
 		}
@@ -222,7 +237,7 @@ public class UISelect extends UIComponent<UISelect>
 		if (isFocused() && isHovered())
 		{
 			int selected = selectedOption + event.getDelta() * -1;
-			selected = Math.max(0, Math.min(optionsContainer.options.size() - 1, selected));
+			selected = Math.max(0, Math.min(optionsContainer.optionsLabel.size() - 1, selected));
 			select(selected);
 		}
 	}
@@ -246,31 +261,34 @@ public class UISelect extends UIComponent<UISelect>
 				select(0);
 				break;
 			case Keyboard.KEY_END:
-				select(optionsContainer.options.size() - 1);
+				select(optionsContainer.optionsLabel.size() - 1);
 				break;
 		}
 	}
 
 	private class OptionsContainer extends UIContainer
 	{
-		ArrayList<UILabel> options = new ArrayList<>();
+		HashMap<Integer, Option> options;
+		ArrayList<UILabel> optionsLabel = new ArrayList<>();
 
 		public OptionsContainer()
 		{
 			this.zIndex = 101;
 		}
 
-		public void setOptions(String[] options)
+		public void setOptions(HashMap<Integer, Option> options)
 		{
-			for (UILabel label : this.options)
+			this.options = options;
+			for (UILabel label : this.optionsLabel)
 				unregister(label);
-			this.options.clear();
+			this.optionsLabel.clear();
 			int i = 0;
-			for (String str : options)
+
+			for (Entry<Integer, UISelect.Option> entry : options.entrySet())
 			{
-				UILabel label = new UILabel(str).setPosition(2, 1 + 10 * i++).setZIndex(zIndex + 1).setDrawShadow(true)
+				UILabel label = new UILabel(entry.getValue().label).setPosition(2, 1 + 10 * i++).setZIndex(zIndex + 1).setDrawShadow(true)
 						.register(UISelect.this);
-				this.options.add(label);
+				this.optionsLabel.add(label);
 				this.add(label);
 			}
 
@@ -280,24 +298,24 @@ public class UISelect extends UIComponent<UISelect>
 		private void calcExpandedSize()
 		{
 			width = UISelect.this.width;
-			height = 10 * (maxDisplayedOptions == -1 ? options.size() : maxDisplayedOptions) + 1;
-			if (maxDisplayedOptions != -1 && maxDisplayedOptions < options.size())
+			height = 10 * (maxDisplayedOptions == -1 ? optionsLabel.size() : maxDisplayedOptions) + 1;
+			if (maxDisplayedOptions != -1 && maxDisplayedOptions < optionsLabel.size())
 
-				for (UILabel label : options)
+				for (UILabel label : optionsLabel)
 					width = Math.max(width, label.getWidth() + 4);
 
 			if (maxExpandedWidth > 0)
 				width = Math.min(maxExpandedWidth, width);
 
-			for (UILabel label : options)
+			for (UILabel label : optionsLabel)
 				label.setSize(width - 2);
 		}
 
-		public String getOption(int index)
+		public Option getOption(int index)
 		{
 			if (index < 0 || index >= options.size())
 				return null;
-			return options.get(index).getText();
+			return options.get(index);
 		}
 
 		@Override
@@ -337,7 +355,7 @@ public class UISelect extends UIComponent<UISelect>
 			Shape shape = ShapePreset.GuiXYResizable(width, height, 3, 3);
 			renderer.drawShape(shape, iconsExpanded);
 
-			for (UILabel label : options)
+			for (UILabel label : optionsLabel)
 			{
 				if (label.isHovered())
 				{
@@ -366,7 +384,7 @@ public class UISelect extends UIComponent<UISelect>
 		public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 		{
 			int i = 0;
-			for (UILabel label : options)
+			for (UILabel label : optionsLabel)
 			{
 				int color = label.isHovered() ? (i == selectedOption ? 0xDED89F : 0xFFFFFF) : (i == selectedOption ? 0x9EA8DF : 0xFFFFFF);
 				label.setColor(color);
@@ -375,6 +393,64 @@ public class UISelect extends UIComponent<UISelect>
 			}
 		}
 
+	}
+
+	public static class Option<T>
+	{
+		private int index;
+		private T key;
+		private String label;
+
+		public Option(int index, T key, String value)
+		{
+			this.index = index;
+			this.key = key;
+			this.label = value;
+		}
+
+		public int getIndex()
+		{
+			return index;
+		}
+
+		public T getKey()
+		{
+			return key;
+		}
+
+		public String getLabel()
+		{
+			return label;
+		}
+
+		public static <T> HashMap<Integer, Option> fromList(List<T> list)
+		{
+			HashMap<Integer, Option> options = new HashMap<>();
+			int index = 0;
+			for (T opt : list)
+			{
+				Option<T> option = new Option(index, opt, opt.toString());
+				options.put(index, option);
+				index++;
+			}
+
+			return options;
+		}
+
+		public static <T> HashMap<Integer, Option> fromList(HashMap<T, String> list)
+		{
+			HashMap<Integer, Option> options = new HashMap<>();
+			int index = 0;
+
+			for (Entry<T, String> entry : list.entrySet())
+			{
+				Option<T> option = new Option(index, entry.getKey(), entry.getValue());
+				options.put(index, option);
+				index++;
+			}
+
+			return options;
+		}
 	}
 
 }
