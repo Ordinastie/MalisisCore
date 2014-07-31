@@ -61,7 +61,6 @@ public class UIButton extends UIComponent<UIButton>
 	public UIButton(String text, int width)
 	{
 		setText(text);
-		label.setColor(0xFFFFFF);
 		label.setDrawShadow(true);
 		setSize(width);
 	}
@@ -139,6 +138,7 @@ public class UIButton extends UIComponent<UIButton>
 		int x = (width - label.getWidth()) / 2;
 		int y = (height - label.getHeight() + 2) / 2;
 
+		label.setColor(isHovered() ? 0xFFFFA0 : 0xFFFFFF);
 		label.setPosition(screenX() + x, screenY() + y);
 		label.draw(renderer, mouseX, mouseY, partialTick);
 	}
