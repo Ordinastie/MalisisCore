@@ -97,7 +97,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiElement(8, 8).translate(1, 1, 0);
+		Shape shape = ShapePreset.GuiElement(8, 8).translate(1, 0, 0);
 		renderer.drawShape(shape, isDisabled() ? rbBackgroundDisabled : rbBackground);
 
 		renderer.next();
@@ -126,7 +126,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 
 		if (label != null)
 		{
-			renderer.drawText(label, 12, 2, 0x404040, false);
+			renderer.drawText(label, 12, 0, 0x404040, false);
 		}
 	}
 
@@ -137,7 +137,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 		{
 			GL11.glEnable(GL11.GL_BLEND);
 			GuiIcon icon = isDisabled() ? rbDisabled : (isHovered() ? rbHovered : rbChecked);
-			Shape shape = ShapePreset.GuiElement(6, 6).translate(2, 2, 0);
+			Shape shape = ShapePreset.GuiElement(6, 6).translate(2, 1, 0);
 			renderer.drawShape(shape, icon);
 		}
 	}

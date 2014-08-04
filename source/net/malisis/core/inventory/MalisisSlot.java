@@ -41,6 +41,10 @@ public class MalisisSlot
 	 * Slot position within {@link MalisisInventory inventory}
 	 */
 	public int slotNumber;
+	/**
+	 * Whether the slot is an output slot. If set to true, isItemValid() always return false
+	 */
+	private boolean isOutputSlot = false;
 
 	public MalisisSlot(MalisisInventory inventory, ItemStack itemStack, int index)
 	{
@@ -89,12 +93,25 @@ public class MalisisSlot
 	}
 
 	/**
+	 * Sets whether this <code>MalisisSlot</code> is an output slot. If set to true, isItemValid() always return false
+	 * 
+	 * @param isOutput
+	 */
+	public void setOutputSlot(boolean isOutput)
+	{
+		isOutputSlot = isOutput;
+	}
+
+	/**
 	 * Check if this <code>MalisisSlot</code> can contain itemStack. Defers the test to this {@link MalisisInventory inventory}.
 	 * 
 	 * @return true if the itemStack can be container in this <code>MalisisSlot</code>
 	 */
 	public boolean isItemValid(ItemStack itemStack)
 	{
+		if (isOutputSlot)
+			return false;
+
 		if (inventory == null)
 			return true;
 
