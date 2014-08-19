@@ -57,7 +57,7 @@ public class ItemUtils
 				return true;
 			}
 
-			nbMerged = intoMaxStackSize - into.stackSize;
+			nbMerged = Math.min(intoMaxStackSize, into.getMaxStackSize()) - into.stackSize;
 			if (nbMerged == 0)
 				return false;
 			nbMerged = Math.min(nbMerged, amount);

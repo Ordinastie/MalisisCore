@@ -411,7 +411,7 @@ public class MalisisInventoryContainer extends Container
 		if (action == SHIFT_LEFT_CLICK)
 		{
 			// we need to store last shift clicked item for double click because at the time of the second click, slot may be empty and we
-			// would know what itemStack to move
+			// wouldn't know what itemStack to move
 			lastShiftClicked = slot.getItemStack();
 			ItemStack itemStack = handleShiftClick(slot);
 			if (itemStack != null)
