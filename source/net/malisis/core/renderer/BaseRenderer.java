@@ -57,16 +57,17 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	private static Map damagedBlocks;
 	protected static IIcon[] damagedIcons;
 
+	protected int renderId = -1;
 	protected Tessellator t = Tessellator.instance;
 	protected IBlockAccess world;
 	protected RenderBlocks renderBlocks;
 
 	/**
-	 * Block to render
+	 * Block to render (ISBRH/TESR)
 	 */
 	protected Block block;
 	/**
-	 * Metadata of the block to render
+	 * Metadata of the block to render (ISBRH/TESR)
 	 */
 	protected int blockMetadata;
 	/**
@@ -74,7 +75,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected int x, y, z;
 	/**
-	 * ItemStack to render
+	 * ItemStack to render (ITEM)
 	 */
 	protected ItemStack itemStack;
 	/**
@@ -84,16 +85,17 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected ItemRenderType itemRenderType;
 	/**
-	 * Type of rendering : <code>TYPE_WORLD</code> or <code>TYPE_INVENTORY</code>
+	 * Type of rendering : <code>TYPE_ISBRH_WORLD</code>, <code>TYPE_ISBRH_INVENTORY</code>, <code>TYPE_ITEM_INVENTORY</code> or
+	 * <code>TYPE_TESR_WORLD</code>
 	 */
 	protected int renderType;
 	/**
-	 * Mode of rendering
+	 * Mode of rendering (GL constants)
 	 */
 	protected int drawMode;
 
 	/**
-	 * Are render coordinates already shifted (<code>TYPE_WORLD</code> only)
+	 * Are render coordinates already shifted (<code>TYPE_ISBRH_WORLD</code> only)
 	 */
 	protected boolean isShifted = false;
 
@@ -148,12 +150,20 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		this.t = Tessellator.instance;
 	}
 
+	/**
+	 * Gets the partialTick for this frame. Used for TESR and ITEMS
+	 * 
+	 * @return
+	 */
 	public float getPartialTick()
 	{
 		return partialTick;
 	}
 
 	// #region set()
+	/**
+	 * Resets data so this <code>BaseRenderer</code> can be reused.
+	 */
 	public void reset()
 	{
 		this.renderType = 0;
@@ -168,6 +178,16 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		this.destroyBlockProgress = null;
 	}
 
+	/**
+	 * Sets informations for this <code>BaseRenderer</code>.
+	 * 
+	 * @param world
+	 * @param block
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param metadata
+	 */
 	public void set(IBlockAccess world, Block block, int x, int y, int z, int metadata)
 	{
 		this.world = world;
@@ -178,26 +198,55 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		this.z = z;
 	}
 
+	/**
+	 * Sets informations for this <code>BaseRenderer</code>.
+	 * 
+	 * @param block
+	 */
 	public void set(Block block)
 	{
 		set(world, block, x, y, z, blockMetadata);
 	}
 
+	/**
+	 * Sets informations for this <code>BaseRenderer</code>.
+	 * 
+	 * @param blockMetadata
+	 */
 	public void set(int blockMetadata)
 	{
 		set(world, block, x, y, z, blockMetadata);
 	}
 
+	/**
+	 * Sets informations for this <code>BaseRenderer</code>.
+	 * 
+	 * @param block
+	 * @param blockMetadata
+	 */
 	public void set(Block block, int blockMetadata)
 	{
 		set(world, block, x, y, z, blockMetadata);
 	}
 
+	/**
+	 * Sets informations for this <code>BaseRenderer</code>.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
 	public void set(int x, int y, int z)
 	{
 		set(world, block, x, y, z, blockMetadata);
 	}
 
+	/**
+	 * Sets informations for this <code>BaseRenderer</code>.
+	 * 
+	 * @param te
+	 * @param partialTick
+	 */
 	public void set(TileEntity te, float partialTick)
 	{
 		set(te.getWorldObj(), te.getBlockType(), te.xCoord, te.yCoord, te.zCoord, te.getBlockMetadata());
@@ -205,6 +254,12 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		this.tileEntity = te;
 	}
 
+	/**
+	 * Sets informations for this <code>BaseRenderer</code>.
+	 * 
+	 * @param type
+	 * @param itemStack
+	 */
 	public void set(ItemRenderType type, ItemStack itemStack)
 	{
 		if (itemStack.getItem() instanceof ItemBlock)
@@ -304,30 +359,30 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	// #end TESR
 
 	// #region prepare()
-	public void prepare(int typeRender, int modeRender)
+	/**
+	 * Prepares the tessellator and the GL states for the <b>renderType</b>. <b>data</b> is only for TESR.
+	 * 
+	 * @param renderType
+	 * @param data
+	 */
+	public void prepare(int renderType, double... data)
 	{
-		this.drawMode = modeRender;
-		prepare(typeRender);
-	}
-
-	public void prepare(int typeRender, double... data)
-	{
-		this.renderType = typeRender;
-		if (typeRender == TYPE_ISBRH_WORLD)
+		this.renderType = renderType;
+		if (renderType == TYPE_ISBRH_WORLD)
 		{
 			tessellatorShift();
 		}
-		else if (typeRender == TYPE_ISBRH_INVENTORY)
+		else if (renderType == TYPE_ISBRH_INVENTORY)
 		{
 			GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
 			startDrawing();
 		}
-		else if (typeRender == TYPE_ITEM_INVENTORY)
+		else if (renderType == TYPE_ITEM_INVENTORY)
 		{
 			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
 			startDrawing();
 		}
-		else if (typeRender == TYPE_TESR_WORLD)
+		else if (renderType == TYPE_TESR_WORLD)
 		{
 			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
 			RenderHelper.disableStandardItemLighting();
@@ -343,33 +398,55 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		}
 	}
 
+	/**
+	 * Tells the tessellator to start drawing GL_QUADS.
+	 */
 	public void startDrawing()
 	{
 		startDrawing(GL11.GL_QUADS);
 	}
 
+	/**
+	 * Tells the tessellator to start drawing <b>drawMode</b>.
+	 * 
+	 * @param drawMode
+	 */
 	public void startDrawing(int drawMode)
 	{
 		t.startDrawing(drawMode);
 		this.drawMode = drawMode;
 	}
 
+	/**
+	 * Triggers a draw and restart drawing with current <i>drawMode</i>.
+	 */
 	public void next()
 	{
 		next(drawMode);
 	}
 
+	/**
+	 * Triggers a draw and restart drawing with <b>drawMode</b>.
+	 * 
+	 * @param drawMode
+	 */
 	public void next(int drawMode)
 	{
 		draw();
 		startDrawing(drawMode);
 	}
 
+	/**
+	 * Triggers a draw.
+	 */
 	public void draw()
 	{
 		t.draw();
 	}
 
+	/**
+	 * Cleans the current renderer state.
+	 */
 	public void clean()
 	{
 		if (renderType == TYPE_ISBRH_WORLD)
@@ -395,6 +472,9 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		reset();
 	}
 
+	/**
+	 * Shifts the tessellator for ISBRH rendering.
+	 */
 	public void tessellatorShift()
 	{
 		if (isShifted)
@@ -404,6 +484,9 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		t.addTranslation(x, y, z);
 	}
 
+	/**
+	 * Unshifts the tessellator for ISBRH rendering.
+	 */
 	public void tessellatorUnshift()
 	{
 		if (!isShifted)
@@ -413,6 +496,9 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		t.addTranslation(-x, -y, -z);
 	}
 
+	/**
+	 * Enables the blending for the rendering. Ineffective for ISBRH.
+	 */
 	public void enableBlending()
 	{
 		if (renderType == TYPE_ISBRH_WORLD)
@@ -429,7 +515,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	// #end prepare()
 
 	/**
-	 * Render the block using the default Minecraft rendering system
+	 * Renders the block using the default Minecraft rendering system
 	 * 
 	 * @param renderer
 	 */
@@ -438,6 +524,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		renderStandard(renderBlocks);
 	}
 
+	/**
+	 * Renders the blocks using the defaul Minecraft rendering system with the specified <b>renderer</b>
+	 * 
+	 * @param renderer
+	 */
 	public void renderStandard(RenderBlocks renderer)
 	{
 		if (renderer == null)
@@ -452,18 +543,20 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			tessellatorShift();
 	}
 
+	/**
+	 * Main rendering method.
+	 */
 	public void render()
-	{
-
-	}
-
-	public void renderDestroyProgress()
-	{
-
-	}
+	{}
 
 	/**
-	 * Draw a shape with its own parameters
+	 * Renders the destroy progress manually for TESR. Called if BaseRenderer.destroyBlockProgress is not null
+	 */
+	public void renderDestroyProgress()
+	{}
+
+	/**
+	 * Draws a shape with its own parameters
 	 * 
 	 * @param shape
 	 */
@@ -473,7 +566,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Draw a shape with specified parameters
+	 * Draws a shape with specified parameters
 	 * 
 	 * @param shape
 	 * @param rp
@@ -495,7 +588,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Draw a face with its own parameters
+	 * Draws a face with its own parameters
 	 * 
 	 * @param face
 	 */
@@ -505,7 +598,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Draw a face with specified parameters.
+	 * Draws a face with specified parameters.
 	 * 
 	 * @param f
 	 * @param rp
@@ -544,7 +637,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/***
-	 * Draw an array of vertexes (usually <i>Face.getVertexes()</i>)
+	 * Draws an array of vertexes (usually <i>Face.getVertexes()</i>)
 	 * 
 	 * @param vertexes
 	 */
@@ -559,7 +652,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Draw a single vertex
+	 * Draws a single vertex
 	 * 
 	 * @param vertex
 	 */
@@ -588,11 +681,17 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		vertexDrawn = true;
 	}
 
+	/**
+	 * Gets the IIcon corresponding to <b>params</b>.
+	 * 
+	 * @param params
+	 * @return
+	 */
 	protected IIcon getIcon(RenderParameters params)
 	{
 		IIcon icon = params.icon.get();
 		if (params.useCustomTexture.get())
-			icon = new BaseIcon();
+			icon = new MalisisIcon(); //use a generic icon where UVs go from 0 to 1
 		else if (overrideTexture != null)
 			icon = overrideTexture;
 		else if (block != null && icon == null)
@@ -607,7 +706,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Check if <b>side</b> should be rendered
+	 * Checks if <b>side</b> should be rendered
 	 * 
 	 * @param side
 	 */
@@ -628,17 +727,30 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		return b;
 	}
 
+	/**
+	 * Applies the texture to the <b>shape</b>. Usually necessary before some shape transformations in conjunction with
+	 * RenderParameters.applyTexture set to false to prevent reapplying texture when rendering.
+	 * 
+	 * @param shape
+	 */
 	public void applyTexture(Shape shape)
 	{
 		applyTexture(shape, null);
 	}
 
-	public void applyTexture(Shape shape, RenderParameters rp)
+	/**
+	 * Applies the texture to the <b>shape</b> with specified <b>parameters. Usually necessary before some shape transformations in
+	 * conjunction with RenderParameters.applyTexture set to false to prevent reapplying texture when rendering.
+	 * 
+	 * @param shape
+	 * @param parameters
+	 */
+	public void applyTexture(Shape shape, RenderParameters parameters)
 	{
 		//shape.applyMatrix();
 		for (Face f : shape.getFaces())
 		{
-			RenderParameters params = RenderParameters.merge(f.getParameters(), rp);
+			RenderParameters params = RenderParameters.merge(f.getParameters(), parameters);
 			IIcon icon = getIcon(params);
 			if (icon != null)
 				f.setTexture(icon, params.flipU.get(), params.flipV.get(), params.interpolateUV.get());
@@ -646,22 +758,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Limit a value between <b>min</b> and <b>max</b>
-	 * 
-	 * @param f
-	 * @param min
-	 * @param max
-	 */
-	protected float limitUV(float f, float min, float max)
-	{
-		if (max - min < 1)
-			return Math.max(Math.min(f, max), min);
-		else
-			return f;
-	}
-
-	/**
-	 * Calculate the ambient occlusion for a vertex and also apply the side dependent shade.<br />
+	 * Calculates the ambient occlusion for a vertex and also apply the side dependent shade.<br />
 	 * <b>aoMatrix</b> is the list of block coordinates necessary to compute AO. If it's empty, only the global face shade is applied.<br />
 	 * Also, <i>params.colorMultiplier</i> is applied as well.
 	 * 
@@ -697,7 +794,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Get the base brightness for the current face.<br />
+	 * Gets the base brightness for the current face.<br />
 	 * If <i>params.useBlockBrightness</i> = false, <i>params.brightness</i>. Else, the brightness is determined base on
 	 * <i>params.offset</i> and <i>getBlockBounds()</i>
 	 */
@@ -730,7 +827,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Calculate the ambient occlusion brightness for a vertex. <b>aoMatrix</b> is the list of block coordinates necessary to compute AO.
+	 * Calculates the ambient occlusion brightness for a vertex. <b>aoMatrix</b> is the list of block coordinates necessary to compute AO.
 	 * Only first 3 blocks are used.<br />
 	 * 
 	 * @param vertex
@@ -757,7 +854,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Do the actual brightness calculation (copied from net.minecraft.client.renderer.BlocksRenderer.java)
+	 * Does the actual brightness calculation (copied from net.minecraft.client.renderer.BlocksRenderer.java)
 	 */
 	protected int getAoBrightness(int b1, int b2, int b3, int base)
 	{
@@ -774,7 +871,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Get the block ambient occlusion value. Contrary to base Minecraft code, it's the actual block at the <b>x</b>, <b>y</b> and <b>z</b>
+	 * Gets the block ambient occlusion value. Contrary to base Minecraft code, it's the actual block at the <b>x</b>, <b>y</b> and <b>z</b>
 	 * coordinates which is used to get the value, and not value of the block drawn. This allows to have different logic behaviors for AO
 	 * values for a block.
 	 * 
@@ -793,7 +890,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Get the mix brightness for a block (sky + block source) TODO: handle block light value for light emitting block sources (as base
+	 * Gets the mix brightness for a block (sky + block source) TODO: handle block light value for light emitting block sources (as base
 	 * Minecraft does)
 	 * 
 	 * @param world
@@ -808,7 +905,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Get the rendering bounds. If <i>params.useBlockBounds</i> = false, <i>params.renderBounds</i> is used instead of the actual block
+	 * Gets the rendering bounds. If <i>params.useBlockBounds</i> = false, <i>params.renderBounds</i> is used instead of the actual block
 	 * bounds.
 	 * 
 	 * @return
@@ -825,7 +922,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Modify the vertex coordinates relative to the bounds specified.<br />
+	 * Modifies the vertexes coordinates relative to the bounds specified.<br />
 	 * Eg : if x = 0.5, minX = 1, maxX = 3, x becomes 2
 	 * 
 	 * @param bounds
@@ -836,6 +933,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			v.interpolateCoord(bounds);
 	}
 
+	/**
+	 * Gets and hold reference to damagedBlocks from Minecraft.renderGlobal via reflection.
+	 * 
+	 * @return
+	 */
 	protected Map getDamagedBlocks()
 	{
 		if (damagedBlocks != null)
@@ -864,6 +966,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		return null;
 	}
 
+	/**
+	 * Gets the destroy block progress for this rendering. Only used for TESR.
+	 * 
+	 * @return
+	 */
 	protected DestroyBlockProgress getBlockDestroyProgress()
 	{
 		if (renderType != TYPE_TESR_WORLD)
@@ -883,11 +990,24 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	}
 
+	/**
+	 * Checks whether the DestroyBlockProgress specified should apply for this TESR.
+	 * 
+	 * @param dbp
+	 * @return
+	 */
 	protected boolean isCurrentBlockDestroyProgress(DestroyBlockProgress dbp)
 	{
 		return dbp.getPartialBlockX() == x && dbp.getPartialBlockY() == y && dbp.getPartialBlockZ() == z;
 	}
 
+	/**
+	 * Creates a renderer of type <b>clazz</b> and sets the renderId for the specified <b>blocks</b>.
+	 * 
+	 * @param clazz
+	 * @param blocks
+	 * @return
+	 */
 	public static <T extends BaseRenderer> T create(Class<T> clazz, IBaseRendering... blocks)
 	{
 		T r = create(clazz);
@@ -899,91 +1019,39 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		return r;
 	}
 
+	/**
+	 * Creates a renderer of type <b>clazz</b>. Sets the renderer static field renderId.
+	 * 
+	 * @param clazz
+	 * @return
+	 */
 	public static <T extends BaseRenderer> T create(Class<T> clazz)
 	{
 		try
 		{
 			T r = clazz.newInstance();
-			int nextId = RenderingRegistry.getNextAvailableRenderId();
-			clazz.getField("renderId").set(null, nextId);
-
+			r.setRenderId(RenderingRegistry.getNextAvailableRenderId());
 			return r;
 		}
 		catch (ReflectiveOperationException e)
 		{
 			throw new RuntimeException(e);
 		}
+	}
 
+	/**
+	 * Sets the renderId for this <code>BaseRenderer</code>
+	 * 
+	 * @param id
+	 */
+	public void setRenderId(int id)
+	{
+		this.renderId = id;
 	}
 
 	@Override
 	public int getRenderId()
 	{
-		try
-		{
-			return (int) (this.getClass().getField("renderId")).get(null);
-		}
-		catch (ReflectiveOperationException e)
-		{
-			return -1;
-		}
-	}
-
-	private class BaseIcon implements IIcon
-	{
-		@Override
-		public int getIconWidth()
-		{
-			return 0;
-		}
-
-		@Override
-		public int getIconHeight()
-		{
-			return 0;
-		}
-
-		@Override
-		public float getMinU()
-		{
-			return 0;
-		}
-
-		@Override
-		public float getMaxU()
-		{
-			return 1;
-		}
-
-		@Override
-		public float getInterpolatedU(double var1)
-		{
-			return (float) var1;
-		}
-
-		@Override
-		public float getMinV()
-		{
-			return 0;
-		}
-
-		@Override
-		public float getMaxV()
-		{
-			return 1;
-		}
-
-		@Override
-		public float getInterpolatedV(double var1)
-		{
-			return (float) var1;
-		}
-
-		@Override
-		public String getIconName()
-		{
-			return null;
-		}
-
+		return renderId;
 	}
 }

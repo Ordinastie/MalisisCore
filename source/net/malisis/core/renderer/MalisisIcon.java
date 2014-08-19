@@ -30,7 +30,7 @@ import net.minecraft.util.IIcon;
  * @author Ordinastie
  * 
  */
-public abstract class MalisisIcon implements IIcon, Cloneable
+public class MalisisIcon implements IIcon, Cloneable
 {
 	/**
 	 * Position in pixels

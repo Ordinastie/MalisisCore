@@ -463,7 +463,7 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public UIComponent getComponentAt(int x, int y)
 	{
-		return isInsideBounds(x, y) ? this : null;
+		return isInsideBounds(x, y) && !isDisabled() && isVisible() ? this : null;
 	}
 
 	/**

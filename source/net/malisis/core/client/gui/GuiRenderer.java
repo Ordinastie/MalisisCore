@@ -197,6 +197,7 @@ public class GuiRenderer extends BaseRenderer
 
 	public String clipString(String text, int width)
 	{
+		text = StatCollector.translateToLocal(text);
 		StringBuilder ret = new StringBuilder();
 		int strWidth = 0;
 		int index = 0;

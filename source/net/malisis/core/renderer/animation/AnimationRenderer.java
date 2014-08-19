@@ -95,6 +95,9 @@ public class AnimationRenderer
 
 	public void animate(Shape shape, Transformation animation)
 	{
+		if (shape == null)
+			return;
+
 		animation.transform(shape, elapsedTime);
 	}
 

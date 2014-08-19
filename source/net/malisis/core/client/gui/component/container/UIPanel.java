@@ -52,6 +52,7 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 		horizontalScroll = new UIScrollBar(this, width, HORIZONTAL);
 		verticalScroll = new UIScrollBar(this, height, VERTICAL);
 		setScrollBarsPosition();
+		calculateContentSize();
 	}
 
 	@Override
@@ -170,8 +171,8 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 	{
 		int w = width - (allowVerticalScroll ? UIScrollBar.SCROLL_THICKNESS + 1 : 0);
 		int h = height - (allowHorizontalScroll ? UIScrollBar.SCROLL_THICKNESS + 1 : 0);
-		int contentWidth = w;
-		int contentHeight = h;
+		int contentWidth = w - horizontalPadding;
+		int contentHeight = h - verticalPadding;
 
 		for (UIComponent c : components)
 		{

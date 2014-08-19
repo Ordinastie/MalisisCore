@@ -26,6 +26,7 @@ package net.malisis.core.util;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.IBlockAccess;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -39,6 +40,22 @@ public class TileEntityUtils
 	private static TileEntity currentTileEntity;
 	@SideOnly(Side.CLIENT)
 	private static MalisisGui currenGui;
+
+	public static <T extends TileEntity> T getTileEntity(Class<T> type, IBlockAccess world, int x, int y, int z)
+	{
+		TileEntity te = world.getTileEntity(x, y, z);
+		if (te == null)
+			return null;
+
+		try
+		{
+			return type.cast(te);
+		}
+		catch (ClassCastException e)
+		{
+			return null;
+		}
+	}
 
 	@SideOnly(Side.CLIENT)
 	public static void linkTileEntityToGui(TileEntity te, MalisisGui gui)

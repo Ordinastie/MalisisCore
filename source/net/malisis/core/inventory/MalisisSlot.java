@@ -44,7 +44,7 @@ public class MalisisSlot
 	/**
 	 * Whether the slot is an output slot. If set to true, isItemValid() always return false
 	 */
-	private boolean isOutputSlot = false;
+	protected boolean isOutputSlot = false;
 
 	public MalisisSlot(MalisisInventory inventory, ItemStack itemStack, int index)
 	{

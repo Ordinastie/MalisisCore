@@ -79,6 +79,7 @@ public class UISelect extends UIComponent<UISelect>
 	protected int maxExpandedWidth = -1;
 	protected int maxDisplayedOptions = -1;
 	protected boolean expanded = false;
+	protected String labelPattern;
 
 	public UISelect(int width, HashMap<Integer, Option> options)
 	{
@@ -108,6 +109,29 @@ public class UISelect extends UIComponent<UISelect>
 			expanded = false;
 	}
 
+	/**
+	 * Sets a pattern that will be used to format the option label.
+	 * 
+	 * @param labelPattern
+	 * @return
+	 */
+	public UISelect setLabelPattern(String labelPattern)
+	{
+		this.labelPattern = labelPattern;
+		for (Option option : optionsContainer.options.values())
+		{
+			optionsContainer.optionsLabel.get(option.getIndex()).setText(String.format(labelPattern, option.label));
+		}
+		optionsContainer.calcExpandedSize();
+		return this;
+	}
+
+	/**
+	 * Sets the max width of the option container
+	 * 
+	 * @param width
+	 * @return
+	 */
 	public UISelect maxExpandedWidth(int width)
 	{
 		maxExpandedWidth = width;
@@ -115,6 +139,12 @@ public class UISelect extends UIComponent<UISelect>
 		return this;
 	}
 
+	/**
+	 * Sets the maximum number options displayed when expanded
+	 * 
+	 * @param nb
+	 * @return
+	 */
 	public UISelect maxDisplayedOptions(int nb)
 	{
 		maxDisplayedOptions = nb;
@@ -122,17 +152,77 @@ public class UISelect extends UIComponent<UISelect>
 		return this;
 	}
 
+	/**
+	 * Set the options to use for this <code>UISelect</code>
+	 * 
+	 * @param options
+	 * @return
+	 */
 	public UISelect setOptions(HashMap<Integer, Option> options)
 	{
 		optionsContainer.setOptions(options);
 		return this;
 	}
 
+	/**
+	 * Sets the selected option from its position in the list
+	 * 
+	 * @param index
+	 */
 	public void setSelectedOption(int index)
 	{
 		selectedOption = index;
 	}
 
+	/**
+	 * Sets the selected option from it's containing key
+	 * 
+	 * @param obj
+	 */
+	public void setSelectedOption(Object obj)
+	{
+		Option opt = getOption(obj);
+		setSelectedOption(opt != null ? opt.index : -1);
+	}
+
+	/**
+	 * Gets the option at the specified index
+	 * 
+	 * @param index
+	 * @return
+	 */
+	public Option getOption(int index)
+	{
+		return optionsContainer.getOption(index);
+	}
+
+	/**
+	 * Gets the option corresponding to the object
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public Option getOption(Object obj)
+	{
+		return optionsContainer.getOption(obj);
+	}
+
+	/**
+	 * Gets the currently selected option
+	 * 
+	 * @return
+	 */
+	public Option getSelectedOption()
+	{
+		return optionsContainer.getOption(selectedOption);
+	}
+
+	/**
+	 * Select the option using the index
+	 * 
+	 * @param index
+	 * @return
+	 */
 	public Option select(int index)
 	{
 		Option oldValue = getOption(selectedOption);
@@ -148,14 +238,16 @@ public class UISelect extends UIComponent<UISelect>
 		return newValue;
 	}
 
-	public Option getOption(int index)
+	/**
+	 * Select the option corresponding to the object
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public Option select(Object obj)
 	{
-		return optionsContainer.getOption(index);
-	}
-
-	public Option getSelectedOption()
-	{
-		return optionsContainer.getOption(selectedOption);
+		Option opt = getOption(obj);
+		return select(opt != null ? opt.index : -1);
 	}
 
 	@Override
@@ -193,7 +285,7 @@ public class UISelect extends UIComponent<UISelect>
 
 		if (selectedOption != -1)
 		{
-			String text = getOption(selectedOption).label;
+			String text = getOption(selectedOption).getLabel(labelPattern);
 			if (text != null && text.length() != 0)
 				renderer.drawText(renderer.clipString(text, width - 15), 2, 2, 0xFFFFFF, true);
 		}
@@ -276,7 +368,12 @@ public class UISelect extends UIComponent<UISelect>
 			this.zIndex = 101;
 		}
 
-		public void setOptions(HashMap<Integer, Option> options)
+		/**
+		 * Sets the options
+		 * 
+		 * @param options
+		 */
+		private void setOptions(HashMap<Integer, Option> options)
 		{
 			this.options = options;
 			for (UILabel label : this.optionsLabel)
@@ -286,8 +383,8 @@ public class UISelect extends UIComponent<UISelect>
 
 			for (Entry<Integer, UISelect.Option> entry : options.entrySet())
 			{
-				UILabel label = new UILabel(entry.getValue().label).setPosition(2, 1 + 10 * i++).setZIndex(zIndex + 1).setDrawShadow(true)
-						.register(UISelect.this);
+				UILabel label = new UILabel(entry.getValue().getLabel(labelPattern)).setPosition(2, 1 + 10 * i++).setZIndex(zIndex + 1)
+						.setDrawShadow(true).register(UISelect.this);
 				this.optionsLabel.add(label);
 				this.add(label);
 			}
@@ -295,14 +392,19 @@ public class UISelect extends UIComponent<UISelect>
 			calcExpandedSize();
 		}
 
+		/**
+		 * Calculates the size of this container base on the options
+		 */
 		private void calcExpandedSize()
 		{
 			width = UISelect.this.width;
 			height = 10 * (maxDisplayedOptions == -1 ? optionsLabel.size() : maxDisplayedOptions) + 1;
-			if (maxDisplayedOptions != -1 && maxDisplayedOptions < optionsLabel.size())
-
-				for (UILabel label : optionsLabel)
-					width = Math.max(width, label.getWidth() + 4);
+			//if (maxDisplayedOptions != -1 && maxDisplayedOptions < optionsLabel.size())
+			for (UILabel label : optionsLabel)
+			{
+				label.setSize(0);
+				width = Math.max(width, label.getWidth() + 4);
+			}
 
 			if (maxExpandedWidth > 0)
 				width = Math.min(maxExpandedWidth, width);
@@ -311,11 +413,35 @@ public class UISelect extends UIComponent<UISelect>
 				label.setSize(width - 2);
 		}
 
-		public Option getOption(int index)
+		/**
+		 * Gets the option at the index
+		 * 
+		 * @param index
+		 * @return
+		 */
+		private Option getOption(int index)
 		{
 			if (index < 0 || index >= options.size())
 				return null;
 			return options.get(index);
+		}
+
+		/**
+		 * Gets the options corresponding to the object
+		 * 
+		 * @param obj
+		 * @return
+		 */
+		public Option getOption(Object obj)
+		{
+			for (Entry<Integer, UISelect.Option> entry : options.entrySet())
+			{
+				UISelect.Option option = entry.getValue();
+
+				if (option.getKey() == obj)
+					return option;
+			}
+			return null;
 		}
 
 		@Override
@@ -408,21 +534,56 @@ public class UISelect extends UIComponent<UISelect>
 			this.label = value;
 		}
 
+		/**
+		 * Gets the index of this <code>Option</code>
+		 * 
+		 * @return
+		 */
 		public int getIndex()
 		{
 			return index;
 		}
 
+		/**
+		 * Gets the key of this <code>Option</code>
+		 * 
+		 * @return
+		 */
 		public T getKey()
 		{
 			return key;
 		}
 
+		/**
+		 * Gets the label of this <code>Option</code> using a pattern
+		 * 
+		 * @param pattern
+		 * @return
+		 */
+		public String getLabel(String pattern)
+		{
+			if (pattern == null)
+				return label;
+
+			return String.format(pattern, label);
+		}
+
+		/**
+		 * Gets the base label of this <code>Option</code>
+		 * 
+		 * @return
+		 */
 		public String getLabel()
 		{
 			return label;
 		}
 
+		/**
+		 * Creates an option HashMap for UISelect.setOptions() from a list of keys.<br />
+		 * 
+		 * @param list
+		 * @return
+		 */
 		public static <T> HashMap<Integer, Option> fromList(List<T> list)
 		{
 			HashMap<Integer, Option> options = new HashMap<>();
@@ -437,6 +598,12 @@ public class UISelect extends UIComponent<UISelect>
 			return options;
 		}
 
+		/**
+		 * Creates an option HashMap for UISelect.setOptions() from a HashMap of keys -> labels.<br />
+		 * 
+		 * @param list
+		 * @return
+		 */
 		public static <T> HashMap<Integer, Option> fromList(HashMap<T, String> list)
 		{
 			HashMap<Integer, Option> options = new HashMap<>();
@@ -450,6 +617,25 @@ public class UISelect extends UIComponent<UISelect>
 			}
 
 			return options;
+		}
+
+		/**
+		 * Creates an option HashMap for UISelect.setOptions() from an Enum
+		 * 
+		 * @param enumClass
+		 * @return
+		 */
+		public static <T, E extends Enum> HashMap<Integer, Option> fromEnum(Class<E> enumClass)
+		{
+			HashMap<Integer, Option> options = new HashMap<>();
+			for (E e : enumClass.getEnumConstants())
+			{
+				Option<T> option = new Option(e.ordinal(), e, e.toString());
+				options.put(e.ordinal(), option);
+			}
+
+			return options;
+
 		}
 	}
 

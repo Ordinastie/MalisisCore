@@ -36,6 +36,11 @@ public class Shape
 		copyMatrix(s);
 	}
 
+	/**
+	 * Gets the faces that make up this <code>Shape</code>
+	 * 
+	 * @return
+	 */
 	public Face[] getFaces()
 	{
 		return faces;
@@ -86,6 +91,28 @@ public class Shape
 		return this;
 	}
 
+	/**
+	 * Sets the color for this <code>Shape</code>. RenderParameters.usePerVertexColor should be set to true for it to have an effect.
+	 * 
+	 * @param color
+	 */
+	public void setColor(int color)
+	{
+		for (Face f : faces)
+		{
+			f.setColor(color);
+		}
+	}
+
+	/**
+	 * Sets the size of this <code>Shape</code>. <b>width</b> represents East-West axis, <b>height</b> represents Bottom-Top axis and
+	 * <b>Depth</b> represents North-South axis. The calculations are based on vertexes names.
+	 * 
+	 * @param width
+	 * @param height
+	 * @param depth
+	 * @return
+	 */
 	public Shape setSize(float width, float height, float depth)
 	{
 		float x = 0, y = 0, z = 0;
@@ -106,6 +133,17 @@ public class Shape
 		return setBounds(x, y, z, x + width, y + height, z + depth);
 	}
 
+	/**
+	 * Sets the bounds for this <code>Shape</code>. Calculations are based on vertexes names
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param X
+	 * @param Y
+	 * @param Z
+	 * @return
+	 */
 	public Shape setBounds(float x, float y, float z, float X, float Y, float Z)
 	{
 		for (Face f : faces)
@@ -130,11 +168,28 @@ public class Shape
 		return this;
 	}
 
+	/**
+	 * Limits this <code>Shape</code> to the bounding box passed.
+	 * 
+	 * @param aabb
+	 * @return
+	 */
 	public Shape limit(AxisAlignedBB aabb)
 	{
 		return limit(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ);
 	}
 
+	/**
+	 * Limits this <code>Shape</code> to the bounding box passed.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param X
+	 * @param Y
+	 * @param Z
+	 * @return
+	 */
 	public Shape limit(double x, double y, double z, double X, double Y, double Z)
 	{
 		for (Face f : faces)
@@ -149,28 +204,71 @@ public class Shape
 		return this;
 	}
 
+	/**
+	 * Translates this <code>Shape</code>.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
 	public Shape translate(float x, float y, float z)
 	{
 		matrix().translate(new Vector3f(x, y, z));
 		return this;
 	}
 
+	/**
+	 * Scales this <code>Shape</code> on all axis.
+	 * 
+	 * @param f
+	 * @return
+	 */
 	public Shape scale(float f)
 	{
 		return scale(f, f, f);
 	}
 
+	/**
+	 * Scales this <code>Shape</code>.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
 	public Shape scale(float x, float y, float z)
 	{
 		matrix().scale(new Vector3f(x, y, z));
 		return this;
 	}
 
+	/**
+	 * Rotates this <code>Shape</code> around the given axis the specified angle.
+	 * 
+	 * @param angle
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
 	public Shape rotate(float angle, float x, float y, float z)
 	{
 		return rotate(angle, x, y, z, 0, 0, 0);
 	}
 
+	/**
+	 * Rotates this <code>Shape</code> around the given axis the specified angle. Offsets the origin for the rotation.
+	 * 
+	 * @param angle
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param offsetX
+	 * @param offsetY
+	 * @param offsetZ
+	 * @return
+	 */
 	public Shape rotate(float angle, float x, float y, float z, float offsetX, float offsetY, float offsetZ)
 	{
 		translate(offsetX, offsetY, offsetZ);
@@ -179,57 +277,132 @@ public class Shape
 		return this;
 	}
 
+	/**
+	 * Rotates this <code>Shape</code> around the X axis the specified angle.
+	 * 
+	 * @param angle
+	 * @return
+	 */
 	public Shape rotateAroundX(float angle)
 	{
 		return rotate(angle, 1, 0, 0, 0, 0, 0);
 	}
 
+	/**
+	 * Rotates this <code>Shape</code> around the X axis the specified angle. Offsets the origin for the rotation.
+	 * 
+	 * @param angle
+	 * @param y
+	 * @param z
+	 * @return
+	 */
 	public Shape rotateAroundX(float angle, float y, float z)
 	{
 		return rotate(angle, 1, 0, 0, 0, y, z);
 	}
 
+	/**
+	 * Rotates this <code>Shape</code> around the Y axis the specified angle.
+	 * 
+	 * @param angle
+	 * @return
+	 */
 	public Shape rotateAroundY(float angle)
 	{
 		return rotate(angle, 0, 1, 0, 0, 0, 0);
 	}
 
+	/**
+	 * Rotates this <code>Shape</code> around the given Y the specified angle. Offsets the origin for the rotation.
+	 * 
+	 * @param angle
+	 * @param x
+	 * @param z
+	 * @return
+	 */
 	public Shape rotateAroundY(float angle, float x, float z)
 	{
 		return rotate(angle, 0, 1, 0, x, 0, z);
 	}
 
+	/**
+	 * Rotates this <code>Shape</code> around the Z axis the specified angle.
+	 * 
+	 * @param angle
+	 * @return
+	 */
 	public Shape rotateAroundZ(float angle)
 	{
 		return rotate(angle, 0, 0, 1, 0, 0, 0);
 	}
 
+	/**
+	 * Rotates this <code>Shape</code> around the Z axis the specified angle. Offsets the origin for the rotation.
+	 * 
+	 * @param angle
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	public Shape rotateAroundZ(float angle, float x, float y)
 	{
 		return rotate(angle, 0, 0, 1, x, y, 0);
 	}
 
+	/**
+	 * Rotates this <code>Shape</code> around itself on the given axis the specified angle.
+	 * 
+	 * @param angle
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
 	public Shape pivot(float angle, float x, float y, float z)
 	{
 		rotationMatrix().rotate((float) Math.toRadians(angle), new Vector3f(x, y, z));
 		return this;
 	}
 
+	/**
+	 * Rotates this <code>Shape</code> around itself on the X axis the specified angle.
+	 * 
+	 * @param angle
+	 * @return
+	 */
 	public Shape pivotX(float angle)
 	{
 		return pivot(angle, 1, 0, 0);
 	}
 
+	/**
+	 * Rotates this <code>Shape</code> around itself on the Y axis the specified angle.
+	 * 
+	 * @param angle
+	 * @return
+	 */
 	public Shape pivotY(float angle)
 	{
 		return pivot(angle, 0, 1, 0);
 	}
 
+	/**
+	 * Rotates this <code>Shape</code> around itself on the Z axis the specified angle.
+	 * 
+	 * @param angle
+	 * @return
+	 */
 	public Shape pivotZ(float angle)
 	{
 		return pivot(angle, 0, 0, 1);
 	}
 
+	/**
+	 * Copies the transformation from <b>shape</b> to this <code>Shape</code>.
+	 * 
+	 * @param shape
+	 * @return
+	 */
 	public Shape copyMatrix(Shape shape)
 	{
 		if (shape.transformMatrix != null)
@@ -237,6 +410,12 @@ public class Shape
 		return this;
 	}
 
+	/**
+	 * Applies the transformations matrices to this <code>Shape</code>. This modifies to position of the vertexes making up the faces of
+	 * this <code>Shape</code>.
+	 * 
+	 * @return
+	 */
 	public Shape applyMatrix()
 	{
 		if (transformMatrix == null && selfRotationMatrix == null)
@@ -263,6 +442,13 @@ public class Shape
 		return this;
 	}
 
+	/**
+	 * Shrinks the face matching <b>face</b> name by a certain <b>factor</b>. The vertexes of connected faces are moved too.
+	 * 
+	 * @param face
+	 * @param factor
+	 * @return
+	 */
 	public Shape shrink(Face face, float factor)
 	{
 		for (Face f : faces)
@@ -294,6 +480,12 @@ public class Shape
 		return this;
 	}
 
+	/**
+	 * Builds a Shape from multiple ones.
+	 * 
+	 * @param shapes
+	 * @return
+	 */
 	public static Shape fromShapes(Shape... shapes)
 	{
 		Face[] faces = new Face[0];

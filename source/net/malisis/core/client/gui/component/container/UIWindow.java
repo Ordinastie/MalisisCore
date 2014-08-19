@@ -39,7 +39,7 @@ import com.google.common.eventbus.Subscribe;
  * 
  * @author PaleoCrafter
  */
-public class UIWindow extends UIContainer
+public class UIWindow extends UIContainer<UIWindow>
 {
 	//@formatter:off
 	public static GuiIcon[] icons = new GuiIcon[] { new GuiIcon(200, 	0, 		5, 	5),
