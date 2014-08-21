@@ -689,12 +689,14 @@ public class MalisisInventoryContainer extends Container
 			for (Entry<Integer, ItemStack> entry : draggedItemStacks.entrySet())
 			{
 				MalisisSlot s = draggedSlots.get(entry.getKey());
-
-				ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(entry.getValue(), s.getItemStack());
-				ism.merge();
-				amountMerged += ism.nbMerged;
-				s.setItemStack(ism.into);
-				s.onSlotChanged();
+				if (s.isItemValid(pickedItemStack))
+				{
+					ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(entry.getValue(), s.getItemStack());
+					ism.merge();
+					amountMerged += ism.nbMerged;
+					s.setItemStack(ism.into);
+					s.onSlotChanged();
+				}
 			}
 
 			resetDrag();
@@ -748,19 +750,23 @@ public class MalisisInventoryContainer extends Container
 		HashMap<Integer, MalisisSlot> draggedSlots = getDraggedSlots();
 		for (Entry<Integer, ItemStack> entry : draggedItemStacks.entrySet())
 		{
-			// work on a copy because we alter pickedItemStack only in the end
-			ItemStack itemStack = pickedItemStack.copy();
-			itemStack.stackSize = draggedAmount;
-			ItemStack slotStack = draggedSlots.get(entry.getKey()).getItemStack();
-			if (slotStack != null)
-				slotStack = slotStack.copy();
+			if (draggedSlots.get(entry.getKey()).isItemValid(pickedItemStack))
+			{
 
-			ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(itemStack, slotStack);
-			ism.merge(amountPerSlot, draggedSlots.get(entry.getKey()).getSlotStackLimit());
+				// work on a copy because we alter pickedItemStack only in the end
+				ItemStack itemStack = pickedItemStack.copy();
+				itemStack.stackSize = draggedAmount;
+				ItemStack slotStack = draggedSlots.get(entry.getKey()).getItemStack();
+				if (slotStack != null)
+					slotStack = slotStack.copy();
 
-			itemStack.stackSize = ism.nbMerged;
-			amountTotal += ism.nbMerged;
-			draggedItemStacks.put(entry.getKey(), itemStack);
+				ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(itemStack, slotStack);
+				ism.merge(amountPerSlot, draggedSlots.get(entry.getKey()).getSlotStackLimit());
+
+				itemStack.stackSize = ism.nbMerged;
+				amountTotal += ism.nbMerged;
+				draggedItemStacks.put(entry.getKey(), itemStack);
+			}
 
 		}
 
