@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
-version = "1.7.2-0.8"
+version = "1.7.2-0.9"
 group = "net.malisis.malisiscore" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "malisiscore"
 libsDirName = "../releases"
@@ -37,10 +37,14 @@ jar {
     }
 }
 
+
 // because the normal output has been made to be obfuscated
 task deobfJar(type: Jar) {
     from sourceSets.main.output
     classifier = 'dev'
+    manifest {
+        attributes 'FMLCorePlugin': 'net.malisis.core.asm.MalisisCorePlugin'
+    }
 }
 
 artifacts {
