@@ -41,6 +41,7 @@ jar {
 // because the normal output has been made to be obfuscated
 task deobfJar(type: Jar) {
     from sourceSets.main.output
+    from sourceSets.main.allJava
     classifier = 'dev'
     manifest {
         attributes 'FMLCorePlugin': 'net.malisis.core.asm.MalisisCorePlugin'
