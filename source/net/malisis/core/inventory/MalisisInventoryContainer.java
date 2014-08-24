@@ -681,9 +681,6 @@ public class MalisisInventoryContainer extends Container
 		// released the mouse button used to start dragging an itemStack
 		if (action == DRAG_END)
 		{
-			if (pickedItemStack.stackSize == 0)
-				setPickedItemStack(null);
-
 			int amountMerged = 0;
 			HashMap<Integer, MalisisSlot> draggedSlots = getDraggedSlots();
 			for (Entry<Integer, ItemStack> entry : draggedItemStacks.entrySet())
@@ -698,6 +695,9 @@ public class MalisisInventoryContainer extends Container
 					s.onSlotChanged();
 				}
 			}
+
+			if (pickedItemStack.stackSize == 0)
+				setPickedItemStack(null);
 
 			resetDrag();
 
