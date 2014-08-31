@@ -144,9 +144,10 @@ public class UISlot extends UIComponent<UISlot>
 
 			GL11.glShadeModel(GL11.GL_FLAT);
 			GL11.glDisable(GL11.GL_BLEND);
-			GL11.glEnable(GL11.GL_ALPHA_TEST);
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
+
+		GL11.glEnable(GL11.GL_ALPHA_TEST);
 
 		// Dirty fix because Mojang can't count and masks overflow the slots
 		Shape shape = ShapePreset.GuiElement(1, 18).translate(0, 0, 50);

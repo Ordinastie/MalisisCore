@@ -773,20 +773,25 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			return color;
 		if (renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD)
 			return color;
-		if (!params.calculateAOColor.get() || aoMatrix == null)
-			return color;
 
-		float factor = getBlockAmbientOcclusion(world, x + params.direction.get().offsetX, y + params.direction.get().offsetY, z
-				+ params.direction.get().offsetZ);
+		float factor = 1;
+		if (params.calculateAOColor.get() && aoMatrix != null && Minecraft.isAmbientOcclusionEnabled()
+				&& block.getLightValue(world, x, y, z) == 0)
+		{
+			factor = getBlockAmbientOcclusion(world, x + params.direction.get().offsetX, y + params.direction.get().offsetY, z
+					+ params.direction.get().offsetZ);
 
-		for (int i = 0; i < aoMatrix.length; i++)
-			factor += getBlockAmbientOcclusion(world, x + aoMatrix[i][0], y + aoMatrix[i][1], z + aoMatrix[i][2]);
+			for (int i = 0; i < aoMatrix.length; i++)
+				factor += getBlockAmbientOcclusion(world, x + aoMatrix[i][0], y + aoMatrix[i][1], z + aoMatrix[i][2]);
+
+			factor /= (aoMatrix.length + 1);
+		}
 
 		factor *= params.colorFactor.get();
 
-		int r = (int) ((color >> 16 & 255) * factor / (aoMatrix.length + 1));
-		int g = (int) ((color >> 8 & 255) * factor / (aoMatrix.length + 1));
-		int b = (int) ((color & 255) * factor / (aoMatrix.length + 1));
+		int r = (int) ((color >> 16 & 255) * factor);
+		int g = (int) ((color >> 8 & 255) * factor);
+		int b = (int) ((color & 255) * factor);
 
 		color = r << 16 | g << 8 | b;
 
@@ -841,6 +846,8 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		if (renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD)
 			return baseBrightness;
 		if (!params.calculateBrightness.get() || aoMatrix == null)
+			return baseBrightness;
+		if (!Minecraft.isAmbientOcclusionEnabled() || block.getLightValue(world, x, y, z) != 0)
 			return baseBrightness;
 
 		int[] b = new int[Math.max(3, aoMatrix.length)];
