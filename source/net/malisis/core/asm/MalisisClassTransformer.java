@@ -1,3 +1,27 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Ordinastie
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package net.malisis.core.asm;
 
 import java.util.ArrayList;
@@ -22,7 +46,11 @@ public abstract class MalisisClassTransformer implements IClassTransformer
 	public MalisisClassTransformer()
 	{
 		logString = "malisiscore";
-		registerHooks();
+		if (MalisisCore.getJavaVersion() >= 1.7)
+			registerHooks();
+		else
+			LogManager.getLogger(logString).warn("Java version detected is {}. Java 1.7 is required to use the event hooks",
+					MalisisCore.getJavaVersion());
 	}
 
 	public void register(AsmHook ah)
@@ -32,7 +60,7 @@ public abstract class MalisisClassTransformer implements IClassTransformer
 			hooks = new ArrayList<AsmHook>();
 		hooks.add(ah);
 		listHooks.put(ah.getTargetClass(), hooks);
-		LogManager.getLogger(logString).info("Hook registered for {}", ah.getTargetClass());;
+		LogManager.getLogger(logString).info("Hook registered for {}", ah.getTargetClass());
 	}
 
 	@Override
@@ -54,8 +82,8 @@ public abstract class MalisisClassTransformer implements IClassTransformer
 			if (methodNode != null)
 			{
 				if (!hook.walkSteps(methodNode))
-					LogManager.getLogger(logString).error("The instruction list was not found in {}:{}{}",
-							hook.getTargetClass(), hook.getMethodName(), hook.getMethodDescriptor());
+					LogManager.getLogger(logString).error("The instruction list was not found in {}:{}{}", hook.getTargetClass(),
+							hook.getMethodName(), hook.getMethodDescriptor());
 
 				if (hook.isDebug() == true && !MalisisCore.isObfEnv)
 				{

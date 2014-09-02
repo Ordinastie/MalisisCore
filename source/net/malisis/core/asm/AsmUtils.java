@@ -1,12 +1,30 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Ordinastie
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package net.malisis.core.asm;
 
-import static org.objectweb.asm.tree.AbstractInsnNode.FIELD_INSN;
-import static org.objectweb.asm.tree.AbstractInsnNode.IINC_INSN;
-import static org.objectweb.asm.tree.AbstractInsnNode.INT_INSN;
-import static org.objectweb.asm.tree.AbstractInsnNode.LDC_INSN;
-import static org.objectweb.asm.tree.AbstractInsnNode.METHOD_INSN;
-import static org.objectweb.asm.tree.AbstractInsnNode.TYPE_INSN;
-import static org.objectweb.asm.tree.AbstractInsnNode.VAR_INSN;
+import static org.objectweb.asm.tree.AbstractInsnNode.*;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -29,13 +47,11 @@ import org.objectweb.asm.util.TraceMethodVisitor;
 public class AsmUtils
 {
 	/**
-	 * find the method with the given name. If multiple methods with the same
-	 * parameters exist, the first one will be returned
+	 * find the method with the given name. If multiple methods with the same parameters exist, the first one will be returned
 	 * 
 	 * @param clazz the class
 	 * @param name the method name to search for
-	 * @return the first method with the given name or null if no such method is
-	 *         found
+	 * @return the first method with the given name or null if no such method is found
 	 */
 	public static MethodNode findMethod(ClassNode clazz, String name)
 	{
@@ -55,8 +71,7 @@ public class AsmUtils
 	 * @param clazz the class
 	 * @param name the method name to search for
 	 * @param desc the method descriptor to search for
-	 * @return the method with the given name and descriptor or null if no such
-	 *         method is found
+	 * @return the method with the given name and descriptor or null if no such method is found
 	 * @see org.objectweb.asm.Type#getMethodDescriptor
 	 */
 	public static MethodNode findMethod(ClassNode clazz, String name, String desc)
@@ -81,13 +96,13 @@ public class AsmUtils
 			{
 				AbstractInsnNode m = match.getNext();
 				AbstractInsnNode n = node.getNext();
-				while(m != null && n != null && insnEqual(m, n))
+				while (m != null && n != null && insnEqual(m, n))
 				{
 					m = m.getNext();
 					n = n.getNext();
 				}
-				if(m == null)
-					return node;					
+				if (m == null)
+					return node;
 			}
 
 			node = node.getNext();
@@ -167,13 +182,12 @@ public class AsmUtils
 
 		return node1.operand == node2.operand;
 	}
-	
-	
+
 	public static String getMethodNodeAsString(MethodNode methodNode)
 	{
 		Printer printer = new Textifier();
 		TraceMethodVisitor methodPrinter = new TraceMethodVisitor(printer);
-		
+
 		methodNode.accept(methodPrinter);
 
 		StringWriter sw = new StringWriter();
@@ -182,6 +196,5 @@ public class AsmUtils
 
 		return sw.toString();
 	}
-
 
 }

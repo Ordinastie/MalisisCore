@@ -1,3 +1,27 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Ordinastie
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package net.malisis.core.util;
 
 import java.util.HashMap;
@@ -32,8 +56,7 @@ public class Raytrace
 	 */
 	private Ray ray;
 	/**
-	 * Vector describing the direction of steps to take when reaching limits of
-	 * a block
+	 * Vector describing the direction of steps to take when reaching limits of a block
 	 */
 	private Vector step;
 	/**
@@ -59,14 +82,12 @@ public class Raytrace
 	private int currentZ;
 
 	/**
-	 * The first block to be hit. If ray trace reaches <code>dest</code> without
-	 * any hit, <code>firstHit</code> will have <code>typeOfHit</code> =
-	 * <b>MISS</b>
+	 * The first block to be hit. If ray trace reaches <code>dest</code> without any hit, <code>firstHit</code> will have
+	 * <code>typeOfHit</code> = <b>MISS</b>
 	 */
 	public MovingObjectPosition firstHit;
 	/**
-	 * List of blocks passed by the ray trace. Only set if options
-	 * <code>LOG_BLOCK_PASSED</code> is set
+	 * List of blocks passed by the ray trace. Only set if options <code>LOG_BLOCK_PASSED</code> is set
 	 */
 	public HashMap<ChunkPosition, MovingObjectPosition> blockPassed;
 
@@ -161,9 +182,8 @@ public class Raytrace
 	/**
 	 * Do the ray tracing.
 	 * 
-	 * @return <code>MovingObjectPosition</code> with <code>typeOfHit</code>
-	 *         <b>BLOCK</b> if a ray hits a block in the way, or <b>MISS</b> if
-	 *         it reaches <code>dest</code> without any hit
+	 * @return <code>MovingObjectPosition</code> with <code>typeOfHit</code> <b>BLOCK</b> if a ray hits a block in the way, or <b>MISS</b>
+	 *         if it reaches <code>dest</code> without any hit
 	 */
 	public MovingObjectPosition trace()
 	{
@@ -225,8 +245,7 @@ public class Raytrace
 	 * @param x
 	 * @param y
 	 * @param z
-	 * @return <code>Double.NaN</code> if <code>x</code>, <code>y</code> and
-	 *         <code>z</code> are all three are <code>Double.NaN</code>
+	 * @return <code>Double.NaN</code> if <code>x</code>, <code>y</code> and <code>z</code> are all three are <code>Double.NaN</code>
 	 */
 	public double getMin(double x, double y, double z)
 	{
@@ -251,8 +270,7 @@ public class Raytrace
 	}
 
 	/**
-	 * Ray trace inside an actual block area. Calls
-	 * <code>Block.collisionRayTrace()</code>
+	 * Ray trace inside an actual block area. Calls <code>Block.collisionRayTrace()</code>
 	 * 
 	 * @param x
 	 * @param y
