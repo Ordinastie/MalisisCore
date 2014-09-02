@@ -46,11 +46,7 @@ public abstract class MalisisClassTransformer implements IClassTransformer
 	public MalisisClassTransformer()
 	{
 		logString = "malisiscore";
-		if (MalisisCore.getJavaVersion() >= 1.7)
-			registerHooks();
-		else
-			LogManager.getLogger(logString).warn("Java version detected is {}. Java 1.7 is required to use the event hooks",
-					MalisisCore.getJavaVersion());
+		registerHooks();
 	}
 
 	public void register(AsmHook ah)

@@ -72,7 +72,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 {
 	public static final String modid = "malisiscore";
 	public static final String modname = "Malisis Core";
-	public static final String version = "1.7.2-0.9.1";
+	public static final String version = "1.7.10-0.9.2";
 	public static final String url = "";
 	public static File coremodLocation;
 
@@ -82,7 +82,6 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	private HashMap<String, IMalisisMod> registeredMods = new HashMap<>();
 
 	public static boolean isObfEnv = false;
-	private static float javaVersion;
 
 	private HashMap<Block, Block> originals = new HashMap<>();
 	private boolean keepConfigurationGuiOpen;
@@ -270,15 +269,5 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	public Class<?> getCustomResourcePackClass()
 	{
 		return coremodLocation.isDirectory() ? FMLFolderResourcePack.class : FMLFileResourcePack.class;
-	}
-
-	public static float getJavaVersion()
-	{
-		if (javaVersion == 0)
-		{
-			String version = System.getProperty("java.version");
-			javaVersion = Float.parseFloat(version.substring(0, 3));
-		}
-		return javaVersion;
 	}
 }
