@@ -1,10 +1,12 @@
 package net.malisis.core.renderer.element;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import net.malisis.core.renderer.RenderParameters;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.vector.Matrix4f;
@@ -46,6 +48,68 @@ public class Shape
 		return faces;
 	}
 
+	/**
+	 * Gets a face from its name
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public Face getFace(String name)
+	{
+		for (Face f : faces)
+			if (f.baseName().toLowerCase().equals(name.toLowerCase()))
+				return f;
+		return null;
+	}
+
+	/**
+	 * Gets a face from a ForgeDirection
+	 * 
+	 * @param dir
+	 * @return
+	 */
+	public Face getFace(ForgeDirection dir)
+	{
+		return getFace(nameFromDirection(dir));
+	}
+
+	/**
+	 * Gets a list of vertexes matching name
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public List<Vertex> getVertexes(String name)
+	{
+		List<Vertex> vertexes = new ArrayList<>();
+		for (Face f : faces)
+			for (Vertex v : f.getVertexes())
+				if (v.name().toLowerCase().contains(name.toLowerCase()))
+					vertexes.add(v);
+		return vertexes;
+	}
+
+	/**
+	 * Gets a list of vertexes from a ForgeDirection
+	 * 
+	 * @param dir
+	 * @return
+	 */
+	public List<Vertex> getVertexes(ForgeDirection dir)
+	{
+		return getVertexes(nameFromDirection(dir));
+	}
+
+	private String nameFromDirection(ForgeDirection dir)
+	{
+		if (dir == ForgeDirection.UP)
+			return "top";
+		else if (dir == ForgeDirection.DOWN)
+			return "bottom";
+		else
+			return dir.toString();
+	}
+
 	private Matrix4f matrix()
 	{
 		if (transformMatrix == null)
@@ -76,17 +140,15 @@ public class Shape
 	 * @param merge
 	 * @return
 	 */
-	public Shape setParameters(Face face, RenderParameters params, boolean merge)
+	public Shape setParameters(String name, RenderParameters params, boolean merge)
 	{
-		for (Face f : faces)
+		Face face = getFace(name);
+		if (face != null)
 		{
-			if (f.name() == face.name())
-			{
-				if (merge)
-					f.getParameters().merge(params);
-				else
-					f.setParameters(params);
-			}
+			if (merge)
+				face.getParameters().merge(params);
+			else
+				face.setParameters(params);
 		}
 		return this;
 	}
@@ -451,9 +513,8 @@ public class Shape
 	 */
 	public Shape shrink(Face face, float factor)
 	{
-		for (Face f : faces)
-			if (f.name() == face.name())
-				face = f;
+		if (face == null)
+			return this;
 
 		HashMap<String, Vertex> vertexNames = new HashMap<String, Vertex>();
 		double x = 0, y = 0, z = 0;
@@ -477,6 +538,12 @@ public class Shape
 			}
 		}
 
+		return this;
+	}
+
+	public Shape removeFace(Face face)
+	{
+		faces = ArrayUtils.removeElement(faces, face);
 		return this;
 	}
 

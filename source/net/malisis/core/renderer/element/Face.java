@@ -9,6 +9,7 @@ import net.minecraft.util.IIcon;
 
 public class Face
 {
+	private String baseName;
 	private Vertex[] vertexes;
 	private RenderParameters params = new RenderParameters();
 
@@ -21,6 +22,7 @@ public class Face
 			this.vertexes[i] = new Vertex(vertexes[i]);
 
 		this.params = params != null ? params : new RenderParameters();
+		this.baseName();
 	}
 
 	public Face(Vertex[] vertexes)
@@ -41,6 +43,7 @@ public class Face
 	public Face(Face face, RenderParameters params)
 	{
 		this(face.vertexes, params);
+		baseName = face.baseName;
 	}
 
 	public Vertex[] getVertexes()
@@ -248,31 +251,40 @@ public class Face
 			v.rotateAroundZ(angle, centerX, centerY, centerZ);
 	}
 
+	public String baseName()
+	{
+		if (baseName == null)
+		{
+			baseName = "";
+			HashMap<String, Integer> map = new HashMap<String, Integer>();
+			String[] dirs = new String[] { "North", "South", "East", "West", "Top", "Bottom" };
+			for (String dir : dirs)
+			{
+				map.put(dir, 0);
+				for (Vertex v : vertexes)
+				{
+					if (v.name().contains(dir))
+						map.put(dir, map.get(dir) + 1);
+				}
+				if (map.get(dir) == 4)
+					baseName = dir;
+			}
+		}
+		return baseName;
+	}
+
 	public String name()
 	{
-		HashMap<String, Integer> map = new HashMap<String, Integer>();
-		String[] dirs = new String[] { "North", "South", "East", "West", "Top", "Bottom" };
-		for (String dir : dirs)
-		{
-			map.put(dir, 0);
-			for (Vertex v : vertexes)
-			{
-				if (v.name().contains(dir))
-					map.put(dir, map.get(dir) + 1);
-			}
-			if (map.get(dir) == 4)
-				return dir;
-		}
-		return "";
+		String s = baseName() + " {";
+		for (Vertex v : vertexes)
+			s += v.name() + ", ";
+		return s + "}";
 	}
 
 	@Override
 	public String toString()
 	{
-		String s = name() + "[";
-		for (Vertex v : vertexes)
-			s += v.name() + ", ";
-		return s + "]";
+		return name();
 	}
 
 }
