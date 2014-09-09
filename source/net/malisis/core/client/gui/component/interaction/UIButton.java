@@ -28,10 +28,9 @@ import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.preset.ShapePreset;
 import net.malisis.core.util.MouseButton;
 
 import com.google.common.eventbus.Subscribe;
@@ -63,6 +62,8 @@ public class UIButton extends UIComponent<UIButton>
 		setText(text);
 		label.setDrawShadow(true);
 		setSize(width);
+
+		shape = new XResizableGuiShape();
 	}
 
 	public UIButton(String text)
@@ -100,6 +101,8 @@ public class UIButton extends UIComponent<UIButton>
 		int extraWidth = label.getWidth() % 2 == 0 ? 6 : 7;
 		this.width = Math.max(width, label.getWidth() + extraWidth);
 		this.height = 20;
+		if (shape != null)
+			shape.setSize(width, height);
 		return this;
 	}
 
@@ -128,7 +131,6 @@ public class UIButton extends UIComponent<UIButton>
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		GuiIcon[] icons = isDisabled() ? iconButtonDisabled : (hovered ? iconButtonHovered : iconButton);
-		Shape shape = ShapePreset.GuiXResizable(width, height);
 		renderer.drawShape(shape, icons);
 	}
 

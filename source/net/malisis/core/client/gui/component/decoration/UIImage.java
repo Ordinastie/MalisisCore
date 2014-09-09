@@ -27,7 +27,7 @@ package net.malisis.core.client.gui.component.decoration;
 import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.renderer.preset.ShapePreset;
+import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
@@ -53,10 +53,23 @@ public class UIImage extends UIComponent
 
 	public UIImage(IIcon icon, ResourceLocation rl)
 	{
+		setIcon(icon, rl);
+		setSize(16, 16);
+
+		shape = new SimpleGuiShape();
+	}
+
+	public UIImage setIcon(IIcon icon)
+	{
+		this.icon = icon;
+		return this;
+	}
+
+	public UIImage setIcon(IIcon icon, ResourceLocation rl)
+	{
 		this.icon = icon;
 		this.texture = rl;
-		this.width = 16;
-		this.height = 16;
+		return this;
 	}
 
 	@Override
@@ -67,7 +80,7 @@ public class UIImage extends UIComponent
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		renderer.bindTexture(texture);
-		renderer.drawShape(ShapePreset.GuiElement(width, height), icon != null ? icon : GuiIcon.iconFixedSized);
+		renderer.drawShape(shape, icon != null ? icon : GuiIcon.iconFixedSized);
 	}
 
 	@Override

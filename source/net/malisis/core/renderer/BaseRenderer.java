@@ -34,6 +34,7 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
+import net.malisis.core.renderer.preset.ShapePreset;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.DestroyBlockProgress;
@@ -80,12 +81,22 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	//Reference to Minecraft.renderGlobal.damagedBlocks (lazy loaded)
 	private static Map damagedBlocks;
 	protected static IIcon[] damagedIcons;
-
+	/**
+	 * Id for the renderer
+	 */
 	protected int renderId = -1;
+	/**
+	 * Tessellator
+	 */
 	protected Tessellator t = Tessellator.instance;
+	/**
+	 * Current world reference (ISBRH/TESR)
+	 */
 	protected IBlockAccess world;
+	/**
+	 * RenderBlocks reference (ISBRH)
+	 */
 	protected RenderBlocks renderBlocks;
-
 	/**
 	 * Block to render (ISBRH/TESR)
 	 */
@@ -95,7 +106,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected int blockMetadata;
 	/**
-	 * Position of the block
+	 * Position of the block (ISBRH/TESR)
 	 */
 	protected int x, y, z;
 	/**
@@ -103,7 +114,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected ItemStack itemStack;
 	/**
-	 * Type of item rendering.
+	 * Type of item rendering (ITEM)
 	 * 
 	 * @see {@link ItemRenderType}
 	 */
@@ -117,14 +128,12 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * Mode of rendering (GL constants)
 	 */
 	protected int drawMode;
-
 	/**
-	 * Are render coordinates already shifted (<code>TYPE_ISBRH_WORLD</code> only)
+	 * Are render coordinates already shifted (ISBRH)
 	 */
 	protected boolean isShifted = false;
-
 	/**
-	 * The shape to render
+	 * Current shape being rendered
 	 */
 	protected Shape shape;
 	/**
@@ -132,9 +141,9 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected Face face;
 	/**
-	 * Global shape parameters
+	 * Current parameters for the shape being rendered
 	 */
-	protected RenderParameters shapeParams;
+	protected RenderParameters rp;
 	/**
 	 * Current parameters for the face being rendered
 	 */
@@ -163,7 +172,6 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * Current block destroy progression (for TESR)
 	 */
 	protected DestroyBlockProgress destroyBlockProgress = null;
-
 	/**
 	 * Is at least one vertex been drawn
 	 */
@@ -172,6 +180,8 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	public BaseRenderer()
 	{
 		this.t = Tessellator.instance;
+		initShapes();
+		initParameters();
 	}
 
 	/**
@@ -539,6 +549,22 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	// #end prepare()
 
 	/**
+	 * Called when the renderer is instantiated
+	 */
+	protected void initShapes()
+	{
+		shape = ShapePreset.Cube();
+	}
+
+	/**
+	 * Called when the renderer is instantiated
+	 */
+	protected void initParameters()
+	{
+		rp = new RenderParameters();
+	}
+
+	/**
 	 * Renders the block using the default Minecraft rendering system
 	 * 
 	 * @param renderer
@@ -593,19 +619,20 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * Draws a shape with specified parameters
 	 * 
 	 * @param shape
-	 * @param rp
+	 * @param params
 	 */
-	public void drawShape(Shape s, RenderParameters rp)
+	public void drawShape(Shape s, RenderParameters params)
 	{
 		if (s == null)
 			return;
 
 		shape = s;
-		shapeParams = rp != null ? rp : new RenderParameters();
+		rp = params != null ? params : new RenderParameters();
+
 		s.applyMatrix();
 
-		if (shapeParams.applyTexture.get())
-			applyTexture(s, shapeParams);
+		if (rp.applyTexture.get())
+			applyTexture(s, rp);
 
 		for (Face face : s.getFaces())
 			drawFace(face, face.getParameters());
@@ -625,9 +652,9 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * Draws a face with specified parameters.
 	 * 
 	 * @param f
-	 * @param rp
+	 * @param faceParams
 	 */
-	protected void drawFace(Face f, RenderParameters rp)
+	protected void drawFace(Face f, RenderParameters faceParams)
 	{
 		if (f == null)
 			return;
@@ -640,7 +667,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		}
 
 		face = f;
-		params = RenderParameters.merge(shapeParams, rp);
+		params = RenderParameters.merge(rp, faceParams);
 
 		if (!shouldRenderFace(face))
 			return;
@@ -738,7 +765,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	{
 		if (renderType != TYPE_ISBRH_WORLD || world == null || block == null)
 			return true;
-		if (shapeParams != null && shapeParams.renderAllFaces.get())
+		if (rp != null && rp.renderAllFaces.get())
 			return true;
 		if (renderBlocks != null && renderBlocks.renderAllFaces == true)
 			return true;

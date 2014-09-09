@@ -39,7 +39,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 
 	public UITabGroup()
 	{
-		this.height = 19;
+		this.height = 12;
 		this.width = 0;
 		this.x = 3;
 	}

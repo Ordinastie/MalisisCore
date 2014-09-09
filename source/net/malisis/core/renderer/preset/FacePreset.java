@@ -87,9 +87,6 @@ public class FacePreset
     private static Face TriangleSouthTopEast = new Face(new Vertex[] { Vertex.TopSouthWest, Vertex.BottomSouthWest, Vertex.BottomSouthEast, Vertex.BottomSouthEast});
    
     
-    private static Face Gui = new Face(new Vertex[] { Vertex.BottomSouthWest, Vertex.TopSouthWest, Vertex.TopSouthEast, Vertex.BottomSouthEast });
-    
-  
     public static Face Bottom() { return new Face(Bottom); }
     public static Face Top() { return new Face(Top); }
     public static Face West() { return new Face(West); }
@@ -139,7 +136,6 @@ public class FacePreset
     public static Face TriangleNorthTopEast() { return new Face(TriangleNorthTopEast); }
     public static Face TriangleSouthTopEast() { return new Face(TriangleSouthTopEast); }
     
-    public static Face Gui()  { return new Face(Gui); }
     //@formatter:on    
 
 	private static HashMap<String, int[]> aom = new HashMap<String, int[]>();
@@ -148,8 +144,6 @@ public class FacePreset
 	{
 		buildDirectionMatrix();
 		RenderParameters rp;
-
-		Gui.setStandardUV();
 
 		/**
 		 * Regular faces

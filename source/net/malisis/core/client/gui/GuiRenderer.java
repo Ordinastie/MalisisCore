@@ -31,10 +31,10 @@ import java.util.List;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.renderer.BaseRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.Shape;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderHelper;
@@ -161,37 +161,36 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Draws a shape on the GUI.
 	 */
-	@Override
-	public void drawShape(Shape s, RenderParameters rp)
+	public void drawShape(GuiShape s, RenderParameters rp)
 	{
 		drawShape(s, rp, (IIcon) null);
 	}
 
-	public void drawShape(Shape s, IIcon... icons)
+	public void drawShape(GuiShape s, IIcon... icons)
 	{
 		drawShape(s, null, icons);
 	}
 
-	public void drawShape(Shape s, RenderParameters rp, IIcon... icons)
+	public void drawShape(GuiShape s, RenderParameters params, IIcon... icons)
 	{
 		if (s == null)
 			return;
 
 		shape = s;
 		// move the shape at the right coord on screen
-		shape.translate(currentComponent.screenX(), currentComponent.screenY(), currentComponent.getZIndex());
-		shapeParams = rp != null ? rp : new RenderParameters();
+		s.translate(currentComponent.screenX(), currentComponent.screenY(), currentComponent.getZIndex());
+		rp = params != null ? params : new RenderParameters();
 		s.applyMatrix();
 
-		if (shapeParams.applyTexture.get())
-			applyTexture(s, shapeParams);
+		if (rp.applyTexture.get())
+			applyTexture(s, rp);
 
 		Face[] faces = s.getFaces();
 		for (int i = 0; i < faces.length; i++)
 		{
 			if (icons != null && i < icons.length && icons[i] != null)
 				faces[i].setTexture(icons[i], false, false, false);
-			drawFace(faces[i], rp);
+			drawFace(faces[i], params);
 		}
 	}
 

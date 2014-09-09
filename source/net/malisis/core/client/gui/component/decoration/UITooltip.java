@@ -30,9 +30,7 @@ import java.util.List;
 import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.preset.ShapePreset;
+import net.malisis.core.client.gui.element.XYResizableGuiShape;
 
 /**
  * UITooltip
@@ -58,9 +56,11 @@ public class UITooltip extends UIComponent
 
 	public UITooltip()
 	{
-		width = 16;
-		height = 16;
+		setSize(16, 16);
 		zIndex = 300;
+		rp.alpha.set(255);
+
+		shape = new XYResizableGuiShape();
 	}
 
 	public UITooltip(String text)
@@ -105,10 +105,7 @@ public class UITooltip extends UIComponent
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiXYResizable(width, height);
-		shape.translate(mouseX + getOffsetX(), mouseY + getOffsetY(), 0);
-		RenderParameters rp = new RenderParameters();
-		rp.alpha.set(255);
+		shape.setPosition(mouseX + getOffsetX(), mouseY + getOffsetY());
 		renderer.drawShape(shape, rp, icons);
 	}
 

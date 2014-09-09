@@ -235,7 +235,7 @@ public class MalisisInventoryContainer extends Container
 			return false;
 
 		if (dragType == DRAG_TYPE_ONE || dragType == DRAG_TYPE_SPREAD)
-			return dragType == button && draggedItemStacks.size() > 1;
+			return dragType == button;// && draggedItemStacks.size() > 1;
 
 		return dragType == DRAG_TYPE_PICKUP;
 	}
@@ -745,6 +745,8 @@ public class MalisisInventoryContainer extends Container
 			return null;
 
 		// action == DRAG_ADD_SLOT
+		if (draggedItemStacks.size() <= 1) // do not start spreading before it's dragged at least over two slots
+			return pickedItemStack;
 		int amountPerSlot = dragType == DRAG_TYPE_SPREAD ? Math.max(draggedAmount / draggedItemStacks.size(), 1) : 1;
 		int amountTotal = 0;
 		HashMap<Integer, MalisisSlot> draggedSlots = getDraggedSlots();
@@ -752,7 +754,6 @@ public class MalisisInventoryContainer extends Container
 		{
 			if (draggedSlots.get(entry.getKey()).isItemValid(pickedItemStack))
 			{
-
 				// work on a copy because we alter pickedItemStack only in the end
 				ItemStack itemStack = pickedItemStack.copy();
 				itemStack.stackSize = draggedAmount;
@@ -817,6 +818,7 @@ public class MalisisInventoryContainer extends Container
 	/*
 	 * COMPATIBILITY
 	 */
+
 	@Override
 	public boolean canInteractWith(EntityPlayer var1)
 	{

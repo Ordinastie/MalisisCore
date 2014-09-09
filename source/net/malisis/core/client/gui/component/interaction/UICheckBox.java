@@ -27,12 +27,10 @@ package net.malisis.core.client.gui.component.interaction;
 import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.preset.ShapePreset;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.renderer.OpenGlHelper;
 
@@ -64,8 +62,10 @@ public class UICheckBox extends UIComponent<UICheckBox>
 			width = GuiRenderer.getStringWidth(label);
 		}
 
-		width += 11;
-		height = 10;
+		setSize(width + 11, 10);
+
+		shape = new SimpleGuiShape();
+
 	}
 
 	public UICheckBox()
@@ -87,7 +87,8 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiElement(10, 10).translate(1, 0, 0);
+		shape.resetState();
+		shape.setSize(10, 10).setPosition(1, 0);
 		renderer.drawShape(shape, isDisabled() ? checkboxBackgroundDisabled : checkboxBackground);
 
 		renderer.next();
@@ -101,12 +102,12 @@ public class UICheckBox extends UIComponent<UICheckBox>
 			OpenGlHelper.glBlendFunc(770, 771, 1, 0);
 			GL11.glShadeModel(GL11.GL_SMOOTH);
 
-			RenderParameters rp = new RenderParameters();
 			rp.colorMultiplier.set(0xFFFFFF);
 			rp.alpha.set(80);
 			rp.useTexture.set(false);
 
-			shape = ShapePreset.GuiElement(8, 8).translate(2, 1, 0);
+			shape.resetState();
+			shape.setSize(8, 8).setPosition(2, 1);
 			renderer.drawShape(shape, rp);
 			renderer.next();
 
@@ -129,7 +130,8 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		{
 			GL11.glEnable(GL11.GL_BLEND);
 			GuiIcon icon = isDisabled() ? checkBoxDisabled : (isHovered() ? checkBoxHovered : checkBoxChecked);
-			Shape shape = ShapePreset.GuiElement(12, 10);
+			shape.resetState();
+			shape.setSize(12, 10);
 			renderer.drawShape(shape, icon);
 		}
 	}

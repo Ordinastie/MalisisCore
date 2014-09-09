@@ -30,12 +30,12 @@ import java.util.regex.Pattern;
 import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.preset.ShapePreset;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
@@ -93,6 +93,9 @@ public class UITextField extends UIComponent<UITextField>
 	 */
 	private int textColor = 0xFFFFFF;
 
+	private GuiShape cursorShape;
+	private GuiShape selectShape;
+
 	public UITextField(int width, String text)
 	{
 		super();
@@ -100,7 +103,12 @@ public class UITextField extends UIComponent<UITextField>
 		this.height = 12;
 		if (text != null)
 			this.text.append(text);
-		iconTextfield = new GuiIcon[] { new GuiIcon(200, 30, 3, 12), new GuiIcon(203, 30, 3, 12), new GuiIcon(206, 30, 3, 12) };
+
+		shape = new XResizableGuiShape(3);
+		cursorShape = new SimpleGuiShape();
+		cursorShape.setSize(1, 10);
+		cursorShape.storeState();
+		selectShape = new SimpleGuiShape();
 	}
 
 	public UITextField(int width)
@@ -161,7 +169,6 @@ public class UITextField extends UIComponent<UITextField>
 
 		this.text.insert(cursorPosition, text);
 		setCursorPosition(cursorPosition + text.length());
-
 	}
 
 	private int stringWidth(int start, int end)
@@ -401,7 +408,8 @@ public class UITextField extends UIComponent<UITextField>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiXResizable(width, height, 3);
+		rp.useTexture.reset();
+		rp.colorMultiplier.reset();
 		renderer.drawShape(shape, isDisabled() ? iconTextfieldDisabled : iconTextfield);
 	}
 
@@ -433,14 +441,13 @@ public class UITextField extends UIComponent<UITextField>
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		int offset = stringWidth(charOffset, cursorPosition);
 
-		Shape shape = ShapePreset.GuiElement(1, 10);
-		shape.translate(offset + 1, 1, 0);
+		cursorShape.resetState();
+		cursorShape.setPosition(offset + 1, 1);
 
-		RenderParameters rp = new RenderParameters();
 		rp.useTexture.set(false);
 		rp.colorMultiplier.set(0xD0D0D0);
 
-		renderer.drawShape(shape, rp);
+		renderer.drawShape(cursorShape, rp);
 		renderer.next();
 
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -457,14 +464,13 @@ public class UITextField extends UIComponent<UITextField>
 		start = stringWidth(charOffset, start);
 		width = Math.min(this.width - start - 2, width);
 
-		Shape shape = ShapePreset.GuiElement(width, 10);
-		shape.translate(start + 1, 1, 0);
+		selectShape.resetState();
+		selectShape.setSize(width, 10).setPosition(start + 1, 1);
 
-		RenderParameters rp = new RenderParameters();
 		rp.useTexture.set(false);
 		rp.colorMultiplier.set(0x0000FF);
 
-		renderer.drawShape(shape, rp);
+		renderer.drawShape(selectShape, rp);
 		renderer.next();
 
 		GL11.glDisable(GL11.GL_COLOR_LOGIC_OP);
@@ -506,6 +512,22 @@ public class UITextField extends UIComponent<UITextField>
 		int pos = cursorPositionFromX(componentX(event.getX()));
 		setSelectionPosition(pos);
 		selectAllOnRelease = false;
+	}
+
+	@Subscribe
+	public void onDoubleClick(MouseEvent.DoubleClick event)
+	{
+		int pos = cursorPositionFromX(componentX(event.getX()));
+		if (pos > 0 && text.charAt(pos - 1) == ' ')
+			selectionPosition = pos;
+		else
+			selectionPosition = pos + nextSpacePosition(true);
+
+		if (text.charAt(pos) == ' ')
+			setCursorPosition(pos);
+		else
+			setCursorPosition(pos + nextSpacePosition(false) - 1);
+
 	}
 
 	@Subscribe

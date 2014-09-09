@@ -27,9 +27,7 @@ package net.malisis.core.client.gui.component.decoration;
 import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.preset.ShapePreset;
+import net.malisis.core.client.gui.element.SimpleGuiShape;
 
 /**
  * @author Ordinastie
@@ -45,8 +43,9 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 
 	public UIProgressBar()
 	{
-		width = 22;
-		height = 16;
+		setSize(width, height);
+
+		shape = new SimpleGuiShape();
 	}
 
 	public float getProgress()
@@ -74,8 +73,7 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiElement(22, 16);
-		RenderParameters rp = new RenderParameters();
+		shape.resetState();
 		rp.icon.set(barIcon);
 		renderer.drawShape(shape, rp);
 	}
@@ -93,8 +91,8 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 			icon = barFilledIcon.clippedCopy(width - 22, 0, -width, 16);
 		}
 
-		Shape shape = ShapePreset.GuiElement(width, 16);
-		shape.translate(xOffset, 0, 0);
+		shape.setSize(width, 16);
+		shape.translate(xOffset, 0);
 		renderer.drawShape(shape, icon);
 	}
 }

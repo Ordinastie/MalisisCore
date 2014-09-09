@@ -31,11 +31,10 @@ import java.util.List;
 import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.preset.ShapePreset;
 import net.malisis.core.util.MouseButton;
 
 import org.lwjgl.opengl.GL11;
@@ -69,8 +68,9 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 			width = GuiRenderer.getStringWidth(label);
 		}
 
-		width += 10;
-		height = 11;
+		setSize(width + 10, 11);
+
+		shape = new SimpleGuiShape();
 
 		addRadioButton(this);
 	}
@@ -97,7 +97,8 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiElement(8, 8).translate(1, 0, 0);
+		shape.resetState();
+		shape.setSize(8, 8).translate(1, 0, 0);
 		renderer.drawShape(shape, isDisabled() ? rbBackgroundDisabled : rbBackground);
 
 		renderer.next();
@@ -109,12 +110,13 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 			GL11.glDisable(GL11.GL_ALPHA_TEST);
 			renderer.enableBlending();
 
-			RenderParameters rp = new RenderParameters();
+			rp = new RenderParameters();
 			rp.colorMultiplier.set(0xFFFFFF);
 			rp.alpha.set(80);
 			rp.useTexture.set(false);
 
-			shape = ShapePreset.GuiElement(6, 6).translate(2, 2, 0);
+			shape.resetState();
+			shape.setSize(6, 6).setPosition(2, 1);
 			renderer.drawShape(shape, rp);
 			renderer.next();
 
@@ -137,7 +139,8 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 		{
 			GL11.glEnable(GL11.GL_BLEND);
 			GuiIcon icon = isDisabled() ? rbDisabled : (isHovered() ? rbHovered : rbChecked);
-			Shape shape = ShapePreset.GuiElement(6, 6).translate(2, 1, 0);
+			shape.resetState();
+			shape.setSize(6, 6).setPosition(2, 1);
 			renderer.drawShape(shape, icon);
 		}
 	}

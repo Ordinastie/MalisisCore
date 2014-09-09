@@ -42,6 +42,11 @@ public class Shape
 	protected Matrix4f selfRotationMatrix;
 	protected Matrix4f transformMatrix;
 
+	public Shape()
+	{
+		this.faces = new Face[0];
+	}
+
 	public Shape(Face[] faces)
 	{
 		// we need a copy of the faces else the modification for one shape would
@@ -62,6 +67,24 @@ public class Shape
 		copyMatrix(s);
 	}
 
+	public Shape addFaces(Face[] faces)
+	{
+		return addFaces(faces, null);
+	}
+
+	public Shape addFaces(Face[] faces, String groupName)
+	{
+		if (groupName != null)
+		{
+			for (Face f : faces)
+				f.setBaseName(groupName);
+		}
+
+		this.faces = ArrayUtils.addAll(this.faces, faces);
+
+		return this;
+	}
+
 	/**
 	 * Gets the faces that make up this <code>Shape</code>
 	 * 
@@ -70,6 +93,15 @@ public class Shape
 	public Face[] getFaces()
 	{
 		return faces;
+	}
+
+	public List<Face> getFaces(String name)
+	{
+		List<Face> list = new ArrayList<>();
+		for (Face f : faces)
+			if (f.baseName().toLowerCase().equals(name.toLowerCase()))
+				list.add(f);
+		return list;
 	}
 
 	/**
@@ -166,13 +198,13 @@ public class Shape
 	 */
 	public Shape setParameters(String name, RenderParameters params, boolean merge)
 	{
-		Face face = getFace(name);
-		if (face != null)
+		List<Face> faces = getFaces(name);
+		for (Face f : faces)
 		{
 			if (merge)
-				face.getParameters().merge(params);
+				f.getParameters().merge(params);
 			else
-				face.setParameters(params);
+				f.setParameters(params);
 		}
 		return this;
 	}
@@ -529,14 +561,63 @@ public class Shape
 	}
 
 	/**
+	 * Stores the current state of each vertex making up this <code>Shape</code>.
+	 * 
+	 * @return
+	 */
+	public Shape storeState()
+	{
+		applyMatrix();
+		for (Face f : faces)
+		{
+			for (Vertex v : f.getVertexes())
+			{
+				v.setInitialState();
+			}
+		}
+		return this;
+	}
+
+	/**
+	 * Resets the state of each vertex making up this <code>Shape</code> to a previously stored one.
+	 * 
+	 * @return
+	 */
+	public Shape resetState()
+	{
+		for (Face f : faces)
+		{
+			for (Vertex v : f.getVertexes())
+			{
+				v.resetState();
+			}
+		}
+		return this;
+	}
+
+	/**
+	 * Interpolates the UVs of each vertex making up this <code>Shape</code> base on their position and the <code>Face</code> orientation.
+	 * 
+	 * @return
+	 */
+	public Shape interpolateUV()
+	{
+		for (Face f : faces)
+			f.interpolateUV();
+
+		return this;
+	}
+
+	/**
 	 * Shrinks the face matching <b>face</b> name by a certain <b>factor</b>. The vertexes of connected faces are moved too.
 	 * 
 	 * @param face
 	 * @param factor
 	 * @return
 	 */
-	public Shape shrink(Face face, float factor)
+	public Shape shrink(ForgeDirection dir, float factor)
 	{
+		Face face = getFace(dir);
 		if (face == null)
 			return this;
 
@@ -549,9 +630,7 @@ public class Shape
 			y += v.getY() / 4;
 			z += v.getZ() / 4;
 		}
-
 		face.scale(factor, x, y, z);
-
 		for (Face f : faces)
 		{
 			for (Vertex v : f.getVertexes())
@@ -561,7 +640,6 @@ public class Shape
 					v.set(tmpV.getX(), tmpV.getY(), tmpV.getZ());
 			}
 		}
-
 		return this;
 	}
 

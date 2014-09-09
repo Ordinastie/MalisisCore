@@ -30,12 +30,14 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.component.interaction.IScrollable;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.ComponentEvent.FocusStateChanged;
 import net.malisis.core.client.gui.event.ComponentEvent.HoveredStateChanged;
 import net.malisis.core.client.gui.event.GuiEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.renderer.RenderParameters;
 
 import com.google.common.eventbus.EventBus;
 
@@ -91,19 +93,28 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	protected boolean disabled = false;
 	/**
-	 * Hover state of this <code>UIComponent</code>
+	 * Hover state of this <code>UIComponent</code>.
 	 */
 	protected boolean hovered;
 	/**
-	 * Focus state of this <code>UIComponent</code>
+	 * Focus state of this <code>UIComponent</code>.
 	 */
 	protected boolean focused;
+	/**
+	 * GuiShape used to draw this <code>UIComponent</code>.
+	 */
+	protected GuiShape shape;
+	/**
+	 * RenderParameters used to draw this <code>UIComponent</code>.
+	 */
+	protected RenderParameters rp;
 
 	public UIComponent()
 	{
 		bus = new EventBus();
 		bus.register(this);
 		visible = true;
+		rp = new RenderParameters();
 	}
 
 	/**
@@ -557,6 +568,11 @@ public abstract class UIComponent<T extends UIComponent>
 		if (!isVisible())
 			return;
 
+		if (shape != null)
+		{
+			shape.resetState();
+			shape.setSize(width, height);
+		}
 		renderer.currentComponent = this;
 		drawBackground(renderer, mouseX, mouseY, partialTick);
 		renderer.next();

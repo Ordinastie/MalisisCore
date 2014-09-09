@@ -75,47 +75,4 @@ public class ShapePreset
 	public static Shape InvTopSouthEast() { return new Shape(InvTopSouthEast); }
 	//@formatter:on
 
-	// GUI
-	public static Shape GuiElement(int width, int height)
-	{
-		return new Shape(new Face[] { FacePreset.Gui().factor(width, height, 0) });
-	}
-
-	public static Shape GuiXYResizable(int width, int height, int cornerWidth, int cornerHeight)
-	{
-		width = Math.max(width - 2 * cornerWidth, 0);
-		height = Math.max(height - 2 * cornerHeight, 0);
-		Face[] faces = new Face[] { FacePreset.Gui().factor(cornerWidth, cornerHeight, 0),
-				FacePreset.Gui().factor(width, cornerHeight, 0).translate(cornerWidth, 0, 0),
-				FacePreset.Gui().factor(cornerWidth, cornerHeight, 0).translate(cornerWidth + width, 0, 0),
-				FacePreset.Gui().factor(cornerWidth, height, 0).translate(0, cornerHeight, 0),
-				FacePreset.Gui().factor(width, height, 0).translate(cornerWidth, cornerHeight, 0),
-				FacePreset.Gui().factor(cornerWidth, height, 0).translate(cornerWidth + width, cornerHeight, 0),
-				FacePreset.Gui().factor(cornerWidth, cornerHeight, 0).translate(0, cornerHeight + height, 0),
-				FacePreset.Gui().factor(width, cornerHeight, 0).translate(cornerWidth, cornerHeight + height, 0),
-				FacePreset.Gui().factor(cornerWidth, cornerHeight, 0).translate(cornerWidth + width, cornerHeight + height, 0) };
-
-		return new Shape(faces);
-	}
-
-	public static Shape GuiXYResizable(int width, int height)
-	{
-		return GuiXYResizable(width, height, 5, 5);
-	}
-
-	public static Shape GuiXResizable(int width, int height, int sideWidth)
-	{
-		width = Math.max(width - 2 * sideWidth, 0);
-		Face[] faces = new Face[] { FacePreset.Gui().factor(sideWidth, height, 0),
-				FacePreset.Gui().factor(width, height, 0).translate(sideWidth, 0, 0),
-				FacePreset.Gui().factor(sideWidth, height, 0).translate(sideWidth + width, 0, 0) };
-
-		return new Shape(faces);
-	}
-
-	public static Shape GuiXResizable(int width, int height)
-	{
-		return GuiXResizable(width, height, 5);
-	}
-
 }

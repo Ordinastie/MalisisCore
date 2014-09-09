@@ -32,10 +32,8 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.interaction.IScrollable;
 import net.malisis.core.client.gui.component.interaction.UIScrollBar;
+import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.preset.ShapePreset;
 import net.minecraft.client.gui.GuiScreen;
 
 import com.google.common.eventbus.Subscribe;
@@ -77,6 +75,8 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 		verticalScroll = new UIScrollBar(this, height, VERTICAL);
 		setScrollBarsPosition();
 		calculateContentSize();
+
+		shape = new XYResizableGuiShape(5);
 	}
 
 	@Override
@@ -233,6 +233,13 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 	}
 
 	@Override
+	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		rp.colorMultiplier.set(color);
+		renderer.drawShape(shape, rp, icons);
+	}
+
+	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		// GL11.glTranslatef(xOffset, yOffset, 0);
@@ -244,16 +251,6 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 		if (allowHorizontalScroll)
 			horizontalScroll.draw(renderer, mouseX, mouseY, partialTick);
 
-	}
-
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		Shape shape = ShapePreset.GuiXYResizable(width, height);
-		RenderParameters rp = new RenderParameters();
-		if (color != -1)
-			rp.colorMultiplier.set(color);
-		renderer.drawShape(shape, rp, icons);
 	}
 
 	@Override

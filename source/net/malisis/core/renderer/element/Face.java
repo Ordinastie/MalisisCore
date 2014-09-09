@@ -121,6 +121,33 @@ public class Face
 		return this;
 	}
 
+	public Face interpolateUV()
+	{
+		float u = 0;
+		float v = 0;
+		float U = 1;
+		float V = 1;
+
+		double factorU, factorV;
+
+		float uvs[][] = new float[vertexes.length][2];
+		for (int i = 0; i < vertexes.length; i++)
+		{
+			Vertex vertex = vertexes[i];
+
+			factorU = getFactorU(vertex);
+			factorV = getFactorV(vertex);
+
+			int k = i;
+			uvs[k] = new float[] { interpolate(u, U, factorU, false), interpolate(v, V, factorV, false) };
+		}
+
+		for (int i = 0; i < vertexes.length; i++)
+			vertexes[i].setUV(uvs[i][0], uvs[i][1]);
+
+		return this;
+	}
+
 	public Face setTexture(IIcon icon, boolean flippedU, boolean flippedV, boolean interpolate)
 	{
 		if (icon == null)
@@ -273,6 +300,11 @@ public class Face
 	{
 		for (Vertex v : vertexes)
 			v.rotateAroundZ(angle, centerX, centerY, centerZ);
+	}
+
+	public void setBaseName(String name)
+	{
+		baseName = name;
 	}
 
 	public String baseName()

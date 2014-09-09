@@ -52,7 +52,9 @@ public class Vertex
 	private double u = 0.0F;
 	private double v = 0.0F;
 
-	public Vertex(double x, double y, double z, int rgba, int brightness, double u, double v)
+	private Vertex initialState;
+
+	public Vertex(double x, double y, double z, int rgba, int brightness, double u, double v, boolean isInitialState)
 	{
 		this.x = x;
 		this.y = y;
@@ -63,21 +65,24 @@ public class Vertex
 		this.u = u;
 		this.v = v;
 		this.baseName();
+
+		if (!isInitialState)
+			initialState = new Vertex(x, y, z, rgba, brightness, u, v, true);
 	}
 
 	public Vertex(double x, double y, double z, int rgba, int brightness)
 	{
-		this(x, y, z, rgba, brightness, 0, 0);
+		this(x, y, z, rgba, brightness, 0, 0, false);
 	}
 
 	public Vertex(double x, double y, double z)
 	{
-		this(x, y, z, 0xFFFFFFFF, BRIGHTNESS_MAX, 0, 0);
+		this(x, y, z, 0xFFFFFFFF, BRIGHTNESS_MAX, 0, 0, false);
 	}
 
 	public Vertex(Vertex vertex)
 	{
-		this(vertex.x, vertex.y, vertex.z, vertex.color << 8 | vertex.alpha, vertex.brightness, vertex.u, vertex.v);
+		this(vertex.x, vertex.y, vertex.z, vertex.color << 8 | vertex.alpha, vertex.brightness, vertex.u, vertex.v, false);
 	}
 
 	public Vertex(Vertex vertex, int rgba, int brightness)
@@ -87,7 +92,7 @@ public class Vertex
 
 	public Vertex(Vertex vertex, int rgba, int brightness, float u, float v)
 	{
-		this(vertex.x, vertex.y, vertex.z, rgba, brightness, u, v);
+		this(vertex.x, vertex.y, vertex.z, rgba, brightness, u, v, false);
 	}
 
 	public double getX()
@@ -373,5 +378,27 @@ public class Vertex
 		x = vec.x;
 		y = vec.y;
 		z = vec.z;
+	}
+
+	private void setState(Vertex vertex)
+	{
+		x = vertex.x;
+		y = vertex.y;
+		z = vertex.z;
+		brightness = vertex.alpha;
+		color = vertex.color;
+		alpha = vertex.alpha;
+		u = vertex.u;
+		v = vertex.v;
+	}
+
+	public void setInitialState()
+	{
+		initialState.setState(this);
+	}
+
+	public void resetState()
+	{
+		setState(initialState);
 	}
 }

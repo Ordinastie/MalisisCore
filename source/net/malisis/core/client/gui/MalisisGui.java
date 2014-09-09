@@ -337,9 +337,7 @@ public class MalisisGui extends GuiScreen
 	{}
 
 	public void updateGui()
-	{
-
-	}
+	{}
 
 	@Override
 	public boolean doesGuiPauseGame()
@@ -364,6 +362,16 @@ public class MalisisGui extends GuiScreen
 		this.mc.displayGuiScreen((GuiScreen) null);
 		this.mc.setIngameFocus();
 		return;
+	}
+
+	/**
+	 * Called when the screen is unloaded. Used to disable keyboard repeat events
+	 */
+	@Override
+	public void onGuiClosed()
+	{
+		if (inventoryContainer != null)
+			inventoryContainer.onContainerClosed(this.mc.thePlayer);
 	}
 
 	/**
@@ -448,5 +456,4 @@ public class MalisisGui extends GuiScreen
 		gui.focusedComponent = component;
 		return true;
 	}
-
 }

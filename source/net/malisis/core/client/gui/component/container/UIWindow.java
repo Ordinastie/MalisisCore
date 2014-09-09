@@ -28,11 +28,7 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.preset.ShapePreset;
-
-import com.google.common.eventbus.Subscribe;
+import net.malisis.core.client.gui.element.XYResizableGuiShape;
 
 /**
  * UIWindow
@@ -58,6 +54,8 @@ public class UIWindow extends UIContainer<UIWindow>
 		super(title, width, height);
 		setPadding(5, 5);
 		this.anchor = anchor;
+
+		shape = new XYResizableGuiShape();
 	}
 
 	public UIWindow(String title, int width, int height)
@@ -73,14 +71,7 @@ public class UIWindow extends UIContainer<UIWindow>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiXYResizable(width, height);
 		renderer.drawShape(shape, icons);
-	}
-
-	@Subscribe
-	public void onMouseMove(MouseEvent.Move event)
-	{
-		// MalisisCore.Message(event.getX() + ", " + event.getY());
 	}
 
 	@Override

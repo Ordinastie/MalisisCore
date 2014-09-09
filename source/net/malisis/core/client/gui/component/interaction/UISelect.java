@@ -35,12 +35,13 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.element.XResizableGuiShape;
+import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.preset.ShapePreset;
 import net.malisis.core.util.MouseButton;
 
 import org.lwjgl.input.Keyboard;
@@ -81,12 +82,18 @@ public class UISelect extends UIComponent<UISelect>
 	protected boolean expanded = false;
 	protected String labelPattern;
 
+	protected GuiShape arrowShape;
+
 	public UISelect(int width, HashMap<Integer, Option> options)
 	{
-		this.width = width;
-		this.height = 12;
+		setSize(width, 12);
 		this.optionsContainer = new OptionsContainer();
 		setOptions(options);
+
+		shape = new XResizableGuiShape(3);
+		arrowShape = new SimpleGuiShape();
+		arrowShape.setSize(7, 4);
+		arrowShape.storeState();
 	}
 
 	public UISelect(int width)
@@ -269,19 +276,19 @@ public class UISelect extends UIComponent<UISelect>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiXResizable(width, 12, 3);
 		renderer.drawShape(shape, isDisabled() ? iconsSelectDisabled : iconsSelect);
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiElement(7, 4);
-		shape.translate(width - 9, 4, 0);
-		RenderParameters rp = new RenderParameters();
+		arrowShape.resetState();
+		arrowShape.setPosition(width - 9, 4);
 		if (isHovered() || expanded)
 			rp.colorMultiplier.set(0xBEC8FF);
-		renderer.drawShape(shape, rp, arrowIcon);
+		else
+			rp.colorMultiplier.reset();
+		renderer.drawShape(arrowShape, rp, arrowIcon);
 
 		if (selectedOption != -1)
 		{
@@ -366,6 +373,8 @@ public class UISelect extends UIComponent<UISelect>
 		public OptionsContainer()
 		{
 			this.zIndex = 101;
+
+			shape = new XYResizableGuiShape(3);
 		}
 
 		/**
@@ -478,7 +487,6 @@ public class UISelect extends UIComponent<UISelect>
 		@Override
 		public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 		{
-			Shape shape = ShapePreset.GuiXYResizable(width, height, 3, 3);
 			renderer.drawShape(shape, iconsExpanded);
 
 			for (UILabel label : optionsLabel)
@@ -489,10 +497,9 @@ public class UISelect extends UIComponent<UISelect>
 
 					GL11.glDisable(GL11.GL_TEXTURE_2D);
 
-					shape = ShapePreset.GuiXResizable(label.getWidth(), label.getHeight());
-					shape.translate(componentX(label) - 1, componentY(label), 0);
+					shape.resetState();
+					shape.setSize(label.getWidth(), label.getHeight()).setPosition(componentX(label) - 1, componentY(label));
 
-					RenderParameters rp = new RenderParameters();
 					rp.colorMultiplier.set(0x5E789F);
 					rp.useTexture.set(false);
 					renderer.drawShape(shape, rp);

@@ -30,6 +30,7 @@ import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
+import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.inventory.InventoryEvent;
@@ -37,8 +38,6 @@ import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
 import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.preset.ShapePreset;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -74,6 +73,8 @@ public class UISlot extends UIComponent<UISlot>
 		this.width = 18;
 		this.height = 18;
 		slot.register(this);
+
+		shape = new SimpleGuiShape();
 	}
 
 	public UISlot()
@@ -115,7 +116,8 @@ public class UISlot extends UIComponent<UISlot>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiElement(18, 18);
+		shape.resetState();
+		shape.setSize(18, 18);
 		renderer.drawShape(shape, icon);
 		renderer.next();
 	}
@@ -142,11 +144,7 @@ public class UISlot extends UIComponent<UISlot>
 		}
 
 		if (itemStack != null)
-		{
-
 			renderer.drawItemStack(itemStack, screenX() + 1, screenY() + 1, format);
-
-		}
 
 		// draw the white shade over the slot
 		if (hovered || draggedItemStack != null)
@@ -162,7 +160,8 @@ public class UISlot extends UIComponent<UISlot>
 			rp.alpha.set(80);
 			rp.useTexture.set(false);
 
-			Shape shape = ShapePreset.GuiElement(16, 16).translate(1, 1, 100);
+			shape.resetState();
+			shape.setSize(16, 16).translate(1, 1, 100);
 			renderer.drawShape(shape, rp);
 			renderer.next();
 
@@ -174,9 +173,11 @@ public class UISlot extends UIComponent<UISlot>
 		GL11.glEnable(GL11.GL_ALPHA_TEST);
 
 		// Dirty fix because Mojang can't count and masks overflow the slots
-		Shape shape = ShapePreset.GuiElement(1, 18).translate(0, 0, 50);
+		shape.resetState();
+		shape.setSize(1, 18).translate(0, 0, 50);
 		renderer.drawShape(shape, iconLeft);
-		shape = ShapePreset.GuiElement(18, 1).translate(0, 0, 50);
+		shape.resetState();
+		shape.setSize(18, 1).translate(0, 0, 50);
 		renderer.drawShape(shape, iconTop);
 
 	}
@@ -203,7 +204,19 @@ public class UISlot extends UIComponent<UISlot>
 
 			buttonRelased = false;
 		}
-		else if (container.getPickedItemStack() != null && event instanceof MouseEvent.Press && !container.isDraggingItemStack())
+
+		if (event instanceof MouseEvent.Release)
+			buttonRelased = true;
+
+		MalisisGui.sendAction(action, slot, event.getButtonCode());
+	}
+
+	public void dragStack(MouseEvent.Drag event)
+	{
+		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
+		ActionType action = null;
+
+		if (container.getPickedItemStack() != null && !container.isDraggingItemStack() && buttonRelased)
 		{
 			if (event.getButton() == MouseButton.LEFT)
 				action = GuiScreen.isCtrlKeyDown() ? ActionType.DRAG_START_PICKUP : ActionType.DRAG_START_LEFT_CLICK;
@@ -211,9 +224,6 @@ public class UISlot extends UIComponent<UISlot>
 			if (event.getButton() == MouseButton.RIGHT)
 				action = ActionType.DRAG_START_RIGHT_CLICK;
 		}
-
-		if (event instanceof MouseEvent.Release)
-			buttonRelased = true;
 
 		MalisisGui.sendAction(action, slot, event.getButtonCode());
 	}

@@ -27,10 +27,11 @@ package net.malisis.core.client.gui.component.interaction;
 import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.preset.ShapePreset;
 import net.malisis.core.util.MouseButton;
 
 import com.google.common.eventbus.Subscribe;
@@ -55,13 +56,20 @@ public class UISlider extends UIComponent<UISlider>
 	private float value;
 	private float offset;
 
+	private GuiShape sliderShape;
+
 	public UISlider(int width, float min, float max, String label)
 	{
-		this.height = 20;
-		this.width = width;
+		setSize(width, 20);
 		this.minValue = min;
 		this.maxValue = max;
 		this.label = label;
+
+		shape = new XResizableGuiShape();
+		sliderShape = new SimpleGuiShape();
+		sliderShape.setSize(8, 20);
+		sliderShape.storeState();
+
 	}
 
 	public UISlider(int width, float min, float max)
@@ -126,7 +134,6 @@ public class UISlider extends UIComponent<UISlider>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		Shape shape = ShapePreset.GuiXResizable(width, 20);
 		renderer.drawShape(shape, iconBackground);
 	}
 
@@ -136,10 +143,10 @@ public class UISlider extends UIComponent<UISlider>
 		zIndex = 0;
 		int ox = (int) (offset * (width - SLIDER_WIDTH));
 
-		Shape shape = ShapePreset.GuiElement(8, 20);
-		shape.translate(ox, 0, 0);
+		sliderShape.resetState();
+		sliderShape.setPosition(ox, 0);
 
-		renderer.drawShape(shape, sliderIcon);
+		renderer.drawShape(sliderShape, sliderIcon);
 
 		renderer.next();
 		//zIndex = 1;

@@ -33,10 +33,8 @@ import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.KeyboardEvent;
-import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.preset.ShapePreset;
 
 import org.lwjgl.opengl.GL11;
 
@@ -74,11 +72,13 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 
 	public UIContainer(String title, int width, int height)
 	{
-		super();
 		setSize(width, height);
+
 		components = new LinkedList<>();
 		if (title != null && !title.equals(""))
 			add(new UILabel(title));
+
+		shape = new SimpleGuiShape();
 	}
 
 	public UIContainer(int width, int height)
@@ -216,12 +216,12 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		if (backgroundColor == 0x404040)
 			return;
 
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-		Shape s = ShapePreset.GuiXYResizable(width, height, 0, 0);
-		RenderParameters rp = new RenderParameters();
 		rp.colorMultiplier.set(backgroundColor);
-		renderer.drawShape(s, rp);
+		shape.resetState();
+		shape.setSize(width, height);
+
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		renderer.drawShape(shape, rp);
 		renderer.next();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
@@ -237,29 +237,6 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 
 		renderer.endClipping(area);
 	}
-
-	// @Override
-	// public boolean fireMouseEvent(MouseEvent event)
-	// {
-	// if (isDisabled() || !isVisible())
-	// return false;
-	//
-	// boolean propagate = true;
-	// UIComponent childHovered = getComponentAt(event.getX(), event.getY());
-	// if (childHovered != null)
-	// childHovered.setHovered(true);
-	//
-	// if (event instanceof MouseEvent.Press && childHovered != null)
-	// childHovered.setFocused(true);
-	//
-	// if (childHovered != null && childHovered != this)
-	// propagate = childHovered.fireMouseEvent(event);
-	//
-	// if (propagate)
-	// propagate = super.fireMouseEvent(event);
-	//
-	// return propagate;
-	// }
 
 	@Override
 	public boolean fireKeyboardEvent(KeyboardEvent event)
