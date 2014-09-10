@@ -33,24 +33,28 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 public class TextureIcon extends MalisisIcon
 {
 	protected TextureAtlasSprite baseIcon;
-	protected int offsetX;
-	protected int offsetY;
+	protected double offsetX;
+	protected double offsetY;
+
+	protected double widthFactor;
+	protected double heightFactor;
 
 	public TextureIcon(TextureAtlasSprite icon)
 	{
 		baseIcon = icon;
+		name = icon.getIconName();
 	}
 
 	@Override
 	public int getX()
 	{
-		return baseIcon.getOriginX() + offsetX;
+		return baseIcon.getOriginX() + (int) currentOffsetX();
 	}
 
 	@Override
 	public int getY()
 	{
-		return baseIcon.getOriginY() + offsetY;
+		return baseIcon.getOriginY() + (int) currentOffsetY();
 	}
 
 	@Override
@@ -65,28 +69,48 @@ public class TextureIcon extends MalisisIcon
 		return baseIcon.getIconHeight();
 	}
 
+	public double currentWidth()
+	{
+		return 16 * widthFactor;
+	}
+
+	public double currentHeight()
+	{
+		return 16 * widthFactor;
+	}
+
+	public double currentOffsetX()
+	{
+		return 16 * offsetX;
+	}
+
+	public double currentOffsetY()
+	{
+		return 16 * offsetY;
+	}
+
 	@Override
 	public float getMinU()
 	{
-		return this.flippedU ? baseIcon.getInterpolatedU(offsetX + width) : baseIcon.getInterpolatedU(offsetX);
+		return this.flippedU ? baseIcon.getInterpolatedU(currentOffsetX() + currentWidth()) : baseIcon.getInterpolatedU(currentOffsetX());
 	}
 
 	@Override
 	public float getMaxU()
 	{
-		return this.flippedU ? baseIcon.getInterpolatedU(offsetX) : baseIcon.getInterpolatedU(offsetX + width);
+		return this.flippedU ? baseIcon.getInterpolatedU(currentOffsetX()) : baseIcon.getInterpolatedU(currentOffsetX() + currentWidth());
 	}
 
 	@Override
 	public float getMinV()
 	{
-		return this.flippedV ? baseIcon.getInterpolatedV(offsetY + height) : baseIcon.getInterpolatedV(offsetY);
+		return this.flippedV ? baseIcon.getInterpolatedV(currentOffsetY() + currentHeight()) : baseIcon.getInterpolatedV(currentOffsetY());
 	}
 
 	@Override
 	public float getMaxV()
 	{
-		return this.flippedV ? baseIcon.getInterpolatedV(offsetY) : baseIcon.getInterpolatedV(offsetY + height);
+		return this.flippedV ? baseIcon.getInterpolatedV(currentOffsetY()) : baseIcon.getInterpolatedV(currentOffsetY() + currentHeight());
 	}
 
 	@Override
@@ -96,19 +120,19 @@ public class TextureIcon extends MalisisIcon
 	}
 
 	@Override
-	public void offset(int offsetX, int offsetY)
+	public TextureIcon offset(int offsetX, int offsetY)
 	{
 		this.offsetX = offsetX;
 		this.offsetY = offsetY;
+		return this;
 	}
 
-	@Override
-	public void clip(int offsetX, int offsetY, int width, int height)
+	public TextureIcon clip(double offsetX, double offsetY, double widthFactor, double heightFactor)
 	{
 		this.offsetX = offsetX;
 		this.offsetY = offsetY;
-		this.width = width;
-		this.height = height;
+		this.widthFactor = widthFactor;
+		this.heightFactor = heightFactor;
+		return this;
 	}
-
 }

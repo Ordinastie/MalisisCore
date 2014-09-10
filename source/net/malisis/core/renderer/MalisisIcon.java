@@ -178,7 +178,7 @@ public class MalisisIcon implements IIcon, Cloneable
 		return clone;
 	}
 
-	public void offset(int offsetX, int offsetY)
+	public MalisisIcon offset(int offsetX, int offsetY)
 	{
 		x += offsetX;
 		y += offsetY;
@@ -186,9 +186,10 @@ public class MalisisIcon implements IIcon, Cloneable
 		v = getInterpolatedU(offsetY);
 		U = getInterpolatedU(offsetX + width);
 		V = getInterpolatedU(offsetY + height);
+		return this;
 	}
 
-	public void clip(int offsetX, int offsetY, int width, int height)
+	public MalisisIcon clip(int offsetX, int offsetY, int width, int height)
 	{
 		x += offsetX;
 		y += offsetY;
@@ -203,6 +204,7 @@ public class MalisisIcon implements IIcon, Cloneable
 		this.v = v;
 		this.U = U;
 		this.V = V;
+		return this;
 	}
 
 }
