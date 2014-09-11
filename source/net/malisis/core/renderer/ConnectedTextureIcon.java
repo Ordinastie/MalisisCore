@@ -24,6 +24,7 @@
 
 package net.malisis.core.renderer;
 
+import static net.minecraftforge.common.util.ForgeDirection.*;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -43,6 +44,15 @@ public class ConnectedTextureIcon extends MalisisIcon
 	private static int RIGHT = 1 << 2;
 	private static int BOTTOM = 1 << 3;
 	private static int FULL = LEFT | TOP | RIGHT | BOTTOM;
+
+	//@formatter:off
+	public static ForgeDirection[][] sides = { 	{ WEST, NORTH, EAST, SOUTH }, 
+												{ WEST, NORTH, EAST, SOUTH }, 
+												{ EAST, UP, WEST, DOWN },
+												{ WEST, UP, EAST, DOWN }, 
+												{ NORTH, UP, SOUTH, DOWN },
+												{ SOUTH, UP, NORTH, DOWN }};
+	//@formatter:on
 
 	private MalisisIcon[] icons = new MalisisIcon[16];
 
@@ -97,75 +107,24 @@ public class ConnectedTextureIcon extends MalisisIcon
 
 	public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side)
 	{
-		int connections = getConnections(world, x, y, z, side);
+		int connections = getConnections2(world, x, y, z, side);
 		MalisisIcon icon = icons[connections];
 
 		return icon;
 	}
 
-	private int getConnections(IBlockAccess world, int x, int y, int z, int side)
+	private int getConnections2(IBlockAccess world, int x, int y, int z, int side)
 	{
 		Block block = world.getBlock(x, y, z);
-		ForgeDirection dir = ForgeDirection.getOrientation(side);
+		ForgeDirection dir = getOrientation(side);
 
 		int connection = 0;
-
-		if (dir == ForgeDirection.WEST)
+		for (int i = 0; i < 4; i++)
 		{
-			if (world.getBlock(x, y, z - 1) == block)
-				connection |= LEFT;
-			if (world.getBlock(x, y, z + 1) == block)
-				connection |= RIGHT;
-			if (world.getBlock(x, y + 1, z) == block)
-				connection |= TOP;
-			if (world.getBlock(x, y - 1, z) == block)
-				connection |= BOTTOM;
+			if (world.getBlock(x + sides[dir.ordinal()][i].offsetX, y + sides[dir.ordinal()][i].offsetY, z
+					+ sides[dir.ordinal()][i].offsetZ) == block)
+				connection |= (1 << i);
 		}
-		else if (dir == ForgeDirection.EAST)
-		{
-			if (world.getBlock(x, y, z + 1) == block)
-				connection |= LEFT;
-			if (world.getBlock(x, y, z - 1) == block)
-				connection |= RIGHT;
-			if (world.getBlock(x, y + 1, z) == block)
-				connection |= TOP;
-			if (world.getBlock(x, y - 1, z) == block)
-				connection |= BOTTOM;
-		}
-		else if (dir == ForgeDirection.SOUTH)
-		{
-			if (world.getBlock(x - 1, y, z) == block)
-				connection |= LEFT;
-			if (world.getBlock(x + 1, y, z) == block)
-				connection |= RIGHT;
-			if (world.getBlock(x, y + 1, z) == block)
-				connection |= TOP;
-			if (world.getBlock(x, y - 1, z) == block)
-				connection |= BOTTOM;
-		}
-		else if (dir == ForgeDirection.NORTH)
-		{
-			if (world.getBlock(x + 1, y, z) == block)
-				connection |= LEFT;
-			if (world.getBlock(x - 1, y, z) == block)
-				connection |= RIGHT;
-			if (world.getBlock(x, y + 1, z) == block)
-				connection |= TOP;
-			if (world.getBlock(x, y - 1, z) == block)
-				connection |= BOTTOM;
-		}
-		else if (dir == ForgeDirection.UP || dir == ForgeDirection.DOWN)
-		{
-			if (world.getBlock(x - 1, y, z) == block)
-				connection |= LEFT;
-			if (world.getBlock(x + 1, y, z) == block)
-				connection |= RIGHT;
-			if (world.getBlock(x, y, z - 1) == block)
-				connection |= TOP;
-			if (world.getBlock(x, y, z + 1) == block)
-				connection |= BOTTOM;
-		}
-
 		return ~connection & 15;
 	}
 
