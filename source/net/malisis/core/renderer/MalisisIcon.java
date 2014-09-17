@@ -92,10 +92,11 @@ public class MalisisIcon extends TextureAtlasSprite implements Cloneable
 		connectedTextureIcon = icon;
 	}
 
-	public void flip(boolean horizontal, boolean vertical)
+	public MalisisIcon flip(boolean horizontal, boolean vertical)
 	{
 		flippedU = horizontal;
 		flippedV = vertical;
+		return this;
 	}
 
 	public boolean isFlippedU()

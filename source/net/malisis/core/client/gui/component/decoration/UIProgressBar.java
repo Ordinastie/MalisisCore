@@ -43,9 +43,10 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 
 	public UIProgressBar()
 	{
-		setSize(width, height);
+		setSize(22, 16);
 
 		shape = new SimpleGuiShape();
+		barIcon = new GuiIcon(246, 0, 22, 16);
 	}
 
 	public float getProgress()
@@ -55,8 +56,6 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 
 	public UIProgressBar setReversed()
 	{
-		barIcon.flip(true, false);
-		barFilledIcon.flip(true, false);
 		reversed = true;
 		return this;
 	}
@@ -68,33 +67,27 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 		if (progress > 1)
 			progress = 1;
 		this.progress = progress;
+		//	this.progress = .4F;
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		shape.resetState();
-		rp.icon.set(barIcon);
-		renderer.drawShape(shape, rp);
+		shape.setSize(width, height);
+		barIcon.flip(reversed, false);
+		renderer.drawShape(shape, rp, barIcon);
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		int width = (int) (this.width * progress);
-		int xOffset = 0;
-		GuiIcon icon = barFilledIcon.clone();
-
-		if (reversed)
-		{
-			xOffset = this.width - width;
-			icon = icon.clip(width - 22, 0, -width, 16);
-		}
-		else
-			icon = icon.clip(0, 0, width, 16);
-
+		barFilledIcon.clip(0, 0, width, 16);
+		barFilledIcon.flip(reversed, false);
+		shape.resetState();
 		shape.setSize(width, 16);
-		shape.translate(xOffset, 0);
-		renderer.drawShape(shape, icon);
+		shape.translate(reversed ? this.width - width : 0, 0);
+		renderer.drawShape(shape, barFilledIcon);
 	}
 }
