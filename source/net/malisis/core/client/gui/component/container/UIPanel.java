@@ -27,30 +27,20 @@ package net.malisis.core.client.gui.component.container;
 import static net.malisis.core.client.gui.component.interaction.UIScrollBar.*;
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.interaction.IScrollable;
 import net.malisis.core.client.gui.component.interaction.UIScrollBar;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.icon.GuiIcon;
 import net.minecraft.client.gui.GuiScreen;
 
 import com.google.common.eventbus.Subscribe;
 
 public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 {
-	//@formatter:off
-	public static GuiIcon[] icons = new GuiIcon[] { new GuiIcon(200, 	15, 	5, 	5),
-													new GuiIcon(205, 	15, 	5, 	5),
-													new GuiIcon(210, 	15, 	5, 	5),
-													new GuiIcon(200, 	20, 	5, 	5),
-													new GuiIcon(205, 	20, 	5, 	5),
-													new GuiIcon(210, 	20, 	5, 	5),
-													new GuiIcon(200, 	25, 	5, 	5),
-													new GuiIcon(205, 	25, 	5, 	5),
-													new GuiIcon(210, 	25, 	5, 	5)};
-	//@formatter:on
+	private static GuiIcon[] icons = GuiIcon.XYResizable(200, 15, 15, 15, 5);
 
 	protected boolean allowVerticalScroll = false;
 	protected boolean allowHorizontalScroll = false;

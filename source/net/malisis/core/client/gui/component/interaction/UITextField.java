@@ -27,7 +27,6 @@ package net.malisis.core.client.gui.component.interaction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiShape;
@@ -36,6 +35,7 @@ import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
@@ -52,14 +52,8 @@ import com.google.common.eventbus.Subscribe;
  */
 public class UITextField extends UIComponent<UITextField>
 {
-	//@formatter:off
-	public static GuiIcon[] iconTextfield = new GuiIcon[] { 		new GuiIcon(200,	30, 	3, 		12),
-																	new GuiIcon(203,	30, 	3, 		12),
-																	new GuiIcon(206, 	30, 	3, 		12)};
-	public static GuiIcon[] iconTextfieldDisabled = new GuiIcon[] { iconTextfield[0].offsetCopy(0,  12),
-																	iconTextfield[1].offsetCopy(0,  12),
-																	iconTextfield[2].offsetCopy(0,  12) };
-	//@formatter:on
+	private static GuiIcon[] iconTextfield = GuiIcon.XResizable(200, 30, 9, 12, 3);
+	private static GuiIcon[] iconTextfieldDisabled = GuiIcon.XResizable(200, 42, 9, 12, 3);
 
 	/**
 	 * Current text of this <code>UITextField</code>

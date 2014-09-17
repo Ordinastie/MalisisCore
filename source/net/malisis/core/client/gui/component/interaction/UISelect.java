@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import net.malisis.core.client.gui.ClipArea;
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
@@ -42,6 +41,7 @@ import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 
 import org.lwjgl.input.Keyboard;
@@ -55,24 +55,10 @@ import com.google.common.eventbus.Subscribe;
  */
 public class UISelect extends UIComponent<UISelect>
 {
-	//@formatter:off
-	public static GuiIcon[] iconsSelect = new GuiIcon[] { 		new GuiIcon(200,	30, 	3, 		12),
-																new GuiIcon(203,	30, 	3, 		12),
-																new GuiIcon(206, 	30, 	3, 		12)};
-	public static GuiIcon[] iconsSelectDisabled = new GuiIcon[] { 	iconsSelect[0].offsetCopy(0,  12),
-																	iconsSelect[1].offsetCopy(0,  12),
-																	iconsSelect[2].offsetCopy(0,  12) };
-	public GuiIcon[] iconsExpanded = new GuiIcon[] { 			new GuiIcon(200,	30, 	3, 		3),
-																new GuiIcon(203,	30, 	3, 		3),
-																new GuiIcon(206, 	30, 	3, 		3),
-																new GuiIcon(200, 	33, 	3, 		3),
-																new GuiIcon(203, 	33, 	3, 		3),
-																new GuiIcon(206, 	33, 	3, 		3),
-																new GuiIcon(200, 	39, 	3, 		3),
-																new GuiIcon(203, 	39, 	3, 		3),
-																new GuiIcon(206, 	39, 	3, 		3)};
-	//@formatter:on
-	public static GuiIcon arrowIcon = new GuiIcon(209, 48, 7, 4);
+	private static GuiIcon[] iconsSelect = GuiIcon.XResizable(200, 30, 9, 12, 3);
+	private static GuiIcon[] iconsSelectDisabled = GuiIcon.XResizable(200, 42, 9, 12, 3);
+	private static GuiIcon[] iconsExpanded = GuiIcon.XResizable(200, 30, 9, 9, 3);
+	private static GuiIcon arrowIcon = new GuiIcon(209, 48, 7, 4);
 
 	protected OptionsContainer optionsContainer;
 

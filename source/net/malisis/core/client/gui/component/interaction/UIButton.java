@@ -24,13 +24,13 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 
 import com.google.common.eventbus.Subscribe;
@@ -42,17 +42,10 @@ import com.google.common.eventbus.Subscribe;
  */
 public class UIButton extends UIComponent<UIButton>
 {
-	//@formatter:off
-	public static GuiIcon[] iconButton = new GuiIcon[] { 			new GuiIcon(0,		20, 	5, 		20),
-																	new GuiIcon(5,		20, 	15, 	20),
-																	new GuiIcon(195, 	20, 	5, 		20)};
-	public static GuiIcon[] iconButtonHovered = new GuiIcon[] { 	iconButton[0].offsetCopy(0,  20),
-																	iconButton[1].offsetCopy(0,  20),
-																	iconButton[2].offsetCopy(0,  20) };
-	public static GuiIcon[] iconButtonDisabled = new GuiIcon[] { 	iconButton[0].offsetCopy(0,  -20),
-																	iconButton[1].offsetCopy(0,  -20),
-																	iconButton[2].offsetCopy(0,  -20) };
-	//@formatter:on
+	private static GuiIcon[] iconButton = GuiIcon.XResizable(0, 20, 200, 20, 5);
+	private static GuiIcon[] iconButtonHovered = GuiIcon.XResizable(0, 40, 200, 20, 5);
+	private static GuiIcon[] iconButtonDisabled = GuiIcon.XResizable(0, 0, 200, 20, 5);
+
 	private UILabel label = new UILabel();
 	private boolean autoWidth = true;
 

@@ -25,6 +25,7 @@
 package net.malisis.core.renderer.element;
 
 import net.malisis.core.util.Point;
+import net.minecraft.util.AxisAlignedBB;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector4f;
@@ -157,15 +158,18 @@ public class Vertex
 		z = clamp(z, min, max);
 	}
 
-	public void interpolateCoord(double[][] bounds)
+	public void interpolateCoord(AxisAlignedBB bounds)
 	{
-		double fx = bounds[1][0] - bounds[0][0];
-		double fy = bounds[1][1] - bounds[0][1];
-		double fz = bounds[1][2] - bounds[0][2];
+		if (bounds == null)
+			return;
 
-		x = x * fx + bounds[0][0];
-		y = y * fy + bounds[0][1];
-		z = z * fz + bounds[0][2];
+		double fx = bounds.maxX - bounds.minX;
+		double fy = bounds.maxY - bounds.minY;
+		double fz = bounds.maxZ - bounds.minZ;
+
+		x = x * fx + bounds.minX;
+		y = y * fy + bounds.minY;
+		z = z * fz + bounds.minZ;
 	}
 
 	public Vertex add(double x, double y, double z)

@@ -24,10 +24,10 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.icon.GuiIcon;
 
 /**
  * @author Ordinastie
@@ -35,8 +35,8 @@ import net.malisis.core.client.gui.element.SimpleGuiShape;
  */
 public class UIProgressBar extends UIComponent<UIProgressBar>
 {
-	private GuiIcon barIcon = new GuiIcon(246, 0, 22, 16);
-	private GuiIcon barFilledIcon = barIcon.offsetCopy(0, 16);
+	private static GuiIcon barIcon = new GuiIcon(246, 0, 22, 16);
+	private static GuiIcon barFilledIcon = barIcon.clone().offset(0, 16);
 
 	protected float progress = 0;
 	protected boolean reversed = false;
@@ -55,8 +55,8 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 
 	public UIProgressBar setReversed()
 	{
-		barIcon = barIcon.getIconFlipped(true, false);
-		barFilledIcon = barFilledIcon.getIconFlipped(true, false);
+		barIcon.flip(true, false);
+		barFilledIcon.flip(true, false);
 		reversed = true;
 		return this;
 	}
@@ -83,13 +83,15 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	{
 		int width = (int) (this.width * progress);
 		int xOffset = 0;
-		GuiIcon icon = barFilledIcon.clippedCopy(0, 0, width, 16);
+		GuiIcon icon = barFilledIcon.clone();
 
 		if (reversed)
 		{
 			xOffset = this.width - width;
-			icon = barFilledIcon.clippedCopy(width - 22, 0, -width, 16);
+			icon = icon.clip(width - 22, 0, -width, 16);
 		}
+		else
+			icon = icon.clip(0, 0, width, 16);
 
 		shape.setSize(width, 16);
 		shape.translate(xOffset, 0);

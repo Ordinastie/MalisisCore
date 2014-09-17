@@ -24,13 +24,13 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.renderer.OpenGlHelper;
 
@@ -46,11 +46,12 @@ import com.google.common.eventbus.Subscribe;
  */
 public class UICheckBox extends UIComponent<UICheckBox>
 {
-	private GuiIcon checkboxBackground = new GuiIcon(242, 32, 10, 10);
-	private GuiIcon checkboxBackgroundDisabled = checkboxBackground.offsetCopy(10, 0);
-	private GuiIcon checkBoxDisabled = new GuiIcon(242, 42, 12, 10);
-	private GuiIcon checkBoxChecked = checkBoxDisabled.offsetCopy(0, 10);
-	private GuiIcon checkBoxHovered = checkBoxDisabled.offsetCopy(12, 0);
+	private static GuiIcon checkboxBackground = new GuiIcon(242, 32, 10, 10);
+	private static GuiIcon checkboxBackgroundDisabled = checkboxBackground.clone().offset(10, 0);
+	private static GuiIcon checkBoxDisabled = new GuiIcon(242, 42, 12, 10);
+	private static GuiIcon checkBoxChecked = checkBoxDisabled.clone().offset(0, 10);
+	private static GuiIcon checkBoxHovered = checkBoxDisabled.clone().offset(12, 0);
+
 	private String label;
 	private boolean checked;
 

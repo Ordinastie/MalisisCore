@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer;
+package net.malisis.core.renderer.icon;
 
 import static net.minecraftforge.common.util.ForgeDirection.*;
+import net.malisis.core.renderer.MalisisIcon;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
@@ -56,47 +56,57 @@ public class ConnectedTextureIcon extends MalisisIcon
 
 	private MalisisIcon[] icons = new MalisisIcon[16];
 
-	public ConnectedTextureIcon(TextureMap register, String name)
+	public ConnectedTextureIcon(String name, MalisisIcon part1, MalisisIcon part2)
 	{
-		this.name = name;
-		CTPart part = new CTPart(name);
-		register.setTextureEntry(name, part);
-		part = new CTPart(name + "2");
-		register.setTextureEntry(name + "2", part);
+		super(name);
+		part1.setConnectedTextureIcon(this);
+		part2.setConnectedTextureIcon(this);
 	}
 
-	private void initIcons(CTPart part)
+	public ConnectedTextureIcon(TextureMap register, String name)
 	{
-		TextureIcon icon = new TextureIcon(part);
-		double size = 1D / 3D;
+		super(name);
+		MalisisIcon part1 = new MalisisIcon(name);
+		MalisisIcon part2 = new MalisisIcon(name + "2");
 
-		if (part.getIconName().equals(name))
+		part1.setConnectedTextureIcon(this);
+		part2.setConnectedTextureIcon(this);
+
+		register.setTextureEntry(name, part1);
+		register.setTextureEntry(name + "2", part2);
+	}
+
+	public void initIcons(MalisisIcon icon)
+	{
+		float f = 1F / 3F;
+
+		if (icon.getIconName().equals(getIconName()))
 		{
-			icons[LEFT | TOP] = icon.clone().clip(0, 0, size, size);
-			icons[TOP] = icon.clone().clip(size, 0, size, size);
-			icons[RIGHT | TOP] = icon.clone().clip(2 * size, 0, size, size);
+			icons[LEFT | TOP] = icon.clone().clip(0, 0, f, f);
+			icons[TOP] = icon.clone().clip(f, 0, f, f);
+			icons[RIGHT | TOP] = icon.clone().clip(2 * f, 0, f, f);
 
-			icons[LEFT] = icon.clone().clip(0, size, size, size);
-			icons[NONE] = icon.clone().clip(size, size, size, size);
-			icons[RIGHT] = icon.clone().clip(2 * size, size, size, size);
+			icons[LEFT] = icon.clone().clip(0, f, f, f);
+			icons[NONE] = icon.clone().clip(f, f, f, f);
+			icons[RIGHT] = icon.clone().clip(2 * f, f, f, f);
 
-			icons[LEFT | BOTTOM] = icon.clone().clip(0, 2 * size, size, size);
-			icons[BOTTOM] = icon.clone().clip(size, 2 * size, size, size);
-			icons[RIGHT | BOTTOM] = icon.clone().clip(2 * size, 2 * size, size, size);
+			icons[LEFT | BOTTOM] = icon.clone().clip(0, 2 * f, f, f);
+			icons[BOTTOM] = icon.clone().clip(f, 2 * f, f, f);
+			icons[RIGHT | BOTTOM] = icon.clone().clip(2 * f, 2 * f, f, f);
 		}
 		else
 		{
-			icons[LEFT | TOP | BOTTOM] = icon.clone().clip(0, 0, size, size);
-			icons[TOP | BOTTOM] = icon.clone().clip(size, 0, size, size);
-			icons[LEFT | RIGHT | TOP] = icon.clone().clip(2 * size, 0, size, size);
+			icons[LEFT | TOP | BOTTOM] = icon.clone().clip(0, 0, f, f);
+			icons[TOP | BOTTOM] = icon.clone().clip(f, 0, f, f);
+			icons[LEFT | RIGHT | TOP] = icon.clone().clip(2 * f, 0, f, f);
 
-			icons[LEFT | RIGHT] = icon.clone().clip(0, size, size, size);
-			icons[FULL] = icon.clone().clip(size, size, size, size);
-			//icons[LEFT | RIGHT] = icon.clone().clip(2 * size, size, size, size);
+			icons[LEFT | RIGHT] = icon.clone().clip(0, f, f, f);
+			icons[FULL] = icon.clone().clip(f, f, f, f);
+			//icons[LEFT | RIGHT] = icon.clone().clip(2 * f, f, f, f);
 
-			icons[LEFT | RIGHT | BOTTOM] = icon.clone().clip(0, 2 * size, size, size);
-			//icons[TOP | BOTTOM] = icon.clone().clip(size, 2 * size, size, size);
-			icons[RIGHT | TOP | BOTTOM] = icon.clone().clip(2 * size, 2 * size, size, size);
+			icons[LEFT | RIGHT | BOTTOM] = icon.clone().clip(0, 2 * f, f, f);
+			//icons[TOP | BOTTOM] = icon.clone().clip(f, 2 * f, f, f);
+			icons[RIGHT | TOP | BOTTOM] = icon.clone().clip(2 * f, 2 * f, f, f);
 		}
 	}
 
@@ -107,13 +117,13 @@ public class ConnectedTextureIcon extends MalisisIcon
 
 	public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side)
 	{
-		int connections = getConnections2(world, x, y, z, side);
+		int connections = getConnections(world, x, y, z, side);
 		MalisisIcon icon = icons[connections];
 
 		return icon;
 	}
 
-	private int getConnections2(IBlockAccess world, int x, int y, int z, int side)
+	private int getConnections(IBlockAccess world, int x, int y, int z, int side)
 	{
 		Block block = world.getBlock(x, y, z);
 		ForgeDirection dir = getOrientation(side);
@@ -128,19 +138,7 @@ public class ConnectedTextureIcon extends MalisisIcon
 		return ~connection & 15;
 	}
 
-	private class CTPart extends TextureAtlasSprite
-	{
-		protected CTPart(String name)
-		{
-			super(name);
-		}
-
-		@Override
-		public void initSprite(int width, int height, int x, int y, boolean rotated)
-		{
-			super.initSprite(width, height, x, y, rotated);
-			ConnectedTextureIcon.this.initIcons(this);
-		}
-
-	}
+	@Override
+	public void initSprite(int width, int height, int x, int y, boolean rotated)
+	{}
 }

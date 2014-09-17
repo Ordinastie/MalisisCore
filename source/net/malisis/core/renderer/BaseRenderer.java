@@ -45,16 +45,20 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import org.lwjgl.opengl.GL11;
 
+import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.relauncher.ReflectionHelper;
@@ -179,6 +183,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	public BaseRenderer()
 	{
+		this.renderId = RenderingRegistry.getNextAvailableRenderId();
 		this.t = Tessellator.instance;
 		initShapes();
 		initParameters();
@@ -631,6 +636,10 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 		s.applyMatrix();
 
+		// vertex position
+		if (rp.vertexPositionRelativeToRenderBounds.get())
+			calcVertexesPosition(getRenderBounds());
+
 		if (rp.applyTexture.get())
 			applyTexture(s, rp);
 
@@ -676,10 +685,6 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			t.setNormal(params.direction.get().offsetX, params.direction.get().offsetY, params.direction.get().offsetZ);
 
 		baseBrightness = getBaseBrightness();
-
-		// vertex position
-		if (params.vertexPositionRelativeToRenderBounds.get())
-			calcVertexesPosition(getRenderBounds());
 
 		drawVertexes(face.getVertexes());
 
@@ -742,7 +747,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	{
 		IIcon icon = params.icon.get();
 		if (params.useCustomTexture.get())
-			icon = new MalisisIcon(); //use a generic icon where UVs go from 0 to 1
+			icon = new MalisisIcon(null); //use a generic icon where UVs go from 0 to 1
 		else if (overrideTexture != null)
 			icon = overrideTexture;
 		else if (block != null && icon == null)
@@ -860,24 +865,27 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 				|| params.direction.get() == null)
 			return params.brightness.get();
 
-		double[][] bounds = getRenderBounds();
+		AxisAlignedBB bounds = getRenderBounds();
 		ForgeDirection dir = params.direction.get();
 		int ox = x + dir.offsetX;
 		int oy = y + dir.offsetY;
 		int oz = z + dir.offsetZ;
 
-		if (dir == ForgeDirection.WEST && bounds[0][0] > 0)
-			ox += 1;
-		else if (dir == ForgeDirection.EAST && bounds[1][0] < 1)
-			ox -= 1;
-		else if (dir == ForgeDirection.NORTH && bounds[0][2] > 0)
-			oz += 1;
-		else if (dir == ForgeDirection.SOUTH && bounds[1][2] < 1)
-			oz -= 1;
-		else if (dir == ForgeDirection.DOWN && bounds[0][1] > 0)
-			oy += 1;
-		else if (dir == ForgeDirection.UP && bounds[1][1] < 1)
-			oy -= 1;
+		if (bounds != null)
+		{
+			if (dir == ForgeDirection.WEST && bounds.minX > 0)
+				ox += 1;
+			else if (dir == ForgeDirection.EAST && bounds.maxX < 1)
+				ox -= 1;
+			else if (dir == ForgeDirection.NORTH && bounds.minZ > 0)
+				oz += 1;
+			else if (dir == ForgeDirection.SOUTH && bounds.maxZ < 1)
+				oz -= 1;
+			else if (dir == ForgeDirection.DOWN && bounds.minY > 0)
+				oy += 1;
+			else if (dir == ForgeDirection.UP && bounds.maxY < 1)
+				oy -= 1;
+		}
 
 		return getMixedBrightnessForBlock(world, ox, oy, oz);
 	}
@@ -948,8 +956,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Gets the mix brightness for a block (sky + block source) TODO: handle block light value for light emitting block sources (as base
-	 * Minecraft does)
+	 * Gets the mix brightness for a block (sky + block source)
 	 * 
 	 * @param world
 	 * @param x
@@ -968,15 +975,16 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * 
 	 * @return
 	 */
-	protected double[][] getRenderBounds()
+	protected AxisAlignedBB getRenderBounds()
 	{
-		if (block == null || !params.useBlockBounds.get())
-			return params.renderBounds.get();
+		if (block == null || !rp.useBlockBounds.get())
+			return rp.renderBounds.get();
 
 		if (world != null)
 			block.setBlockBoundsBasedOnState(world, x, y, z);
-		return new double[][] { { block.getBlockBoundsMinX(), block.getBlockBoundsMinY(), block.getBlockBoundsMinZ() },
-				{ block.getBlockBoundsMaxX(), block.getBlockBoundsMaxY(), block.getBlockBoundsMaxZ() } };
+
+		return AxisAlignedBB.getBoundingBox(block.getBlockBoundsMinX(), block.getBlockBoundsMinY(), block.getBlockBoundsMinZ(),
+				block.getBlockBoundsMaxX(), block.getBlockBoundsMaxY(), block.getBlockBoundsMaxZ());
 	}
 
 	/**
@@ -985,10 +993,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * 
 	 * @param bounds
 	 */
-	protected void calcVertexesPosition(double[][] bounds)
+	protected void calcVertexesPosition(AxisAlignedBB bounds)
 	{
-		for (Vertex v : face.getVertexes())
-			v.interpolateCoord(bounds);
+		for (Face f : shape.getFaces())
+			for (Vertex v : f.getVertexes())
+				v.interpolateCoord(bounds);
 	}
 
 	/**
@@ -1059,57 +1068,39 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		return dbp.getPartialBlockX() == x && dbp.getPartialBlockY() == y && dbp.getPartialBlockZ() == z;
 	}
 
-	/**
-	 * Creates a renderer of type <b>clazz</b> and sets the renderId for the specified <b>blocks</b>.
-	 * 
-	 * @param clazz
-	 * @param blocks
-	 * @return
-	 */
-	public static <T extends BaseRenderer> T create(Class<T> clazz, IBaseRendering... blocks)
-	{
-		T r = create(clazz);
-		for (IBaseRendering b : blocks)
-		{
-			if (b != null)
-				b.setRenderId(r.getRenderId());
-		}
-		return r;
-	}
-
-	/**
-	 * Creates a renderer of type <b>clazz</b>. Sets the renderer static field renderId.
-	 * 
-	 * @param clazz
-	 * @return
-	 */
-	public static <T extends BaseRenderer> T create(Class<T> clazz)
-	{
-		try
-		{
-			T r = clazz.newInstance();
-			r.setRenderId(RenderingRegistry.getNextAvailableRenderId());
-			return r;
-		}
-		catch (ReflectiveOperationException e)
-		{
-			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * Sets the renderId for this <code>BaseRenderer</code>
-	 * 
-	 * @param id
-	 */
-	public void setRenderId(int id)
-	{
-		this.renderId = id;
-	}
-
 	@Override
 	public int getRenderId()
 	{
 		return renderId;
+	}
+
+	public void registerFor(Class... listClass)
+	{
+		for (Class clazz : listClass)
+		{
+			if (Block.class.isAssignableFrom(clazz))
+			{
+				try
+				{
+					clazz.getField("renderId").set(null, renderId);
+					RenderingRegistry.registerBlockHandler(this);
+				}
+				catch (ReflectiveOperationException e)
+				{
+					MalisisCore.log.error("Tried to register ISBRH for block class {} that does not have renderId field",
+							clazz.getSimpleName());
+					e.printStackTrace();
+				}
+			}
+			else if (TileEntity.class.isAssignableFrom(clazz))
+			{
+				ClientRegistry.bindTileEntitySpecialRenderer(clazz, this);
+			}
+		}
+	}
+
+	public void registerFor(Item item)
+	{
+		MinecraftForgeClient.registerItemRenderer(item, this);
 	}
 }

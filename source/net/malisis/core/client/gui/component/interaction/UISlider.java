@@ -24,7 +24,6 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiShape;
@@ -32,6 +31,7 @@ import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 
 import com.google.common.eventbus.Subscribe;
@@ -43,12 +43,9 @@ import com.google.common.eventbus.Subscribe;
 public class UISlider extends UIComponent<UISlider>
 {
 	public static int SLIDER_WIDTH = 8;
-	//@formatter:off
-	public static GuiIcon[] iconBackground = new GuiIcon[] { 	new GuiIcon(0, 		0, 		5, 		20), 
-																new GuiIcon(5, 		0, 		15, 	20),
-																new GuiIcon(195, 	0, 		5, 		20)};
+
+	public static GuiIcon[] iconBackground = GuiIcon.XResizable(0, 0, 200, 20, 5);
 	public static GuiIcon sliderIcon = new GuiIcon(227, 46, 8, 20);
-	//@formatter:on
 
 	private String label;
 	private float minValue;

@@ -22,8 +22,9 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer;
+package net.malisis.core.renderer.icon;
 
+import net.malisis.core.renderer.MalisisIcon;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 /**
@@ -41,20 +42,8 @@ public class TextureIcon extends MalisisIcon
 
 	public TextureIcon(TextureAtlasSprite icon)
 	{
+		super(icon.getIconName());
 		baseIcon = icon;
-		name = icon.getIconName();
-	}
-
-	@Override
-	public int getX()
-	{
-		return baseIcon.getOriginX() + (int) currentOffsetX();
-	}
-
-	@Override
-	public int getY()
-	{
-		return baseIcon.getOriginY() + (int) currentOffsetY();
 	}
 
 	@Override

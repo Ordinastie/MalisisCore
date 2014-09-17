@@ -24,7 +24,6 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
@@ -32,6 +31,7 @@ import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
 
@@ -50,36 +50,19 @@ public class UIScrollBar extends UIComponent
 	public static final int SCROLL_THICKNESS = 10;
 	public static final int SCROLLER_HEIGHT = 15;
 
+	private static GuiIcon[] icons = GuiIcon.XYResizable(215, 0, 15, 15, 1);
+	private static GuiIcon[] disabledIcons = GuiIcon.XYResizable(215, 15, 15, 15, 1);
+
+	private static GuiIcon verticalIcon = new GuiIcon(230, 0, 8, 15);
+	private static GuiIcon verticalDisabledIcon = verticalIcon.clone().offset(8, 0);
+	private static GuiIcon horizontalIcon = new GuiIcon(230, 15, 15, 8);
+	private static GuiIcon horizontalDisabledIcon = horizontalIcon.clone().offset(0, 8);
+
 	private int type;
 	public IScrollable scrollable;
 	public int length;
 	public int scrollableLength;
 	public float offset;
-
-	//@formatter:off
-	public GuiIcon[] icons = new GuiIcon[] { 	new GuiIcon(215, 	0, 		1, 	1),
-												new GuiIcon(220, 	0, 		1, 	1),
-												new GuiIcon(229, 	0, 		1, 	1),
-												new GuiIcon(215, 	1, 		1, 	1),
-												new GuiIcon(220, 	1, 		1, 	1),
-												new GuiIcon(229, 	1, 		1, 	1),
-												new GuiIcon(215, 	14, 	1, 	1),
-												new GuiIcon(220, 	14, 	1, 	1),
-												new GuiIcon(229, 	14, 	1, 	1)};
-	public GuiIcon[] disabledIcons = new GuiIcon[] { 	icons[0].offsetCopy(0,  15),
-														icons[1].offsetCopy(0,  15),
-														icons[2].offsetCopy(0,  15),
-														icons[3].offsetCopy(0,  15),
-														icons[4].offsetCopy(0,  15),
-														icons[5].offsetCopy(0,  15),
-														icons[6].offsetCopy(0,  15),
-														icons[7].offsetCopy(0,  15),
-														icons[8].offsetCopy(0,  15)};
-	//@formatter:on
-	public GuiIcon verticalIcon = new GuiIcon(230, 0, 8, 15);
-	public GuiIcon verticalDisabledIcon = verticalIcon.offsetCopy(8, 0);
-	public GuiIcon horizontalIcon = new GuiIcon(230, 15, 15, 8);
-	public GuiIcon horizontalDisabledIcon = horizontalIcon.offsetCopy(0, 8);
 
 	private GuiShape scrollShape;
 
@@ -117,7 +100,6 @@ public class UIScrollBar extends UIComponent
 		shape = new XYResizableGuiShape(1);
 		scrollShape = new SimpleGuiShape().setSize(w, h);
 		scrollShape.storeState();
-
 	}
 
 	@Override

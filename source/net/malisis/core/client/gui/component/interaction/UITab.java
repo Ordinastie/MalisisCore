@@ -24,13 +24,13 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UITabGroup;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 
 import com.google.common.eventbus.Subscribe;
@@ -41,11 +41,7 @@ import com.google.common.eventbus.Subscribe;
  */
 public class UITab extends UIComponent<UITab>
 {
-	//@formatter:off
-	public static GuiIcon[] icons = new GuiIcon[] { new GuiIcon(200, 	15, 	5, 	12),
-													new GuiIcon(205, 	15, 	5, 	12),
-													new GuiIcon(210, 	15, 	5, 	12)};
-	//@formatter:on
+	private static GuiIcon[] icons = GuiIcon.XResizable(200, 15, 15, 12, 5);
 
 	protected String label;
 	protected boolean autoWidth = false;

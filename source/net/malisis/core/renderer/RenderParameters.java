@@ -24,6 +24,7 @@
 
 package net.malisis.core.renderer;
 
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -44,7 +45,7 @@ public class RenderParameters
 	/**
 	 * Defines the rendering bounds to limit the vertex inside (Block Level)
 	 */
-	public Parameter<double[][]> renderBounds = new Parameter<>(new double[][] { { 0, 0, 0 }, { 1, 1, 1 } });
+	public Parameter<AxisAlignedBB> renderBounds = new Parameter<>(null);
 	/**
 	 * Defines whether the vertex coordinates are relatives to the bounding box. This means 0 = min_, 1 = max_
 	 */
@@ -145,6 +146,7 @@ public class RenderParameters
 
 		renderAllFaces.merge(params.renderAllFaces);
 		useBlockBounds.merge(params.useBlockBounds);
+		renderBounds.merge(params.renderBounds);
 		vertexPositionRelativeToRenderBounds.merge(params.vertexPositionRelativeToRenderBounds);
 		useCustomTexture.merge(params.useCustomTexture);
 		applyTexture.merge(params.applyTexture);

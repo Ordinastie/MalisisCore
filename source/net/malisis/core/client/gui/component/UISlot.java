@@ -26,13 +26,13 @@ package net.malisis.core.client.gui.component;
 
 import java.util.List;
 
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.inventory.InventoryEvent;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
@@ -53,15 +53,16 @@ import com.google.common.eventbus.Subscribe;
 public class UISlot extends UIComponent<UISlot>
 {
 	/**
+	 * Icon to use for the background of this <code>UISlot</code>
+	 */
+	private static GuiIcon icon = new GuiIcon(209, 30, 18, 18);
+	private static GuiIcon iconLeft = new GuiIcon(209, 30, 1, 18);
+	private static GuiIcon iconTop = new GuiIcon(209, 30, 18, 1);
+
+	/**
 	 * Whether the mouse button has been released at least once.
 	 */
 	public static boolean buttonRelased = true;
-	/**
-	 * Icon to use for the background of this <code>UISlot</code>
-	 */
-	private GuiIcon icon = new GuiIcon(209, 30, 18, 18);
-	private GuiIcon iconLeft = new GuiIcon(209, 30, 1, 18);
-	private GuiIcon iconTop = new GuiIcon(209, 30, 18, 1);
 	/**
 	 * Slot to draw containing the itemStack
 	 */

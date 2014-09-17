@@ -28,12 +28,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.util.MouseButton;
 
@@ -49,11 +49,11 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 {
 	private static HashMap<String, List<UIRadioButton>> radioButtons = new HashMap<>();
 
-	private GuiIcon rbBackground = new GuiIcon(200, 54, 8, 8);
-	private GuiIcon rbBackgroundDisabled = rbBackground.offsetCopy(0, 8);
-	private GuiIcon rbDisabled = new GuiIcon(208, 54, 6, 6);
-	private GuiIcon rbChecked = rbDisabled.offsetCopy(6, 0);
-	private GuiIcon rbHovered = rbDisabled.offsetCopy(12, 0);
+	private static GuiIcon rbBackground = new GuiIcon(200, 54, 8, 8);
+	private static GuiIcon rbBackgroundDisabled = rbBackground.clone().offset(0, 8);
+	private static GuiIcon rbDisabled = new GuiIcon(208, 54, 6, 6);
+	private static GuiIcon rbChecked = rbDisabled.clone().offset(6, 0);
+	private static GuiIcon rbHovered = rbDisabled.clone().offset(12, 0);
 
 	private String name;
 	private String label;

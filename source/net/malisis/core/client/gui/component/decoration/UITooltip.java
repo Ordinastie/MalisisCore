@@ -27,10 +27,10 @@ package net.malisis.core.client.gui.component.decoration;
 import java.util.Arrays;
 import java.util.List;
 
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.client.gui.icon.GuiIcon;
 
 /**
  * UITooltip
@@ -39,17 +39,7 @@ import net.malisis.core.client.gui.element.XYResizableGuiShape;
  */
 public class UITooltip extends UIComponent
 {
-	//@formatter:off
-	public static GuiIcon[] icons = new GuiIcon[] { new GuiIcon(227, 	31, 	5, 	5),
-													new GuiIcon(232, 	31, 	5, 	5),
-													new GuiIcon(237, 	31, 	5, 	5),
-													new GuiIcon(227, 	36, 	5, 	5),
-													new GuiIcon(232, 	36, 	5, 	5),
-													new GuiIcon(237, 	36,  	5, 	5),
-													new GuiIcon(227, 	41, 	5, 	5),
-													new GuiIcon(232, 	41, 	5, 	5),
-													new GuiIcon(237, 	41, 	5, 	5)};
-	//@formatter:on
+	private static GuiIcon[] icons = GuiIcon.XYResizable(227, 31, 15, 15, 5);
 
 	protected List<String> lines;
 	protected int padding = 4;

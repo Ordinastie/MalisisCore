@@ -24,30 +24,23 @@
 
 package net.malisis.core.renderer;
 
-import net.minecraft.util.IIcon;
+import java.awt.image.BufferedImage;
+
+import net.malisis.core.renderer.icon.ConnectedTextureIcon;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.resources.data.AnimationMetadataSection;
 
 /**
  * @author Ordinastie
  * 
  */
-public class MalisisIcon implements IIcon, Cloneable
+public class MalisisIcon extends TextureAtlasSprite implements Cloneable
 {
-	/**
-	 * Position in pixels
-	 */
-	protected int x = 0, y = 0;
-	/**
-	 * Dimension in pixels
-	 */
-	protected int width = 16, height = 16;
-	/**
-	 * Minimum UVs
-	 */
-	protected float u = 0, v = 0;
-	/**
-	 * Maximum UVs
-	 */
-	protected float U = 1, V = 1;
+	protected int sheetWidth;
+	protected int sheetHeight;
+	protected boolean useAnisotropicFiltering;
+
 	/**
 	 * Is the icon flipped on the U axis
 	 */
@@ -61,69 +54,42 @@ public class MalisisIcon implements IIcon, Cloneable
 	 */
 	protected int rotation = 0;
 	/**
-	 * Name of the icon
+	 * Main icon for connected textures
 	 */
-	protected String name;
+	protected ConnectedTextureIcon connectedTextureIcon;
 
-	public MalisisIcon()
-	{}
-
-	public int getX()
+	public MalisisIcon(String name)
 	{
-		return x;
-	}
-
-	public int getY()
-	{
-		return y;
-	}
-
-	@Override
-	public int getIconWidth()
-	{
-		return width;
-	}
-
-	@Override
-	public int getIconHeight()
-	{
-		return height;
+		super(name);
 	}
 
 	@Override
 	public float getMinU()
 	{
-		return this.flippedU ? U : u;
+		return this.flippedU ? super.getMaxU() : super.getMinU();
 	}
 
 	@Override
 	public float getMaxU()
 	{
-		return this.flippedU ? u : U;
-	}
-
-	@Override
-	public float getInterpolatedU(double f)
-	{
-		return (float) (getMinU() + (f / 16) * (getMaxU() - getMinU()));
+		return this.flippedU ? super.getMinU() : super.getMaxU();
 	}
 
 	@Override
 	public float getMinV()
 	{
-		return this.flippedV ? V : v;
+		return this.flippedV ? super.getMaxV() : super.getMinV();
 	}
 
 	@Override
 	public float getMaxV()
 	{
-		return this.flippedV ? v : V;
+		return this.flippedV ? super.getMinV() : super.getMaxV();
 	}
 
-	@Override
-	public float getInterpolatedV(double f)
+	public void setConnectedTextureIcon(ConnectedTextureIcon icon)
 	{
-		return (float) (getMinV() + (f / 16) * (getMaxV() - getMinV()));
+		connectedTextureIcon = icon;
 	}
 
 	public void flip(boolean horizontal, boolean vertical)
@@ -158,18 +124,13 @@ public class MalisisIcon implements IIcon, Cloneable
 	}
 
 	@Override
-	public String getIconName()
-	{
-		return name;
-	}
-
-	@Override
 	public MalisisIcon clone()
 	{
 		MalisisIcon clone = null;
 		try
 		{
 			clone = (MalisisIcon) super.clone();
+			clone.connectedTextureIcon = null;
 		}
 		catch (CloneNotSupportedException e)
 		{
@@ -180,31 +141,64 @@ public class MalisisIcon implements IIcon, Cloneable
 
 	public MalisisIcon offset(int offsetX, int offsetY)
 	{
-		x += offsetX;
-		y += offsetY;
-		u = getInterpolatedU(offsetX);
-		v = getInterpolatedU(offsetY);
-		U = getInterpolatedU(offsetX + width);
-		V = getInterpolatedU(offsetY + height);
+		initSprite(sheetWidth, sheetHeight, getOriginX() + offsetX, getOriginY() + offsetY, isRotated());
 		return this;
 	}
 
 	public MalisisIcon clip(int offsetX, int offsetY, int width, int height)
 	{
-		x += offsetX;
-		y += offsetY;
-		this.width = width;
-		this.height = height;
-		float u = getInterpolatedU(offsetX);
-		float v = getInterpolatedV(offsetY);
-		float U = getInterpolatedU(offsetX + width);
-		float V = getInterpolatedV(offsetY + height);
+		this.width = width + (useAnisotropicFiltering ? 16 : 0);
+		this.height = height + (useAnisotropicFiltering ? 16 : 0);
+		offset(offsetX, offsetY);
 
-		this.u = u;
-		this.v = v;
-		this.U = U;
-		this.V = V;
 		return this;
 	}
 
+	public MalisisIcon clip(float offsetXFactor, float offsetYFactor, float widthFactor, float heightFactor)
+	{
+		if (useAnisotropicFiltering)
+		{
+			width -= 16;
+			height -= 16;
+		}
+
+		int offsetX = Math.round(width * offsetXFactor);
+		int offsetY = Math.round(height * offsetYFactor);
+
+		width = Math.round(width * widthFactor);
+		height = Math.round(height * heightFactor);
+
+		if (useAnisotropicFiltering)
+		{
+			width += 16;
+			height += 16;
+		}
+
+		offset(offsetX, offsetY);
+
+		return this;
+	}
+
+	@Override
+	public void loadSprite(BufferedImage[] buffer, AnimationMetadataSection metadataSection, boolean useAnisotropicFiltering)
+	{
+		super.loadSprite(buffer, metadataSection, useAnisotropicFiltering);
+		this.useAnisotropicFiltering = useAnisotropicFiltering;
+	}
+
+	@Override
+	public void initSprite(int width, int height, int x, int y, boolean rotated)
+	{
+		this.sheetWidth = width;
+		this.sheetHeight = height;
+		super.initSprite(width, height, x, y, rotated);
+		if (connectedTextureIcon != null)
+			connectedTextureIcon.initIcons(this);
+	}
+
+	public MalisisIcon register(TextureMap register)
+	{
+		register.setTextureEntry(getIconName(), this);
+		return this;
+	}
 }

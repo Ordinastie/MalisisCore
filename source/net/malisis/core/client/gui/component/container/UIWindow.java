@@ -26,9 +26,9 @@ package net.malisis.core.client.gui.component.container;
 
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
-import net.malisis.core.client.gui.GuiIcon;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.client.gui.icon.GuiIcon;
 
 /**
  * UIWindow
@@ -37,17 +37,7 @@ import net.malisis.core.client.gui.element.XYResizableGuiShape;
  */
 public class UIWindow extends UIContainer<UIWindow>
 {
-	//@formatter:off
-	public static GuiIcon[] icons = new GuiIcon[] { new GuiIcon(200, 	0, 		5, 	5),
-													new GuiIcon(205, 	0, 		5, 	5),
-													new GuiIcon(210, 	0, 		5, 	5),
-													new GuiIcon(200, 	5, 		5, 	5),
-													new GuiIcon(205, 	5, 		5, 	5),
-													new GuiIcon(210, 	5, 		5, 	5),
-													new GuiIcon(200, 	10, 	5, 	5),
-													new GuiIcon(205, 	10, 	5, 	5),
-													new GuiIcon(210, 	10, 	5, 	5)};
-	//@formatter:on
+	private static GuiIcon[] icons = GuiIcon.XYResizable(200, 0, 15, 15, 5);
 
 	public UIWindow(String title, int width, int height, int anchor)
 	{
