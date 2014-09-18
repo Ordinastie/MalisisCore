@@ -54,6 +54,7 @@ public class UITab extends UIComponent<UITab>
 		setLabel(label);
 
 		shape = new XResizableGuiShape();
+		icons = GuiIcon.XResizable(200, 15, 15, 12, 5);
 	}
 
 	public UITab(String label)
@@ -98,7 +99,7 @@ public class UITab extends UIComponent<UITab>
 		if (this.active != active)
 		{
 			this.y += active ? -1 : 1;
-			this.height += active ? 1 : -1;
+			this.height += active ? 2 : -2;
 		}
 
 		this.active = active;
@@ -122,6 +123,7 @@ public class UITab extends UIComponent<UITab>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		//if (!active)
 		renderer.drawShape(shape, icons);
 	}
 

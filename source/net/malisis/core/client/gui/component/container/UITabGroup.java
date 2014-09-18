@@ -39,7 +39,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 
 	public UITabGroup()
 	{
-		this.height = 12;
+		this.height = 14;
 		this.width = 0;
 		this.x = 3;
 	}
@@ -65,6 +65,8 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		tab.setActive(false);
 		listTabs.put(tab, container);
 		width += tab.getWidth();
+
+		container.setPosition(getX() - 3, getY() + getHeight() - 1);
 
 		if (activeTab == null)
 			setActiveTab(tab);
