@@ -57,7 +57,7 @@ public class UISelect extends UIComponent<UISelect>
 {
 	private static GuiIcon[] iconsSelect = GuiIcon.XResizable(200, 30, 9, 12, 3);
 	private static GuiIcon[] iconsSelectDisabled = GuiIcon.XResizable(200, 42, 9, 12, 3);
-	private static GuiIcon[] iconsExpanded = GuiIcon.XResizable(200, 30, 9, 9, 3);
+	private static GuiIcon[] iconsExpanded = GuiIcon.XYResizable(200, 30, 9, 9, 3);
 	private static GuiIcon arrowIcon = new GuiIcon(209, 48, 7, 4);
 
 	protected OptionsContainer optionsContainer;
@@ -80,6 +80,7 @@ public class UISelect extends UIComponent<UISelect>
 		arrowShape = new SimpleGuiShape();
 		arrowShape.setSize(7, 4);
 		arrowShape.storeState();
+		iconsExpanded = GuiIcon.XYResizable(200, 30, 9, 12, 3);
 	}
 
 	public UISelect(int width)
@@ -337,10 +338,12 @@ public class UISelect extends UIComponent<UISelect>
 		switch (keyCode)
 		{
 			case Keyboard.KEY_UP:
-				select(selectedOption - 1);
+				if (selectedOption > 0)
+					select(selectedOption - 1);
 				break;
 			case Keyboard.KEY_DOWN:
-				select(selectedOption + 1);
+				if (selectedOption < optionsContainer.options.size() - 1)
+					select(selectedOption + 1);
 				break;
 			case Keyboard.KEY_HOME:
 				select(0);
