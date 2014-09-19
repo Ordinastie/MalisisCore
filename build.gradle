@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
-version = "1.7.10-0.9.3"
+version = "1.7.10-0.9.4"
 group = "net.malisis.malisiscore" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "malisiscore"
 libsDirName = "../releases"
@@ -64,7 +64,7 @@ minecraft {
 processResources {
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod/info'
+        include 'mcmod.info'
 
         // replace version and mcversion
         expand 'version': project.version, 'mcversion': project.minecraft.version
