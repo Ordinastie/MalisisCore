@@ -72,9 +72,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 
 	public UIContainer(String title, int width, int height)
 	{
-		setSize(width, height);
-
 		components = new LinkedList<>();
+		setSize(width, height);
 		if (title != null && !title.equals(""))
 			add(new UILabel(title));
 

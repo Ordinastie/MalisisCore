@@ -47,13 +47,7 @@ public abstract class GuiShape extends Shape
 		return guiFace().factor(width, height, 0);
 	}
 
-	public GuiShape()
-	{
-		faces = createFaces();
-		storeState();
-	}
-
-	protected abstract Face[] createFaces();
+	protected abstract void createFaces();
 
 	public abstract GuiShape setSize(int width, int height);
 
@@ -95,19 +89,5 @@ public abstract class GuiShape extends Shape
 	{
 		scale(scale, scale);
 		return this;
-	}
-
-	public static Shape guiFaceXResizable(int width, int height, int sideWidth)
-	{
-		width = Math.max(width - 2 * sideWidth, 0);
-		Face[] faces = new Face[] { guiFace().factor(sideWidth, height, 0), guiFace().factor(width, height, 0).translate(sideWidth, 0, 0),
-				guiFace().factor(sideWidth, height, 0).translate(sideWidth + width, 0, 0) };
-
-		return new Shape(faces);
-	}
-
-	public static Shape guiFaceXResizable(int width, int height)
-	{
-		return guiFaceXResizable(width, height, 5);
 	}
 }

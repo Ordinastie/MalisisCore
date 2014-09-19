@@ -81,7 +81,7 @@ public class ConfigurationGui extends MalisisGui
 		comment.setColor(0xFFFFFF);
 		comment.setDrawShadow(true);
 		UIPanel panelComment = new UIPanel(140, windowHeight - 35).setPosition(0, 0, Anchor.RIGHT);
-		panelComment.setColor(0xCCCCCC);
+		panelComment.setBackgroundColor(0xCCCCCC);
 		panelComment.add(comment);
 
 		btnCancel = new UIButton("gui.cancel").setPosition(-32, 0, Anchor.BOTTOM | Anchor.CENTER).register(this);

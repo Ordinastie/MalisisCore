@@ -29,6 +29,7 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 
@@ -51,6 +52,11 @@ public class UIImage extends UIComponent
 	 */
 	private IIcon icon = null;
 
+	/**
+	 * ItemStack to render
+	 */
+	private ItemStack itemStack;
+
 	public UIImage(IIcon icon, ResourceLocation rl)
 	{
 		setIcon(icon, rl);
@@ -59,16 +65,34 @@ public class UIImage extends UIComponent
 		shape = new SimpleGuiShape();
 	}
 
+	public UIImage(ItemStack itemStack)
+	{
+		setItemStack(itemStack);
+		setSize(16, 16);
+
+		shape = new SimpleGuiShape();
+	}
+
 	public UIImage setIcon(IIcon icon)
 	{
+		this.itemStack = null;
 		this.icon = icon != null ? icon : new GuiIcon();
 		return this;
 	}
 
 	public UIImage setIcon(IIcon icon, ResourceLocation rl)
 	{
+		this.itemStack = null;
 		this.icon = icon;
 		this.texture = rl;
+		return this;
+	}
+
+	public UIImage setItemStack(ItemStack itemStack)
+	{
+		this.icon = null;
+		this.texture = null;
+		this.itemStack = itemStack;
 		return this;
 	}
 
@@ -79,8 +103,15 @@ public class UIImage extends UIComponent
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.bindTexture(texture);
-		renderer.drawShape(shape, icon);
+		if (icon != null)
+		{
+			renderer.bindTexture(texture);
+			renderer.drawShape(shape, icon);
+		}
+		else if (itemStack != null)
+		{
+			renderer.drawItemStack(itemStack, screenX(), screenY());
+		}
 	}
 
 	@Override

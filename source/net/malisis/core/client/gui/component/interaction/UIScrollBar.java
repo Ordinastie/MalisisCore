@@ -72,19 +72,7 @@ public class UIScrollBar extends UIComponent
 		this.setParent(scrollable);
 		this.scrollable = scrollable;
 		this.type = type;
-		this.length = length;
-		if (type == HORIZONTAL)
-		{
-			width = length;
-			height = SCROLL_THICKNESS;
-		}
-		else
-		{
-			width = SCROLL_THICKNESS;
-			height = length;
-		}
-
-		setSize(width, height);
+		setLength(length);
 
 		int w, h;
 		if (type == HORIZONTAL)
@@ -97,6 +85,7 @@ public class UIScrollBar extends UIComponent
 			w = SCROLL_THICKNESS - 2;
 			h = SCROLLER_HEIGHT;
 		}
+
 		shape = new XYResizableGuiShape(1);
 		scrollShape = new SimpleGuiShape().setSize(w, h);
 		scrollShape.storeState();
@@ -120,9 +109,15 @@ public class UIScrollBar extends UIComponent
 	{
 		this.length = length;
 		if (type == HORIZONTAL)
+		{
 			width = length;
+			height = SCROLL_THICKNESS;
+		}
 		else
+		{
+			width = SCROLL_THICKNESS;
 			height = length;
+		}
 		offset = Math.max(0, Math.min(offset, length - SCROLLER_HEIGHT - 2));
 		setSize(width, height);
 		return this;

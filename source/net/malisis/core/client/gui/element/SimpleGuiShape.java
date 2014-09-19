@@ -32,11 +32,16 @@ import net.malisis.core.renderer.element.Face;
  */
 public class SimpleGuiShape extends GuiShape
 {
+	public SimpleGuiShape()
+	{
+		createFaces();
+		storeState();
+	}
 
 	@Override
-	protected Face[] createFaces()
+	protected void createFaces()
 	{
-		return new Face[] { guiFace() };
+		faces = new Face[] { guiFace() };
 	}
 
 	@Override

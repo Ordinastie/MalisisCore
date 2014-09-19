@@ -190,7 +190,13 @@ public class GuiRenderer extends BaseRenderer
 		{
 			if (icons != null && i < icons.length && icons[i] != null)
 				faces[i].setTexture(icons[i], false, false, false);
-			drawFace(faces[i], params);
+			//			if (faces.length == 6 && i == 4)
+			//				rp.colorMultiplier.set(0xFF6666);
+			//			else if (faces.length == 6 && i == 5)
+			//				rp.colorMultiplier.set(0x6666FF);
+			//			else
+			//rp.colorMultiplier.set(rand.nextInt(0xFFFFFF));
+			drawFace(faces[i], rp);
 		}
 	}
 
@@ -319,7 +325,8 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Draws itemStack to the GUI. Uses RenderItem.renderItemAndEffectIntoGUI() and RenderItem.renderItemOverlayIntoGUI();
+	 * Draws itemStack to the GUI. Uses RenderItem.renderItemAndEffectIntoGUI() and RenderItem.renderItemOverlayIntoGUI(); TODO: use
+	 * currrentComponent position
 	 * 
 	 * @param itemStack
 	 * @param x
@@ -341,11 +348,15 @@ public class GuiRenderer extends BaseRenderer
 
 		t.draw();
 		RenderHelper.enableGUIStandardItemLighting();
+		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 
 		itemRenderer.renderItemAndEffectIntoGUI(fontRenderer, Minecraft.getMinecraft().getTextureManager(), itemStack, x, y);
 		itemRenderer.renderItemOverlayIntoGUI(fontRenderer, Minecraft.getMinecraft().getTextureManager(), itemStack, x, y, s);
+
 		RenderHelper.disableStandardItemLighting();
 		GL11.glColor4f(1, 1, 1, 1);
+		GL11.glEnable(GL11.GL_ALPHA_TEST);
+
 		setDefaultTexture();
 		t.startDrawingQuads();
 	}

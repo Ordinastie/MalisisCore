@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component.container;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import net.malisis.core.client.gui.component.interaction.UITab;
 
@@ -34,20 +35,41 @@ import net.malisis.core.client.gui.component.interaction.UITab;
  */
 public class UITabGroup extends UIContainer<UITabGroup>
 {
+	public enum Position
+	{
+		TOP, BOTTOM, LEFT, RIGHT
+	}
+
 	private HashMap<UITab, UIContainer> listTabs = new HashMap<>();
 	private UITab activeTab;
+	private Position tabPosition = Position.TOP;
+	private int containerDiff = 0;
+
+	public UITabGroup(Position tabPosition)
+	{
+		this.tabPosition = tabPosition;
+		this.height = 0;
+		this.width = 0;
+		if (tabPosition == Position.TOP || tabPosition == Position.BOTTOM)
+			x = 3;
+		else
+			y = 3;
+	}
 
 	public UITabGroup()
 	{
-		this.height = 14;
-		this.width = 0;
-		this.x = 3;
+		this(Position.TOP);
 	}
 
 	@Override
 	public UITabGroup setPosition(int x, int y, int anchor)
 	{
-		return super.setPosition(x + 3, y, anchor);
+		return super.setPosition(x, y, anchor);
+	}
+
+	public Position getTabPosition()
+	{
+		return tabPosition;
 	}
 
 	/**
@@ -57,24 +79,89 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 * @param tab
 	 * @param container
 	 */
-	public void addTab(UITab tab, UIContainer container)
+	public UITab addTab(UITab tab, UIContainer container)
 	{
 		add(tab);
-		tab.setPosition(getWidth(), 0);
 		tab.setContainer(container);
 		tab.setActive(false);
 		listTabs.put(tab, container);
-		width += tab.getWidth();
 
-		container.setPosition(getX() - 3, getY() + getHeight() - 1);
+		if (tabPosition == Position.TOP || tabPosition == Position.BOTTOM)
+		{
+			tab.setPosition(getWidth(), 0);
+			containerDiff += Math.max(tab.getHeight() - height, 0);
+			width += tab.getWidth();
+			height = Math.max(height, tab.getHeight());
 
-		if (activeTab == null)
-			setActiveTab(tab);
+			if (tabPosition == Position.BOTTOM)
+				setPosition(x, container.getHeight() - containerDiff);
+		}
+		else
+		{
+			tab.setPosition(0, getHeight());
+			containerDiff += Math.max(tab.getWidth() - width, 0);
+			width = Math.max(width, tab.getWidth());
+
+			height += tab.getHeight();
+
+			if (tabPosition == Position.RIGHT)
+				setPosition(container.getWidth() - containerDiff, y);
+		}
+
+		updateTabs();
+
+		return tab;
 	}
 
-	public void addTab(String tabName, UIContainer container)
+	public UITab addTab(String tabName, UIContainer container)
 	{
-		addTab(new UITab(tabName), container);
+		return addTab(new UITab(tabName), container);
+	}
+
+	/**
+	 * Aligns the height of each tab
+	 */
+	private void updateTabs()
+	{
+		for (Entry<UITab, UIContainer> entry : listTabs.entrySet())
+		{
+			UITab tab = entry.getKey();
+			UIContainer container = entry.getValue();
+
+			int w, h, cx, cy, cw, ch;
+			if (tabPosition == Position.TOP || tabPosition == Position.BOTTOM)
+			{
+				w = tab.isAutoWidth() ? 0 : tab.getWidth();
+				h = getHeight();
+
+				cx = getX() - 3;
+				if (tabPosition == Position.TOP)
+					cy = getY() + getHeight() - 2;
+				else
+					cy = container.getY();
+
+				cw = tab.getContainerWidth();
+				ch = tab.getContainerHeight() - containerDiff + 2;
+			}
+			else
+			{
+				w = tab.getWidth();
+				h = tab.isAutoHeight() ? 0 : getHeight();
+
+				if (tabPosition == Position.LEFT)
+					cx = getX() + getWidth() - 2;
+				else
+					cx = container.getX();
+				cy = getY() - 3;
+
+				cw = tab.getContainerWidth() - containerDiff + 2;
+				ch = tab.getContainerHeight();
+			}
+
+			tab.setSize(w, h);
+			container.setSize(cw, ch);
+			container.setPosition(cx, cy);
+		}
 	}
 
 	/**

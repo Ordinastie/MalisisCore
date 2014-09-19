@@ -37,6 +37,9 @@ public class XResizableGuiShape extends GuiShape
 	public XResizableGuiShape(int sideWidth)
 	{
 		this.sideWidth = sideWidth;
+
+		createFaces();
+		storeState();
 	}
 
 	public XResizableGuiShape()
@@ -45,9 +48,9 @@ public class XResizableGuiShape extends GuiShape
 	}
 
 	@Override
-	protected Face[] createFaces()
+	protected void createFaces()
 	{
-		return new Face[] { guiFace(), guiFace(), guiFace() };
+		faces = new Face[] { guiFace(), guiFace(), guiFace() };
 	}
 
 	@Override

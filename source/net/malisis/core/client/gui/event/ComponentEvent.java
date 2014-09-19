@@ -77,6 +77,14 @@ public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 		}
 	}
 
+	public static class ActiveStateChanged<T extends UIComponent> extends StateChanged<T>
+	{
+		public ActiveStateChanged(T component, boolean active)
+		{
+			super(component, active);
+		}
+	}
+
 	public static class ValueChanged<T extends UIComponent, S> extends ComponentEvent<T>
 	{
 		private S oldValue;

@@ -38,6 +38,10 @@ public class XYResizableGuiShape extends GuiShape
 	{
 		this.cornerWidth = cornerWidth;
 		this.cornerHeight = cornerHeight;
+
+		createFaces();
+		storeState();
+
 	}
 
 	public XYResizableGuiShape(int corner)
@@ -51,9 +55,9 @@ public class XYResizableGuiShape extends GuiShape
 	}
 
 	@Override
-	protected Face[] createFaces()
+	protected void createFaces()
 	{
-		return new Face[] { guiFace(), guiFace(), guiFace(), guiFace(), guiFace(), guiFace(), guiFace(), guiFace(), guiFace() };
+		faces = new Face[] { guiFace(), guiFace(), guiFace(), guiFace(), guiFace(), guiFace(), guiFace(), guiFace(), guiFace() };
 	}
 
 	@Override

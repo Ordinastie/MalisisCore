@@ -54,8 +54,6 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 	protected int xOffset;
 	protected int yOffset;
 
-	protected int color = -1;
-
 	public UIPanel(int width, int height)
 	{
 		super(width, height);
@@ -98,6 +96,25 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 	}
 
 	// #region getters/setters
+	@Override
+	public UIPanel setSize(int width, int height)
+	{
+		super.setSize(width, height);
+		if (verticalScroll != null)
+		{
+			verticalScroll.setLength(height);
+			//setVerticalScroll(allowVerticalScroll);
+
+			horizontalScroll.setLength(width);
+			//setVerticalScroll(allowHorizontalScroll);
+
+			setScrollBarsPosition();
+		}
+
+		calculateContentSize();
+		return this;
+	}
+
 	public UIPanel setHorizontalScroll(boolean allow)
 	{
 		int shift = allow ? -SCROLL_THICKNESS : SCROLL_THICKNESS;
@@ -154,16 +171,6 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 	public int getOffsetY()
 	{
 		return yOffset;
-	}
-
-	public void setColor(int color)
-	{
-		this.color = color;
-	}
-
-	public int getColor()
-	{
-		return color;
 	}
 
 	// #end getters/setters
@@ -225,7 +232,7 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.colorMultiplier.set(color);
+		rp.colorMultiplier.set(getBackgroundColor() != 0x404040 ? getBackgroundColor() : -1);
 		renderer.drawShape(shape, rp, icons);
 	}
 
