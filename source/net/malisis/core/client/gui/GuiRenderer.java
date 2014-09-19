@@ -355,7 +355,7 @@ public class GuiRenderer extends BaseRenderer
 
 		RenderHelper.disableStandardItemLighting();
 		GL11.glColor4f(1, 1, 1, 1);
-		GL11.glEnable(GL11.GL_ALPHA_TEST);
+		//	GL11.glDisable(GL11.GL_ALPHA_TEST);
 
 		setDefaultTexture();
 		t.startDrawingQuads();

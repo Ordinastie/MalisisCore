@@ -129,11 +129,15 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	{
 		if (checked)
 		{
-			GL11.glEnable(GL11.GL_BLEND);
+			if (isHovered() && !isDisabled())
+				GL11.glEnable(GL11.GL_BLEND);
 			GuiIcon icon = isDisabled() ? checkBoxDisabled : (isHovered() ? checkBoxHovered : checkBoxChecked);
 			shape.resetState();
 			shape.setSize(12, 10);
 			renderer.drawShape(shape, icon);
+			renderer.next();
+			if (isHovered() && !isDisabled())
+				GL11.glDisable(GL11.GL_BLEND);
 		}
 	}
 

@@ -48,12 +48,8 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	public UITabGroup(Position tabPosition)
 	{
 		this.tabPosition = tabPosition;
-		this.height = 0;
-		this.width = 0;
-		if (tabPosition == Position.TOP || tabPosition == Position.BOTTOM)
-			x = 3;
-		else
-			y = 3;
+		this.height = 3;
+		this.width = 3;
 	}
 
 	public UITabGroup()
@@ -134,7 +130,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 				w = tab.isAutoWidth() ? 0 : tab.getWidth();
 				h = getHeight();
 
-				cx = getX() - 3;
+				cx = getX();
 				if (tabPosition == Position.TOP)
 					cy = getY() + getHeight() - 2;
 				else
@@ -152,7 +148,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 					cx = getX() + getWidth() - 2;
 				else
 					cx = container.getX();
-				cy = getY() - 3;
+				cy = getY();
 
 				cw = tab.getContainerWidth() - containerDiff + 2;
 				ch = tab.getContainerHeight();
