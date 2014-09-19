@@ -59,6 +59,9 @@ minecraft {
     } else {
         runDir = "assets"
     }
+    
+    replace '${version}', project.version
+    replaceIn "MalisisCore.java"
 }
 
 processResources {
