@@ -27,8 +27,8 @@ package net.malisis.core.renderer.element;
 import java.util.HashMap;
 import java.util.List;
 
-import net.malisis.core.renderer.MalisisIcon;
 import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.util.IIcon;
 
 public class Face

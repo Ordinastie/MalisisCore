@@ -34,6 +34,7 @@ sourceSets {
 jar {
 	manifest {
         attributes 'FMLCorePlugin': 'net.malisis.core.asm.MalisisCorePlugin'
+        attributes 'FMLAT': 'malisiscore_at.cfg'
     }
 }
 

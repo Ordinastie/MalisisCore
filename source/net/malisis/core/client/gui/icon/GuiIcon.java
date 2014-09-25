@@ -24,7 +24,7 @@
 
 package net.malisis.core.client.gui.icon;
 
-import net.malisis.core.renderer.MalisisIcon;
+import net.malisis.core.renderer.icon.MalisisIcon;
 
 /**
  * @author Ordinastie
@@ -42,7 +42,7 @@ public class GuiIcon extends MalisisIcon
 
 	public GuiIcon()
 	{
-		super(null);
+		super();
 		x = 0;
 		y = 0;
 		width = GUI_TEXTURE_WIDTH;
@@ -51,7 +51,7 @@ public class GuiIcon extends MalisisIcon
 
 	public GuiIcon(int x, int y, int width, int height)
 	{
-		super(null);
+		super();
 		this.x = x;
 		this.y = y;
 		this.width = width;

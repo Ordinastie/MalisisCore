@@ -25,7 +25,6 @@
 package net.malisis.core.renderer.icon;
 
 import static net.minecraftforge.common.util.ForgeDirection.*;
-import net.malisis.core.renderer.MalisisIcon;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.IIcon;
@@ -59,8 +58,8 @@ public class ConnectedTextureIcon extends MalisisIcon
 	public ConnectedTextureIcon(String name, MalisisIcon part1, MalisisIcon part2)
 	{
 		super(name);
-		part1.setConnectedTextureIcon(this);
-		part2.setConnectedTextureIcon(this);
+		part1.parentIcon = this;
+		part2.parentIcon = this;
 	}
 
 	public ConnectedTextureIcon(TextureMap register, String name)
@@ -69,14 +68,15 @@ public class ConnectedTextureIcon extends MalisisIcon
 		MalisisIcon part1 = new MalisisIcon(name);
 		MalisisIcon part2 = new MalisisIcon(name + "2");
 
-		part1.setConnectedTextureIcon(this);
-		part2.setConnectedTextureIcon(this);
+		part1.parentIcon = this;
+		part2.parentIcon = this;
 
 		register.setTextureEntry(name, part1);
 		register.setTextureEntry(name + "2", part2);
 	}
 
-	public void initIcons(MalisisIcon icon)
+	@Override
+	protected void initIcon(MalisisIcon icon, int width, int height, int x, int y, boolean rotated)
 	{
 		float f = 1F / 3F;
 

@@ -28,7 +28,6 @@ import static net.minecraftforge.common.util.ForgeDirection.*;
 
 import java.util.HashMap;
 
-import net.malisis.core.renderer.MalisisIcon;
 import net.minecraft.block.Block;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
@@ -60,6 +59,17 @@ public class MegaTexture extends MalisisIcon
 	public MegaTexture(String name, int numBlocks)
 	{
 		super(name);
+		this.numBlocks = numBlocks;
+	}
+
+	public MegaTexture(MalisisIcon icon)
+	{
+		super(icon);
+	}
+
+	public MegaTexture(MalisisIcon icon, int numBlocks)
+	{
+		super(icon);
 		this.numBlocks = numBlocks;
 	}
 

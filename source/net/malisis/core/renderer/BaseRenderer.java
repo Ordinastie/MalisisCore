@@ -34,6 +34,7 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
+import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.preset.ShapePreset;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -747,7 +748,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	{
 		IIcon icon = params.icon.get();
 		if (params.useCustomTexture.get())
-			icon = new MalisisIcon(null); //use a generic icon where UVs go from 0 to 1
+			icon = new MalisisIcon(); //use a generic icon where UVs go from 0 to 1
 		else if (overrideTexture != null)
 			icon = overrideTexture;
 		else if (block != null && icon == null)

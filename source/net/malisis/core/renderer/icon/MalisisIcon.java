@@ -22,14 +22,10 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer;
+package net.malisis.core.renderer.icon;
 
-import java.awt.image.BufferedImage;
-
-import net.malisis.core.renderer.icon.ConnectedTextureIcon;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.resources.data.AnimationMetadataSection;
 
 /**
  * @author Ordinastie
@@ -39,7 +35,6 @@ public class MalisisIcon extends TextureAtlasSprite implements Cloneable
 {
 	protected int sheetWidth;
 	protected int sheetHeight;
-	protected boolean useAnisotropicFiltering;
 
 	/**
 	 * Is the icon flipped on the U axis
@@ -56,13 +51,25 @@ public class MalisisIcon extends TextureAtlasSprite implements Cloneable
 	/**
 	 * Main icon for connected textures
 	 */
-	protected ConnectedTextureIcon connectedTextureIcon;
+	protected MalisisIcon parentIcon;
+
+	public MalisisIcon()
+	{
+		super(null);
+	}
 
 	public MalisisIcon(String name)
 	{
 		super(name);
 	}
 
+	public MalisisIcon(MalisisIcon baseIcon)
+	{
+		super(baseIcon.getIconName());
+		baseIcon.parentIcon = this;
+	}
+
+	//#region getters/setters
 	@Override
 	public float getMinU()
 	{
@@ -85,11 +92,6 @@ public class MalisisIcon extends TextureAtlasSprite implements Cloneable
 	public float getMaxV()
 	{
 		return this.flippedV ? super.getMinV() : super.getMaxV();
-	}
-
-	public void setConnectedTextureIcon(ConnectedTextureIcon icon)
-	{
-		connectedTextureIcon = icon;
 	}
 
 	public MalisisIcon flip(boolean horizontal, boolean vertical)
@@ -124,20 +126,11 @@ public class MalisisIcon extends TextureAtlasSprite implements Cloneable
 		return rotation;
 	}
 
-	@Override
-	public MalisisIcon clone()
+	//#end getters/setters
+
+	protected void initIcon(MalisisIcon baseIcon, int width, int height, int x, int y, boolean rotated)
 	{
-		MalisisIcon clone = null;
-		try
-		{
-			clone = (MalisisIcon) super.clone();
-			clone.connectedTextureIcon = null;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			e.printStackTrace();
-		}
-		return clone;
+		copyFrom(baseIcon);
 	}
 
 	public MalisisIcon offset(int offsetX, int offsetY)
@@ -181,20 +174,39 @@ public class MalisisIcon extends TextureAtlasSprite implements Cloneable
 	}
 
 	@Override
-	public void loadSprite(BufferedImage[] buffer, AnimationMetadataSection metadataSection, boolean useAnisotropicFiltering)
-	{
-		super.loadSprite(buffer, metadataSection, useAnisotropicFiltering);
-		this.useAnisotropicFiltering = useAnisotropicFiltering;
-	}
-
-	@Override
 	public void initSprite(int width, int height, int x, int y, boolean rotated)
 	{
 		this.sheetWidth = width;
 		this.sheetHeight = height;
 		super.initSprite(width, height, x, y, rotated);
-		if (connectedTextureIcon != null)
-			connectedTextureIcon.initIcons(this);
+		if (parentIcon != null)
+			parentIcon.initIcon(this, width, height, x, y, rotated);
+	}
+
+	public void copyFrom(MalisisIcon base)
+	{
+		super.copyFrom(base);
+		this.useAnisotropicFiltering = base.useAnisotropicFiltering;
+		this.sheetWidth = base.sheetWidth;
+		this.sheetHeight = base.sheetHeight;
+		this.flippedU = base.flippedU;
+		this.flippedV = base.flippedV;
+	}
+
+	@Override
+	public MalisisIcon clone()
+	{
+		MalisisIcon clone = null;
+		try
+		{
+			clone = (MalisisIcon) super.clone();
+			clone.parentIcon = null;
+		}
+		catch (CloneNotSupportedException e)
+		{
+			e.printStackTrace();
+		}
+		return clone;
 	}
 
 	public MalisisIcon register(TextureMap register)
