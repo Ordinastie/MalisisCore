@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
-version = "1.7.10-0.9.5"
+version = "1.7.10-0.9.6"
 group = "net.malisis.malisiscore" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "malisiscore"
 libsDirName = "../releases"
@@ -34,7 +34,7 @@ sourceSets {
 jar {
 	manifest {
         attributes 'FMLCorePlugin': 'net.malisis.core.asm.MalisisCorePlugin'
-        attributes 'FMLAT': 'malisiscore_at.cfg'
+        //attributes 'FMLAT': 'malisiscore_at.cfg'
     }
 }
 

@@ -83,7 +83,7 @@ public class MalisisCorePlugin implements IFMLLoadingPlugin
 	@Override
 	public String getAccessTransformerClass()
 	{
-		return null;
+		return MalisisCoreAccessTransformer.class.getName();
 	}
 
 }
