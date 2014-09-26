@@ -36,7 +36,7 @@ public class MalisisCoreAccessTransformer extends AccessTransformer
 {
 	public MalisisCoreAccessTransformer() throws IOException
 	{
-		super("META-INF/malisiscore_at.cfg");
+		super("malisiscore_at.cfg");
 	}
 
 }
