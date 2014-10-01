@@ -97,7 +97,7 @@ public class RenderParameters
 	/**
 	 * Defines the color to apply to the face (useful for grass and leaves) usePerVertexColor must be false (Block Level)
 	 */
-	public Parameter<Integer> colorMultiplier = new Parameter<>(0xFFFFFF);
+	public Parameter<Integer> colorMultiplier = new Parameter<>(null);
 	/**
 	 * Defines the color factor for the face (Block Level)
 	 */

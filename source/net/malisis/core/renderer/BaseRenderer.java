@@ -339,7 +339,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	@Override
 	public boolean shouldRender3DInInventory(int modelId)
 	{
-		return false;
+		return true;
 	}
 
 	// #end ISBRH
@@ -756,7 +756,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			int side = 0;
 			if (params.textureSide.get() != null)
 				side = params.textureSide.get().ordinal();
-			icon = block.getIcon(side, blockMetadata);
+			icon = world != null ? block.getIcon(world, x, y, z, side) : block.getIcon(side, blockMetadata);
 		}
 
 		return icon;
@@ -824,7 +824,13 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected int calcVertexColor(Vertex vertex, int[][] aoMatrix)
 	{
-		int color = params.usePerVertexColor.get() ? vertex.getColor() : params.colorMultiplier.get();
+		int color = 0xFFFFFF;
+		if (params.usePerVertexColor.get())
+			color = vertex.getColor();
+		if (params.colorMultiplier.get() != null)
+			color = params.colorMultiplier.get();
+		else if (block != null)
+			color = world != null ? block.colorMultiplier(world, x, y, z) : block.getRenderColor(blockMetadata);
 
 		if (drawMode == GL11.GL_LINE)
 			return color;
