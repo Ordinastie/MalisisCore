@@ -756,7 +756,10 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			int side = 0;
 			if (params.textureSide.get() != null)
 				side = params.textureSide.get().ordinal();
-			icon = world != null ? block.getIcon(world, x, y, z, side) : block.getIcon(side, blockMetadata);
+			if (world != null && params.useWorldSensitiveIcon.get())
+				icon = block.getIcon(world, x, y, z, side);
+			else
+				icon = block.getIcon(side, blockMetadata);
 		}
 
 		return icon;

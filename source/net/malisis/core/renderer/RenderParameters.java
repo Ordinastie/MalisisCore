@@ -63,7 +63,11 @@ public class RenderParameters
 	 */
 	public Parameter<IIcon> icon = new Parameter<>(null);
 	/**
-	 * Defines whether to use a texture
+	 * Defines whether to use block.getIcon(world, x, y, z, side) instead of block.getIcon(side, metadata) to get the IIcon
+	 */
+	public Parameter<Boolean> useWorldSensitiveIcon = new Parameter<Boolean>(true);
+	/**
+	 * Defines whether to use a texture (will call addVertexWithUV instead of addVertex)
 	 */
 	public Parameter<Boolean> useTexture = new Parameter<>(true);
 	/**
@@ -151,6 +155,7 @@ public class RenderParameters
 		useCustomTexture.merge(params.useCustomTexture);
 		applyTexture.merge(params.applyTexture);
 		icon.merge(params.icon);
+		useWorldSensitiveIcon.merge(params.useWorldSensitiveIcon);
 		useTexture.merge(params.useTexture);
 		interpolateUV.merge(params.interpolateUV);
 		calculateAOColor.merge(params.calculateAOColor);
