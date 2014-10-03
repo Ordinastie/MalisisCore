@@ -85,6 +85,10 @@ public class GuiRenderer extends BaseRenderer
 	 */
 	private int scaleFactor;
 	/**
+	 * Should the rendering be done according to scaleFactor
+	 */
+	private boolean ignoreScale = false;
+	/**
 	 * Current X position of the mouse.
 	 */
 	public int mouseX;
@@ -100,6 +104,11 @@ public class GuiRenderer extends BaseRenderer
 	public GuiRenderer()
 	{
 		updateGuiScale();
+	}
+
+	public void setIgnoreScale(boolean ignore)
+	{
+		ignoreScale = ignore;
 	}
 
 	/**
@@ -142,12 +151,28 @@ public class GuiRenderer extends BaseRenderer
 		if (container != null)
 		{
 			setDefaultTexture();
+
+			if (ignoreScale)
+			{
+				GL11.glPushMatrix();
+				GL11.glScalef(1F / scaleFactor, 1F / scaleFactor, 1);
+			}
+
 			startDrawing();
+
 			container.draw(this, mouseX, mouseY, partialTick);
 			draw();
+
+			if (ignoreScale)
+				GL11.glPopMatrix();
 		}
 	}
 
+	/**
+	 * Draws a tooltip to the screen
+	 * 
+	 * @param tooltip
+	 */
 	public void drawTooltip(UITooltip tooltip)
 	{
 		if (tooltip != null)
@@ -159,18 +184,34 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Draws a shape on the GUI.
+	 * Draws a shape on the GUI with the specified parameters
+	 * 
+	 * @param s
+	 * @param rp
 	 */
 	public void drawShape(GuiShape s, RenderParameters rp)
 	{
 		drawShape(s, rp, (IIcon) null);
 	}
 
+	/**
+	 * Draws a shape on the GUI with the specified icons. Icons length should match the number of faces in the shape.
+	 * 
+	 * @param s
+	 * @param icons
+	 */
 	public void drawShape(GuiShape s, IIcon... icons)
 	{
 		drawShape(s, null, icons);
 	}
 
+	/**
+	 * Draws a shape to the GUI with the specified parameters and icons. Icons length should match the number of faces in the shape.
+	 * 
+	 * @param s
+	 * @param params
+	 * @param icons
+	 */
 	public void drawShape(GuiShape s, RenderParameters params, IIcon... icons)
 	{
 		if (s == null)
@@ -200,6 +241,13 @@ public class GuiRenderer extends BaseRenderer
 		}
 	}
 
+	/**
+	 * Clips a string to fit in the specified width. The string is translated before clipping.
+	 * 
+	 * @param text
+	 * @param width
+	 * @return
+	 */
 	public String clipString(String text, int width)
 	{
 		text = StatCollector.translateToLocal(text);
@@ -220,6 +268,13 @@ public class GuiRenderer extends BaseRenderer
 		return ret.toString();
 	}
 
+	/**
+	 * Splits the string in multiple lines to fit in the specified maxWidth.
+	 * 
+	 * @param text
+	 * @param maxWidth
+	 * @return
+	 */
 	public static List<String> wrapText(String text, int maxWidth)
 	{
 		List<String> lines = new ArrayList<>();
@@ -263,23 +318,44 @@ public class GuiRenderer extends BaseRenderer
 		return lines;
 	}
 
+	/**
+	 * Draws a white text on the GUI without shadow.
+	 * 
+	 * @param text
+	 */
 	public void drawText(String text)
 	{
 		drawText(text, 0, 0, 0, 0xFFFFFF, false);
 	}
 
+	/**
+	 * Draws a text on the GUI with specified color and shadow.
+	 * 
+	 * @param text
+	 * @param color
+	 * @param shadow
+	 */
 	public void drawText(String text, int color, boolean shadow)
 	{
 		drawText(text, 0, 0, 0, color, shadow);
 	}
 
+	/**
+	 * Draws a text on the GUI at the specified coordinates, relative to its parent container, with color and shadow.
+	 * 
+	 * @param text
+	 * @param x
+	 * @param y
+	 * @param color
+	 * @param shadow
+	 */
 	public void drawText(String text, int x, int y, int color, boolean shadow)
 	{
 		drawText(text, x, y, 0, color, shadow);
 	}
 
 	/**
-	 * Draws a string in the currently drawn component. x, y, and zIndex are relatives to that component Uses FontRenderer.drawString().
+	 * Draws a text on the GUI at the specified coordinates, relative to its parent container, with zIndex, color and shadow.
 	 * 
 	 * @param text
 	 * @param x
@@ -294,6 +370,16 @@ public class GuiRenderer extends BaseRenderer
 				shadow);
 	}
 
+	/**
+	 * Draws a string at the specified coordinates, with color and shadow. The string gets translated. Uses FontRenderer.drawString().
+	 * 
+	 * @param text
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param color
+	 * @param shadow
+	 */
 	public void drawString(String text, int x, int y, int z, int color, boolean shadow)
 	{
 		if (fontRenderer == null)
