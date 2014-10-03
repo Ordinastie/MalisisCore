@@ -460,10 +460,11 @@ public class GuiRenderer extends BaseRenderer
 		GL11.glPushAttrib(GL11.GL_SCISSOR_BIT);
 		GL11.glEnable(GL11.GL_SCISSOR_TEST);
 
-		int x = area.x * scaleFactor;
-		int y = displayHeight - (area.y + area.height()) * scaleFactor;
-		int w = area.width() * scaleFactor;
-		int h = area.height() * scaleFactor;;
+		int f = ignoreScale ? 1 : scaleFactor;
+		int x = area.x * f;
+		int y = displayHeight - (area.y + area.height()) * f;
+		int w = area.width() * f;
+		int h = area.height() * f;;
 		GL11.glScissor(x, y, w, h);
 	}
 

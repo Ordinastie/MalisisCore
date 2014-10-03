@@ -31,6 +31,7 @@ import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.component.interaction.IScrollable;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.ComponentEvent.FocusStateChanged;
 import net.malisis.core.client.gui.event.ComponentEvent.HoveredStateChanged;
@@ -115,6 +116,7 @@ public abstract class UIComponent<T extends UIComponent>
 		bus.register(this);
 		visible = true;
 		rp = new RenderParameters();
+		shape = new SimpleGuiShape();
 	}
 
 	/**

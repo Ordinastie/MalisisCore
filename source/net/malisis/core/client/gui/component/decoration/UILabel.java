@@ -132,9 +132,10 @@ public class UILabel extends UIComponent<UILabel>
 	 * 
 	 * @param color
 	 */
-	public void setColor(int color)
+	public UILabel setColor(int color)
 	{
 		this.color = color;
+		return this;
 	}
 
 	@Override

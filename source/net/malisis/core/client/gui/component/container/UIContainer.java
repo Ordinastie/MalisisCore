@@ -209,6 +209,21 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 			component.setZIndex(zIndex);
 	}
 
+	public void remove(UIComponent component)
+	{
+		if (component.getParent() != this)
+			return;
+		component.setParent(null);
+		components.remove(component);
+	}
+
+	public void removeAll()
+	{
+		for (UIComponent component : components)
+			component.setParent(null);
+		components.clear();
+	}
+
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
