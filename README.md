@@ -12,3 +12,16 @@ Currently available in MalisisCore :
 - Enhanced inventory system
 - Setting system with automatic GUI
 - Various utility classes (Entity, Items...)
+
+
+To use MalisisCore : 
+1 ) add those lines inside you build.gradle :
+dependencies
+{
+	compile 'net.malisis:malisiscore:1.7.10-0.9.7:dev'	
+}
+
+2 ) add -Dfml.coreMods.load=net.malisis.core.asm.MalisisCorePlugin in your VM arguments
+
+
+
