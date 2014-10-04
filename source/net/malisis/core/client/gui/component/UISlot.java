@@ -96,6 +96,9 @@ public class UISlot extends UIComponent<UISlot>
 		}
 	}
 
+	/**
+	 * Update the tooltip of this <code>UISlot</code> based on the contained ItemStack
+	 */
 	protected void updateTooltip()
 	{
 		if (slot.getItemStack() == null)
