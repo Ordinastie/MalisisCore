@@ -40,7 +40,7 @@ import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class UITab extends UIComponent<UITab>
 {
@@ -93,6 +93,11 @@ public class UITab extends UIComponent<UITab>
 		return this;
 	}
 
+	/**
+	 * Calculates the width of this <code>UITab</code> based on its contents
+	 *
+	 * @return
+	 */
 	private int calcAutoWidth()
 	{
 		if (label != null)
@@ -103,11 +108,19 @@ public class UITab extends UIComponent<UITab>
 			return 8;
 	}
 
+	/**
+	 * @return whether the width should be calculated automatically.
+	 */
 	public boolean isAutoWidth()
 	{
 		return autoWidth;
 	}
 
+	/**
+	 * Calculates the height of this <code>UITab</code> base on its contents.
+	 *
+	 * @return
+	 */
 	private int calcAutoHeight()
 	{
 		if (label != null)
@@ -118,6 +131,9 @@ public class UITab extends UIComponent<UITab>
 			return 8;
 	}
 
+	/**
+	 * @return whether the height should be calculated automatically.
+	 */
 	public boolean isAutoHeight()
 	{
 		return autoHeight;
@@ -146,6 +162,12 @@ public class UITab extends UIComponent<UITab>
 		return super.setPosition(x, y, anchor);
 	}
 
+	/**
+	 * Sets the label for this <code>UITab</code>. Removes the image if was previously set.
+	 *
+	 * @param label
+	 * @return
+	 */
 	public UITab setLabel(String label)
 	{
 		this.image = null;
@@ -157,6 +179,12 @@ public class UITab extends UIComponent<UITab>
 		return this;
 	}
 
+	/**
+	 * Sets the image <code>UITab</code>. Removes the label if was previously set.
+	 *
+	 * @param image
+	 * @return
+	 */
 	public UITab setImage(UIImage image)
 	{
 		this.label = null;
@@ -169,29 +197,49 @@ public class UITab extends UIComponent<UITab>
 		return this;
 	}
 
+	/**
+	 * Set the <code>UIContainer</code> linked with this <code>UITab</code>.
+	 *
+	 * @param container
+	 * @return
+	 */
 	public UITab setContainer(UIContainer container)
 	{
 		this.container = container;
-		this.baseContainerWidth = container.getWidth();
-		this.baseContainerHeight = container.getHeight();
+		this.baseContainerWidth = container.getBaseWidth(); //we don't want the calculated width/height if INHERITED
+		this.baseContainerHeight = container.getBaseHeight();
 		return this;
 	}
 
+	/**
+	 * @return the container original width.
+	 */
 	public int getContainerWidth()
 	{
 		return baseContainerWidth;
 	}
 
+	/**
+	 * @return the container original height.
+	 */
 	public int getContainerHeight()
 	{
 		return baseContainerHeight;
 	}
 
+	/**
+	 * @return this <code>UITab</code> position around the container.
+	 */
 	public Position getTabPosition()
 	{
 		return ((UITabGroup) parent).getTabPosition();
 	}
 
+	/**
+	 * Sets this tab to be active. Enables and sets visiblity for its container.
+	 *
+	 * @param active
+	 */
 	public void setActive(boolean active)
 	{
 		if (container == null)

@@ -35,16 +35,17 @@ import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.ComponentEvent.FocusStateChanged;
 import net.malisis.core.client.gui.event.ComponentEvent.HoveredStateChanged;
-import net.malisis.core.client.gui.event.GuiEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.renderer.RenderParameters;
+
+import org.lwjgl.opengl.GL11;
 
 import com.google.common.eventbus.EventBus;
 
 /**
  * UIComponent
- * 
+ *
  * @author PaleoCrafter
  */
 public abstract class UIComponent<T extends UIComponent>
@@ -65,7 +66,7 @@ public abstract class UIComponent<T extends UIComponent>
 	/**
 	 * Size of this <code>UIComponent</code>
 	 */
-	protected int width, height;
+	protected int width = INHERITED, height = INHERITED;
 	/**
 	 * Event bus on which event listeners are registered
 	 */
@@ -120,8 +121,8 @@ public abstract class UIComponent<T extends UIComponent>
 	}
 
 	/**
-	 * Register an <code>object</code> to handle events received by this <code>UIComponent</code>.
-	 * 
+	 * Registers an <code>object</code> to handle events received by this <code>UIComponent</code>.
+	 *
 	 * @param object object whose handler methods should be registered
 	 */
 	public T register(Object object)
@@ -130,12 +131,24 @@ public abstract class UIComponent<T extends UIComponent>
 		return (T) this;
 	}
 
+	/**
+	 * Unregister an <code>object</code> to stop receiving events for this <code>UIComponent</code>
+	 *
+	 * @param object
+	 * @return
+	 */
 	public T unregister(Object object)
 	{
 		bus.unregister(object);
 		return (T) this;
 	}
 
+	/**
+	 * Fires a {@link ComponentEvent}
+	 *
+	 * @param event
+	 * @return
+	 */
 	public boolean fireEvent(ComponentEvent event)
 	{
 		bus.post(event);
@@ -143,8 +156,8 @@ public abstract class UIComponent<T extends UIComponent>
 	}
 
 	/**
-	 * Fire a {@link GuiEvent}
-	 * 
+	 * Fires a {@link MouseEvent}
+	 *
 	 * @param event
 	 * @return
 	 */
@@ -157,6 +170,12 @@ public abstract class UIComponent<T extends UIComponent>
 		return !event.isCancelled();
 	}
 
+	/**
+	 * Fires a {@link KeyboardEvent}
+	 *
+	 * @param event
+	 * @return
+	 */
 	public boolean fireKeyboardEvent(KeyboardEvent event)
 	{
 		if (isDisabled())
@@ -169,7 +188,7 @@ public abstract class UIComponent<T extends UIComponent>
 	// #region getters/setters
 	/**
 	 * Set the position of this <code>UIComponent</code>.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @return this <code>UIComponent</code>
@@ -181,7 +200,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Set the position of this <code>UIComponent</code> relative to an anchor.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param anchor
@@ -221,12 +240,12 @@ public abstract class UIComponent<T extends UIComponent>
 
 	public int getZIndex()
 	{
-		return zIndex == INHERITED ? 0 : zIndex;
+		return zIndex == INHERITED ? (parent != null ? parent.getZIndex() : 0) : zIndex;
 	}
 
 	/**
 	 * Set the anchor for this <code>UIComponent</code>'s position
-	 * 
+	 *
 	 * @param anchor
 	 * @return
 	 */
@@ -246,7 +265,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Set the size of this <code>UIComponent</code>.
-	 * 
+	 *
 	 * @param width
 	 * @param height
 	 * @return this <code>UIComponent</code>
@@ -261,11 +280,33 @@ public abstract class UIComponent<T extends UIComponent>
 	}
 
 	/**
+	 * @return the raw width of this <code>UIComponent</code>
+	 */
+	public int getBaseWidth()
+	{
+		return width;
+	}
+
+	/**
 	 * @return the width of this <code>UIComponent</code>
 	 */
 	public int getWidth()
 	{
-		return width;
+		if (width != INHERITED)
+			return width;
+
+		if (parent == null)
+			return 0;
+
+		return parent.getWidth() - 2 * parent.getHorizontalPadding();
+	}
+
+	/**
+	 * @return the raw width of this <code>UIComponent</code>
+	 */
+	public int getBaseHeight()
+	{
+		return height;
 	}
 
 	/**
@@ -273,12 +314,18 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public int getHeight()
 	{
-		return height;
+		if (height != INHERITED)
+			return height;
+
+		if (parent == null)
+			return 0;
+
+		return parent.getHeight() - 2 * parent.getVerticalPadding();
 	}
 
 	/**
 	 * Set the <code>hovered</code> state of this <code>UIComponent</code>.
-	 * 
+	 *
 	 * @param hovered
 	 */
 	public void setHovered(boolean hovered)
@@ -294,7 +341,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Get the <code>hovered</code> state of this <code>UIComponent</code>.
-	 * 
+	 *
 	 * @return hovered state
 	 */
 	public boolean isHovered()
@@ -304,7 +351,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Set the <code>focused</code> state of this <code>UIComponent</code>.
-	 * 
+	 *
 	 * @param focused
 	 */
 	public void setFocused(boolean focused)
@@ -323,7 +370,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Get the <code>focused</code> state of this <code>UIComponent</code>.
-	 * 
+	 *
 	 * @return focused state
 	 */
 	public boolean isFocused()
@@ -342,7 +389,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Set the parent of this <code>UIComponent</code>.
-	 * 
+	 *
 	 * @param parent the parent to be used
 	 * @see #parent
 	 */
@@ -361,7 +408,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Set the visibility of this component.
-	 * 
+	 *
 	 * @param visible the visibility for this component
 	 */
 	public T setVisible(boolean visible)
@@ -389,7 +436,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Set the state of this <code>UIComponent</code>.
-	 * 
+	 *
 	 * @param enabled true for the component to be enabled
 	 */
 	public T setDisabled(boolean disabled)
@@ -414,7 +461,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Set the name of this <code>UIComponent</code>.
-	 * 
+	 *
 	 * @param name the name to be used
 	 * @see #name
 	 */
@@ -434,7 +481,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Set the tooltip of this <code>UIComponent</code>.
-	 * 
+	 *
 	 * @param tooltip the tooltip for this <code>UIComponent</code>
 	 * @see #tooltip
 	 */
@@ -446,7 +493,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Set the text for the tooltip
-	 * 
+	 *
 	 * @param text
 	 */
 	public T setTooltip(String text)
@@ -459,7 +506,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Check if supplied coordinates are inside this <code>UIComponent</code> bounds.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @return true if coordinates are inside bounds
@@ -468,11 +515,11 @@ public abstract class UIComponent<T extends UIComponent>
 	{
 		if (!isVisible())
 			return false;
-		return x >= screenX() && x <= screenX() + width && y >= screenY() && y <= screenY() + height;
+		return x >= screenX() && x <= screenX() + getWidth() && y >= screenY() && y <= screenY() + getHeight();
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public UIComponent getComponentAt(int x, int y)
 	{
@@ -481,7 +528,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Get the X coordinate relative to this <code>UIComponent</code>
-	 * 
+	 *
 	 * @param x
 	 * @return
 	 */
@@ -492,7 +539,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Get the Y coordinate relative to this <code>UIComponent</code>
-	 * 
+	 *
 	 * @param y
 	 * @return
 	 */
@@ -503,7 +550,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Get the X coordinate of this <code>UIComponent</code> relative to its parent container
-	 * 
+	 *
 	 * @return
 	 */
 	public int containerX()
@@ -514,7 +561,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Get the Y coordinate of this <code>UIComponent</code> relative to its parent container
-	 * 
+	 *
 	 * @return
 	 */
 	public int containerY()
@@ -524,7 +571,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Get the X coordinate of this <code>UIComponent</code> relative to the screen.
-	 * 
+	 *
 	 * @return
 	 */
 	public int screenX()
@@ -542,7 +589,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Get the Y coordinate of this <code>UIComponent</code> relative to the screen.
-	 * 
+	 *
 	 * @return
 	 */
 	public int screenY()
@@ -559,7 +606,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Draw this <code>UIComponent</code>. Called by {@link #parent} container.
-	 * 
+	 *
 	 * @param renderer
 	 * @param mouseX
 	 * @param mouseY
@@ -573,14 +620,17 @@ public abstract class UIComponent<T extends UIComponent>
 		if (shape != null)
 		{
 			shape.resetState();
-			shape.setSize(width, height);
+			shape.setSize(getWidth(), getHeight());
 		}
+
+		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 		renderer.currentComponent = this;
 		drawBackground(renderer, mouseX, mouseY, partialTick);
 		renderer.next();
 		renderer.currentComponent = this;
 		drawForeground(renderer, mouseX, mouseY, partialTick);
 		renderer.next();
+		GL11.glPopAttrib();
 	}
 
 	@Override
@@ -597,7 +647,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Called first when drawing this <code>UIComponent</code>.
-	 * 
+	 *
 	 * @param renderer
 	 * @param mouseX
 	 * @param mouseY
@@ -607,7 +657,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Called last when drawing this <code>UIComponent</code>.
-	 * 
+	 *
 	 * @param renderer
 	 * @param mouseX
 	 * @param mouseY

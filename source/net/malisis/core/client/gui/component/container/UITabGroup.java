@@ -31,7 +31,7 @@ import net.malisis.core.client.gui.component.interaction.UITab;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class UITabGroup extends UIContainer<UITabGroup>
 {
@@ -63,6 +63,9 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		return super.setPosition(x, y, anchor);
 	}
 
+	/**
+	 * @return the relative position of the tabs around their containers.
+	 */
 	public Position getTabPosition()
 	{
 		return tabPosition;
@@ -71,7 +74,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	/**
 	 * Adds tab and its corresponding container to this <code>UITabGroup</code>.<br />
 	 * Also sets the width of this <code>UITabGroup</code>.
-	 * 
+	 *
 	 * @param tab
 	 * @param container
 	 */
@@ -109,13 +112,20 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		return tab;
 	}
 
+	/**
+	 * Creates and adds a tab with label to this <code>UITabGroup</code>.
+	 *
+	 * @param tabName
+	 * @param container
+	 * @return
+	 */
 	public UITab addTab(String tabName, UIContainer container)
 	{
 		return addTab(new UITab(tabName), container);
 	}
 
 	/**
-	 * Aligns the height of each tab
+	 * Aligns the height or width of each tab.
 	 */
 	private void updateTabs()
 	{
@@ -162,7 +172,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 
 	/**
 	 * Activates the tab and deactivates currently active tab.
-	 * 
+	 *
 	 * @param tab
 	 */
 	public void setActiveTab(UITab tab)

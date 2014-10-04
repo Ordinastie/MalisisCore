@@ -68,34 +68,25 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 	}
 
 	@Override
-	public boolean fireMouseEvent(MouseEvent event)
+	public UIComponent getComponentAt(int x, int y)
 	{
-		if (allowVerticalScroll
-				&& (verticalScroll.isInsideBounds(event.getX(), event.getY()) || (verticalScroll.isFocused() && event instanceof MouseEvent.Drag)))
-			return verticalScroll.fireMouseEvent(event);
-		if (allowHorizontalScroll
-				&& (horizontalScroll.isInsideBounds(event.getX(), event.getY()) || (horizontalScroll.isFocused() && event instanceof MouseEvent.Drag)))
-			return horizontalScroll.fireMouseEvent(event);
+		if (allowVerticalScroll && verticalScroll.isInsideBounds(x, y))
+			return verticalScroll;
+		if (allowHorizontalScroll && horizontalScroll.isInsideBounds(x, y))
+			return horizontalScroll;
 
-		if (isInsideBounds(event.getX(), event.getY()))
-			return super.fireMouseEvent(event);
-
-		return false;
-	}
-
-	public boolean isInsideBounds(int x, int y, boolean scrolls)
-	{
-		if (scrolls && allowVerticalScroll && verticalScroll.isInsideBounds(x, y))
-			return true;
-		if (scrolls && allowHorizontalScroll && horizontalScroll.isInsideBounds(x, y))
-			return true;
-		if (super.isInsideBounds(x, y))
-			return true;
-
-		return false;
+		return super.getComponentAt(x, y);
 	}
 
 	// #region getters/setters
+	@Override
+	public void setParent(UIContainer parent)
+	{
+		super.setParent(parent);
+		if (width == INHERITED || height == INHERITED)
+			calculateContentSize();
+	}
+
 	@Override
 	public UIPanel setSize(int width, int height)
 	{
@@ -143,8 +134,11 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 
 	public void setScrollBarsPosition()
 	{
-		verticalScroll.setPosition(horizontalPadding - xOffset, -verticalPadding - yOffset, Anchor.RIGHT);
-		horizontalScroll.setPosition(-verticalPadding - xOffset, horizontalPadding - yOffset, Anchor.BOTTOM);
+		if (verticalScroll != null)
+		{
+			verticalScroll.setPosition(horizontalPadding - xOffset, -verticalPadding - yOffset, Anchor.RIGHT);
+			horizontalScroll.setPosition(-verticalPadding - xOffset, horizontalPadding - yOffset, Anchor.BOTTOM);
+		}
 	}
 
 	@Override
@@ -190,8 +184,8 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 
 	public void calculateContentSize()
 	{
-		int w = width - (allowVerticalScroll ? UIScrollBar.SCROLL_THICKNESS + 1 : 0);
-		int h = height - (allowHorizontalScroll ? UIScrollBar.SCROLL_THICKNESS + 1 : 0);
+		int w = getWidth() - (allowVerticalScroll ? UIScrollBar.SCROLL_THICKNESS + 1 : 0);
+		int h = getHeight() - (allowHorizontalScroll ? UIScrollBar.SCROLL_THICKNESS + 1 : 0);
 		int contentWidth = w - horizontalPadding;
 		int contentHeight = h - verticalPadding;
 

@@ -40,7 +40,7 @@ import org.lwjgl.opengl.GL11;
 
 /**
  * UIContainer
- * 
+ *
  * @author PaleoCrafter
  */
 public class UIContainer<T extends UIContainer> extends UIComponent<T>
@@ -123,7 +123,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 
 	/**
 	 * Set the padding for this <code>UIContainer</code>.
-	 * 
+	 *
 	 * @param horizontal
 	 * @param vertical
 	 */
@@ -153,9 +153,9 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	{
 		int x = component.getX();
 		if (Anchor.horizontal(component.getAnchor()) == Anchor.CENTER)
-			x += (width - component.getWidth()) / 2;
+			x += (getWidth() - component.getWidth()) / 2;
 		else if (Anchor.horizontal(component.getAnchor()) == Anchor.RIGHT)
-			x += width - component.getWidth() - getHorizontalPadding();
+			x += getWidth() - component.getWidth() - getHorizontalPadding();
 		else
 			x += getHorizontalPadding();
 
@@ -166,9 +166,9 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	{
 		int y = component.getY();
 		if (Anchor.vertical(component.getAnchor()) == Anchor.MIDDLE)
-			y += (height - component.getHeight()) / 2;
+			y += (getHeight() - component.getHeight()) / 2;
 		else if (Anchor.vertical(component.getAnchor()) == Anchor.BOTTOM)
-			y += height - component.getHeight() - getVerticalPadding();
+			y += getHeight() - component.getHeight() - getVerticalPadding();
 		else
 			y += getVerticalPadding();
 
@@ -193,7 +193,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 
 	/**
 	 * Get the clipping area delimited by this <code>UIContainer</code>
-	 * 
+	 *
 	 * @return
 	 */
 	public ClipArea getClipArea()
@@ -205,8 +205,6 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	{
 		components.add(component);
 		component.setParent(this);
-		if (component.getZIndex() == INHERITED)
-			component.setZIndex(zIndex);
 	}
 
 	public void remove(UIComponent component)
@@ -232,7 +230,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 
 		rp.colorMultiplier.set(backgroundColor);
 		shape.resetState();
-		shape.setSize(width, height);
+		shape.setSize(getWidth(), getHeight());
 
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		renderer.drawShape(shape, rp);

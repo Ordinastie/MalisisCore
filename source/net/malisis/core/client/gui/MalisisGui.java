@@ -46,7 +46,7 @@ import org.lwjgl.opengl.GL11;
 
 /**
  * GuiScreenProxy
- * 
+ *
  * @author Ordinastie
  */
 public class MalisisGui extends GuiScreen
@@ -113,7 +113,7 @@ public class MalisisGui extends GuiScreen
 
 	/**
 	 * Sets the inventory container for this <code>MalisisGui</code>.
-	 * 
+	 *
 	 * @param container
 	 */
 	public void setInventoryContainer(MalisisInventoryContainer container)
@@ -123,7 +123,7 @@ public class MalisisGui extends GuiScreen
 
 	/**
 	 * Gets the inventory container for this <code>MalisisGui</code>.
-	 * 
+	 *
 	 * @return
 	 */
 	public MalisisInventoryContainer getInventoryContainer()
@@ -133,7 +133,7 @@ public class MalisisGui extends GuiScreen
 
 	/**
 	 * Gets elapsed time since the GUI was opened.
-	 * 
+	 *
 	 * @return
 	 */
 	public long getElapsedTime()
@@ -143,7 +143,7 @@ public class MalisisGui extends GuiScreen
 
 	/**
 	 * Adds container to the screen.
-	 * 
+	 *
 	 * @param container
 	 */
 	protected void addToScreen(UIContainer container)
@@ -256,7 +256,7 @@ public class MalisisGui extends GuiScreen
 
 	/**
 	 * Called when a button is double clicked.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param button
@@ -376,7 +376,7 @@ public class MalisisGui extends GuiScreen
 
 	/**
 	 * Gets the current <code>MalisisGui</code> displayed.
-	 * 
+	 *
 	 * @return null if no GUI being displayed or if not a <code>MalisisGui</code>
 	 */
 	public static MalisisGui currentGui()
@@ -389,7 +389,7 @@ public class MalisisGui extends GuiScreen
 
 	/**
 	 * Sends a GUI action to the server.
-	 * 
+	 *
 	 * @param action
 	 * @param slot
 	 * @param code
