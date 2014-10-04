@@ -29,7 +29,7 @@ import net.malisis.core.client.gui.component.UIComponent;
 
 /**
  * UILabel
- * 
+ *
  * @author PaleoCrafter
  */
 public class UILabel extends UIComponent<UILabel>
@@ -58,6 +58,10 @@ public class UILabel extends UIComponent<UILabel>
 	 * Height of the text
 	 */
 	protected int textHeight;
+	/**
+	 * Scale of the font
+	 */
+	protected float fontScale = 1;
 
 	public UILabel(String text, int width)
 	{
@@ -78,15 +82,15 @@ public class UILabel extends UIComponent<UILabel>
 	// #region getters/setters
 	/**
 	 * Sets the text of this <code>UILabel</code>. If no width was previously set, it will be recalculated for this text.
-	 * 
+	 *
 	 * @param text
 	 * @return this <code>UILabel</code>
 	 */
 	public UILabel setText(String text)
 	{
 		this.text = text;
-		this.textWidth = GuiRenderer.getStringWidth(text);
-		this.textHeight = GuiRenderer.FONT_HEIGHT;
+		this.textWidth = GuiRenderer.getStringWidth(text, fontScale);
+		this.textHeight = GuiRenderer.getStringHeight(fontScale);
 		if (autoWidth)
 			setSize(0);
 		return this;
@@ -102,7 +106,7 @@ public class UILabel extends UIComponent<UILabel>
 
 	/**
 	 * Sets the width of this <code>UILabel</code>. Height is defined by text height.
-	 * 
+	 *
 	 * @param width
 	 * @return this <code>UILabel</code>
 	 */
@@ -116,7 +120,7 @@ public class UILabel extends UIComponent<UILabel>
 
 	/**
 	 * Sets the width of this <code>UILabel</code>. Height parameter is ignored and defined by text height.
-	 * 
+	 *
 	 * @param width
 	 * @param height ignored
 	 * @return this <code>UILabel</code>
@@ -128,8 +132,8 @@ public class UILabel extends UIComponent<UILabel>
 	}
 
 	/**
-	 * Set the color of the text of this <code>UILabel</code>.
-	 * 
+	 * Sets the color of the text of this <code>UILabel</code>.
+	 *
 	 * @param color
 	 */
 	public UILabel setColor(int color)
@@ -148,13 +152,33 @@ public class UILabel extends UIComponent<UILabel>
 
 	/**
 	 * Set the drop shadow for the text of this <code>UILabel</code>.
-	 * 
+	 *
 	 * @param drawShadow
 	 */
 	public UILabel setDrawShadow(boolean drawShadow)
 	{
 		this.drawShadow = drawShadow;
 		return this;
+	}
+
+	/**
+	 * Sets the scale of the font to use for this <code>UILabel</code>
+	 *
+	 * @param scale
+	 * @return
+	 */
+	public UILabel setFontScale(float scale)
+	{
+		this.fontScale = scale;
+		return this;
+	}
+
+	/**
+	 * @return the fontScale used by this <code>UILabel</code>
+	 */
+	public float getFontScale()
+	{
+		return fontScale;
 	}
 
 	// #end getters/setters
