@@ -89,6 +89,10 @@ public class GuiRenderer extends BaseRenderer
 	 */
 	private boolean ignoreScale = false;
 	/**
+	 * Scale to use when drawing fonts
+	 */
+	private float fontScale = 1F;
+	/**
 	 * Current X position of the mouse.
 	 */
 	public int mouseX;
@@ -106,9 +110,24 @@ public class GuiRenderer extends BaseRenderer
 		updateGuiScale();
 	}
 
+	/**
+	 * Sets whether to ignore default Minecraft GUI scale factor.
+	 *
+	 * @param ignore
+	 */
 	public void setIgnoreScale(boolean ignore)
 	{
 		ignoreScale = ignore;
+	}
+
+	/**
+	 * Sets a custom font scale factor
+	 *
+	 * @param scale
+	 */
+	public void setFontScale(float scale)
+	{
+		fontScale = scale;
 	}
 
 	/**
@@ -124,7 +143,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Sets the mouse position and the partial tick.
-	 * 
+	 *
 	 * @param mouseX
 	 * @param mouseY
 	 * @param partialTicks
@@ -138,7 +157,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Draws the component to the screen.
-	 * 
+	 *
 	 * @param container
 	 * @param mouseX
 	 * @param mouseY
@@ -170,7 +189,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Draws a tooltip to the screen
-	 * 
+	 *
 	 * @param tooltip
 	 */
 	public void drawTooltip(UITooltip tooltip)
@@ -185,7 +204,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Draws a shape on the GUI with the specified parameters
-	 * 
+	 *
 	 * @param s
 	 * @param rp
 	 */
@@ -196,7 +215,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Draws a shape on the GUI with the specified icons. Icons length should match the number of faces in the shape.
-	 * 
+	 *
 	 * @param s
 	 * @param icons
 	 */
@@ -207,7 +226,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Draws a shape to the GUI with the specified parameters and icons. Icons length should match the number of faces in the shape.
-	 * 
+	 *
 	 * @param s
 	 * @param params
 	 * @param icons
@@ -243,7 +262,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Clips a string to fit in the specified width. The string is translated before clipping.
-	 * 
+	 *
 	 * @param text
 	 * @param width
 	 * @return
@@ -270,7 +289,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Splits the string in multiple lines to fit in the specified maxWidth.
-	 * 
+	 *
 	 * @param text
 	 * @param maxWidth
 	 * @return
@@ -320,7 +339,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Draws a white text on the GUI without shadow.
-	 * 
+	 *
 	 * @param text
 	 */
 	public void drawText(String text)
@@ -330,7 +349,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Draws a text on the GUI with specified color and shadow.
-	 * 
+	 *
 	 * @param text
 	 * @param color
 	 * @param shadow
@@ -342,7 +361,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Draws a text on the GUI at the specified coordinates, relative to its parent container, with color and shadow.
-	 * 
+	 *
 	 * @param text
 	 * @param x
 	 * @param y
@@ -356,7 +375,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Draws a text on the GUI at the specified coordinates, relative to its parent container, with zIndex, color and shadow.
-	 * 
+	 *
 	 * @param text
 	 * @param x
 	 * @param y
@@ -372,7 +391,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Draws a string at the specified coordinates, with color and shadow. The string gets translated. Uses FontRenderer.drawString().
-	 * 
+	 *
 	 * @param text
 	 * @param x
 	 * @param y
@@ -388,6 +407,11 @@ public class GuiRenderer extends BaseRenderer
 		text = StatCollector.translateToLocal(text);
 
 		GL11.glPushMatrix();
+		//if (fontScale != 1)
+		{
+			GL11.glTranslatef(x * (1 - fontScale), y * (1 - fontScale), 0);
+			GL11.glScalef(fontScale, fontScale, 1);
+		}
 		GL11.glTranslatef(0, 0, z);
 		// GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
@@ -400,7 +424,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Draws itemStack to the GUI. Uses RenderItem.renderItemAndEffectIntoGUI() and RenderItem.renderItemOverlayIntoGUI();
-	 * 
+	 *
 	 * @param itemStack
 	 * @param x
 	 * @param y
@@ -413,7 +437,7 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Draws itemStack to the GUI. Uses RenderItem.renderItemAndEffectIntoGUI() and RenderItem.renderItemOverlayIntoGUI(); TODO: use
 	 * currrentComponent position
-	 * 
+	 *
 	 * @param itemStack
 	 * @param x
 	 * @param y
@@ -449,7 +473,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Starts clipping an area to prevent drawing outside of it.
-	 * 
+	 *
 	 * @param area
 	 */
 	public void startClipping(ClipArea area)
@@ -470,7 +494,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Ends the clipping.
-	 * 
+	 *
 	 * @param area
 	 */
 	public void endClipping(ClipArea area)
@@ -484,7 +508,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Calculate GUI scale factor.
-	 * 
+	 *
 	 * @param guiScale
 	 */
 	private void calcScaleFactor(int guiScale)
@@ -500,7 +524,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Render the picked up itemStack at the cursor position.
-	 * 
+	 *
 	 * @param itemStack
 	 */
 	public void renderPickedItemStack(ItemStack itemStack)
@@ -517,14 +541,35 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Gets rendering width of a string.
-	 * 
+	 *
 	 * @param str
 	 * @return
 	 */
 	public static int getStringWidth(String str)
 	{
+		return getStringWidth(str, 1);
+	}
+
+	/**
+	 * Gets rendering width of a string according to fontScale
+	 *
+	 * @param str
+	 * @return
+	 */
+	public static int getStringWidth(String str, float fontScale)
+	{
 		str = StatCollector.translateToLocal(str);
-		return fontRenderer.getStringWidth(str);
+		return Math.round(fontRenderer.getStringWidth(str) * fontScale);
+	}
+
+	public static int getStringHeight()
+	{
+		return getStringHeight(1);
+	}
+
+	public static int getStringHeight(float fontScale)
+	{
+		return Math.round(FONT_HEIGHT * fontScale);
 	}
 
 	/**
@@ -545,7 +590,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Gets the rendering width of a char.
-	 * 
+	 *
 	 * @param c
 	 * @return
 	 */
