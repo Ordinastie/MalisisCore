@@ -170,12 +170,4 @@ public abstract class MouseEvent extends GuiEvent
 		}
 	}
 
-	public static class HoveredStateChange extends MouseEvent
-	{
-		public HoveredStateChange(int x, int y)
-		{
-			super(x, y);
-		}
-	}
-
 }
