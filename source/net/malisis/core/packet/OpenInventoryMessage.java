@@ -28,7 +28,10 @@ import io.netty.buffer.ByteBuf;
 import net.malisis.core.inventory.IInventoryProvider;
 import net.malisis.core.inventory.MalisisInventory;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -36,7 +39,7 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class OpenIventoryMessage implements IMessageHandler<OpenIventoryMessage.Packet, IMessage>
+public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessage.Packet, IMessage>
 {
 	public enum ContainerType
 	{
@@ -53,7 +56,7 @@ public class OpenIventoryMessage implements IMessageHandler<OpenIventoryMessage.
 
 	/**
 	 * Open a the GUI for the container.
-	 * 
+	 *
 	 * @param type
 	 * @param x
 	 * @param y
@@ -63,19 +66,29 @@ public class OpenIventoryMessage implements IMessageHandler<OpenIventoryMessage.
 	@SideOnly(Side.CLIENT)
 	private void openGui(ContainerType type, int x, int y, int z, int windowId)
 	{
+		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
 		if (type == ContainerType.TYPE_TILEENTITY)
 		{
 			TileEntity te = Minecraft.getMinecraft().theWorld.getTileEntity(x, y, z);
 			if (te instanceof IInventoryProvider)
 			{
-				((IInventoryProvider) te).getInventory().open(Minecraft.getMinecraft().thePlayer, windowId);
+				((IInventoryProvider) te).getInventory().open(player, windowId);
 			}
 		}
+		else if (type == ContainerType.TYPE_ITEM)
+		{
+			ItemStack itemStack = player.getCurrentEquippedItem();
+			if (itemStack.getItem() instanceof IInventoryProvider)
+			{
+				((IInventoryProvider) itemStack.getItem()).getInventory(itemStack).open(player, windowId);
+			}
+		}
+
 	}
 
 	/**
 	 * Send a packet to client to notify it to open a {@link MalisisInventory}.
-	 * 
+	 *
 	 * @param container
 	 * @param player
 	 * @param windowId
@@ -105,6 +118,8 @@ public class OpenIventoryMessage implements IMessageHandler<OpenIventoryMessage.
 				this.y = ((TileEntity) container).yCoord;
 				this.z = ((TileEntity) container).zCoord;
 			}
+			if (container instanceof Item)
+				this.type = ContainerType.TYPE_ITEM;
 		}
 
 		@Override
@@ -116,8 +131,8 @@ public class OpenIventoryMessage implements IMessageHandler<OpenIventoryMessage.
 				this.x = buf.readInt();
 				this.y = buf.readInt();
 				this.z = buf.readInt();
-				this.windowId = buf.readInt();
 			}
+			this.windowId = buf.readInt();
 		}
 
 		@Override
@@ -129,8 +144,8 @@ public class OpenIventoryMessage implements IMessageHandler<OpenIventoryMessage.
 				buf.writeInt(x);
 				buf.writeInt(y);
 				buf.writeInt(z);
-				buf.writeInt(windowId);
 			}
+			buf.writeInt(windowId);
 		}
 
 	}

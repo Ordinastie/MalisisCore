@@ -47,29 +47,26 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInventorySlotsMessage.Packet, IMessage>
 {
-	public enum SlotType
-	{
-		TYPE_INVENTORY, TYPE_PLAYERINVENTORY, TYPE_PICKEDITEM, TYPE_DRAGGEDITEMS
-	}
+	public static int PICKEDITEM = -1;
 
 	@Override
 	public IMessage onMessage(Packet message, MessageContext ctx)
 	{
 		if (ctx.side == Side.CLIENT)
-			updateSlots(message.type, message.slots, message.windowId);
+			updateSlots(message.inventoryId, message.slots, message.windowId);
 
 		return null;
 	}
 
 	/**
 	 * Handle the reception of packets that update the inventory of the client.
-	 * 
+	 *
 	 * @param type
 	 * @param slots
 	 * @param windowId
 	 */
 	@SideOnly(Side.CLIENT)
-	private void updateSlots(SlotType type, HashMap<Integer, ItemStack> slots, int windowId)
+	private void updateSlots(int inventoryId, HashMap<Integer, ItemStack> slots, int windowId)
 	{
 		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
 		Container c = player.openContainer;
@@ -77,19 +74,15 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 			return;
 
 		MalisisInventoryContainer container = (MalisisInventoryContainer) c;
-		if (type == SlotType.TYPE_PICKEDITEM)
+		if (inventoryId == PICKEDITEM)
 		{
 			container.setPickedItemStack(slots.get(-1));
 			return;
 		}
 
-		if (type == SlotType.TYPE_DRAGGEDITEMS)
-		{
-			container.setDraggedItems(slots);
+		MalisisInventory inventory = container.getInventory(inventoryId);
+		if (inventory == null)
 			return;
-		}
-
-		MalisisInventory inventory = type == SlotType.TYPE_INVENTORY ? container.getContainerInventory() : container.getPlayerInventory();
 
 		for (Entry<Integer, ItemStack> entry : slots.entrySet())
 		{
@@ -102,60 +95,46 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 
 	/**
 	 * Sends a packet to player to update the picked itemStack
-	 * 
+	 *
 	 * @param itemStack
 	 * @param player
 	 * @param windowId
 	 */
 	public static void updatePickedItemStack(ItemStack itemStack, EntityPlayerMP player, int windowId)
 	{
-		Packet packet = new Packet(SlotType.TYPE_PICKEDITEM, windowId);
+		Packet packet = new Packet(PICKEDITEM, windowId);
 		packet.draggedItemStack(itemStack);
 		NetworkHandler.network.sendTo(packet, player);
 	}
 
 	/**
 	 * Sends a packet to player to update the inventory slots
-	 * 
+	 *
 	 * @param type
 	 * @param slots
 	 * @param player
 	 * @param windowId
 	 */
-	public static void updateSlots(SlotType type, ArrayList<MalisisSlot> slots, EntityPlayerMP player, int windowId)
+	public static void updateSlots(int inventoryId, ArrayList<MalisisSlot> slots, EntityPlayerMP player, int windowId)
 	{
-		Packet packet = new Packet(type, windowId);
+		Packet packet = new Packet(inventoryId, windowId);
 		for (MalisisSlot slot : slots)
 			packet.addSlot(slot);
 		NetworkHandler.network.sendTo(packet, player);
 	}
 
-	/**
-	 * Sends a packet to player to update the dragged itemStacks
-	 * 
-	 * @param slots
-	 * @param player
-	 * @param windowId
-	 */
-	public static void updateDraggedItemStacks(HashMap<Integer, ItemStack> slots, EntityPlayerMP player, int windowId)
-	{
-		Packet packet = new Packet(SlotType.TYPE_DRAGGEDITEMS, windowId);
-		packet.setSlots(slots);
-		NetworkHandler.network.sendTo(packet, player);
-	}
-
 	public static class Packet implements IMessage
 	{
-		private SlotType type;
+		private int inventoryId;
 		private HashMap<Integer, ItemStack> slots = new HashMap<>();
 		private int windowId;
 
 		public Packet()
 		{}
 
-		public Packet(SlotType type, int windowId)
+		public Packet(int inventoryId, int windowId)
 		{
-			this.type = type;
+			this.inventoryId = inventoryId;
 			this.windowId = windowId;
 		}
 
@@ -178,7 +157,7 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 		@Override
 		public void fromBytes(ByteBuf buf)
 		{
-			this.type = SlotType.values()[buf.readByte()];
+			this.inventoryId = buf.readInt();
 			this.windowId = buf.readInt();
 			int size = buf.readInt();
 
@@ -189,7 +168,7 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 		@Override
 		public void toBytes(ByteBuf buf)
 		{
-			buf.writeByte(type.ordinal());
+			buf.writeInt(inventoryId);
 			buf.writeInt(windowId);
 			buf.writeInt(slots.size());
 

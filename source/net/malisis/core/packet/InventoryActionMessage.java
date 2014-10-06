@@ -51,7 +51,7 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 			return null;
 
 		MalisisInventoryContainer container = (MalisisInventoryContainer) c;
-		container.handleAction(message.action, message.slotNumber, message.code, message.playerInventory);
+		container.handleAction(message.action, message.inventoryId, message.slotNumber, message.code);
 		container.detectAndSendChanges();
 
 		return null;
@@ -59,37 +59,37 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 
 	/**
 	 * Sends GUI action to the server MalisisInventoryContainer.
-	 * 
+	 *
 	 * @param action
 	 * @param slotNumber
 	 * @param code
 	 * @param playerInventory
 	 */
 	@SideOnly(Side.CLIENT)
-	public static void sendAction(ActionType action, int slotNumber, int code, boolean playerInventory)
+	public static void sendAction(ActionType action, int inventoryId, int slotNumber, int code)
 	{
 		int windowId = Minecraft.getMinecraft().thePlayer.openContainer.windowId;
-		Packet packet = new Packet(action, slotNumber, code, playerInventory, windowId);
+		Packet packet = new Packet(action, inventoryId, slotNumber, code, windowId);
 		NetworkHandler.network.sendToServer(packet);
 	}
 
 	public static class Packet implements IMessage
 	{
 		private ActionType action;
+		private int inventoryId;
 		private int slotNumber;
 		private int code;
-		private boolean playerInventory;
 		private int windowId;
 
 		public Packet()
 		{}
 
-		public Packet(ActionType action, int slotNumber, int code, boolean playerInventory, int windowId)
+		public Packet(ActionType action, int inventoryId, int slotNumber, int code, int windowId)
 		{
 			this.action = action;
+			this.inventoryId = inventoryId;
 			this.slotNumber = slotNumber;
 			this.code = code;
-			this.playerInventory = playerInventory;
 			this.windowId = windowId;
 		}
 
@@ -97,9 +97,9 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 		public void fromBytes(ByteBuf buf)
 		{
 			action = ActionType.values()[buf.readByte()];
+			inventoryId = buf.readInt();
 			slotNumber = buf.readInt();
 			code = buf.readInt();
-			playerInventory = buf.readBoolean();
 			windowId = buf.readInt();
 		}
 
@@ -107,9 +107,9 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 		public void toBytes(ByteBuf buf)
 		{
 			buf.writeByte(action.ordinal());
+			buf.writeInt(inventoryId);
 			buf.writeInt(slotNumber);
 			buf.writeInt(code);
-			buf.writeBoolean(playerInventory);
 			buf.writeInt(windowId);
 		}
 	}

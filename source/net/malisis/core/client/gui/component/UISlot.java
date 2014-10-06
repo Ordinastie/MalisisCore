@@ -30,6 +30,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.event.ComponentEvent.HoveredStateChanged;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
@@ -83,17 +84,17 @@ public class UISlot extends UIComponent<UISlot>
 		this(null);
 	}
 
-	@Override
-	public void setHovered(boolean hovered)
+	@Subscribe
+	public void onHovered(HoveredStateChanged<UISlot> event)
 	{
-		super.setHovered(hovered);
 		updateTooltip();
 
-		if (hovered && MalisisGui.currentGui().getInventoryContainer().isDraggingItemStack())
+		if (event.getState() && MalisisGui.currentGui().getInventoryContainer().isDraggingItemStack())
 		{
-			if (MalisisGui.currentGui().getInventoryContainer().getDraggedItemstack(slot) == null)
-				MalisisGui.sendAction(ActionType.DRAG_ADD_SLOT, slot, 0);
+			//if (MalisisGui.currentGui().getInventoryContainer().getDraggedItemstack(slot) == null)
+			MalisisGui.sendAction(ActionType.DRAG_ADD_SLOT, slot, 0);
 		}
+
 	}
 
 	/**
@@ -134,7 +135,7 @@ public class UISlot extends UIComponent<UISlot>
 			return;
 
 		ItemStack itemStack = slot.getItemStack() != null ? slot.getItemStack().copy() : null;
-		ItemStack draggedItemStack = container.getDraggedItemstack(slot);
+		ItemStack draggedItemStack = slot.getDraggedItemStack();
 
 		// if dragged slots contains an itemStack for this slot, add the stack size
 		EnumChatFormatting format = null;
@@ -214,6 +215,7 @@ public class UISlot extends UIComponent<UISlot>
 		MalisisGui.sendAction(action, slot, event.getButtonCode());
 	}
 
+	@Subscribe
 	public void dragStack(MouseEvent.Drag event)
 	{
 		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();

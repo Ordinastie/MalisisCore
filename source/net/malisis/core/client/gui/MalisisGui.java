@@ -33,7 +33,6 @@ import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
-import net.malisis.core.inventory.player.PlayerInventorySlot;
 import net.malisis.core.packet.InventoryActionMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -72,9 +71,13 @@ public class MalisisGui extends GuiScreen
 	 */
 	protected int lastMouseX, lastMouseY;
 	/**
+	 *
+	 */
+	protected long lastClickButton = -1;
+	/**
 	 * How long since last click.
 	 */
-	protected long lastClick = 0;
+	protected long lastClickTime = 0;
 	/**
 	 * Inventory container that handles the inventories and slots actions.
 	 */
@@ -109,6 +112,7 @@ public class MalisisGui extends GuiScreen
 		this.screen = new UIContainer();
 		this.screen.clipContent = false;
 		startTime = System.currentTimeMillis();
+		Keyboard.enableRepeatEvents(true);
 	}
 
 	/**
@@ -198,10 +202,10 @@ public class MalisisGui extends GuiScreen
 	protected void mouseClicked(int x, int y, int button)
 	{
 		long time = System.currentTimeMillis();
-		if (button == 0 && time - lastClick < 250)
+		if (button == lastClickButton && time - lastClickTime < 250)
 		{
 			doubleClick(x, y, button);
-			lastClick = 0;
+			lastClickTime = 0;
 			return;
 		}
 
@@ -216,7 +220,8 @@ public class MalisisGui extends GuiScreen
 			}
 		}
 
-		lastClick = time;
+		lastClickTime = time;
+		lastClickButton = button;
 	}
 
 	/**
@@ -358,6 +363,7 @@ public class MalisisGui extends GuiScreen
 	 */
 	public void close()
 	{
+		Keyboard.enableRepeatEvents(false);
 		this.mc.thePlayer.closeScreen();
 		this.mc.displayGuiScreen((GuiScreen) null);
 		this.mc.setIngameFocus();
@@ -399,11 +405,11 @@ public class MalisisGui extends GuiScreen
 		if (action == null || currentGui() == null || currentGui().inventoryContainer == null)
 			return;
 
+		int inventoryId = slot != null ? slot.getInventoryId() : 0;
 		int slotNumber = slot != null ? slot.slotNumber : 0;
-		boolean playerInv = slot instanceof PlayerInventorySlot;
 
-		currentGui().inventoryContainer.handleAction(action, slotNumber, code, playerInv);
-		InventoryActionMessage.sendAction(action, slotNumber, code, playerInv);
+		currentGui().inventoryContainer.handleAction(action, inventoryId, slotNumber, code);
+		InventoryActionMessage.sendAction(action, inventoryId, slotNumber, code);
 	}
 
 	public static boolean setHoveredComponent(UIComponent component, boolean hovered)

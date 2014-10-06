@@ -38,6 +38,19 @@ public class MalisisSlot
 	 */
 	private ItemStack itemStack;
 	/**
+	 * ItemStack cached to detect changes
+	 */
+	private ItemStack cachedItemStack;
+	/**
+	 * ItemStack currently dragged into the slot
+	 */
+	private ItemStack draggedItemStack;
+	/**
+	 * ItemStack cached to detect changes
+	 */
+	private ItemStack cachedDraggedItemStack;
+
+	/**
 	 * Slot position within {@link MalisisInventory inventory}
 	 */
 	public int slotNumber;
@@ -63,20 +76,40 @@ public class MalisisSlot
 		this(null, null, index);
 	}
 
+	/**
+	 * Registers an object to inventory changes.
+	 *
+	 * @param object
+	 */
 	public void register(Object object)
 	{
 		if (inventory != null)
 			inventory.register(object);
 	}
 
+	/**
+	 * Sets the inventory containing this <code>MalisisSlot</code>
+	 *
+	 * @param inventory
+	 */
 	public void setInventory(MalisisInventory inventory)
 	{
 		this.inventory = inventory;
 	}
 
+	public MalisisInventory getInventory()
+	{
+		return inventory;
+	}
+
+	public int getInventoryId()
+	{
+		return inventory.getInventoryId();
+	}
+
 	/**
-	 * Set the itemStack contained by this <code>MalisisSlot</code>
-	 * 
+	 * Sets the itemStack contained by this <code>MalisisSlot</code>
+	 *
 	 * @param itemStack
 	 */
 	public void setItemStack(ItemStack itemStack)
@@ -93,8 +126,21 @@ public class MalisisSlot
 	}
 
 	/**
+	 *
+	 */
+	public void setDraggedItemStack(ItemStack itemStack)
+	{
+		this.draggedItemStack = itemStack;
+	}
+
+	public ItemStack getDraggedItemStack()
+	{
+		return draggedItemStack;
+	}
+
+	/**
 	 * Sets whether this <code>MalisisSlot</code> is an output slot. If set to true, isItemValid() always return false
-	 * 
+	 *
 	 * @param isOutput
 	 */
 	public void setOutputSlot(boolean isOutput)
@@ -103,8 +149,8 @@ public class MalisisSlot
 	}
 
 	/**
-	 * Check if this <code>MalisisSlot</code> can contain itemStack. Defers the test to this {@link MalisisInventory inventory}.
-	 * 
+	 * Checks if this <code>MalisisSlot</code> can contain itemStack. Defers the test to this {@link MalisisInventory inventory}.
+	 *
 	 * @return true if the itemStack can be container in this <code>MalisisSlot</code>
 	 */
 	public boolean isItemValid(ItemStack itemStack)
@@ -119,7 +165,7 @@ public class MalisisSlot
 	}
 
 	/**
-	 * Called when itemStack is set
+	 * Called when itemStack is set.
 	 */
 	public void onSlotChanged()
 	{
@@ -128,7 +174,7 @@ public class MalisisSlot
 
 	/**
 	 * Called when itemStack is picked up from this <code>MalisisSlot</code>
-	 * 
+	 *
 	 * @param player
 	 * @param itemStack
 	 */
@@ -169,6 +215,18 @@ public class MalisisSlot
 			return 64;
 
 		return this.inventory.getInventoryStackLimit();
+	}
+
+	public boolean hasChanged()
+	{
+		return !ItemStack.areItemStacksEqual(itemStack, cachedItemStack)
+				|| !ItemStack.areItemStacksEqual(draggedItemStack, cachedDraggedItemStack);
+	}
+
+	public void updateCache()
+	{
+		cachedItemStack = itemStack != null ? itemStack.copy() : null;
+		cachedDraggedItemStack = draggedItemStack != null ? draggedItemStack.copy() : null;
 	}
 
 	@Override

@@ -32,14 +32,14 @@ public interface IInventoryProvider
 {
 	/**
 	 * Gets the {@link MalisisInventory} instance.
-	 * 
+	 *
 	 * @return
 	 */
-	public MalisisInventory getInventory();
+	public MalisisInventory getInventory(Object... data);
 
 	/**
 	 * Get the GUI associated with the the {@link MalisisInventory}.
-	 * 
+	 *
 	 * @param player
 	 * @return
 	 */

@@ -39,7 +39,7 @@ public class NetworkHandler
 	{
 		network = new SimpleNetworkWrapper(channelName);
 
-		network.registerMessage(OpenIventoryMessage.class, OpenIventoryMessage.Packet.class, OPENINVENTORY, Side.CLIENT);
+		network.registerMessage(OpenInventoryMessage.class, OpenInventoryMessage.Packet.class, OPENINVENTORY, Side.CLIENT);
 		network.registerMessage(UpdateInventorySlotsMessage.class, UpdateInventorySlotsMessage.Packet.class, UPDATEINVENTORYSLOTS,
 				Side.CLIENT);
 		network.registerMessage(InventoryActionMessage.class, InventoryActionMessage.Packet.class, INVENTORYACTION, Side.SERVER);

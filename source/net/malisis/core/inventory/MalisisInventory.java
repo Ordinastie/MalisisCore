@@ -24,13 +24,19 @@
 
 package net.malisis.core.inventory;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
+
+import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.packet.OpenIventoryMessage;
+import net.malisis.core.packet.OpenInventoryMessage;
 import net.malisis.core.util.ItemUtils;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -44,10 +50,20 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class MalisisInventory implements IInventory
 {
+	protected Set<MalisisInventoryContainer> containers = Collections.newSetFromMap(new WeakHashMap<MalisisInventoryContainer, Boolean>());
+	/**
+	 * The inventory id inside the container.
+	 */
+	protected int inventoryId;
 	/**
 	 * Object containing this <code>MalisisInventory</code>.
 	 */
 	protected IInventoryProvider inventoryProvider;
+	/**
+	 * ItemStack holding the inventory when inventoryProvider is an Item
+	 */
+	protected ItemStack itemStackProvider;
+
 	/**
 	 * Slots for this <code>MalisisInventory</code>.
 	 */
@@ -79,6 +95,11 @@ public class MalisisInventory implements IInventory
 		setSlots(slots);
 	}
 
+	/**
+	 * Sets the slots for this <code>MalisisInventory</code>.
+	 *
+	 * @param slots
+	 */
 	public void setSlots(MalisisSlot[] slots)
 	{
 		this.size = slots.length;
@@ -87,23 +108,63 @@ public class MalisisInventory implements IInventory
 			slot.setInventory(this);
 	}
 
+	/**
+	 * Overrides a specific slot with a new one.
+	 *
+	 * @param slot
+	 * @param slotNumber
+	 */
 	public void overrideSlot(MalisisSlot slot, int slotNumber)
 	{
 		if (slotNumber < 0 || slotNumber >= getSizeInventory())
 			return;
 
 		slots[slotNumber] = slot;
+		slot.setInventory(this);
 	}
 
+	/**
+	 * Registers an object for the events fired by this <code>MalisisInventory</code>.
+	 *
+	 * @param object
+	 */
 	public void register(Object object)
 	{
 		bus.register(object);
 	}
 
+	/**
+	 * Sets the id of this <code>MalisisInventory</code> inside its container.
+	 *
+	 * @param id
+	 */
+	public void setInventoryId(int id)
+	{
+		inventoryId = id;
+		if (itemStackProvider == null)
+			return;
+
+		NBTTagCompound tag = itemStackProvider.stackTagCompound;
+		if (tag == null)
+		{
+			tag = new NBTTagCompound();
+			itemStackProvider.stackTagCompound = tag;
+		}
+		itemStackProvider.stackTagCompound.setInteger("inventoryId", id);
+	}
+
+	/**
+	 * Gets the id of <code>MalisisInventory</code>
+	 */
+	public int getInventoryId()
+	{
+		return inventoryId;
+	}
+
 	// #region getters/setters
 	/**
 	 * Gets the slot at position slotNumber.
-	 * 
+	 *
 	 * @param slotNumber
 	 * @return
 	 */
@@ -125,7 +186,7 @@ public class MalisisInventory implements IInventory
 
 	/**
 	 * Gets the itemStack from the slot at position slotNumber.
-	 * 
+	 *
 	 * @param slotNumber
 	 * @return
 	 */
@@ -137,7 +198,7 @@ public class MalisisInventory implements IInventory
 
 	/**
 	 * Sets the itemStack for the slot at position slotNumber.
-	 * 
+	 *
 	 * @param slotNumber
 	 * @param itemStack
 	 */
@@ -149,13 +210,17 @@ public class MalisisInventory implements IInventory
 
 		if (itemStack != null && itemStack.stackSize > this.getInventoryStackLimit())
 			itemStack.stackSize = this.getInventoryStackLimit();
+
+		if (ItemStack.areItemStacksEqual(itemStack, slot.getItemStack()))
+			return;
+
 		slot.setItemStack(itemStack);
 		slot.onSlotChanged();
 	}
 
 	/**
 	 * Checks whether itemStack can be contained by slot.
-	 * 
+	 *
 	 * @param slot
 	 * @param itemStack
 	 * @return
@@ -200,15 +265,58 @@ public class MalisisInventory implements IInventory
 		slotMaxStackSize = limit;
 	}
 
+	/**
+	 * Set this <code>MalisisInventory</code> contents based on the itemStack NBT. <br />
+	 * The inventoryProvider need to be an Item.
+	 *
+	 * @param itemStack
+	 */
+	public void setItemStackProvider(ItemStack itemStack)
+	{
+		if (!(inventoryProvider instanceof Item))
+			throw new IllegalArgumentException("setItemStack not allowed with " + inventoryProvider.getClass().getSimpleName()
+					+ " provider.");
+
+		if (itemStack.getItem() != inventoryProvider)
+		{
+			MalisisCore.log.error("[MalisisInventory] Tried to set itemStack with an different item (" + itemStack.getItem()
+					+ ") than the provider (" + inventoryProvider + ")");
+			return;
+		}
+
+		this.itemStackProvider = itemStack;
+		readFromNBT(itemStack.getTagCompound());
+	}
+
+	public void addOpenedContainer(MalisisInventoryContainer container)
+	{
+		containers.add(container);
+	}
+
+	public void removeOpenedContainer(MalisisInventoryContainer container)
+	{
+		containers.remove(container);
+		if (containers.size() == 0 && itemStackProvider != null && itemStackProvider.stackTagCompound != null)
+			itemStackProvider.stackTagCompound.removeTag("inventoryId");
+	}
+
+	public Set<MalisisInventoryContainer> getOpenedContainers()
+	{
+		return containers;
+	}
+
 	// #end getters/setters
 
 	/**
 	 * Called when itemStack change in slot
-	 * 
+	 *
 	 * @param malisisSlot
 	 */
 	public void onSlotChanged(MalisisSlot slot)
 	{
+		if (inventoryProvider instanceof Item && itemStackProvider != null)
+			this.writeToNBT(itemStackProvider.getTagCompound());
+
 		bus.post(new InventoryEvent.SlotChanged(this, slot));
 	}
 
@@ -221,7 +329,7 @@ public class MalisisInventory implements IInventory
 
 	/**
 	 * Transfer itemStack inside this <code>MalisisInventory</code>.
-	 * 
+	 *
 	 * @param itemStack that could not fit inside this <code>MalisisInventory</code>
 	 * @return
 	 */
@@ -232,7 +340,7 @@ public class MalisisInventory implements IInventory
 
 	/**
 	 * Transfer itemStack inside this <code>MalisisInventory</code>.
-	 * 
+	 *
 	 * @param itemStack that could not fit inside this <code>MalisisInventory</code>
 	 * @param reversed start filling slots from the last slot
 	 * @return
@@ -252,7 +360,7 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Transfer itemStack inside this <code>MalisisInventory</code> into slots at position from start to end. If start > end, the slots will
 	 * be filled backwards.
-	 * 
+	 *
 	 * @param itemStack
 	 * @param emptySlot
 	 * @param start
@@ -291,11 +399,14 @@ public class MalisisInventory implements IInventory
 
 	/**
 	 * Read this <code>MalisisInventory</code> data from tagCompound
-	 * 
+	 *
 	 * @param tagCompound
 	 */
 	public void readFromNBT(NBTTagCompound tagCompound)
 	{
+		if (tagCompound == null)
+			return;
+
 		NBTTagList nbttaglist = tagCompound.getTagList("Items", NBT.TAG_COMPOUND);
 		for (int i = 0; i < nbttaglist.tagCount(); ++i)
 		{
@@ -309,11 +420,14 @@ public class MalisisInventory implements IInventory
 
 	/**
 	 * Writes this <code>MalisisInventory</code> data inside tagCompound
-	 * 
+	 *
 	 * @param tagCompound
 	 */
 	public void writeToNBT(NBTTagCompound tagCompound)
 	{
+		if (tagCompound == null)
+			return;
+
 		NBTTagList itemList = new NBTTagList();
 		for (int i = 0; i < slots.length; i++)
 		{
@@ -331,10 +445,10 @@ public class MalisisInventory implements IInventory
 
 	/**
 	 * Open this <code>MalisisInventory</code>. Called server-side only
-	 * 
+	 *
 	 * @param player
 	 * @return
-	 * 
+	 *
 	 */
 	public MalisisInventoryContainer open(EntityPlayerMP player)
 	{
@@ -342,7 +456,7 @@ public class MalisisInventory implements IInventory
 			return null;
 
 		MalisisInventoryContainer c = new MalisisInventoryContainer(this, player, 0);
-		OpenIventoryMessage.send(inventoryProvider, player, c.windowId);
+		OpenInventoryMessage.send(inventoryProvider, player, c.windowId);
 		c.sendInventoryContent();
 
 		openInventory();
@@ -353,7 +467,7 @@ public class MalisisInventory implements IInventory
 
 	/**
 	 * Open this <code>MalisisInventory</code>. Called client-side only.
-	 * 
+	 *
 	 * @param player
 	 * @param windowId
 	 * @return
