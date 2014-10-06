@@ -31,12 +31,22 @@ import net.malisis.core.inventory.player.PlayerInventorySlot;
 
 public class UIPlayerInventory extends UIContainer
 {
+	/**
+	 * Width required for player inventory
+	 */
+	public static final int INVENTORY_WIDTH = 162;
+
+	/**
+	 * Height required for player inventory (including title)
+	 */
+	public static final int INVENTORY_HEIGHT = 87;
+
 	@SuppressWarnings("unused")
 	private MalisisInventory inventory;
 
 	public UIPlayerInventory(MalisisInventory inventory)
 	{
-		super("container.inventory", 162, 87);
+		super("container.inventory", INVENTORY_WIDTH, INVENTORY_HEIGHT);
 		this.inventory = inventory;
 
 		for (int i = 0; i < inventory.getSizeInventory(); i++)
@@ -45,6 +55,12 @@ public class UIPlayerInventory extends UIContainer
 		setPosition(0, 0, Anchor.BOTTOM | Anchor.CENTER);
 	}
 
+	/**
+	 * Creates and adds <code>UISlot</code> into this <code>UIPlayerInventory</code>.
+	 *
+	 * @param slot
+	 * @param number
+	 */
 	protected void addSlot(PlayerInventorySlot slot, int number)
 	{
 		UISlot uislot = new UISlot(slot);
