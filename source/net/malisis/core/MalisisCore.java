@@ -43,6 +43,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.GuiOpenEvent;
@@ -250,11 +252,16 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
 		{
 			MinecraftServer server = MinecraftServer.getServer();
+
 			if (server != null)
 				server.getConfigurationManager().sendChatMsg(msg);
 		}
 		else
 		{
+			ChatStyle cs = new ChatStyle();
+			cs.setItalic(true);
+			cs.setColor(EnumChatFormatting.GRAY);
+			msg.setChatStyle(cs);
 			Minecraft.getMinecraft().thePlayer.addChatMessage(msg);
 		}
 	}
