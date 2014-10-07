@@ -236,7 +236,7 @@ public class MalisisInventoryContainer extends Container
 			return false;
 
 		if (dragType == DRAG_TYPE_ONE || dragType == DRAG_TYPE_SPREAD)
-			return dragType == button;// && draggedItemStacks.size() > 1;
+			return dragType == button && draggedSlots.size() > 1;
 
 		return dragType == DRAG_TYPE_PICKUP;
 	}
