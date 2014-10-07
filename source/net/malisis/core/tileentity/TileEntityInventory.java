@@ -24,162 +24,103 @@
 
 package net.malisis.core.tileentity;
 
+import net.malisis.core.inventory.IInventoryProvider;
+import net.malisis.core.inventory.MalisisInventory;
+import net.malisis.core.inventory.MalisisSlot;
+import net.malisis.core.util.ItemUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.common.util.ForgeDirection;
 
-abstract public class TileEntityInventory extends TileEntity implements IInventory
+public abstract class TileEntityInventory extends TileEntity implements IInventoryProvider, IInventory
 {
-	protected ItemStack[] slots;
-	protected String customName;
-	protected String unLocalizedName;
+	protected MalisisInventory inventory;
 
-	public TileEntityInventory()
+	public TileEntityInventory(MalisisInventory inventory)
 	{
-		slots = new ItemStack[getSizeInventory()];
+		this.inventory = inventory;
 	}
 
 	@Override
-	public ItemStack getStackInSlot(int slot)
+	public MalisisInventory getInventory(Object... data)
 	{
-		if (slot < 0 || slot >= getSizeInventory())
-			return null;
-
-		return slots[slot];
+		return inventory;
 	}
 
 	@Override
-	public ItemStack decrStackSize(int slot, int count)
+	public MalisisInventory getInventory(ForgeDirection side, Object... data)
 	{
-		ItemStack stack = getStackInSlot(slot);
-		if (stack == null)
-			return null;
-
-		if (stack.stackSize <= count)
-		{
-			setInventorySlotContents(slot, null);
-			return stack;
-		}
-		else
-		{
-			ItemStack ret = stack.splitStack(count);
-			if (stack.stackSize == 0)
-				setInventorySlotContents(slot, null);
-			return ret;
-		}
-	}
-
-	@Override
-	public ItemStack getStackInSlotOnClosing(int slot)
-	{
-		if (this.slots[slot] != null)
-		{
-			ItemStack itemstack = getStackInSlot(slot);
-			setInventorySlotContents(slot, null);
-			return itemstack;
-		}
-		else
-		{
-			return null;
-		}
-	}
-
-	@Override
-	public void setInventorySlotContents(int slot, ItemStack stack)
-	{
-		if (slot < 0 || slot > getSizeInventory())
-			return;
-
-		this.slots[slot] = stack;
-
-		if (stack != null && stack.stackSize > this.getInventoryStackLimit())
-			stack.stackSize = this.getInventoryStackLimit();
-		this.markDirty();
-	}
-
-	@Override
-	public String getInventoryName()
-	{
-		return hasCustomInventoryName() ? customName : unLocalizedName;
-	}
-
-	@Override
-	public boolean hasCustomInventoryName()
-	{
-		return this.customName != null && this.customName.length() > 0;
-	}
-
-	@Override
-	public int getInventoryStackLimit()
-	{
-		return 64;
-	}
-
-	@Override
-	public boolean isUseableByPlayer(EntityPlayer player)
-	{
-		if (worldObj.getTileEntity(xCoord, yCoord, zCoord) != this)
-			return false;
-		return player.getDistanceSq(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D) <= 64.0D;
+		return inventory;
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound tagCompound)
 	{
 		super.readFromNBT(tagCompound);
-		this.slots = new ItemStack[this.getSizeInventory()];
 
-		if (tagCompound.hasKey("CustomName", Constants.NBT.TAG_STRING))
-			this.customName = tagCompound.getString("CustomName");
-
-		NBTTagList nbttaglist = tagCompound.getTagList("Items", 10);
-		for (int i = 0; i < nbttaglist.tagCount(); ++i)
-		{
-			NBTTagCompound stackTag = nbttaglist.getCompoundTagAt(i);
-			int slot = stackTag.getByte("Slot") & 255;
-			setInventorySlotContents(slot, ItemStack.loadItemStackFromNBT(stackTag));
-		}
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound tagCompound)
 	{
 		super.writeToNBT(tagCompound);
-
-		NBTTagList itemList = new NBTTagList();
-		for (int i = 0; i < slots.length; i++)
-		{
-			ItemStack stack = getStackInSlot(i);
-			if (stack != null)
-			{
-				NBTTagCompound tag = new NBTTagCompound();
-				tag.setByte("Slot", (byte) i);
-				stack.writeToNBT(tag);
-				itemList.appendTag(tag);
-			}
-		}
-		tagCompound.setTag("Items", itemList);
 	}
 
 	@Override
-	public Packet getDescriptionPacket()
+	public int getSizeInventory()
 	{
-		NBTTagCompound nbt = new NBTTagCompound();
-		this.writeToNBT(nbt);
-		return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 1, nbt);
+		return inventory.getSizeInventory();
 	}
 
 	@Override
-	public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt)
+	public ItemStack getStackInSlot(int slotNumber)
 	{
-		this.readFromNBT(pkt.func_148857_g());
+		return inventory.getItemStack(slotNumber);
+	}
+
+	@Override
+	public ItemStack decrStackSize(int slotNumber, int amount)
+	{
+		return (new ItemUtils.ItemStackSplitter(inventory.getItemStack(slotNumber))).split(amount);
+	}
+
+	@Override
+	public ItemStack getStackInSlotOnClosing(int slotNumber)
+	{
+		return inventory.getItemStack(slotNumber);
+	}
+
+	@Override
+	public void setInventorySlotContents(int slotNumber, ItemStack itemStack)
+	{
+		inventory.setItemStack(slotNumber, itemStack);
+	}
+
+	@Override
+	public String getInventoryName()
+	{
+		return null;
+	}
+
+	@Override
+	public boolean hasCustomInventoryName()
+	{
+		return false;
+	}
+
+	@Override
+	public int getInventoryStackLimit()
+	{
+		return inventory.getInventoryStackLimit();
+	}
+
+	@Override
+	public boolean isUseableByPlayer(EntityPlayer player)
+	{
+		return true;
 	}
 
 	@Override
@@ -191,9 +132,11 @@ abstract public class TileEntityInventory extends TileEntity implements IInvento
 	{}
 
 	@Override
-	public boolean isItemValidForSlot(int var1, ItemStack var2)
+	public boolean isItemValidForSlot(int slotNumber, ItemStack itemStack)
 	{
-		return true;
+		MalisisSlot slot = inventory.getSlot(slotNumber);
+		if (slot == null)
+			return false;
+		return slot.isItemValid(itemStack);
 	}
-
 }
