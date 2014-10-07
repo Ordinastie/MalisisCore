@@ -24,13 +24,16 @@
 
 package net.malisis.core.inventory;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.packet.OpenInventoryMessage;
+import net.malisis.core.util.EntityUtils;
 import net.malisis.core.util.ItemUtils;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
@@ -40,6 +43,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants.NBT;
 
 import com.google.common.eventbus.EventBus;
@@ -216,6 +220,16 @@ public class MalisisInventory implements IInventory
 
 		slot.setItemStack(itemStack);
 		slot.onSlotChanged();
+	}
+
+	public List<ItemStack> getItemStackList()
+	{
+		ArrayList<ItemStack> list = new ArrayList<>();
+		for (int i = 0; i < slots.length; i++)
+			if (getItemStack(i) != null)
+				list.add(getItemStack(i));
+
+		return list;
 	}
 
 	/**
@@ -395,6 +409,15 @@ public class MalisisInventory implements IInventory
 		}
 
 		return itemStack;
+	}
+
+	/**
+	 * Spills out all the itemStack contained inside this <code>MalisisInvnetory</code>
+	 */
+	public void breakInventory(World world, int x, int y, int z)
+	{
+		for (ItemStack itemStack : getItemStackList())
+			EntityUtils.spawnEjectedItem(world, x, y, z, itemStack);
 	}
 
 	/**
