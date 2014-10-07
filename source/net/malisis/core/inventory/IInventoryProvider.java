@@ -25,6 +25,7 @@
 package net.malisis.core.inventory;
 
 import net.malisis.core.client.gui.MalisisGui;
+import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -33,9 +34,19 @@ public interface IInventoryProvider
 	/**
 	 * Gets the {@link MalisisInventory} instance.
 	 *
+	 * @param data null for TileEntity, ItemStack for Item
 	 * @return
 	 */
 	public MalisisInventory getInventory(Object... data);
+
+	/**
+	 * Gets the {@link MalisisInventory} for a specific side.
+	 *
+	 * @param side
+	 * @param data null for TileEntity, ItemStack for Item
+	 * @return
+	 */
+	public MalisisInventory getInventory(ForgeDirection side, Object... data);
 
 	/**
 	 * Get the GUI associated with the the {@link MalisisInventory}.
