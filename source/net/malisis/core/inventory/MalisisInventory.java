@@ -32,6 +32,7 @@ import java.util.WeakHashMap;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.inventory.player.PlayerInventory;
 import net.malisis.core.packet.OpenInventoryMessage;
 import net.malisis.core.util.EntityUtils;
 import net.malisis.core.util.ItemUtils;
@@ -72,6 +73,10 @@ public class MalisisInventory implements IInventory
 	 * Slots for this <code>MalisisInventory</code>.
 	 */
 	protected MalisisSlot[] slots;
+	/**
+	 * Name for this inventory
+	 */
+	protected String name;
 	/**
 	 * Size of this <code>MalisisInventory</code>.
 	 */
@@ -166,6 +171,23 @@ public class MalisisInventory implements IInventory
 	}
 
 	// #region getters/setters
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+	@Override
+	public String getInventoryName()
+	{
+		return name;
+	}
+
+	@Override
+	public boolean hasCustomInventoryName()
+	{
+		return name != null;
+	}
+
 	/**
 	 * Gets the slot at position slotNumber.
 	 *
@@ -319,6 +341,30 @@ public class MalisisInventory implements IInventory
 		return containers;
 	}
 
+	/**
+	 * Checks if at least one itemStack is present in inventory.
+	 *
+	 * @return
+	 */
+	public boolean isEmpty()
+	{
+		return getItemStackList().size() == 0;
+	}
+
+	/**
+	 * Checks if at least one slot is not full.
+	 *
+	 * @return
+	 */
+	public boolean isFull()
+	{
+		for (MalisisSlot slot : slots)
+			if (!slot.isFull())
+				return false;
+
+		return true;
+	}
+
 	// #end getters/setters
 
 	/**
@@ -350,6 +396,36 @@ public class MalisisInventory implements IInventory
 	public ItemStack transferInto(ItemStack itemStack)
 	{
 		return transferInto(itemStack, false);
+	}
+
+	/**
+	 * Gets the first slot containing an itemStack.
+	 *
+	 * @return
+	 */
+	public MalisisSlot getFirstOccupiedSlot()
+	{
+		for (MalisisSlot slot : slots)
+			if (slot.getItemStack() != null)
+				return slot;
+		return null;
+	}
+
+	/**
+	 * Removes the first itemStack in the inventory and returns it.
+	 *
+	 * @return
+	 */
+	public ItemStack pullItemStack()
+	{
+		MalisisSlot slot = getFirstOccupiedSlot();
+		if (slot == null)
+			return null;
+
+		ItemStack itemStack = slot.getItemStack();
+		slot.setItemStack(null);
+		slot.onSlotChanged();
+		return itemStack;
 	}
 
 	/**
@@ -483,7 +559,7 @@ public class MalisisInventory implements IInventory
 		c.sendInventoryContent();
 
 		openInventory();
-		bus.post(new InventoryEvent.Open(this));
+		bus.post(new InventoryEvent.Open(c, this));
 
 		return c;
 	}
@@ -510,20 +586,22 @@ public class MalisisInventory implements IInventory
 		}
 
 		openInventory();
-		bus.post(new InventoryEvent.Open(this));
+		bus.post(new InventoryEvent.Open(c, this));
 
 		return c;
 	}
 
-	// #region Unused
-	/**
-	 * Unused
-	 */
 	@Override
-	public boolean hasCustomInventoryName()
+	public String toString()
 	{
-		return false;
+		String provider = "Player";
+		if (!(this instanceof PlayerInventory))
+			provider = inventoryProvider != null ? inventoryProvider.getClass().getSimpleName() : "null	";
+
+		return (name != null ? name : getClass().getSimpleName()) + " (" + inventoryId + ") from " + provider;
 	}
+
+	// #region Unused
 
 	/**
 	 * Unused
@@ -566,12 +644,6 @@ public class MalisisInventory implements IInventory
 		return null;
 	}
 
-	@Override
-	public String getInventoryName()
-	{
-		return null;
-	}
-
 	/**
 	 * Use MalisisInventory.getItemStack(int slotNumber);
 	 */
@@ -591,5 +663,6 @@ public class MalisisInventory implements IInventory
 	{
 		setItemStack(slotNumber, itemStack);
 	}
+
 	// #end Unused
 }
