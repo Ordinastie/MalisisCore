@@ -62,9 +62,17 @@ public abstract class InventoryEvent
 	 */
 	public static class Open extends InventoryEvent
 	{
-		public Open(MalisisInventory inventory)
+		private MalisisInventoryContainer container;
+
+		public Open(MalisisInventoryContainer container, MalisisInventory inventory)
 		{
 			super(inventory);
+			this.container = container;
+		}
+
+		public MalisisInventoryContainer getContainer()
+		{
+			return this.container;
 		}
 
 	}
