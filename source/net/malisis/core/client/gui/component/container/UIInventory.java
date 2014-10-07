@@ -28,28 +28,48 @@ import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisSlot;
 
-public class UIInventory extends UIContainer
+public class UIInventory extends UIContainer<UIInventory>
 {
 	@SuppressWarnings("unused")
 	private MalisisInventory inventory;
+	private int numCols;
+	private boolean hasTitle;
+
+	public UIInventory(String title, MalisisInventory inventory, int numCols)
+	{
+		super(title != null ? title : inventory.getInventoryName(), 0, 0);
+		this.hasTitle = title == null && !inventory.hasCustomInventoryName();
+		this.inventory = inventory;
+		this.numCols = numCols;
+		this.width = Math.min(inventory.getSizeInventory() * 18, numCols * 18);
+		this.height = (int) Math.ceil((float) inventory.getSizeInventory() / numCols) * 18 + (hasTitle ? 11 : 0);
+		for (int i = 0; i < inventory.getSizeInventory(); i++)
+			addSlot(inventory.getSlot(i), i);
+	}
+
+	public UIInventory(MalisisInventory inventory, int numCols)
+	{
+		this(null, inventory, numCols);
+
+	}
+
+	public UIInventory(String title, MalisisInventory inventory)
+	{
+		this(title, inventory, 9);
+	}
 
 	public UIInventory(MalisisInventory inventory)
 	{
-		this.inventory = inventory;
-		this.width = Math.min(inventory.getSizeInventory() * 18, 9 * 18);
-		this.height = (int) Math.ceil((float) inventory.getSizeInventory() / 9) * 18;
-		for (int i = 0; i < inventory.getSizeInventory(); i++)
-			addSlot(inventory.getSlot(i), i);
-
+		this(null, inventory, 9);
 	}
 
 	protected void addSlot(MalisisSlot slot, int number)
 	{
 		UISlot uislot = new UISlot(slot);
 
-		int row = number / 9;
-		int col = number % 9;
-		uislot.setPosition(col * 18, row * 18);
+		int row = number / numCols;
+		int col = number % numCols;
+		uislot.setPosition(col * 18, row * 18 + (hasTitle ? 11 : 0));
 
 		add(uislot);
 	}
