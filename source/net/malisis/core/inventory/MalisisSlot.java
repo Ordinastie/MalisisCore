@@ -165,6 +165,16 @@ public class MalisisSlot
 	}
 
 	/**
+	 * Checks if this <code>MalisisSlot</code> can accept more itemStack.
+	 * 
+	 * @return
+	 */
+	public boolean isFull()
+	{
+		return itemStack != null && itemStack.stackSize == Math.min(itemStack.getMaxStackSize(), getSlotStackLimit());
+	}
+
+	/**
 	 * Called when itemStack is set.
 	 */
 	public void onSlotChanged()
