@@ -338,9 +338,19 @@ public class MalisisGui extends GuiScreen
 		lastMouseY = mouseY;
 	}
 
+	/**
+	 * Called every frame.
+	 * 
+	 * @param mouseX
+	 * @param mouseY
+	 * @param partialTick
+	 */
 	public void update(int mouseX, int mouseY, float partialTick)
 	{}
 
+	/**
+	 * Called from TE when TE is updated. Override this method when you want to change displayed informations when the TileEntity changes.
+	 */
 	public void updateGui()
 	{}
 
