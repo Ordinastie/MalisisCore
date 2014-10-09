@@ -36,7 +36,7 @@ import net.minecraftforge.client.model.obj.WavefrontObject;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class MalisisModel
 {
@@ -46,11 +46,6 @@ public class MalisisModel
 	protected HashMap<String, Shape> shapes = new HashMap<>();
 
 	public MalisisModel()
-	{
-
-	}
-
-	public MalisisModel(ResourceLocation resource)
 	{
 
 	}
