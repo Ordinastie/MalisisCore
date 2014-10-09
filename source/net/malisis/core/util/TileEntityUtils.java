@@ -32,7 +32,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class TileEntityUtils
 {
@@ -41,8 +41,11 @@ public class TileEntityUtils
 	@SideOnly(Side.CLIENT)
 	private static MalisisGui currenGui;
 
-	public static <T extends TileEntity> T getTileEntity(Class<T> type, IBlockAccess world, int x, int y, int z)
+	public static <T> T getTileEntity(Class<T> type, IBlockAccess world, int x, int y, int z)
 	{
+		if (world == null)
+			return null;
+
 		TileEntity te = world.getTileEntity(x, y, z);
 		if (te == null)
 			return null;
