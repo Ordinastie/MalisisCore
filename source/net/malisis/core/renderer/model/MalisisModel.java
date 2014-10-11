@@ -52,12 +52,12 @@ public class MalisisModel
 
 	public void addShape(String name, Shape shape)
 	{
-		shapes.put(name, shape);
+		shapes.put(name.toLowerCase(), shape);
 	}
 
 	public Shape getShape(String name)
 	{
-		return shapes.get(name);
+		return shapes.get(name.toLowerCase());
 	}
 
 	public Collection<Shape> getShapes()
