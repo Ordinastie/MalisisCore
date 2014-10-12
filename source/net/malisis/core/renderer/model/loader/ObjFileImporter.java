@@ -41,11 +41,10 @@ import net.malisis.core.renderer.model.MalisisModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.ModelFormatException;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class ObjFileImporter
 {
@@ -63,20 +62,22 @@ public class ObjFileImporter
 	protected List<UV> uvs = new ArrayList<>();
 	protected List<Face> faces = new ArrayList<>();
 
-	public ObjFileImporter(ResourceLocation resource) throws ModelFormatException
+	public ObjFileImporter(ResourceLocation resource)
 	{
 		this.fileName = resource.toString();
 		this.model = new MalisisModel();
 
+		IResource res;
 		try
 		{
-			IResource res = Minecraft.getMinecraft().getResourceManager().getResource(resource);
+			res = Minecraft.getMinecraft().getResourceManager().getResource(resource);
 			loadObjModel(res.getInputStream());
 		}
 		catch (IOException e)
 		{
-			throw new ModelFormatException("IO Exception reading model format", e);
+			MalisisCore.log.error("[ObjFileImporter] An error happened while reading the file : {}", e);
 		}
+
 	}
 
 	public MalisisModel getModel()
@@ -84,7 +85,7 @@ public class ObjFileImporter
 		return model;
 	}
 
-	private void loadObjModel(InputStream inputStream) throws ModelFormatException
+	private void loadObjModel(InputStream inputStream) throws IOException
 	{
 		BufferedReader reader = null;
 
@@ -136,13 +137,9 @@ public class ObjFileImporter
 
 			addShape("");
 		}
-		catch (IOException e)
-		{
-			throw new ModelFormatException("IO Exception reading model format", e);
-		}
 		catch (Exception e)
 		{
-			e.printStackTrace(System.err);
+			MalisisCore.log.error("[ObjFileImporter] An error happened while reading the file : {}", e);
 		}
 		finally
 		{
