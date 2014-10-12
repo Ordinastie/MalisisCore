@@ -28,11 +28,18 @@ import net.malisis.core.MalisisCore;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.ChunkPosition;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 /**
+ * This class handle MultiBlock structures. Primary aim is to emulate block bigger than 1x1x1 so that the logic is only concerning the
+ * original block.<br />
+ * IProviders should only do processes for the one tied to the original placed block.<br >
+ * Renderers should check for original block/tileEntity before rendering.
+ *
  * @author Ordinastie
  *
  */
@@ -40,25 +47,48 @@ public class MultiBlock
 {
 	private World world;
 	private Block block;
+	private AxisAlignedBB aabb;
 	private ForgeDirection direction;
-	private int width;
-	private int height;
-	private int depth;
+
 	private int x;
 	private int y;
 	private int z;
 
-	public MultiBlock(ForgeDirection dir, int width, int height, int depth, int x, int y, int z)
+	public MultiBlock(int x, int y, int z)
 	{
-		this.direction = dir;
-		this.width = width;
-		this.height = height;
-		this.depth = depth;
 		this.x = x;
 		this.y = y;
 		this.z = z;
 	}
 
+	public MultiBlock(World world, int x, int y, int z)
+	{
+		this(x, y, z);
+		setWorld(world);
+	}
+
+	public MultiBlock(World world, int x, int y, int z, AxisAlignedBB aabb)
+	{
+		this(x, y, z);
+		setWorld(world);
+		setBounds(aabb);
+	}
+
+	public MultiBlock(World world, int x, int y, int z, int width, int height, int depth)
+	{
+		this(x, y, z);
+		setWorld(world);
+		setSize(width, height, depth);
+	}
+
+	public MultiBlock(NBTTagCompound tag)
+	{
+		readFromNBT(tag);
+	}
+
+	/**
+	 * @return the Block composing this <code>MultiBlock</code>.
+	 */
 	private Block getBlock()
 	{
 		if (block == null && world != null)
@@ -66,17 +96,82 @@ public class MultiBlock
 		return block;
 	}
 
+	/**
+	 * Sets the world object for this <code>MultiBlock</code>.<br />
+	 * To be called from the TileEntity.setWorldObj() providing this <code>MultiBlock</code>.
+	 *
+	 * @param world
+	 */
 	public void setWorld(World world)
 	{
 		this.world = world;
 	}
 
-	//	private void setSize(int width, int height, int depth)
-	//	{
-	//		this.width = width;
-	//		this.height = height;
-	//		this.depth = depth;
-	//	}
+	/**
+	 * Sets a facing for this <code>MultiBlock</code>.
+	 *
+	 * @param direction
+	 */
+	public void setDirection(ForgeDirection direction)
+	{
+		this.direction = direction;
+	}
+
+	/**
+	 * Checks whether the coordinates passed are the origin of this <code>MultiBlock</code>
+	 *
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	public boolean isOrigin(int x, int y, int z)
+	{
+		return this.x == x && this.y == y && this.z == z;
+	}
+
+	/**
+	 * Sets the size for this <code>MultiBlock</code>.
+	 *
+	 * @param width
+	 * @param height
+	 * @param depth
+	 */
+	public void setSize(int width, int height, int depth)
+	{
+		int minX = width > 0 ? 0 : width + 1;
+		int maxX = width > 0 ? width : 1;
+		int minY = height > 0 ? 0 : height + 1;
+		int maxY = height > 0 ? height : 1;
+		int minZ = depth > 0 ? 0 : depth + 1;
+		int maxZ = depth > 0 ? depth : 1;
+
+		setBounds(AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ));
+	}
+
+	/**
+	 * Sets a bounding box for this <code>MultiBlock</code>. To be used when the origin needs not to be in a corner.<br />
+	 * The AxisAlignedBB must englobe origin point.
+	 *
+	 * @param aabb
+	 */
+	public void setBounds(AxisAlignedBB aabb)
+	{
+		if (aabb.minX > 0 || aabb.maxX < 0)
+			throw new IllegalArgumentException("Bounds need to contain X origin point");
+		if (aabb.maxX - aabb.minX < 1)
+			throw new IllegalArgumentException("Width needs to be greater or equal to 1");
+		if (aabb.minY > 0 || aabb.maxY < 0)
+			throw new IllegalArgumentException("Bounds need to contain Y origin point");
+		if (aabb.maxY - aabb.minY < 1)
+			throw new IllegalArgumentException("Height needs to be greater or equal to 1");
+		if (aabb.minZ > 0 || aabb.maxZ < 0)
+			throw new IllegalArgumentException("Bounds needs to contain X origin point");
+		if (aabb.maxZ - aabb.minZ < 1)
+			throw new IllegalArgumentException("Width need to be greater or equal to 1");
+
+		this.aabb = aabb.copy();
+	}
 
 	/**
 	 * Gets a list of block position for this <code>MultiBlock</code>. Does not include original block position.
@@ -89,54 +184,45 @@ public class MultiBlock
 	 */
 	protected ChunkPosition[] getListPositions()
 	{
-		ChunkPosition[] pos = new ChunkPosition[width * height * depth - 1];
+		if (this.aabb == null)
+			return new ChunkPosition[0];
 
-		int w = width;
-		int d = depth;
+		AxisAlignedBB aabb = this.aabb.copy();
 
-		if (direction == ForgeDirection.EAST || direction == ForgeDirection.WEST)
+		if (direction != null)
 		{
-			w = depth;
-			d = width;
+			if (direction == ForgeDirection.EAST || direction == ForgeDirection.WEST)
+				aabb.setBounds(aabb.minZ, aabb.minY, aabb.minX, aabb.maxZ, aabb.maxY, aabb.maxX);
+
+			if (direction == ForgeDirection.NORTH)
+				aabb.offset(0, 0, Math.abs(1 - aabb.maxZ - aabb.minZ));
+			else if (direction == ForgeDirection.SOUTH)
+				aabb.offset(Math.abs(1 - aabb.maxX - aabb.minX), 0, 0);
+			else if (direction == ForgeDirection.WEST)
+				aabb.offset(Math.abs(1 - aabb.maxX - aabb.minX), 0, Math.abs(1 - aabb.maxZ - aabb.minZ));
 		}
 
-		int sX = x;
-		int sY = y;
-		int sZ = z;
-		int eX = x + w;
-		int eY = y + height;
-		int eZ = z + d;
+		int sX = x + (int) aabb.minX;
+		int sY = y + (int) aabb.minY;
+		int sZ = z + (int) aabb.minZ;
+		int eX = x + (int) aabb.maxX;
+		int eY = y + (int) aabb.maxY;
+		int eZ = z + (int) aabb.maxZ;
 
-		if (direction == ForgeDirection.NORTH)
-		{
-			sZ = z - d + 1;
-			eZ = z + 1;
-		}
-		else if (direction == ForgeDirection.SOUTH)
-		{
-			sX = x - w + 1;
-			eX = x + 1;
-		}
-		else if (direction == ForgeDirection.WEST)
-		{
-			sX = x - w + 1;
-			eX = x + 1;
-			sZ = z - d + 1;
-			eZ = z + 1;
-		}
+		ChunkPosition[] pos = new ChunkPosition[(eX - sX) * (eY - sY) * (eZ - sZ) - 1];
 
 		int n = 0;
 		for (int i = sX; i < eX; i++)
 			for (int j = sY; j < eY; j++)
 				for (int k = sZ; k < eZ; k++)
-					if (i != x || j != y || k != z) // excluse origin
+					if (i != x || j != y || k != z) // exclude origin
 						pos[n++] = new ChunkPosition(i, j, k);
 
 		return pos;
 	}
 
 	/**
-	 * To be called from inside block.onBlockPlacedBy()
+	 * Place Block for every To be called from inside block.onBlockPlacedBy()
 	 *
 	 * @param world
 	 * @param x
@@ -145,19 +231,19 @@ public class MultiBlock
 	 * @param player
 	 * @param itemStack
 	 */
-	public void placeBlocks()
+	public boolean placeBlocks()
 	{
 		ChunkPosition[] listPos = getListPositions();
 		for (ChunkPosition pos : listPos)
 		{
-			if (pos == null)
-				return;
+			if (pos == null) //should not happen
+				return false;
 
 			if (!getBlock().canPlaceBlockAt(world, pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ))
 			{
 				//cancel placement : remove block
 				world.setBlockToAir(x, y, z);
-				return;
+				return false;
 			}
 		}
 
@@ -165,20 +251,23 @@ public class MultiBlock
 		if (te == null)
 		{
 			MalisisCore.log.error("[MultiBlock] Tried to set multiblock in provider, but no IProvider found at {}, {}, {}", x, y, z);
-			return;
+			return false;
 		}
 		te.setMultiBlock(this);
 		for (ChunkPosition pos : listPos)
 		{
-			world.setBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, getBlock(), direction.ordinal(), 1);
+			world.setBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, getBlock(), 0, 1);
 			te = TileEntityUtils.getTileEntity(IProvider.class, world, pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ);
 			te.setMultiBlock(this);
 		}
-		world.setBlockMetadataWithNotify(x, y, z, direction.ordinal(), 2);
+
+		//world.setBlockMetadataWithNotify(x, y, z, direction.ordinal(), 2);
+
+		return true;
 	}
 
 	/**
-	 * To be called from inside Block.removedByPlayer()
+	 * Removes the blocks composing this <code>MultiBlock</code>, including the origin.
 	 *
 	 * @param world
 	 * @param player
@@ -199,74 +288,59 @@ public class MultiBlock
 	}
 
 	/**
-	 * Creates a MultiBlock structure.<br />
-	 * To be used from block.onBlockPlacedBy()
+	 * Write this <code>MultiBlock</code> informations into the provided NBTTagCompound.
 	 *
-	 * @param world
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param width
-	 * @param height
-	 * @param depth
-	 * @param dir
-	 * @return
-	 */
-	public static MultiBlock create(World world, int x, int y, int z, int width, int height, int depth, ForgeDirection dir)
-	{
-		MultiBlock mb = new MultiBlock(dir, width, height, depth, x, y, z);
-		mb.setWorld(world);
-		mb.placeBlocks();
-
-		return mb;
-	}
-
-	/**
 	 * @param tag
 	 */
 	public void writeToNBT(NBTTagCompound tag)
 	{
 		NBTTagCompound mbTag = new NBTTagCompound();
-		mbTag.setInteger("direction", direction.ordinal());
-		mbTag.setInteger("width", width);
-		mbTag.setInteger("height", height);
-		mbTag.setInteger("depth", depth);
 		mbTag.setInteger("x", x);
 		mbTag.setInteger("y", y);
 		mbTag.setInteger("z", z);
+		if (direction != null)
+			mbTag.setInteger("direction", direction.ordinal());
+		if (aabb != null)
+			NBTUtils.writeToNBT(mbTag, aabb);
 
 		tag.setTag("multiBlock", mbTag);
 	}
 
 	/**
-	 * Creates MultiBlock structure.<br />
+	 * Creates MultiBlock structure using the provided NBTTagCompound.<br />
 	 * To be used from tileEntity.readNBT()
 	 *
 	 * @param tag
 	 * @return
 	 */
-	public static MultiBlock create(NBTTagCompound tag)
+	public void readFromNBT(NBTTagCompound tag)
 	{
 		if (!tag.hasKey("multiBlock"))
 		{
 			MalisisCore.log.error("[MultiBlock] Couldn't read MultiBlock informations from tag {}", tag);
-			return null;
+			return;
 		}
 		tag = tag.getCompoundTag("multiBlock");
 
-		ForgeDirection dir = ForgeDirection.getOrientation(tag.getInteger("direction"));
-		int width = tag.getInteger("width");
-		int height = tag.getInteger("height");
-		int depth = tag.getInteger("depth");
-		int x = tag.getInteger("x");
-		int y = tag.getInteger("y");
-		int z = tag.getInteger("z");
+		MultiBlock mb = new MultiBlock(tag.getInteger("x"), tag.getInteger("y"), tag.getInteger("z"));
+		mb.setBounds(NBTUtils.readFromNBT(tag, AxisAlignedBB.getBoundingBox(0, 0, 0, 0, 0, 0)));
+		if (tag.hasKey("direction"))
+			mb.setDirection(ForgeDirection.getOrientation(tag.getInteger("direction")));
 
-		MultiBlock mb = new MultiBlock(dir, width, height, depth, x, y, z);
-
-		return mb;
+		return;
 	}
 
+	/**
+	 * Destroy this <code>MultiBlock</code>. <br />
+	 * Will remove all the blocks composing this <code>MultiBlock</code> structure.<br />
+	 * To be called from inside Block.removedByPlayer().
+	 *
+	 * @param world
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return true if blocks were removed
+	 */
 	public static boolean destroy(World world, int x, int y, int z)
 	{
 		IProvider te = TileEntityUtils.getTileEntity(IProvider.class, world, x, y, z);
@@ -288,10 +362,53 @@ public class MultiBlock
 		return true;
 	}
 
+	/**
+	 * Gets the <code>MultiBlock</code> instance at the specified coordinates.<br />
+	 *
+	 * @param world
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	public static MultiBlock getMultiBlock(IBlockAccess world, int x, int y, int z)
+	{
+		IProvider provider = TileEntityUtils.getTileEntity(IProvider.class, world, x, y, z);
+		if (provider == null)
+			return null;
+
+		return provider.getMultiBlock();
+	}
+
+	/**
+	 * Checks whether the coordinates passed are the origin of a <code>MultiBlock</code>.
+	 *
+	 * @param world
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	public static boolean isOrigin(IBlockAccess world, int x, int y, int z)
+	{
+		MultiBlock mb = getMultiBlock(world, x, y, z);
+		if (mb == null)
+			return false;
+		return mb.isOrigin(x, y, z);
+	}
+
 	public static interface IProvider
 	{
+		/**
+		 * Sets the <code>MultiBlock</code> instance for the provider.
+		 *
+		 * @param multiBlock
+		 */
 		public void setMultiBlock(MultiBlock multiBlock);
 
+		/**
+		 * @return the <code>MultiBlock</code> instance of the provider.
+		 */
 		public MultiBlock getMultiBlock();
 	}
 
