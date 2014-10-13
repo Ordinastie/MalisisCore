@@ -49,7 +49,7 @@ public abstract class Transformation<T extends Transformation>
 
 	public T forTicks(int duration)
 	{
-		return forTicks(duration, 0);
+		return forTicks(duration, delay);
 	}
 
 	public T forTicks(int duration, int delay)
@@ -134,12 +134,11 @@ public abstract class Transformation<T extends Transformation>
 		}
 
 		comp = Math.min(elapsedTimeCurrentLoop / duration, 1);
+		comp = Math.max(0, Math.min(1, comp));
 		if (movement == SINUSOIDAL)
 		{
 			comp = (float) (1 - Math.cos(comp * Math.PI)) / 2;
 		}
-
-		comp = Math.max(0, Math.min(1, comp));
 
 		return comp;
 	}
