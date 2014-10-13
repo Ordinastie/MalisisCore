@@ -28,6 +28,7 @@ import net.malisis.core.MalisisCore;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.IBlockAccess;
@@ -45,14 +46,14 @@ import net.minecraftforge.common.util.ForgeDirection;
  */
 public class MultiBlock
 {
-	private World world;
-	private Block block;
-	private AxisAlignedBB aabb;
-	private ForgeDirection direction;
+	protected World world;
+	protected Block block;
+	protected AxisAlignedBB aabb;
+	protected ForgeDirection direction;
 
-	private int x;
-	private int y;
-	private int z;
+	protected int x;
+	protected int y;
+	protected int z;
 
 	public MultiBlock(int x, int y, int z)
 	{
@@ -86,6 +87,21 @@ public class MultiBlock
 		readFromNBT(tag);
 	}
 
+	public int getX()
+	{
+		return x;
+	}
+
+	public int getY()
+	{
+		return y;
+	}
+
+	public int getZ()
+	{
+		return z;
+	}
+
 	/**
 	 * @return the Block composing this <code>MultiBlock</code>.
 	 */
@@ -115,6 +131,11 @@ public class MultiBlock
 	public void setDirection(ForgeDirection direction)
 	{
 		this.direction = direction;
+	}
+
+	public ForgeDirection getDirection()
+	{
+		return direction;
 	}
 
 	/**
@@ -174,6 +195,40 @@ public class MultiBlock
 	}
 
 	/**
+	 *
+	 */
+	public AxisAlignedBB getBounds()
+	{
+		if (this.aabb == null)
+			return null;
+
+		AxisAlignedBB aabb = this.aabb.copy();
+
+		if (direction != null)
+		{
+			if (direction == ForgeDirection.EAST || direction == ForgeDirection.WEST)
+				aabb.setBounds(aabb.minZ, aabb.minY, aabb.minX, aabb.maxZ, aabb.maxY, aabb.maxX);
+
+			double shiftX = 1 - aabb.maxX - aabb.minX;
+			double shiftZ = 1 - aabb.maxZ - aabb.minZ;
+
+			if (direction == ForgeDirection.NORTH)
+				aabb.offset(0, 0, shiftZ);
+			else if (direction == ForgeDirection.SOUTH)
+				aabb.offset(shiftX, 0, 0);
+			else if (direction == ForgeDirection.WEST)
+				aabb.offset(shiftX, 0, shiftZ);
+		}
+
+		return aabb;
+	}
+
+	public AxisAlignedBB getWorldBounds()
+	{
+		return getBounds().offset(x, y, z);
+	}
+
+	/**
 	 * Gets a list of block position for this <code>MultiBlock</code>. Does not include original block position.
 	 *
 	 * @param x
@@ -184,23 +239,9 @@ public class MultiBlock
 	 */
 	protected ChunkPosition[] getListPositions()
 	{
-		if (this.aabb == null)
+		AxisAlignedBB aabb = getBounds();
+		if (aabb == null)
 			return new ChunkPosition[0];
-
-		AxisAlignedBB aabb = this.aabb.copy();
-
-		if (direction != null)
-		{
-			if (direction == ForgeDirection.EAST || direction == ForgeDirection.WEST)
-				aabb.setBounds(aabb.minZ, aabb.minY, aabb.minX, aabb.maxZ, aabb.maxY, aabb.maxX);
-
-			if (direction == ForgeDirection.NORTH)
-				aabb.offset(0, 0, Math.abs(1 - aabb.maxZ - aabb.minZ));
-			else if (direction == ForgeDirection.SOUTH)
-				aabb.offset(Math.abs(1 - aabb.maxX - aabb.minX), 0, 0);
-			else if (direction == ForgeDirection.WEST)
-				aabb.offset(Math.abs(1 - aabb.maxX - aabb.minX), 0, Math.abs(1 - aabb.maxZ - aabb.minZ));
-		}
 
 		int sX = x + (int) aabb.minX;
 		int sY = y + (int) aabb.minY;
@@ -209,7 +250,8 @@ public class MultiBlock
 		int eY = y + (int) aabb.maxY;
 		int eZ = z + (int) aabb.maxZ;
 
-		ChunkPosition[] pos = new ChunkPosition[(eX - sX) * (eY - sY) * (eZ - sZ) - 1];
+		int size = (eX - sX) * (eY - sY) * (eZ - sZ) - 1;
+		ChunkPosition[] pos = new ChunkPosition[size >= 0 ? size : 0];
 
 		int n = 0;
 		for (int i = sX; i < eX; i++)
@@ -322,10 +364,13 @@ public class MultiBlock
 		}
 		tag = tag.getCompoundTag("multiBlock");
 
-		MultiBlock mb = new MultiBlock(tag.getInteger("x"), tag.getInteger("y"), tag.getInteger("z"));
-		mb.setBounds(NBTUtils.readFromNBT(tag, AxisAlignedBB.getBoundingBox(0, 0, 0, 0, 0, 0)));
+		x = tag.getInteger("x");
+		y = tag.getInteger("y");
+		z = tag.getInteger("z");
+		aabb = AxisAlignedBB.getBoundingBox(0, 0, 0, 1, 1, 1);
+		aabb = NBTUtils.readFromNBT(tag, aabb);
 		if (tag.hasKey("direction"))
-			mb.setDirection(ForgeDirection.getOrientation(tag.getInteger("direction")));
+			direction = ForgeDirection.getOrientation(tag.getInteger("direction"));
 
 		return;
 	}
@@ -395,6 +440,26 @@ public class MultiBlock
 		if (mb == null)
 			return false;
 		return mb.isOrigin(x, y, z);
+	}
+
+	public static <T extends TileEntity & IProvider> T getOriginProvider(Class<T> providerClass, IBlockAccess world, int x, int y, int z)
+	{
+		return getOriginProvider(TileEntityUtils.getTileEntity(providerClass, world, x, y, z));
+	}
+
+	public static <T extends TileEntity & IProvider> T getOriginProvider(T provider)
+	{
+		if (provider == null)
+			return null;
+
+		MultiBlock mb = provider.getMultiBlock();
+		if (provider.xCoord == mb.x && provider.yCoord == mb.y && provider.zCoord == mb.z)
+			return provider;
+
+		TileEntity te = provider.getWorldObj().getTileEntity(mb.x, mb.y, mb.z);
+		if (te == null || !(te instanceof IProvider))
+			return null;
+		return (T) te;
 	}
 
 	public static interface IProvider
