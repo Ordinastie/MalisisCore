@@ -120,7 +120,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	protected ItemStack itemStack;
 	/**
 	 * Type of item rendering (ITEM)
-	 * 
+	 *
 	 * @see {@link ItemRenderType}
 	 */
 	protected ItemRenderType itemRenderType;
@@ -192,7 +192,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Gets the partialTick for this frame. Used for TESR and ITEMS
-	 * 
+	 *
 	 * @return
 	 */
 	public float getPartialTick()
@@ -220,7 +220,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Sets informations for this <code>BaseRenderer</code>.
-	 * 
+	 *
 	 * @param world
 	 * @param block
 	 * @param x
@@ -240,7 +240,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Sets informations for this <code>BaseRenderer</code>.
-	 * 
+	 *
 	 * @param block
 	 */
 	public void set(Block block)
@@ -250,7 +250,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Sets informations for this <code>BaseRenderer</code>.
-	 * 
+	 *
 	 * @param blockMetadata
 	 */
 	public void set(int blockMetadata)
@@ -260,7 +260,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Sets informations for this <code>BaseRenderer</code>.
-	 * 
+	 *
 	 * @param block
 	 * @param blockMetadata
 	 */
@@ -271,7 +271,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Sets informations for this <code>BaseRenderer</code>.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param z
@@ -283,7 +283,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Sets informations for this <code>BaseRenderer</code>.
-	 * 
+	 *
 	 * @param te
 	 * @param partialTick
 	 */
@@ -296,7 +296,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Sets informations for this <code>BaseRenderer</code>.
-	 * 
+	 *
 	 * @param type
 	 * @param itemStack
 	 */
@@ -401,7 +401,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	// #region prepare()
 	/**
 	 * Prepares the tessellator and the GL states for the <b>renderType</b>. <b>data</b> is only for TESR.
-	 * 
+	 *
 	 * @param renderType
 	 * @param data
 	 */
@@ -448,7 +448,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Tells the tessellator to start drawing <b>drawMode</b>.
-	 * 
+	 *
 	 * @param drawMode
 	 */
 	public void startDrawing(int drawMode)
@@ -467,7 +467,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Triggers a draw and restart drawing with <b>drawMode</b>.
-	 * 
+	 *
 	 * @param drawMode
 	 */
 	public void next(int drawMode)
@@ -572,7 +572,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Renders the block using the default Minecraft rendering system
-	 * 
+	 *
 	 * @param renderer
 	 */
 	public void renderStandard()
@@ -582,7 +582,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Renders the blocks using the defaul Minecraft rendering system with the specified <b>renderer</b>
-	 * 
+	 *
 	 * @param renderer
 	 */
 	public void renderStandard(RenderBlocks renderer)
@@ -613,7 +613,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Draws a shape with its own parameters
-	 * 
+	 *
 	 * @param shape
 	 */
 	public void drawShape(Shape shape)
@@ -623,7 +623,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Draws a shape with specified parameters
-	 * 
+	 *
 	 * @param shape
 	 * @param params
 	 */
@@ -650,7 +650,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Draws a face with its own parameters
-	 * 
+	 *
 	 * @param face
 	 */
 	public void drawFace(Face face)
@@ -660,7 +660,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Draws a face with specified parameters.
-	 * 
+	 *
 	 * @param f
 	 * @param faceParams
 	 */
@@ -695,7 +695,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/***
 	 * Draws an array of vertexes (usually <i>Face.getVertexes()</i>)
-	 * 
+	 *
 	 * @param vertexes
 	 */
 	protected void drawVertexes(Vertex[] vertexes)
@@ -710,7 +710,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Draws a single vertex
-	 * 
+	 *
 	 * @param vertex
 	 */
 	protected void drawVertex(Vertex vertex, int count)
@@ -740,7 +740,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Gets the IIcon corresponding to <b>params</b>.
-	 * 
+	 *
 	 * @param params
 	 * @return
 	 */
@@ -767,7 +767,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Checks if <b>side</b> should be rendered
-	 * 
+	 *
 	 * @param side
 	 */
 	protected boolean shouldRenderFace(Face face)
@@ -790,7 +790,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	/**
 	 * Applies the texture to the <b>shape</b>. Usually necessary before some shape transformations in conjunction with
 	 * RenderParameters.applyTexture set to false to prevent reapplying texture when rendering.
-	 * 
+	 *
 	 * @param shape
 	 */
 	public void applyTexture(Shape shape)
@@ -801,7 +801,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	/**
 	 * Applies the texture to the <b>shape</b> with specified <b>parameters. Usually necessary before some shape transformations in
 	 * conjunction with RenderParameters.applyTexture set to false to prevent reapplying texture when rendering.
-	 * 
+	 *
 	 * @param shape
 	 * @param parameters
 	 */
@@ -821,7 +821,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * Calculates the ambient occlusion for a vertex and also apply the side dependent shade.<br />
 	 * <b>aoMatrix</b> is the list of block coordinates necessary to compute AO. If it's empty, only the global face shade is applied.<br />
 	 * Also, <i>params.colorMultiplier</i> is applied as well.
-	 * 
+	 *
 	 * @param vertex
 	 * @param aoMatrix
 	 */
@@ -871,9 +871,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected int getBaseBrightness()
 	{
-		if ((renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD) || world == null || !params.useBlockBrightness.get()
-				|| params.direction.get() == null)
+		if ((renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD) || world == null || !params.useBlockBrightness.get())
 			return params.brightness.get();
+
+		if (params.direction.get() == null)
+			return block.getMixedBrightnessForBlock(world, x, y, z);
 
 		AxisAlignedBB bounds = getRenderBounds();
 		ForgeDirection dir = params.direction.get();
@@ -903,7 +905,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	/**
 	 * Calculates the ambient occlusion brightness for a vertex. <b>aoMatrix</b> is the list of block coordinates necessary to compute AO.
 	 * Only first 3 blocks are used.<br />
-	 * 
+	 *
 	 * @param vertex
 	 * @param baseBrightness
 	 * @param aoMatrix
@@ -950,7 +952,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * Gets the block ambient occlusion value. Contrary to base Minecraft code, it's the actual block at the <b>x</b>, <b>y</b> and <b>z</b>
 	 * coordinates which is used to get the value, and not value of the block drawn. This allows to have different logic behaviors for AO
 	 * values for a block.
-	 * 
+	 *
 	 * @param world
 	 * @param x
 	 * @param y
@@ -967,7 +969,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Gets the mix brightness for a block (sky + block source)
-	 * 
+	 *
 	 * @param world
 	 * @param x
 	 * @param y
@@ -982,7 +984,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	/**
 	 * Gets the rendering bounds. If <i>params.useBlockBounds</i> = false, <i>params.renderBounds</i> is used instead of the actual block
 	 * bounds.
-	 * 
+	 *
 	 * @return
 	 */
 	protected AxisAlignedBB getRenderBounds()
@@ -1000,7 +1002,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	/**
 	 * Modifies the vertexes coordinates relative to the bounds specified.<br />
 	 * Eg : if x = 0.5, minX = 1, maxX = 3, x becomes 2
-	 * 
+	 *
 	 * @param bounds
 	 */
 	protected void calcVertexesPosition(AxisAlignedBB bounds)
@@ -1012,7 +1014,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Gets and hold reference to damagedBlocks from Minecraft.renderGlobal via reflection.
-	 * 
+	 *
 	 * @return
 	 */
 	protected Map getDamagedBlocks()
@@ -1045,7 +1047,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Gets the destroy block progress for this rendering. Only used for TESR.
-	 * 
+	 *
 	 * @return
 	 */
 	protected DestroyBlockProgress getBlockDestroyProgress()
@@ -1069,7 +1071,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Checks whether the DestroyBlockProgress specified should apply for this TESR.
-	 * 
+	 *
 	 * @param dbp
 	 * @return
 	 */
