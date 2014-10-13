@@ -27,6 +27,7 @@ package net.malisis.core.tileentity;
 import net.malisis.core.util.MultiBlock;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
 /**
@@ -73,6 +74,14 @@ public class MultiBlockTileEntity extends TileEntity implements MultiBlock.IProv
 		super.writeToNBT(tag);
 		if (multiBlock != null)
 			multiBlock.writeToNBT(tag);
+	}
+
+	@Override
+	public AxisAlignedBB getRenderBoundingBox()
+	{
+		if (multiBlock != null)
+			return multiBlock.getWorldBounds();
+		return super.getRenderBoundingBox();
 	}
 
 }
