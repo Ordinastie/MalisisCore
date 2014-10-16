@@ -40,6 +40,8 @@ public class AsmHook
 		FIND, INSERT, JUMP,
 	}
 
+	private static int END = Short.MIN_VALUE;
+
 	private McpMethodMapping mapping;
 	private boolean debug = false;
 
@@ -59,6 +61,11 @@ public class AsmHook
 		this.matches.add(match);
 		this.jump(-1);
 		return this;
+	}
+
+	public AsmHook jumpToEnd()
+	{
+		return this.jump(END);
 	}
 
 	public AsmHook jumpAfter(InsnList match)
@@ -127,7 +134,10 @@ public class AsmHook
 					break;
 				case JUMP:
 					int jump = jumps.remove(0);
-					index += jump;
+					if (jump == END)
+						index = methodNode.instructions.size() - 1;
+					else
+						index += jump;
 				default:
 					break;
 			}
