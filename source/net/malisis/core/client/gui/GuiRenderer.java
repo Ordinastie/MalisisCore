@@ -121,6 +121,14 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
+	 * @return is the scale ignored
+	 */
+	public boolean isIgnoreScale()
+	{
+		return ignoreScale;
+	}
+
+	/**
 	 * Sets a custom font scale factor
 	 *
 	 * @param scale
@@ -132,13 +140,16 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Sets the width, height and scale factor.
+	 * 
+	 * @return
 	 */
-	public void updateGuiScale()
+	public int updateGuiScale()
 	{
 		Minecraft mc = Minecraft.getMinecraft();
 		displayWidth = mc.displayWidth;
 		displayHeight = mc.displayHeight;
 		calcScaleFactor(mc.gameSettings.guiScale);
+		return scaleFactor;
 	}
 
 	/**

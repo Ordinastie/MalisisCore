@@ -184,8 +184,6 @@ public class MalisisGui extends GuiScreen
 		int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
 		int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
 
-		renderer.drawString(mouseX + ", " + mouseY + "(" + lastMouseX + ", " + lastMouseY + ")", 10, 10, 0, 0xFFFFFF, true);
-
 		if (lastMouseX != mouseX || lastMouseY != mouseY)
 			fireEvent(new MouseEvent.Move(lastMouseX, lastMouseY, mouseX, mouseY));
 
@@ -303,15 +301,28 @@ public class MalisisGui extends GuiScreen
 	@Override
 	public void setWorldAndResolution(Minecraft minecraft, int width, int height)
 	{
+		int factor = renderer.updateGuiScale();
+		if (renderer.isIgnoreScale())
+		{
+			width *= factor;
+			height *= factor;
+		}
+
 		super.setWorldAndResolution(minecraft, width, height);
 		screen.setSize(width, height);
-		renderer.updateGuiScale();
 	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks)
 	{
 		elaspedTime = System.currentTimeMillis() - startTime;
+
+		//if we ignore scaling, use real mouse position on screen
+		if (renderer.isIgnoreScale())
+		{
+			mouseX = Mouse.getX();
+			mouseY = this.height - Mouse.getY() - 1;
+		}
 
 		update(mouseX, mouseY, partialTicks);
 
@@ -332,7 +343,7 @@ public class MalisisGui extends GuiScreen
 			ItemStack itemStack = inventoryContainer.getPickedItemStack();
 			if (itemStack != null)
 				renderer.renderPickedItemStack(itemStack);
-			else if (hoveredComponent != null)
+			else if (hoveredComponent != null) //do not draw the tooltip if an itemStack is picked up
 				renderer.drawTooltip(hoveredComponent.getTooltip());
 		}
 		else if (hoveredComponent != null)
@@ -384,9 +395,6 @@ public class MalisisGui extends GuiScreen
 		return;
 	}
 
-	/**
-	 * Called when the screen is unloaded. Used to disable keyboard repeat events
-	 */
 	@Override
 	public void onGuiClosed()
 	{
@@ -426,6 +434,13 @@ public class MalisisGui extends GuiScreen
 		InventoryActionMessage.sendAction(action, inventoryId, slotNumber, code);
 	}
 
+	/**
+	 * Sets the hovered state for a component. If a component is currently hovered, it will be "unhovered" first.
+	 *
+	 * @param component
+	 * @param hovered
+	 * @return
+	 */
 	public static boolean setHoveredComponent(UIComponent component, boolean hovered)
 	{
 		MalisisGui gui = currentGui();
