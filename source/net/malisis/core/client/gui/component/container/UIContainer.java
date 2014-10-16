@@ -25,13 +25,13 @@
 package net.malisis.core.client.gui.component.container;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.control.IControlComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.KeyboardEvent;
@@ -46,9 +46,13 @@ import org.lwjgl.opengl.GL11;
 public class UIContainer<T extends UIContainer> extends UIComponent<T>
 {
 	/**
-	 * The list of {@link net.malisis.core.client.gui.component.UIComponent components}.
+	 * List of {@link net.malisis.core.client.gui.component.UIComponent components}.
 	 */
 	protected final List<UIComponent> components;
+	/**
+	 * List of {@link net.malisis.core.client.gui.component.UIComponent components} controling this <code>UIContainer</code>.
+	 */
+	protected final List<UIComponent> controlComponents;
 	/**
 	 * Horizontal padding to apply to this <code>UIContainer</code>
 	 */
@@ -72,7 +76,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 
 	public UIContainer(String title, int width, int height)
 	{
-		components = new LinkedList<>();
+		components = new ArrayList<>();
+		controlComponents = new ArrayList<>();
 		setSize(width, height);
 		if (title != null && !title.equals(""))
 			add(new UILabel(title));
@@ -192,7 +197,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	{}
 
 	/**
-	 * Get the clipping area delimited by this <code>UIContainer</code>
+	 * Gets the clipping area delimited by this <code>UIContainer</code>.
 	 *
 	 * @return
 	 */
@@ -201,25 +206,78 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		return new ClipArea(this);
 	}
 
+	/**
+	 * Adds a component to this <code>UIContainer</code>.
+	 *
+	 * @param component
+	 */
 	public void add(UIComponent component)
 	{
-		components.add(component);
+		if (component instanceof IControlComponent)
+			controlComponents.add(component);
+		else
+			components.add(component);
 		component.setParent(this);
 	}
 
+	/**
+	 * Removes the component from this <code>UIContainer</code>.
+	 *
+	 * @param component
+	 */
 	public void remove(UIComponent component)
 	{
 		if (component.getParent() != this)
 			return;
+		if (component instanceof IControlComponent)
+			controlComponents.remove(component);
+		else
+			components.remove(component);
 		component.setParent(null);
-		components.remove(component);
 	}
 
+	/**
+	 * Removes all the components from this <code>UIContainer</code>. Does not remove control components
+	 */
 	public void removeAll()
 	{
 		for (UIComponent component : components)
 			component.setParent(null);
 		components.clear();
+	}
+
+	/**
+	 * Adds a control component to this <code>UIContainer</code>.
+	 *
+	 * @param component
+	 */
+	public <S extends UIComponent & IControlComponent> void addControlComponent(S component)
+	{
+		controlComponents.add(component);
+		component.setParent(this);
+	}
+
+	/**
+	 * Removes the component from this <code>UIContainer</code>.
+	 *
+	 * @param component
+	 */
+	public <S extends UIComponent & IControlComponent> void removeControlComponent(S component)
+	{
+		if (component.getParent() != this)
+			return;
+		component.setParent(null);
+		controlComponents.remove(component);
+	}
+
+	/**
+	 * Removes all the control components from this <code>UIContainer</code>. Does not remove regular components
+	 */
+	public void removeAllControlComponents()
+	{
+		for (UIComponent component : controlComponents)
+			component.setParent(null);
+		controlComponents.clear();
 	}
 
 	@Override
@@ -241,6 +299,9 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		for (UIComponent c : controlComponents)
+			c.draw(renderer, mouseX, mouseY, partialTick);
+
 		ClipArea area = getClipArea();
 		renderer.startClipping(area);
 
@@ -253,6 +314,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	@Override
 	public boolean fireKeyboardEvent(KeyboardEvent event)
 	{
+		for (UIComponent c : controlComponents)
+			c.fireKeyboardEvent(event);
 		for (UIComponent c : components)
 			c.fireKeyboardEvent(event);
 		return true;
@@ -261,6 +324,14 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	@Override
 	public UIComponent getComponentAt(int x, int y)
 	{
+		//control components take precedence over regular components
+		for (UIComponent c : controlComponents)
+		{
+			UIComponent component = c.getComponentAt(x, y);
+			if (component != null)
+				return component;
+		}
+
 		ArrayList<UIComponent> list = new ArrayList<>();
 		for (UIComponent c : components)
 		{

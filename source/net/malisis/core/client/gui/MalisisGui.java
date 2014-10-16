@@ -184,6 +184,14 @@ public class MalisisGui extends GuiScreen
 		int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
 		int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
 
+		renderer.drawString(mouseX + ", " + mouseY + "(" + lastMouseX + ", " + lastMouseY + ")", 10, 10, 0, 0xFFFFFF, true);
+
+		if (lastMouseX != mouseX || lastMouseY != mouseY)
+			fireEvent(new MouseEvent.Move(lastMouseX, lastMouseY, mouseX, mouseY));
+
+		lastMouseX = mouseX;
+		lastMouseY = mouseY;
+
 		int delta = Mouse.getEventDWheel();
 		if (delta == 0)
 			return;
@@ -193,6 +201,7 @@ public class MalisisGui extends GuiScreen
 			delta = -1;
 
 		fireEvent(new MouseEvent.ScrollWheel(mouseX, mouseY, delta));
+
 	}
 
 	/**
@@ -211,9 +220,10 @@ public class MalisisGui extends GuiScreen
 
 		if (container.isInsideBounds(x, y))
 			fireEvent(new MouseEvent.Press(x, y, button));
-		else if (inventoryContainer != null)
+		else
 		{
-			if (inventoryContainer.getPickedItemStack() != null)
+			setFocusedComponent(null, true);
+			if (inventoryContainer != null && inventoryContainer.getPickedItemStack() != null)
 			{
 				ActionType action = button == 1 ? ActionType.DROP_ONE : ActionType.DROP_STACK;
 				MalisisGui.sendAction(action, null, button);
@@ -311,9 +321,6 @@ public class MalisisGui extends GuiScreen
 		if (container == null)
 			return;
 
-		if (container.isInsideBounds(mouseX, mouseY) && (lastMouseX != mouseX || lastMouseY != mouseY))
-			fireEvent(new MouseEvent.Move(lastMouseX, lastMouseY, mouseX, mouseY));
-
 		RenderHelper.enableGUIStandardItemLighting();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_LIGHTING);
@@ -333,14 +340,11 @@ public class MalisisGui extends GuiScreen
 
 		GL11.glEnable(GL11.GL_LIGHTING);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
-
-		lastMouseX = mouseX;
-		lastMouseY = mouseY;
 	}
 
 	/**
 	 * Called every frame.
-	 * 
+	 *
 	 * @param mouseX
 	 * @param mouseY
 	 * @param partialTick
