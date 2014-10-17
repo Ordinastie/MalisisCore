@@ -682,7 +682,8 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		if (!shouldRenderFace(face))
 			return;
 
-		if (renderType == TYPE_ITEM_INVENTORY || renderType == TYPE_ISBRH_INVENTORY || params.useNormals.get())
+		if ((renderType == TYPE_ITEM_INVENTORY || renderType == TYPE_ISBRH_INVENTORY || params.useNormals.get())
+				&& params.direction.get() != null)
 			t.setNormal(params.direction.get().offsetX, params.direction.get().offsetY, params.direction.get().offsetZ);
 
 		baseBrightness = getBaseBrightness();

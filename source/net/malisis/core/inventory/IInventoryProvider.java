@@ -49,7 +49,7 @@ public interface IInventoryProvider
 	public MalisisInventory getInventory(ForgeDirection side, Object... data);
 
 	/**
-	 * Get the GUI associated with the the {@link MalisisInventory}.
+	 * Gets the GUI associated with the the {@link MalisisInventory}.
 	 *
 	 * @param player
 	 * @return
