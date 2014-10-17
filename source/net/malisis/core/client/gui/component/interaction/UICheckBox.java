@@ -41,7 +41,7 @@ import com.google.common.eventbus.Subscribe;
 
 /**
  * UICheckBox
- * 
+ *
  * @author PaleoCrafter
  */
 public class UICheckBox extends UIComponent<UICheckBox>
@@ -57,13 +57,14 @@ public class UICheckBox extends UIComponent<UICheckBox>
 
 	public UICheckBox(String label)
 	{
+		int w = 0;
 		if (label != null && !label.equals(""))
 		{
 			this.label = label;
-			width = GuiRenderer.getStringWidth(label);
+			w = GuiRenderer.getStringWidth(label);
 		}
 
-		setSize(width + 11, 10);
+		setSize(w + 11, 10);
 
 		shape = new SimpleGuiShape();
 
