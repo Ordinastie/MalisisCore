@@ -62,7 +62,7 @@ public abstract class UIComponent<T extends UIComponent>
 	/**
 	 * Position anchor for this <code>UIComponent</code>. See {@link net.malisis.core.client.gui.Anchor Anchor}
 	 */
-	protected int anchor;
+	protected int anchor = Anchor.NONE;
 	/**
 	 * Size of this <code>UIComponent</code>
 	 */
@@ -195,7 +195,7 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public T setPosition(int x, int y)
 	{
-		return setPosition(x, y, Anchor.NONE);
+		return setPosition(x, y, anchor);
 	}
 
 	/**
@@ -413,6 +413,9 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public T setVisible(boolean visible)
 	{
+		if (isVisible() == visible)
+			return (T) this;
+
 		this.visible = visible;
 		if (!visible)
 		{

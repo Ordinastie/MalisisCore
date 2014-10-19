@@ -99,6 +99,9 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	@Override
 	public T setVisible(boolean visible)
 	{
+		if (isVisible() == visible)
+			return (T) this;
+
 		super.setVisible(visible);
 		if (!visible)
 		{
