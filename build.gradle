@@ -55,12 +55,6 @@ artifacts {
 
 minecraft {
     version = "1.7.10-10.13.0.1208"
-    if (file("../../run").exists()) {
-        runDir = "../../run/assets"
-    } 
-    else {
-        runDir = "assets"
-    }
     
     replace '${version}', project.version
     replaceIn "MalisisCore.java"
@@ -82,81 +76,3 @@ processResources {
 }
 
 
-uploadArchives() 
-{
-	//dependsOn reobf
-	
-	if (project.mavenUrl != null) 
-	{
-		repositories 
-		{
-			logger.info('Publishing to files server')
-			mavenDeployer 
-			{
-				repository(url: project.mavenUrl) 
-				{
-					authentication(userName: project.mavenUser, password: project.mavenPassword)
-				}
-				
-				addFilter('deobf') 
-				{
-					artifact, file -> artifact.attributes['classifier'] == 'dev'
-				}				
-				pom('deobf').version = project.version
-				
-				addFilter('universal') 
-				{
-					artifact, file -> artifact.attributes['classifier'] == null
-				}
-				pom('universal').version = project.version
-				
-				pom 
-				{
-					groupId = project.group
-					version = project.version
-					artifactId = project.archivesBaseName
-					project 
-					{
-						name project.archivesBaseName
-						packaging 'jar'
-						description 'Framework over Forge'
-						url 'https://github.com/Ordinastie/MalisisCore'
-						scm 
-						{
-							url 'scm:git:git@github.com:Ordinastie/MalisisCore.git'
-							connection 'scm:git:git@github.com:Ordinastie/MalisisCore.git'
-							developerConnection 'scm:git:git@github.com:Ordinastie/MalisisCore.git'
-						}
-						issueManagement 
-						{
-							system 'github'
-							url 'https://github.com/Ordinastie/MalisisCore/issues'
-						}
-						licenses 
-						{
-							license 
-							{
-								name 'MIT'
-								url 'http://opensource.org/licenses/MIT'
-								distribution 'repo'
-							}
-						}
-						developers 
-						{
-							developer 
-							{
-								id 'Ordinastie'
-								name 'Ordinastie'
-								roles { role 'developer' }
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	else 
-	{
-		logger.log(LogLevel.ERROR, 'No upload url (project.mavenUrl) defined!');
-	}
-}
