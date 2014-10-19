@@ -170,6 +170,8 @@ public class MalisisGui extends GuiScreen
 					component.setHovered(true);
 				component.fireMouseEvent(me);
 			}
+			else
+				setHoveredComponent(null, false);
 		}
 		else if (event instanceof KeyboardEvent)
 			container.fireKeyboardEvent((KeyboardEvent) event);
