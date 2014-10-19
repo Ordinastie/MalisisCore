@@ -35,10 +35,10 @@ import net.minecraft.util.ResourceLocation;
 
 /**
  * UIImage
- * 
+ *
  * @author PaleoCrafter
  */
-public class UIImage extends UIComponent
+public class UIImage extends UIComponent<UIImage>
 {
 	public static final ResourceLocation BLOCKS_TEXTURE = TextureMap.locationBlocksTexture;
 	public static final ResourceLocation ITEMS_TEXTURE = TextureMap.locationItemsTexture;
@@ -94,6 +94,16 @@ public class UIImage extends UIComponent
 		this.texture = null;
 		this.itemStack = itemStack;
 		return this;
+	}
+
+	public IIcon getIcon()
+	{
+		return icon;
+	}
+
+	public ItemStack getItemStack()
+	{
+		return itemStack;
 	}
 
 	@Override
