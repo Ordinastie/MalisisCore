@@ -11,3 +11,7 @@ bin/*
 /bin
 gradle.properties
 init.gradle
+*.bat
+*.ipr
+*.iws
+*.stickyStorage
