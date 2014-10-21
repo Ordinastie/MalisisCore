@@ -40,7 +40,7 @@ import com.google.common.eventbus.Subscribe;
 
 public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 {
-	private static GuiIcon[] icons = GuiIcon.XYResizable(200, 15, 15, 15, 5);
+	public static GuiIcon[] icons = GuiIcon.XYResizable(200, 15, 15, 15, 5);
 
 	protected boolean allowVerticalScroll = false;
 	protected boolean allowHorizontalScroll = false;
@@ -65,17 +65,6 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 		calculateContentSize();
 
 		shape = new XYResizableGuiShape(5);
-	}
-
-	@Override
-	public UIComponent getComponentAt(int x, int y)
-	{
-		if (allowVerticalScroll && verticalScroll.isInsideBounds(x, y))
-			return verticalScroll;
-		if (allowHorizontalScroll && horizontalScroll.isInsideBounds(x, y))
-			return horizontalScroll;
-
-		return super.getComponentAt(x, y);
 	}
 
 	// #region getters/setters
@@ -215,12 +204,26 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 		}
 	}
 
-	@Subscribe
-	public void onScrollWheel(MouseEvent.ScrollWheel event)
+	@Override
+	public UIComponent getComponentAt(int x, int y)
 	{
-		UIScrollBar sb = GuiScreen.isShiftKeyDown() ? horizontalScroll : verticalScroll;
-		if (GuiScreen.isShiftKeyDown() ? allowHorizontalScroll : allowVerticalScroll)
-			sb.scrollBy(event.getDelta() * (GuiScreen.isCtrlKeyDown() ? 15 : 5));
+		if (allowVerticalScroll && verticalScroll.isInsideBounds(x, y))
+			return verticalScroll;
+		if (allowHorizontalScroll && horizontalScroll.isInsideBounds(x, y))
+			return horizontalScroll;
+
+		return super.getComponentAt(x, y);
+	}
+
+	@Override
+	public ClipArea getClipArea()
+	{
+		ClipArea area = new ClipArea(this, 1);
+		if (allowVerticalScroll)
+			area.X -= UIScrollBar.SCROLL_THICKNESS - 1;
+		if (allowHorizontalScroll)
+			area.Y -= UIScrollBar.SCROLL_THICKNESS - 1;
+		return area;
 	}
 
 	@Override
@@ -244,14 +247,11 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 
 	}
 
-	@Override
-	public ClipArea getClipArea()
+	@Subscribe
+	public void onScrollWheel(MouseEvent.ScrollWheel event)
 	{
-		ClipArea area = new ClipArea(this, 1);
-		if (allowVerticalScroll)
-			area.X -= UIScrollBar.SCROLL_THICKNESS - 1;
-		if (allowHorizontalScroll)
-			area.Y -= UIScrollBar.SCROLL_THICKNESS - 1;
-		return area;
+		UIScrollBar sb = GuiScreen.isShiftKeyDown() ? horizontalScroll : verticalScroll;
+		if (GuiScreen.isShiftKeyDown() ? allowHorizontalScroll : allowVerticalScroll)
+			sb.scrollBy(event.getDelta() * (GuiScreen.isCtrlKeyDown() ? 15 : 5));
 	}
 }
