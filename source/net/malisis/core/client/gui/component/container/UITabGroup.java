@@ -245,17 +245,21 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		if (attachedContainer == null)
 			return super.screenX();
 
+		int x = this.x + attachedContainer.screenX();
 		switch (tabPosition)
 		{
-			case TOP:
-			case BOTTOM:
-				return attachedContainer.screenX();
 			case LEFT:
-				return attachedContainer.screenX() - getWidth() + offset;
+				x += offset - getWidth();
+				break;
 			case RIGHT:
-				return attachedContainer.screenX() + attachedContainer.getWidth() - offset;
+				x += attachedContainer.getWidth() - offset;
+				break;
+			default:
+				break;
+
 		}
-		return super.screenX();
+
+		return x;
 	}
 
 	@Override
@@ -264,18 +268,20 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		if (attachedContainer == null)
 			return super.screenY();
 
+		int y = this.y + attachedContainer.screenY();
 		switch (tabPosition)
 		{
 			case TOP:
-				return attachedContainer.screenY() - getHeight() + offset;
+				y += offset - getHeight();
+				break;
 			case BOTTOM:
-				return attachedContainer.screenY() + attachedContainer.getHeight() - offset;
-			case LEFT:
-			case RIGHT:
-				return attachedContainer.screenY();
+				y += attachedContainer.getHeight() - offset;
+				break;
+			default:
+				break;
 
 		}
-		return super.screenY();
+		return y;
 	}
 
 	/**
