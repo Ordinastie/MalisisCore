@@ -31,13 +31,11 @@ import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.icon.GuiIcon;
 
 /**
- * UIWindow
- * 
- * @author PaleoCrafter
+ * @author Ordinastie, PaleoCrafter
  */
 public class UIWindow extends UIContainer<UIWindow>
 {
-	private static GuiIcon[] icons = GuiIcon.XYResizable(200, 0, 15, 15, 5);
+	public static GuiIcon[] icons = GuiIcon.XYResizable(200, 0, 15, 15, 5);
 
 	public UIWindow(String title, int width, int height, int anchor)
 	{
@@ -61,7 +59,8 @@ public class UIWindow extends UIContainer<UIWindow>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawShape(shape, icons);
+		rp.colorMultiplier.set(backgroundColor);
+		renderer.drawShape(shape, rp, icons);
 	}
 
 	@Override
