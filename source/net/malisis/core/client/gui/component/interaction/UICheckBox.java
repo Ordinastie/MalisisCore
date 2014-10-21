@@ -75,11 +75,20 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		this(null);
 	}
 
+	/**
+	 * @return whether this <code>UICheckbox</code> is checked or not.
+	 */
 	public boolean isChecked()
 	{
 		return this.checked;
 	}
 
+	/**
+	 * Sets the state for this <code>UICheckbox</code>. Does not fire CheckEvent.
+	 * 
+	 * @param checked
+	 * @return
+	 */
 	public UICheckBox setChecked(boolean checked)
 	{
 		this.checked = checked;
@@ -147,7 +156,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	{
 		if (event.getButton() == MouseButton.LEFT)
 		{
-			if (fireEvent(new ComponentEvent.ValueChanged(this, this.checked, !this.checked)))
+			if (fireEvent(new CheckEvent(this, !checked)))
 				checked = !checked;
 		}
 	}
@@ -160,7 +169,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 
 		if (event.getKeyCode() == Keyboard.KEY_SPACE)
 		{
-			if (fireEvent(new ComponentEvent.ValueChanged(this, this.checked, !this.checked)))
+			if (fireEvent(new CheckEvent(this, !checked)))
 				checked = !checked;
 		}
 	}
@@ -169,6 +178,33 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	public String toString()
 	{
 		return this.getClass().getName() + "[ text=" + label + ", checked=" + this.checked + ", " + this.getPropertyString() + " ]";
+	}
+
+	/**
+	 * Event fired when a checkbox is checked or unchecked.<br />
+	 * <i>checked</i> holds the new state of the checkbox. When catching the event, the state is not applied to the checkbox yet.<br />
+	 * Cancelling the event will prevent the state to be set for the checkbox.
+	 *
+	 * @author Ordinastie
+	 *
+	 */
+	public static class CheckEvent extends ComponentEvent<UICheckBox>
+	{
+		private boolean checked;
+
+		public CheckEvent(UICheckBox component, boolean checked)
+		{
+			super(component);
+			this.checked = checked;
+		}
+
+		/**
+		 * @return the new state for the checkbox
+		 */
+		public boolean isChecked()
+		{
+			return checked;
+		}
 	}
 
 }
