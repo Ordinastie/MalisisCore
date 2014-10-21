@@ -24,10 +24,13 @@
 
 package net.malisis.core.client.gui.component.container;
 
-import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import net.malisis.core.client.gui.component.interaction.UITab;
+import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.icon.GuiIcon;
+import net.minecraft.util.IIcon;
 
 /**
  * @author Ordinastie
@@ -37,19 +40,35 @@ public class UITabGroup extends UIContainer<UITabGroup>
 {
 	public enum Position
 	{
-		TOP, BOTTOM, LEFT, RIGHT
+		TOP, RIGHT, LEFT, BOTTOM
 	}
 
-	private HashMap<UITab, UIContainer> listTabs = new HashMap<>();
+	//@formatter:off
+	public static IIcon[][] windowIcons = new IIcon[][] {	GuiIcon.XYResizable(0, 60, 15, 15, 5),
+															GuiIcon.XYResizable(15, 60, 15, 15, 5),
+															GuiIcon.XYResizable(0, 75, 15, 15, 5),
+															GuiIcon.XYResizable(15, 75, 15, 15, 5)};
+
+	public static IIcon[][] panelIcons = new IIcon[][] {	GuiIcon.XYResizable(30, 60, 15, 15, 5),
+															GuiIcon.XYResizable(45, 60, 15, 15, 5),
+															GuiIcon.XYResizable(30, 75, 15, 15, 5),
+															GuiIcon.XYResizable(45, 75, 15, 15, 5)};
+	//@formatter:on
+
+	private Map<UITab, UIContainer> listTabs = new LinkedHashMap<>();
 	private UITab activeTab;
 	private Position tabPosition = Position.TOP;
-	private int containerDiff = 0;
+	private UIContainer attachedContainer;
+
+	private int offset = 3;
 
 	public UITabGroup(Position tabPosition)
 	{
 		this.tabPosition = tabPosition;
-		this.height = 3;
-		this.width = 3;
+		clipContent = false;
+		setSize(0, 0);
+
+		//	setBackgroundColor(0xAAFFCC);
 	}
 
 	public UITabGroup()
@@ -71,45 +90,15 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		return tabPosition;
 	}
 
-	/**
-	 * Adds tab and its corresponding container to this <code>UITabGroup</code>.<br />
-	 * Also sets the width of this <code>UITabGroup</code>.
-	 *
-	 * @param tab
-	 * @param container
-	 */
-	public UITab addTab(UITab tab, UIContainer container)
+	public IIcon[] getIcons()
 	{
-		add(tab);
-		tab.setContainer(container);
-		tab.setActive(false);
-		listTabs.put(tab, container);
+		if (attachedContainer == null)
+			return null;
 
-		if (tabPosition == Position.TOP || tabPosition == Position.BOTTOM)
-		{
-			tab.setPosition(getWidth(), 0);
-			containerDiff += Math.max(tab.getHeight() - height, 0);
-			width += tab.getWidth();
-			height = Math.max(height, tab.getHeight());
-
-			if (tabPosition == Position.BOTTOM)
-				setPosition(x, container.getHeight() - containerDiff);
-		}
+		if (attachedContainer instanceof UIPanel)
+			return panelIcons[tabPosition.ordinal()];
 		else
-		{
-			tab.setPosition(0, getHeight());
-			containerDiff += Math.max(tab.getWidth() - width, 0);
-			width = Math.max(width, tab.getWidth());
-
-			height += tab.getHeight();
-
-			if (tabPosition == Position.RIGHT)
-				setPosition(container.getWidth() - containerDiff, y);
-		}
-
-		updateTabs();
-
-		return tab;
+			return windowIcons[tabPosition.ordinal()];
 	}
 
 	/**
@@ -125,49 +114,55 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	}
 
 	/**
-	 * Aligns the height or width of each tab.
+	 * Adds tab and its corresponding container to this <code>UITabGroup</code>.<br />
+	 * Also sets the width of this <code>UITabGroup</code>.
+	 *
+	 * @param tab
+	 * @param container
 	 */
-	private void updateTabs()
+	public UITab addTab(UITab tab, UIContainer container)
 	{
-		for (Entry<UITab, UIContainer> entry : listTabs.entrySet())
-		{
-			UITab tab = entry.getKey();
-			UIContainer container = entry.getValue();
+		add(tab);
+		tab.setContainer(container);
+		tab.setActive(false);
+		listTabs.put(tab, container);
 
-			int w, h, cx, cy, cw, ch;
+		calculateTabPosition();
+
+		return tab;
+	}
+
+	public void calculateTabPosition()
+	{
+		int w = 0;
+		int h = 0;
+
+		for (UITab tab : listTabs.keySet())
+		{
 			if (tabPosition == Position.TOP || tabPosition == Position.BOTTOM)
 			{
-				w = tab.isAutoWidth() ? 0 : tab.getWidth();
-				h = getHeight();
-
-				cx = getX();
-				if (tabPosition == Position.TOP)
-					cy = getY() + getHeight() - 2;
-				else
-					cy = container.getY();
-
-				cw = tab.getContainerWidth();
-				ch = tab.getContainerHeight() - containerDiff + 2;
+				tab.setPosition(w + offset, 1);
+				w += tab.getWidth();
+				h = Math.max(h, tab.getHeight());
 			}
 			else
 			{
-				w = tab.getWidth();
-				h = tab.isAutoHeight() ? 0 : getHeight();
-
-				if (tabPosition == Position.LEFT)
-					cx = getX() + getWidth() - 2;
-				else
-					cx = container.getX();
-				cy = getY();
-
-				cw = tab.getContainerWidth() - containerDiff + 2;
-				ch = tab.getContainerHeight();
+				tab.setPosition(1, h + offset);
+				w = Math.max(w, tab.getWidth());
+				h += tab.getHeight();
 			}
-
-			tab.setSize(w, h);
-			container.setSize(cw, ch);
-			container.setPosition(cx, cy);
 		}
+
+		boolean isHorizontal = tabPosition == Position.TOP || tabPosition == Position.BOTTOM;
+		for (UITab tab : listTabs.keySet())
+			tab.setSize(isHorizontal ? 0 : w, isHorizontal ? h : 0);
+
+		if (isHorizontal)
+			w += offset * 2;
+		else
+			h += offset * 2;
+
+		setSize(w + 2, h + 2);
 	}
 
 	/**
@@ -184,6 +179,137 @@ public class UITabGroup extends UIContainer<UITabGroup>
 			activeTab.setActive(false);
 
 		activeTab = tab;
-		tab.setActive(true);
+		if (tab != null)
+			tab.setActive(true);
+
+		if (attachedContainer != null)
+			attachedContainer.setBackgroundColor(tab.getColor());
+
+	}
+
+	public UIContainer getAttachedContainer()
+	{
+		return attachedContainer;
+	}
+
+	/**
+	 * Attach the container to this <code>UITabGroup</code>.
+	 *
+	 * @param container
+	 * @param resize
+	 * @return
+	 */
+	public UITabGroup attachTo(UIContainer container, boolean displace)
+	{
+		attachedContainer = container;
+
+		if (activeTab != null)
+			attachedContainer.setBackgroundColor(activeTab.getColor());
+
+		if (!displace)
+			return this;
+
+		int cx = container.getX();
+		int cy = container.getY();
+		int cw = container.getBaseWidth();
+		int ch = container.getBaseHeight();
+
+		if (tabPosition == Position.TOP)
+		{
+			cy += getHeight() - 1;
+			ch = (container.getBaseHeight() == INHERITED ? 0 : container.getBaseHeight()) - getHeight();
+		}
+		else if (tabPosition == Position.BOTTOM)
+		{
+			ch = (container.getBaseHeight() == INHERITED ? 0 : container.getBaseHeight()) - getHeight() + 1;
+		}
+		else if (tabPosition == Position.LEFT)
+		{
+			cx += getWidth() - 1;
+			cw = (container.getBaseWidth() == INHERITED ? 0 : container.getBaseWidth()) - getWidth();
+		}
+		else if (tabPosition == Position.RIGHT)
+		{
+			cw = (container.getBaseWidth() == INHERITED ? 0 : container.getBaseWidth()) - getWidth() + 1;
+		}
+
+		//tab.setSize(w, h);
+		container.setSize(cw, ch);
+		container.setPosition(cx, cy);
+		return this;
+	}
+
+	@Override
+	public int screenX()
+	{
+		if (attachedContainer == null)
+			return super.screenX();
+
+		switch (tabPosition)
+		{
+			case TOP:
+			case BOTTOM:
+				return attachedContainer.screenX();
+			case LEFT:
+				return attachedContainer.screenX() - getWidth() + offset;
+			case RIGHT:
+				return attachedContainer.screenX() + attachedContainer.getWidth() - offset;
+		}
+		return super.screenX();
+	}
+
+	@Override
+	public int screenY()
+	{
+		if (attachedContainer == null)
+			return super.screenY();
+
+		switch (tabPosition)
+		{
+			case TOP:
+				return attachedContainer.screenY() - getHeight() + offset;
+			case BOTTOM:
+				return attachedContainer.screenY() + attachedContainer.getHeight() - offset;
+			case LEFT:
+			case RIGHT:
+				return attachedContainer.screenY();
+
+		}
+		return super.screenY();
+	}
+
+	/**
+	 * Event fired when an inactive {@link UITab} is clicked.<br>
+	 * Canceling the event will keep the old tab active.
+	 *
+	 * @author Ordinastie
+	 *
+	 */
+	public static class TabChangeEvent extends ComponentEvent<UITabGroup>
+	{
+		private UITab newTab;
+
+		public TabChangeEvent(UITabGroup component, UITab newTab)
+		{
+			super(component);
+			this.newTab = newTab;
+		}
+
+		/**
+		 * @return the {@link UITab} deactivated
+		 */
+		public UITab getOldTab()
+		{
+			return component.activeTab;
+		}
+
+		/**
+		 * @return the {@link UITab} activated
+		 */
+		public UITab getNewTab()
+		{
+			return newTab;
+		}
+
 	}
 }

@@ -29,12 +29,13 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UITabGroup;
 import net.malisis.core.client.gui.component.container.UITabGroup.Position;
+import net.malisis.core.client.gui.component.container.UITabGroup.TabChangeEvent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
-import net.malisis.core.client.gui.element.TabShape;
+import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ActiveStateChanged;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
+import net.minecraft.util.IIcon;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -44,38 +45,70 @@ import com.google.common.eventbus.Subscribe;
  */
 public class UITab extends UIComponent<UITab>
 {
-	private GuiIcon[] tabIcons = GuiIcon.XYResizable(200, 15, 15, 15, 3);
-
 	protected String label;
 	protected UIImage image;
 	protected boolean autoWidth = false;
 	protected boolean autoHeight = false;
 	protected UIContainer container;
 	protected boolean active = false;
-
-	protected int baseContainerWidth;
-	protected int baseContainerHeight;
-
-	private GuiIcon[] icons;
+	protected int color = 0xFFFFFF;
 
 	public UITab(String label)
 	{
 		setSize(0, 0);
 		setLabel(label);
+
+		shape = new XYResizableGuiShape();
 	}
 
 	public UITab(UIImage image)
 	{
 		setSize(0, 0);
 		setImage(image);
+
+		shape = new XYResizableGuiShape();
+	}
+
+	/**
+	 * @return whether this {@link UITab} is horizontally positioned.
+	 */
+	protected boolean isHorizontal()
+	{
+		if (parent == null)
+			return true;
+		Position pos = ((UITabGroup) parent).getTabPosition();
+		return pos == Position.TOP || pos == Position.BOTTOM;
+	}
+
+	/**
+	 * Sets the color for this {@link UITab}. Also sets the color for its {@link UIContainer}.
+	 *
+	 * @param color
+	 * @return
+	 */
+	public UITab setColor(int color)
+	{
+		this.color = color;
+		if (parent != null && ((UITabGroup) parent).getAttachedContainer() != null)
+			((UITabGroup) parent).getAttachedContainer().setBackgroundColor(color);
+		return this;
+	}
+
+	/**
+	 * @return the color of this {@link UITab}.
+	 */
+	public int getColor()
+	{
+		return color;
 	}
 
 	@Override
 	public void setParent(UIContainer parent)
 	{
+		if (!(parent instanceof UITabGroup))
+			throw new IllegalArgumentException("UITabs can only be added to UITabGroup");
+
 		super.setParent(parent);
-		this.shape = new TabShape(((UITabGroup) parent).getTabPosition(), 3);
-		this.icons = ((TabShape) shape).getIcons(tabIcons);
 	}
 
 	@Override
@@ -88,22 +121,22 @@ public class UITab extends UIComponent<UITab>
 		this.height = autoHeight ? calcAutoHeight() : height;
 
 		if (shape != null)
-			shape.setSize(width, height);
+			shape.setSize(this.width, this.height);
 
 		return this;
 	}
 
 	/**
-	 * Calculates the width of this <code>UITab</code> based on its contents
+	 * Calculates the width of this {@link UITab} based on its contents.
 	 *
 	 * @return
 	 */
 	private int calcAutoWidth()
 	{
 		if (label != null)
-			return GuiRenderer.getStringWidth(label) + 8;
+			return GuiRenderer.getStringWidth(label) + (isHorizontal() ? 8 : 4);
 		else if (image != null)
-			return image.getWidth() + 8;
+			return image.getWidth() + 10;
 		else
 			return 8;
 	}
@@ -117,16 +150,16 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	/**
-	 * Calculates the height of this <code>UITab</code> base on its contents.
+	 * Calculates the height of this {@link UITab} base on its contents.
 	 *
 	 * @return
 	 */
 	private int calcAutoHeight()
 	{
 		if (label != null)
-			return GuiRenderer.FONT_HEIGHT + 8;
+			return GuiRenderer.FONT_HEIGHT + (isHorizontal() ? 4 : 8);
 		else if (image != null)
-			return image.getHeight() + 8;
+			return image.getHeight() + 10;
 		else
 			return 8;
 	}
@@ -139,31 +172,8 @@ public class UITab extends UIComponent<UITab>
 		return autoHeight;
 	}
 
-	@Override
-	public UITab setPosition(int x, int y, int anchor)
-	{
-		switch (getTabPosition())
-		{
-			case TOP:
-				y += 1;
-				break;
-			case BOTTOM:
-				y -= 1;
-				break;
-			case LEFT:
-				x += 1;
-				break;
-			case RIGHT:
-				x -= 1;
-				break;
-			default:
-				break;
-		}
-		return super.setPosition(x, y, anchor);
-	}
-
 	/**
-	 * Sets the label for this <code>UITab</code>. Removes the image if was previously set.
+	 * Sets the label for this {@link UITab}. Removes the image if was previously set.
 	 *
 	 * @param label
 	 * @return
@@ -180,7 +190,7 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	/**
-	 * Sets the image <code>UITab</code>. Removes the label if was previously set.
+	 * Sets the image {@link UITab}. Removes the label if was previously set.
 	 *
 	 * @param image
 	 * @return
@@ -198,7 +208,7 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	/**
-	 * Set the <code>UIContainer</code> linked with this <code>UITab</code>.
+	 * Set the {@link UIContainer} linked with this {@link UITab}.
 	 *
 	 * @param container
 	 * @return
@@ -206,29 +216,11 @@ public class UITab extends UIComponent<UITab>
 	public UITab setContainer(UIContainer container)
 	{
 		this.container = container;
-		this.baseContainerWidth = container.getBaseWidth(); //we don't want the calculated width/height if INHERITED
-		this.baseContainerHeight = container.getBaseHeight();
 		return this;
 	}
 
 	/**
-	 * @return the container original width.
-	 */
-	public int getContainerWidth()
-	{
-		return baseContainerWidth;
-	}
-
-	/**
-	 * @return the container original height.
-	 */
-	public int getContainerHeight()
-	{
-		return baseContainerHeight;
-	}
-
-	/**
-	 * @return this <code>UITab</code> position around the container.
+	 * @return this {@link UITab} position around the container.
 	 */
 	public Position getTabPosition()
 	{
@@ -236,7 +228,7 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	/**
-	 * Sets this tab to be active. Enables and sets visiblity for its container.
+	 * Sets this tab to be active. Enables and sets visibility for its container.
 	 *
 	 * @param active
 	 */
@@ -270,23 +262,22 @@ public class UITab extends UIComponent<UITab>
 		fireEvent(new ActiveStateChanged(this, active));
 	}
 
-	@Subscribe
-	public void onClick(MouseEvent.Release event)
+	/**
+	 * @return the icons to render.
+	 */
+	private IIcon[] getIcons()
 	{
-		if (event.getButton() != MouseButton.LEFT)
-			return;
+		if (parent == null)
+			return null;
 
-		if (!(parent instanceof UITabGroup))
-			return;
-
-		((UITabGroup) parent).setActiveTab(this);
+		return ((UITabGroup) parent).getIcons();
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.colorMultiplier.set(container.getBackgroundColor() != 0x404040 ? container.getBackgroundColor() : -1);
-		renderer.drawShape(shape, rp, icons);
+		rp.colorMultiplier.set(color);
+		renderer.drawShape(shape, rp, getIcons());
 	}
 
 	@Override
@@ -294,8 +285,8 @@ public class UITab extends UIComponent<UITab>
 	{
 		int w = label != null ? GuiRenderer.getStringWidth(label) : image.getWidth();
 		int h = label != null ? GuiRenderer.FONT_HEIGHT : image.getHeight();
-		int x = (width - w) / 2;
-		int y = (height - h) / 2;
+		int x = (getWidth() - w) / 2;
+		int y = (getHeight() - h) / 2 + 1;
 
 		if (active)
 		{
@@ -327,5 +318,21 @@ public class UITab extends UIComponent<UITab>
 			image.setZIndex(zIndex);
 			image.draw(renderer, mouseX, mouseY, partialTick);
 		}
+	}
+
+	@Subscribe
+	public void onClick(MouseEvent.Release event)
+	{
+		if (event.getButton() != MouseButton.LEFT)
+			return;
+
+		if (!(parent instanceof UITabGroup))
+			return;
+
+		if (!fireEvent(new TabChangeEvent((UITabGroup) parent, this)))
+			return;
+
+		((UITabGroup) parent).setActiveTab(this);
+
 	}
 }
