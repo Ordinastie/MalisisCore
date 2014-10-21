@@ -248,7 +248,10 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		if (text == null)
 			return;
 
-		ChatComponentText msg = new ChatComponentText(StatCollector.translateToLocalFormatted(text.toString(), data));
+		String txt = text.toString();
+		if (text instanceof Object[])
+			txt = Arrays.deepToString((Object[]) text);
+		ChatComponentText msg = new ChatComponentText(StatCollector.translateToLocalFormatted(txt, data));
 		if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
 		{
 			MinecraftServer server = MinecraftServer.getServer();
