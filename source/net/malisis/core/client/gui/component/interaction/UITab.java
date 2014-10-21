@@ -134,7 +134,7 @@ public class UITab extends UIComponent<UITab>
 	private int calcAutoWidth()
 	{
 		if (label != null)
-			return GuiRenderer.getStringWidth(label) + (isHorizontal() ? 8 : 4);
+			return GuiRenderer.getStringWidth(label) + (isHorizontal() ? 10 : 8);
 		else if (image != null)
 			return image.getWidth() + 10;
 		else
@@ -157,7 +157,7 @@ public class UITab extends UIComponent<UITab>
 	private int calcAutoHeight()
 	{
 		if (label != null)
-			return GuiRenderer.FONT_HEIGHT + (isHorizontal() ? 4 : 8);
+			return GuiRenderer.FONT_HEIGHT + (isHorizontal() ? 8 : 10);
 		else if (image != null)
 			return image.getHeight() + 10;
 		else
