@@ -821,7 +821,12 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			RenderParameters params = RenderParameters.merge(f.getParameters(), parameters);
 			IIcon icon = getIcon(params);
 			if (icon != null)
-				f.setTexture(icon, params.flipU.get(), params.flipV.get(), params.interpolateUV.get());
+			{
+				boolean flipU = params.flipU.get();
+				if (params.direction.get() == ForgeDirection.NORTH || params.direction.get() == ForgeDirection.EAST)
+					flipU = !flipU;
+				f.setTexture(icon, flipU, params.flipV.get(), params.interpolateUV.get());
+			}
 		}
 	}
 

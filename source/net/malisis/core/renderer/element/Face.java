@@ -231,12 +231,8 @@ public class Face
 		if (factor < 0)
 			factor = 0;
 		if (flipped)
-		{
 			factor = 1 - factor;
-			float t = max;
-			max = min;
-			min = t;
-		}
+
 		return min + (max - min) * (float) factor;
 	}
 
