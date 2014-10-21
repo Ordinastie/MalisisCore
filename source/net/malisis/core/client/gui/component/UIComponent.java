@@ -44,9 +44,11 @@ import org.lwjgl.opengl.GL11;
 import com.google.common.eventbus.EventBus;
 
 /**
- * UIComponent
+ * {@link UIComponent} is the base of everything drawn onto a GUI.<br />
+ * The drawing is separated between background and foreground.<br />
+ * Most of the events are launched from UIComponent.
  *
- * @author PaleoCrafter
+ * @author Ordinastie, PaleoCrafter
  */
 public abstract class UIComponent<T extends UIComponent>
 {
@@ -292,13 +294,14 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public int getWidth()
 	{
-		if (width != INHERITED)
+		if (width >= 0)
 			return width;
 
 		if (parent == null)
 			return 0;
 
-		return parent.getWidth() - 2 * parent.getHorizontalPadding();
+		//if width < 0 consider it relative to parent container
+		return parent.getWidth() - (width == INHERITED ? 0 : -width) - 2 * parent.getHorizontalPadding();
 	}
 
 	/**
@@ -314,13 +317,14 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public int getHeight()
 	{
-		if (height != INHERITED)
+		if (height >= 0)
 			return height;
 
 		if (parent == null)
 			return 0;
 
-		return parent.getHeight() - 2 * parent.getVerticalPadding();
+		//if height < 0 consider it relative to parent container
+		return parent.getHeight() - (height == INHERITED ? 0 : height) - 2 * parent.getVerticalPadding();
 	}
 
 	/**
@@ -522,7 +526,12 @@ public abstract class UIComponent<T extends UIComponent>
 	}
 
 	/**
+	 * Gets the component at the specified coordinates.<br />
+	 * Checks if inside bounds, visible and not disabled.
 	 *
+	 * @param x
+	 * @param y
+	 * @return this <code>UIComponent</code> or null if outside its bounds.
 	 */
 	public UIComponent getComponentAt(int x, int y)
 	{
@@ -608,7 +617,10 @@ public abstract class UIComponent<T extends UIComponent>
 	}
 
 	/**
-	 * Draw this <code>UIComponent</code>. Called by {@link #parent} container.
+	 * Draw this <code>UIComponent</code>. Called by {@link #parent} container.<br />
+	 * Will set the size of <i>shape</i> according to the size of this <code>UIComponent</code>. <br />
+	 * Rendering is surrounded by glPushAttrib(GL_ALL_ATTRIB_BITS) so no state should bleed between components. Also, a draw() is triggered
+	 * between background and foreground.
 	 *
 	 * @param renderer
 	 * @param mouseX
@@ -644,8 +656,8 @@ public abstract class UIComponent<T extends UIComponent>
 
 	public String getPropertyString()
 	{
-		return "size=" + width + "," + height + " | position=" + x + "," + y + " | container=" + containerX() + "," + containerY()
-				+ " | screen=" + screenX() + "," + screenY();
+		return "parent=" + parent != null ? parent.getClass().getSimpleName() : "null" + "size=" + width + "," + height + " | position="
+				+ x + "," + y + " | container=" + containerX() + "," + containerY() + " | screen=" + screenX() + "," + screenY();
 	}
 
 	/**
