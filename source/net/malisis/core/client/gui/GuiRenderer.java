@@ -111,7 +111,8 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Sets whether to ignore default Minecraft GUI scale factor.
+	 * Sets whether to ignore default Minecraft GUI scale factor.<br />
+	 * If set to true, 1 pixel size will be equal to 1 pixel on screen.
 	 *
 	 * @param ignore
 	 */
@@ -129,7 +130,7 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Sets a custom font scale factor
+	 * Sets a custom font scale factor.
 	 *
 	 * @param scale
 	 */
@@ -139,8 +140,8 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Sets the width, height and scale factor.
-	 * 
+	 * Sets the width, height and scale factor for this <code>GuiRenderer</code>.
+	 *
 	 * @return
 	 */
 	public int updateGuiScale()
@@ -191,6 +192,7 @@ public class GuiRenderer extends BaseRenderer
 			startDrawing();
 
 			container.draw(this, mouseX, mouseY, partialTick);
+
 			draw();
 
 			if (ignoreScale)
@@ -250,23 +252,15 @@ public class GuiRenderer extends BaseRenderer
 		shape = s;
 		// move the shape at the right coord on screen
 		s.translate(currentComponent.screenX(), currentComponent.screenY(), currentComponent.getZIndex());
-		rp = params != null ? params : new RenderParameters();
 		s.applyMatrix();
 
-		if (rp.applyTexture.get())
-			applyTexture(s, rp);
+		rp = params != null ? params : new RenderParameters();
 
 		Face[] faces = s.getFaces();
 		for (int i = 0; i < faces.length; i++)
 		{
 			if (icons != null && i < icons.length && icons[i] != null)
 				faces[i].setTexture(icons[i], false, false, false);
-			//			if (faces.length == 6 && i == 4)
-			//				rp.colorMultiplier.set(0xFF6666);
-			//			else if (faces.length == 6 && i == 5)
-			//				rp.colorMultiplier.set(0x6666FF);
-			//			else
-			//rp.colorMultiplier.set(rand.nextInt(0xFFFFFF));
 			drawFace(faces[i], rp);
 		}
 	}
@@ -303,7 +297,7 @@ public class GuiRenderer extends BaseRenderer
 	 *
 	 * @param text
 	 * @param maxWidth
-	 * @return
+	 * @return list of lines that won't exceed maxWidth limit
 	 */
 	public static List<String> wrapText(String text, int maxWidth)
 	{
@@ -434,7 +428,7 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Draws itemStack to the GUI. Uses RenderItem.renderItemAndEffectIntoGUI() and RenderItem.renderItemOverlayIntoGUI();
+	 * Draws an itemStack to the GUI. Uses RenderItem.renderItemAndEffectIntoGUI() and RenderItem.renderItemOverlayIntoGUI();
 	 *
 	 * @param itemStack
 	 * @param x
@@ -573,11 +567,22 @@ public class GuiRenderer extends BaseRenderer
 		return Math.round(fontRenderer.getStringWidth(str) * fontScale);
 	}
 
+	/**
+	 * Gets the rendering height of strings
+	 *
+	 * @return
+	 */
 	public static int getStringHeight()
 	{
 		return getStringHeight(1);
 	}
 
+	/**
+	 * Gets the rendering height of strings according to fontscale
+	 *
+	 * @param fontScale
+	 * @return
+	 */
 	public static int getStringHeight(float fontScale)
 	{
 		return Math.round(FONT_HEIGHT * fontScale);
@@ -585,6 +590,9 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Gets max rendering width of an array of string
+	 *
+	 * @param strings
+	 * @return
 	 */
 	public static int getMaxStringWidth(List<String> strings)
 	{
@@ -594,6 +602,12 @@ public class GuiRenderer extends BaseRenderer
 		return width;
 	}
 
+	/**
+	 * Gets max rendering width of an array of string
+	 * 
+	 * @param strings
+	 * @return
+	 */
 	public static int getMaxStringWidth(String[] strings)
 	{
 		return getMaxStringWidth(Arrays.asList(strings));

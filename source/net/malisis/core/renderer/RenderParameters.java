@@ -30,7 +30,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class RenderParameters
 {
@@ -99,11 +99,16 @@ public class RenderParameters
 	 */
 	public Parameter<Boolean> useNormals = new Parameter<>(false);
 	/**
-	 * Defines the color to apply to the face (useful for grass and leaves) usePerVertexColor must be false (Block Level)
+	 * Defines the color to apply to the face (useful for grass and leaves) usePerVertexColor must be false (Block Level).<br>
+	 * Overrides the Block.colorMultiplier() and Block.getRenderColor()
 	 */
 	public Parameter<Integer> colorMultiplier = new Parameter<>(null);
 	/**
-	 * Defines the color factor for the face (Block Level)
+	 * Defines the color factor for the face (Block Level). Used for shading the faces depending on their orientation : <br>
+	 * - NORTH/SOUTH : 0.8<br>
+	 * - EAST/WEST : 0.6<br>
+	 * - TOP : 1<br>
+	 * - BOTTOM : 0.5<br>
 	 */
 	public Parameter<Float> colorFactor = new Parameter<>(1.0F);
 	/**

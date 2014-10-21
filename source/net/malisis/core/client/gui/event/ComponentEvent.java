@@ -27,27 +27,37 @@ package net.malisis.core.client.gui.event;
 import net.malisis.core.client.gui.component.UIComponent;
 
 /**
- * ComponentEvent
- * 
- * @author PaleoCrafter
+ * Base for events fired by {@link UIComponent}.
+ *
+ * @author Ordinastie, PaleoCrafter
  */
 public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 {
-	private T component;
+	protected T component;
 
 	public ComponentEvent(T component)
 	{
 		this.component = component;
 	}
 
+	/**
+	 * @return the {@link UIComponent} that fired this {@link ComponentEvent}
+	 */
 	public T getComponent()
 	{
 		return component;
 	}
 
+	/**
+	 * Fired when a {@link UIComponent} changes state.
+	 *
+	 * @author Ordinastie
+	 *
+	 * @param <T> the type of <code>UIComponent</code> that fired this event.
+	 */
 	public abstract static class StateChanged<T extends UIComponent> extends ComponentEvent<T>
 	{
-		private boolean state;
+		protected boolean state;
 
 		public StateChanged(T component, boolean state)
 		{
@@ -55,12 +65,22 @@ public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 			this.state = state;
 		}
 
+		/**
+		 * @return the new state for the {@link UIComponent} that fired this {@link StateChanged} event.
+		 */
 		public boolean getState()
 		{
 			return state;
 		}
 	}
 
+	/**
+	 * Fired when a {@link UIComponent} gets hovered.
+	 *
+	 * @author Ordinastie
+	 *
+	 * @param <T> the type of <code>UIComponent</code> that fired this event.
+	 */
 	public static class HoveredStateChanged<T extends UIComponent> extends StateChanged<T>
 	{
 		public HoveredStateChanged(T component, boolean hovered)
@@ -69,6 +89,13 @@ public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 		}
 	}
 
+	/**
+	 * Fired when a {@link UIComponent} gets focused.
+	 *
+	 * @author Ordinastie
+	 *
+	 * @param <T> the type of <code>UIComponent</code> that fired this event.
+	 */
 	public static class FocusStateChanged<T extends UIComponent> extends StateChanged<T>
 	{
 		public FocusStateChanged(T component, boolean focused)
@@ -77,6 +104,13 @@ public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 		}
 	}
 
+	/**
+	 * Fired when a {@link UIComponent} gets activated.
+	 *
+	 * @author Ordinastie
+	 *
+	 * @param <T> the type of <code>UIComponent</code> that fired this event.
+	 */
 	public static class ActiveStateChanged<T extends UIComponent> extends StateChanged<T>
 	{
 		public ActiveStateChanged(T component, boolean active)
@@ -85,10 +119,18 @@ public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 		}
 	}
 
+	/**
+	 * Fired when a {@link UIComponent} gets it's value changed.
+	 *
+	 * @author Ordinastie
+	 *
+	 * @param <T> the type of <code>UIComponent</code> that fired this event.
+	 * @param <S> the type of the value being changed.
+	 */
 	public static class ValueChanged<T extends UIComponent, S> extends ComponentEvent<T>
 	{
-		private S oldValue;
-		private S newValue;
+		protected S oldValue;
+		protected S newValue;
 
 		public ValueChanged(T component, S oldValue, S newValue)
 		{
@@ -97,11 +139,17 @@ public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 			this.newValue = newValue;
 		}
 
+		/**
+		 * @return the value being changed for the {@link UIComponent}
+		 */
 		public S getOldValue()
 		{
 			return oldValue;
 		}
 
+		/**
+		 * @return the being set for the {@link UIComponent}
+		 */
 		public S getNewValue()
 		{
 			return newValue;

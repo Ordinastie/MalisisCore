@@ -400,7 +400,8 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	// #region prepare()
 	/**
-	 * Prepares the tessellator and the GL states for the <b>renderType</b>. <b>data</b> is only for TESR.
+	 * Prepares the tessellator and the GL states for the <b>renderType</b>. <b>data</b> is only used for TESR.<br />
+	 * TESR rendering is surrounded by glPushAttrib(GL_LIGHTING_BIT) and block texture sheet is bound.
 	 *
 	 * @param renderType
 	 * @param data
@@ -581,7 +582,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Renders the blocks using the defaul Minecraft rendering system with the specified <b>renderer</b>
+	 * Renders the blocks using the default Minecraft rendering system with the specified <b>renderer</b>
 	 *
 	 * @param renderer
 	 */
@@ -600,19 +601,21 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Main rendering method.
+	 * Main rendering method. Draws simple cube by default.
 	 */
 	public void render()
-	{}
+	{
+		drawShape(shape, rp);
+	}
 
 	/**
-	 * Renders the destroy progress manually for TESR. Called if BaseRenderer.destroyBlockProgress is not null
+	 * Renders the destroy progress manually for TESR. Called if BaseRenderer.destroyBlockProgress is not null.
 	 */
 	public void renderDestroyProgress()
 	{}
 
 	/**
-	 * Draws a shape with its own parameters
+	 * Draws a shape without parameters (default will be used).
 	 *
 	 * @param shape
 	 */
@@ -622,7 +625,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Draws a shape with specified parameters
+	 * Draws a shape with specified parameters.
 	 *
 	 * @param shape
 	 * @param params
@@ -635,6 +638,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		shape = s;
 		rp = params != null ? params : new RenderParameters();
 
+		//apply transformations
 		s.applyMatrix();
 
 		// vertex position
@@ -649,7 +653,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Draws a face with its own parameters
+	 * Draws a face with its own parameters.
 	 *
 	 * @param face
 	 */
@@ -682,6 +686,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		if (!shouldRenderFace(face))
 			return;
 
+		//use normals if available
 		if ((renderType == TYPE_ITEM_INVENTORY || renderType == TYPE_ISBRH_INVENTORY || params.useNormals.get())
 				&& params.direction.get() != null)
 			t.setNormal(params.direction.get().offsetX, params.direction.get().offsetY, params.direction.get().offsetZ);
@@ -690,12 +695,13 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 		drawVertexes(face.getVertexes());
 
+		//we need to separate each face
 		if (drawMode == GL11.GL_POLYGON)
 			next();
 	}
 
 	/***
-	 * Draws an array of vertexes (usually <i>Face.getVertexes()</i>)
+	 * Draws an array of vertexes (usually <i>Face.getVertexes()</i>).
 	 *
 	 * @param vertexes
 	 */
@@ -710,18 +716,19 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Draws a single vertex
+	 * Draws a single vertex.
 	 *
 	 * @param vertex
+	 * @param number
 	 */
-	protected void drawVertex(Vertex vertex, int count)
+	protected void drawVertex(Vertex vertex, int number)
 	{
 		// brightness
-		int brightness = calcVertexBrightness(vertex, (int[][]) params.aoMatrix.get(count));
+		int brightness = calcVertexBrightness(vertex, (int[][]) params.aoMatrix.get(number));
 		vertex.setBrightness(brightness);
 
 		// color
-		int color = calcVertexColor(vertex, (int[][]) params.aoMatrix.get(count));
+		int color = calcVertexColor(vertex, (int[][]) params.aoMatrix.get(number));
 		vertex.setColor(color);
 
 		// alpha
@@ -767,7 +774,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Checks if <b>side</b> should be rendered
+	 * Checks if <b>face</b> should be rendered.
 	 *
 	 * @param side
 	 */
@@ -800,7 +807,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Applies the texture to the <b>shape</b> with specified <b>parameters. Usually necessary before some shape transformations in
+	 * Applies the texture to the <b>shape</b> with specified <b>parameters</b>. Usually necessary before some shape transformations in
 	 * conjunction with RenderParameters.applyTexture set to false to prevent reapplying texture when rendering.
 	 *
 	 * @param shape
@@ -829,19 +836,21 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	protected int calcVertexColor(Vertex vertex, int[][] aoMatrix)
 	{
 		int color = 0xFFFFFF;
-		if (params.usePerVertexColor.get())
+
+		if (params.usePerVertexColor.get()) //vertex should use their own colors
 			color = vertex.getColor();
-		if (params.colorMultiplier.get() != null)
+		if (params.colorMultiplier.get() != null) //global color multiplier is set
 			color = params.colorMultiplier.get();
-		else if (block != null)
+		else if (block != null) //use block color mulitplier
 			color = world != null ? block.colorMultiplier(world, x, y, z) : block.getRenderColor(blockMetadata);
 
-		if (drawMode == GL11.GL_LINE)
+		if (drawMode == GL11.GL_LINE) //no AO for lines
 			return color;
-		if (renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD)
+		if (renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD) //no AO for item/inventories
 			return color;
 
 		float factor = 1;
+		//calculate AO
 		if (params.calculateAOColor.get() && aoMatrix != null && Minecraft.isAmbientOcclusionEnabled()
 				&& block.getLightValue(world, x, y, z) == 0)
 		{
@@ -854,6 +863,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			factor /= (aoMatrix.length + 1);
 		}
 
+		//apply face dependent shading
 		factor *= params.colorFactor.get();
 
 		int r = (int) ((color >> 16 & 255) * factor);
@@ -869,12 +879,16 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * Gets the base brightness for the current face.<br />
 	 * If <i>params.useBlockBrightness</i> = false, <i>params.brightness</i>. Else, the brightness is determined base on
 	 * <i>params.offset</i> and <i>getBlockBounds()</i>
+	 *
+	 * @return
 	 */
 	protected int getBaseBrightness()
 	{
+		//not in world
 		if ((renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD) || world == null || !params.useBlockBrightness.get())
 			return params.brightness.get();
 
+		//no direction, we can only use current block brightness
 		if (params.direction.get() == null)
 			return block.getMixedBrightnessForBlock(world, x, y, z);
 
@@ -884,6 +898,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		int oy = y + dir.offsetY;
 		int oz = z + dir.offsetZ;
 
+		//use the brightness of the block next to it
 		if (bounds != null)
 		{
 			if (dir == ForgeDirection.WEST && bounds.minX > 0)
@@ -913,18 +928,18 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected int calcVertexBrightness(Vertex vertex, int[][] aoMatrix)
 	{
-		if (drawMode == GL11.GL_LINE)
+		if (drawMode == GL11.GL_LINE) //no AO for lines
 			return baseBrightness;
-		if (renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD)
+		if (renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD) //not in world
 			return baseBrightness;
-		if (!params.calculateBrightness.get() || aoMatrix == null)
+		if (!params.calculateBrightness.get() || aoMatrix == null) //no data
 			return baseBrightness;
-		if (!Minecraft.isAmbientOcclusionEnabled() || block.getLightValue(world, x, y, z) != 0)
+		if (!Minecraft.isAmbientOcclusionEnabled() || block.getLightValue(world, x, y, z) != 0) // emit light
 			return baseBrightness;
 
 		int[] b = new int[Math.max(3, aoMatrix.length)];
 
-		for (int i = 0; i < aoMatrix.length; i++)
+		for (int i = 0; i < b.length; i++)
 			b[i] += getMixedBrightnessForBlock(world, x + aoMatrix[i][0], y + aoMatrix[i][1], z + aoMatrix[i][2]);
 
 		int brightness = getAoBrightness(b[0], b[1], b[2], baseBrightness);
@@ -934,15 +949,19 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	/**
 	 * Does the actual brightness calculation (copied from net.minecraft.client.renderer.BlocksRenderer.java)
+	 *
+	 * @param b1
+	 * @param b2
+	 * @param b3
+	 * @param base
+	 * @return
 	 */
 	protected int getAoBrightness(int b1, int b2, int b3, int base)
 	{
 		if (b1 == 0)
 			b1 = base;
-
 		if (b2 == 0)
 			b2 = base;
-
 		if (b3 == 0)
 			b3 = base;
 
@@ -1087,6 +1106,13 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		return renderId;
 	}
 
+	/**
+	 * Register this {@link BaseRenderer} to be used for rendering for specified classes.<br>
+	 * Classes have to extend Block or TileEntity.<br>
+	 * <font color="990000">A static <b>renderId</b> field is required inside the class extending Block !</font>
+	 *
+	 * @param listClass
+	 */
 	public void registerFor(Class... listClass)
 	{
 		for (Class clazz : listClass)
@@ -1100,7 +1126,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 				}
 				catch (ReflectiveOperationException e)
 				{
-					MalisisCore.log.error("Tried to register ISBRH for block class {} that does not have renderId field",
+					MalisisCore.log.error("[BaseRenderer] Tried to register ISBRH for block class {} that does not have renderId field",
 							clazz.getSimpleName());
 					e.printStackTrace();
 				}
@@ -1112,6 +1138,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		}
 	}
 
+	/**
+	 * Register this {@link BaseRenderer} to be used for rendering the specified <b>item</b>.
+	 *
+	 * @param item
+	 */
 	public void registerFor(Item item)
 	{
 		MinecraftForgeClient.registerItemRenderer(item, this);

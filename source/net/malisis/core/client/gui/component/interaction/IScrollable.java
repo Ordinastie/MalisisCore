@@ -24,6 +24,11 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
+
+/**
+ * @author Ordinastie
+ *
+ */
 public interface IScrollable
 {
 	public void setOffsetX(int offsetX);

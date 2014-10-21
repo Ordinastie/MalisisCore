@@ -24,10 +24,11 @@
 
 package net.malisis.core.client.gui.event;
 
+import net.malisis.core.client.gui.MalisisGui;
 
 /**
- * GuiEvent
- * 
+ * Base for all events happening while a {@link MalisisGui} is opened.
+ *
  * @author PaleoCrafter
  */
 public class GuiEvent
@@ -35,15 +36,22 @@ public class GuiEvent
 	private boolean cancelled = false;
 
 	public GuiEvent()
-	{
-	}
+	{}
 
+	/**
+	 * Marks this {@link GuiEvent} as cancelled.
+	 *
+	 * @return
+	 */
 	public boolean cancel()
 	{
 		cancelled = true;
 		return true;
 	}
 
+	/**
+	 * @return whether this {@link GuiEvent} is cancelled.
+	 */
 	public boolean isCancelled()
 	{
 		return cancelled;
