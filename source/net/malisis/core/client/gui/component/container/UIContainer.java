@@ -39,9 +39,12 @@ import net.malisis.core.client.gui.event.KeyboardEvent;
 import org.lwjgl.opengl.GL11;
 
 /**
- * UIContainer
+ * {@link UIContainer} are the base for components holding other components.<br />
+ * Child components are drawn in the foreground.<br />
+ * Mouse events received are passed to the child concerned (getComponentAt()).<br />
+ * Keyboard event are passed to all the children.
  *
- * @author PaleoCrafter
+ * @author Ordinastie, PaleoCrafter
  */
 public class UIContainer<T extends UIContainer> extends UIComponent<T>
 {
@@ -66,33 +69,41 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	 */
 	public boolean clipContent = true;
 	/**
-	 * Background color multiplier
+	 * Background color multiplier.
 	 */
-	private int backgroundColor = 0x404040;
+	protected int backgroundColor = 0x404040;
+	/**
+	 * Label for the title of this <code>UIContainer</code>.
+	 */
+	protected UILabel titleLabel = null;
 
 	/**
 	 * Default constructor, creates the components list.
 	 */
-
-	public UIContainer(String title, int width, int height)
+	public UIContainer()
 	{
 		components = new ArrayList<>();
 		controlComponents = new ArrayList<>();
-		setSize(width, height);
-		if (title != null && !title.equals(""))
-			add(new UILabel(title));
 
 		shape = new SimpleGuiShape();
 	}
 
-	public UIContainer(int width, int height)
+	public UIContainer(String title)
 	{
-		this(null, width, height);
+		this();
+		setTitle(title);
 	}
 
-	public UIContainer()
+	public UIContainer(String title, int width, int height)
 	{
-		this(null, 16, 16);
+		this(title);
+		setSize(width, height);
+	}
+
+	public UIContainer(int width, int height)
+	{
+		this(null);
+		setSize(width, height);
 	}
 
 	// #region getters/setters
@@ -157,6 +168,71 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		return verticalPadding;
 	}
 
+	/**
+	 * Sets the background color for <code>UIContainer</code>.
+	 *
+	 * @param color
+	 * @return
+	 */
+	public UIContainer setBackgroundColor(int color)
+	{
+		this.backgroundColor = color;
+		return this;
+	}
+
+	/**
+	 * @return the background color for <code>UIContainer</code>.
+	 */
+	public int getBackgroundColor()
+	{
+		return backgroundColor;
+	}
+
+	/**
+	 * Sets the title for <code>UIContainer</code>.<br />
+	 * Creates a {@link UILabel} and adds it inside <code>UIContainer</code>.
+	 *
+	 * @param title
+	 * @return
+	 */
+	public UIContainer setTitle(String title)
+	{
+		if (title == null || title == "")
+		{
+			if (titleLabel != null)
+			{
+				remove(titleLabel);
+				titleLabel = null;
+			}
+			return this;
+		}
+
+		if (titleLabel == null)
+		{
+			titleLabel = new UILabel();
+			add(titleLabel);
+		}
+
+		titleLabel.setText(title);
+		return this;
+	}
+
+	/**
+	 * @return the title for this <code>UIContainer</code>.
+	 */
+	public String getTitle()
+	{
+		return titleLabel != null ? titleLabel.getText() : null;
+	}
+
+	// #end getters/setters
+
+	/**
+	 * Gets the relative position of the specified {@link UIComponent} inside this <code>UIContainer</code>.
+	 *
+	 * @param component
+	 * @return
+	 */
 	public int componentX(UIComponent component)
 	{
 		int x = component.getX();
@@ -170,6 +246,12 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		return x;
 	}
 
+	/**
+	 * Gets the relative position of the specified {@link UIComponent} inside this <code>UIContainer</code>.
+	 *
+	 * @param component
+	 * @return
+	 */
 	public int componentY(UIComponent component)
 	{
 		int y = component.getY();
@@ -183,18 +265,45 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		return y;
 	}
 
-	public UIContainer setBackgroundColor(int color)
+	/**
+	 * Gets the component at the specified coordinates.<br />
+	 * Selects the component with the highest z-index from the components overlapping the coordinates.
+	 *
+	 * @param x
+	 * @param y
+	 * @return the child component in this <code>UIContainer</code>, this <code>UIContainer</code> if none, or null if outside its bounds.
+	 */
+	@Override
+	public UIComponent getComponentAt(int x, int y)
 	{
-		this.backgroundColor = color;
-		return this;
-	}
+		//control components take precedence over regular components
+		for (UIComponent c : controlComponents)
+		{
+			UIComponent component = c.getComponentAt(x, y);
+			if (component != null)
+				return component;
+		}
 
-	public int getBackgroundColor()
-	{
-		return backgroundColor;
-	}
+		ArrayList<UIComponent> list = new ArrayList<>();
+		for (UIComponent c : components)
+		{
+			UIComponent component = c.getComponentAt(x, y);
+			if (component != null)
+				list.add(component);
+		}
 
-	// #end getters/setters
+		if (list.size() == 0)
+			return super.getComponentAt(x, y);
+
+		UIComponent component = null;
+		for (UIComponent c : list)
+		{
+			if (component == null || component.getZIndex() <= c.getZIndex())
+				component = c;
+		}
+
+		return component;
+	}
 
 	public void onContentUpdate()
 	{}
@@ -209,6 +318,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		return new ClipArea(this);
 	}
 
+	//#region Child components
 	/**
 	 * Adds a component to this <code>UIContainer</code>.
 	 *
@@ -219,8 +329,12 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		if (component instanceof IControlComponent)
 			controlComponents.add(component);
 		else
+		{
 			components.add(component);
+			onContentUpdate();
+		}
 		component.setParent(this);
+
 	}
 
 	/**
@@ -235,8 +349,12 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		if (component instanceof IControlComponent)
 			controlComponents.remove(component);
 		else
+		{
 			components.remove(component);
+			onContentUpdate();
+		}
 		component.setParent(null);
+
 	}
 
 	/**
@@ -247,6 +365,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		for (UIComponent component : components)
 			component.setParent(null);
 		components.clear();
+		onContentUpdate();
 	}
 
 	/**
@@ -283,6 +402,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		controlComponents.clear();
 	}
 
+	//#end Child components
+
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
@@ -290,8 +411,6 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 			return;
 
 		rp.colorMultiplier.set(backgroundColor);
-		shape.resetState();
-		shape.setSize(getWidth(), getHeight());
 
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		renderer.drawShape(shape, rp);
@@ -322,38 +441,6 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		for (UIComponent c : components)
 			c.fireKeyboardEvent(event);
 		return true;
-	}
-
-	@Override
-	public UIComponent getComponentAt(int x, int y)
-	{
-		//control components take precedence over regular components
-		for (UIComponent c : controlComponents)
-		{
-			UIComponent component = c.getComponentAt(x, y);
-			if (component != null)
-				return component;
-		}
-
-		ArrayList<UIComponent> list = new ArrayList<>();
-		for (UIComponent c : components)
-		{
-			UIComponent component = c.getComponentAt(x, y);
-			if (component != null)
-				list.add(component);
-		}
-
-		if (list.size() == 0)
-			return super.getComponentAt(x, y);
-
-		UIComponent component = null;
-		for (UIComponent c : list)
-		{
-			if (component == null || component.getZIndex() <= c.getZIndex())
-				component = c;
-		}
-
-		return component;
 	}
 
 }
