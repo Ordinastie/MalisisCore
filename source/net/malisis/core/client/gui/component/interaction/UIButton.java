@@ -142,7 +142,7 @@ public class UIButton extends UIComponent<UIButton>
 	public void onClick(MouseEvent.Release event)
 	{
 		if (event.getButton() == MouseButton.LEFT)
-			fireEvent(new ClickedEvent(this, event));
+			fireEvent(new ClickEvent(this, event));
 	}
 
 	@Override
@@ -151,13 +151,13 @@ public class UIButton extends UIComponent<UIButton>
 		return this.getClass().getName() + "[ text=" + label.getText() + ", " + this.getPropertyString() + " ]";
 	}
 
-	public static class ClickedEvent extends ComponentEvent<UIButton>
+	public static class ClickEvent extends ComponentEvent<UIButton>
 	{
 		private int x, y;
 		private MouseButton button;
 		private int buttonCode;
 
-		public ClickedEvent(UIButton component, MouseEvent.Release mouseEvent)
+		public ClickEvent(UIButton component, MouseEvent.Release mouseEvent)
 		{
 			super(component);
 			this.x = mouseEvent.getX();

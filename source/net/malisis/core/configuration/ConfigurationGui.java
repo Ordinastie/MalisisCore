@@ -128,7 +128,7 @@ public class ConfigurationGui extends MalisisGui
 	}
 
 	@Subscribe
-	public void onButtonClick(UIButton.ClickedEvent event)
+	public void onButtonClick(UIButton.ClickEvent event)
 	{
 		if (event.getComponent() == btnCancel)
 			close();
