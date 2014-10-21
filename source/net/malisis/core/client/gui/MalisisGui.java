@@ -59,10 +59,6 @@ public class MalisisGui extends GuiScreen
 	 */
 	private UIContainer screen;
 	/**
-	 * UIContainer user provided.
-	 */
-	protected UIContainer container;
-	/**
 	 * Determines if the screen should be darkened when the GUI is opened.
 	 */
 	protected boolean guiscreenBackground = true;
@@ -152,7 +148,6 @@ public class MalisisGui extends GuiScreen
 	 */
 	protected void addToScreen(UIContainer container)
 	{
-		this.container = container;
 		screen.add(container);
 	}
 
@@ -161,8 +156,8 @@ public class MalisisGui extends GuiScreen
 		if (event instanceof MouseEvent)
 		{
 			MouseEvent me = (MouseEvent) event;
-			UIComponent component = container.getComponentAt(me.getX(), me.getY());
-			if (component != null)
+			UIComponent component = screen.getComponentAt(me.getX(), me.getY());
+			if (component != screen)
 			{
 				if (me instanceof MouseEvent.Press)
 					component.setFocused(true);
@@ -174,7 +169,7 @@ public class MalisisGui extends GuiScreen
 				setHoveredComponent(null, false);
 		}
 		else if (event instanceof KeyboardEvent)
-			container.fireKeyboardEvent((KeyboardEvent) event);
+			screen.fireKeyboardEvent((KeyboardEvent) event);
 		return !event.isCancelled();
 	}
 
@@ -218,7 +213,7 @@ public class MalisisGui extends GuiScreen
 			return;
 		}
 
-		if (container.isInsideBounds(x, y))
+		if (screen.isInsideBounds(x, y))
 			fireEvent(new MouseEvent.Press(x, y, button));
 		else
 		{
@@ -265,8 +260,7 @@ public class MalisisGui extends GuiScreen
 			}
 		}
 
-		if (container.isInsideBounds(x, y))
-			fireEvent(new MouseEvent.Release(x, y, button));
+		fireEvent(new MouseEvent.Release(x, y, button));
 	}
 
 	/**
@@ -278,8 +272,7 @@ public class MalisisGui extends GuiScreen
 	 */
 	protected void doubleClick(int x, int y, int button)
 	{
-		if (container.isInsideBounds(x, y))
-			fireEvent(new MouseEvent.DoubleClick(x, y, button));
+		fireEvent(new MouseEvent.DoubleClick(x, y, button));
 	}
 
 	/**
@@ -289,7 +282,7 @@ public class MalisisGui extends GuiScreen
 	protected void keyTyped(char keyChar, int keyCode)
 	{
 		KeyboardEvent event = new KeyboardEvent(keyChar, keyCode);
-		container.fireKeyboardEvent(event);
+		fireEvent(event);
 
 		if (event.isCancelled())
 			return;
@@ -331,14 +324,11 @@ public class MalisisGui extends GuiScreen
 		if (guiscreenBackground)
 			drawWorldBackground(1);
 
-		if (container == null)
-			return;
-
 		RenderHelper.enableGUIStandardItemLighting();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_LIGHTING);
 
-		renderer.drawScreen(container, mouseX, mouseY, partialTicks);
+		renderer.drawScreen(screen, mouseX, mouseY, partialTicks);
 
 		if (inventoryContainer != null)
 		{
