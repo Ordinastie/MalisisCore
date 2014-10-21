@@ -57,7 +57,7 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 			return;
 
 		if (getParent().getAnchor() != Anchor.NONE)
-			getParent().setPosition(parent.screenX(), parent.screenY());
+			getParent().setPosition(parent.screenX(), parent.screenY(), Anchor.NONE);
 
 		int w = parent.getWidth() + event.getDeltaX();
 		int h = parent.getHeight() + event.getDeltaY();

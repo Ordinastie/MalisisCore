@@ -24,6 +24,7 @@
 
 package net.malisis.core.client.gui.component.control;
 
+import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
@@ -67,14 +68,12 @@ public class UIMoveHandle extends UIComponent implements IControlComponent
 		if (y < 0)
 			y = 0;
 
-		getParent().setPosition(x, y);
+		getParent().setPosition(x, y, Anchor.NONE);
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-
-	}
+	{}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
