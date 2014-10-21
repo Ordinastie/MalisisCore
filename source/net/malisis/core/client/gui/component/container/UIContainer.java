@@ -71,7 +71,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	/**
 	 * Background color multiplier.
 	 */
-	protected int backgroundColor = 0x404040;
+	protected int backgroundColor = -1;
 	/**
 	 * Label for the title of this <code>UIContainer</code>.
 	 */
@@ -407,7 +407,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (backgroundColor == 0x404040)
+		if (backgroundColor == -1)
 			return;
 
 		rp.colorMultiplier.set(backgroundColor);
