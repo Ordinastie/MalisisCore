@@ -24,6 +24,7 @@
 
 package net.malisis.core.configuration.setting;
 
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UILabel;
@@ -34,7 +35,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class DoubleSetting extends Setting<Double>
 {
@@ -67,12 +68,12 @@ public class DoubleSetting extends Setting<Double>
 
 	@SideOnly(Side.CLIENT)
 	@Override
-	public UIComponent getComponent()
+	public UIComponent getComponent(MalisisGui gui)
 	{
-		UILabel label = new UILabel(key);
-		textField = new UITextField(50, writeValue(value)).setPosition(label.getWidth() + 2, 0);
+		UILabel label = new UILabel(gui, key);
+		textField = new UITextField(gui, 50, writeValue(value)).setPosition(label.getWidth() + 2, 0);
 
-		UIContainer container = new UIContainer(label.getWidth() + 54, 12);
+		UIContainer container = new UIContainer(gui, label.getWidth() + 54, 12);
 		container.add(label);
 		container.add(textField);
 

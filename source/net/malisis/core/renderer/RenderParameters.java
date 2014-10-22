@@ -24,6 +24,9 @@
 
 package net.malisis.core.renderer;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -34,6 +37,7 @@ import net.minecraftforge.common.util.ForgeDirection;
  */
 public class RenderParameters
 {
+	private List<Parameter> listParams = new LinkedList<>();
 	/**
 	 * Defines whether to render all faces even if shoudSideBeRendered is false
 	 */
@@ -141,11 +145,51 @@ public class RenderParameters
 	public Parameter<Boolean> flipV = new Parameter<>(false);
 
 	public RenderParameters()
-	{}
+	{
+		listParams.add(renderAllFaces);
+		listParams.add(useBlockBounds);
+		listParams.add(renderBounds);
+		listParams.add(vertexPositionRelativeToRenderBounds);
+		listParams.add(useCustomTexture);
+		listParams.add(applyTexture);
+		listParams.add(icon);
+		listParams.add(useWorldSensitiveIcon);
+		listParams.add(useTexture);
+		listParams.add(interpolateUV);
+		listParams.add(calculateAOColor);
+		listParams.add(calculateBrightness);
+		listParams.add(usePerVertexColor);
+		listParams.add(usePerVertexAlpha);
+		listParams.add(useBlockBrightness);
+		listParams.add(useNormals);
+		listParams.add(colorMultiplier);
+		listParams.add(colorFactor);
+		listParams.add(brightness);
+		listParams.add(alpha);
+		listParams.add(direction);
+		listParams.add(textureSide);
+		listParams.add(aoMatrix);
+		listParams.add(flipU);
+		listParams.add(flipV);
+	}
 
 	public RenderParameters(RenderParameters params)
 	{
+		this();
 		merge(params);
+	}
+
+	private Parameter getParameter(int index)
+	{
+		if (index < 0 || index >= listParams.size())
+			return null;
+		return listParams.get(index);
+	}
+
+	public void reset()
+	{
+		for (Parameter param : listParams)
+			param.reset();
 	}
 
 	public void merge(RenderParameters params)
@@ -153,31 +197,8 @@ public class RenderParameters
 		if (params == null)
 			return;
 
-		renderAllFaces.merge(params.renderAllFaces);
-		useBlockBounds.merge(params.useBlockBounds);
-		renderBounds.merge(params.renderBounds);
-		vertexPositionRelativeToRenderBounds.merge(params.vertexPositionRelativeToRenderBounds);
-		useCustomTexture.merge(params.useCustomTexture);
-		applyTexture.merge(params.applyTexture);
-		icon.merge(params.icon);
-		useWorldSensitiveIcon.merge(params.useWorldSensitiveIcon);
-		useTexture.merge(params.useTexture);
-		interpolateUV.merge(params.interpolateUV);
-		calculateAOColor.merge(params.calculateAOColor);
-		calculateBrightness.merge(params.calculateBrightness);
-		usePerVertexColor.merge(params.usePerVertexColor);
-		usePerVertexAlpha.merge(params.usePerVertexAlpha);
-		useBlockBrightness.merge(params.useBlockBrightness);
-		useNormals.merge(params.useNormals);
-		colorMultiplier.merge(params.colorMultiplier);
-		colorFactor.merge(params.colorFactor);
-		brightness.merge(params.brightness);
-		alpha.merge(params.alpha);
-		direction.merge(params.direction);
-		textureSide.merge(params.textureSide);
-		aoMatrix.merge(params.aoMatrix);
-		flipU.merge(params.flipU);
-		flipV.merge(params.flipV);
+		for (int i = 0; i < listParams.size(); i++)
+			getParameter(i).merge(params.getParameter(i));
 	}
 
 	public static RenderParameters merge(RenderParameters rp1, RenderParameters rp2)

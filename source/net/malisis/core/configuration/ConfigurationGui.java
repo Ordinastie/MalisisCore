@@ -44,7 +44,7 @@ import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class ConfigurationGui extends MalisisGui
 {
@@ -70,22 +70,22 @@ public class ConfigurationGui extends MalisisGui
 			//TODO: build tabs
 		}
 
-		UIWindow window = new UIWindow("config.title", windowWidth, windowHeight);
+		UIWindow window = new UIWindow(this, "config.title", windowWidth, windowHeight);
 
 		for (String category : categories)
 		{
 			window.add(createSettingContainer(category));
 		}
 
-		comment = new UIMultiLineLabel(136, windowHeight - 41);
+		comment = new UIMultiLineLabel(this, 136, windowHeight - 41);
 		comment.setColor(0xFFFFFF);
 		comment.setDrawShadow(true);
-		UIPanel panelComment = new UIPanel(140, windowHeight - 35).setPosition(0, 0, Anchor.RIGHT);
+		UIPanel panelComment = new UIPanel(this, 140, windowHeight - 35).setPosition(0, 0, Anchor.RIGHT);
 		panelComment.setBackgroundColor(0xCCCCCC);
 		panelComment.add(comment);
 
-		btnCancel = new UIButton("gui.cancel").setPosition(-32, 0, Anchor.BOTTOM | Anchor.CENTER).register(this);
-		btnSave = new UIButton("gui.done").setPosition(32, 0, Anchor.BOTTOM | Anchor.CENTER).register(this);
+		btnCancel = new UIButton(this, "gui.cancel").setPosition(-32, 0, Anchor.BOTTOM | Anchor.CENTER).register(this);
+		btnSave = new UIButton(this, "gui.done").setPosition(32, 0, Anchor.BOTTOM | Anchor.CENTER).register(this);
 
 		window.add(panelComment);
 		window.add(btnCancel);
@@ -97,12 +97,12 @@ public class ConfigurationGui extends MalisisGui
 	private UIContainer createSettingContainer(String category)
 	{
 		List<Setting> categorySettings = settings.getSettings(category);
-		UIContainer container = (UIContainer) new UIContainer(windowWidth - 105, windowHeight - 35).setPosition(5, 12);
+		UIContainer container = new UIContainer<UIContainer>(this, windowWidth - 105, windowHeight - 35).setPosition(5, 12);
 
 		int y = 0;
 		for (Setting setting : categorySettings)
 		{
-			UIComponent component = setting.getComponent();
+			UIComponent component = setting.getComponent(this);
 			component.setPosition(0, y);
 			component.register(this);
 			container.add(component);

@@ -24,139 +24,38 @@
 
 package net.malisis.core.client.gui.icon;
 
+import java.util.Arrays;
+
 import net.malisis.core.renderer.icon.MalisisIcon;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class GuiIcon extends MalisisIcon
 {
-	private static final int GUI_TEXTURE_WIDTH = 300;
-	private static final int GUI_TEXTURE_HEIGHT = 100;
+	protected MalisisIcon[] icons;
 
-	private int x;
-	private int y;
-	private int width;
-	private int height;
-
-	public GuiIcon()
+	public GuiIcon(MalisisIcon icon)
 	{
-		super();
-		x = 0;
-		y = 0;
-		width = GUI_TEXTURE_WIDTH;
-		height = GUI_TEXTURE_HEIGHT;
+		this.icons = new MalisisIcon[] { icon };
 	}
 
-	public GuiIcon(int x, int y, int width, int height)
+	public GuiIcon(MalisisIcon[] icons)
 	{
-		super();
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
+		this.icons = icons;
 	}
 
-	private float getU(boolean max)
+	public MalisisIcon getIcon(int index)
 	{
-		if (flippedU)
-			max = !max;
-		return max ? (float) (x + width) / GUI_TEXTURE_WIDTH : (float) x / GUI_TEXTURE_WIDTH;
-	}
-
-	private float getV(boolean max)
-	{
-		if (flippedV)
-			max = !max;
-
-		return max ? (float) (y + height) / GUI_TEXTURE_HEIGHT : (float) y / GUI_TEXTURE_HEIGHT;
+		if (icons == null || icons.length == 0)
+			return null;
+		return icons[index % icons.length];
 	}
 
 	@Override
-	public float getMinU()
+	public String toString()
 	{
-		return getU(false);
-	}
-
-	@Override
-	public float getMaxU()
-	{
-		return getU(true);
-	}
-
-	@Override
-	public float getMinV()
-	{
-		return getV(false);
-	}
-
-	@Override
-	public float getMaxV()
-	{
-		return getV(true);
-	}
-
-	@Override
-	public GuiIcon clone()
-	{
-		return (GuiIcon) super.clone();
-	}
-
-	@Override
-	public GuiIcon offset(int offsetX, int offsetY)
-	{
-		x += offsetX;
-		y += offsetY;
-		return this;
-	}
-
-	@Override
-	public GuiIcon clip(int offsetX, int offsetY, int width, int height)
-	{
-		this.width = width;
-		this.height = height;
-		return offset(offsetX, offsetY);
-	}
-
-	public static GuiIcon[] XYResizable(int x, int y, int width, int height, int corner)
-	{
-		int w = width - corner * 2;
-		int h = height - corner * 2;
-
-		GuiIcon base = new GuiIcon(x, y, corner, corner);
-		//@formatter:off
-		GuiIcon[] icons = new GuiIcon[] { 
-				base, 
-				base.clone().clip(corner, 0, w, corner),
-				base.clone().clip(corner + w, 0, corner, corner), 
-				
-				base.clone().clip(0, corner, corner, h),			
-				base.clone().clip(corner, corner, w, h),
-				base.clone().clip(corner + w, corner, corner, h),
-				
-				base.clone().clip(0, corner + h, corner, corner),
-				base.clone().clip(corner, corner + h, w, corner),
-				base.clone().clip(corner +w, corner + h, corner, corner)
-		};
-		//@formatter:on
-
-		return icons;
-	}
-
-	public static GuiIcon[] XResizable(int x, int y, int width, int height, int side)
-	{
-		int w = width - side * 2;
-		int h = height;
-		GuiIcon base = new GuiIcon(x, y, side, h);
-		//@formatter:off
-		GuiIcon[] icons = new GuiIcon[] { 
-				base, 
-				base.clone().clip(side, 0, w, h),
-				base.clone().clip(side + w, 0, side, h), 
-		};
-		//@formatter:on
-
-		return icons;
+		return Arrays.toString(icons);
 	}
 }

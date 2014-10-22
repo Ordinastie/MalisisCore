@@ -28,20 +28,18 @@ import static net.malisis.core.client.gui.component.interaction.UIScrollBar.*;
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.interaction.IScrollable;
 import net.malisis.core.client.gui.component.interaction.UIScrollBar;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.minecraft.client.gui.GuiScreen;
 
 import com.google.common.eventbus.Subscribe;
 
 public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 {
-	public static GuiIcon[] icons = GuiIcon.XYResizable(200, 15, 15, 15, 5);
-
 	protected boolean allowVerticalScroll = false;
 	protected boolean allowHorizontalScroll = false;
 
@@ -54,17 +52,18 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 	protected int xOffset;
 	protected int yOffset;
 
-	public UIPanel(int width, int height)
+	public UIPanel(MalisisGui gui, int width, int height)
 	{
-		super(width, height);
+		super(gui, width, height);
 		setPadding(3, 3);
 
-		horizontalScroll = new UIScrollBar(this, width, HORIZONTAL);
-		verticalScroll = new UIScrollBar(this, height, VERTICAL);
+		horizontalScroll = new UIScrollBar(gui, this, width, HORIZONTAL);
+		verticalScroll = new UIScrollBar(gui, this, height, VERTICAL);
 		setScrollBarsPosition();
 		calculateContentSize();
 
 		shape = new XYResizableGuiShape(5);
+		icon = gui.getGuiTexture().getXYResizableIcon(200, 15, 15, 15, 5);
 	}
 
 	// #region getters/setters
@@ -230,7 +229,8 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		rp.colorMultiplier.set(getBackgroundColor() != 0x404040 ? getBackgroundColor() : -1);
-		renderer.drawShape(shape, rp, icons);
+		rp.icon.set(icon);
+		renderer.drawShape(shape, rp);
 	}
 
 	@Override

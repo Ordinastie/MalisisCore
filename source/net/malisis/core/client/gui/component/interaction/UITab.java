@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component.interaction;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UITabGroup;
@@ -53,16 +54,18 @@ public class UITab extends UIComponent<UITab>
 	protected boolean active = false;
 	protected int color = 0xFFFFFF;
 
-	public UITab(String label)
+	public UITab(MalisisGui gui, String label)
 	{
+		super(gui);
 		setSize(0, 0);
 		setLabel(label);
 
 		shape = new XYResizableGuiShape();
 	}
 
-	public UITab(UIImage image)
+	public UITab(MalisisGui gui, UIImage image)
 	{
+		super(gui);
 		setSize(0, 0);
 		setImage(image);
 
@@ -257,7 +260,7 @@ public class UITab extends UIComponent<UITab>
 		this.active = active;
 		this.container.setVisible(active);
 		this.container.setDisabled(!active);
-		this.zIndex = active ? container.getZIndex() + 1 : 0;
+		this.zIndex = container.getZIndex() + (active ? 1 : 0);
 
 		fireEvent(new ActiveStateChanged(this, active));
 	}
@@ -265,7 +268,7 @@ public class UITab extends UIComponent<UITab>
 	/**
 	 * @return the icons to render.
 	 */
-	private IIcon[] getIcons()
+	private IIcon getIcon()
 	{
 		if (parent == null)
 			return null;
@@ -277,7 +280,8 @@ public class UITab extends UIComponent<UITab>
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		rp.colorMultiplier.set(color);
-		renderer.drawShape(shape, rp, getIcons());
+		rp.icon.set(getIcon());
+		renderer.drawShape(shape, rp);
 	}
 
 	@Override

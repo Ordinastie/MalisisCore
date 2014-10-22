@@ -27,31 +27,33 @@ package net.malisis.core.client.gui.component.decoration;
 import java.util.List;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.minecraft.util.StatCollector;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class UIMultiLineLabel extends UILabel
 {
 	protected String[] lines;
 	protected boolean autoHeight;
 
-	public UIMultiLineLabel(int width, int height, String... text)
+	public UIMultiLineLabel(MalisisGui gui, int width, int height, String... text)
 	{
+		super(gui);
 		this.setText(text);
 		this.setSize(width, height);
 	}
 
-	public UIMultiLineLabel()
+	public UIMultiLineLabel(MalisisGui gui)
 	{
-		this(0, 0);
+		this(gui, 0, 0);
 	}
 
-	public UIMultiLineLabel(String... text)
+	public UIMultiLineLabel(MalisisGui gui, String... text)
 	{
-		this(0, 0, text);
+		this(gui, 0, 0, text);
 	}
 
 	@Override

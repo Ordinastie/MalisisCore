@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component.decoration;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 
 /**
@@ -63,20 +64,21 @@ public class UILabel extends UIComponent<UILabel>
 	 */
 	protected float fontScale = 1;
 
-	public UILabel(String text, int width)
+	public UILabel(MalisisGui gui, String text, int width)
 	{
+		super(gui);
 		this.setText(text);
 		this.setSize(0);
 	}
 
-	public UILabel()
+	public UILabel(MalisisGui gui)
 	{
-		this(null, 0);
+		this(gui, null, 0);
 	}
 
-	public UILabel(String text)
+	public UILabel(MalisisGui gui, String text)
 	{
-		this(text, 0);
+		this(gui, text, 0);
 	}
 
 	// #region getters/setters

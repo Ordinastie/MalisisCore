@@ -24,12 +24,14 @@
 
 package net.malisis.core.client.gui.component.container;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IControlComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
@@ -51,21 +53,21 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	/**
 	 * List of {@link net.malisis.core.client.gui.component.UIComponent components}.
 	 */
-	protected final List<UIComponent> components;
+	protected final Set<UIComponent> components;
 	/**
-	 * List of {@link net.malisis.core.client.gui.component.UIComponent components} controling this <code>UIContainer</code>.
+	 * List of {@link net.malisis.core.client.gui.component.UIComponent components} controling this {@link UIContainer}.
 	 */
-	protected final List<UIComponent> controlComponents;
+	protected final Set<UIComponent> controlComponents;
 	/**
-	 * Horizontal padding to apply to this <code>UIContainer</code>
+	 * Horizontal padding to apply to this {@link UIContainer}
 	 */
 	protected int horizontalPadding;
 	/**
-	 * Vertical padding to apply to this <code>UIContainer</code>
+	 * Vertical padding to apply to this {@link UIContainer}
 	 */
 	protected int verticalPadding;
 	/**
-	 * Determines whether this <code>UIContainer</code> should clip its contents to its drawn area.
+	 * Determines whether this {@link UIContainer} should clip its contents to its drawn area.
 	 */
 	public boolean clipContent = true;
 	/**
@@ -73,36 +75,39 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	 */
 	protected int backgroundColor = -1;
 	/**
-	 * Label for the title of this <code>UIContainer</code>.
+	 * Label for the title of this {@link UIContainer}.
 	 */
-	protected UILabel titleLabel = null;
+	protected UILabel titleLabel;
 
 	/**
 	 * Default constructor, creates the components list.
 	 */
-	public UIContainer()
+	public UIContainer(MalisisGui gui)
 	{
-		components = new ArrayList<>();
-		controlComponents = new ArrayList<>();
+		super(gui);
+		components = new LinkedHashSet<>();
+		controlComponents = new LinkedHashSet<>();
 
 		shape = new SimpleGuiShape();
+		titleLabel = new UILabel(gui);
 	}
 
-	public UIContainer(String title)
+	public UIContainer(MalisisGui gui, String title)
 	{
-		this();
+		this(gui);
 		setTitle(title);
 	}
 
-	public UIContainer(String title, int width, int height)
+	public UIContainer(MalisisGui gui, int width, int height)
 	{
-		this(title);
+		this(gui);
 		setSize(width, height);
 	}
 
-	public UIContainer(int width, int height)
+	public UIContainer(MalisisGui gui, String title, int width, int height)
 	{
-		this(null);
+		this(gui);
+		setTitle(title);
 		setSize(width, height);
 	}
 
@@ -141,7 +146,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	}
 
 	/**
-	 * Set the padding for this <code>UIContainer</code>.
+	 * Set the padding for this {@link UIContainer}.
 	 *
 	 * @param horizontal
 	 * @param vertical
@@ -153,7 +158,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	}
 
 	/**
-	 * @return horizontal padding of this <code>UIContainer</code>.
+	 * @return horizontal padding of this {@link UIContainer}.
 	 */
 	public int getHorizontalPadding()
 	{
@@ -161,7 +166,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	}
 
 	/**
-	 * @return horizontal padding of this <code>UIContainer</code>.
+	 * @return horizontal padding of this {@link UIContainer}.
 	 */
 	public int getVerticalPadding()
 	{
@@ -169,7 +174,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	}
 
 	/**
-	 * Sets the background color for <code>UIContainer</code>.
+	 * Sets the background color for {@link UIContainer}.
 	 *
 	 * @param color
 	 * @return
@@ -181,7 +186,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	}
 
 	/**
-	 * @return the background color for <code>UIContainer</code>.
+	 * @return the background color for {@link UIContainer}.
 	 */
 	public int getBackgroundColor()
 	{
@@ -189,8 +194,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	}
 
 	/**
-	 * Sets the title for <code>UIContainer</code>.<br />
-	 * Creates a {@link UILabel} and adds it inside <code>UIContainer</code>.
+	 * Sets the title for {@link UIContainer}.<br />
+	 * Creates a {@link UILabel} and adds it inside {@link UIContainer}.
 	 *
 	 * @param title
 	 * @return
@@ -199,26 +204,17 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	{
 		if (title == null || title == "")
 		{
-			if (titleLabel != null)
-			{
-				remove(titleLabel);
-				titleLabel = null;
-			}
+			remove(titleLabel);
 			return this;
 		}
 
-		if (titleLabel == null)
-		{
-			titleLabel = new UILabel();
-			add(titleLabel);
-		}
-
 		titleLabel.setText(title);
+		add(titleLabel);
 		return this;
 	}
 
 	/**
-	 * @return the title for this <code>UIContainer</code>.
+	 * @return the title for this {@link UIContainer}.
 	 */
 	public String getTitle()
 	{
@@ -228,7 +224,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	// #end getters/setters
 
 	/**
-	 * Gets the relative position of the specified {@link UIComponent} inside this <code>UIContainer</code>.
+	 * Gets the relative position of the specified {@link UIComponent} inside this {@link UIContainer}.
 	 *
 	 * @param component
 	 * @return
@@ -247,7 +243,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	}
 
 	/**
-	 * Gets the relative position of the specified {@link UIComponent} inside this <code>UIContainer</code>.
+	 * Gets the relative position of the specified {@link UIComponent} inside this {@link UIContainer}.
 	 *
 	 * @param component
 	 * @return
@@ -271,7 +267,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	 *
 	 * @param x
 	 * @param y
-	 * @return the child component in this <code>UIContainer</code>, this <code>UIContainer</code> if none, or null if outside its bounds.
+	 * @return the child component in this {@link UIContainer}, this {@link UIContainer} if none, or null if outside its bounds.
 	 */
 	@Override
 	public UIComponent getComponentAt(int x, int y)
@@ -284,7 +280,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 				return component;
 		}
 
-		ArrayList<UIComponent> list = new ArrayList<>();
+		Set<UIComponent> list = new HashSet<>();
 		for (UIComponent c : components)
 		{
 			UIComponent component = c.getComponentAt(x, y);
@@ -309,7 +305,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	{}
 
 	/**
-	 * Gets the clipping area delimited by this <code>UIContainer</code>.
+	 * Gets the clipping area delimited by this {@link UIContainer}.
 	 *
 	 * @return
 	 */
@@ -320,7 +316,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 
 	//#region Child components
 	/**
-	 * Adds a component to this <code>UIContainer</code>.
+	 * Adds a component to this {@link UIContainer}.
 	 *
 	 * @param component
 	 */
@@ -338,7 +334,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	}
 
 	/**
-	 * Removes the component from this <code>UIContainer</code>.
+	 * Removes the component from this {@link UIContainer}.
 	 *
 	 * @param component
 	 */
@@ -358,7 +354,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	}
 
 	/**
-	 * Removes all the components from this <code>UIContainer</code>. Does not remove control components
+	 * Removes all the components from this {@link UIContainer}. Does not remove control components
 	 */
 	public void removeAll()
 	{
@@ -369,7 +365,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	}
 
 	/**
-	 * Adds a control component to this <code>UIContainer</code>.
+	 * Adds a control component to this {@link UIContainer}.
 	 *
 	 * @param component
 	 */
@@ -380,7 +376,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	}
 
 	/**
-	 * Removes the component from this <code>UIContainer</code>.
+	 * Removes the component from this {@link UIContainer}.
 	 *
 	 * @param component
 	 */
@@ -393,7 +389,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	}
 
 	/**
-	 * Removes all the control components from this <code>UIContainer</code>. Does not remove regular components
+	 * Removes all the control components from this {@link UIContainer}. Does not remove regular components
 	 */
 	public void removeAllControlComponents()
 	{

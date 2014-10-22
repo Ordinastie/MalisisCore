@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component.interaction;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
@@ -38,14 +39,14 @@ import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class UISlider extends UIComponent<UISlider>
 {
 	public static int SLIDER_WIDTH = 8;
 
-	public static GuiIcon[] iconBackground = GuiIcon.XResizable(0, 0, 200, 20, 5);
-	public static GuiIcon sliderIcon = new GuiIcon(227, 46, 8, 20);
+	protected GuiIcon iconBackground;
+	protected GuiIcon sliderIcon;
 
 	private String label;
 	private float minValue;
@@ -55,8 +56,9 @@ public class UISlider extends UIComponent<UISlider>
 
 	private GuiShape sliderShape;
 
-	public UISlider(int width, float min, float max, String label)
+	public UISlider(MalisisGui gui, int width, float min, float max, String label)
 	{
+		super(gui);
 		setSize(width, 20);
 		this.minValue = min;
 		this.maxValue = max;
@@ -67,11 +69,14 @@ public class UISlider extends UIComponent<UISlider>
 		sliderShape.setSize(8, 20);
 		sliderShape.storeState();
 
+		iconBackground = gui.getGuiTexture().getXResizableIcon(0, 0, 200, 20, 5);
+		sliderIcon = gui.getGuiTexture().getIcon(227, 46, 8, 20);
+
 	}
 
-	public UISlider(int width, float min, float max)
+	public UISlider(MalisisGui gui, int width, float min, float max)
 	{
-		this(width, min, max, null);
+		this(gui, width, min, max, null);
 	}
 
 	@Subscribe
@@ -131,7 +136,8 @@ public class UISlider extends UIComponent<UISlider>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawShape(shape, iconBackground);
+		rp.icon.set(iconBackground);
+		renderer.drawShape(shape, rp);
 	}
 
 	@Override
@@ -143,7 +149,8 @@ public class UISlider extends UIComponent<UISlider>
 		sliderShape.resetState();
 		sliderShape.setPosition(ox, 0);
 
-		renderer.drawShape(sliderShape, sliderIcon);
+		rp.icon.set(sliderIcon);
+		renderer.drawShape(sliderShape, rp);
 
 		renderer.next();
 		//zIndex = 1;

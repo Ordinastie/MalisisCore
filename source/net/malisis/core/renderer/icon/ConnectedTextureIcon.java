@@ -33,7 +33,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class ConnectedTextureIcon extends MalisisIcon
 {
@@ -45,10 +45,10 @@ public class ConnectedTextureIcon extends MalisisIcon
 	private static int FULL = LEFT | TOP | RIGHT | BOTTOM;
 
 	//@formatter:off
-	public static ForgeDirection[][] sides = { 	{ WEST, NORTH, EAST, SOUTH }, 
-												{ WEST, NORTH, EAST, SOUTH }, 
+	public static ForgeDirection[][] sides = { 	{ WEST, NORTH, EAST, SOUTH },
+												{ WEST, NORTH, EAST, SOUTH },
 												{ EAST, UP, WEST, DOWN },
-												{ WEST, UP, EAST, DOWN }, 
+												{ WEST, UP, EAST, DOWN },
 												{ NORTH, UP, SOUTH, DOWN },
 												{ SOUTH, UP, NORTH, DOWN }};
 	//@formatter:on
@@ -82,31 +82,31 @@ public class ConnectedTextureIcon extends MalisisIcon
 
 		if (icon.getIconName().equals(getIconName()))
 		{
-			icons[LEFT | TOP] = icon.clone().clip(0, 0, f, f);
-			icons[TOP] = icon.clone().clip(f, 0, f, f);
-			icons[RIGHT | TOP] = icon.clone().clip(2 * f, 0, f, f);
+			icons[LEFT | TOP] = icon.copy().clip(0, 0, f, f);
+			icons[TOP] = icon.copy().clip(f, 0, f, f);
+			icons[RIGHT | TOP] = icon.copy().clip(2 * f, 0, f, f);
 
-			icons[LEFT] = icon.clone().clip(0, f, f, f);
-			icons[NONE] = icon.clone().clip(f, f, f, f);
-			icons[RIGHT] = icon.clone().clip(2 * f, f, f, f);
+			icons[LEFT] = icon.copy().clip(0, f, f, f);
+			icons[NONE] = icon.copy().clip(f, f, f, f);
+			icons[RIGHT] = icon.copy().clip(2 * f, f, f, f);
 
-			icons[LEFT | BOTTOM] = icon.clone().clip(0, 2 * f, f, f);
-			icons[BOTTOM] = icon.clone().clip(f, 2 * f, f, f);
-			icons[RIGHT | BOTTOM] = icon.clone().clip(2 * f, 2 * f, f, f);
+			icons[LEFT | BOTTOM] = icon.copy().clip(0, 2 * f, f, f);
+			icons[BOTTOM] = icon.copy().clip(f, 2 * f, f, f);
+			icons[RIGHT | BOTTOM] = icon.copy().clip(2 * f, 2 * f, f, f);
 		}
 		else
 		{
-			icons[LEFT | TOP | BOTTOM] = icon.clone().clip(0, 0, f, f);
-			icons[TOP | BOTTOM] = icon.clone().clip(f, 0, f, f);
-			icons[LEFT | RIGHT | TOP] = icon.clone().clip(2 * f, 0, f, f);
+			icons[LEFT | TOP | BOTTOM] = icon.copy().clip(0, 0, f, f);
+			icons[TOP | BOTTOM] = icon.copy().clip(f, 0, f, f);
+			icons[LEFT | RIGHT | TOP] = icon.copy().clip(2 * f, 0, f, f);
 
-			icons[LEFT | RIGHT] = icon.clone().clip(0, f, f, f);
-			icons[FULL] = icon.clone().clip(f, f, f, f);
-			//icons[LEFT | RIGHT] = icon.clone().clip(2 * f, f, f, f);
+			icons[LEFT | RIGHT] = icon.copy().clip(0, f, f, f);
+			icons[FULL] = icon.copy().clip(f, f, f, f);
+			//icons[LEFT | RIGHT] = icon.copy().clip(2 * f, f, f, f);
 
-			icons[LEFT | RIGHT | BOTTOM] = icon.clone().clip(0, 2 * f, f, f);
-			//icons[TOP | BOTTOM] = icon.clone().clip(f, 2 * f, f, f);
-			icons[RIGHT | TOP | BOTTOM] = icon.clone().clip(2 * f, 2 * f, f, f);
+			icons[LEFT | RIGHT | BOTTOM] = icon.copy().clip(0, 2 * f, f, f);
+			//icons[TOP | BOTTOM] = icon.copy().clip(f, 2 * f, f, f);
+			icons[RIGHT | TOP | BOTTOM] = icon.copy().clip(2 * f, 2 * f, f, f);
 		}
 	}
 

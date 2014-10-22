@@ -35,9 +35,9 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
-public class MegaTexture extends MalisisIcon
+public class MegaTextureIcon extends MalisisIcon
 {
 	private static HashMap<ForgeDirection, ForgeDirection[]> searchDirs = new HashMap<>();
 	static
@@ -51,23 +51,23 @@ public class MegaTexture extends MalisisIcon
 	int baseX, baseY, baseZ;
 	int numBlocks = -1;
 
-	public MegaTexture(String name)
+	public MegaTextureIcon(String name)
 	{
 		super(name);
 	}
 
-	public MegaTexture(String name, int numBlocks)
+	public MegaTextureIcon(String name, int numBlocks)
 	{
 		super(name);
 		this.numBlocks = numBlocks;
 	}
 
-	public MegaTexture(MalisisIcon icon)
+	public MegaTextureIcon(MalisisIcon icon)
 	{
 		super(icon);
 	}
 
-	public MegaTexture(MalisisIcon icon, int numBlocks)
+	public MegaTextureIcon(MalisisIcon icon, int numBlocks)
 	{
 		super(icon);
 		this.numBlocks = numBlocks;
@@ -123,7 +123,8 @@ public class MegaTexture extends MalisisIcon
 			u = Math.abs(z - baseZ) % numBlocks;
 
 		float factor = 1.0F / numBlocks;
-		MalisisIcon icon = clone();
+		MalisisIcon icon = new MalisisIcon();
+		icon.copyFrom(this);
 		icon.clip(u * factor, 1 - v * factor, factor, factor);
 		return icon;
 	}

@@ -37,6 +37,7 @@ import net.malisis.core.packet.InventoryActionMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 
 import org.lwjgl.input.Keyboard;
@@ -50,6 +51,8 @@ import org.lwjgl.opengl.GL11;
  */
 public class MalisisGui extends GuiScreen
 {
+	public static GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.locationBlocksTexture);
+	public static GuiTexture ITEM_TEXTURE = new GuiTexture(TextureMap.locationItemsTexture);
 	/**
 	 * Renderer drawing the components.
 	 */
@@ -105,7 +108,7 @@ public class MalisisGui extends GuiScreen
 	protected MalisisGui()
 	{
 		this.renderer = new GuiRenderer();
-		this.screen = new UIContainer();
+		this.screen = new UIContainer(this);
 		this.screen.clipContent = false;
 		startTime = System.currentTimeMillis();
 		Keyboard.enableRepeatEvents(true);
@@ -132,6 +135,14 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
+	 * @return the defaultGuiTexture
+	 */
+	public GuiTexture getGuiTexture()
+	{
+		return renderer.getGuiTexture();
+	}
+
+	/**
 	 * Gets elapsed time since the GUI was opened.
 	 *
 	 * @return
@@ -151,13 +162,24 @@ public class MalisisGui extends GuiScreen
 		screen.add(container);
 	}
 
+	public void clearScreen()
+	{
+		screen.removeAll();
+	}
+
+	public UIComponent getComponentAt(int x, int y)
+	{
+		UIComponent component = screen.getComponentAt(x, y);
+		return component == screen ? null : component;
+	}
+
 	protected boolean fireEvent(GuiEvent event)
 	{
 		if (event instanceof MouseEvent)
 		{
 			MouseEvent me = (MouseEvent) event;
-			UIComponent component = screen.getComponentAt(me.getX(), me.getY());
-			if (component != screen)
+			UIComponent component = getComponentAt(me.getX(), me.getY());
+			if (component != null)
 			{
 				if (me instanceof MouseEvent.Press)
 					component.setFocused(true);

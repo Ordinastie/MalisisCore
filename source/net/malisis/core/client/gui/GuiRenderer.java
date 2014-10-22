@@ -32,9 +32,11 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.BaseRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Face;
+import net.malisis.core.renderer.element.Shape;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderHelper;
@@ -48,14 +50,8 @@ import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
-import cpw.mods.fml.client.FMLClientHandler;
-
 public class GuiRenderer extends BaseRenderer
 {
-	/**
-	 * Base texture for GUIs.
-	 */
-	private final ResourceLocation GUI_TEXTURE = new ResourceLocation("malisiscore", "textures/gui/gui.png");
 	/**
 	 * Font renderer used to draw strings.
 	 */
@@ -101,13 +97,26 @@ public class GuiRenderer extends BaseRenderer
 	 */
 	public int mouseY;
 	/**
+	 * Default texture to use for current gui.
+	 */
+	private GuiTexture defaultGuiTexture;
+	/**
 	 * Determines whether the texture has been changed.
 	 */
 	private boolean defaultTexture = true;
 
 	public GuiRenderer()
 	{
+		defaultGuiTexture = new GuiTexture(new ResourceLocation("malisiscore", "textures/gui/gui.png"), 300, 100);
 		updateGuiScale();
+	}
+
+	/**
+	 * @return the defaultGuiTexture
+	 */
+	public GuiTexture getGuiTexture()
+	{
+		return defaultGuiTexture;
 	}
 
 	/**
@@ -216,53 +225,42 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Draws a shape on the GUI with the specified parameters
-	 *
-	 * @param s
-	 * @param rp
-	 */
-	public void drawShape(GuiShape s, RenderParameters rp)
-	{
-		drawShape(s, rp, (IIcon) null);
-	}
-
-	/**
-	 * Draws a shape on the GUI with the specified icons. Icons length should match the number of faces in the shape.
-	 *
-	 * @param s
-	 * @param icons
-	 */
-	public void drawShape(GuiShape s, IIcon... icons)
-	{
-		drawShape(s, null, icons);
-	}
-
-	/**
-	 * Draws a shape to the GUI with the specified parameters and icons. Icons length should match the number of faces in the shape.
+	 * Draws a shape to the GUI with the specified parameters.
 	 *
 	 * @param s
 	 * @param params
 	 * @param icons
 	 */
-	public void drawShape(GuiShape s, RenderParameters params, IIcon... icons)
+	public void drawShape(GuiShape s, RenderParameters params)
 	{
 		if (s == null)
 			return;
 
 		shape = s;
-		// move the shape at the right coord on screen
-		s.translate(currentComponent.screenX(), currentComponent.screenY(), currentComponent.getZIndex());
-		s.applyMatrix();
-
 		rp = params != null ? params : new RenderParameters();
 
-		Face[] faces = s.getFaces();
+		// move the shape at the right coord on screen
+		shape.translate(currentComponent.screenX(), currentComponent.screenY(), currentComponent.getZIndex());
+		shape.applyMatrix();
+
+		applyTexture(shape, rp);
+
+		for (Face face : s.getFaces())
+			drawFace(face, face.getParameters());
+	}
+
+	@Override
+	public void applyTexture(Shape shape, RenderParameters parameters)
+	{
+		if (parameters.icon.get() == null)
+			return;
+
+		Face[] faces = shape.getFaces();
+		IIcon icon = parameters.icon.get();
+		boolean isGuiIcon = icon instanceof GuiIcon;
+
 		for (int i = 0; i < faces.length; i++)
-		{
-			if (icons != null && i < icons.length && icons[i] != null)
-				faces[i].setTexture(icons[i], false, false, false);
-			drawFace(faces[i], rp);
-		}
+			faces[i].setTexture(isGuiIcon ? ((GuiIcon) icon).getIcon(i) : icon, false, false, false);
 	}
 
 	/**
@@ -604,7 +602,7 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Gets max rendering width of an array of string
-	 * 
+	 *
 	 * @param strings
 	 * @return
 	 */
@@ -626,14 +624,16 @@ public class GuiRenderer extends BaseRenderer
 
 	/**
 	 * Bind a new texture for rendering.
+	 *
+	 * @param texture
 	 */
-	@Override
-	public void bindTexture(ResourceLocation rl)
+	public void bindTexture(GuiTexture texture)
 	{
-		if (rl == null)
+		if (texture == null)
 			return;
+
 		defaultTexture = false;
-		FMLClientHandler.instance().getClient().getTextureManager().bindTexture(rl);
+		Minecraft.getMinecraft().getTextureManager().bindTexture(texture.getResourceLocation());
 	}
 
 	/**
@@ -641,7 +641,7 @@ public class GuiRenderer extends BaseRenderer
 	 */
 	public void setDefaultTexture()
 	{
-		bindTexture(GUI_TEXTURE);
+		bindTexture(defaultGuiTexture);
 		defaultTexture = true;
 	}
 

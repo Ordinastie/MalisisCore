@@ -29,9 +29,9 @@ import net.minecraft.client.renderer.texture.TextureMap;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
-public class MalisisIcon extends TextureAtlasSprite implements Cloneable
+public class MalisisIcon extends TextureAtlasSprite
 {
 	protected int sheetWidth;
 	protected int sheetHeight;
@@ -55,7 +55,7 @@ public class MalisisIcon extends TextureAtlasSprite implements Cloneable
 
 	public MalisisIcon()
 	{
-		super(null);
+		super("");
 	}
 
 	public MalisisIcon(String name)
@@ -70,28 +70,34 @@ public class MalisisIcon extends TextureAtlasSprite implements Cloneable
 	}
 
 	//#region getters/setters
+	public void setSize(int width, int height)
+	{
+		this.width = width;
+		this.height = height;
+	}
+
 	@Override
 	public float getMinU()
 	{
-		return this.flippedU ? super.getMaxU() : super.getMinU();
+		return this.flippedU ? maxU : minU;
 	}
 
 	@Override
 	public float getMaxU()
 	{
-		return this.flippedU ? super.getMinU() : super.getMaxU();
+		return this.flippedU ? minU : maxU;
 	}
 
 	@Override
 	public float getMinV()
 	{
-		return this.flippedV ? super.getMaxV() : super.getMinV();
+		return this.flippedV ? maxV : minV;
 	}
 
 	@Override
 	public float getMaxV()
 	{
-		return this.flippedV ? super.getMinV() : super.getMaxV();
+		return this.flippedV ? minV : maxV;
 	}
 
 	public MalisisIcon flip(boolean horizontal, boolean vertical)
@@ -193,20 +199,11 @@ public class MalisisIcon extends TextureAtlasSprite implements Cloneable
 		this.flippedV = base.flippedV;
 	}
 
-	@Override
-	public MalisisIcon clone()
+	public MalisisIcon copy()
 	{
-		MalisisIcon clone = null;
-		try
-		{
-			clone = (MalisisIcon) super.clone();
-			clone.parentIcon = null;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			e.printStackTrace();
-		}
-		return clone;
+		MalisisIcon icon = new MalisisIcon();
+		icon.copyFrom(this);
+		return icon;
 	}
 
 	public MalisisIcon register(TextureMap register)

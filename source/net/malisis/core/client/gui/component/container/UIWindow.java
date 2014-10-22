@@ -27,40 +27,40 @@ package net.malisis.core.client.gui.component.container;
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
-import net.malisis.core.client.gui.icon.GuiIcon;
 
 /**
  * @author Ordinastie, PaleoCrafter
  */
 public class UIWindow extends UIContainer<UIWindow>
 {
-	public static GuiIcon[] icons = GuiIcon.XYResizable(200, 0, 15, 15, 5);
-
-	public UIWindow(String title, int width, int height, int anchor)
+	public UIWindow(MalisisGui gui, String title, int width, int height, int anchor)
 	{
-		super(title, width, height);
+		super(gui, title, width, height);
 		setPadding(5, 5);
 		this.anchor = anchor;
 
 		shape = new XYResizableGuiShape();
+		icon = gui.getGuiTexture().getXYResizableIcon(200, 0, 15, 15, 5);
 	}
 
-	public UIWindow(String title, int width, int height)
+	public UIWindow(MalisisGui gui, String title, int width, int height)
 	{
-		this(title, width, height, Anchor.CENTER | Anchor.MIDDLE);
+		this(gui, title, width, height, Anchor.CENTER | Anchor.MIDDLE);
 	}
 
-	public UIWindow(int width, int height)
+	public UIWindow(MalisisGui gui, int width, int height)
 	{
-		this(null, width, height, Anchor.CENTER | Anchor.MIDDLE);
+		this(gui, null, width, height, Anchor.CENTER | Anchor.MIDDLE);
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		rp.colorMultiplier.set(backgroundColor);
-		renderer.drawShape(shape, rp, icons);
+		rp.icon.set(icon);
+		renderer.drawShape(shape, rp);
 	}
 
 	@Override

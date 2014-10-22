@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component.interaction;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.element.GuiShape;
@@ -39,7 +40,7 @@ import com.google.common.eventbus.Subscribe;
 
 /**
  * UIScrollBar
- * 
+ *
  * @author Ordinastie
  */
 public class UIScrollBar extends UIComponent
@@ -50,13 +51,12 @@ public class UIScrollBar extends UIComponent
 	public static final int SCROLL_THICKNESS = 10;
 	public static final int SCROLLER_HEIGHT = 15;
 
-	private static GuiIcon[] icons = GuiIcon.XYResizable(215, 0, 15, 15, 1);
-	private static GuiIcon[] disabledIcons = GuiIcon.XYResizable(215, 15, 15, 15, 1);
+	protected GuiIcon disabledIcon;
 
-	private static GuiIcon verticalIcon = new GuiIcon(230, 0, 8, 15);
-	private static GuiIcon verticalDisabledIcon = verticalIcon.clone().offset(8, 0);
-	private static GuiIcon horizontalIcon = new GuiIcon(230, 15, 15, 8);
-	private static GuiIcon horizontalDisabledIcon = horizontalIcon.clone().offset(0, 8);
+	protected GuiIcon verticalIcon;
+	protected GuiIcon verticalDisabledIcon;
+	protected GuiIcon horizontalIcon;
+	protected GuiIcon horizontalDisabledIcon;
 
 	private int type;
 	public IScrollable scrollable;
@@ -66,9 +66,9 @@ public class UIScrollBar extends UIComponent
 
 	private GuiShape scrollShape;
 
-	public <T extends UIContainer & IScrollable> UIScrollBar(T scrollable, int length, int type)
+	public <T extends UIContainer & IScrollable> UIScrollBar(MalisisGui gui, T scrollable, int length, int type)
 	{
-		super();
+		super(gui);
 		this.setParent(scrollable);
 		this.scrollable = scrollable;
 		this.type = type;
@@ -89,6 +89,14 @@ public class UIScrollBar extends UIComponent
 		shape = new XYResizableGuiShape(1);
 		scrollShape = new SimpleGuiShape().setSize(w, h);
 		scrollShape.storeState();
+
+		icon = gui.getGuiTexture().getXYResizableIcon(215, 0, 15, 15, 1);
+		disabledIcon = gui.getGuiTexture().getXYResizableIcon(215, 15, 15, 15, 1);
+
+		verticalIcon = gui.getGuiTexture().getIcon(230, 0, 8, 15);
+		verticalDisabledIcon = gui.getGuiTexture().getIcon(238, 0, 8, 15);
+		horizontalIcon = gui.getGuiTexture().getIcon(230, 15, 15, 8);
+		horizontalDisabledIcon = gui.getGuiTexture().getIcon(230, 23, 15, 8);
 	}
 
 	@Override
@@ -185,7 +193,8 @@ public class UIScrollBar extends UIComponent
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawShape(shape, isDisabled() ? disabledIcons : icons);
+		rp.icon.set(isDisabled() ? disabledIcon : icon);
+		renderer.drawShape(shape, rp);
 	}
 
 	@Override
@@ -208,6 +217,7 @@ public class UIScrollBar extends UIComponent
 		scrollShape.resetState();
 		scrollShape.setPosition(ox + 1, oy + 1);
 
-		renderer.drawShape(scrollShape, icon);
+		rp.icon.set(icon);
+		renderer.drawShape(scrollShape, rp);
 	}
 }

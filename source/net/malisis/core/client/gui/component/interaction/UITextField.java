@@ -28,6 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
@@ -47,13 +48,13 @@ import com.google.common.eventbus.Subscribe;
 
 /**
  * UITextField
- * 
+ *
  * @author Ordinastie
  */
 public class UITextField extends UIComponent<UITextField>
 {
-	private static GuiIcon[] iconTextfield = GuiIcon.XResizable(200, 30, 9, 12, 3);
-	private static GuiIcon[] iconTextfieldDisabled = GuiIcon.XResizable(200, 42, 9, 12, 3);
+	protected GuiIcon iconTextfield;
+	protected GuiIcon iconTextfieldDisabled;
 
 	/**
 	 * Current text of this <code>UITextField</code>
@@ -90,9 +91,9 @@ public class UITextField extends UIComponent<UITextField>
 	private GuiShape cursorShape;
 	private GuiShape selectShape;
 
-	public UITextField(int width, String text)
+	public UITextField(MalisisGui gui, int width, String text)
 	{
-		super();
+		super(gui);
 		this.width = width;
 		this.height = 12;
 		if (text != null)
@@ -103,16 +104,19 @@ public class UITextField extends UIComponent<UITextField>
 		cursorShape.setSize(1, 10);
 		cursorShape.storeState();
 		selectShape = new SimpleGuiShape();
+
+		iconTextfield = gui.getGuiTexture().getXResizableIcon(200, 30, 9, 12, 3);
+		iconTextfieldDisabled = gui.getGuiTexture().getXResizableIcon(200, 42, 9, 12, 3);
 	}
 
-	public UITextField(int width)
+	public UITextField(MalisisGui gui, int width)
 	{
-		this(width, null);
+		this(gui, width, null);
 	}
 
 	/**
 	 * Clamps the position <i>pos</i> between 0 and text length
-	 * 
+	 *
 	 * @param pos
 	 * @return position clamped
 	 */
@@ -123,7 +127,7 @@ public class UITextField extends UIComponent<UITextField>
 
 	/**
 	 * Determines the cursor position for a given x coordinate
-	 * 
+	 *
 	 * @param x
 	 * @return position
 	 */
@@ -230,7 +234,7 @@ public class UITextField extends UIComponent<UITextField>
 
 	/**
 	 * Sets the position of the cursor to the provided index.
-	 * 
+	 *
 	 * @param position
 	 */
 	public void setCursorPosition(int position)
@@ -245,7 +249,7 @@ public class UITextField extends UIComponent<UITextField>
 
 	/**
 	 * Sets the text color for this <code>UITextField</code>.
-	 * 
+	 *
 	 * @return this <code>UITextField</code>
 	 */
 	public UITextField setTextColor(int color)
@@ -404,7 +408,8 @@ public class UITextField extends UIComponent<UITextField>
 	{
 		rp.useTexture.reset();
 		rp.colorMultiplier.reset();
-		renderer.drawShape(shape, isDisabled() ? iconTextfieldDisabled : iconTextfield);
+		rp.icon.set(isDisabled() ? iconTextfieldDisabled : iconTextfield);
+		renderer.drawShape(shape, rp);
 	}
 
 	@Override

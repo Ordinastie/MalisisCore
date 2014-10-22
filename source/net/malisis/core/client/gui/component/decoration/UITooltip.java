@@ -28,34 +28,34 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
-import net.malisis.core.client.gui.icon.GuiIcon;
 
 /**
  * UITooltip
- * 
+ *
  * @author PaleoCrafter
  */
 public class UITooltip extends UIComponent
 {
-	private static GuiIcon[] icons = GuiIcon.XYResizable(227, 31, 15, 15, 5);
-
 	protected List<String> lines;
 	protected int padding = 4;
 
-	public UITooltip()
+	public UITooltip(MalisisGui gui)
 	{
+		super(gui);
 		setSize(16, 16);
 		zIndex = 300;
 		rp.alpha.set(255);
 
 		shape = new XYResizableGuiShape();
+		icon = gui.getGuiTexture().getXYResizableIcon(227, 31, 15, 15, 5);
 	}
 
-	public UITooltip(String text)
+	public UITooltip(MalisisGui gui, String text)
 	{
-		this();
+		this(gui);
 		setText(text);
 	}
 
@@ -96,7 +96,8 @@ public class UITooltip extends UIComponent
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		shape.setPosition(mouseX + getOffsetX(), mouseY + getOffsetY());
-		renderer.drawShape(shape, rp, icons);
+		rp.icon.set(icon);
+		renderer.drawShape(shape, rp);
 	}
 
 	@Override

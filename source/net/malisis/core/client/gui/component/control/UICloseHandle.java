@@ -26,10 +26,10 @@ package net.malisis.core.client.gui.component.control;
 
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 
 import com.google.common.eventbus.Subscribe;
@@ -40,16 +40,16 @@ import com.google.common.eventbus.Subscribe;
  */
 public abstract class UICloseHandle extends UIComponent implements IControlComponent
 {
-
-	public static GuiIcon icon = new GuiIcon(268, 30, 15, 15);
-
-	public UICloseHandle(UIContainer parent)
+	public UICloseHandle(MalisisGui gui, UIContainer parent)
 	{
+		super(gui);
 		parent.add(this);
 		setPosition(parent.getHorizontalPadding() - 1, 1 - parent.getVerticalPadding(), Anchor.RIGHT);
 		setSize(5, 5);
 		register(this);
 		setZIndex(10);
+
+		icon = gui.getGuiTexture().getIcon(268, 30, 15, 15);
 	}
 
 	@Subscribe
@@ -72,7 +72,7 @@ public abstract class UICloseHandle extends UIComponent implements IControlCompo
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		icon = new GuiIcon(268, 30, 15, 15);
-		renderer.drawShape(shape, icon);
+		rp.icon.set(icon);
+		renderer.drawShape(shape, rp);
 	}
 }

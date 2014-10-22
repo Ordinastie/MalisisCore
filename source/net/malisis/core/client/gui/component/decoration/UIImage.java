@@ -25,9 +25,11 @@
 package net.malisis.core.client.gui.component.decoration;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.GuiTexture;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.icon.GuiIcon;
+import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
@@ -44,9 +46,9 @@ public class UIImage extends UIComponent<UIImage>
 	public static final ResourceLocation ITEMS_TEXTURE = TextureMap.locationItemsTexture;
 
 	/**
-	 * Resource location for the texture to use
+	 * {@link GuiTexture} to use for the icon.
 	 */
-	private ResourceLocation texture;
+	private GuiTexture texture;
 	/**
 	 * IIcon to use for the texture
 	 */
@@ -57,16 +59,18 @@ public class UIImage extends UIComponent<UIImage>
 	 */
 	private ItemStack itemStack;
 
-	public UIImage(IIcon icon, ResourceLocation rl)
+	public UIImage(MalisisGui gui, GuiTexture texture, IIcon icon)
 	{
-		setIcon(icon, rl);
+		super(gui);
+		setIcon(texture, icon);
 		setSize(16, 16);
 
 		shape = new SimpleGuiShape();
 	}
 
-	public UIImage(ItemStack itemStack)
+	public UIImage(MalisisGui gui, ItemStack itemStack)
 	{
+		super(gui);
 		setItemStack(itemStack);
 		setSize(16, 16);
 
@@ -76,15 +80,15 @@ public class UIImage extends UIComponent<UIImage>
 	public UIImage setIcon(IIcon icon)
 	{
 		this.itemStack = null;
-		this.icon = icon != null ? icon : new GuiIcon();
+		this.icon = icon != null ? icon : new MalisisIcon();
 		return this;
 	}
 
-	public UIImage setIcon(IIcon icon, ResourceLocation rl)
+	public UIImage setIcon(GuiTexture texture, IIcon icon)
 	{
 		this.itemStack = null;
 		this.icon = icon;
-		this.texture = rl;
+		this.texture = texture;
 		return this;
 	}
 
@@ -115,8 +119,9 @@ public class UIImage extends UIComponent<UIImage>
 	{
 		if (icon != null)
 		{
+			rp.icon.set(icon);
 			renderer.bindTexture(texture);
-			renderer.drawShape(shape, icon);
+			renderer.drawShape(shape, rp);
 		}
 		else if (itemStack != null)
 		{

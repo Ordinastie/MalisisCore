@@ -25,28 +25,31 @@
 package net.malisis.core.client.gui.component.decoration;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.icon.GuiIcon;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class UIProgressBar extends UIComponent<UIProgressBar>
 {
-	private static GuiIcon barIcon = new GuiIcon(246, 0, 22, 16);
-	private static GuiIcon barFilledIcon = barIcon.clone().offset(0, 16);
+	protected GuiIcon barIcon;
+	protected GuiIcon barFilledIcon;
 
 	protected float progress = 0;
 	protected boolean reversed = false;
 
-	public UIProgressBar()
+	public UIProgressBar(MalisisGui gui)
 	{
+		super(gui);
 		setSize(22, 16);
 
 		shape = new SimpleGuiShape();
-		barIcon = new GuiIcon(246, 0, 22, 16);
+		barIcon = gui.getGuiTexture().getIcon(246, 0, 22, 16);
+		barFilledIcon = gui.getGuiTexture().getIcon(246, 16, 22, 16);
 	}
 
 	public float getProgress()
@@ -76,7 +79,8 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 		shape.resetState();
 		shape.setSize(width, height);
 		barIcon.flip(reversed, false);
-		renderer.drawShape(shape, rp, barIcon);
+		rp.icon.set(barIcon);
+		renderer.drawShape(shape, rp);
 	}
 
 	@Override
@@ -88,6 +92,7 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 		shape.resetState();
 		shape.setSize(width, 16);
 		shape.translate(reversed ? this.width - width : 0, 0);
-		renderer.drawShape(shape, barFilledIcon);
+		rp.icon.set(barFilledIcon);
+		renderer.drawShape(shape, rp);
 	}
 }

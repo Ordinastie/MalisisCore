@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component.container;
 
 import net.malisis.core.client.gui.Anchor;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.player.PlayerInventorySlot;
@@ -44,13 +45,13 @@ public class UIPlayerInventory extends UIContainer
 	@SuppressWarnings("unused")
 	private MalisisInventory inventory;
 
-	public UIPlayerInventory(MalisisInventory inventory)
+	public UIPlayerInventory(MalisisGui gui, MalisisInventory inventory)
 	{
-		super("container.inventory", INVENTORY_WIDTH, INVENTORY_HEIGHT);
+		super(gui, "container.inventory", INVENTORY_WIDTH, INVENTORY_HEIGHT);
 		this.inventory = inventory;
 
 		for (int i = 0; i < inventory.getSizeInventory(); i++)
-			addSlot((PlayerInventorySlot) inventory.getSlot(i), i);
+			addSlot(gui, (PlayerInventorySlot) inventory.getSlot(i), i);
 
 		setPosition(0, 0, Anchor.BOTTOM | Anchor.CENTER);
 	}
@@ -61,9 +62,9 @@ public class UIPlayerInventory extends UIContainer
 	 * @param slot
 	 * @param number
 	 */
-	protected void addSlot(PlayerInventorySlot slot, int number)
+	protected void addSlot(MalisisGui gui, PlayerInventorySlot slot, int number)
 	{
-		UISlot uislot = new UISlot(slot);
+		UISlot uislot = new UISlot(gui, slot);
 		if (number < 9)
 			uislot.setPosition(number * 18, 69);
 		else if (number < 36)

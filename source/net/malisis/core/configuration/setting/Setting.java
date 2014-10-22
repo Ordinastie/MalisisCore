@@ -24,6 +24,7 @@
 
 package net.malisis.core.configuration.setting;
 
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Configuration;
@@ -36,7 +37,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public abstract class Setting<T>
 {
@@ -101,7 +102,7 @@ public abstract class Setting<T>
 	public abstract String writeValue(T value);
 
 	@SideOnly(Side.CLIENT)
-	public abstract UIComponent getComponent();
+	public abstract UIComponent getComponent(MalisisGui gui);
 
 	@SideOnly(Side.CLIENT)
 	public abstract T getValueFromComponent();

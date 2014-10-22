@@ -56,9 +56,9 @@ public class UISlot extends UIComponent<UISlot>
 	/**
 	 * Icon to use for the background of this <code>UISlot</code>
 	 */
-	private static GuiIcon icon = new GuiIcon(209, 30, 18, 18);
-	private static GuiIcon iconLeft = new GuiIcon(209, 30, 1, 18);
-	private static GuiIcon iconTop = new GuiIcon(209, 30, 18, 1);
+	protected GuiIcon icon;
+	protected GuiIcon iconLeft;
+	protected GuiIcon iconTop;
 
 	/**
 	 * Whether the mouse button has been released at least once.
@@ -69,19 +69,28 @@ public class UISlot extends UIComponent<UISlot>
 	 */
 	protected MalisisSlot slot;
 
-	public UISlot(MalisisSlot slot)
+	protected MalisisGui gui;
+
+	public UISlot(MalisisGui gui, MalisisSlot slot)
 	{
+		super(gui);
+		this.gui = gui;
 		this.slot = slot;
 		this.width = 18;
 		this.height = 18;
 		slot.register(this);
 
 		shape = new SimpleGuiShape();
+
+		icon = gui.getGuiTexture().getIcon(209, 30, 18, 18);
+		iconLeft = gui.getGuiTexture().getIcon(209, 30, 1, 18);
+		iconTop = gui.getGuiTexture().getIcon(209, 30, 18, 1);
+
 	}
 
-	public UISlot()
+	public UISlot(MalisisGui gui)
 	{
-		this(null);
+		this(gui, null);
 	}
 
 	@Subscribe
@@ -115,7 +124,7 @@ public class UISlot extends UIComponent<UISlot>
 		for (int i = 1; i < lines.size(); i++)
 			lines.set(i, EnumChatFormatting.GRAY + lines.get(i));
 
-		tooltip = new UITooltip().setText(lines);
+		tooltip = new UITooltip(gui).setText(lines);
 	}
 
 	@Override
@@ -123,7 +132,8 @@ public class UISlot extends UIComponent<UISlot>
 	{
 		shape.resetState();
 		shape.setSize(18, 18);
-		renderer.drawShape(shape, icon);
+		rp.icon.set(icon);
+		renderer.drawShape(shape, rp);
 		renderer.next();
 	}
 
@@ -179,10 +189,12 @@ public class UISlot extends UIComponent<UISlot>
 		// Dirty fix because Mojang can't count and masks overflow the slots
 		shape.resetState();
 		shape.setSize(1, 18).translate(0, 0, 50);
-		renderer.drawShape(shape, iconLeft);
+		rp.icon.set(iconLeft);
+		renderer.drawShape(shape, rp);
 		shape.resetState();
 		shape.setSize(18, 1).translate(0, 0, 50);
-		renderer.drawShape(shape, iconTop);
+		rp.icon.set(iconTop);
+		renderer.drawShape(shape, rp);
 
 	}
 

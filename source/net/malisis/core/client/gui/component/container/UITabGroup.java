@@ -27,10 +27,10 @@ package net.malisis.core.client.gui.component.container;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.interaction.UITab;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
-import net.minecraft.util.IIcon;
 
 /**
  * @author Ordinastie
@@ -43,43 +43,37 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		TOP, RIGHT, LEFT, BOTTOM
 	}
 
-	//@formatter:off
-	public static IIcon[][] windowIcons = new IIcon[][] {	GuiIcon.XYResizable(0, 60, 15, 15, 5),
-															GuiIcon.XYResizable(15, 60, 15, 15, 5),
-															GuiIcon.XYResizable(0, 75, 15, 15, 5),
-															GuiIcon.XYResizable(15, 75, 15, 15, 5)};
+	protected Map<UITab, UIContainer> listTabs = new LinkedHashMap<>();
+	protected UITab activeTab;
+	protected Position tabPosition = Position.TOP;
+	protected UIContainer attachedContainer;
+	protected int offset = 3;
+	protected GuiIcon[] windowIcons;
+	protected GuiIcon[] panelIcons;
 
-	public static IIcon[][] panelIcons = new IIcon[][] {	GuiIcon.XYResizable(30, 60, 15, 15, 5),
-															GuiIcon.XYResizable(45, 60, 15, 15, 5),
-															GuiIcon.XYResizable(30, 75, 15, 15, 5),
-															GuiIcon.XYResizable(45, 75, 15, 15, 5)};
-	//@formatter:on
-
-	private Map<UITab, UIContainer> listTabs = new LinkedHashMap<>();
-	private UITab activeTab;
-	private Position tabPosition = Position.TOP;
-	private UIContainer attachedContainer;
-
-	private int offset = 3;
-
-	public UITabGroup(Position tabPosition)
+	public UITabGroup(MalisisGui gui, Position tabPosition)
 	{
+		super(gui);
 		this.tabPosition = tabPosition;
 		clipContent = false;
 		setSize(0, 0);
 
-		//	setBackgroundColor(0xAAFFCC);
+		//@formatter:off
+		windowIcons = new GuiIcon[] {	gui.getGuiTexture().getXYResizableIcon(0, 60, 15, 15, 5),
+										gui.getGuiTexture().getXYResizableIcon(15, 60, 15, 15, 5),
+										gui.getGuiTexture().getXYResizableIcon(0, 75, 15, 15, 5),
+										gui.getGuiTexture().getXYResizableIcon(15, 75, 15, 15, 5)};
+
+		panelIcons = new GuiIcon[] {	gui.getGuiTexture().getXYResizableIcon(30, 60, 15, 15, 5),
+										gui.getGuiTexture().getXYResizableIcon(45, 60, 15, 15, 5),
+										gui.getGuiTexture().getXYResizableIcon(30, 75, 15, 15, 5),
+										gui.getGuiTexture().getXYResizableIcon(45, 75, 15, 15, 5)};
+		//@formatter:on
 	}
 
-	public UITabGroup()
+	public UITabGroup(MalisisGui gui)
 	{
-		this(Position.TOP);
-	}
-
-	@Override
-	public UITabGroup setPosition(int x, int y, int anchor)
-	{
-		return super.setPosition(x, y, anchor);
+		this(gui, Position.TOP);
 	}
 
 	/**
@@ -90,7 +84,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		return tabPosition;
 	}
 
-	public IIcon[] getIcons()
+	public GuiIcon getIcons()
 	{
 		if (attachedContainer == null)
 			return null;
@@ -99,18 +93,6 @@ public class UITabGroup extends UIContainer<UITabGroup>
 			return panelIcons[tabPosition.ordinal()];
 		else
 			return windowIcons[tabPosition.ordinal()];
-	}
-
-	/**
-	 * Creates and adds a tab with label to this <code>UITabGroup</code>.
-	 *
-	 * @param tabName
-	 * @param container
-	 * @return
-	 */
-	public UITab addTab(String tabName, UIContainer container)
-	{
-		return addTab(new UITab(tabName), container);
 	}
 
 	/**
@@ -202,7 +184,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	public UITabGroup attachTo(UIContainer container, boolean displace)
 	{
 		attachedContainer = container;
-
+		setZIndex(attachedContainer.getZIndex() - 1);
 		if (activeTab != null)
 			attachedContainer.setBackgroundColor(activeTab.getColor());
 

@@ -24,6 +24,7 @@
 
 package net.malisis.core.client.gui.component.container;
 
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisSlot;
@@ -35,37 +36,37 @@ public class UIInventory extends UIContainer<UIInventory>
 	private int numCols;
 	private boolean hasTitle;
 
-	public UIInventory(String title, MalisisInventory inventory, int numCols)
+	public UIInventory(MalisisGui gui, String title, MalisisInventory inventory, int numCols)
 	{
-		super(title != null ? title : inventory.getInventoryName(), 0, 0);
+		super(gui, title != null ? title : inventory.getInventoryName(), 0, 0);
 		this.hasTitle = title == null && !inventory.hasCustomInventoryName();
 		this.inventory = inventory;
 		this.numCols = numCols;
 		this.width = Math.min(inventory.getSizeInventory() * 18, numCols * 18);
 		this.height = (int) Math.ceil((float) inventory.getSizeInventory() / numCols) * 18 + (hasTitle ? 11 : 0);
 		for (int i = 0; i < inventory.getSizeInventory(); i++)
-			addSlot(inventory.getSlot(i), i);
+			addSlot(gui, inventory.getSlot(i), i);
 	}
 
-	public UIInventory(MalisisInventory inventory, int numCols)
+	public UIInventory(MalisisGui gui, MalisisInventory inventory, int numCols)
 	{
-		this(null, inventory, numCols);
+		this(gui, null, inventory, numCols);
 
 	}
 
-	public UIInventory(String title, MalisisInventory inventory)
+	public UIInventory(MalisisGui gui, String title, MalisisInventory inventory)
 	{
-		this(title, inventory, 9);
+		this(gui, title, inventory, 9);
 	}
 
-	public UIInventory(MalisisInventory inventory)
+	public UIInventory(MalisisGui gui, MalisisInventory inventory)
 	{
-		this(null, inventory, 9);
+		this(gui, null, inventory, 9);
 	}
 
-	protected void addSlot(MalisisSlot slot, int number)
+	protected void addSlot(MalisisGui gui, MalisisSlot slot, int number)
 	{
-		UISlot uislot = new UISlot(slot);
+		UISlot uislot = new UISlot(gui, slot);
 
 		int row = number / numCols;
 		int col = number % numCols;

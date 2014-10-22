@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component.interaction;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
@@ -46,17 +47,19 @@ import com.google.common.eventbus.Subscribe;
  */
 public class UICheckBox extends UIComponent<UICheckBox>
 {
-	private static GuiIcon checkboxBackground = new GuiIcon(242, 32, 10, 10);
-	private static GuiIcon checkboxBackgroundDisabled = checkboxBackground.clone().offset(10, 0);
-	private static GuiIcon checkBoxDisabled = new GuiIcon(242, 42, 12, 10);
-	private static GuiIcon checkBoxChecked = checkBoxDisabled.clone().offset(0, 10);
-	private static GuiIcon checkBoxHovered = checkBoxDisabled.clone().offset(12, 0);
+	protected GuiIcon bgIcon;
+	protected GuiIcon bgIconDisabled;
+	protected GuiIcon cbDisabled;
+	protected GuiIcon cbChecked;
+	protected GuiIcon cbHovered;
 
 	private String label;
 	private boolean checked;
 
-	public UICheckBox(String label)
+	public UICheckBox(MalisisGui gui, String label)
 	{
+		super(gui);
+
 		int w = 0;
 		if (label != null && !label.equals(""))
 		{
@@ -68,11 +71,16 @@ public class UICheckBox extends UIComponent<UICheckBox>
 
 		shape = new SimpleGuiShape();
 
+		bgIcon = gui.getGuiTexture().getIcon(242, 32, 10, 10);
+		bgIconDisabled = gui.getGuiTexture().getIcon(252, 32, 10, 10);
+		cbDisabled = gui.getGuiTexture().getIcon(242, 42, 12, 10);
+		cbChecked = gui.getGuiTexture().getIcon(242, 52, 12, 10);
+		cbHovered = gui.getGuiTexture().getIcon(254, 42, 12, 10);
 	}
 
-	public UICheckBox()
+	public UICheckBox(MalisisGui gui)
 	{
-		this(null);
+		this(gui, null);
 	}
 
 	/**
@@ -85,7 +93,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 
 	/**
 	 * Sets the state for this <code>UICheckbox</code>. Does not fire CheckEvent.
-	 * 
+	 *
 	 * @param checked
 	 * @return
 	 */
@@ -100,7 +108,8 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	{
 		shape.resetState();
 		shape.setSize(10, 10).setPosition(1, 0);
-		renderer.drawShape(shape, isDisabled() ? checkboxBackgroundDisabled : checkboxBackground);
+		rp.icon.set(isDisabled() ? bgIconDisabled : bgIcon);
+		renderer.drawShape(shape, rp);
 
 		renderer.next();
 
@@ -141,10 +150,10 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		{
 			if (isHovered() && !isDisabled())
 				GL11.glEnable(GL11.GL_BLEND);
-			GuiIcon icon = isDisabled() ? checkBoxDisabled : (isHovered() ? checkBoxHovered : checkBoxChecked);
 			shape.resetState();
 			shape.setSize(12, 10);
-			renderer.drawShape(shape, icon);
+			rp.icon.set(isDisabled() ? cbDisabled : (isHovered() ? cbHovered : cbChecked));
+			renderer.drawShape(shape, rp);
 			renderer.next();
 			if (isHovered() && !isDisabled())
 				GL11.glDisable(GL11.GL_BLEND);

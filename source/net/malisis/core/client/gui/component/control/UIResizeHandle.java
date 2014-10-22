@@ -26,10 +26,10 @@ package net.malisis.core.client.gui.component.control;
 
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 
 import com.google.common.eventbus.Subscribe;
@@ -40,14 +40,15 @@ import com.google.common.eventbus.Subscribe;
  */
 public class UIResizeHandle extends UIComponent<UIResizeHandle> implements IControlComponent
 {
-	public static GuiIcon icon = new GuiIcon(268, 0, 15, 15);
-
-	public UIResizeHandle(UIContainer parent)
+	public UIResizeHandle(MalisisGui gui, UIContainer parent)
 	{
+		super(gui);
 		parent.add(this);
 		setPosition(parent.getHorizontalPadding() - 1, parent.getVerticalPadding() - 1, Anchor.BOTTOM | Anchor.RIGHT);
 		setSize(5, 5);
 		register(this);
+
+		icon = gui.getGuiTexture().getIcon(268, 0, 15, 15);
 	}
 
 	@Subscribe
@@ -76,7 +77,8 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawShape(shape, icon);
+		rp.icon.set(icon);
+		renderer.drawShape(shape, rp);
 	}
 
 }

@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component.interaction;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
@@ -37,41 +38,45 @@ import com.google.common.eventbus.Subscribe;
 
 /**
  * UIButton
- * 
- * @author PaleoCrafter
+ *
+ * @author Ordinastie, PaleoCrafter
  */
 public class UIButton extends UIComponent<UIButton>
 {
-	private static GuiIcon[] iconButton = GuiIcon.XResizable(0, 20, 200, 20, 5);
-	private static GuiIcon[] iconButtonHovered = GuiIcon.XResizable(0, 40, 200, 20, 5);
-	private static GuiIcon[] iconButtonDisabled = GuiIcon.XResizable(0, 0, 200, 20, 5);
+	protected GuiIcon iconHovered;
+	protected GuiIcon iconDisabled;
 
-	private UILabel label = new UILabel();
+	private UILabel label;
 	private boolean autoWidth = true;
 
 	// this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
-	public UIButton(String text, int width)
+	public UIButton(MalisisGui gui, String text, int width)
 	{
+		super(gui);
+		label = new UILabel(gui);
 		setText(text);
 		label.setDrawShadow(true);
 		setSize(width);
 
 		shape = new XResizableGuiShape();
+		icon = gui.getGuiTexture().getXResizableIcon(0, 20, 200, 20, 5);
+		iconHovered = gui.getGuiTexture().getXResizableIcon(0, 20, 200, 20, 5);
+		iconDisabled = gui.getGuiTexture().getXResizableIcon(0, 20, 200, 20, 5);
 	}
 
-	public UIButton(String text)
+	public UIButton(MalisisGui gui, String text)
 	{
-		this(text, 60);
+		this(gui, text, 60);
 	}
 
-	public UIButton()
+	public UIButton(MalisisGui gui)
 	{
-		this(null, 60);
+		this(gui, null, 60);
 	}
 
 	/**
 	 * Sets the text of this <code>UIButton</code>. If a width of 0 was previously set, it will be recalculated for this text.
-	 * 
+	 *
 	 * @param text
 	 * @return this <code>UIButton</code>
 	 */
@@ -84,7 +89,7 @@ public class UIButton extends UIComponent<UIButton>
 
 	/**
 	 * Sets the width of this <code>UIButton</code>. Height is fixed 20.
-	 * 
+	 *
 	 * @param width
 	 * @return this <code>UIButton</code>
 	 */
@@ -101,7 +106,7 @@ public class UIButton extends UIComponent<UIButton>
 
 	/**
 	 * Sets the width of this <code>UIButton</code>. Height parameter is ignored as it's fixed 20.
-	 * 
+	 *
 	 * @param width
 	 * @param height ignored
 	 * @return this <code>UILabel</code>
@@ -123,8 +128,8 @@ public class UIButton extends UIComponent<UIButton>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		GuiIcon[] icons = isDisabled() ? iconButtonDisabled : (hovered ? iconButtonHovered : iconButton);
-		renderer.drawShape(shape, icons);
+		rp.icon.set(isDisabled() ? iconDisabled : (hovered ? iconHovered : icon));
+		renderer.drawShape(shape, rp);
 	}
 
 	@Override
