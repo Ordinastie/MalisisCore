@@ -325,6 +325,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer)
 	{
 		set(world, block, x, y, z, world.getBlockMetadata(x, y, z));
+		tileEntity = world.getTileEntity(x, y, z);
 		renderBlocks = renderer;
 		vertexDrawn = false;
 
