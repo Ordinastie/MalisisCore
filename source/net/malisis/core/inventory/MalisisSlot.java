@@ -24,6 +24,9 @@
 
 package net.malisis.core.inventory;
 
+import net.malisis.core.util.ItemUtils;
+import net.malisis.core.util.ItemUtils.ItemStackSplitter;
+import net.malisis.core.util.ItemUtils.ItemStacksMerger;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
@@ -54,9 +57,9 @@ public class MalisisSlot
 	 */
 	public int slotNumber;
 	/**
-	 * Whether the slot is an output slot. If set to true, isItemValid() always return false
+	 * {@link InventoryState} of this slot.
 	 */
-	protected boolean isOutputSlot = false;
+	protected InventoryState state = new InventoryState();
 
 	public MalisisSlot(MalisisInventory inventory, ItemStack itemStack, int index)
 	{
@@ -117,15 +120,7 @@ public class MalisisSlot
 	}
 
 	/**
-	 * @return the {@link InventoryState} of the {@link MalisisInventory} of this {@link MalisisSlot}.
-	 */
-	public InventoryState getState()
-	{
-		return inventory.state;
-	}
-
-	/**
-	 * Sets the itemStack contained by this {@link MalisisSlot}
+	 * Sets the itemStack contained by this {@link MalisisSlot}. Does not check for slot validity, max stack size etc...
 	 *
 	 * @param itemStack
 	 */
@@ -135,7 +130,7 @@ public class MalisisSlot
 	}
 
 	/**
-	 * @return the itemStack contained by this {@link MalisisSlot}
+	 * @return the itemStack contained by this {@link MalisisSlot}.
 	 */
 	public ItemStack getItemStack()
 	{
@@ -143,26 +138,48 @@ public class MalisisSlot
 	}
 
 	/**
+	 * Sets the currently dragged ItemStack for this {@link MalisisSlot}.
 	 *
+	 * @param itemStack
 	 */
 	public void setDraggedItemStack(ItemStack itemStack)
 	{
 		this.draggedItemStack = itemStack;
 	}
 
+	/**
+	 * @return the currently dragged ItemStack for this {@link MalisisSlot}
+	 */
 	public ItemStack getDraggedItemStack()
 	{
 		return draggedItemStack;
 	}
 
 	/**
-	 * Sets whether this {@link MalisisSlot} is an output slot. If set to true, isItemValid() always return false
-	 *
-	 * @param isOutput
+	 * Sets this {@link MalisisSlot} as an output slot. Sets the slot {@link InventoryState state} to deny inserts.
 	 */
-	public void setOutputSlot(boolean isOutput)
+	public void setOutputSlot()
 	{
-		isOutputSlot = isOutput;
+		state.unset(InventoryState.PLAYER_INSERT | InventoryState.AUTO_INSERT);
+	}
+
+	/**
+	 * @return whether this {@link MalisisSlot} is an output slot (if {@link InventoryState state} denies inserts)
+	 */
+	public boolean isOutputSlot()
+	{
+		return !state.is(InventoryState.PLAYER_INSERT) && !state.is(InventoryState.AUTO_INSERT);
+	}
+
+	/**
+	 * Checks whether this {@link MalisisSlot} is allowed for the <b>state</b>.
+	 *
+	 * @param state
+	 * @return false if either the inventory or the slot denies the state.
+	 */
+	public boolean isState(int state)
+	{
+		return inventory.state.is(state) && this.state.is(state);
 	}
 
 	/**
@@ -172,9 +189,6 @@ public class MalisisSlot
 	 */
 	public boolean isItemValid(ItemStack itemStack)
 	{
-		if (isOutputSlot)
-			return false;
-
 		if (inventory == null)
 			return true;
 
@@ -224,13 +238,10 @@ public class MalisisSlot
 	{
 		if (itemStack == null)
 			return 0;
-		int start = itemStack.stackSize;
 		if (stackSize <= 0)
-		{
-			itemStack = null;
-			return start;
-		}
+			stackSize = 0;
 
+		int start = itemStack.stackSize;
 		itemStack.stackSize = Math.min(stackSize, Math.min(itemStack.getMaxStackSize(), getSlotStackLimit()));
 		return itemStack.stackSize - start;
 	}
@@ -245,23 +256,59 @@ public class MalisisSlot
 
 	public ItemStack extract(int amount)
 	{
-		if (itemStack == null)
-			return null;
-		if (amount < 1)
-			return null;
-
-		ItemStack extract = itemStack.copy();
-		extract.stackSize = -addItemStackSize(-amount);
-		return extract;
+		ItemStackSplitter iss = new ItemUtils.ItemStackSplitter(getItemStack());
+		iss.split(amount);
+		setItemStack(iss.source);
+		if (hasChanged())
+			onSlotChanged();
+		return iss.split;
 	}
 
-	public ItemStack insert(ItemStack itemStack)
+	public ItemStack insert(ItemStack insert)
 	{
-		if (itemStack == null)
+		return insert(insert, insert != null ? insert.stackSize : 0, false);
+	}
+
+	public ItemStack insert(ItemStack insert, int amount)
+	{
+		return insert(insert, amount, false);
+	}
+
+	public ItemStack insert(ItemStack insert, int amount, boolean force)
+	{
+		if (insert == null)
 			return null;
 
-		itemStack.stackSize -= addItemStackSize(itemStack.stackSize);
-		return itemStack.stackSize > 0 ? itemStack : null;
+		if (!isItemValid(insert))
+			return insert;
+
+		ItemStacksMerger ism = new ItemUtils.ItemStacksMerger(insert, itemStack);
+		if (!ism.canMerge() || isFull())
+		{
+			if (!force)
+				return insert;
+
+			ItemStack slotStack = extract(ItemUtils.FULL_STACK);
+			ItemStack insertStack = insert.copy();
+			if (insert(insertStack, amount, false) != null)
+			{
+				setItemStack(slotStack);
+				return insert;
+			}
+			else
+				return slotStack;
+		}
+
+		int max = getSlotStackLimit();
+		if (itemStack != null)
+			max = Math.min(itemStack.getMaxStackSize(), max);
+		ism.merge(amount, max);
+		setItemStack(ism.into);
+
+		if (hasChanged())
+			onSlotChanged();
+
+		return ism.merge;
 	}
 
 	/**

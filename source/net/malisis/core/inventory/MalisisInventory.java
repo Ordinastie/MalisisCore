@@ -401,17 +401,6 @@ public class MalisisInventory implements IInventory
 	{}
 
 	/**
-	 * Transfer itemStack inside this {@link MalisisInventory}.
-	 *
-	 * @param itemStack that could not fit inside this {@link MalisisInventory}
-	 * @return
-	 */
-	public ItemStack transferInto(ItemStack itemStack)
-	{
-		return transferInto(itemStack, false);
-	}
-
-	/**
 	 * Gets the first slot containing an itemStack.
 	 *
 	 * @return
@@ -439,6 +428,17 @@ public class MalisisInventory implements IInventory
 		slot.setItemStack(null);
 		slot.onSlotChanged();
 		return itemStack;
+	}
+
+	/**
+	 * Transfer itemStack inside this {@link MalisisInventory}.
+	 *
+	 * @param itemStack that could not fit inside this {@link MalisisInventory}
+	 * @return
+	 */
+	public ItemStack transferInto(ItemStack itemStack)
+	{
+		return transferInto(itemStack, false);
 	}
 
 	/**
@@ -484,7 +484,7 @@ public class MalisisInventory implements IInventory
 		while (itemStack != null && current >= start && current <= end)
 		{
 			slot = getSlot(current);
-			if (slot.isItemValid(itemStack) && (emptySlot || slot.getItemStack() != null))
+			if (slot.isItemValid(itemStack) && !slot.isOutputSlot() && (emptySlot || slot.getItemStack() != null))
 			{
 				ItemUtils.ItemStacksMerger ism = new ItemUtils.ItemStacksMerger(itemStack, slot.getItemStack());
 				if (ism.merge(ItemUtils.FULL_STACK, slot.getSlotStackLimit()))

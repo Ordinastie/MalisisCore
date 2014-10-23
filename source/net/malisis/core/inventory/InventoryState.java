@@ -48,6 +48,11 @@ public class InventoryState
 		this.state = state;
 	}
 
+	public void unset(int state)
+	{
+		this.state &= ~state;
+	}
+
 	public boolean is(int state)
 	{
 		return (this.state & state) != 0;
