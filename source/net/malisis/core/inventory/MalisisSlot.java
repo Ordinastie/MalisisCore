@@ -30,11 +30,11 @@ import net.minecraft.item.ItemStack;
 public class MalisisSlot
 {
 	/**
-	 * Inventory containing this <code>MalisisSlot</code>.
+	 * Inventory containing this {@link MalisisSlot}.
 	 */
 	private MalisisInventory inventory;
 	/**
-	 * ItemStack held by this <code>MalisisSlot</code>
+	 * ItemStack held by this {@link MalisisSlot}
 	 */
 	private ItemStack itemStack;
 	/**
@@ -49,9 +49,8 @@ public class MalisisSlot
 	 * ItemStack cached to detect changes
 	 */
 	private ItemStack cachedDraggedItemStack;
-
 	/**
-	 * Slot position within {@link MalisisInventory inventory}
+	 * Slot position within its {@link MalisisInventory}
 	 */
 	public int slotNumber;
 	/**
@@ -88,7 +87,7 @@ public class MalisisSlot
 	}
 
 	/**
-	 * Sets the inventory containing this <code>MalisisSlot</code>
+	 * Sets the inventory containing this {@link MalisisSlot}.
 	 *
 	 * @param inventory
 	 */
@@ -97,18 +96,36 @@ public class MalisisSlot
 		this.inventory = inventory;
 	}
 
+	/**
+	 * Gets the {@link MalisisInventory} of this {@link MalisisSlot}.
+	 *
+	 * @return
+	 */
 	public MalisisInventory getInventory()
 	{
 		return inventory;
 	}
 
+	/**
+	 * Gets the id of the {@link MalisisInventory} of this {@link MalisisSlot} inside the {@link MalisisInventoryContainer}.
+	 *
+	 * @return
+	 */
 	public int getInventoryId()
 	{
 		return inventory.getInventoryId();
 	}
 
 	/**
-	 * Sets the itemStack contained by this <code>MalisisSlot</code>
+	 * @return the {@link InventoryState} of the {@link MalisisInventory} of this {@link MalisisSlot}.
+	 */
+	public InventoryState getState()
+	{
+		return inventory.state;
+	}
+
+	/**
+	 * Sets the itemStack contained by this {@link MalisisSlot}
 	 *
 	 * @param itemStack
 	 */
@@ -118,7 +135,7 @@ public class MalisisSlot
 	}
 
 	/**
-	 * @return the itemStack contained by this <code>MalisisSlot</code>
+	 * @return the itemStack contained by this {@link MalisisSlot}
 	 */
 	public ItemStack getItemStack()
 	{
@@ -139,7 +156,7 @@ public class MalisisSlot
 	}
 
 	/**
-	 * Sets whether this <code>MalisisSlot</code> is an output slot. If set to true, isItemValid() always return false
+	 * Sets whether this {@link MalisisSlot} is an output slot. If set to true, isItemValid() always return false
 	 *
 	 * @param isOutput
 	 */
@@ -149,9 +166,9 @@ public class MalisisSlot
 	}
 
 	/**
-	 * Checks if this <code>MalisisSlot</code> can contain itemStack. Defers the test to this {@link MalisisInventory inventory}.
+	 * Checks if this {@link MalisisSlot} can contain itemStack. Defers the test to this {@link MalisisInventory inventory}.
 	 *
-	 * @return true if the itemStack can be container in this <code>MalisisSlot</code>
+	 * @return true if the itemStack can be container in this {@link MalisisSlot}
 	 */
 	public boolean isItemValid(ItemStack itemStack)
 	{
@@ -165,13 +182,23 @@ public class MalisisSlot
 	}
 
 	/**
-	 * Checks if this <code>MalisisSlot</code> can accept more itemStack.
-	 * 
+	 * Checks if this {@link MalisisSlot} can accept more itemStack.
+	 *
 	 * @return
 	 */
 	public boolean isFull()
 	{
 		return itemStack != null && itemStack.stackSize == Math.min(itemStack.getMaxStackSize(), getSlotStackLimit());
+	}
+
+	/**
+	 * Checks if this {@link MalisisSlot} is empty.
+	 *
+	 * @return
+	 */
+	public boolean isEmpty()
+	{
+		return itemStack == null || itemStack.stackSize == 0;
 	}
 
 	/**
@@ -183,7 +210,7 @@ public class MalisisSlot
 	}
 
 	/**
-	 * Called when itemStack is picked up from this <code>MalisisSlot</code>
+	 * Called when itemStack is picked up from this {@link MalisisSlot}
 	 *
 	 * @param player
 	 * @param itemStack
@@ -214,6 +241,27 @@ public class MalisisSlot
 			return 0;
 
 		return setItemStackSize(itemStack.stackSize + stackSize);
+	}
+
+	public ItemStack extract(int amount)
+	{
+		if (itemStack == null)
+			return null;
+		if (amount < 1)
+			return null;
+
+		ItemStack extract = itemStack.copy();
+		extract.stackSize = -addItemStackSize(-amount);
+		return extract;
+	}
+
+	public ItemStack insert(ItemStack itemStack)
+	{
+		if (itemStack == null)
+			return null;
+
+		itemStack.stackSize -= addItemStackSize(itemStack.stackSize);
+		return itemStack.stackSize > 0 ? itemStack : null;
 	}
 
 	/**

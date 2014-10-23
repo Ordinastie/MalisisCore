@@ -45,15 +45,15 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 	}
 
 	@Override
-	public MalisisInventory getInventory(Object... data)
+	public MalisisInventory[] getInventories(Object... data)
 	{
-		return inventory;
+		return new MalisisInventory[] { inventory };
 	}
 
 	@Override
-	public MalisisInventory getInventory(ForgeDirection side, Object... data)
+	public MalisisInventory[] getInventories(ForgeDirection side, Object... data)
 	{
-		return inventory;
+		return getInventories(data);
 	}
 
 	@Override

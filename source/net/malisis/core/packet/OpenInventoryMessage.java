@@ -27,6 +27,7 @@ package net.malisis.core.packet;
 import io.netty.buffer.ByteBuf;
 import net.malisis.core.inventory.IInventoryProvider;
 import net.malisis.core.inventory.MalisisInventory;
+import net.malisis.core.util.TileEntityUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -67,22 +68,22 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 	private void openGui(ContainerType type, int x, int y, int z, int windowId)
 	{
 		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+		IInventoryProvider inventoryProvider = null;
+		Object data = null;
 		if (type == ContainerType.TYPE_TILEENTITY)
-		{
-			TileEntity te = Minecraft.getMinecraft().theWorld.getTileEntity(x, y, z);
-			if (te instanceof IInventoryProvider)
-			{
-				((IInventoryProvider) te).getInventory().open(player, windowId);
-			}
-		}
+			inventoryProvider = TileEntityUtils.getTileEntity(IInventoryProvider.class, Minecraft.getMinecraft().theWorld, x, y, z);
 		else if (type == ContainerType.TYPE_ITEM)
 		{
 			ItemStack itemStack = player.getCurrentEquippedItem();
-			if (itemStack.getItem() instanceof IInventoryProvider)
+			if (itemStack != null && itemStack.getItem() instanceof IInventoryProvider)
 			{
-				((IInventoryProvider) itemStack.getItem()).getInventory(itemStack).open(player, windowId);
+				inventoryProvider = (IInventoryProvider) itemStack.getItem();
+				data = itemStack;
 			}
 		}
+
+		if (inventoryProvider != null)
+			MalisisInventory.open(player, inventoryProvider, windowId, data);
 
 	}
 

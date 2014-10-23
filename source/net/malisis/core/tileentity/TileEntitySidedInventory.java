@@ -60,30 +60,6 @@ public abstract class TileEntitySidedInventory extends TileEntity implements IIn
 		}
 	}
 
-	/*private int convertSlotNumber(int slotNumber)
-	{
-		int offset = 0;
-		for (Entry<Integer, ForgeDirection> entry : ranges.entrySet())
-		{
-			if (slotNumber < entry.getKey())
-				return slotNumber - offset;
-			offset += entry.getKey();
-		}
-
-		return -1;
-	}
-
-	public MalisisInventory getInventory(int slotNumber)
-	{
-		for (Entry<Integer, ForgeDirection> entry : ranges.entrySet())
-		{
-			if (slotNumber < entry.getKey())
-				return getInventory(entry.getValue());
-		}
-
-		return null;
-	}*/
-
 	private int convertSlotNumber(int slotNumber)
 	{
 		return slotNumber >> 3;
@@ -91,13 +67,19 @@ public abstract class TileEntitySidedInventory extends TileEntity implements IIn
 
 	public MalisisInventory getInventory(int slotNumber)
 	{
-		return inventories.get(ForgeDirection.getOrientation(slotNumber & 0b111));
+		return inventories.get(ForgeDirection.getOrientation(slotNumber & 7));
 	}
 
 	@Override
-	public MalisisInventory getInventory(ForgeDirection side, Object... data)
+	public MalisisInventory[] getInventories(Object... data)
 	{
-		return inventories.get(side);
+		return inventories.values().toArray(new MalisisInventory[0]);
+	}
+
+	@Override
+	public MalisisInventory[] getInventories(ForgeDirection side, Object... data)
+	{
+		return new MalisisInventory[] { inventories.get(side) };
 	}
 
 	@Override

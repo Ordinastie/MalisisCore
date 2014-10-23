@@ -55,13 +55,15 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class MalisisInventory implements IInventory
 {
+	private static EventBus bus = new EventBus();
+
 	protected Set<MalisisInventoryContainer> containers = Collections.newSetFromMap(new WeakHashMap<MalisisInventoryContainer, Boolean>());
 	/**
 	 * The inventory id inside the container.
 	 */
 	protected int inventoryId;
 	/**
-	 * Object containing this <code>MalisisInventory</code>.
+	 * Object containing this {@link MalisisInventory}.
 	 */
 	protected IInventoryProvider inventoryProvider;
 	/**
@@ -70,7 +72,7 @@ public class MalisisInventory implements IInventory
 	protected ItemStack itemStackProvider;
 
 	/**
-	 * Slots for this <code>MalisisInventory</code>.
+	 * Slots for this {@link MalisisInventory}.
 	 */
 	protected MalisisSlot[] slots;
 	/**
@@ -78,7 +80,7 @@ public class MalisisInventory implements IInventory
 	 */
 	protected String name;
 	/**
-	 * Size of this <code>MalisisInventory</code>.
+	 * Size of this {@link MalisisInventory}.
 	 */
 	protected int size;
 	/**
@@ -86,7 +88,7 @@ public class MalisisInventory implements IInventory
 	 */
 	protected int slotMaxStackSize = 64;
 
-	protected EventBus bus = new EventBus();
+	public InventoryState state = new InventoryState();
 
 	public MalisisInventory(IInventoryProvider provider, int size)
 	{
@@ -105,7 +107,15 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Sets the slots for this <code>MalisisInventory</code>.
+	 * @return the {@link IInventoryProvider} of this {@link MalisisInventory}.
+	 */
+	public IInventoryProvider getProvider()
+	{
+		return inventoryProvider;
+	}
+
+	/**
+	 * Sets the slots for this {@link MalisisInventory}.
 	 *
 	 * @param slots
 	 */
@@ -133,7 +143,7 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Registers an object for the events fired by this <code>MalisisInventory</code>.
+	 * Registers an object for the events fired by this {@link MalisisInventory}.
 	 *
 	 * @param object
 	 */
@@ -143,7 +153,7 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Sets the id of this <code>MalisisInventory</code> inside its container.
+	 * Sets the id of this {@link MalisisInventory} inside its container.
 	 *
 	 * @param id
 	 */
@@ -163,7 +173,7 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Gets the id of <code>MalisisInventory</code>
+	 * @return the id of this {@link MalisisInventory} inside the {@link MalisisInventoryContainer}.
 	 */
 	public int getInventoryId()
 	{
@@ -203,7 +213,7 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * @return all slots from this <code>MalisisInventory</code>.
+	 * @return all slots from this {@link MalisisInventory}.
 	 */
 	public MalisisSlot[] getSlots()
 	{
@@ -234,8 +244,11 @@ public class MalisisInventory implements IInventory
 		if (slot == null)
 			return;
 
-		if (itemStack != null && itemStack.stackSize > this.getInventoryStackLimit())
-			itemStack.stackSize = this.getInventoryStackLimit();
+		if (itemStack != null)
+		{
+			int max = Math.min(slot.getSlotStackLimit(), itemStack.getMaxStackSize());
+			itemStack.stackSize = Math.min(itemStack.stackSize, max);
+		}
 
 		if (ItemStack.areItemStacksEqual(itemStack, slot.getItemStack()))
 			return;
@@ -279,7 +292,7 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * @return size of this <code>MalisisInventory</code>.
+	 * @return size of this {@link MalisisInventory}.
 	 */
 	@Override
 	public int getSizeInventory()
@@ -302,7 +315,7 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Set this <code>MalisisInventory</code> contents based on the itemStack NBT. <br />
+	 * Set this {@link MalisisInventory} contents based on the itemStack NBT. <br />
 	 * The inventoryProvider need to be an Item.
 	 *
 	 * @param itemStack
@@ -381,16 +394,16 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Called when this <code>MalisisInventory</code> is opened.
+	 * Called when this {@link MalisisInventory} is opened.
 	 */
 	@Override
 	public void openInventory()
 	{}
 
 	/**
-	 * Transfer itemStack inside this <code>MalisisInventory</code>.
+	 * Transfer itemStack inside this {@link MalisisInventory}.
 	 *
-	 * @param itemStack that could not fit inside this <code>MalisisInventory</code>
+	 * @param itemStack that could not fit inside this {@link MalisisInventory}
 	 * @return
 	 */
 	public ItemStack transferInto(ItemStack itemStack)
@@ -429,9 +442,9 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Transfer itemStack inside this <code>MalisisInventory</code>.
+	 * Transfer itemStack inside this {@link MalisisInventory}.
 	 *
-	 * @param itemStack that could not fit inside this <code>MalisisInventory</code>
+	 * @param itemStack that could not fit inside this {@link MalisisInventory}
 	 * @param reversed start filling slots from the last slot
 	 * @return
 	 */
@@ -448,8 +461,8 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Transfer itemStack inside this <code>MalisisInventory</code> into slots at position from start to end. If start > end, the slots will
-	 * be filled backwards.
+	 * Transfer itemStack inside this {@link MalisisInventory} into slots at position from start to end. If start > end, the slots will be
+	 * filled backwards.
 	 *
 	 * @param itemStack
 	 * @param emptySlot
@@ -497,7 +510,7 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Read this <code>MalisisInventory</code> data from tagCompound
+	 * Read this {@link MalisisInventory} data from tagCompound
 	 *
 	 * @param tagCompound
 	 */
@@ -518,7 +531,7 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Writes this <code>MalisisInventory</code> data inside tagCompound
+	 * Writes this {@link MalisisInventory} data inside tagCompound
 	 *
 	 * @param tagCompound
 	 */
@@ -542,55 +555,6 @@ public class MalisisInventory implements IInventory
 		tagCompound.setTag("Items", itemList);
 	}
 
-	/**
-	 * Open this <code>MalisisInventory</code>. Called server-side only
-	 *
-	 * @param player
-	 * @return
-	 *
-	 */
-	public MalisisInventoryContainer open(EntityPlayerMP player)
-	{
-		if (inventoryProvider == null)
-			return null;
-
-		MalisisInventoryContainer c = new MalisisInventoryContainer(this, player, 0);
-		OpenInventoryMessage.send(inventoryProvider, player, c.windowId);
-		c.sendInventoryContent();
-
-		openInventory();
-		bus.post(new InventoryEvent.Open(c, this));
-
-		return c;
-	}
-
-	/**
-	 * Open this <code>MalisisInventory</code>. Called client-side only.
-	 *
-	 * @param player
-	 * @param windowId
-	 * @return
-	 */
-	@SideOnly(Side.CLIENT)
-	public MalisisInventoryContainer open(EntityClientPlayerMP player, int windowId)
-	{
-		if (inventoryProvider == null)
-			return null;
-
-		MalisisInventoryContainer c = new MalisisInventoryContainer(this, player, windowId);
-		if (FMLCommonHandler.instance().getSide().isClient())
-		{
-			MalisisGui gui = inventoryProvider.getGui(c);
-			if (gui != null)
-				gui.display();
-		}
-
-		openInventory();
-		bus.post(new InventoryEvent.Open(c, this));
-
-		return c;
-	}
-
 	@Override
 	public String toString()
 	{
@@ -599,6 +563,68 @@ public class MalisisInventory implements IInventory
 			provider = inventoryProvider != null ? inventoryProvider.getClass().getSimpleName() : "null	";
 
 		return (name != null ? name : getClass().getSimpleName()) + " (" + inventoryId + ") from " + provider;
+	}
+
+	/**
+	 * Open this {@link MalisisInventory}. Called server-side only
+	 *
+	 * @param player
+	 * @return
+	 *
+	 */
+	public static MalisisInventoryContainer open(EntityPlayerMP player, IInventoryProvider inventoryProvider, Object... data)
+	{
+		if (inventoryProvider == null)
+			return null;
+
+		MalisisInventoryContainer c = new MalisisInventoryContainer(player, 0);
+
+		MalisisInventory[] inventories = inventoryProvider.getInventories(data);
+		if (inventories != null)
+			for (MalisisInventory inv : inventories)
+			{
+				c.addInventory(inv);
+				inv.openInventory();
+				bus.post(new InventoryEvent.Open(c, inv));
+			}
+
+		OpenInventoryMessage.send(inventoryProvider, player, c.windowId);
+		c.sendInventoryContent();
+
+		return c;
+	}
+
+	/**
+	 * Open this {@link MalisisInventory}. Called client-side only.
+	 *
+	 * @param player
+	 * @param windowId
+	 * @return
+	 */
+	@SideOnly(Side.CLIENT)
+	public static MalisisInventoryContainer open(EntityClientPlayerMP player, IInventoryProvider inventoryProvider, int windowId, Object... data)
+	{
+		if (inventoryProvider == null)
+			return null;
+
+		MalisisInventoryContainer c = new MalisisInventoryContainer(player, windowId);
+		MalisisInventory[] inventories = inventoryProvider.getInventories(data);
+		if (inventories != null)
+			for (MalisisInventory inv : inventories)
+			{
+				c.addInventory(inv);
+				inv.openInventory();
+				bus.post(new InventoryEvent.Open(c, inv));
+			}
+
+		if (FMLCommonHandler.instance().getSide().isClient())
+		{
+			MalisisGui gui = inventoryProvider.getGui(c);
+			if (gui != null)
+				gui.display();
+		}
+
+		return c;
 	}
 
 	// #region Unused

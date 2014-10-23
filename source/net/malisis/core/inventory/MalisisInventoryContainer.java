@@ -24,6 +24,7 @@
 
 package net.malisis.core.inventory;
 
+import static net.malisis.core.inventory.InventoryState.*;
 import static net.malisis.core.inventory.MalisisInventoryContainer.ActionType.*;
 
 import java.util.ArrayList;
@@ -137,7 +138,7 @@ public class MalisisInventoryContainer extends Container
 	 */
 	protected ItemStack lastShiftClicked;
 
-	public MalisisInventoryContainer(MalisisInventory inventory, EntityPlayer player, int windowId)
+	public MalisisInventoryContainer(EntityPlayer player, int windowId)
 	{
 		// if server
 		if (player instanceof EntityPlayerMP)
@@ -151,7 +152,6 @@ public class MalisisInventoryContainer extends Container
 		this.owner = player;
 		this.windowId = windowId;
 		addInventory(new PlayerInventory(player));
-		addInventory(inventory);
 		this.owner.openContainer = this;
 	}
 
@@ -367,7 +367,7 @@ public class MalisisInventoryContainer extends Container
 	 * @param slotNumber
 	 * @param code
 	 * @param isPlayerInv
-	 * @return itemStack resulting of the actions. Should be used the check client/server coherence.
+	 * @return itemStack resulting of the actions. Should be used to check client/server coherence.
 	 */
 	public ItemStack handleAction(ActionType action, int inventoryId, int slotNumber, int code)
 	{
@@ -384,7 +384,10 @@ public class MalisisInventoryContainer extends Container
 			return null;
 		}
 
-		//first check if current slot is current providing inventory
+		if (slot.getState().is(FROZEN))
+			return pickedItemStack;
+
+		//first check if current slot is current providing inventory (for Items providing inventory)
 		if (slot.getItemStack() != null && slot.getItemStack().getItem() instanceof IInventoryProvider
 				&& slot.getItemStack().getTagCompound() != null)
 		{
@@ -528,6 +531,11 @@ public class MalisisInventoryContainer extends Container
 		//transfer into PlayerInventory
 		if (inventoryId != 0)
 		{
+			if (!slot.getState().is(PLAYER_EXTRACT))
+				return null;
+			if (!inventories.get(0).state.is(PLAYER_INSERT))
+				return null;
+
 			itemStack = inventories.get(0).transferInto(itemStack);
 
 			slot.setItemStack(itemStack);
@@ -539,16 +547,21 @@ public class MalisisInventoryContainer extends Container
 		else
 		//comes from PlayerInventory
 		{
+			if (!inventories.get(0).state.is(PLAYER_EXTRACT))
+				return null;
 
 			MalisisInventory targetInventory;
 			int i = 1;
 			while (itemStack != null && (targetInventory = inventories.get(i++)) != null)
 			{
-				itemStack = targetInventory.transferInto(itemStack);
+				if (targetInventory.state.is(PLAYER_INSERT))
+				{
+					itemStack = targetInventory.transferInto(itemStack);
 
-				slot.setItemStack(itemStack);
-				if (slot.hasChanged())
-					slot.onSlotChanged();
+					slot.setItemStack(itemStack);
+					if (slot.hasChanged())
+						slot.onSlotChanged();
+				}
 			}
 			return itemStack;
 		}
@@ -613,6 +626,9 @@ public class MalisisInventoryContainer extends Container
 		if (slot.getItemStack() == null)
 			return null;
 
+		if (!slot.getState().is(PLAYER_EXTRACT))
+			return null;
+
 		ItemUtils.ItemStackSplitter iss = new ItemUtils.ItemStackSplitter(slot.getItemStack());
 		iss.split(fullStack ? ItemUtils.FULL_STACK : 1);
 
@@ -637,10 +653,12 @@ public class MalisisInventoryContainer extends Container
 	private ItemStack handleDoubleClick(int inventoryId, MalisisSlot slot, boolean shiftClick)
 	{
 		MalisisInventory inventory = inventories.get(inventoryId);
+		if (!inventory.state.is(PLAYER_EXTRACT))
+			return null;
+
 		// normal double click, go through all hovered slot inventory to merge the slots with the currently picked one
 		if (!shiftClick && pickedItemStack != null)
 		{
-
 			int i = 0;
 			while (pickedItemStack.stackSize < pickedItemStack.getMaxStackSize() && i < inventory.size)
 			{
@@ -655,10 +673,9 @@ public class MalisisInventoryContainer extends Container
 			}
 			setPickedItemStack(pickedItemStack);
 		}
-		else if (lastShiftClicked != null)
 		// shift double click, go through all hovered slot inventory to transfer matching itemStack to the other inventory
+		else if (lastShiftClicked != null)
 		{
-
 			for (MalisisSlot s : inventory.getSlots())
 			{
 				MalisisInventory targetInventory;
@@ -677,10 +694,13 @@ public class MalisisInventoryContainer extends Container
 					{
 						while (itemStack != null && (targetInventory = inventories.get(i++)) != null)
 						{
-							itemStack = targetInventory.transferInto(itemStack);
-							s.setItemStack(itemStack);
-							if (s.hasChanged())
-								s.onSlotChanged();
+							if (targetInventory.state.is(PLAYER_INSERT))
+							{
+								itemStack = targetInventory.transferInto(itemStack);
+								s.setItemStack(itemStack);
+								if (s.hasChanged())
+									s.onSlotChanged();
+							}
 						}
 					}
 
@@ -748,7 +768,7 @@ public class MalisisInventoryContainer extends Container
 			int amountMerged = 0;
 			for (MalisisSlot s : draggedSlots)
 			{
-				if (s.isItemValid(pickedItemStack))
+				if (s.isItemValid(pickedItemStack) && s.getState().is(PLAYER_INSERT))
 				{
 					ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(s.getDraggedItemStack(), s.getItemStack());
 					ism.merge();
@@ -774,7 +794,8 @@ public class MalisisInventoryContainer extends Container
 		// start dragging an itemStack with left mouse button while pressing control key
 		if (action == DRAG_START_PICKUP)
 		{
-			dragType = DRAG_TYPE_PICKUP;
+			if (slot.getState().is(PLAYER_EXTRACT))
+				dragType = DRAG_TYPE_PICKUP;
 			return pickedItemStack;
 		}
 
@@ -782,6 +803,9 @@ public class MalisisInventoryContainer extends Container
 		if (action == DRAG_ADD_SLOT && dragType == DRAG_TYPE_PICKUP)
 		{
 			if (pickedItemStack.stackSize >= pickedItemStack.getMaxStackSize())
+				return pickedItemStack;
+
+			if (!slot.getState().is(PLAYER_EXTRACT))
 				return pickedItemStack;
 
 			ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(slot.getItemStack(), pickedItemStack);
@@ -795,6 +819,11 @@ public class MalisisInventoryContainer extends Container
 			return pickedItemStack;
 		}
 
+		//we can't insert into slot, so no need to add to list
+		if (!slot.getState().is(PLAYER_INSERT))
+			return pickedItemStack;
+
+		//add the current slot to the list of dragged slots
 		draggedSlots.add(slot);
 
 		if (action == DRAG_START_LEFT_CLICK || action == DRAG_START_RIGHT_CLICK)
