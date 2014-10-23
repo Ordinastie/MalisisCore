@@ -651,7 +651,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	public String getPropertyString()
 	{
-		return "parent=" + parent != null ? parent.getClass().getSimpleName() : "null" + "size=" + width + "," + height + " | position="
+		return "parent=" + (parent != null ? parent.getClass().getSimpleName() : "null") + "size=" + width + "," + height + " | position="
 				+ x + "," + y + " | container=" + containerX() + "," + containerY() + " | screen=" + screenX() + "," + screenY();
 	}
 
