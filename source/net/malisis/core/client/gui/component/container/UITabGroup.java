@@ -86,13 +86,11 @@ public class UITabGroup extends UIContainer<UITabGroup>
 
 	public GuiIcon getIcons()
 	{
-		if (attachedContainer == null)
-			return null;
-
-		if (attachedContainer instanceof UIPanel)
-			return panelIcons[tabPosition.ordinal()];
-		else
+		if (attachedContainer instanceof UIWindow)
 			return windowIcons[tabPosition.ordinal()];
+		else
+			return panelIcons[tabPosition.ordinal()];
+
 	}
 
 	/**
@@ -184,7 +182,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	public UITabGroup attachTo(UIContainer container, boolean displace)
 	{
 		attachedContainer = container;
-		setZIndex(attachedContainer.getZIndex() - 1);
+
 		if (activeTab != null)
 			attachedContainer.setBackgroundColor(activeTab.getColor());
 
