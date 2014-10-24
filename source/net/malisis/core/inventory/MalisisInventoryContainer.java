@@ -473,22 +473,20 @@ public class MalisisInventoryContainer extends Container
 		if (pickedItemStack != null && !slot.isItemValid(pickedItemStack))
 			return null;
 
-		// already picked up an itemStack
+		// already picked up an itemStack, insert/swap itemStack
 		if (pickedItemStack != null)
 		{
-			int amount = fullStack ? ItemUtils.FULL_STACK : 1;
-			setPickedItemStack(slot.insert(pickedItemStack, amount, true));
-
-			return getPickedItemStack();
+			if (slot.isState(PLAYER_INSERT | PLAYER_EXTRACT))
+				setPickedItemStack(slot.insert(pickedItemStack, fullStack ? ItemUtils.FULL_STACK : 1, true));
 		}
-		else
 		// pick itemStack in slot
+		else
 		{
-			int amount = fullStack ? ItemUtils.FULL_STACK : ItemUtils.HALF_STACK;
-			setPickedItemStack(slot.extract(amount));
-
-			return pickedItemStack;
+			if (slot.isState(PLAYER_EXTRACT))
+				setPickedItemStack(slot.extract(fullStack ? ItemUtils.FULL_STACK : ItemUtils.HALF_STACK));
 		}
+
+		return getPickedItemStack();
 	}
 
 	/**
@@ -519,8 +517,8 @@ public class MalisisInventoryContainer extends Container
 
 			return itemStack;
 		}
-		else
 		//comes from PlayerInventory
+		else
 		{
 			if (!inventories.get(0).state.is(PLAYER_EXTRACT))
 				return null;
@@ -553,40 +551,40 @@ public class MalisisInventoryContainer extends Container
 	private ItemStack handleHotbar(MalisisSlot slot, int num)
 	{
 		boolean fromPlayerInv = slot instanceof PlayerInventorySlot;
-		MalisisSlot destSlot = inventories.get(0).getSlot(num);
+		MalisisSlot hotbarSlot = inventories.get(0).getSlot(num);
 
 		// slot from player's inventory, swap itemStacks
 		if (fromPlayerInv || slot.getItemStack() == null)
 		{
-			ItemUtils.ItemStacksMerger ism = new ItemUtils.ItemStacksMerger(destSlot.getItemStack(), slot.getItemStack());
-			ism.merge(ItemUtils.FULL_STACK, slot.getSlotStackLimit());
+			if (slot.isState(PLAYER_INSERT))
+			{
+				ItemStack dest = hotbarSlot.extract(ItemUtils.FULL_STACK);
+				ItemStack src = slot.extract(ItemUtils.FULL_STACK);
 
-			destSlot.setItemStack(ism.merge);
-			if (destSlot.hasChanged())
-				destSlot.onSlotChanged();
-			slot.setItemStack(ism.into);
-			if (slot.hasChanged())
-				slot.onSlotChanged();
-			return null;
+				dest = slot.insert(dest);
+				//couldn't fit all into the slot, put back what's left in hotbar
+				if (dest != null)
+				{
+					hotbarSlot.insert(dest);
+					//src should be null but better safe than sorry
+					inventories.get(0).transferInto(src);
+				}
+				else
+					src = hotbarSlot.insert(src);
+			}
 		}
+		// merge itemStack in slot into hotbar. If already holding an itemStack, move elsewhere inside player inventory
 		else
-		// merge itemStack in slot into slot in hotbar. If already holding an itemStack, move elsewhere inside player inventory
 		{
-			ItemUtils.ItemStacksMerger ism = new ItemUtils.ItemStacksMerger(slot.getItemStack(), destSlot.getItemStack());
-			ism.merge();
-
-			destSlot.setItemStack(ism.into);
-			if (destSlot.hasChanged())
-				destSlot.onSlotChanged();
-
-			ItemStack itemStack = inventories.get(0).transferInto(ism.merge, false);
-			slot.setItemStack(itemStack);
-			if (slot.hasChanged())
-				slot.onSlotChanged();
-
+			if (slot.isState(PLAYER_EXTRACT))
+			{
+				ItemStack dest = slot.extract(ItemUtils.FULL_STACK);
+				ItemStack left = hotbarSlot.insert(dest, ItemUtils.FULL_STACK, true);
+				inventories.get(0).transferInto(left, false);
+			}
 		}
 
-		return destSlot.getItemStack();
+		return hotbarSlot.getItemStack();
 	}
 
 	/**
@@ -637,26 +635,32 @@ public class MalisisInventoryContainer extends Container
 			int i = 0;
 			while (pickedItemStack.stackSize < pickedItemStack.getMaxStackSize() && i < inventory.size)
 			{
-				MalisisSlot s = inventory.getSlot(i);
-				ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(s.getItemStack(), pickedItemStack);
-				ism.merge();
-				s.setItemStack(ism.merge);
-				if (s.hasChanged())
-					s.onSlotChanged();
-				pickedItemStack = ism.into;
+				if (slot.isState(PLAYER_EXTRACT))
+				{
+					MalisisSlot s = inventory.getSlot(i);
+					if (s.getItemStack() != null && s.getItemStack().stackSize != s.getItemStack().getMaxStackSize())
+					{
+						ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(s.getItemStack(), pickedItemStack);
+						ism.merge();
+						s.setItemStack(ism.merge);
+						if (s.hasChanged())
+							s.onSlotChanged();
+						pickedItemStack = ism.into;
+					}
+				}
 				i++;
+
 			}
 			setPickedItemStack(pickedItemStack);
 		}
-		// shift double click, go through all hovered slot inventory to transfer matching itemStack to the other inventory
+		// shift double click, go through all hovered slot's inventory to transfer matching itemStack to the other inventory
 		else if (lastShiftClicked != null)
 		{
 			for (MalisisSlot s : inventory.getSlots())
 			{
 				MalisisInventory targetInventory;
-				int i = 1;
 				ItemStack itemStack = s.getItemStack();
-				if (itemStack != null && ItemUtils.areItemStacksStackable(itemStack, lastShiftClicked))
+				if (slot.isState(PLAYER_EXTRACT) && ItemUtils.areItemStacksStackable(itemStack, lastShiftClicked))
 				{
 					if (inventoryId != 0)
 					{
@@ -667,6 +671,7 @@ public class MalisisInventoryContainer extends Container
 					}
 					else
 					{
+						int i = 1;
 						while (itemStack != null && (targetInventory = inventories.get(i++)) != null)
 						{
 							if (targetInventory.state.is(PLAYER_INSERT))
@@ -679,9 +684,11 @@ public class MalisisInventoryContainer extends Container
 						}
 					}
 
+					//all inventories are full, no need to try to transfer more
 					if (itemStack != null)
 						return pickedItemStack;
 				}
+
 			}
 		}
 		lastShiftClicked = null;
@@ -745,13 +752,20 @@ public class MalisisInventoryContainer extends Container
 			{
 				if (s.isItemValid(pickedItemStack) && s.isState(PLAYER_INSERT))
 				{
-					ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(s.getDraggedItemStack(), s.getItemStack());
-					ism.merge();
-					amountMerged += ism.nbMerged;
-					s.setItemStack(ism.into);
-					s.setDraggedItemStack(null);
-					if (s.hasChanged())
-						s.onSlotChanged();
+					//should never be null
+					if (s.getDraggedItemStack() != null)
+					{
+						amountMerged += s.getDraggedItemStack().stackSize;
+						s.insert(s.getDraggedItemStack());
+						s.setDraggedItemStack(null);
+					}
+					//					ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(s.getDraggedItemStack(), s.getItemStack());
+					//					ism.merge();
+					//					amountMerged += ism.nbMerged;
+					//					s.setItemStack(ism.into);
+					//					s.setDraggedItemStack(null);
+					//					if (s.hasChanged())
+					//						s.onSlotChanged();
 				}
 			}
 
@@ -817,11 +831,6 @@ public class MalisisInventoryContainer extends Container
 		int amountPerSlot = dragType == DRAG_TYPE_SPREAD ? Math.max(draggedAmount / draggedSlots.size(), 1) : 1;
 		int amountTotal = 0;
 
-		if (amountPerSlot == 16)
-		{
-			amountPerSlot += 0;
-		}
-
 		for (MalisisSlot s : draggedSlots)
 		{
 			if (s.isItemValid(pickedItemStack))
@@ -835,6 +844,8 @@ public class MalisisInventoryContainer extends Container
 
 				ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(itemStack, slotStack);
 				ism.merge(amountPerSlot, s.getSlotStackLimit());
+				if (s.getItemStack() != null)
+					ism.into.stackSize -= s.getItemStack().stackSize;
 				s.setDraggedItemStack(ism.into);
 
 				amountTotal += ism.nbMerged;

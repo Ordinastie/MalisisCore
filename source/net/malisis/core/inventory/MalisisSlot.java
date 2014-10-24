@@ -299,10 +299,7 @@ public class MalisisSlot
 				return slotStack;
 		}
 
-		int max = getSlotStackLimit();
-		if (itemStack != null)
-			max = Math.min(itemStack.getMaxStackSize(), max);
-		ism.merge(amount, max);
+		ism.merge(amount, getSlotStackLimit());
 		setItemStack(ism.into);
 
 		if (hasChanged())
