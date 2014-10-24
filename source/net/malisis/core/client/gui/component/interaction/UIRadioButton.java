@@ -147,6 +147,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 		if (selected)
 		{
 			GL11.glEnable(GL11.GL_BLEND);
+			rp.reset();
 			shape.resetState();
 			shape.setSize(6, 6).setPosition(2, 1);
 			rp.icon.set(isDisabled() ? rbDisabled : (isHovered() ? rbHovered : rbChecked));

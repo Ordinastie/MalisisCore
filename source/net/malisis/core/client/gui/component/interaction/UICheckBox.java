@@ -150,6 +150,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		{
 			if (isHovered() && !isDisabled())
 				GL11.glEnable(GL11.GL_BLEND);
+			rp.reset();
 			shape.resetState();
 			shape.setSize(12, 10);
 			rp.icon.set(isDisabled() ? cbDisabled : (isHovered() ? cbHovered : cbChecked));
