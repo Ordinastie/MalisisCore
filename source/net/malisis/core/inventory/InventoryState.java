@@ -55,7 +55,7 @@ public class InventoryState
 
 	public boolean is(int state)
 	{
-		return (this.state & state) != 0;
+		return (this.state & state) == state;
 	}
 
 	public void allowPlayer()
