@@ -248,6 +248,8 @@ public class UISlot extends UIComponent<UISlot>
 	@Subscribe
 	public void doubleClick(MouseEvent.DoubleClick event)
 	{
+		if (event.getButton() != MouseButton.LEFT)
+			return;
 		ActionType action = GuiScreen.isShiftKeyDown() ? ActionType.DOUBLE_SHIFT_LEFT_CLICK : ActionType.DOUBLE_LEFT_CLICK;
 		MalisisGui.sendAction(action, slot, event.getButtonCode());
 		buttonRelased = false;
