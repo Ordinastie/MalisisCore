@@ -35,7 +35,6 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.inventory.player.PlayerInventory;
 import net.malisis.core.packet.OpenInventoryMessage;
 import net.malisis.core.util.EntityUtils;
-import net.malisis.core.util.ItemUtils;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -55,8 +54,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class MalisisInventory implements IInventory
 {
-	private static EventBus bus = new EventBus();
-
 	protected Set<MalisisInventoryContainer> containers = Collections.newSetFromMap(new WeakHashMap<MalisisInventoryContainer, Boolean>());
 	/**
 	 * The inventory id inside the container.
@@ -87,6 +84,8 @@ public class MalisisInventory implements IInventory
 	 * Maximum stack size for the slots
 	 */
 	protected int slotMaxStackSize = 64;
+
+	private EventBus bus = new EventBus();
 
 	public InventoryState state = new InventoryState();
 
@@ -486,13 +485,14 @@ public class MalisisInventory implements IInventory
 			slot = getSlot(current);
 			if (slot.isItemValid(itemStack) && !slot.isOutputSlot() && (emptySlot || slot.getItemStack() != null))
 			{
-				ItemUtils.ItemStacksMerger ism = new ItemUtils.ItemStacksMerger(itemStack, slot.getItemStack());
-				if (ism.merge(ItemUtils.FULL_STACK, slot.getSlotStackLimit()))
-				{
-					itemStack = ism.merge;
-					slot.setItemStack(ism.into);
-					slot.onSlotChanged();
-				}
+				itemStack = slot.insert(itemStack);
+				//				ItemUtils.ItemStacksMerger ism = new ItemUtils.ItemStacksMerger(itemStack, slot.getItemStack());
+				//				if (ism.merge(ItemUtils.FULL_STACK, slot.getSlotStackLimit()))
+				//				{
+				//					itemStack = ism.merge;
+				//					slot.setItemStack(ism.into);
+				//					slot.onSlotChanged();
+				//				}
 			}
 			current += step;
 		}
@@ -585,7 +585,7 @@ public class MalisisInventory implements IInventory
 			{
 				c.addInventory(inv);
 				inv.openInventory();
-				bus.post(new InventoryEvent.Open(c, inv));
+				inv.bus.post(new InventoryEvent.Open(c, inv));
 			}
 
 		OpenInventoryMessage.send(inventoryProvider, player, c.windowId);
@@ -614,7 +614,7 @@ public class MalisisInventory implements IInventory
 			{
 				c.addInventory(inv);
 				inv.openInventory();
-				bus.post(new InventoryEvent.Open(c, inv));
+				inv.bus.post(new InventoryEvent.Open(c, inv));
 			}
 
 		if (FMLCommonHandler.instance().getSide().isClient())
