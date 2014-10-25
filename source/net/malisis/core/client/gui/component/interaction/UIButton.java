@@ -28,7 +28,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
-import net.malisis.core.client.gui.element.XResizableGuiShape;
+import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
@@ -58,10 +58,10 @@ public class UIButton extends UIComponent<UIButton>
 		label.setDrawShadow(true);
 		setSize(width);
 
-		shape = new XResizableGuiShape();
-		icon = gui.getGuiTexture().getXResizableIcon(0, 20, 200, 20, 5);
-		iconHovered = gui.getGuiTexture().getXResizableIcon(0, 20, 200, 20, 5);
-		iconDisabled = gui.getGuiTexture().getXResizableIcon(0, 20, 200, 20, 5);
+		shape = new XYResizableGuiShape();
+		icon = gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5);
+		iconHovered = gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5);
+		iconDisabled = gui.getGuiTexture().getXYResizableIcon(0, 0, 200, 20, 5);
 	}
 
 	public UIButton(MalisisGui gui, String text)
@@ -95,13 +95,7 @@ public class UIButton extends UIComponent<UIButton>
 	 */
 	public UIButton setSize(int width)
 	{
-		autoWidth = width == 0;
-		int extraWidth = label.getWidth() % 2 == 0 ? 6 : 7;
-		this.width = Math.max(width, label.getWidth() + extraWidth);
-		this.height = 20;
-		if (shape != null)
-			shape.setSize(width, height);
-		return this;
+		return setSize(width, 20);
 	}
 
 	/**
@@ -114,7 +108,12 @@ public class UIButton extends UIComponent<UIButton>
 	@Override
 	public UIButton setSize(int width, int height)
 	{
-		return setSize(width);
+		autoWidth = width == 0;
+		int extraWidth = label.getWidth() % 2 == 0 ? 6 : 7;
+		this.width = Math.max(width, label.getWidth() + extraWidth);
+		this.height = height;
+		return this;
+
 	}
 
 	@Override
@@ -128,7 +127,7 @@ public class UIButton extends UIComponent<UIButton>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.icon.set(isDisabled() ? iconDisabled : (hovered ? iconHovered : icon));
+		rp.icon.set(isDisabled() ? iconDisabled : (isHovered() ? iconHovered : icon));
 		renderer.drawShape(shape, rp);
 	}
 
