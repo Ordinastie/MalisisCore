@@ -22,46 +22,27 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.element;
+package net.malisis.core.renderer.element.shape;
+
+import net.malisis.core.renderer.element.Face;
+import net.malisis.core.renderer.element.Shape;
+import net.malisis.core.renderer.element.face.BottomFace;
+import net.malisis.core.renderer.element.face.EastFace;
+import net.malisis.core.renderer.element.face.NorthFace;
+import net.malisis.core.renderer.element.face.SouthFace;
+import net.malisis.core.renderer.element.face.TopFace;
+import net.malisis.core.renderer.element.face.WestFace;
 
 /**
+ * Basic Cube {@link Shape} using predefined {@link Face faces}.
+ *
  * @author Ordinastie
  *
  */
-public class XResizableGuiShape extends GuiShape
+public class Cube extends Shape
 {
-	protected int sideWidth;
-
-	public XResizableGuiShape(int sideWidth)
+	public Cube()
 	{
-		super(3);
-		this.sideWidth = sideWidth;
-		storeState();
-	}
-
-	public XResizableGuiShape()
-	{
-		this(5);
-	}
-
-	@Override
-	public GuiShape setSize(int w, int h)
-	{
-		w = Math.max(w - 2 * sideWidth, 0);
-
-		faces[0].factor(sideWidth, h, 0);
-		faces[1].factor(w, h, 0);
-		faces[2].factor(sideWidth, h, 0);
-
-		faces[1].translate(sideWidth, 0, 0);
-		faces[2].translate(sideWidth + w, 0, 0);
-
-		return this;
-	}
-
-	@Override
-	public GuiShape scale(float x, float y)
-	{
-		return this;
+		super(new NorthFace(), new SouthFace(), new EastFace(), new WestFace(), new TopFace(), new BottomFace());
 	}
 }

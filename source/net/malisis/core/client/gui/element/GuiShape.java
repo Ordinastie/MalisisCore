@@ -30,28 +30,25 @@ import net.malisis.core.renderer.element.Vertex;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public abstract class GuiShape extends Shape
 {
-	private static Face guiFace = new Face(new Vertex[] { Vertex.BottomSouthWest, Vertex.TopSouthWest, Vertex.TopSouthEast,
-			Vertex.BottomSouthEast });
-
-	protected static Face guiFace()
-	{
-		return new Face(guiFace).setStandardUV();
-	}
-
-	protected static Face guiFace(int width, int height)
-	{
-		return guiFace().factor(width, height, 0);
-	}
-
-	protected abstract void createFaces();
-
 	public abstract GuiShape setSize(int width, int height);
 
 	public abstract GuiShape scale(float x, float y);
+
+	public GuiShape(GuiFace... faces)
+	{
+		super(faces);
+	}
+
+	public GuiShape(int faceCount)
+	{
+		faces = new Face[faceCount];
+		for (int i = 0; i < faceCount; i++)
+			faces[i] = new GuiFace();
+	}
 
 	public GuiShape setPosition(int x, int y)
 	{
@@ -89,5 +86,20 @@ public abstract class GuiShape extends Shape
 	{
 		scale(scale, scale);
 		return this;
+	}
+
+	protected static class GuiFace extends Face
+	{
+		public GuiFace()
+		{
+			super(new Vertex.BottomSouthWest(), new Vertex.TopSouthWest(), new Vertex.TopSouthEast(), new Vertex.BottomSouthEast());
+			setStandardUV();
+		}
+
+		public GuiFace(int width, int height)
+		{
+			this();
+			factor(width, height, 0);
+		}
 	}
 }

@@ -24,11 +24,10 @@
 
 package net.malisis.core.client.gui.element;
 
-import net.malisis.core.renderer.element.Face;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class XYResizableGuiShape extends GuiShape
 {
@@ -36,12 +35,10 @@ public class XYResizableGuiShape extends GuiShape
 
 	public XYResizableGuiShape(int cornerWidth, int cornerHeight)
 	{
+		super(9);
 		this.cornerWidth = cornerWidth;
 		this.cornerHeight = cornerHeight;
-
-		createFaces();
 		storeState();
-
 	}
 
 	public XYResizableGuiShape(int corner)
@@ -52,12 +49,6 @@ public class XYResizableGuiShape extends GuiShape
 	public XYResizableGuiShape()
 	{
 		this(5, 5);
-	}
-
-	@Override
-	protected void createFaces()
-	{
-		faces = new Face[] { guiFace(), guiFace(), guiFace(), guiFace(), guiFace(), guiFace(), guiFace(), guiFace(), guiFace() };
 	}
 
 	@Override

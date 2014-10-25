@@ -34,8 +34,8 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
+import net.malisis.core.renderer.element.shape.Cube;
 import net.malisis.core.renderer.icon.MalisisIcon;
-import net.malisis.core.renderer.preset.ShapePreset;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.DestroyBlockProgress;
@@ -561,7 +561,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected void initShapes()
 	{
-		shape = ShapePreset.Cube();
+		shape = new Cube();
 	}
 
 	/**

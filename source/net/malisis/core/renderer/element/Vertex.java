@@ -26,6 +26,7 @@ package net.malisis.core.renderer.element;
 
 import net.malisis.core.util.Point;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector4f;
@@ -34,14 +35,16 @@ public class Vertex
 {
 	public static final int BRIGHTNESS_MAX = 15728880;
 
-	public static final Vertex TopNorthWest = new Vertex(0, 1, 0);
-	public static final Vertex TopNorthEast = new Vertex(1, 1, 0);
-	public static final Vertex TopSouthWest = new Vertex(0, 1, 1);
-	public static final Vertex TopSouthEast = new Vertex(1, 1, 1);
-	public static final Vertex BottomNorthWest = new Vertex(0, 0, 0);
-	public static final Vertex BottomNorthEast = new Vertex(1, 0, 0);
-	public static final Vertex BottomSouthWest = new Vertex(0, 0, 1);
-	public static final Vertex BottomSouthEast = new Vertex(1, 0, 1);
+	//@formatter:off
+	public static class TopNorthWest extends Vertex { public TopNorthWest() { super(0, 1, 0); }}
+	public static class TopNorthEast extends Vertex { public TopNorthEast() { super(1, 1, 0); }}
+	public static class TopSouthWest extends Vertex { public TopSouthWest() { super(0, 1, 1); }}
+	public static class TopSouthEast extends Vertex { public TopSouthEast() { super(1, 1, 1); }}
+	public static class BottomNorthWest extends Vertex { public BottomNorthWest() { super(0, 0, 0); }}
+	public static class BottomNorthEast extends Vertex { public BottomNorthEast() { super(1, 0, 0); }}
+	public static class BottomSouthWest extends Vertex { public BottomSouthWest() { super(0, 0, 1); }}
+	public static class BottomSouthEast extends Vertex { public BottomSouthEast() { super(1, 0, 1); }}
+	//@formatter:on
 
 	private String baseName;
 	private double x = 0;
@@ -347,7 +350,7 @@ public class Vertex
 
 	public String name()
 	{
-		return baseName() + " [" + x + ", " + y + ", " + z + "]";
+		return baseName() + " [" + x + ", " + y + ", " + z + "|" + u + ", " + v + "]";
 	}
 
 	@Override
@@ -404,5 +407,44 @@ public class Vertex
 	public void resetState()
 	{
 		setState(initialState);
+	}
+
+	/**
+	 * Calculate AoMatrix for a vertex based on the vertex position and the face it belongs. Only works for regular N/S/E/W/T/B faces
+	 *
+	 * @param vertex
+	 * @param offset
+	 * @return
+	 */
+	public int[][] getAoMatrix(ForgeDirection offset)
+	{
+		int[][] a = new int[3][3];
+
+		if (offset == ForgeDirection.WEST || offset == ForgeDirection.EAST)
+		{
+			a[0][0] = a[1][0] = a[2][0] = offset.offsetX;
+			a[1][1] += y * 2 - 1; // 1 if 0, 1 if 1;
+			a[2][1] += y * 2 - 1; // -1 if 0, 1 if 1;
+			a[0][2] += z * 2 - 1; // -1 if 0, 1 if 1;
+			a[1][2] += z * 2 - 1; // -1 if 0, 1 if 1;
+		}
+		else if (offset == ForgeDirection.UP || offset == ForgeDirection.DOWN)
+		{
+			a[0][1] = a[1][1] = a[2][1] = offset.offsetY;
+			a[1][0] += x * 2 - 1; // 1 if 0, 1 if 1;
+			a[2][0] += x * 2 - 1; // -1 if 0, 1 if 1;
+			a[0][2] += z * 2 - 1; // -1 if 0, 1 if 1;
+			a[1][2] += z * 2 - 1; // -1 if 0, 1 if 1;
+		}
+		else if (offset == ForgeDirection.NORTH || offset == ForgeDirection.SOUTH)
+		{
+			a[0][2] = a[1][2] = a[2][2] = offset.offsetZ;
+			a[1][0] += x * 2 - 1; // 1 if 0, 1 if 1;
+			a[2][0] += x * 2 - 1; // -1 if 0, 1 if 1;
+			a[0][1] += y * 2 - 1; // -1 if 0, 1 if 1;
+			a[1][1] += y * 2 - 1; // -1 if 0, 1 if 1;
+		}
+
+		return a;
 	}
 }

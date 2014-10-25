@@ -236,11 +236,13 @@ public class ObjFileImporter
 	{
 		if (faces.size() != 0)
 		{
-			model.addShape(currentShape, new Shape(faces));
+			Shape s = new Shape(faces);
+			s.storeState();
+			model.addShape(currentShape, s);
 			faces.clear();
 		}
 
-		if (data != "")
+		if (data != "" && data.indexOf('_') != -1)
 			currentShape = data.substring(0, data.indexOf('_'));
 	}
 

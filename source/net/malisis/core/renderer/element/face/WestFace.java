@@ -22,46 +22,27 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.element;
+package net.malisis.core.renderer.element.face;
+
+import static net.minecraftforge.common.util.ForgeDirection.*;
+import net.malisis.core.renderer.element.Face;
+import net.malisis.core.renderer.element.Vertex;
 
 /**
  * @author Ordinastie
  *
  */
-public class XResizableGuiShape extends GuiShape
+public class WestFace extends Face
 {
-	protected int sideWidth;
 
-	public XResizableGuiShape(int sideWidth)
+	public WestFace()
 	{
-		super(3);
-		this.sideWidth = sideWidth;
-		storeState();
-	}
+		super(new Vertex.TopNorthWest(), new Vertex.BottomNorthWest(), new Vertex.BottomSouthWest(), new Vertex.TopSouthWest());
 
-	public XResizableGuiShape()
-	{
-		this(5);
-	}
-
-	@Override
-	public GuiShape setSize(int w, int h)
-	{
-		w = Math.max(w - 2 * sideWidth, 0);
-
-		faces[0].factor(sideWidth, h, 0);
-		faces[1].factor(w, h, 0);
-		faces[2].factor(sideWidth, h, 0);
-
-		faces[1].translate(sideWidth, 0, 0);
-		faces[2].translate(sideWidth + w, 0, 0);
-
-		return this;
-	}
-
-	@Override
-	public GuiShape scale(float x, float y)
-	{
-		return this;
+		params.direction.set(WEST);
+		params.textureSide.set(WEST);
+		params.colorFactor.set(0.6F);
+		params.aoMatrix.set(calculateAoMatrix(WEST));
+		setStandardUV();
 	}
 }

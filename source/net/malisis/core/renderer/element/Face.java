@@ -28,28 +28,31 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.element.face.BottomFace;
+import net.malisis.core.renderer.element.face.EastFace;
+import net.malisis.core.renderer.element.face.NorthFace;
+import net.malisis.core.renderer.element.face.SouthFace;
+import net.malisis.core.renderer.element.face.TopFace;
+import net.malisis.core.renderer.element.face.WestFace;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.util.IIcon;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public class Face
 {
-	private String baseName;
-	private Vertex[] vertexes;
-	private RenderParameters params = new RenderParameters();
+	protected String baseName;
+	protected Vertex[] vertexes;
+	protected RenderParameters params = new RenderParameters();
 
 	public Face(Vertex[] vertexes, RenderParameters params)
 	{
-		// we need a copy of the vertexes else the modification for one face
-		// would impact the others ones
-		this.vertexes = new Vertex[vertexes.length];
-		for (int i = 0; i < vertexes.length; i++)
-			this.vertexes[i] = new Vertex(vertexes[i]);
-
-		this.params = params != null ? params : new RenderParameters();
+		this.vertexes = vertexes;
+		if (params != null)
+			this.params = params;
 		this.baseName();
 	}
 
-	public Face(Vertex[] vertexes)
+	public Face(Vertex... vertexes)
 	{
 		this(vertexes, null);
 	}
@@ -298,6 +301,22 @@ public class Face
 			v.rotateAroundZ(angle, centerX, centerY, centerZ);
 	}
 
+	/**
+	 * Automatically calculate AoMatrix for this {@link Face}. Only works for regular N/S/E/W/T/B faces
+	 *
+	 * @param face
+	 * @param offset
+	 */
+	public int[][][] calculateAoMatrix(ForgeDirection offset)
+	{
+		int[][][] aoMatrix = new int[vertexes.length][3][3];
+
+		for (int i = 0; i < vertexes.length; i++)
+			aoMatrix[i] = vertexes[i].getAoMatrix(offset);
+
+		return aoMatrix;
+	}
+
 	public void setBaseName(String name)
 	{
 		baseName = name;
@@ -337,6 +356,33 @@ public class Face
 	public String toString()
 	{
 		return name();
+	}
+
+	/**
+	 * Creates a new {@link Face} from a {@link ForgeDirection}.
+	 *
+	 * @param dir
+	 * @return
+	 */
+	public static Face fromDirection(ForgeDirection dir)
+	{
+		switch (dir)
+		{
+			case DOWN:
+				return new BottomFace();
+			case UP:
+				return new TopFace();
+			case NORTH:
+				return new NorthFace();
+			case SOUTH:
+				return new SouthFace();
+			case WEST:
+				return new WestFace();
+			case EAST:
+				return new EastFace();
+			default:
+				return null;
+		}
 	}
 
 }

@@ -36,9 +36,13 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
 public class Shape
 {
 	protected Face[] faces;
+	private Multimap<String, Vertex> vertexes = ArrayListMultimap.create();
 	protected Matrix4f selfRotationMatrix;
 	protected Matrix4f transformMatrix;
 
@@ -47,13 +51,14 @@ public class Shape
 		this.faces = new Face[0];
 	}
 
-	public Shape(Face[] faces)
+	public Shape(Face... faces)
 	{
-		// we need a copy of the faces else the modification for one shape would
-		// impact the others ones
-		this.faces = new Face[faces.length];
-		for (int i = 0; i < faces.length; i++)
-			this.faces[i] = new Face(faces[i]);
+		this.faces = faces;
+		for (Face f : faces)
+		{
+			for (Vertex v : f.getVertexes())
+				vertexes.put(v.baseName(), v);
+		}
 	}
 
 	public Shape(List<Face> faces)
@@ -87,7 +92,7 @@ public class Shape
 
 	/**
 	 * Gets the faces that make up this <code>Shape</code>
-	 * 
+	 *
 	 * @return
 	 */
 	public Face[] getFaces()
@@ -106,7 +111,7 @@ public class Shape
 
 	/**
 	 * Gets a face from its name
-	 * 
+	 *
 	 * @param name
 	 * @return
 	 */
@@ -120,7 +125,7 @@ public class Shape
 
 	/**
 	 * Gets a face from a ForgeDirection
-	 * 
+	 *
 	 * @param dir
 	 * @return
 	 */
@@ -131,7 +136,7 @@ public class Shape
 
 	/**
 	 * Gets a list of vertexes matching name
-	 * 
+	 *
 	 * @param name
 	 * @return
 	 */
@@ -147,7 +152,7 @@ public class Shape
 
 	/**
 	 * Gets a list of vertexes from a ForgeDirection
-	 * 
+	 *
 	 * @param dir
 	 * @return
 	 */
@@ -190,7 +195,7 @@ public class Shape
 	 * Set parameters for a face. The face is determined by <b>face</b>.<i>name()</i> in order to avoid having to keep a reference to the
 	 * actual shape face. If <b>merge</b> is true, the parameters will be merge with the shape face parameters instead of completely
 	 * overriding them
-	 * 
+	 *
 	 * @param face
 	 * @param params
 	 * @param merge
@@ -211,7 +216,7 @@ public class Shape
 
 	/**
 	 * Sets the color for this <code>Shape</code>. RenderParameters.usePerVertexColor should be set to true for it to have an effect.
-	 * 
+	 *
 	 * @param color
 	 */
 	public void setColor(int color)
@@ -225,7 +230,7 @@ public class Shape
 	/**
 	 * Sets the size of this <code>Shape</code>. <b>width</b> represents East-West axis, <b>height</b> represents Bottom-Top axis and
 	 * <b>Depth</b> represents North-South axis. The calculations are based on vertexes names.
-	 * 
+	 *
 	 * @param width
 	 * @param height
 	 * @param depth
@@ -253,7 +258,7 @@ public class Shape
 
 	/**
 	 * Sets the bounds for this <code>Shape</code>. Calculations are based on vertexes names
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param z
@@ -288,7 +293,7 @@ public class Shape
 
 	/**
 	 * Limits this <code>Shape</code> to the bounding box passed.
-	 * 
+	 *
 	 * @param aabb
 	 * @return
 	 */
@@ -299,7 +304,7 @@ public class Shape
 
 	/**
 	 * Limits this <code>Shape</code> to the bounding box passed.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param z
@@ -324,7 +329,7 @@ public class Shape
 
 	/**
 	 * Translates this <code>Shape</code>.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param z
@@ -338,7 +343,7 @@ public class Shape
 
 	/**
 	 * Scales this <code>Shape</code> on all axis.
-	 * 
+	 *
 	 * @param f
 	 * @return
 	 */
@@ -349,7 +354,7 @@ public class Shape
 
 	/**
 	 * Scales this <code>Shape</code>.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param z
@@ -363,7 +368,7 @@ public class Shape
 
 	/**
 	 * Rotates this <code>Shape</code> around the given axis the specified angle.
-	 * 
+	 *
 	 * @param angle
 	 * @param x
 	 * @param y
@@ -377,7 +382,7 @@ public class Shape
 
 	/**
 	 * Rotates this <code>Shape</code> around the given axis the specified angle. Offsets the origin for the rotation.
-	 * 
+	 *
 	 * @param angle
 	 * @param x
 	 * @param y
@@ -397,7 +402,7 @@ public class Shape
 
 	/**
 	 * Rotates this <code>Shape</code> around the X axis the specified angle.
-	 * 
+	 *
 	 * @param angle
 	 * @return
 	 */
@@ -408,7 +413,7 @@ public class Shape
 
 	/**
 	 * Rotates this <code>Shape</code> around the X axis the specified angle. Offsets the origin for the rotation.
-	 * 
+	 *
 	 * @param angle
 	 * @param y
 	 * @param z
@@ -421,7 +426,7 @@ public class Shape
 
 	/**
 	 * Rotates this <code>Shape</code> around the Y axis the specified angle.
-	 * 
+	 *
 	 * @param angle
 	 * @return
 	 */
@@ -432,7 +437,7 @@ public class Shape
 
 	/**
 	 * Rotates this <code>Shape</code> around the given Y the specified angle. Offsets the origin for the rotation.
-	 * 
+	 *
 	 * @param angle
 	 * @param x
 	 * @param z
@@ -445,7 +450,7 @@ public class Shape
 
 	/**
 	 * Rotates this <code>Shape</code> around the Z axis the specified angle.
-	 * 
+	 *
 	 * @param angle
 	 * @return
 	 */
@@ -456,7 +461,7 @@ public class Shape
 
 	/**
 	 * Rotates this <code>Shape</code> around the Z axis the specified angle. Offsets the origin for the rotation.
-	 * 
+	 *
 	 * @param angle
 	 * @param x
 	 * @param y
@@ -469,7 +474,7 @@ public class Shape
 
 	/**
 	 * Rotates this <code>Shape</code> around itself on the given axis the specified angle.
-	 * 
+	 *
 	 * @param angle
 	 * @param x
 	 * @param y
@@ -484,7 +489,7 @@ public class Shape
 
 	/**
 	 * Rotates this <code>Shape</code> around itself on the X axis the specified angle.
-	 * 
+	 *
 	 * @param angle
 	 * @return
 	 */
@@ -495,7 +500,7 @@ public class Shape
 
 	/**
 	 * Rotates this <code>Shape</code> around itself on the Y axis the specified angle.
-	 * 
+	 *
 	 * @param angle
 	 * @return
 	 */
@@ -506,7 +511,7 @@ public class Shape
 
 	/**
 	 * Rotates this <code>Shape</code> around itself on the Z axis the specified angle.
-	 * 
+	 *
 	 * @param angle
 	 * @return
 	 */
@@ -517,7 +522,7 @@ public class Shape
 
 	/**
 	 * Copies the transformation from <b>shape</b> to this <code>Shape</code>.
-	 * 
+	 *
 	 * @param shape
 	 * @return
 	 */
@@ -531,7 +536,7 @@ public class Shape
 	/**
 	 * Applies the transformations matrices to this <code>Shape</code>. This modifies to position of the vertexes making up the faces of
 	 * this <code>Shape</code>.
-	 * 
+	 *
 	 * @return
 	 */
 	public Shape applyMatrix()
@@ -562,7 +567,7 @@ public class Shape
 
 	/**
 	 * Stores the current state of each vertex making up this <code>Shape</code>.
-	 * 
+	 *
 	 * @return
 	 */
 	public Shape storeState()
@@ -580,11 +585,13 @@ public class Shape
 
 	/**
 	 * Resets the state of each vertex making up this <code>Shape</code> to a previously stored one.
-	 * 
+	 *
 	 * @return
 	 */
 	public Shape resetState()
 	{
+		transformMatrix = null;
+		selfRotationMatrix = null;
 		for (Face f : faces)
 		{
 			for (Vertex v : f.getVertexes())
@@ -597,7 +604,7 @@ public class Shape
 
 	/**
 	 * Interpolates the UVs of each vertex making up this <code>Shape</code> base on their position and the <code>Face</code> orientation.
-	 * 
+	 *
 	 * @return
 	 */
 	public Shape interpolateUV()
@@ -610,7 +617,7 @@ public class Shape
 
 	/**
 	 * Shrinks the face matching <b>face</b> name by a certain <b>factor</b>. The vertexes of connected faces are moved too.
-	 * 
+	 *
 	 * @param face
 	 * @param factor
 	 * @return
@@ -631,15 +638,17 @@ public class Shape
 			z += v.getZ() / 4;
 		}
 		face.scale(factor, x, y, z);
-		for (Face f : faces)
+
+		for (Vertex v : face.getVertexes())
 		{
-			for (Vertex v : f.getVertexes())
+			for (Vertex sv : vertexes.get(v.baseName()))
 			{
-				Vertex tmpV = vertexNames.get(v.name());
-				if (tmpV != null)
-					v.set(tmpV.getX(), tmpV.getY(), tmpV.getZ());
+				if (sv != v)
+					sv.set(v.getX(), v.getY(), v.getZ());
 			}
+
 		}
+
 		return this;
 	}
 
@@ -651,7 +660,7 @@ public class Shape
 
 	/**
 	 * Builds a Shape from multiple ones.
-	 * 
+	 *
 	 * @param shapes
 	 * @return
 	 */
