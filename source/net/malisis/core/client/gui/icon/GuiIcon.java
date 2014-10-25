@@ -54,6 +54,38 @@ public class GuiIcon extends MalisisIcon
 	}
 
 	@Override
+	public MalisisIcon flip(boolean horizontal, boolean vertical)
+	{
+		for (MalisisIcon icon : icons)
+			icon.flip(horizontal, vertical);
+		return super.flip(horizontal, vertical);
+	}
+
+	@Override
+	public void setRotation(int rotation)
+	{
+		for (MalisisIcon icon : icons)
+			icon.setRotation(rotation);
+		super.setRotation(rotation);
+	}
+
+	@Override
+	public MalisisIcon clip(float offsetXFactor, float offsetYFactor, float widthFactor, float heightFactor)
+	{
+		for (MalisisIcon icon : icons)
+			icon.clip(offsetXFactor, offsetYFactor, widthFactor, heightFactor);
+		return super.clip(offsetXFactor, offsetYFactor, widthFactor, heightFactor);
+	}
+
+	@Override
+	public MalisisIcon clip(int offsetX, int offsetY, int width, int height)
+	{
+		for (MalisisIcon icon : icons)
+			icon.clip(offsetX, offsetY, width, height);
+		return super.clip(offsetX, offsetY, width, height);
+	}
+
+	@Override
 	public String toString()
 	{
 		return Arrays.toString(icons);
