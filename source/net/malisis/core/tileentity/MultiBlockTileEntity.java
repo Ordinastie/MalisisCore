@@ -62,6 +62,12 @@ public class MultiBlockTileEntity extends TileEntity implements MultiBlock.IProv
 	}
 
 	@Override
+	public boolean canUpdate()
+	{
+		return multiBlock != null && multiBlock.isOrigin(xCoord, yCoord, zCoord);
+	}
+
+	@Override
 	public void readFromNBT(NBTTagCompound tag)
 	{
 		super.readFromNBT(tag);
