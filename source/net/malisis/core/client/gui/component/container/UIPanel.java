@@ -68,7 +68,7 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 
 	// #region getters/setters
 	@Override
-	public void setParent(UIContainer parent)
+	public void setParent(UIComponent parent)
 	{
 		super.setParent(parent);
 		if (width == INHERITED || height == INHERITED)
@@ -181,8 +181,8 @@ public class UIPanel extends UIContainer<UIPanel> implements IScrollable
 		{
 			if (c.isVisible())
 			{
-				contentWidth = Math.max(contentWidth, c.containerX() + c.getWidth());
-				contentHeight = Math.max(contentHeight, c.containerY() + c.getHeight());
+				contentWidth = Math.max(contentWidth, c.parentX() + c.getWidth());
+				contentHeight = Math.max(contentHeight, c.parentY() + c.getHeight());
 			}
 		}
 

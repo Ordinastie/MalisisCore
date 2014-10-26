@@ -86,7 +86,7 @@ public class UISlider extends UIComponent<UISlider>
 			return;
 
 		int l = width - SLIDER_WIDTH;
-		int pos = componentX(event.getX());
+		int pos = relativeX(event.getX());
 		pos = Math.max(0, Math.min(pos - SLIDER_WIDTH / 2, l));
 		slideTo((float) pos / l);
 	}
@@ -105,7 +105,7 @@ public class UISlider extends UIComponent<UISlider>
 			return;
 
 		int l = width - SLIDER_WIDTH;
-		int pos = componentX(event.getX());
+		int pos = relativeX(event.getX());
 		pos = Math.max(0, Math.min(pos - SLIDER_WIDTH / 2, l));
 		slideTo((float) pos / l);
 	}
@@ -123,7 +123,7 @@ public class UISlider extends UIComponent<UISlider>
 		this.offset = offset;
 		float oldValue = this.value;
 		float newValue = minValue + (maxValue - minValue) * offset;
-		if (fireEvent(new ComponentEvent.ValueChanged(this, oldValue, newValue)))
+		if (fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
 			value = newValue;
 	}
 

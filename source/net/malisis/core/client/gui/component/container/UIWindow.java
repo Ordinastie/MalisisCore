@@ -28,12 +28,13 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.control.ICloseable;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 
 /**
  * @author Ordinastie, PaleoCrafter
  */
-public class UIWindow extends UIContainer<UIWindow>
+public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 {
 	public UIWindow(MalisisGui gui, String title, int width, int height, int anchor)
 	{
@@ -53,6 +54,14 @@ public class UIWindow extends UIContainer<UIWindow>
 	public UIWindow(MalisisGui gui, int width, int height)
 	{
 		this(gui, null, width, height, Anchor.CENTER | Anchor.MIDDLE);
+	}
+
+	@Override
+	public void onClose()
+	{
+		MalisisGui gui = MalisisGui.currentGui();
+		if (gui != null)
+			gui.close();
 	}
 
 	@Override

@@ -38,16 +38,25 @@ import com.google.common.eventbus.Subscribe;
  * @author Ordinastie
  *
  */
-public abstract class UICloseHandle extends UIComponent implements IControlComponent
+public class UICloseHandle extends UIComponent<UICloseHandle> implements IControlComponent
 {
-	public UICloseHandle(MalisisGui gui, UIContainer parent)
+	public <T extends UIComponent & ICloseable> UICloseHandle(MalisisGui gui, T parent)
 	{
 		super(gui);
-		parent.add(this);
-		setPosition(parent.getHorizontalPadding() - 1, 1 - parent.getVerticalPadding(), Anchor.RIGHT);
+
+		int x = -1;
+		int y = 1;
+		if (parent instanceof UIContainer)
+		{
+			x += ((UIContainer) parent).getHorizontalPadding();
+			y -= ((UIContainer) parent).getVerticalPadding();
+		}
+		setPosition(x, y, Anchor.RIGHT);
 		setSize(5, 5);
-		register(this);
 		setZIndex(10);
+		register(this);
+
+		parent.addControlComponent(this);
 
 		icon = gui.getGuiTexture().getIcon(268, 30, 15, 15);
 	}
@@ -58,16 +67,12 @@ public abstract class UICloseHandle extends UIComponent implements IControlCompo
 		if (event.getButton() != MouseButton.LEFT)
 			return;
 
-		onClose();
+		((ICloseable) getParent()).onClose();
 	}
-
-	public abstract void onClose();
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-
-	}
+	{}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)

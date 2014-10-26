@@ -38,19 +38,40 @@ import com.google.common.eventbus.Subscribe;
  * @author Ordinastie
  *
  */
-public class UIMoveHandle extends UIComponent implements IControlComponent
+public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlComponent
 {
-	public UIMoveHandle(MalisisGui gui, UIContainer parent)
+	public enum Type
+	{
+		BOTH, HORIZONTAL, VERTICAL
+	};
+
+	private Type type;
+
+	public UIMoveHandle(MalisisGui gui, UIComponent parent, Type type)
 	{
 		super(gui);
-		parent.add(this);
-		setPosition(1 - parent.getHorizontalPadding(), 1 - parent.getVerticalPadding());
+		this.type = type != null ? type : Type.BOTH;
+
+		int x = 1;
+		int y = 1;
+		if (parent instanceof UIContainer)
+		{
+			x -= ((UIContainer) parent).getHorizontalPadding();
+			y -= ((UIContainer) parent).getVerticalPadding();
+		}
+		setPosition(x, y);
 		setSize(5, 5);
-		register(this);
 		setZIndex(10);
+		register(this);
+
+		parent.addControlComponent(this);
 
 		icon = gui.getGuiTexture().getIcon(268, 15, 15, 15);
+	}
 
+	public UIMoveHandle(MalisisGui gui, UIComponent parent)
+	{
+		this(gui, parent, Type.BOTH);
 	}
 
 	@Subscribe
@@ -59,12 +80,16 @@ public class UIMoveHandle extends UIComponent implements IControlComponent
 		if (event.getButton() != MouseButton.LEFT)
 			return;
 
-		UIContainer parentCont = getParent().getParent();
+		UIComponent parentCont = getParent().getParent();
 		if (parentCont == null)
 			return;
 
-		int x = parentCont.componentX(event.getX() - parentCont.getHorizontalPadding());
-		int y = parentCont.componentY(event.getY() - parentCont.getVerticalPadding());
+		int x = parent.getX();
+		if (type == Type.BOTH || type == Type.HORIZONTAL)
+			x = parentCont.relativeX(event.getX() /*- parentCont.getHorizontalPadding()*/);
+		int y = parent.getY();
+		if (type == Type.BOTH || type == Type.VERTICAL)
+			y = parentCont.relativeY(event.getY() /*- parentCont.getVerticalPadding()*/);
 		if (x < 0)
 			x = 0;
 		if (y < 0)

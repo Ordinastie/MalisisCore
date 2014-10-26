@@ -49,77 +49,6 @@ public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 	}
 
 	/**
-	 * Fired when a {@link UIComponent} changes state.
-	 *
-	 * @author Ordinastie
-	 *
-	 * @param <T> the type of <code>UIComponent</code> that fired this event.
-	 */
-	public abstract static class StateChanged<T extends UIComponent> extends ComponentEvent<T>
-	{
-		protected boolean state;
-
-		public StateChanged(T component, boolean state)
-		{
-			super(component);
-			this.state = state;
-		}
-
-		/**
-		 * @return the new state for the {@link UIComponent} that fired this {@link StateChanged} event.
-		 */
-		public boolean getState()
-		{
-			return state;
-		}
-	}
-
-	/**
-	 * Fired when a {@link UIComponent} gets hovered.
-	 *
-	 * @author Ordinastie
-	 *
-	 * @param <T> the type of <code>UIComponent</code> that fired this event.
-	 */
-	public static class HoveredStateChanged<T extends UIComponent> extends StateChanged<T>
-	{
-		public HoveredStateChanged(T component, boolean hovered)
-		{
-			super(component, hovered);
-		}
-	}
-
-	/**
-	 * Fired when a {@link UIComponent} gets focused.
-	 *
-	 * @author Ordinastie
-	 *
-	 * @param <T> the type of <code>UIComponent</code> that fired this event.
-	 */
-	public static class FocusStateChanged<T extends UIComponent> extends StateChanged<T>
-	{
-		public FocusStateChanged(T component, boolean focused)
-		{
-			super(component, focused);
-		}
-	}
-
-	/**
-	 * Fired when a {@link UIComponent} gets activated.
-	 *
-	 * @author Ordinastie
-	 *
-	 * @param <T> the type of <code>UIComponent</code> that fired this event.
-	 */
-	public static class ActiveStateChanged<T extends UIComponent> extends StateChanged<T>
-	{
-		public ActiveStateChanged(T component, boolean active)
-		{
-			super(component, active);
-		}
-	}
-
-	/**
 	 * Fired when a {@link UIComponent} gets it's value changed.
 	 *
 	 * @author Ordinastie
@@ -127,12 +56,12 @@ public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 	 * @param <T> the type of <code>UIComponent</code> that fired this event.
 	 * @param <S> the type of the value being changed.
 	 */
-	public static class ValueChanged<T extends UIComponent, S> extends ComponentEvent<T>
+	public static class ValueChange<T extends UIComponent, S> extends ComponentEvent<T>
 	{
 		protected S oldValue;
 		protected S newValue;
 
-		public ValueChanged(T component, S oldValue, S newValue)
+		public ValueChange(T component, S oldValue, S newValue)
 		{
 			super(component);
 			this.oldValue = oldValue;

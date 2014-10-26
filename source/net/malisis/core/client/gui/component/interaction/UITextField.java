@@ -162,7 +162,7 @@ public class UITextField extends UIComponent<UITextField>
 		if (!validateText(temp.toString()))
 			return;
 
-		if (!fireEvent(new ComponentEvent.ValueChanged(this, oldValue, newValue)))
+		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
 			return;
 
 		this.text.insert(cursorPosition, text);
@@ -479,7 +479,7 @@ public class UITextField extends UIComponent<UITextField>
 	@Subscribe
 	public void onClick(MouseEvent.Press event)
 	{
-		int pos = cursorPositionFromX(componentX(event.getX()));
+		int pos = cursorPositionFromX(relativeX(event.getX()));
 		if (GuiScreen.isShiftKeyDown())
 			setSelectionPosition(pos);
 		else
@@ -508,7 +508,7 @@ public class UITextField extends UIComponent<UITextField>
 	{
 		if (!this.focused || event.getButton() != MouseButton.LEFT)
 			return;
-		int pos = cursorPositionFromX(componentX(event.getX()));
+		int pos = cursorPositionFromX(relativeX(event.getX()));
 		setSelectionPosition(pos);
 		selectAllOnRelease = false;
 	}
@@ -516,7 +516,7 @@ public class UITextField extends UIComponent<UITextField>
 	@Subscribe
 	public void onDoubleClick(MouseEvent.DoubleClick event)
 	{
-		int pos = cursorPositionFromX(componentX(event.getX()));
+		int pos = cursorPositionFromX(relativeX(event.getX()));
 		if (pos > 0 && text.charAt(pos - 1) == ' ')
 			selectionPosition = pos;
 		else

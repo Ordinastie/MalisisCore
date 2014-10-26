@@ -37,7 +37,7 @@ import net.malisis.core.client.gui.component.container.UIPanel;
 import net.malisis.core.client.gui.component.container.UIWindow;
 import net.malisis.core.client.gui.component.decoration.UIMultiLineLabel;
 import net.malisis.core.client.gui.component.interaction.UIButton;
-import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.configuration.setting.Setting;
 
 import com.google.common.eventbus.Subscribe;
@@ -115,7 +115,7 @@ public class ConfigurationGui extends MalisisGui
 	}
 
 	@Subscribe
-	public void onMouseOver(ComponentEvent.HoveredStateChanged event)
+	public void onMouseOver(HoveredStateChange event)
 	{
 		if (event.getState() == true)
 		{

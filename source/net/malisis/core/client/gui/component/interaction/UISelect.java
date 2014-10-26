@@ -96,7 +96,7 @@ public class UISelect extends UIComponent<UISelect>
 	}
 
 	@Override
-	public void setParent(UIContainer parent)
+	public void setParent(UIComponent parent)
 	{
 		super.setParent(parent);
 		this.optionsContainer.setParent(parent);
@@ -231,7 +231,7 @@ public class UISelect extends UIComponent<UISelect>
 
 		selectedOption = newValue != null ? newValue.index : -1;
 
-		if (!fireEvent(new ComponentEvent.ValueChanged(this, oldValue, newValue)))
+		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
 		{
 			selectedOption = oldValue.index;
 			return oldValue;
@@ -318,7 +318,7 @@ public class UISelect extends UIComponent<UISelect>
 		}
 		else if (expanded)
 		{
-			int selected = ((optionsContainer.componentY(event.getY()) - 1) / 10);
+			int selected = ((optionsContainer.relativeY(event.getY()) - 1) / 10);
 			select(selected);
 			expanded = false;
 			setFocused(true);

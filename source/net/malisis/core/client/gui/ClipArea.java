@@ -24,7 +24,7 @@
 
 package net.malisis.core.client.gui;
 
-import net.malisis.core.client.gui.component.container.UIContainer;
+import net.malisis.core.client.gui.component.IClipable;
 
 public class ClipArea
 {
@@ -35,19 +35,19 @@ public class ClipArea
 	public int Y;
 	public int clipPadding;
 
-	public ClipArea(UIContainer container)
+	public ClipArea(IClipable container)
 	{
 		this(container, 0, true);
 	}
 
-	public ClipArea(UIContainer container, int clipPadding)
+	public ClipArea(IClipable container, int clipPadding)
 	{
 		this(container, clipPadding, true);
 	}
 
-	public ClipArea(UIContainer container, int clipPadding, boolean intersect)
+	public ClipArea(IClipable container, int clipPadding, boolean intersect)
 	{
-		if (!container.clipContent)
+		if (!container.shouldClipContent())
 			this.noClip = true;
 		else
 		{
@@ -58,8 +58,8 @@ public class ClipArea
 			this.clipPadding = clipPadding;
 		}
 
-		if (intersect && container.getParent() != null)
-			this.intersect(container.getParent().getClipArea());
+		if (intersect && container.getParent() instanceof IClipable)
+			this.intersect(((IClipable) container.getParent()).getClipArea());
 	}
 
 	public void intersect(ClipArea area)

@@ -30,9 +30,9 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.event.ComponentEvent.HoveredStateChanged;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.inventory.InventoryEvent;
 import net.malisis.core.inventory.MalisisInventoryContainer;
@@ -94,7 +94,7 @@ public class UISlot extends UIComponent<UISlot>
 	}
 
 	@Subscribe
-	public void onHovered(HoveredStateChanged<UISlot> event)
+	public void onHovered(HoveredStateChange<UISlot> event)
 	{
 		updateTooltip();
 

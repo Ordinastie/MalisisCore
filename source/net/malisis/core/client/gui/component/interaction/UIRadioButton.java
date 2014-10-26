@@ -160,7 +160,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 	{
 		if (event.getButton() == MouseButton.LEFT)
 		{
-			if (fireEvent(new ComponentEvent.ValueChanged(this, this, getSelected(name))))
+			if (fireEvent(new ComponentEvent.ValueChange(this, this, getSelected(name))))
 				setSelected();
 		}
 	}

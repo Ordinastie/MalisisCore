@@ -32,13 +32,20 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.control.IControlComponent;
+import net.malisis.core.client.gui.component.control.ICloseable;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.KeyboardEvent;
+import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
+import net.malisis.core.client.gui.event.component.StateChangeEvent;
+import net.malisis.core.client.gui.event.component.StateChangeEvent.DisabledStateChange;
+import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
 
 import org.lwjgl.opengl.GL11;
+
+import com.google.common.eventbus.Subscribe;
 
 /**
  * {@link UIContainer} are the base for components holding other components.<br />
@@ -48,16 +55,12 @@ import org.lwjgl.opengl.GL11;
  *
  * @author Ordinastie, PaleoCrafter
  */
-public class UIContainer<T extends UIContainer> extends UIComponent<T>
+public class UIContainer<T extends UIContainer> extends UIComponent<T> implements IClipable, ICloseable
 {
 	/**
 	 * List of {@link net.malisis.core.client.gui.component.UIComponent components}.
 	 */
 	protected final Set<UIComponent> components;
-	/**
-	 * List of {@link net.malisis.core.client.gui.component.UIComponent components} controling this {@link UIContainer}.
-	 */
-	protected final Set<UIComponent> controlComponents;
 	/**
 	 * Horizontal padding to apply to this {@link UIContainer}
 	 */
@@ -69,7 +72,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	/**
 	 * Determines whether this {@link UIContainer} should clip its contents to its drawn area.
 	 */
-	public boolean clipContent = true;
+	protected boolean clipContent = true;
 	/**
 	 * Background color multiplier.
 	 */
@@ -86,7 +89,6 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	{
 		super(gui);
 		components = new LinkedHashSet<>();
-		controlComponents = new LinkedHashSet<>();
 
 		shape = new SimpleGuiShape();
 		titleLabel = new UILabel(gui);
@@ -229,15 +231,15 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	 * @param component
 	 * @return
 	 */
+	@Override
 	public int componentX(UIComponent component)
 	{
-		int x = component.getX();
-		if (Anchor.horizontal(component.getAnchor()) == Anchor.CENTER)
-			x += (getWidth() - component.getWidth()) / 2;
-		else if (Anchor.horizontal(component.getAnchor()) == Anchor.RIGHT)
-			x += getWidth() - component.getWidth() - getHorizontalPadding();
-		else
+		int x = super.componentX(component);
+		int a = Anchor.horizontal(component.getAnchor());
+		if (a == Anchor.LEFT || a == Anchor.NONE)
 			x += getHorizontalPadding();
+		else if (a == Anchor.RIGHT)
+			x -= getHorizontalPadding();
 
 		return x;
 	}
@@ -248,15 +250,15 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	 * @param component
 	 * @return
 	 */
+	@Override
 	public int componentY(UIComponent component)
 	{
-		int y = component.getY();
-		if (Anchor.vertical(component.getAnchor()) == Anchor.MIDDLE)
-			y += (getHeight() - component.getHeight()) / 2;
-		else if (Anchor.vertical(component.getAnchor()) == Anchor.BOTTOM)
-			y += getHeight() - component.getHeight() - getVerticalPadding();
-		else
+		int y = super.componentY(component);
+		int a = Anchor.vertical(component.getAnchor());
+		if (a == Anchor.TOP || a == Anchor.NONE)
 			y += getVerticalPadding();
+		else if (a == Anchor.BOTTOM)
+			y -= getVerticalPadding();
 
 		return y;
 	}
@@ -272,13 +274,9 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	@Override
 	public UIComponent getComponentAt(int x, int y)
 	{
-		//control components take precedence over regular components
-		for (UIComponent c : controlComponents)
-		{
-			UIComponent component = c.getComponentAt(x, y);
-			if (component != null)
-				return component;
-		}
+		UIComponent superComp = super.getComponentAt(x, y);
+		if (superComp != null && superComp != this)
+			return superComp;
 
 		Set<UIComponent> list = new HashSet<>();
 		for (UIComponent c : components)
@@ -289,7 +287,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		}
 
 		if (list.size() == 0)
-			return super.getComponentAt(x, y);
+			return superComp;
 
 		UIComponent component = null;
 		for (UIComponent c : list)
@@ -304,17 +302,24 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	public void onContentUpdate()
 	{}
 
-	/**
-	 * Gets the clipping area delimited by this {@link UIContainer}.
-	 *
-	 * @return
-	 */
+	@Override
 	public ClipArea getClipArea()
 	{
 		return new ClipArea(this);
 	}
 
-	//#region Child components
+	@Override
+	public void setClipContent(boolean clipContent)
+	{
+		this.clipContent = clipContent;
+	}
+
+	@Override
+	public boolean shouldClipContent()
+	{
+		return clipContent;
+	}
+
 	/**
 	 * Adds a component to this {@link UIContainer}.
 	 *
@@ -322,15 +327,10 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	 */
 	public void add(UIComponent component)
 	{
-		if (component instanceof IControlComponent)
-			controlComponents.add(component);
-		else
-		{
-			components.add(component);
-			onContentUpdate();
-		}
+		components.add(component);
 		component.setParent(this);
-
+		component.register(this);
+		onContentUpdate();
 	}
 
 	/**
@@ -342,15 +342,11 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	{
 		if (component.getParent() != this)
 			return;
-		if (component instanceof IControlComponent)
-			controlComponents.remove(component);
-		else
-		{
-			components.remove(component);
-			onContentUpdate();
-		}
-		component.setParent(null);
 
+		components.remove(component);
+		component.setParent(null);
+		component.unregister(this);
+		onContentUpdate();
 	}
 
 	/**
@@ -364,41 +360,12 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 		onContentUpdate();
 	}
 
-	/**
-	 * Adds a control component to this {@link UIContainer}.
-	 *
-	 * @param component
-	 */
-	public <S extends UIComponent & IControlComponent> void addControlComponent(S component)
+	@Override
+	public void onClose()
 	{
-		controlComponents.add(component);
-		component.setParent(this);
+		if (getParent() instanceof UIContainer)
+			((UIContainer) getParent()).remove(this);
 	}
-
-	/**
-	 * Removes the component from this {@link UIContainer}.
-	 *
-	 * @param component
-	 */
-	public <S extends UIComponent & IControlComponent> void removeControlComponent(S component)
-	{
-		if (component.getParent() != this)
-			return;
-		component.setParent(null);
-		controlComponents.remove(component);
-	}
-
-	/**
-	 * Removes all the control components from this {@link UIContainer}. Does not remove regular components
-	 */
-	public void removeAllControlComponents()
-	{
-		for (UIComponent component : controlComponents)
-			component.setParent(null);
-		controlComponents.clear();
-	}
-
-	//#end Child components
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
@@ -417,26 +384,31 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		for (UIComponent c : controlComponents)
-			c.draw(renderer, mouseX, mouseY, partialTick);
-
-		ClipArea area = getClipArea();
-		renderer.startClipping(area);
-
 		for (UIComponent c : components)
 			c.draw(renderer, mouseX, mouseY, partialTick);
-
-		renderer.endClipping(area);
 	}
 
 	@Override
 	public boolean fireKeyboardEvent(KeyboardEvent event)
 	{
-		for (UIComponent c : controlComponents)
-			c.fireKeyboardEvent(event);
+		if (!super.fireKeyboardEvent(event))
+			return false;
+
 		for (UIComponent c : components)
 			c.fireKeyboardEvent(event);
 		return true;
 	}
 
+	@Subscribe
+	public void onComponentStateChange(StateChangeEvent event)
+	{
+		if (event instanceof VisibleStateChange || event instanceof DisabledStateChange)
+			onContentUpdate();
+	}
+
+	@Subscribe
+	public void onComponentSpaceChange(SpaceChangeEvent event)
+	{
+		onContentUpdate();
+	}
 }

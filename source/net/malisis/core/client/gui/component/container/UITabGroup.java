@@ -191,7 +191,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 
 		int cx = container.getX();
 		int cy = container.getY();
-		int cw = container.getBaseWidth();
+		int cw = container.getRawWidth();
 		int ch = container.getBaseHeight();
 
 		if (tabPosition == Position.TOP)
@@ -206,11 +206,11 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		else if (tabPosition == Position.LEFT)
 		{
 			cx += getWidth() - 1;
-			cw = (container.getBaseWidth() == INHERITED ? 0 : container.getBaseWidth()) - getWidth();
+			cw = (container.getRawWidth() == INHERITED ? 0 : container.getRawWidth()) - getWidth();
 		}
 		else if (tabPosition == Position.RIGHT)
 		{
-			cw = (container.getBaseWidth() == INHERITED ? 0 : container.getBaseWidth()) - getWidth() + 1;
+			cw = (container.getRawWidth() == INHERITED ? 0 : container.getRawWidth()) - getWidth() + 1;
 		}
 
 		//tab.setSize(w, h);

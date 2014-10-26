@@ -24,19 +24,27 @@
 
 package net.malisis.core.client.gui.component;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import net.malisis.core.client.gui.Anchor;
+import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.container.UIContainer;
+import net.malisis.core.client.gui.component.control.IControlComponent;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
-import net.malisis.core.client.gui.component.interaction.IScrollable;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
-import net.malisis.core.client.gui.event.ComponentEvent.FocusStateChanged;
-import net.malisis.core.client.gui.event.ComponentEvent.HoveredStateChanged;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.event.component.SpaceChangeEvent.PositionChangeEvent;
+import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
+import net.malisis.core.client.gui.event.component.StateChangeEvent.DisabledStateChange;
+import net.malisis.core.client.gui.event.component.StateChangeEvent.FocusStateChange;
+import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
+import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.RenderParameters;
 
@@ -54,6 +62,10 @@ import com.google.common.eventbus.EventBus;
 public abstract class UIComponent<T extends UIComponent>
 {
 	public final static int INHERITED = Integer.MIN_VALUE;
+	/**
+	 * List of {@link net.malisis.core.client.gui.component.UIComponent components} controling this {@link UIContainer}.
+	 */
+	private final Set<IControlComponent> controlComponents;
 	/**
 	 * Position of this {@link UIComponent}
 	 */
@@ -78,7 +90,7 @@ public abstract class UIComponent<T extends UIComponent>
 	 * The parent {@link UIContainer} of this {@link UIComponent} Can be used to pass through things or manipulate the parent's other
 	 * children.
 	 */
-	protected UIContainer parent;
+	protected UIComponent parent;
 	/**
 	 * The name of this {@link UIComponent} Can be used to retrieve this back from a container.
 	 */
@@ -99,11 +111,11 @@ public abstract class UIComponent<T extends UIComponent>
 	/**
 	 * Hover state of this {@link UIComponent}
 	 */
-	protected boolean hovered;
+	protected boolean hovered = false;
 	/**
 	 * Focus state of this {@link UIComponent}
 	 */
-	protected boolean focused;
+	protected boolean focused = false;
 	/**
 	 * GuiShape used to draw this {@link UIComponent}
 	 */
@@ -121,7 +133,7 @@ public abstract class UIComponent<T extends UIComponent>
 	{
 		bus = new EventBus();
 		bus.register(this);
-		visible = true;
+		controlComponents = new LinkedHashSet<>();
 		rp = new RenderParameters();
 		shape = new SimpleGuiShape();
 	}
@@ -187,6 +199,9 @@ public abstract class UIComponent<T extends UIComponent>
 		if (isDisabled())
 			return false;
 
+		for (IControlComponent c : controlComponents)
+			c.fireKeyboardEvent(event);
+
 		bus.post(event);
 		return !event.isCancelled();
 	}
@@ -214,11 +229,13 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public T setPosition(int x, int y, int anchor)
 	{
+		if (!fireEvent(new PositionChangeEvent(this, x, y, anchor)))
+			return (T) this;
+
 		this.x = x;
 		this.y = y;
 		this.anchor = anchor;
-		if (parent != null)
-			parent.onContentUpdate();
+
 		return (T) this;
 	}
 
@@ -257,6 +274,9 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public T setAnchor(int anchor)
 	{
+		if (!fireEvent(new PositionChangeEvent(this, x, y, anchor)))
+			return (T) this;
+
 		this.anchor = anchor;
 		return (T) this;
 	}
@@ -278,17 +298,19 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public T setSize(int width, int height)
 	{
+		if (!fireEvent(new SizeChangeEvent(this, width, height)))
+			return (T) this;
+
 		this.width = width;
 		this.height = height;
-		if (parent != null)
-			parent.onContentUpdate();
+
 		return (T) this;
 	}
 
 	/**
 	 * @return the raw width of this {@link UIComponent}
 	 */
-	public int getBaseWidth()
+	public int getRawWidth()
 	{
 		return width;
 	}
@@ -305,7 +327,11 @@ public abstract class UIComponent<T extends UIComponent>
 			return 0;
 
 		//if width < 0 consider it relative to parent container
-		return parent.getWidth() - (width == INHERITED ? 0 : -width) - 2 * parent.getHorizontalPadding();
+		int w = parent.getWidth() - (width == INHERITED ? 0 : -width);
+		if (parent instanceof UIContainer)
+			w -= 2 * ((UIContainer) parent).getHorizontalPadding();
+
+		return w;
 	}
 
 	/**
@@ -328,7 +354,11 @@ public abstract class UIComponent<T extends UIComponent>
 			return 0;
 
 		//if height < 0 consider it relative to parent container
-		return parent.getHeight() - (height == INHERITED ? 0 : height) - 2 * parent.getVerticalPadding();
+		int h = parent.getHeight() - (height == INHERITED ? 0 : height);
+		if (parent instanceof UIContainer)
+			h -= 2 * ((UIContainer) parent).getVerticalPadding();
+
+		return h;
 	}
 
 	/**
@@ -344,7 +374,7 @@ public abstract class UIComponent<T extends UIComponent>
 			return;
 
 		this.hovered = hovered;
-		fireEvent(new HoveredStateChanged(this, hovered));
+		fireEvent(new HoveredStateChange(this, hovered));
 	}
 
 	/**
@@ -373,7 +403,7 @@ public abstract class UIComponent<T extends UIComponent>
 			return;
 
 		this.focused = focused;
-		fireEvent(new FocusStateChanged(this, focused));
+		fireEvent(new FocusStateChange(this, focused));
 	}
 
 	/**
@@ -390,7 +420,7 @@ public abstract class UIComponent<T extends UIComponent>
 	 * @return the parent of this {@link UIComponent}
 	 * @see #parent
 	 */
-	public UIContainer getParent()
+	public UIComponent getParent()
 	{
 		return parent;
 	}
@@ -401,7 +431,7 @@ public abstract class UIComponent<T extends UIComponent>
 	 * @param parent the parent to be used
 	 * @see #parent
 	 */
-	public void setParent(UIContainer parent)
+	public void setParent(UIComponent parent)
 	{
 		this.parent = parent;
 	}
@@ -424,15 +454,15 @@ public abstract class UIComponent<T extends UIComponent>
 		if (isVisible() == visible)
 			return (T) this;
 
+		if (!fireEvent(new VisibleStateChange(this, visible)))
+			return (T) this;
+
 		this.visible = visible;
 		if (!visible)
 		{
 			this.setHovered(false);
 			this.setFocused(false);
 		}
-
-		if (parent != null)
-			parent.onContentUpdate();
 
 		return (T) this;
 	}
@@ -452,6 +482,9 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public T setDisabled(boolean disabled)
 	{
+		if (!fireEvent(new DisabledStateChange(this, disabled)))
+			return (T) this;
+
 		this.disabled = disabled;
 		if (disabled)
 		{
@@ -528,6 +561,14 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public UIComponent getComponentAt(int x, int y)
 	{
+		//control components take precedence over regular components
+		for (IControlComponent c : controlComponents)
+		{
+			UIComponent component = c.getComponentAt(x, y);
+			if (component != null)
+				return component;
+		}
+
 		return isInsideBounds(x, y) && !isDisabled() && isVisible() ? this : null;
 	}
 
@@ -537,7 +578,7 @@ public abstract class UIComponent<T extends UIComponent>
 	 * @param x
 	 * @return
 	 */
-	public int componentX(int x)
+	public int relativeX(int x)
 	{
 		return x - screenX();
 	}
@@ -548,30 +589,65 @@ public abstract class UIComponent<T extends UIComponent>
 	 * @param y
 	 * @return
 	 */
-	public int componentY(int y)
+	public int relativeY(int y)
 	{
 		return y - screenY();
 	}
 
 	/**
-	 * Get the X coordinate of this {@link UIComponent} relative to its parent container
+	 * Gets the X coordinate of a {@link UIComponent} inside this <code>UIComponent</code>.
 	 *
+	 * @param component
 	 * @return
 	 */
-	public int containerX()
+	public int componentX(UIComponent component)
 	{
-		return parent == null ? this.x : parent.componentX(this);
-
+		int x = component.getX();
+		int w = getWidth() - component.getWidth();
+		int a = Anchor.horizontal(component.getAnchor());
+		if (a == Anchor.CENTER)
+			x += w / 2;
+		else if (a == Anchor.RIGHT)
+			x += w;
+		return x;
 	}
 
 	/**
-	 * Get the Y coordinate of this {@link UIComponent} relative to its parent container
+	 * Gets the Y coordinate of a {@link UIComponent} inside this <code>UIComponent</code>.
+	 *
+	 * @param component
+	 * @return
+	 */
+	public int componentY(UIComponent component)
+	{
+		int y = component.getY();
+		int h = getHeight() - component.getHeight();
+		int a = Anchor.vertical(component.getAnchor());
+		if (a == Anchor.MIDDLE)
+			y += h / 2;
+		else if (a == Anchor.BOTTOM)
+			y += h;
+		return y;
+	}
+
+	/**
+	 * Get the X coordinate of this {@link UIComponent} relative to its parent.
 	 *
 	 * @return
 	 */
-	public int containerY()
+	public int parentX()
 	{
-		return parent == null ? this.y : parent.componentY(this);
+		return getParent() != null ? getParent().componentX(this) : getX();
+	}
+
+	/**
+	 * Get the Y coordinate of this {@link UIComponent} relative to its parent.
+	 *
+	 * @return
+	 */
+	public int parentY()
+	{
+		return getParent() != null ? getParent().componentY(this) : getY();
 	}
 
 	/**
@@ -581,14 +657,9 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public int screenX()
 	{
-		int x = containerX();
-		if (parent != null)
-		{
-			x += parent.screenX();
-			if (parent instanceof IScrollable)
-				x += ((IScrollable) parent).getOffsetX();
-		}
-
+		int x = parentX();
+		if (getParent() != null)
+			x += getParent().screenX();
 		return x;
 	}
 
@@ -599,14 +670,45 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public int screenY()
 	{
-		int y = containerY();
-		if (parent != null)
-		{
-			y += parent.screenY();
-			if (parent instanceof IScrollable)
-				y += ((IScrollable) parent).getOffsetY();
-		}
+		int y = parentY();
+		if (getParent() != null)
+			y += getParent().screenY();
 		return y;
+	}
+
+	/**
+	 * Adds a control component to this {@link UIContainer}.
+	 *
+	 * @param component
+	 */
+	public void addControlComponent(IControlComponent component)
+	{
+		controlComponents.add(component);
+		component.setParent(this);
+	}
+
+	/**
+	 * Removes the component from this {@link UIContainer}.
+	 *
+	 * @param component
+	 */
+	public void removeControlComponent(IControlComponent component)
+	{
+		if (component.getParent() != this)
+			return;
+
+		controlComponents.remove(component);
+		component.setParent(null);
+	}
+
+	/**
+	 * Removes all the control components from this {@link UIContainer}. Does not remove regular components
+	 */
+	public void removeAllControlComponents()
+	{
+		for (IControlComponent component : controlComponents)
+			component.setParent(null);
+		controlComponents.clear();
 	}
 
 	/**
@@ -638,8 +740,19 @@ public abstract class UIComponent<T extends UIComponent>
 		drawBackground(renderer, mouseX, mouseY, partialTick);
 		renderer.next();
 		renderer.currentComponent = this;
+
+		ClipArea area = this instanceof IClipable ? ((IClipable) this).getClipArea() : null;
+		if (area != null)
+			renderer.startClipping(area);
 		drawForeground(renderer, mouseX, mouseY, partialTick);
+		if (area != null)
+			renderer.endClipping(area);
+
 		renderer.next();
+
+		for (IControlComponent c : controlComponents)
+			c.draw(renderer, mouseX, mouseY, partialTick);
+
 		GL11.glPopAttrib();
 	}
 
@@ -651,8 +764,8 @@ public abstract class UIComponent<T extends UIComponent>
 
 	public String getPropertyString()
 	{
-		return "parent=" + (parent != null ? parent.getClass().getSimpleName() : "null") + "size=" + width + "," + height + " | position="
-				+ x + "," + y + " | container=" + containerX() + "," + containerY() + " | screen=" + screenX() + "," + screenY();
+		return "parent=" + (parent != null ? parent.getClass().getSimpleName() : "null") + ", size=" + width + "," + height
+				+ " | position=" + x + "," + y + " | container=" + parentX() + "," + parentY() + " | screen=" + screenX() + "," + screenY();
 	}
 
 	/**

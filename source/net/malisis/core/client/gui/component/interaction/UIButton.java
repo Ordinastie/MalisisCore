@@ -31,6 +31,9 @@ import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.event.MouseEvent.DoubleClick;
+import net.malisis.core.client.gui.event.MouseEvent.Press;
+import net.malisis.core.client.gui.event.MouseEvent.Release;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 
@@ -48,6 +51,7 @@ public class UIButton extends UIComponent<UIButton>
 
 	private UILabel label;
 	private boolean autoWidth = true;
+	private boolean isPressed = false;
 
 	// this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
 	public UIButton(MalisisGui gui, String text, int width)
@@ -125,9 +129,19 @@ public class UIButton extends UIComponent<UIButton>
 	}
 
 	@Override
+	public void setHovered(boolean hovered)
+	{
+		super.setHovered(hovered);
+		if (!hovered)
+			isPressed = false;
+	}
+
+	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.icon.set(isDisabled() ? iconDisabled : (isHovered() ? iconHovered : icon));
+		GuiIcon icon = isDisabled() ? iconDisabled : (isHovered() ? iconHovered : this.icon);
+		icon.flip(false, isPressed);
+		rp.icon.set(icon);
 		renderer.drawShape(shape, rp);
 	}
 
@@ -143,16 +157,28 @@ public class UIButton extends UIComponent<UIButton>
 	}
 
 	@Subscribe
-	public void onClick(MouseEvent.Release event)
+	public void onClick(MouseEvent.ButtonStateEvent event)
 	{
-		if (event.getButton() == MouseButton.LEFT)
-			fireEvent(new ClickEvent(this, event));
+		if (event instanceof DoubleClick)
+			return;
+
+		if (event instanceof Press && event.getButton() == MouseButton.LEFT)
+		{
+			isPressed = true;
+			return;
+		}
+
+		if (event instanceof Release && !isPressed)
+			return;
+
+		isPressed = false;
+		fireEvent(new ClickEvent(this, (Release) event));
 	}
 
 	@Override
 	public String toString()
 	{
-		return this.getClass().getName() + "[ text=" + label.getText() + ", " + this.getPropertyString() + " ]";
+		return this.getClass().getSimpleName() + "[ text=" + label.getText() + ", " + this.getPropertyString() + " ]";
 	}
 
 	public static class ClickEvent extends ComponentEvent<UIButton>

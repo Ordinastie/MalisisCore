@@ -24,11 +24,56 @@
 
 package net.malisis.core.client.gui.component.control;
 
+import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.event.KeyboardEvent;
+
 /**
+ * IControlledComponent are special components designed to affect other {@link UIComponent}.
+ *
  * @author Ordinastie
  *
  */
 public interface IControlComponent
 {
+	/**
+	 * Sets the {@link UIComponent} controlled by this {@link IControlComponent}.
+	 *
+	 * @return
+	 */
+	public void setParent(UIComponent component);
+
+	/**
+	 * Gets the {@link UIComponent} controlled by this {@link IControlComponent}.
+	 *
+	 * @return
+	 */
+	public UIComponent getParent();
+
+	/**
+	 * Gets the component at the specified coordinates. See {@link UIComponent#getComponentAt(int, int)}.
+	 *
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public UIComponent getComponentAt(int x, int y);
+
+	/**
+	 * Fires an event for this {@link IControlComponent}. See {@link UIComponent#fireKeyboardEvent(KeyboardEvent)}.
+	 *
+	 * @param event
+	 */
+	public boolean fireKeyboardEvent(KeyboardEvent event);
+
+	/**
+	 * Draws this {@link IControlComponent}. See {@link UIComponent#draw(GuiRenderer, int, int, float)}.
+	 *
+	 * @param renderer
+	 * @param mouseX
+	 * @param mouseY
+	 * @param partialTick
+	 */
+	public void draw(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
 
 }

@@ -33,8 +33,8 @@ import net.malisis.core.client.gui.component.container.UITabGroup.Position;
 import net.malisis.core.client.gui.component.container.UITabGroup.TabChangeEvent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
-import net.malisis.core.client.gui.event.ComponentEvent.ActiveStateChanged;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.util.IIcon;
 
@@ -106,7 +106,7 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	@Override
-	public void setParent(UIContainer parent)
+	public void setParent(UIComponent parent)
 	{
 		if (!(parent instanceof UITabGroup))
 			throw new IllegalArgumentException("UITabs can only be added to UITabGroup");
@@ -262,7 +262,7 @@ public class UITab extends UIComponent<UITab>
 		this.container.setDisabled(!active);
 		this.zIndex = container.getZIndex() + (active ? 1 : 0);
 
-		fireEvent(new ActiveStateChanged(this, active));
+		fireEvent(new ActiveStateChange(this, active));
 	}
 
 	/**

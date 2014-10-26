@@ -109,7 +109,7 @@ public class MalisisGui extends GuiScreen
 	{
 		this.renderer = new GuiRenderer();
 		this.screen = new UIContainer(this);
-		this.screen.clipContent = false;
+		this.screen.setClipContent(false);
 		startTime = System.currentTimeMillis();
 		Keyboard.enableRepeatEvents(true);
 	}

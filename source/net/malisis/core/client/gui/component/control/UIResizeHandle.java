@@ -40,15 +40,38 @@ import com.google.common.eventbus.Subscribe;
  */
 public class UIResizeHandle extends UIComponent<UIResizeHandle> implements IControlComponent
 {
-	public UIResizeHandle(MalisisGui gui, UIContainer parent)
+	public enum Type
+	{
+		BOTH, HORIZONTAL, VERTICAL
+	};
+
+	private Type type;
+
+	public UIResizeHandle(MalisisGui gui, UIComponent parent, Type type)
 	{
 		super(gui);
-		parent.add(this);
-		setPosition(parent.getHorizontalPadding() - 1, parent.getVerticalPadding() - 1, Anchor.BOTTOM | Anchor.RIGHT);
+		this.type = type != null ? type : Type.BOTH;
+
+		int x = -1;
+		int y = -1;
+		if (parent instanceof UIContainer)
+		{
+			x += ((UIContainer) parent).getHorizontalPadding();
+			y += ((UIContainer) parent).getVerticalPadding();
+		}
+
+		setPosition(x, y, Anchor.BOTTOM | Anchor.RIGHT);
 		setSize(5, 5);
 		register(this);
 
+		parent.addControlComponent(this);
+
 		icon = gui.getGuiTexture().getIcon(268, 0, 15, 15);
+	}
+
+	public UIResizeHandle(MalisisGui gui, UIComponent parent)
+	{
+		this(gui, parent, Type.BOTH);
 	}
 
 	@Subscribe
@@ -57,11 +80,16 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		if (event.getButton() != MouseButton.LEFT)
 			return;
 
-		if (getParent().getAnchor() != Anchor.NONE)
-			getParent().setPosition(parent.screenX(), parent.screenY(), Anchor.NONE);
+		UIComponent p = getParent();
+		if (p.getAnchor() != Anchor.NONE)
+			p.setPosition(p.parentX(), p.parentY(), Anchor.NONE);
 
-		int w = parent.getWidth() + event.getDeltaX();
-		int h = parent.getHeight() + event.getDeltaY();
+		int w = parent.getWidth();
+		int h = parent.getHeight();
+		if (type == Type.BOTH || type == Type.HORIZONTAL)
+			w += event.getDeltaX();
+		if (type == Type.BOTH || type == Type.VERTICAL)
+			h += event.getDeltaY();
 		if (w < 10)
 			w = 10;
 		if (h < 10)
@@ -80,5 +108,4 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		rp.icon.set(icon);
 		renderer.drawShape(shape, rp);
 	}
-
 }

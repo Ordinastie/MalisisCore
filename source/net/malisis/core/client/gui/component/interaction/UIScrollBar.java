@@ -167,7 +167,7 @@ public class UIScrollBar extends UIComponent
 			return;
 
 		int l = length - SCROLLER_HEIGHT - 2;
-		int pos = type == HORIZONTAL ? componentX(event.getX()) : componentY(event.getY());
+		int pos = type == HORIZONTAL ? relativeX(event.getX()) : relativeY(event.getY());
 		pos = Math.max(0, Math.min(pos - SCROLLER_HEIGHT / 2, l));
 		scrollTo((float) pos / l);
 	}
@@ -185,7 +185,7 @@ public class UIScrollBar extends UIComponent
 			return;
 
 		int l = length - SCROLLER_HEIGHT - 2;
-		int pos = type == HORIZONTAL ? componentX(event.getX()) : componentY(event.getY());
+		int pos = type == HORIZONTAL ? relativeX(event.getX()) : relativeY(event.getY());
 		pos = Math.max(0, Math.min(pos - SCROLLER_HEIGHT / 2, l));
 		scrollTo((float) pos / l);
 	}
