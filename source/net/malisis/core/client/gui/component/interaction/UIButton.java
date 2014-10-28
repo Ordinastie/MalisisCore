@@ -140,7 +140,7 @@ public class UIButton extends UIComponent<UIButton>
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		GuiIcon icon = isDisabled() ? iconDisabled : (isHovered() ? iconHovered : this.icon);
-		icon.flip(false, isPressed);
+		icon.flip(isPressed, isPressed);
 		rp.icon.set(icon);
 		renderer.drawShape(shape, rp);
 	}
@@ -150,6 +150,11 @@ public class UIButton extends UIComponent<UIButton>
 	{
 		int x = (width - label.getWidth()) / 2;
 		int y = (height - label.getHeight() + 2) / 2;
+		if (isPressed)
+		{
+			x += 1;
+			y += 1;
+		}
 
 		label.setColor(isHovered() ? 0xFFFFA0 : 0xFFFFFF);
 		label.setPosition(screenX() + x, screenY() + y);
