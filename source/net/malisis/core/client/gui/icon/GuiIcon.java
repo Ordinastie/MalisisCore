@@ -50,7 +50,23 @@ public class GuiIcon extends MalisisIcon
 	{
 		if (icons == null || icons.length == 0)
 			return null;
-		return icons[index % icons.length];
+
+		//make sure we don't overflow
+		index = index % icons.length;
+
+		int row = index / 3;
+		int col = index % 3;
+
+		if (flippedU)
+			index = 3 * row + (2 - col);
+
+		row = index / 3;
+		col = index % 3;
+
+		if (flippedV)
+			index = 3 * (2 - row) + col;
+
+		return icons[index];
 	}
 
 	@Override
