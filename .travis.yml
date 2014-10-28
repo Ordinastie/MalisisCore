@@ -22,5 +22,5 @@ env:
     # Make the log output cleaner
     - TERM=dumb
     # Super secure, encrypted variables! Ssssh!
-    - secure: "rtBXPgjAEB3D2pNMWHT5cAjUPx/K90Lhmaa/x6P+WJIokXR6ALlXRPYunv1c99GuibJX+uK/Y+fykr97tUxX69ZYi3j55kDiAlm4zgXHjJi4A4AYlnWKvX+yJ77Cm/Ci0Ks3rRmAyeIXJzoIZyfl8e6lqqUfY5uDth+kXVuM0c8="
-    - secure: "rtBXPgjAEB3D2pNMWHT5cAjUPx/K90Lhmaa/x6P+WJIokXR6ALlXRPYunv1c99GuibJX+uK/Y+fykr97tUxX69ZYi3j55kDiAlm4zgXHjJi4A4AYlnWKvX+yJ77Cm/Ci0Ks3rRmAyeIXJzoIZyfl8e6lqqUfY5uDth+kXVuM0c8="
+    - secure: eLRcYXZuIG57lRbCtCIVw9nvLYntFyt6sTSJtjHWD1qa8xaJScHVvBBMZ2iga6KnFwgALNkhCqXpjVzabY0okr2ehf0XhIIQbD91ei2xY/d3WuivtkrD1ECjOaDQCnLMBsNJ/jfydV0vRePXaSL/f/5nZY7xa5evrPpEjhBn36U=
+    - secure: 1e3AVn9sskiWTbM8lJC94dIc2DHq/a/AM+5JGYF0CMmlFLeCkSqPhIaBylPAf1DvbAATY/PIhRGIswiOopBtuGnyZSJRPsLEdcD/bz9lHaVZQZoYuxvR/otWWuI3Y9An0GK4jCHMj0+EaJEb3LtdOHUapmezmiIgl/lOufty7YQ=
