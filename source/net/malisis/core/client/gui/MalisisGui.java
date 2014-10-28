@@ -179,7 +179,7 @@ public class MalisisGui extends GuiScreen
 		{
 			MouseEvent me = (MouseEvent) event;
 			UIComponent component = getComponentAt(me.getX(), me.getY());
-			if (component != null)
+			if (component != null && !component.isDisabled())
 			{
 				if (me instanceof MouseEvent.Press)
 					component.setFocused(true);
