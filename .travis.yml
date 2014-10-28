@@ -1,0 +1,26 @@
+# Source language and JDK version to use
+language: java
+jdk: oraclejdk7
+
+# Compile and package JAR and set build properties
+install: gradle setupCIWorkspace
+script: gradle build -PbuildNumber=$TRAVIS_BUILD_NUMBER -PciSystem=travis -Pcommit=${TRAVIS_COMMIT:0:7}
+
+# Perform steps after compilation/test success
+after_success:
+  # Check if commit s not a pull request, if git repo is official, and if branch is master. If checks pass, add libs and deploy artifacts to Maven repository.
+  - "[[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_REPO_SLUG == Ordinastie/MalisisCore ]] && [[ $TRAVIS_BRANCH == master ]] && gradle uploadArchives"
+
+# Notification services
+notifications:
+  # Disable build status email notifications, until the issue with forks is fixed
+  email: false
+
+# Environmental system variables
+env:
+  global:
+    # Make the log output cleaner
+    - TERM=dumb
+    # Super secure, encrypted variables! Ssssh!
+    - secure: "rtBXPgjAEB3D2pNMWHT5cAjUPx/K90Lhmaa/x6P+WJIokXR6ALlXRPYunv1c99GuibJX+uK/Y+fykr97tUxX69ZYi3j55kDiAlm4zgXHjJi4A4AYlnWKvX+yJ77Cm/Ci0Ks3rRmAyeIXJzoIZyfl8e6lqqUfY5uDth+kXVuM0c8="
+    - secure: "rtBXPgjAEB3D2pNMWHT5cAjUPx/K90Lhmaa/x6P+WJIokXR6ALlXRPYunv1c99GuibJX+uK/Y+fykr97tUxX69ZYi3j55kDiAlm4zgXHjJi4A4AYlnWKvX+yJ77Cm/Ci0Ks3rRmAyeIXJzoIZyfl8e6lqqUfY5uDth+kXVuM0c8="

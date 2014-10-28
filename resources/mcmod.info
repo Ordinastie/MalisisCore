@@ -1,16 +1,14 @@
-[
-{
-  "modid": "malisiscore",
-  "name": "Malisis' Core",
-  "description": "Framework over Forge",
-  "version": "${version}",
-  "logoFile": "malisiscore.png",
+[{
+  "modid": "${modid}",
+  "name": "${name}",
+  "description": "${description}",
+  "version": "${version}-b${buildNumber}",
+  "credits": "",
   "mcversion": "${mcversion}",
-  "url": "http://github.com/ordinastie",
+  "url": "${url}",
   "updateUrl": "",
-  "authors": [ "Ordinastie", "PaleoCrafter" ],
-  "parent":"",
+  "authorList": [ "Ordinastie", "PaleoCrafter" ],
+  "parent": "",
   "screenshots": [],
-  "dependencies": [ "mod_MinecraftForge" ]
-}
-]
+  "dependencies": [ "MinecraftForge" ]
+}]
