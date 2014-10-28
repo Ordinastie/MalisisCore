@@ -22,8 +22,7 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.component.interaction;
-
+package net.malisis.core.client.gui.component.control;
 
 /**
  * @author Ordinastie
@@ -31,11 +30,11 @@ package net.malisis.core.client.gui.component.interaction;
  */
 public interface IScrollable
 {
-	public void setOffsetX(int offsetX);
+	public int getContentWidth();
 
-	public void setOffsetY(int offsetY);
+	public int getContentHeight();
 
-	public int getOffsetX();
+	public void setOffsetX(float offsetX, int delta);
 
-	public int getOffsetY();
+	public void setOffsetY(float offsetY, int delta);
 }

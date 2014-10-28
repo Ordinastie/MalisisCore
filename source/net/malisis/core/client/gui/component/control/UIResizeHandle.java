@@ -43,7 +43,7 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 	public enum Type
 	{
 		BOTH, HORIZONTAL, VERTICAL
-	};
+	}
 
 	private Type type;
 

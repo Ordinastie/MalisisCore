@@ -43,7 +43,7 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 	public enum Type
 	{
 		BOTH, HORIZONTAL, VERTICAL
-	};
+	}
 
 	private Type type;
 

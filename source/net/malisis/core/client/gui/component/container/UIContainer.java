@@ -35,9 +35,12 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.ICloseable;
+import net.malisis.core.client.gui.component.control.IControlComponent;
+import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.KeyboardEvent;
+import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.DisabledStateChange;
@@ -55,24 +58,20 @@ import com.google.common.eventbus.Subscribe;
  *
  * @author Ordinastie, PaleoCrafter
  */
-public class UIContainer<T extends UIContainer> extends UIComponent<T> implements IClipable, ICloseable
+public class UIContainer<T extends UIContainer> extends UIComponent<T> implements IClipable, IScrollable, ICloseable
 {
 	/**
-	 * List of {@link net.malisis.core.client.gui.component.UIComponent components}.
+	 * List of {@link UIComponent} inside this {@link UIContainer}.
 	 */
 	protected final Set<UIComponent> components;
 	/**
-	 * Horizontal padding to apply to this {@link UIContainer}
+	 * Horizontal padding to apply to this {@link UIContainer}.
 	 */
 	protected int horizontalPadding;
 	/**
-	 * Vertical padding to apply to this {@link UIContainer}
+	 * Vertical padding to apply to this {@link UIContainer}.
 	 */
 	protected int verticalPadding;
-	/**
-	 * Determines whether this {@link UIContainer} should clip its contents to its drawn area.
-	 */
-	protected boolean clipContent = true;
 	/**
 	 * Background color multiplier.
 	 */
@@ -81,6 +80,30 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 * Label for the title of this {@link UIContainer}.
 	 */
 	protected UILabel titleLabel;
+	//IClipable
+	/**
+	 * Determines whether this {@link UIContainer} should clip its contents to its drawn area.
+	 */
+	protected boolean clipContent = true;
+	//IScrollable
+	/**
+	 * Width of the contents of this {@link UIContainer}.
+	 */
+	protected int contentWidth;
+	/**
+	 * Height of the contents of this {@link UIContainer}.
+	 */
+	protected int contentHeight;
+	/**
+	 * X Offset for the contents of this {@link UIContainer} from 0 to 1.
+	 */
+	protected int xOffset;
+	/**
+	 * Y Offset for the contents of this {@link UIContainer} from 0 to 1.
+	 */
+	protected int yOffset;
+
+	public boolean drawContentSize = false;
 
 	/**
 	 * Default constructor, creates the components list.
@@ -241,6 +264,9 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		else if (a == Anchor.RIGHT)
 			x -= getHorizontalPadding();
 
+		if (!(component instanceof IControlComponent))
+			x -= xOffset;
+
 		return x;
 	}
 
@@ -260,6 +286,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		else if (a == Anchor.BOTTOM)
 			y -= getVerticalPadding();
 
+		if (!(component instanceof IControlComponent))
+			y -= yOffset;
 		return y;
 	}
 
@@ -300,8 +328,30 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	}
 
 	public void onContentUpdate()
-	{}
+	{
+		calculateContentSize();
+		fireEvent(new ContentUpdateEvent(this));
+	}
 
+	public void calculateContentSize()
+	{
+		int contentWidth = 0;
+		int contentHeight = 0;
+
+		for (UIComponent c : components)
+		{
+			if (c.isVisible())
+			{
+				contentWidth = Math.max(contentWidth, c.parentX() + c.getWidth() + xOffset);
+				contentHeight = Math.max(contentHeight, c.parentY() + c.getHeight() + yOffset);
+			}
+		}
+
+		this.contentHeight = contentHeight + 2 * getVerticalPadding();
+		this.contentWidth = contentWidth + 2 * getHorizontalPadding();
+	}
+
+	//#region IClipable
 	@Override
 	public ClipArea getClipArea()
 	{
@@ -319,6 +369,35 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	{
 		return clipContent;
 	}
+
+	//#end IClipable
+
+	//#region IScrollable
+	@Override
+	public int getContentWidth()
+	{
+		return contentWidth;
+	}
+
+	@Override
+	public int getContentHeight()
+	{
+		return contentHeight;
+	}
+
+	@Override
+	public void setOffsetX(float offsetX, int delta)
+	{
+		this.xOffset = (int) ((getContentWidth() - getWidth() + delta) * offsetX);
+	}
+
+	@Override
+	public void setOffsetY(float offsetY, int delta)
+	{
+		this.yOffset = (int) ((getContentHeight() - getHeight() + delta) * offsetY);
+	}
+
+	//#end IScrollable
 
 	/**
 	 * Adds a component to this {@link UIContainer}.
@@ -370,14 +449,24 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (backgroundColor == -1)
+		if (backgroundColor == -1 && !drawContentSize)
 			return;
 
 		rp.colorMultiplier.set(backgroundColor);
 
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
+
 		renderer.drawShape(shape, rp);
 		renderer.next();
+
+		if (drawContentSize)
+		{
+			shape.resetState();
+			shape.setSize(contentWidth, contentHeight);
+			rp.colorMultiplier.set(0xFFCCCC);
+			renderer.drawShape(shape, rp);
+			renderer.next();
+		}
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 

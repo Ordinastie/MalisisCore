@@ -192,25 +192,25 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		int cx = container.getX();
 		int cy = container.getY();
 		int cw = container.getRawWidth();
-		int ch = container.getBaseHeight();
+		int ch = container.getRawHeight();
 
 		if (tabPosition == Position.TOP)
 		{
 			cy += getHeight() - 1;
-			ch = (container.getBaseHeight() == INHERITED ? 0 : container.getBaseHeight()) - getHeight();
+			ch = container.getRawHeight() - getHeight();
 		}
 		else if (tabPosition == Position.BOTTOM)
 		{
-			ch = (container.getBaseHeight() == INHERITED ? 0 : container.getBaseHeight()) - getHeight() + 1;
+			ch = container.getRawHeight() - getHeight() + 1;
 		}
 		else if (tabPosition == Position.LEFT)
 		{
 			cx += getWidth() - 1;
-			cw = (container.getRawWidth() == INHERITED ? 0 : container.getRawWidth()) - getWidth();
+			cw = container.getRawWidth() - getWidth();
 		}
 		else if (tabPosition == Position.RIGHT)
 		{
-			cw = (container.getRawWidth() == INHERITED ? 0 : container.getRawWidth()) - getWidth() + 1;
+			cw = container.getRawWidth() - getWidth() + 1;
 		}
 
 		//tab.setSize(w, h);

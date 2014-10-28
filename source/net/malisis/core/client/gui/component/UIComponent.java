@@ -39,6 +39,7 @@ import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
+import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.PositionChangeEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.DisabledStateChange;
@@ -61,7 +62,7 @@ import com.google.common.eventbus.EventBus;
  */
 public abstract class UIComponent<T extends UIComponent>
 {
-	public final static int INHERITED = Integer.MIN_VALUE;
+	public final static int INHERITED = 0;
 	/**
 	 * List of {@link net.malisis.core.client.gui.component.UIComponent components} controling this {@link UIContainer}.
 	 */
@@ -229,12 +230,23 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public T setPosition(int x, int y, int anchor)
 	{
-		if (!fireEvent(new PositionChangeEvent(this, x, y, anchor)))
-			return (T) this;
+		//backup values
+		int oldX = this.x;
+		int oldY = this.y;
+		int oldAnchor = this.anchor;
 
 		this.x = x;
 		this.y = y;
 		this.anchor = anchor;
+
+		if (!fireEvent(new PositionChangeEvent(this, x, y, anchor)))
+		{
+			//event is cancelled, restore old values
+			this.x = oldX;
+			this.y = oldY;
+			this.anchor = oldAnchor;
+			return (T) this;
+		}
 
 		return (T) this;
 	}
@@ -274,10 +286,15 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public T setAnchor(int anchor)
 	{
-		if (!fireEvent(new PositionChangeEvent(this, x, y, anchor)))
-			return (T) this;
-
+		int oldAnchor = this.anchor;
 		this.anchor = anchor;
+
+		if (!fireEvent(new PositionChangeEvent(this, x, y, anchor)))
+		{
+			//event is cancelled, restore old values
+			this.anchor = oldAnchor;
+			return (T) this;
+		}
 		return (T) this;
 	}
 
@@ -298,11 +315,19 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public T setSize(int width, int height)
 	{
-		if (!fireEvent(new SizeChangeEvent(this, width, height)))
-			return (T) this;
+		int oldWidth = this.width;
+		int oldHeight = this.height;
 
 		this.width = width;
 		this.height = height;
+
+		if (!fireEvent(new SizeChangeEvent(this, width, height)))
+		{
+			//event is cancelled, restore old values
+			this.width = oldWidth;
+			this.height = oldHeight;
+			return (T) this;
+		}
 
 		return (T) this;
 	}
@@ -320,14 +345,14 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public int getWidth()
 	{
-		if (width >= 0)
+		if (width > 0)
 			return width;
 
 		if (parent == null)
 			return 0;
 
 		//if width < 0 consider it relative to parent container
-		int w = parent.getWidth() - (width == INHERITED ? 0 : -width);
+		int w = parent.getWidth() + width;
 		if (parent instanceof UIContainer)
 			w -= 2 * ((UIContainer) parent).getHorizontalPadding();
 
@@ -335,9 +360,17 @@ public abstract class UIComponent<T extends UIComponent>
 	}
 
 	/**
+	 * @return true if the width of this {@link UIComponent} is relative to its parent <code>UIComponent</code>.
+	 */
+	public boolean isRelativeWidth()
+	{
+		return width <= 0;
+	}
+
+	/**
 	 * @return the raw width of this {@link UIComponent}
 	 */
-	public int getBaseHeight()
+	public int getRawHeight()
 	{
 		return height;
 	}
@@ -347,18 +380,26 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public int getHeight()
 	{
-		if (height >= 0)
+		if (height > 0)
 			return height;
 
 		if (parent == null)
 			return 0;
 
 		//if height < 0 consider it relative to parent container
-		int h = parent.getHeight() - (height == INHERITED ? 0 : height);
+		int h = parent.getHeight() + height;
 		if (parent instanceof UIContainer)
 			h -= 2 * ((UIContainer) parent).getVerticalPadding();
 
 		return h;
+	}
+
+	/**
+	 * @return true if the height of this {@link UIComponent} is relative to its parent <code>UIComponent</code>.
+	 */
+	public boolean isRelativeHeight()
+	{
+		return height <= 0;
 	}
 
 	/**
@@ -434,6 +475,7 @@ public abstract class UIComponent<T extends UIComponent>
 	public void setParent(UIComponent parent)
 	{
 		this.parent = parent;
+		fireEvent(new ContentUpdateEvent(this));
 	}
 
 	/**
@@ -569,7 +611,7 @@ public abstract class UIComponent<T extends UIComponent>
 				return component;
 		}
 
-		return isInsideBounds(x, y) && !isDisabled() && isVisible() ? this : null;
+		return isInsideBounds(x, y) ? this : null;
 	}
 
 	/**
@@ -744,7 +786,9 @@ public abstract class UIComponent<T extends UIComponent>
 		ClipArea area = this instanceof IClipable ? ((IClipable) this).getClipArea() : null;
 		if (area != null)
 			renderer.startClipping(area);
+
 		drawForeground(renderer, mouseX, mouseY, partialTick);
+
 		if (area != null)
 			renderer.endClipping(area);
 
