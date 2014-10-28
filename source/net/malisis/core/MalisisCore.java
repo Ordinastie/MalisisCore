@@ -76,7 +76,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 {
 	public static final String modid = "malisiscore";
 	public static final String modname = "Malisis Core";
-	public static final String version = "${version}";
+	public static final String version = MalisisCore.class.getPackage().getImplementationVersion();
 	public static final String url = "";
 	public static File coremodLocation;
 
