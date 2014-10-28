@@ -24,9 +24,8 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-import net.malisis.core.renderer.element.Shape;
 
-public abstract class Transformation<T extends Transformation>
+public abstract class Transformation<T extends Transformation, S>
 {
 	public static final int LINEAR = 0, SINUSOIDAL = 1;
 
@@ -106,9 +105,9 @@ public abstract class Transformation<T extends Transformation>
 		return (T) this;
 	}
 
-	public void transform(Shape s, float elapsedTime)
+	public void transform(S transformable, float elapsedTime)
 	{
-		doTransform(s, completion(Math.max(0, elapsedTime)));
+		doTransform(transformable, completion(Math.max(0, elapsedTime)));
 	}
 
 	protected float completion(float elapsedTime)
@@ -143,7 +142,7 @@ public abstract class Transformation<T extends Transformation>
 		return comp;
 	}
 
-	protected abstract void doTransform(Shape s, float comp);
+	protected abstract void doTransform(S transformable, float comp);
 
 	public abstract T reversed(boolean reversed);
 }

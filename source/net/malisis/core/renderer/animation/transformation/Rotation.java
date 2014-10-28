@@ -26,7 +26,7 @@ package net.malisis.core.renderer.animation.transformation;
 
 import net.malisis.core.renderer.element.Shape;
 
-public class Rotation extends Transformation<Rotation>
+public class Rotation extends Transformation<Rotation, Shape>
 {
 	protected float fromAngle;
 	protected float toAngle;

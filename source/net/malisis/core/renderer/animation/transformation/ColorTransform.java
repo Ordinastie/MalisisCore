@@ -24,53 +24,71 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-import java.util.ArrayList;
+import net.malisis.core.renderer.RenderParameters;
 
 /**
- * @author -
+ * @author Ordinastie
  *
  */
-public class ChainedTransformation<T> extends Transformation<ChainedTransformation, T>
+public class ColorTransform extends Transformation<ColorTransform, RenderParameters>
 {
-	protected ArrayList<Transformation> listTransformations = new ArrayList<>();
-	private boolean reversed = false;
+	protected int fromColor;
+	protected int toColor;
+	protected boolean relative = false;
 
-	public ChainedTransformation(Transformation... transformations)
+	public ColorTransform(int toColor)
 	{
-		addTransformations(transformations);
+		this.toColor = toColor;
+		this.relative = true;
 	}
 
-	public ChainedTransformation addTransformations(Transformation... transformations)
+	public ColorTransform(int fromColor, int toColor)
 	{
-		duration = 0;
-		for (Transformation transformation : transformations)
-		{
-			duration += transformation.totalDuration();
-			listTransformations.add(transformation);
-		}
+		this.fromColor = fromColor;
+		this.toColor = toColor;
+	}
 
-		return this;
+	private int red(int color)
+	{
+		return (color >> 16) & 0xFF;
+	}
+
+	private int green(int color)
+	{
+		return (color >> 8) & 0xFF;
+	}
+
+	private int blue(int color)
+	{
+		return color & 0xFF;
 	}
 
 	@Override
-	protected void doTransform(T transformable, float comp)
+	protected void doTransform(RenderParameters rp, float comp)
 	{
-		if (listTransformations.size() == 0)
+		if (comp <= 0)
 			return;
 
-		if (reversed)
-			elapsedTimeCurrentLoop = Math.max(0, duration - elapsedTimeCurrentLoop);
-		for (Transformation transformation : listTransformations)
-		{
-			transformation.transform(transformable, elapsedTimeCurrentLoop);
-			elapsedTimeCurrentLoop -= transformation.totalDuration();
-		}
+		int fromColor = relative ? rp.colorMultiplier.get() : this.fromColor;
+		int r = (int) (red(fromColor) + (red(toColor) - red(fromColor)) * comp);
+		int g = (int) (green(fromColor) + (green(toColor) - green(fromColor)) * comp);
+		int b = (int) (blue(fromColor) + (blue(toColor) - blue(fromColor)) * comp);
+
+		rp.colorMultiplier.set((r & 0xFF) << 16 | (g & 0xFF) << 8 | b & 0xFF);
 	}
 
 	@Override
-	public ChainedTransformation reversed(boolean reversed)
+	public ColorTransform reversed(boolean reversed)
 	{
-		this.reversed = reversed;
+		if (!reversed)
+			return this;
+
+		int tmpColor = fromColor;
+		fromColor = toColor;
+		toColor = tmpColor;
+
 		return this;
+
 	}
+
 }

@@ -26,13 +26,11 @@ package net.malisis.core.renderer.animation.transformation;
 
 import java.util.ArrayList;
 
-import net.malisis.core.renderer.element.Shape;
-
 /**
  * @author Ordinastie
- * 
+ *
  */
-public class ParallelTransformation extends Transformation<ParallelTransformation>
+public class ParallelTransformation<T> extends Transformation<ParallelTransformation, T>
 {
 	protected ArrayList<Transformation> listTransformations = new ArrayList<>();
 
@@ -54,13 +52,13 @@ public class ParallelTransformation extends Transformation<ParallelTransformatio
 	}
 
 	@Override
-	protected void doTransform(Shape s, float comp)
+	protected void doTransform(T transformable, float comp)
 	{
 		if (listTransformations.size() == 0)
 			return;
 
 		for (Transformation transformation : listTransformations)
-			transformation.transform(s, elapsedTimeCurrentLoop);
+			transformation.transform(transformable, elapsedTimeCurrentLoop);
 	}
 
 	@Override

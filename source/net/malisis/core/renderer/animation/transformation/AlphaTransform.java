@@ -24,53 +24,43 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-import java.util.ArrayList;
+import net.malisis.core.renderer.RenderParameters;
 
 /**
- * @author -
+ * @author Ordinastie
  *
  */
-public class ChainedTransformation<T> extends Transformation<ChainedTransformation, T>
+public class AlphaTransform extends Transformation<AlphaTransform, RenderParameters>
 {
-	protected ArrayList<Transformation> listTransformations = new ArrayList<>();
-	private boolean reversed = false;
+	protected int fromAlpha;
+	protected int toAlpha;
 
-	public ChainedTransformation(Transformation... transformations)
+	public AlphaTransform(int fromAlpa, int toAlpha)
 	{
-		addTransformations(transformations);
-	}
-
-	public ChainedTransformation addTransformations(Transformation... transformations)
-	{
-		duration = 0;
-		for (Transformation transformation : transformations)
-		{
-			duration += transformation.totalDuration();
-			listTransformations.add(transformation);
-		}
-
-		return this;
+		this.fromAlpha = fromAlpa;
+		this.toAlpha = toAlpha;
 	}
 
 	@Override
-	protected void doTransform(T transformable, float comp)
+	protected void doTransform(RenderParameters rp, float comp)
 	{
-		if (listTransformations.size() == 0)
+		if (comp <= 0)
 			return;
 
-		if (reversed)
-			elapsedTimeCurrentLoop = Math.max(0, duration - elapsedTimeCurrentLoop);
-		for (Transformation transformation : listTransformations)
-		{
-			transformation.transform(transformable, elapsedTimeCurrentLoop);
-			elapsedTimeCurrentLoop -= transformation.totalDuration();
-		}
+		rp.alpha.set((int) (fromAlpha + (toAlpha - fromAlpha) * comp));
 	}
 
 	@Override
-	public ChainedTransformation reversed(boolean reversed)
+	public AlphaTransform reversed(boolean reversed)
 	{
-		this.reversed = reversed;
+		if (!reversed)
+			return this;
+
+		int tmpAlpha = fromAlpha;
+		fromAlpha = toAlpha;
+		toAlpha = tmpAlpha;
+
 		return this;
 	}
+
 }

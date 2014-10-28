@@ -26,7 +26,7 @@ package net.malisis.core.renderer.animation.transformation;
 
 import net.malisis.core.renderer.element.Shape;
 
-public class Translation extends Transformation<Translation>
+public class Translation extends Transformation<Translation, Shape>
 {
 	protected float fromX, fromY, fromZ;
 	protected float toX, toY, toZ;

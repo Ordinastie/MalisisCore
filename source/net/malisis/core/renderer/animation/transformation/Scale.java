@@ -26,7 +26,7 @@ package net.malisis.core.renderer.animation.transformation;
 
 import net.malisis.core.renderer.element.Shape;
 
-public class Scale extends Transformation<Scale>
+public class Scale extends Transformation<Scale, Shape>
 {
 	protected float fromX = 1, fromY = 1, fromZ = 1;
 	protected float toX = 1, toY = 1, toZ = 1;
