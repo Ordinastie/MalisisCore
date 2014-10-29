@@ -26,10 +26,8 @@ package net.malisis.core.renderer.element;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
@@ -144,6 +142,15 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	 */
 	public Shape removeFace(Face face)
 	{
+		if (mergedVertexes != null)
+		{
+			for (Vertex v : face.getVertexes())
+			{
+				MergedVertex mv = getMergedVertex(v);
+				mv.removeVertex(v);
+			}
+		}
+
 		faces = ArrayUtils.removeElement(faces, face);
 		return this;
 	}
@@ -169,7 +176,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	}
 
 	/**
-	 * Gets a list of {@link Vertex} matching <b>name</b>.
+	 * Gets a list of {@link Vertex} with a base name containing <b>name</b>.
 	 *
 	 * @param name
 	 * @return
@@ -188,32 +195,37 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		return vertexes;
 	}
 
+	/**
+	 * Gets a list of {@link Vertex} with a base name containing {@link Face} name.
+	 *
+	 * @param face
+	 * @return
+	 */
 	public List<Vertex> getVertexes(Face face)
 	{
-		List<Vertex> vertexes = new ArrayList<>();
 		if (face == null)
-			return vertexes;
+			return new ArrayList<>();
 
-		Set<String> names = new HashSet<>();
-		for (Vertex v : face.getVertexes())
-			names.add(v.baseName().toLowerCase());
-
-		for (Face f : faces)
-		{
-			for (Vertex v : f.getVertexes())
-			{
-				if (names.contains(v.baseName().toLowerCase()))
-					vertexes.add(v);
-			}
-		}
-		return vertexes;
+		return getVertexes(face.baseName());
 	}
 
+	/**
+	 * Gets a list of {@link Vertex} with a base name containing the {@link ForgeDirection} name.
+	 *
+	 * @param direction
+	 * @return
+	 */
 	public List<Vertex> getVertexes(ForgeDirection direction)
 	{
-		return getVertexes(getFace(Face.name(direction)));
+		return getVertexes(Face.nameFromDirection(direction));
 	}
 
+	/**
+	 * Gets the {@link MergedVertex} for the specified {@link Vertex}.
+	 *
+	 * @param vertex
+	 * @return
+	 */
 	public MergedVertex getMergedVertex(Vertex vertex)
 	{
 		if (mergedVertexes == null)
@@ -221,35 +233,58 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		return mergedVertexes.get(vertex.baseName());
 	}
 
+	/**
+	 * Gets a list of {@link MergedVertex} with a name containing the specified <b>name</b>.
+	 *
+	 * @param name
+	 * @return
+	 */
+	public List<MergedVertex> getMergedVertexes(String name)
+	{
+		if (mergedVertexes == null || name == null)
+			return new ArrayList<>();
+
+		List<MergedVertex> vertexes = new ArrayList<>();
+		for (MergedVertex mv : mergedVertexes.values())
+		{
+			if (mv.getName().toLowerCase().contains(name.toLowerCase()))
+				vertexes.add(mv);
+		}
+
+		return vertexes;
+	}
+
+	/**
+	 * Gets a list of {@link MergedVertex} with a base name containing {@link Face} name.
+	 *
+	 * @param face
+	 * @return
+	 */
 	public List<MergedVertex> getMergedVertexes(Face face)
 	{
-		List<MergedVertex> vertexes = new ArrayList<>();
-		if (mergedVertexes == null)
-			return vertexes;
+		if (face == null)
+			return new ArrayList<>();
 
-		for (Vertex v : face.getVertexes())
-		{
-			MergedVertex mv = getMergedVertex(v);
-			if (mv != null)
-				vertexes.add(mv);
-		}
-
-		return vertexes;
+		return getMergedVertexes(face.baseName());
 	}
 
-	public List<MergedVertex> getMergedVertexs(Face face)
+	/**
+	 * Gets a list of {@link MergedVertex} with a base name containing the {@link ForgeDirection} name.
+	 *
+	 * @param direction
+	 * @return
+	 */
+	public List<MergedVertex> getMergedVertexes(ForgeDirection direction)
 	{
-		List<MergedVertex> vertexes = new ArrayList<>();
-		for (Vertex v : face.getVertexes())
-		{
-			MergedVertex mv = getMergedVertex(v);
-			if (mv != null)
-				vertexes.add(mv);
-		}
-
-		return vertexes;
+		return getMergedVertexes(Face.nameFromDirection(direction));
 	}
 
+	/**
+	 * Gets the transform matrix of this {@link Shape}. Creates it if it doesn't exist already.<br>
+	 * The matrix is translated by 0.5F, 0.5F, 0.5F upon creation.
+	 *
+	 * @return
+	 */
 	private Matrix4f matrix()
 	{
 		if (transformMatrix == null)
@@ -261,7 +296,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	}
 
 	/**
-	 * Copies the transformation from a {@link Shape shape} to this <code>Shape</code>.
+	 * Copies the transformation matrix from a {@link Shape shape} to this <code>Shape</code>.
 	 *
 	 * @param shape
 	 * @return
@@ -274,8 +309,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	}
 
 	/**
-	 * Applies the transformations matrices to this {@link Shape}. This modifies to position of the vertexes making up the faces of this
-	 * <code>Shape</code>.
+	 * Applies the transformations matrix to this {@link Shape}. This modifies the position of the {@link Vertex vertexes} making up the
+	 * {@link Face faces} of this <code>Shape</code>.
 	 *
 	 * @return
 	 */
@@ -521,7 +556,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	}
 
 	/**
-	 * Stores the current state of each vertex making up this {@link Shape}.
+	 * Stores the current state of each {@link Vertex} making up this {@link Shape}.
 	 *
 	 * @return
 	 */
@@ -537,7 +572,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	}
 
 	/**
-	 * Resets the state of each vertex making up this {@link Shape} to a previously stored one.
+	 * Resets the state of each {@link Vertex} making up this {@link Shape} to a previously stored one.
 	 *
 	 * @return
 	 */
@@ -574,7 +609,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	 */
 	public Shape shrink(ForgeDirection dir, float factor)
 	{
-		Face face = getFace(Face.name(dir));
+		Face face = getFace(Face.nameFromDirection(dir));
 		if (face == null || mergedVertexes == null)
 			return this;
 
