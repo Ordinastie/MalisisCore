@@ -34,9 +34,9 @@ import net.malisis.core.renderer.element.Vertex;
  */
 public abstract class GuiShape extends Shape
 {
-	public abstract GuiShape setSize(int width, int height);
+	public abstract void setSize(int width, int height);
 
-	public abstract GuiShape scale(float x, float y);
+	public abstract void scale(float x, float y);
 
 	public GuiShape(GuiFace... faces)
 	{
@@ -50,29 +50,27 @@ public abstract class GuiShape extends Shape
 			faces[i] = new GuiFace();
 	}
 
-	public GuiShape setPosition(int x, int y)
+	public void setPosition(int x, int y)
 	{
-		return translate(x, y, 0);
+		translate(x, y, 0);
 	}
 
 	@Override
-	public GuiShape translate(float x, float y, float z)
+	public void translate(float x, float y, float z)
 	{
 		super.translate(x, y, z);
 		applyMatrix();
-		return this;
 	}
 
-	public GuiShape translate(int x, int y)
+	public void translate(int x, int y)
 	{
-		return translate(x, y, 0);
+		translate(x, y, 0);
 	}
 
 	@Override
-	public GuiShape rotate(float angle, float x, float y, float z)
+	public void rotate(float angle, float x, float y, float z)
 	{
 		rotate(angle, 0, 0, 1, x, y, z);
-		return this;
 	}
 
 	public void rotate(float angle)
@@ -82,10 +80,9 @@ public abstract class GuiShape extends Shape
 	}
 
 	@Override
-	public GuiShape scale(float scale)
+	public void scale(float scale)
 	{
 		scale(scale, scale);
-		return this;
 	}
 
 	protected static class GuiFace extends Face

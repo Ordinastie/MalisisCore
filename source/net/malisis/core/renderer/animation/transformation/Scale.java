@@ -24,9 +24,8 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-import net.malisis.core.renderer.element.Shape;
 
-public class Scale extends Transformation<Scale, Shape>
+public class Scale extends Transformation<Scale, ITransformable.Scale>
 {
 	protected float fromX = 1, fromY = 1, fromZ = 1;
 	protected float toX = 1, toY = 1, toZ = 1;
@@ -62,10 +61,12 @@ public class Scale extends Transformation<Scale, Shape>
 	}
 
 	@Override
-	protected void doTransform(Shape s, float comp)
+	protected void doTransform(ITransformable.Scale transformable, float comp)
 	{
-		comp = Math.max(comp, 0);
-		s.scale(fromX + (toX - fromX) * comp, fromY + (toY - fromY) * comp, fromZ + (toZ - fromZ) * comp);
+		if (comp <= 0)
+			return;
+
+		transformable.scale(fromX + (toX - fromX) * comp, fromY + (toY - fromY) * comp, fromZ + (toZ - fromZ) * comp);
 	}
 
 	@Override

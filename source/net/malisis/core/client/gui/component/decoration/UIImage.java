@@ -87,7 +87,7 @@ public class UIImage extends UIComponent<UIImage>
 	public UIImage setIcon(GuiTexture texture, IIcon icon)
 	{
 		this.itemStack = null;
-		this.icon = icon;
+		this.icon = icon != null ? icon : new MalisisIcon();
 		this.texture = texture;
 		return this;
 	}

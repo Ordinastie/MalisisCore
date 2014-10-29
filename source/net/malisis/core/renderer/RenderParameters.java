@@ -27,6 +27,7 @@ package net.malisis.core.renderer;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -35,7 +36,7 @@ import net.minecraftforge.common.util.ForgeDirection;
  * @author Ordinastie
  *
  */
-public class RenderParameters
+public class RenderParameters implements ITransformable.Color, ITransformable.Alpha
 {
 	private List<Parameter> listParams = new LinkedList<>();
 	/**
@@ -208,5 +209,29 @@ public class RenderParameters
 		rp.merge(rp2);
 
 		return rp;
+	}
+
+	@Override
+	public int getAlpha()
+	{
+		return alpha.get();
+	}
+
+	@Override
+	public void setAlpha(int alpha)
+	{
+		this.alpha.set(alpha);
+	}
+
+	@Override
+	public int getColor()
+	{
+		return colorMultiplier.get();
+	}
+
+	@Override
+	public void setColor(int color)
+	{
+		this.colorMultiplier.set(color);
 	}
 }

@@ -500,7 +500,8 @@ public class UISelect extends UIComponent<UISelect>
 					GL11.glDisable(GL11.GL_TEXTURE_2D);
 
 					shape.resetState();
-					shape.setSize(label.getWidth(), label.getHeight()).setPosition(componentX(label) - 1, componentY(label));
+					shape.setSize(label.getWidth(), label.getHeight());
+					shape.setPosition(componentX(label) - 1, componentY(label));
 
 					rp.colorMultiplier.set(0x5E789F);
 					rp.useTexture.set(false);

@@ -30,7 +30,7 @@ import java.util.ArrayList;
  * @author -
  *
  */
-public class ChainedTransformation<T> extends Transformation<ChainedTransformation, T>
+public class ChainedTransformation extends Transformation<ChainedTransformation, ITransformable>
 {
 	protected ArrayList<Transformation> listTransformations = new ArrayList<>();
 	private boolean reversed = false;
@@ -53,7 +53,7 @@ public class ChainedTransformation<T> extends Transformation<ChainedTransformati
 	}
 
 	@Override
-	protected void doTransform(T transformable, float comp)
+	protected void doTransform(ITransformable transformable, float comp)
 	{
 		if (listTransformations.size() == 0)
 			return;

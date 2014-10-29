@@ -28,12 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.renderer.element.face.BottomFace;
-import net.malisis.core.renderer.element.face.EastFace;
-import net.malisis.core.renderer.element.face.NorthFace;
-import net.malisis.core.renderer.element.face.SouthFace;
-import net.malisis.core.renderer.element.face.TopFace;
-import net.malisis.core.renderer.element.face.WestFace;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -359,30 +353,19 @@ public class Face
 	}
 
 	/**
-	 * Creates a new {@link Face} from a {@link ForgeDirection}.
-	 *
+	 * Gets a {@link Face} name from a {@link ForgeDirection}.
+	 * 
 	 * @param dir
 	 * @return
 	 */
-	public static Face fromDirection(ForgeDirection dir)
+	public static String name(ForgeDirection dir)
 	{
-		switch (dir)
-		{
-			case DOWN:
-				return new BottomFace();
-			case UP:
-				return new TopFace();
-			case NORTH:
-				return new NorthFace();
-			case SOUTH:
-				return new SouthFace();
-			case WEST:
-				return new WestFace();
-			case EAST:
-				return new EastFace();
-			default:
-				return null;
-		}
+		if (dir == ForgeDirection.UP)
+			return "top";
+		else if (dir == ForgeDirection.DOWN)
+			return "bottom";
+		else
+			return dir.toString();
 	}
 
 }

@@ -464,7 +464,8 @@ public class UITextField extends UIComponent<UITextField>
 		width = Math.min(this.width - start - 2, width);
 
 		selectShape.resetState();
-		selectShape.setSize(width, 10).setPosition(start + 1, 1);
+		selectShape.setSize(width, 10);
+		shape.setPosition(start + 1, 1);
 
 		rp.useTexture.set(false);
 		rp.colorMultiplier.set(0x0000FF);

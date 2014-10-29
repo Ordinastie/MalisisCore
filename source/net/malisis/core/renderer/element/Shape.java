@@ -26,9 +26,13 @@ package net.malisis.core.renderer.element;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -36,15 +40,11 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-
-public class Shape
+public class Shape implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale
 {
 	protected Face[] faces;
-	private Multimap<String, Vertex> vertexes = ArrayListMultimap.create();
-	protected Matrix4f selfRotationMatrix;
 	protected Matrix4f transformMatrix;
+	protected Map<String, MergedVertex> mergedVertexes;
 
 	public Shape()
 	{
@@ -54,11 +54,6 @@ public class Shape
 	public Shape(Face... faces)
 	{
 		this.faces = faces;
-		for (Face f : faces)
-		{
-			for (Vertex v : f.getVertexes())
-				vertexes.put(v.baseName(), v);
-		}
 	}
 
 	public Shape(List<Face> faces)
@@ -72,11 +67,25 @@ public class Shape
 		copyMatrix(s);
 	}
 
+	//#region FACES
+	/**
+	 * Adds {@link Face faces} to this {@link Shape}.
+	 *
+	 * @param faces
+	 * @return
+	 */
 	public Shape addFaces(Face[] faces)
 	{
 		return addFaces(faces, null);
 	}
 
+	/**
+	 * Adds {@link Face faces} to this {@link Shape} with the specified <b>groupName</b>.
+	 *
+	 * @param faces
+	 * @param groupName
+	 * @return
+	 */
 	public Shape addFaces(Face[] faces, String groupName)
 	{
 		if (groupName != null)
@@ -91,7 +100,7 @@ public class Shape
 	}
 
 	/**
-	 * Gets the faces that make up this <code>Shape</code>
+	 * Gets the {@link Face faces} that make up this {@link Shape}.
 	 *
 	 * @return
 	 */
@@ -100,6 +109,12 @@ public class Shape
 		return faces;
 	}
 
+	/**
+	 * Gets the {@link Face faces} that make up this {@link Shape} which match the specified <b>name</b>.
+	 *
+	 * @param name
+	 * @return
+	 */
 	public List<Face> getFaces(String name)
 	{
 		List<Face> list = new ArrayList<>();
@@ -117,25 +132,44 @@ public class Shape
 	 */
 	public Face getFace(String name)
 	{
-		for (Face f : faces)
-			if (f.baseName().toLowerCase().equals(name.toLowerCase()))
-				return f;
-		return null;
+		List<Face> list = getFaces(name);
+		return list.size() > 0 ? list.get(0) : null;
 	}
 
 	/**
-	 * Gets a face from a ForgeDirection
+	 * Removes a {@link Face} from this {@link Shape}. Has no effect if the <code>Face</code> doesn't belong to this <code>Shape</code>.
 	 *
-	 * @param dir
+	 * @param face
 	 * @return
 	 */
-	public Face getFace(ForgeDirection dir)
+	public Shape removeFace(Face face)
 	{
-		return getFace(nameFromDirection(dir));
+		faces = ArrayUtils.removeElement(faces, face);
+		return this;
+	}
+
+	//#end FACES
+
+	//#region VERTEXES
+	/**
+	 * Enables the {@link MergedVertex} for this {@link Shape}. Will transfer the current transformation matrix to the {@link MergedVertex}
+	 */
+	public void enableMergedVertexes()
+	{
+		if (mergedVertexes != null)
+			return;
+
+		this.mergedVertexes = MergedVertex.getMergedVertexes(this);
+		//transfer current transforms into the mergedVertexes if any
+		if (transformMatrix != null)
+		{
+			for (MergedVertex mv : mergedVertexes.values())
+				mv.copyMatrix(transformMatrix);
+		}
 	}
 
 	/**
-	 * Gets a list of vertexes matching name
+	 * Gets a list of {@link Vertex} matching <b>name</b>.
 	 *
 	 * @param name
 	 * @return
@@ -144,31 +178,76 @@ public class Shape
 	{
 		List<Vertex> vertexes = new ArrayList<>();
 		for (Face f : faces)
+		{
 			for (Vertex v : f.getVertexes())
-				if (v.name().toLowerCase().contains(name.toLowerCase()))
+			{
+				if (v.baseName().toLowerCase().contains(name.toLowerCase()))
 					vertexes.add(v);
+			}
+		}
 		return vertexes;
 	}
 
-	/**
-	 * Gets a list of vertexes from a ForgeDirection
-	 *
-	 * @param dir
-	 * @return
-	 */
-	public List<Vertex> getVertexes(ForgeDirection dir)
+	public List<Vertex> getVertexes(Face face)
 	{
-		return getVertexes(nameFromDirection(dir));
+		List<Vertex> vertexes = new ArrayList<>();
+		if (face == null)
+			return vertexes;
+
+		Set<String> names = new HashSet<>();
+		for (Vertex v : face.getVertexes())
+			names.add(v.baseName().toLowerCase());
+
+		for (Face f : faces)
+		{
+			for (Vertex v : f.getVertexes())
+			{
+				if (names.contains(v.baseName().toLowerCase()))
+					vertexes.add(v);
+			}
+		}
+		return vertexes;
 	}
 
-	private String nameFromDirection(ForgeDirection dir)
+	public List<Vertex> getVertexes(ForgeDirection direction)
 	{
-		if (dir == ForgeDirection.UP)
-			return "top";
-		else if (dir == ForgeDirection.DOWN)
-			return "bottom";
-		else
-			return dir.toString();
+		return getVertexes(getFace(Face.name(direction)));
+	}
+
+	public MergedVertex getMergedVertex(Vertex vertex)
+	{
+		if (mergedVertexes == null)
+			return null;
+		return mergedVertexes.get(vertex.baseName());
+	}
+
+	public List<MergedVertex> getMergedVertexes(Face face)
+	{
+		List<MergedVertex> vertexes = new ArrayList<>();
+		if (mergedVertexes == null)
+			return vertexes;
+
+		for (Vertex v : face.getVertexes())
+		{
+			MergedVertex mv = getMergedVertex(v);
+			if (mv != null)
+				vertexes.add(mv);
+		}
+
+		return vertexes;
+	}
+
+	public List<MergedVertex> getMergedVertexs(Face face)
+	{
+		List<MergedVertex> vertexes = new ArrayList<>();
+		for (Vertex v : face.getVertexes())
+		{
+			MergedVertex mv = getMergedVertex(v);
+			if (mv != null)
+				vertexes.add(mv);
+		}
+
+		return vertexes;
 	}
 
 	private Matrix4f matrix()
@@ -181,20 +260,54 @@ public class Shape
 		return transformMatrix;
 	}
 
-	private Matrix4f rotationMatrix()
+	/**
+	 * Copies the transformation from a {@link Shape shape} to this <code>Shape</code>.
+	 *
+	 * @param shape
+	 * @return
+	 */
+	public Shape copyMatrix(Shape shape)
 	{
-		if (selfRotationMatrix == null)
-		{
-			selfRotationMatrix = new Matrix4f();
-			selfRotationMatrix.translate(new Vector3f(0.5F, 0.5F, 0.5F));
-		}
-		return selfRotationMatrix;
+		if (shape.transformMatrix != null)
+			this.transformMatrix = new Matrix4f(shape.transformMatrix);
+		return this;
 	}
 
 	/**
-	 * Set parameters for a face. The face is determined by <b>face</b>.<i>name()</i> in order to avoid having to keep a reference to the
-	 * actual shape face. If <b>merge</b> is true, the parameters will be merge with the shape face parameters instead of completely
-	 * overriding them
+	 * Applies the transformations matrices to this {@link Shape}. This modifies to position of the vertexes making up the faces of this
+	 * <code>Shape</code>.
+	 *
+	 * @return
+	 */
+	public Shape applyMatrix()
+	{
+		if (mergedVertexes != null)
+		{
+			for (MergedVertex mv : mergedVertexes.values())
+				mv.applyMatrix();
+
+			return this;
+		}
+
+		if (transformMatrix == null)
+			return this;
+
+		//transform back to original place
+		transformMatrix.translate(new Vector3f(-0.5F, -0.5F, -0.5F));
+
+		for (Face f : faces)
+		{
+			for (Vertex v : f.getVertexes())
+				v.applyMatrix(transformMatrix);
+		}
+
+		transformMatrix = null;
+		return this;
+	}
+
+	/**
+	 * Set {@link RenderParameters} for {@link Face faces} matching the specified <b>name</b>. If <b>merge</b> is true, the parameters will
+	 * be merge with the <code>face</code> parameters instead of completely overriding them.
 	 *
 	 * @param face
 	 * @param params
@@ -215,21 +328,8 @@ public class Shape
 	}
 
 	/**
-	 * Sets the color for this <code>Shape</code>. RenderParameters.usePerVertexColor should be set to true for it to have an effect.
-	 *
-	 * @param color
-	 */
-	public void setColor(int color)
-	{
-		for (Face f : faces)
-		{
-			f.setColor(color);
-		}
-	}
-
-	/**
-	 * Sets the size of this <code>Shape</code>. <b>width</b> represents East-West axis, <b>height</b> represents Bottom-Top axis and
-	 * <b>Depth</b> represents North-South axis. The calculations are based on vertexes names.
+	 * Sets the size of this {@link Shape}. <b>width</b> represents East-West axis, <b>height</b> represents Bottom-Top axis and
+	 * <b>Depth</b> represents North-South axis. The calculations are based on {@link Vertex#baseName()}.
 	 *
 	 * @param width
 	 * @param height
@@ -243,7 +343,7 @@ public class Shape
 		{
 			for (Vertex v : f.getVertexes())
 			{
-				String name = v.name();
+				String name = v.baseName();
 				if (name.contains("West"))
 					x = (float) v.getX();
 				if (name.contains("Bottom"))
@@ -257,7 +357,7 @@ public class Shape
 	}
 
 	/**
-	 * Sets the bounds for this <code>Shape</code>. Calculations are based on vertexes names
+	 * Sets the bounds for this {@link Shape}. Calculations are based on {@link Vertex#baseName()}.
 	 *
 	 * @param x
 	 * @param y
@@ -292,7 +392,7 @@ public class Shape
 	}
 
 	/**
-	 * Limits this <code>Shape</code> to the bounding box passed.
+	 * Limits this {@link Shape} to the bounding box passed.
 	 *
 	 * @param aabb
 	 * @return
@@ -303,7 +403,7 @@ public class Shape
 	}
 
 	/**
-	 * Limits this <code>Shape</code> to the bounding box passed.
+	 * Limits this {@link Shape} to the bounding box passed.
 	 *
 	 * @param x
 	 * @param y
@@ -328,46 +428,58 @@ public class Shape
 	}
 
 	/**
-	 * Translates this <code>Shape</code>.
+	 * Translates this {@link Shape}.
 	 *
 	 * @param x
 	 * @param y
 	 * @param z
 	 * @return
 	 */
-	public Shape translate(float x, float y, float z)
+	@Override
+	public void translate(float x, float y, float z)
 	{
-		matrix().translate(new Vector3f(x, y, z));
-		return this;
+		if (mergedVertexes != null)
+		{
+			for (MergedVertex mv : mergedVertexes.values())
+				mv.translate(x, y, z);
+		}
+		else
+			matrix().translate(new Vector3f(x, y, z));
 	}
 
 	/**
-	 * Scales this <code>Shape</code> on all axis.
+	 * Scales this {@link Shape} on all axis.
 	 *
 	 * @param f
 	 * @return
 	 */
-	public Shape scale(float f)
+	public void scale(float f)
 	{
-		return scale(f, f, f);
+		scale(f, f, f);
 	}
 
 	/**
-	 * Scales this <code>Shape</code>.
+	 * Scales this {@link Shape}.
 	 *
 	 * @param x
 	 * @param y
 	 * @param z
 	 * @return
 	 */
-	public Shape scale(float x, float y, float z)
+	@Override
+	public void scale(float x, float y, float z)
 	{
-		matrix().scale(new Vector3f(x, y, z));
-		return this;
+		if (mergedVertexes != null)
+		{
+			for (MergedVertex mv : mergedVertexes.values())
+				mv.scale(x, y, z);
+		}
+		else
+			matrix().scale(new Vector3f(x, y, z));
 	}
 
 	/**
-	 * Rotates this <code>Shape</code> around the given axis the specified angle.
+	 * Rotates this {@link Shape} around the given axis the specified angle.
 	 *
 	 * @param angle
 	 * @param x
@@ -375,13 +487,13 @@ public class Shape
 	 * @param z
 	 * @return
 	 */
-	public Shape rotate(float angle, float x, float y, float z)
+	public void rotate(float angle, float x, float y, float z)
 	{
-		return rotate(angle, x, y, z, 0, 0, 0);
+		rotate(angle, x, y, z, 0, 0, 0);
 	}
 
 	/**
-	 * Rotates this <code>Shape</code> around the given axis the specified angle. Offsets the origin for the rotation.
+	 * Rotates this {@link Shape} around the given axis the specified angle. Offsets the origin for the rotation.
 	 *
 	 * @param angle
 	 * @param x
@@ -392,181 +504,24 @@ public class Shape
 	 * @param offsetZ
 	 * @return
 	 */
-	public Shape rotate(float angle, float x, float y, float z, float offsetX, float offsetY, float offsetZ)
+	@Override
+	public void rotate(float angle, float x, float y, float z, float offsetX, float offsetY, float offsetZ)
 	{
-		translate(offsetX, offsetY, offsetZ);
-		matrix().rotate((float) Math.toRadians(angle), new Vector3f(x, y, z));
-		translate(-offsetX, -offsetY, -offsetZ);
-		return this;
-	}
-
-	/**
-	 * Rotates this <code>Shape</code> around the X axis the specified angle.
-	 *
-	 * @param angle
-	 * @return
-	 */
-	public Shape rotateAroundX(float angle)
-	{
-		return rotate(angle, 1, 0, 0, 0, 0, 0);
-	}
-
-	/**
-	 * Rotates this <code>Shape</code> around the X axis the specified angle. Offsets the origin for the rotation.
-	 *
-	 * @param angle
-	 * @param y
-	 * @param z
-	 * @return
-	 */
-	public Shape rotateAroundX(float angle, float y, float z)
-	{
-		return rotate(angle, 1, 0, 0, 0, y, z);
-	}
-
-	/**
-	 * Rotates this <code>Shape</code> around the Y axis the specified angle.
-	 *
-	 * @param angle
-	 * @return
-	 */
-	public Shape rotateAroundY(float angle)
-	{
-		return rotate(angle, 0, 1, 0, 0, 0, 0);
-	}
-
-	/**
-	 * Rotates this <code>Shape</code> around the given Y the specified angle. Offsets the origin for the rotation.
-	 *
-	 * @param angle
-	 * @param x
-	 * @param z
-	 * @return
-	 */
-	public Shape rotateAroundY(float angle, float x, float z)
-	{
-		return rotate(angle, 0, 1, 0, x, 0, z);
-	}
-
-	/**
-	 * Rotates this <code>Shape</code> around the Z axis the specified angle.
-	 *
-	 * @param angle
-	 * @return
-	 */
-	public Shape rotateAroundZ(float angle)
-	{
-		return rotate(angle, 0, 0, 1, 0, 0, 0);
-	}
-
-	/**
-	 * Rotates this <code>Shape</code> around the Z axis the specified angle. Offsets the origin for the rotation.
-	 *
-	 * @param angle
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	public Shape rotateAroundZ(float angle, float x, float y)
-	{
-		return rotate(angle, 0, 0, 1, x, y, 0);
-	}
-
-	/**
-	 * Rotates this <code>Shape</code> around itself on the given axis the specified angle.
-	 *
-	 * @param angle
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
-	 */
-	public Shape pivot(float angle, float x, float y, float z)
-	{
-		rotationMatrix().rotate((float) Math.toRadians(angle), new Vector3f(x, y, z));
-		return this;
-	}
-
-	/**
-	 * Rotates this <code>Shape</code> around itself on the X axis the specified angle.
-	 *
-	 * @param angle
-	 * @return
-	 */
-	public Shape pivotX(float angle)
-	{
-		return pivot(angle, 1, 0, 0);
-	}
-
-	/**
-	 * Rotates this <code>Shape</code> around itself on the Y axis the specified angle.
-	 *
-	 * @param angle
-	 * @return
-	 */
-	public Shape pivotY(float angle)
-	{
-		return pivot(angle, 0, 1, 0);
-	}
-
-	/**
-	 * Rotates this <code>Shape</code> around itself on the Z axis the specified angle.
-	 *
-	 * @param angle
-	 * @return
-	 */
-	public Shape pivotZ(float angle)
-	{
-		return pivot(angle, 0, 0, 1);
-	}
-
-	/**
-	 * Copies the transformation from <b>shape</b> to this <code>Shape</code>.
-	 *
-	 * @param shape
-	 * @return
-	 */
-	public Shape copyMatrix(Shape shape)
-	{
-		if (shape.transformMatrix != null)
-			this.transformMatrix = new Matrix4f(shape.transformMatrix);
-		return this;
-	}
-
-	/**
-	 * Applies the transformations matrices to this <code>Shape</code>. This modifies to position of the vertexes making up the faces of
-	 * this <code>Shape</code>.
-	 *
-	 * @return
-	 */
-	public Shape applyMatrix()
-	{
-		if (transformMatrix == null && selfRotationMatrix == null)
-			return this;
-
-		if (transformMatrix != null)
-			transformMatrix.translate(new Vector3f(-0.5F, -0.5F, -0.5F));
-		if (selfRotationMatrix != null)
-			selfRotationMatrix.translate(new Vector3f(-0.5F, -0.5F, -0.5F));
-
-		for (Face f : faces)
+		if (mergedVertexes != null)
 		{
-			for (Vertex v : f.getVertexes())
-			{
-				if (selfRotationMatrix != null)
-					v.applyMatrix(selfRotationMatrix);
-				if (transformMatrix != null)
-					v.applyMatrix(transformMatrix);
-			}
+			for (MergedVertex mv : mergedVertexes.values())
+				mv.rotate(angle, x, y, z, offsetX, offsetY, offsetZ);
 		}
-
-		transformMatrix = null;
-		selfRotationMatrix = null;
-		return this;
+		else
+		{
+			translate(offsetX, offsetY, offsetZ);
+			matrix().rotate((float) Math.toRadians(angle), new Vector3f(x, y, z));
+			translate(-offsetX, -offsetY, -offsetZ);
+		}
 	}
 
 	/**
-	 * Stores the current state of each vertex making up this <code>Shape</code>.
+	 * Stores the current state of each vertex making up this {@link Shape}.
 	 *
 	 * @return
 	 */
@@ -576,34 +531,29 @@ public class Shape
 		for (Face f : faces)
 		{
 			for (Vertex v : f.getVertexes())
-			{
 				v.setInitialState();
-			}
 		}
 		return this;
 	}
 
 	/**
-	 * Resets the state of each vertex making up this <code>Shape</code> to a previously stored one.
+	 * Resets the state of each vertex making up this {@link Shape} to a previously stored one.
 	 *
 	 * @return
 	 */
 	public Shape resetState()
 	{
 		transformMatrix = null;
-		selfRotationMatrix = null;
 		for (Face f : faces)
 		{
 			for (Vertex v : f.getVertexes())
-			{
 				v.resetState();
-			}
 		}
 		return this;
 	}
 
 	/**
-	 * Interpolates the UVs of each vertex making up this <code>Shape</code> base on their position and the <code>Face</code> orientation.
+	 * Interpolates the UVs of each vertex making up this {@link Shape} base on their position and the {@link Face} orientation.
 	 *
 	 * @return
 	 */
@@ -624,8 +574,8 @@ public class Shape
 	 */
 	public Shape shrink(ForgeDirection dir, float factor)
 	{
-		Face face = getFace(dir);
-		if (face == null)
+		Face face = getFace(Face.name(dir));
+		if (face == null || mergedVertexes == null)
 			return this;
 
 		HashMap<String, Vertex> vertexNames = new HashMap<String, Vertex>();
@@ -641,20 +591,13 @@ public class Shape
 
 		for (Vertex v : face.getVertexes())
 		{
-			for (Vertex sv : vertexes.get(v.baseName()))
+			for (Vertex sv : mergedVertexes.get(v.baseName()))
 			{
 				if (sv != v)
 					sv.set(v.getX(), v.getY(), v.getZ());
 			}
-
 		}
 
-		return this;
-	}
-
-	public Shape removeFace(Face face)
-	{
-		faces = ArrayUtils.removeElement(faces, face);
 		return this;
 	}
 

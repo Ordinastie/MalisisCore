@@ -56,6 +56,8 @@ public class MalisisIcon extends TextureAtlasSprite
 	public MalisisIcon()
 	{
 		super("");
+		maxU = 1;
+		maxV = 1;
 	}
 
 	public MalisisIcon(String name)

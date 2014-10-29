@@ -24,52 +24,38 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-import java.util.ArrayList;
-
 /**
  * @author Ordinastie
  *
  */
-public class ParallelTransformation extends Transformation<ParallelTransformation, ITransformable>
+public interface ITransformable
 {
-	protected ArrayList<Transformation> listTransformations = new ArrayList<>();
-
-	public ParallelTransformation(Transformation... transformations)
+	public static interface Translate extends ITransformable
 	{
-		addTransformations(transformations);
-
+		public void translate(float x, float y, float z);
 	}
 
-	public ParallelTransformation addTransformations(Transformation... transformations)
+	public static interface Rotate extends ITransformable
 	{
-		for (Transformation transformation : transformations)
-		{
-			duration = Math.max(duration, transformation.totalDuration());
-			listTransformations.add(transformation);
-		}
-
-		return this;
+		public void rotate(float angle, float x, float y, float z, float offsetX, float offsetY, float offsetZ);
 	}
 
-	@Override
-	protected void doTransform(ITransformable transformable, float comp)
+	public static interface Scale extends ITransformable
 	{
-		if (listTransformations.size() == 0)
-			return;
-
-		for (Transformation transformation : listTransformations)
-			transformation.transform(transformable, elapsedTimeCurrentLoop);
+		public void scale(float x, float y, float z);
 	}
 
-	@Override
-	public ParallelTransformation reversed(boolean reversed)
+	public static interface Color extends ITransformable
 	{
-		if (!reversed)
-			return this;
+		public int getColor();
 
-		for (Transformation transformation : listTransformations)
-			transformation.reversed(true);
+		public void setColor(int color);
+	}
 
-		return this;
+	public static interface Alpha extends ITransformable
+	{
+		public int getAlpha();
+
+		public void setAlpha(int alpha);
 	}
 }

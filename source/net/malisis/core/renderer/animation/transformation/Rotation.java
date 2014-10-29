@@ -24,9 +24,7 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-import net.malisis.core.renderer.element.Shape;
-
-public class Rotation extends Transformation<Rotation, Shape>
+public class Rotation extends Transformation<Rotation, ITransformable.Rotate>
 {
 	protected float fromAngle;
 	protected float toAngle;
@@ -87,10 +85,13 @@ public class Rotation extends Transformation<Rotation, Shape>
 	}
 
 	@Override
-	protected void doTransform(Shape s, float comp)
+	protected void doTransform(ITransformable.Rotate transformable, float comp)
 	{
-		if (comp >= 0)
-			s.rotate(fromAngle + (toAngle - fromAngle) * comp, axisX, axisY, axisZ, offsetX, offsetY, offsetZ);
+		if (comp <= 0)
+			return;
+
+		transformable.rotate(fromAngle + (toAngle - fromAngle) * comp, axisX, axisY, axisZ, offsetX, offsetY, offsetZ);
+		//MalisisCore.message(fromAngle + (toAngle - fromAngle) * comp);
 	}
 
 	@Override

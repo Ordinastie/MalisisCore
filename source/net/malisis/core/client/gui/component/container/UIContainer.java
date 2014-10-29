@@ -400,15 +400,18 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	//#end IScrollable
 
 	/**
-	 * Adds a component to this {@link UIContainer}.
+	 * Adds components to this {@link UIContainer}.
 	 *
 	 * @param component
 	 */
-	public void add(UIComponent component)
+	public void add(UIComponent... components)
 	{
-		components.add(component);
-		component.setParent(this);
-		component.register(this);
+		for (UIComponent component : components)
+		{
+			this.components.add(component);
+			component.setParent(this);
+			component.register(this);
+		}
 		onContentUpdate();
 	}
 

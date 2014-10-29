@@ -107,7 +107,8 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		shape.resetState();
-		shape.setSize(10, 10).setPosition(1, 0);
+		shape.setSize(10, 10);
+		shape.setPosition(1, 0);
 		rp.icon.set(isDisabled() ? bgIconDisabled : bgIcon);
 		renderer.drawShape(shape, rp);
 
@@ -127,7 +128,8 @@ public class UICheckBox extends UIComponent<UICheckBox>
 			rp.useTexture.set(false);
 
 			shape.resetState();
-			shape.setSize(8, 8).setPosition(2, 1);
+			shape.setSize(8, 8);
+			shape.setPosition(2, 1);
 			renderer.drawShape(shape, rp);
 			renderer.next();
 

@@ -24,9 +24,7 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-import net.malisis.core.renderer.element.Shape;
-
-public class Translation extends Transformation<Translation, Shape>
+public class Translation extends Transformation<Translation, ITransformable.Translate>
 {
 	protected float fromX, fromY, fromZ;
 	protected float toX, toY, toZ;
@@ -59,10 +57,12 @@ public class Translation extends Transformation<Translation, Shape>
 	}
 
 	@Override
-	protected void doTransform(Shape s, float comp)
+	protected void doTransform(ITransformable.Translate transformable, float comp)
 	{
-		if (comp >= 0)
-			s.translate(fromX + (toX - fromX) * comp, fromY + (toY - fromY) * comp, fromZ + (toZ - fromZ) * comp);
+		if (comp <= 0)
+			return;
+
+		transformable.translate(fromX + (toX - fromX) * comp, fromY + (toY - fromY) * comp, fromZ + (toZ - fromZ) * comp);
 	}
 
 	@Override

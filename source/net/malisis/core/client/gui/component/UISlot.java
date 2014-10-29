@@ -176,7 +176,8 @@ public class UISlot extends UIComponent<UISlot>
 			rp.useTexture.set(false);
 
 			shape.resetState();
-			shape.setSize(16, 16).translate(1, 1, 100);
+			shape.setSize(16, 16);
+			shape.translate(1, 1, 100);
 			renderer.drawShape(shape, rp);
 			renderer.next();
 
@@ -188,11 +189,13 @@ public class UISlot extends UIComponent<UISlot>
 
 		// Dirty fix because Mojang can't count and masks overflow the slots
 		shape.resetState();
-		shape.setSize(1, 18).translate(0, 0, 50);
+		shape.setSize(1, 18);
+		shape.translate(0, 0, 50);
 		rp.icon.set(iconLeft);
 		renderer.drawShape(shape, rp);
 		shape.resetState();
-		shape.setSize(18, 1).translate(0, 0, 50);
+		shape.setSize(18, 1);
+		shape.translate(0, 0, 50);
 		rp.icon.set(iconTop);
 		renderer.drawShape(shape, rp);
 

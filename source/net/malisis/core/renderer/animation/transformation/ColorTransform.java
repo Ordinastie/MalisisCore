@@ -24,13 +24,11 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-import net.malisis.core.renderer.RenderParameters;
-
 /**
  * @author Ordinastie
  *
  */
-public class ColorTransform extends Transformation<ColorTransform, RenderParameters>
+public class ColorTransform extends Transformation<ColorTransform, ITransformable.Color>
 {
 	protected int fromColor;
 	protected int toColor;
@@ -64,17 +62,17 @@ public class ColorTransform extends Transformation<ColorTransform, RenderParamet
 	}
 
 	@Override
-	protected void doTransform(RenderParameters rp, float comp)
+	protected void doTransform(ITransformable.Color transformable, float comp)
 	{
 		if (comp <= 0)
 			return;
 
-		int fromColor = relative ? rp.colorMultiplier.get() : this.fromColor;
+		int fromColor = relative ? transformable.getColor() : this.fromColor;
 		int r = (int) (red(fromColor) + (red(toColor) - red(fromColor)) * comp);
 		int g = (int) (green(fromColor) + (green(toColor) - green(fromColor)) * comp);
 		int b = (int) (blue(fromColor) + (blue(toColor) - blue(fromColor)) * comp);
 
-		rp.colorMultiplier.set((r & 0xFF) << 16 | (g & 0xFF) << 8 | b & 0xFF);
+		transformable.setColor((r & 0xFF) << 16 | (g & 0xFF) << 8 | b & 0xFF);
 	}
 
 	@Override

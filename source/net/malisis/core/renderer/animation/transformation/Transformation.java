@@ -24,8 +24,9 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
+import java.util.List;
 
-public abstract class Transformation<T extends Transformation, S>
+public abstract class Transformation<T extends Transformation, S extends ITransformable>
 {
 	public static final int LINEAR = 0, SINUSOIDAL = 1;
 
@@ -103,6 +104,12 @@ public abstract class Transformation<T extends Transformation, S>
 		this.loopStartDelay = startDelay;
 		this.loopResetDelay = resetDelay;
 		return (T) this;
+	}
+
+	public void transform(List<S> transformables, float elapsedTime)
+	{
+		for (S transformable : transformables)
+			transform(transformable, elapsedTime);
 	}
 
 	public void transform(S transformable, float elapsedTime)

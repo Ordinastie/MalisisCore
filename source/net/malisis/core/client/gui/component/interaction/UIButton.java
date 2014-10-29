@@ -79,10 +79,10 @@ public class UIButton extends UIComponent<UIButton>
 	}
 
 	/**
-	 * Sets the text of this <code>UIButton</code>. If a width of 0 was previously set, it will be recalculated for this text.
+	 * Sets the text of this {@link UIButton}. If a width of 0 was previously set, it will be recalculated for this text.
 	 *
 	 * @param text
-	 * @return this <code>UIButton</code>
+	 * @return this {@link UIButton}
 	 */
 	public UIButton setText(String text)
 	{
@@ -92,10 +92,18 @@ public class UIButton extends UIComponent<UIButton>
 	}
 
 	/**
-	 * Sets the width of this <code>UIButton</code>. Height is fixed 20.
+	 * @return the text of this {@link UIButton}.
+	 */
+	public String getText()
+	{
+		return label.getText();
+	}
+
+	/**
+	 * Sets the width of this {@link UIButton}. Height is fixed 20.
 	 *
 	 * @param width
-	 * @return this <code>UIButton</code>
+	 * @return this {@link UIButton}
 	 */
 	public UIButton setSize(int width)
 	{
@@ -103,11 +111,11 @@ public class UIButton extends UIComponent<UIButton>
 	}
 
 	/**
-	 * Sets the width of this <code>UIButton</code>. Height parameter is ignored as it's fixed 20.
+	 * Sets the size of this {@link UIButton}.
 	 *
 	 * @param width
-	 * @param height ignored
-	 * @return this <code>UILabel</code>
+	 * @param height
+	 * @return
 	 */
 	@Override
 	public UIButton setSize(int width, int height)

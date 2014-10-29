@@ -24,7 +24,6 @@
 
 package net.malisis.core.client.gui.element;
 
-
 /**
  * @author Ordinastie
  *
@@ -38,17 +37,15 @@ public class SimpleGuiShape extends GuiShape
 	}
 
 	@Override
-	public GuiShape setSize(int width, int height)
+	public void setSize(int width, int height)
 	{
 		faces[0].factor(width, height, 0);
-		return this;
 	}
 
 	@Override
-	public GuiShape scale(float x, float y)
+	public void scale(float x, float y)
 	{
 		super.scale(x, y, 0);
 		applyMatrix();
-		return this;
 	}
 }

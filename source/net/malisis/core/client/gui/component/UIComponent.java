@@ -267,19 +267,28 @@ public abstract class UIComponent<T extends UIComponent>
 		return y;
 	}
 
+	/**
+	 * Sets the zIndex for this {@link UIComponent}.
+	 * 
+	 * @param zIndex
+	 * @return
+	 */
 	public T setZIndex(int zIndex)
 	{
 		this.zIndex = zIndex;
 		return (T) this;
 	}
 
+	/**
+	 * @return the zIndex of this {@link UIComponent}.
+	 */
 	public int getZIndex()
 	{
 		return zIndex == INHERITED ? (parent != null ? parent.getZIndex() : 0) : zIndex;
 	}
 
 	/**
-	 * Set the anchor for this {@link UIComponent}'s position
+	 * Sets the anchor for this {@link UIComponent}'s position
 	 *
 	 * @param anchor
 	 * @return
@@ -307,7 +316,7 @@ public abstract class UIComponent<T extends UIComponent>
 	}
 
 	/**
-	 * Set the size of this {@link UIComponent}
+	 * Sets the size of this {@link UIComponent}
 	 *
 	 * @param width
 	 * @param height

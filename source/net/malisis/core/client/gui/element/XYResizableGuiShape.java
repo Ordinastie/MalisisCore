@@ -24,7 +24,6 @@
 
 package net.malisis.core.client.gui.element;
 
-
 /**
  * @author Ordinastie
  *
@@ -52,7 +51,7 @@ public class XYResizableGuiShape extends GuiShape
 	}
 
 	@Override
-	public GuiShape setSize(int w, int h)
+	public void setSize(int w, int h)
 	{
 		w = Math.max(w - 2 * cornerWidth, 0);
 		h = Math.max(h - 2 * cornerHeight, 0);
@@ -75,13 +74,9 @@ public class XYResizableGuiShape extends GuiShape
 		faces[6].translate(0, cornerHeight + h, 0);
 		faces[7].translate(cornerWidth, cornerHeight + h, 0);
 		faces[8].translate(cornerWidth + w, cornerHeight + h, 0);
-
-		return this;
 	}
 
 	@Override
-	public GuiShape scale(float x, float y)
-	{
-		return this;
-	}
+	public void scale(float x, float y)
+	{}
 }

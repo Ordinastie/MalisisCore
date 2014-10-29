@@ -115,7 +115,8 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		//background shape
 		shape = new XYResizableGuiShape(1);
 		//scroller shape
-		scrollShape = new SimpleGuiShape().setSize(w, h);
+		scrollShape = new SimpleGuiShape();
+		scrollShape.setSize(w, h);
 		scrollShape.storeState();
 
 		icon = gui.getGuiTexture().getXYResizableIcon(215, 0, 15, 15, 1);

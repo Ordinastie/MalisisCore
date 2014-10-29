@@ -106,7 +106,8 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		shape.resetState();
-		shape.setSize(8, 8).translate(1, 0, 0);
+		shape.setSize(8, 8);
+		shape.translate(1, 0, 0);
 		rp.icon.set(isDisabled() ? bgIconDisabled : bgIcon);
 		renderer.drawShape(shape, rp);
 
@@ -125,7 +126,8 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 			rp.useTexture.set(false);
 
 			shape.resetState();
-			shape.setSize(6, 6).setPosition(2, 1);
+			shape.setSize(6, 6);
+			shape.setPosition(2, 1);
 			renderer.drawShape(shape, rp);
 			renderer.next();
 
@@ -149,7 +151,8 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 			GL11.glEnable(GL11.GL_BLEND);
 			rp.reset();
 			shape.resetState();
-			shape.setSize(6, 6).setPosition(2, 1);
+			shape.setSize(6, 6);
+			shape.setPosition(2, 1);
 			rp.icon.set(isDisabled() ? rbDisabled : (isHovered() ? rbHovered : rbChecked));
 			renderer.drawShape(shape, rp);
 		}

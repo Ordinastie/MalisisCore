@@ -24,13 +24,11 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-import net.malisis.core.renderer.RenderParameters;
-
 /**
  * @author Ordinastie
  *
  */
-public class AlphaTransform extends Transformation<AlphaTransform, RenderParameters>
+public class AlphaTransform extends Transformation<AlphaTransform, ITransformable.Alpha>
 {
 	protected int fromAlpha;
 	protected int toAlpha;
@@ -42,12 +40,12 @@ public class AlphaTransform extends Transformation<AlphaTransform, RenderParamet
 	}
 
 	@Override
-	protected void doTransform(RenderParameters rp, float comp)
+	protected void doTransform(ITransformable.Alpha transformable, float comp)
 	{
 		if (comp <= 0)
 			return;
 
-		rp.alpha.set((int) (fromAlpha + (toAlpha - fromAlpha) * comp));
+		transformable.setAlpha((int) (fromAlpha + (toAlpha - fromAlpha) * comp));
 	}
 
 	@Override
