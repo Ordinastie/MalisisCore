@@ -154,7 +154,7 @@ uploadArchives {
 
         // Set login credentials for repository
         repository(url: sonatypeUrl) {
-            authentication(userName: System.getenv("SONATYPE_USERNAME"), password: System.getenv("SONATYPE_PASSWORD"))
+            authentication(userName: System.getenv("sonatypeUsername"), password: System.getenv("sonatypePassword"))
         }
 
         // Maven POM generation
