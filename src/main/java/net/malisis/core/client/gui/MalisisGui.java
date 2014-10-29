@@ -99,12 +99,6 @@ public class MalisisGui extends GuiScreen
 	 */
 	private long elaspedTime;
 
-	public MalisisGui(UIContainer container)
-	{
-		this();
-		addToScreen(container);
-	}
-
 	protected MalisisGui()
 	{
 		this.renderer = new GuiRenderer();
@@ -157,22 +151,38 @@ public class MalisisGui extends GuiScreen
 	 *
 	 * @param container
 	 */
-	protected void addToScreen(UIContainer container)
+	protected void addToScreen(UIComponent container)
 	{
 		screen.add(container);
 	}
 
+	/**
+	 * Removes all the components from the screen
+	 */
 	public void clearScreen()
 	{
 		screen.removeAll();
 	}
 
+	/**
+	 * Gets the current component at the specified coordinates inside this {@link MalisisGui}.
+	 *
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	public UIComponent getComponentAt(int x, int y)
 	{
 		UIComponent component = screen.getComponentAt(x, y);
 		return component == screen ? null : component;
 	}
 
+	/**
+	 * Fires a {@link GuiEvent} for this {@link MalisisGui}.
+	 *
+	 * @param event
+	 * @return
+	 */
 	protected boolean fireEvent(GuiEvent event)
 	{
 		if (event instanceof MouseEvent)
@@ -195,6 +205,9 @@ public class MalisisGui extends GuiScreen
 		return !event.isCancelled();
 	}
 
+	/**
+	 * Called every frame to handle mouse input.
+	 */
 	@Override
 	public void handleMouseInput()
 	{
@@ -218,7 +231,6 @@ public class MalisisGui extends GuiScreen
 			delta = -1;
 
 		fireEvent(new MouseEvent.ScrollWheel(mouseX, mouseY, delta));
-
 	}
 
 	/**
@@ -315,6 +327,9 @@ public class MalisisGui extends GuiScreen
 		}
 	}
 
+	/**
+	 * Called when game resolution changes.
+	 */
 	@Override
 	public void setWorldAndResolution(Minecraft minecraft, int width, int height)
 	{
@@ -329,6 +344,9 @@ public class MalisisGui extends GuiScreen
 		screen.setSize(width, height);
 	}
 
+	/**
+	 * Draws this {@link MalisisGui}.
+	 */
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks)
 	{
@@ -390,7 +408,7 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Displays this <code>MalisisGui</code>
+	 * Displays this {@link MalisisGui}.
 	 */
 	public void display()
 	{
@@ -398,7 +416,7 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Closes this <code>MalisisGui</code>
+	 * Closes this {@link MalisisGui}.
 	 */
 	public void close()
 	{
@@ -417,7 +435,7 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Gets the current <code>MalisisGui</code> displayed.
+	 * Gets the current {@link MalisisGui} displayed.
 	 *
 	 * @return null if no GUI being displayed or if not a <code>MalisisGui</code>
 	 */
@@ -449,7 +467,15 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Sets the hovered state for a component. If a component is currently hovered, it will be "unhovered" first.
+	 * @return the currently hovered {@link UIComponent}. null if there is no current GUI.
+	 */
+	public static UIComponent getHoveredComponent()
+	{
+		return currentGui() != null ? currentGui().hoveredComponent : null;
+	}
+
+	/**
+	 * Sets the hovered state for a {@link UIComponent}. If a <code>UIComponent</code> is currently hovered, it will be "unhovered" first.
 	 *
 	 * @param component
 	 * @param hovered
@@ -478,6 +504,11 @@ public class MalisisGui extends GuiScreen
 		return true;
 	}
 
+	/**
+	 * Gets the currently focused
+	 *
+	 * @return
+	 */
 	public static UIComponent getFocusedComponent()
 	{
 		return currentGui() != null ? currentGui().focusedComponent : null;
