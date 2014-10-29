@@ -354,11 +354,11 @@ public class Face
 
 	/**
 	 * Gets a {@link Face} name from a {@link ForgeDirection}.
-	 * 
+	 *
 	 * @param dir
 	 * @return
 	 */
-	public static String name(ForgeDirection dir)
+	public static String nameFromDirection(ForgeDirection dir)
 	{
 		if (dir == ForgeDirection.UP)
 			return "top";
@@ -367,5 +367,4 @@ public class Face
 		else
 			return dir.toString();
 	}
-
 }
