@@ -44,7 +44,8 @@ import org.lwjgl.util.vector.Vector3f;
  * @author Ordinastie
  *
  */
-public class MergedVertex implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale, Iterable<Vertex>
+public class MergedVertex implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale, ITransformable.Alpha,
+		ITransformable.Color, Iterable<Vertex>
 {
 	protected String name;
 	protected Vertex base;
@@ -58,28 +59,40 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 		addVertex(vertex);
 	}
 
+	/**
+	 * @return the name of this {@link MergedVertex}.
+	 */
 	public String getName()
 	{
 		return name;
 	}
 
+	/**
+	 * @return the X coordinate of this {@link MergedVertex}.
+	 */
 	public double getX()
 	{
 		return base.getX();
 	}
 
+	/**
+	 * @return the Y coordinate of this {@link MergedVertex}.
+	 */
 	public double getY()
 	{
 		return base.getY();
 	}
 
+	/**
+	 * @return the Z coordinate of this {@link MergedVertex}.
+	 */
 	public double getZ()
 	{
 		return base.getZ();
 	}
 
 	/**
-	 * Adds a vertex to this {@link MergedVertex}. The vertex base name must match this <code>MergedVertex</code> name.
+	 * Adds a {@link Vertex} to this {@link MergedVertex}. The <code>Vertex</code> base name must match this <code>MergedVertex</code> name.
 	 *
 	 * @param vertex
 	 */
@@ -89,6 +102,16 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 			return;
 
 		vertexes.add(vertex);
+	}
+
+	/**
+	 * Removes a {@link Vertex} from this {@link MergedVertex}.
+	 *
+	 * @param vertex
+	 */
+	public void removeVertex(Vertex vertex)
+	{
+		vertexes.remove(vertex);
 	}
 
 	/**
@@ -183,6 +206,48 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	public void scale(float x, float y, float z)
 	{
 		matrix().scale(new Vector3f(x, y, z));
+	}
+
+	/**
+	 * @return the color of this {@link MergedVertex}.
+	 */
+	@Override
+	public int getColor()
+	{
+		return base.getColor();
+	}
+
+	/**
+	 * Sets the color for this {@link MergedVertex}.
+	 * 
+	 * @param color
+	 */
+	@Override
+	public void setColor(int color)
+	{
+		for (Vertex v : this)
+			v.setColor(color);
+	}
+
+	/**
+	 * @return the alpha value for this {@link MergedVertex}.
+	 */
+	@Override
+	public int getAlpha()
+	{
+		return 0;
+	}
+
+	/**
+	 * Sets the alpha value for this {@link MergedVertex}.
+	 * 
+	 * @param alpha
+	 */
+	@Override
+	public void setAlpha(int alpha)
+	{
+		for (Vertex v : this)
+			v.setAlpha(alpha);
 	}
 
 	/**
