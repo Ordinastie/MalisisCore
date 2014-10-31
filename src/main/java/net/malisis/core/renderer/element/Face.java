@@ -36,13 +36,12 @@ public class Face
 {
 	protected String baseName;
 	protected Vertex[] vertexes;
-	protected RenderParameters params = new RenderParameters();
+	protected RenderParameters params;;
 
 	public Face(Vertex[] vertexes, RenderParameters params)
 	{
 		this.vertexes = vertexes;
-		if (params != null)
-			this.params = params;
+		this.params = params != null ? params : new RenderParameters();
 		this.baseName();
 	}
 
@@ -63,7 +62,11 @@ public class Face
 
 	public Face(Face face, RenderParameters params)
 	{
-		this(face.vertexes, params);
+		Vertex[] faceVertexes = face.getVertexes();
+		this.vertexes = new Vertex[faceVertexes.length];
+		for (int i = 0; i < faceVertexes.length; i++)
+			vertexes[i] = new Vertex(faceVertexes[i]);
+		this.params = params != null ? params : new RenderParameters();
 		baseName = face.baseName;
 	}
 

@@ -87,6 +87,7 @@ public class Vertex
 	public Vertex(Vertex vertex)
 	{
 		this(vertex.x, vertex.y, vertex.z, vertex.color << 8 | vertex.alpha, vertex.brightness, vertex.u, vertex.v, false);
+		baseName = vertex.baseName;
 	}
 
 	public Vertex(Vertex vertex, int rgba, int brightness)

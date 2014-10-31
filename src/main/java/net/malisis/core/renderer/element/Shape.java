@@ -61,7 +61,10 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 
 	public Shape(Shape s)
 	{
-		this(s.faces);
+		Face[] shapeFaces = s.getFaces();
+		this.faces = new Face[shapeFaces.length];
+		for (int i = 0; i < shapeFaces.length; i++)
+			faces[i] = new Face(shapeFaces[i]);
 		copyMatrix(s);
 	}
 
@@ -239,15 +242,15 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	 * @param name
 	 * @return
 	 */
-	public List<MergedVertex> getMergedVertexes(String name)
+	public List<MergedVertex> getMergedVertexes(String... names)
 	{
-		if (mergedVertexes == null || name == null)
+		if (mergedVertexes == null || names == null || names.length == 0)
 			return new ArrayList<>();
 
 		List<MergedVertex> vertexes = new ArrayList<>();
 		for (MergedVertex mv : mergedVertexes.values())
 		{
-			if (mv.getName().toLowerCase().contains(name.toLowerCase()))
+			if (mv.is(names))
 				vertexes.add(mv);
 		}
 
@@ -278,6 +281,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	{
 		return getMergedVertexes(Face.nameFromDirection(direction));
 	}
+
+	//#end VERTEXES
 
 	/**
 	 * Gets the transform matrix of this {@link Shape}. Creates it if it doesn't exist already.<br>
