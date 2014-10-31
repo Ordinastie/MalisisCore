@@ -306,6 +306,9 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		if (superComp != null && superComp != this)
 			return superComp;
 
+		if (isDisabled() || !isVisible())
+			return null;
+
 		Set<UIComponent> list = new HashSet<>();
 		for (UIComponent c : components)
 		{
