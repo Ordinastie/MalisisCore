@@ -611,4 +611,10 @@ public class UITextField extends UIComponent<UITextField>
 				return false;
 		}
 	}
+
+	@Override
+	public String getPropertyString()
+	{
+		return text + " | " + super.getPropertyString();
+	}
 }
