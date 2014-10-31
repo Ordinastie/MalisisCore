@@ -92,6 +92,22 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
+	 * Checks whether this {@link MergedVertex} matches one of the <b>names</b> specified.
+	 *
+	 * @param names
+	 * @return
+	 */
+	public boolean is(String... names)
+	{
+		boolean b = true;
+		for (String n : names)
+		{
+			b &= name.toLowerCase().contains(n.toLowerCase());
+		}
+		return b;
+	}
+
+	/**
 	 * Adds a {@link Vertex} to this {@link MergedVertex}. The <code>Vertex</code> base name must match this <code>MergedVertex</code> name.
 	 *
 	 * @param vertex
@@ -219,7 +235,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 
 	/**
 	 * Sets the color for this {@link MergedVertex}.
-	 * 
+	 *
 	 * @param color
 	 */
 	@Override
@@ -240,7 +256,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 
 	/**
 	 * Sets the alpha value for this {@link MergedVertex}.
-	 * 
+	 *
 	 * @param alpha
 	 */
 	@Override
