@@ -613,7 +613,10 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 * Renders the destroy progress manually for TESR. Called if BaseRenderer.destroyBlockProgress is not null.
 	 */
 	public void renderDestroyProgress()
-	{}
+	{
+		overrideTexture = damagedIcons[destroyBlockProgress.getPartialBlockDamage()];
+		render();
+	}
 
 	/**
 	 * Draws a shape without parameters (default will be used).
