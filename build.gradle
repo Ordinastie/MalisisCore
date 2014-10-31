@@ -65,13 +65,6 @@ minecraft {
     version = "1.7.10-10.13.2.1230"
 }
 
-sourceSets {
-    main {
-        java { srcDirs = ["$projectDir/source"] }
-        resources { srcDirs = ["$projectDir/resources"] }
-    }
-}
-
 // Filter, process, and include resources
 processResources {
     inputs.property "version", version
@@ -120,7 +113,6 @@ uploadArchives {
         // Create a JAR based on deobfuscated code
         task deobfJar(type: Jar) {
             from sourceSets.main.output
-            from sourceSets.main.allJava
             classifier = 'dev'
         }
 
