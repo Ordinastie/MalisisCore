@@ -24,50 +24,33 @@
 
 package net.malisis.core.renderer.animation;
 
-import net.malisis.core.renderer.BaseRenderer;
-import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.animation.transformation.Transformation;
-import net.malisis.core.renderer.element.Shape;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class Animation
 {
-
-	private Shape shape;
-	private Shape transformedShape;
-	private Transformation tranformation;
-	private RenderParameters parameters;
-	private int delay;
+	private ITransformable transformable;
+	private Transformation transform;
 	private boolean started = false;
 	private boolean finished = false;
-	private boolean renderBefore = false;
-	private boolean renderAfter = false;
 
-	public Animation(Shape shape, Transformation transformation, RenderParameters parameters, int delay)
-	{
-		this.shape = shape;
-		this.tranformation = transformation;
-		this.parameters = parameters;
-		this.delay = delay;
-	}
+	//private boolean renderBefore = false;
+	//private boolean renderAfter = false;
 
-	public Animation(Shape shape, Transformation transformation)
+	public Animation(ITransformable transformable, Transformation transform)
 	{
-		this(shape, transformation, null, 0);
+		this.transformable = transformable;
+		this.transform = transform;
 	}
 
 	public void setRender(boolean before, boolean after)
 	{
-		renderBefore = before;
-		renderAfter = after;
-	}
-
-	public void setDelay(int delay)
-	{
-		this.delay = delay;
+		//renderBefore = before;
+		//renderAfter = after;
 	}
 
 	public boolean isStarted()
@@ -80,25 +63,24 @@ public class Animation
 		return finished;
 	}
 
-	public Shape animate(float elapsedTime)
+	public ITransformable animate(float elapsedTime)
 	{
-		float elapsed = elapsedTime - delay;
-		started = elapsed > tranformation.getDelay();
-		finished = elapsed > tranformation.totalDuration() && tranformation.getLoops() != -1;
+		float elapsed = elapsedTime;
+		started = elapsed > transform.getDelay();
+		finished = elapsed > transform.totalDuration() && transform.getLoops() != -1;
 
-		transformedShape = new Shape(shape);
-		tranformation.transform(transformedShape, elapsed);
-		return transformedShape;
+		transform.transform(transformable, elapsed);
+		return transformable;
 	}
 
-	public void render(BaseRenderer renderer)
-	{
-		if (!started && !renderBefore)
-			return;
-		if (finished && !renderAfter)
-			return;
-
-		renderer.drawShape(transformedShape, parameters);
-	}
+	//	public void render(BaseRenderer renderer)
+	//	{
+	//		if (!started && !renderBefore)
+	//			return;
+	//		if (finished && !renderAfter)
+	//			return;
+	//
+	//		renderer.drawShape(transformable, rp);
+	//	}
 
 }

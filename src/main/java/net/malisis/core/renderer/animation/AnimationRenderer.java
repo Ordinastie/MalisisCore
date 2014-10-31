@@ -33,7 +33,7 @@ import net.minecraft.client.Minecraft;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class AnimationRenderer
 {
@@ -77,7 +77,7 @@ public class AnimationRenderer
 		animations.clear();
 	}
 
-	public void animate()
+	public void animate(Animation... animations)
 	{
 		for (Animation animation : animations)
 		{
@@ -85,12 +85,9 @@ public class AnimationRenderer
 		}
 	}
 
-	public void render(BaseRenderer renderer)
+	public void animate()
 	{
-		for (Animation animation : animations)
-		{
-			animation.render(renderer);
-		}
+		animate(animations.toArray(new Animation[0]));
 	}
 
 	public void animate(Shape shape, Transformation animation)
