@@ -54,6 +54,9 @@ public class GuiIcon extends MalisisIcon
 		//make sure we don't overflow
 		index = index % icons.length;
 
+		if (icons.length < 3)
+			return icons[index];
+
 		int row = index / 3;
 		int col = index % 3;
 
