@@ -24,11 +24,12 @@
 
 package net.malisis.core.renderer.model;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import net.malisis.core.renderer.BaseRenderer;
 import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.model.loader.ObjFileImporter;
 import net.minecraft.util.ResourceLocation;
@@ -38,7 +39,7 @@ import net.minecraftforge.client.model.obj.WavefrontObject;
  * @author Ordinastie
  *
  */
-public class MalisisModel
+public class MalisisModel implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale, Iterable<Shape>
 {
 	protected String fileName;
 	protected WavefrontObject wfo;
@@ -58,11 +59,6 @@ public class MalisisModel
 	public Shape getShape(String name)
 	{
 		return shapes.get(name.toLowerCase());
-	}
-
-	public Collection<Shape> getShapes()
-	{
-		return shapes.values();
 	}
 
 	public void render(BaseRenderer renderer)
@@ -85,7 +81,46 @@ public class MalisisModel
 	{
 		Shape shape = shapes.get(name);
 		if (shape != null)
-			renderer.drawShape(new Shape(shape), rp);
+			renderer.drawShape(shape, rp);
+	}
+
+	public void storeState()
+	{
+		for (Shape s : this)
+			s.storeState();
+	}
+
+	public void resetState()
+	{
+		for (Shape s : this)
+			s.resetState();
+	}
+
+	@Override
+	public void translate(float x, float y, float z)
+	{
+		for (Shape s : this)
+			s.translate(x, y, z);
+	}
+
+	@Override
+	public void rotate(float angle, float x, float y, float z, float offsetX, float offsetY, float offsetZ)
+	{
+		for (Shape s : this)
+			s.rotate(angle, x, y, z, offsetX, offsetY, offsetZ);
+	}
+
+	@Override
+	public void scale(float x, float y, float z)
+	{
+		for (Shape s : this)
+			s.scale(x, y, z);
+	}
+
+	@Override
+	public Iterator<Shape> iterator()
+	{
+		return shapes.values().iterator();
 	}
 
 	public static MalisisModel load(ResourceLocation resource)
