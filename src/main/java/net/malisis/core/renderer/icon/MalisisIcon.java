@@ -29,6 +29,7 @@ import java.util.Set;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.util.IIcon;
 
 /**
  * Extension of {@link TextureAtlasSprite} to allow common operations like clipping and offset.<br>
@@ -317,13 +318,18 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Registers this {@link MalisisIcon} to the {@link TextureMap}.
+	 * Attempts to register this {@link MalisisIcon} to the {@link TextureMap}. If an {@link IIcon} is already registered with this name,
+	 * that registered icon will be returned instead.
 	 *
 	 * @param register
 	 * @return
 	 */
 	public MalisisIcon register(TextureMap register)
 	{
+		TextureAtlasSprite icon = register.getTextureExtry(getIconName());
+		if (icon != null)
+			return (MalisisIcon) icon;
+
 		register.setTextureEntry(getIconName(), this);
 		return this;
 	}
