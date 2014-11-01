@@ -615,6 +615,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	public void renderDestroyProgress()
 	{
 		overrideTexture = damagedIcons[destroyBlockProgress.getPartialBlockDamage()];
+		enableBlending();
 		render();
 	}
 
