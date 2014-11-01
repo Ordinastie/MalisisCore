@@ -32,6 +32,10 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.util.ForgeDirection;
 
 /**
+ * Implementation that handles automatically connected textures. Two texture files are required, that will be stiched to the texture sheet.
+ * The {@link ConnectedTextureIcon} will then clip different parts for different connection cases.<br>
+ * The textures need to have a specific pattern (http://puu.sh/bIWaX.png).
+ *
  * @author Ordinastie
  *
  */
@@ -58,8 +62,8 @@ public class ConnectedTextureIcon extends MalisisIcon
 	public ConnectedTextureIcon(String name, MalisisIcon part1, MalisisIcon part2)
 	{
 		super(name);
-		part1.parentIcon = this;
-		part2.parentIcon = this;
+		part1.addDependant(this);
+		part2.addDependant(this);
 	}
 
 	public ConnectedTextureIcon(TextureMap register, String name)
@@ -68,8 +72,8 @@ public class ConnectedTextureIcon extends MalisisIcon
 		MalisisIcon part1 = new MalisisIcon(name);
 		MalisisIcon part2 = new MalisisIcon(name + "2");
 
-		part1.parentIcon = this;
-		part2.parentIcon = this;
+		part1.addDependant(this);
+		part2.addDependant(this);
 
 		register.setTextureEntry(name, part1);
 		register.setTextureEntry(name + "2", part2);
@@ -110,19 +114,42 @@ public class ConnectedTextureIcon extends MalisisIcon
 		}
 	}
 
+	/**
+	 * Gets the icon with no connection on any side.
+	 *
+	 * @return
+	 */
 	public IIcon getFullIcon()
 	{
 		return icons[FULL];
 	}
 
+	/**
+	 * Gets the corresponding {@link IIcon} based on the connection available.
+	 *
+	 * @param world
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param side
+	 * @return
+	 */
 	public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side)
 	{
 		int connections = getConnections(world, x, y, z, side);
-		MalisisIcon icon = icons[connections];
-
-		return icon;
+		return icons[connections];
 	}
 
+	/**
+	 * Determines the connections available at this position for the specified <b>side</b>
+	 * 
+	 * @param world
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param side
+	 * @return
+	 */
 	private int getConnections(IBlockAccess world, int x, int y, int z, int side)
 	{
 		Block block = world.getBlock(x, y, z);
