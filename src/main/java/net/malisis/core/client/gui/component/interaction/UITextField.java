@@ -67,7 +67,7 @@ public class UITextField extends UIComponent<UITextField>
 	/**
 	 * Current selection cursor position. If -1, no selection is active.
 	 */
-	private int selectionPosition = -1;
+	protected int selectionPosition = -1;
 	/**
 	 * Number of characters offset out of this <code>UITextField</code> when drawn.
 	 */
@@ -177,7 +177,7 @@ public class UITextField extends UIComponent<UITextField>
 		return GuiRenderer.getStringWidth(text.substring(clamp(start), clamp(end)));
 	}
 
-	private boolean validateText(String text)
+	protected boolean validateText(String text)
 	{
 		if (filter == null)
 			return true;
@@ -574,7 +574,7 @@ public class UITextField extends UIComponent<UITextField>
 		}
 	}
 
-	private boolean handleCtrlKeyDown(int keyCode)
+	protected boolean handleCtrlKeyDown(int keyCode)
 	{
 		if (!GuiScreen.isCtrlKeyDown())
 			return false;
