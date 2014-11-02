@@ -51,6 +51,17 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 
 	}
 
+	public void addShapes(Shape... shapes)
+	{
+		for (Shape shape : shapes)
+			addShape(shape);
+	}
+
+	public void addShape(Shape shape)
+	{
+		addShape("Shape_" + (shapes.size() + 1), shape);
+	}
+
 	public void addShape(String name, Shape shape)
 	{
 		shapes.put(name.toLowerCase(), shape);
@@ -111,10 +122,10 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	@Override
-	public void scale(float x, float y, float z)
+	public void scale(float x, float y, float z, float offsetX, float offsetY, float offsetZ)
 	{
 		for (Shape s : this)
-			s.scale(x, y, z);
+			s.scale(x, y, z, offsetX, offsetY, offsetZ);
 	}
 
 	@Override
@@ -126,8 +137,10 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	public static MalisisModel load(ResourceLocation resource)
 	{
 		ObjFileImporter importer = new ObjFileImporter(resource);
+		MalisisModel model = importer.getModel();
+		model.storeState();
 
-		return importer.getModel();
+		return model;
 	}
 
 }
