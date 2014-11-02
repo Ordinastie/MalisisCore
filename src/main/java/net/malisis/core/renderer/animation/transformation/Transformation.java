@@ -30,10 +30,11 @@ public abstract class Transformation<T extends Transformation, S extends ITransf
 {
 	public static final int LINEAR = 0, SINUSOIDAL = 1;
 
-	public int movement = LINEAR;
+	protected int movement = LINEAR;
 	protected int duration, delay = 0;
 	protected int loops = 1, loopStartDelay = 0, loopResetDelay = 0;
 	protected float elapsedTimeCurrentLoop;
+	protected boolean reversed = false;
 
 	public T movement(int movement)
 	{
@@ -149,7 +150,12 @@ public abstract class Transformation<T extends Transformation, S extends ITransf
 		return comp;
 	}
 
+	public T reversed(boolean reversed)
+	{
+		this.reversed = reversed;
+		return (T) this;
+	}
+
 	protected abstract void doTransform(S transformable, float comp);
 
-	public abstract T reversed(boolean reversed);
 }

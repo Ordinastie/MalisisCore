@@ -34,16 +34,16 @@ public class ColorTransform extends Transformation<ColorTransform, ITransformabl
 	protected int toColor;
 	protected boolean relative = false;
 
-	public ColorTransform(int toColor)
-	{
-		this.toColor = toColor;
-		this.relative = true;
-	}
-
 	public ColorTransform(int fromColor, int toColor)
 	{
 		this.fromColor = fromColor;
 		this.toColor = toColor;
+	}
+
+	public ColorTransform(int toColor)
+	{
+		this.toColor = toColor;
+		this.relative = true;
 	}
 
 	private int red(int color)
@@ -67,26 +67,15 @@ public class ColorTransform extends Transformation<ColorTransform, ITransformabl
 		if (comp <= 0)
 			return;
 
-		int fromColor = relative ? transformable.getColor() : this.fromColor;
-		int r = (int) (red(fromColor) + (red(toColor) - red(fromColor)) * comp);
-		int g = (int) (green(fromColor) + (green(toColor) - green(fromColor)) * comp);
-		int b = (int) (blue(fromColor) + (blue(toColor) - blue(fromColor)) * comp);
+		int from = reversed ? toColor : fromColor;
+		from = relative ? transformable.getColor() : from;
+		int to = reversed ? fromColor : toColor;
+
+		int r = (int) (red(from) + (red(to) - red(from)) * comp);
+		int g = (int) (green(from) + (green(to) - green(from)) * comp);
+		int b = (int) (blue(from) + (blue(to) - blue(from)) * comp);
 
 		transformable.setColor((r & 0xFF) << 16 | (g & 0xFF) << 8 | b & 0xFF);
-	}
-
-	@Override
-	public ColorTransform reversed(boolean reversed)
-	{
-		if (!reversed)
-			return this;
-
-		int tmpColor = fromColor;
-		fromColor = toColor;
-		toColor = tmpColor;
-
-		return this;
-
 	}
 
 }

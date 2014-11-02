@@ -30,7 +30,6 @@ public class Rotation extends Transformation<Rotation, ITransformable.Rotate>
 	protected float toAngle;
 	protected float axisX, axisY, axisZ;
 	protected float offsetX, offsetY, offsetZ;
-	protected boolean reversed = false;
 
 	public Rotation(float angle)
 	{
@@ -88,18 +87,8 @@ public class Rotation extends Transformation<Rotation, ITransformable.Rotate>
 	@Override
 	protected void doTransform(ITransformable.Rotate transformable, float comp)
 	{
-		//if (comp <= 0)
-		//	return;
-
 		float from = reversed ? toAngle : fromAngle;
 		float to = reversed ? fromAngle : toAngle;
 		transformable.rotate(from + (to - from) * comp, axisX, axisY, axisZ, offsetX, offsetY, offsetZ);
-	}
-
-	@Override
-	public Rotation reversed(boolean reversed)
-	{
-		this.reversed = reversed;
-		return this;
 	}
 }

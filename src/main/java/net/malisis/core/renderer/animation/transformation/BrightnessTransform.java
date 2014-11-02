@@ -30,14 +30,20 @@ package net.malisis.core.renderer.animation.transformation;
  */
 public class BrightnessTransform extends Transformation<BrightnessTransform, ITransformable.Brightness>
 {
-	private boolean reversed;
 	protected int fromBrightness;
 	protected int toBrightness;
+	protected boolean relative = false;
 
 	public BrightnessTransform(int fromBrightness, int toBrightness)
 	{
 		this.fromBrightness = fromBrightness;
 		this.toBrightness = toBrightness;
+	}
+
+	public BrightnessTransform(int toBrightness)
+	{
+		this.toBrightness = toBrightness;
+		this.relative = true;
 	}
 
 	@Override
@@ -47,15 +53,8 @@ public class BrightnessTransform extends Transformation<BrightnessTransform, ITr
 			return;
 
 		float from = reversed ? toBrightness : fromBrightness;
+		from = relative ? transformable.getBrightness() : from;
 		float to = reversed ? fromBrightness : toBrightness;
 		transformable.setBrightness((int) (from + (to - from) * comp));
 	}
-
-	@Override
-	public BrightnessTransform reversed(boolean reversed)
-	{
-		this.reversed = reversed;
-		return this;
-	}
-
 }

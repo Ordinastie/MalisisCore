@@ -33,7 +33,6 @@ import java.util.ArrayList;
 public class ChainedTransformation extends Transformation<ChainedTransformation, ITransformable>
 {
 	protected ArrayList<Transformation> listTransformations = new ArrayList<>();
-	private boolean reversed = false;
 
 	public ChainedTransformation(Transformation... transformations)
 	{
@@ -65,12 +64,5 @@ public class ChainedTransformation extends Transformation<ChainedTransformation,
 			transformation.transform(transformable, elapsedTimeCurrentLoop);
 			elapsedTimeCurrentLoop -= transformation.totalDuration();
 		}
-	}
-
-	@Override
-	public ChainedTransformation reversed(boolean reversed)
-	{
-		this.reversed = reversed;
-		return this;
 	}
 }

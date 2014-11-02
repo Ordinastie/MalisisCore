@@ -24,11 +24,11 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-
 public class Scale extends Transformation<Scale, ITransformable.Scale>
 {
 	protected float fromX = 1, fromY = 1, fromZ = 1;
 	protected float toX = 1, toY = 1, toZ = 1;
+	protected float offsetX = 0, offsetY = 0, offsetZ = 0;
 
 	public Scale()
 	{}
@@ -60,31 +60,25 @@ public class Scale extends Transformation<Scale, ITransformable.Scale>
 		return this;
 	}
 
-	@Override
-	protected void doTransform(ITransformable.Scale transformable, float comp)
+	public Scale offset(float x, float y, float z)
 	{
-		if (comp <= 0)
-			return;
-
-		transformable.scale(fromX + (toX - fromX) * comp, fromY + (toY - fromY) * comp, fromZ + (toZ - fromZ) * comp);
-	}
-
-	@Override
-	public Scale reversed(boolean reversed)
-	{
-		if (!reversed)
-			return this;
-
-		float tmpX = fromX;
-		float tmpY = fromY;
-		float tmpZ = fromZ;
-		fromX = toX;
-		fromY = toY;
-		fromZ = toZ;
-		toX = tmpX;
-		toY = tmpY;
-		toZ = tmpZ;
+		offsetX = x;
+		offsetY = y;
+		offsetZ = z;
 		return this;
 	}
 
+	@Override
+	protected void doTransform(ITransformable.Scale transformable, float comp)
+	{
+		float fromX = reversed ? this.toX : this.fromX;
+		float toX = reversed ? this.fromX : this.toX;
+		float fromY = reversed ? this.toY : this.fromY;
+		float toY = reversed ? this.fromY : this.toY;
+		float fromZ = reversed ? this.toZ : this.fromZ;
+		float toZ = reversed ? this.fromZ : this.toZ;
+
+		transformable.scale(fromX + (toX - fromX) * comp, fromY + (toY - fromY) * comp, fromZ + (toZ - fromZ) * comp, offsetX, offsetY,
+				offsetZ);
+	}
 }

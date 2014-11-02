@@ -59,28 +59,14 @@ public class Translation extends Transformation<Translation, ITransformable.Tran
 	@Override
 	protected void doTransform(ITransformable.Translate transformable, float comp)
 	{
-		if (comp <= 0)
-			return;
+		float fromX = reversed ? this.toX : this.fromX;
+		float toX = reversed ? this.fromX : this.toX;
+		float fromY = reversed ? this.toY : this.fromY;
+		float toY = reversed ? this.fromY : this.toY;
+		float fromZ = reversed ? this.toZ : this.fromZ;
+		float toZ = reversed ? this.fromZ : this.toZ;
 
 		transformable.translate(fromX + (toX - fromX) * comp, fromY + (toY - fromY) * comp, fromZ + (toZ - fromZ) * comp);
-	}
-
-	@Override
-	public Translation reversed(boolean reversed)
-	{
-		if (!reversed)
-			return this;
-
-		float tmpX = fromX;
-		float tmpY = fromY;
-		float tmpZ = fromZ;
-		fromX = toX;
-		fromY = toY;
-		fromZ = toZ;
-		toX = tmpX;
-		toY = tmpY;
-		toZ = tmpZ;
-		return this;
 	}
 
 }
