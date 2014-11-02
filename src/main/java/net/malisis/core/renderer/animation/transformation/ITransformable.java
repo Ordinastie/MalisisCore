@@ -42,7 +42,7 @@ public interface ITransformable
 
 	public static interface Scale extends ITransformable
 	{
-		public void scale(float x, float y, float z);
+		public void scale(float x, float y, float z, float offsetX, float offsetY, float offsetZ);
 	}
 
 	public static interface Color extends ITransformable
@@ -57,5 +57,12 @@ public interface ITransformable
 		public int getAlpha();
 
 		public void setAlpha(int alpha);
+	}
+
+	public static interface Brightness extends ITransformable
+	{
+		public int getBrightness();
+
+		public void setBrightness(int brightness);
 	}
 }
