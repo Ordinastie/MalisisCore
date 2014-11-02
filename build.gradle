@@ -43,13 +43,13 @@ defaultTasks 'build'
 // Basic project information
 group = 'net.malisis'
 archivesBaseName = 'malisiscore'
-version = '1.7.10-0.9.10-SNAPSHOT'
+version = '1.7.10-0.10.0'
 ext.packaging = 'jar'
 
 // Extended project information
 ext.projectName = 'Malisis\' Core'
-ext.description = 'Malisis\' Core is a framework dedicated to simplify many process required during a mod development.'
-ext.url = 'http://github.com/ordinastie'
+ext.description = 'Malisis\' Core is a framework dedicated to simplify many processes required during a mod development.'
+ext.url = 'http://github.com/ordinastie/malisiscore'
 
 // Java version target/source compatibility
 sourceCompatibility = '1.7'
