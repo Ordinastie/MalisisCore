@@ -45,7 +45,7 @@ import org.lwjgl.util.vector.Vector3f;
  *
  */
 public class MergedVertex implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale, ITransformable.Alpha,
-		ITransformable.Color, Iterable<Vertex>
+		ITransformable.Color, ITransformable.Brightness, Iterable<Vertex>
 {
 	protected String name;
 	protected Vertex base;
@@ -219,9 +219,11 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	 * @return
 	 */
 	@Override
-	public void scale(float x, float y, float z)
+	public void scale(float x, float y, float z, float offsetX, float offsetY, float offsetZ)
 	{
+		translate(offsetX, offsetY, offsetZ);
 		matrix().scale(new Vector3f(x, y, z));
+		translate(-offsetX, -offsetY, -offsetZ);
 	}
 
 	/**
@@ -251,7 +253,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	@Override
 	public int getAlpha()
 	{
-		return 0;
+		return base.getAlpha();
 	}
 
 	/**
@@ -264,6 +266,19 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	{
 		for (Vertex v : this)
 			v.setAlpha(alpha);
+	}
+
+	@Override
+	public int getBrightness()
+	{
+		return base.getBrightness();
+	}
+
+	@Override
+	public void setBrightness(int brightness)
+	{
+		for (Vertex v : this)
+			v.setBrightness(brightness);
 	}
 
 	/**
@@ -304,4 +319,5 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 		return mergedVertexes;
 
 	}
+
 }

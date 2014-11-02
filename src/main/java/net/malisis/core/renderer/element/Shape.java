@@ -345,6 +345,17 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		return this;
 	}
 
+	public Shape setParameters(RenderParameters params, boolean merge)
+	{
+		for (Face f : faces)
+			if (merge)
+				f.getParameters().merge(params);
+			else
+				f.setParameters(params);
+
+		return this;
+	}
+
 	/**
 	 * Set {@link RenderParameters} for {@link Face faces} matching the specified <b>name</b>. If <b>merge</b> is true, the parameters will
 	 * be merge with the <code>face</code> parameters instead of completely overriding them.
@@ -495,7 +506,12 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	 */
 	public void scale(float f)
 	{
-		scale(f, f, f);
+		scale(f, f, f, 0, 0, 0);
+	}
+
+	public void scale(float x, float y, float z)
+	{
+		scale(x, y, z, 0, 0, 0);
 	}
 
 	/**
@@ -507,15 +523,19 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	 * @return
 	 */
 	@Override
-	public void scale(float x, float y, float z)
+	public void scale(float x, float y, float z, float offsetX, float offsetY, float offsetZ)
 	{
 		if (mergedVertexes != null)
 		{
 			for (MergedVertex mv : mergedVertexes.values())
-				mv.scale(x, y, z);
+				mv.scale(x, y, z, offsetX, offsetY, offsetZ);
 		}
 		else
+		{
+			translate(offsetX, offsetY, offsetZ);
 			matrix().scale(new Vector3f(x, y, z));
+			translate(-offsetX, -offsetY, -offsetZ);
+		}
 	}
 
 	/**
@@ -615,8 +635,9 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	public Shape shrink(ForgeDirection dir, float factor)
 	{
 		Face face = getFace(Face.nameFromDirection(dir));
-		if (face == null || mergedVertexes == null)
+		if (face == null)
 			return this;
+		enableMergedVertexes();
 
 		HashMap<String, Vertex> vertexNames = new HashMap<String, Vertex>();
 		double x = 0, y = 0, z = 0;
