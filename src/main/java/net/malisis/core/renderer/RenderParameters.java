@@ -36,7 +36,7 @@ import net.minecraftforge.common.util.ForgeDirection;
  * @author Ordinastie
  *
  */
-public class RenderParameters implements ITransformable.Color, ITransformable.Alpha
+public class RenderParameters implements ITransformable.Color, ITransformable.Alpha, ITransformable.Brightness
 {
 	private List<Parameter> listParams = new LinkedList<>();
 	/**
@@ -88,13 +88,17 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	 */
 	public Parameter<Boolean> calculateBrightness = new Parameter<>(true);
 	/**
-	 * Define whether to override each vertex color. If true, FaceParams.colorMultiplier will be used instead (Block Level)
+	 * Define whether to override each vertex color. If false, FaceParams.colorMultiplier will be used instead (Block Level)
 	 */
 	public Parameter<Boolean> usePerVertexColor = new Parameter<>(false);
 	/**
-	 * Define whether to override each vertex alpha. If true, FaceParams.alpha will be used instead (Block Level)
+	 * Define whether to override each vertex alpha. If false, FaceParams.alpha will be used instead (Block Level)
 	 */
 	public Parameter<Boolean> usePerVertexAlpha = new Parameter<>(false);
+	/**
+	 * Define whether to override each vertex brightness. If false, FaceParams.brightness will be used instead (Block Level)
+	 */
+	public Parameter<Boolean> usePerVertexBrightness = new Parameter<>(false);
 	/**
 	 * Defines whether to use the block mixBlockBrightness (if false, RenderParameters.brightness will be used) (Block Level)
 	 */
@@ -161,6 +165,7 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 		listParams.add(calculateBrightness);
 		listParams.add(usePerVertexColor);
 		listParams.add(usePerVertexAlpha);
+		listParams.add(usePerVertexBrightness);
 		listParams.add(useBlockBrightness);
 		listParams.add(useNormals);
 		listParams.add(colorMultiplier);
@@ -233,5 +238,17 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	public void setColor(int color)
 	{
 		this.colorMultiplier.set(color);
+	}
+
+	@Override
+	public int getBrightness()
+	{
+		return brightness.get();
+	}
+
+	@Override
+	public void setBrightness(int brightness)
+	{
+		this.brightness.set(brightness);
 	}
 }

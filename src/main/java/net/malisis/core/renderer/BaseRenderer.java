@@ -86,12 +86,17 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	//Reference to Minecraft.renderGlobal.damagedBlocks (lazy loaded)
 	private static Map damagedBlocks;
 	protected static IIcon[] damagedIcons;
+
+	/**
+	 * Is this {@link BaseRenderer} initialized.
+	 */
+	private boolean initialized = false;
 	/**
 	 * Id for the renderer
 	 */
 	protected int renderId = -1;
 	/**
-	 * Tessellator
+	 * Tessellator reference
 	 */
 	protected Tessellator t = Tessellator.instance;
 	/**
@@ -140,7 +145,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	/**
 	 * Current shape being rendered
 	 */
-	protected Shape shape;
+	protected Shape shape = new Cube();
 	/**
 	 * Current face being rendered
 	 */
@@ -148,7 +153,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	/**
 	 * Current parameters for the shape being rendered
 	 */
-	protected RenderParameters rp;
+	protected RenderParameters rp = new RenderParameters();
 	/**
 	 * Current parameters for the face being rendered
 	 */
@@ -186,8 +191,6 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	{
 		this.renderId = RenderingRegistry.getNextAvailableRenderId();
 		this.t = Tessellator.instance;
-		initShapes();
-		initParameters();
 	}
 
 	/**
@@ -409,6 +412,8 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	public void prepare(int renderType, double... data)
 	{
+		_initialize();
+
 		this.renderType = renderType;
 		if (renderType == TYPE_ISBRH_WORLD)
 		{
@@ -556,21 +561,19 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	// #end prepare()
 
-	/**
-	 * Called when the renderer is instantiated
-	 */
-	protected void initShapes()
+	private final void _initialize()
 	{
-		shape = new Cube();
+		if (initialized)
+			return;
+		initialize();
+		initialized = true;
 	}
 
 	/**
-	 * Called when the renderer is instantiated
+	 * Called the first time a rendering is done.
 	 */
-	protected void initParameters()
-	{
-		rp = new RenderParameters();
-	}
+	protected void initialize()
+	{}
 
 	/**
 	 * Renders the block using the default Minecraft rendering system
@@ -938,6 +941,8 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected int calcVertexBrightness(Vertex vertex, int[][] aoMatrix)
 	{
+		if (params.usePerVertexBrightness.get())
+			return vertex.getBrightness();
 		if (drawMode == GL11.GL_LINE) //no AO for lines
 			return baseBrightness;
 		if (renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD) //not in world
