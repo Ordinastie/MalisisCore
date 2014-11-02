@@ -132,7 +132,7 @@ uploadArchives {
             // Deployment signing
             signing {
                 // Check if uploadArchives task is used
-                required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+                required { gradle.taskGraph.hasTask("uploadArchives") }
 
                 // Sign JAR artifacts
                 sign configurations.archives
