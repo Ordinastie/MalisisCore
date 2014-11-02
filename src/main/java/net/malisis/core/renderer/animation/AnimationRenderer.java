@@ -24,9 +24,12 @@
 
 package net.malisis.core.renderer.animation;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import net.malisis.core.renderer.BaseRenderer;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.animation.transformation.Transformation;
 import net.malisis.core.renderer.element.Shape;
 import net.minecraft.client.Minecraft;
@@ -77,17 +80,22 @@ public class AnimationRenderer
 		animations.clear();
 	}
 
-	public void animate(Animation... animations)
+	public List<ITransformable> animate(Animation... animations)
 	{
+		List<ITransformable> tranformables = new ArrayList<>();
 		for (Animation animation : animations)
 		{
-			animation.animate(elapsedTime);
+			ITransformable tr = animation.animate(elapsedTime);
+			if (tr != null)
+				tranformables.add(tr);
 		}
+
+		return tranformables;
 	}
 
-	public void animate()
+	public List<ITransformable> animate()
 	{
-		animate(animations.toArray(new Animation[0]));
+		return animate(animations.toArray(new Animation[0]));
 	}
 
 	public void animate(Shape shape, Transformation animation)

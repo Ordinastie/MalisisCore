@@ -38,8 +38,8 @@ public class Animation
 	private boolean started = false;
 	private boolean finished = false;
 
-	//private boolean renderBefore = false;
-	//private boolean renderAfter = false;
+	private boolean renderBefore = true;
+	private boolean renderAfter = true;
 
 	public Animation(ITransformable transformable, Transformation transform)
 	{
@@ -49,8 +49,8 @@ public class Animation
 
 	public void setRender(boolean before, boolean after)
 	{
-		//renderBefore = before;
-		//renderAfter = after;
+		renderBefore = before;
+		renderAfter = after;
 	}
 
 	public boolean isStarted()
@@ -65,22 +65,19 @@ public class Animation
 
 	public ITransformable animate(float elapsedTime)
 	{
+		if (transform == null)
+			return transformable;
+
 		float elapsed = elapsedTime;
 		started = elapsed > transform.getDelay();
 		finished = elapsed > transform.totalDuration() && transform.getLoops() != -1;
 
+		if (!started && !renderBefore)
+			return null;
+		if (finished && !renderAfter)
+			return null;
+
 		transform.transform(transformable, elapsed);
 		return transformable;
 	}
-
-	//	public void render(BaseRenderer renderer)
-	//	{
-	//		if (!started && !renderBefore)
-	//			return;
-	//		if (finished && !renderAfter)
-	//			return;
-	//
-	//		renderer.drawShape(transformable, rp);
-	//	}
-
 }
