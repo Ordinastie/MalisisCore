@@ -48,8 +48,10 @@ import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredState
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 
 import com.google.common.eventbus.EventBus;
 
@@ -60,11 +62,16 @@ import com.google.common.eventbus.EventBus;
  *
  * @author Ordinastie, PaleoCrafter
  */
-public abstract class UIComponent<T extends UIComponent>
+public abstract class UIComponent<T extends UIComponent> implements ITransformable.Position<T>, ITransformable.Size<T>,
+		ITransformable.Alpha
 {
 	public final static int INHERITED = 0;
 	/**
-	 * List of {@link net.malisis.core.client.gui.component.UIComponent components} controling this {@link UIContainer}.
+	 * Reference to the {@link MalisisGui} this {@link UIComponent} was added to
+	 */
+	private final MalisisGui gui;
+	/**
+	 * List of {@link UIComponent components} controling this {@link UIContainer}.
 	 */
 	private final Set<IControlComponent> controlComponents;
 	/**
@@ -130,8 +137,11 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	protected GuiIcon icon;
 
+	protected int alpha = 255;
+
 	public UIComponent(MalisisGui gui)
 	{
+		this.gui = gui;
 		bus = new EventBus();
 		bus.register(this);
 		controlComponents = new LinkedHashSet<>();
@@ -139,75 +149,15 @@ public abstract class UIComponent<T extends UIComponent>
 		shape = new SimpleGuiShape();
 	}
 
-	/**
-	 * Registers an <code>object</code> to handle events received by this {@link UIComponent}
-	 *
-	 * @param object object whose handler methods should be registered
-	 */
-	public T register(Object object)
-	{
-		bus.register(object);
-		return (T) this;
-	}
-
-	/**
-	 * Unregister an <code>object</code> to stop receiving events for this {@link UIComponent}
-	 *
-	 * @param object
-	 * @return
-	 */
-	public T unregister(Object object)
-	{
-		bus.unregister(object);
-		return (T) this;
-	}
-
-	/**
-	 * Fires a {@link ComponentEvent}
-	 *
-	 * @param event
-	 * @return
-	 */
-	public boolean fireEvent(ComponentEvent event)
-	{
-		bus.post(event);
-		return !event.isCancelled();
-	}
-
-	/**
-	 * Fires a {@link MouseEvent}
-	 *
-	 * @param event
-	 * @return
-	 */
-	public boolean fireMouseEvent(MouseEvent event)
-	{
-		if (isDisabled() || !isVisible())
-			return false;
-
-		bus.post(event);
-		return !event.isCancelled();
-	}
-
-	/**
-	 * Fires a {@link KeyboardEvent}
-	 *
-	 * @param event
-	 * @return
-	 */
-	public boolean fireKeyboardEvent(KeyboardEvent event)
-	{
-		if (isDisabled())
-			return false;
-
-		for (IControlComponent c : controlComponents)
-			c.fireKeyboardEvent(event);
-
-		bus.post(event);
-		return !event.isCancelled();
-	}
-
 	// #region getters/setters
+	/**
+	 * @return the {@link MalisisGui} this {@link UIComponent} was added to.
+	 */
+	public MalisisGui getGui()
+	{
+		return gui;
+	}
+
 	/**
 	 * Set the position of this {@link UIComponent}
 	 *
@@ -215,6 +165,7 @@ public abstract class UIComponent<T extends UIComponent>
 	 * @param y
 	 * @return this {@link UIComponent}
 	 */
+	@Override
 	public T setPosition(int x, int y)
 	{
 		return setPosition(x, y, anchor);
@@ -269,7 +220,7 @@ public abstract class UIComponent<T extends UIComponent>
 
 	/**
 	 * Sets the zIndex for this {@link UIComponent}.
-	 * 
+	 *
 	 * @param zIndex
 	 * @return
 	 */
@@ -322,6 +273,7 @@ public abstract class UIComponent<T extends UIComponent>
 	 * @param height
 	 * @return this {@link UIComponent}
 	 */
+	@Override
 	public T setSize(int width, int height)
 	{
 		int oldWidth = this.width;
@@ -533,6 +485,9 @@ public abstract class UIComponent<T extends UIComponent>
 	 */
 	public T setDisabled(boolean disabled)
 	{
+		if (isDisabled() == disabled)
+			return (T) this;
+
 		if (!fireEvent(new DisabledStateChange(this, disabled)))
 			return (T) this;
 
@@ -586,7 +541,89 @@ public abstract class UIComponent<T extends UIComponent>
 		return (T) this;
 	}
 
+	@Override
+	public void setAlpha(int alpha)
+	{
+		this.alpha = alpha;
+	}
+
+	public int getAlpha()
+	{
+		if (getParent() == null)
+			return alpha;
+
+		return Math.min(alpha, parent.getAlpha());
+	}
+
 	// #end getters/setters
+
+	/**
+	 * Registers an <code>object</code> to handle events received by this {@link UIComponent}
+	 *
+	 * @param object object whose handler methods should be registered
+	 */
+	public T register(Object object)
+	{
+		bus.register(object);
+		return (T) this;
+	}
+
+	/**
+	 * Unregister an <code>object</code> to stop receiving events for this {@link UIComponent}
+	 *
+	 * @param object
+	 * @return
+	 */
+	public T unregister(Object object)
+	{
+		bus.unregister(object);
+		return (T) this;
+	}
+
+	/**
+	 * Fires a {@link ComponentEvent}
+	 *
+	 * @param event
+	 * @return
+	 */
+	public boolean fireEvent(ComponentEvent event)
+	{
+		bus.post(event);
+		return !event.isCancelled();
+	}
+
+	/**
+	 * Fires a {@link MouseEvent}
+	 *
+	 * @param event
+	 * @return
+	 */
+	public boolean fireMouseEvent(MouseEvent event)
+	{
+		if (isDisabled() || !isVisible())
+			return false;
+
+		bus.post(event);
+		return !event.isCancelled();
+	}
+
+	/**
+	 * Fires a {@link KeyboardEvent}
+	 *
+	 * @param event
+	 * @return
+	 */
+	public boolean fireKeyboardEvent(KeyboardEvent event)
+	{
+		if (isDisabled())
+			return false;
+
+		for (IControlComponent c : controlComponents)
+			c.fireKeyboardEvent(event);
+
+		bus.post(event);
+		return !event.isCancelled();
+	}
 
 	/**
 	 * Check if supplied coordinates are inside this {@link UIComponent} bounds.
@@ -762,6 +799,12 @@ public abstract class UIComponent<T extends UIComponent>
 		controlComponents.clear();
 	}
 
+	public void onAddedToScreen()
+	{
+		if (width <= 0)
+			fireEvent(new SizeChangeEvent<UIComponent>(this, getWidth(), getHeight()));
+	}
+
 	/**
 	 * Draw this {@link UIComponent} Called by {@link #parent} container.<br />
 	 * Will set the size of <i>shape</i> according to the size of this {@link UIComponent} <br />
@@ -787,14 +830,22 @@ public abstract class UIComponent<T extends UIComponent>
 			rp.reset();
 
 		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+		GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE_MINUS_CONSTANT_ALPHA);
+		GL14.glBlendColor(1, 1, 1, (float) getAlpha() / 255);
+
+		//draw background
 		renderer.currentComponent = this;
 		drawBackground(renderer, mouseX, mouseY, partialTick);
 		renderer.next();
+
+		//draw forgeground
 		renderer.currentComponent = this;
 
 		ClipArea area = this instanceof IClipable ? ((IClipable) this).getClipArea() : null;
 		if (area != null)
 			renderer.startClipping(area);
+
+		//GL11.glColor4f(1, 1, 1, 0.5F);
 
 		drawForeground(renderer, mouseX, mouseY, partialTick);
 

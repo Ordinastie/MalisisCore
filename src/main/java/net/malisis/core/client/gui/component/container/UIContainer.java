@@ -24,7 +24,6 @@
 
 package net.malisis.core.client.gui.component.container;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -45,6 +44,7 @@ import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.DisabledStateChange;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 
 import org.lwjgl.opengl.GL11;
 
@@ -58,7 +58,7 @@ import com.google.common.eventbus.Subscribe;
  *
  * @author Ordinastie, PaleoCrafter
  */
-public class UIContainer<T extends UIContainer> extends UIComponent<T> implements IClipable, IScrollable, ICloseable
+public class UIContainer<T extends UIContainer> extends UIComponent<T> implements IClipable, IScrollable, ICloseable, ITransformable.Color
 {
 	/**
 	 * List of {@link UIComponent} inside this {@link UIContainer}.
@@ -309,7 +309,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		if (isDisabled() || !isVisible())
 			return null;
 
-		Set<UIComponent> list = new HashSet<>();
+		Set<UIComponent> list = new LinkedHashSet<>();
 		for (UIComponent c : components)
 		{
 			UIComponent component = c.getComponentAt(x, y);
@@ -446,6 +446,14 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	}
 
 	@Override
+	public void onAddedToScreen()
+	{
+		super.onAddedToScreen();
+		for (UIComponent component : components)
+			component.onAddedToScreen();
+	}
+
+	@Override
 	public void onClose()
 	{
 		if (getParent() instanceof UIContainer)
@@ -505,5 +513,11 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	public void onComponentSpaceChange(SpaceChangeEvent event)
 	{
 		onContentUpdate();
+	}
+
+	@Override
+	public void setColor(int color)
+	{
+		setBackgroundColor(color);
 	}
 }
