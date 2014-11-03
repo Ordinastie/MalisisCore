@@ -47,22 +47,26 @@ public interface ITransformable
 
 	public static interface Color extends ITransformable
 	{
-		public int getColor();
-
 		public void setColor(int color);
 	}
 
 	public static interface Alpha extends ITransformable
 	{
-		public int getAlpha();
-
 		public void setAlpha(int alpha);
 	}
 
 	public static interface Brightness extends ITransformable
 	{
-		public int getBrightness();
-
 		public void setBrightness(int brightness);
+	}
+
+	public interface Position<T> extends ITransformable
+	{
+		public T setPosition(int x, int y);
+	}
+
+	public interface Size<T> extends ITransformable
+	{
+		public T setSize(int width, int height);
 	}
 }
