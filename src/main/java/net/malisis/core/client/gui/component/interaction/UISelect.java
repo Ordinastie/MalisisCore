@@ -411,16 +411,9 @@ public class UISelect extends UIComponent<UISelect>
 			height = 10 * (maxDisplayedOptions == -1 ? optionsLabel.size() : maxDisplayedOptions) + 1;
 			//if (maxDisplayedOptions != -1 && maxDisplayedOptions < optionsLabel.size())
 			for (UILabel label : optionsLabel)
-			{
-				label.setSize(0);
 				width = Math.max(width, label.getWidth() + 4);
-			}
-
 			if (maxExpandedWidth > 0)
 				width = Math.min(maxExpandedWidth, width);
-
-			for (UILabel label : optionsLabel)
-				label.setSize(width - 2);
 		}
 
 		/**

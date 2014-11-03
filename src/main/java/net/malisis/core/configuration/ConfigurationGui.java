@@ -40,6 +40,8 @@ import net.malisis.core.client.gui.component.interaction.UIButton;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.configuration.setting.Setting;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.eventbus.Subscribe;
 
 /**
@@ -77,7 +79,7 @@ public class ConfigurationGui extends MalisisGui
 			window.add(createSettingContainer(category));
 		}
 
-		comment = new UIMultiLineLabel(this, 136, windowHeight - 41);
+		comment = new UIMultiLineLabel(this);
 		comment.setColor(0xFFFFFF);
 		comment.setDrawShadow(true);
 		UIPanel panelComment = new UIPanel(this, 140, windowHeight - 35).setPosition(0, 0, Anchor.RIGHT);
@@ -121,7 +123,10 @@ public class ConfigurationGui extends MalisisGui
 		{
 			Setting setting = componentSettings.get(event.getComponent());
 			if (setting != null)
-				comment.setText(setting.getComments());
+			{
+				String str = StringUtils.join(setting.getComments(), "\r");
+				comment.setText(str);
+			}
 		}
 		else
 			comment.setText("");

@@ -58,8 +58,10 @@ public class UIButton extends UIComponent<UIButton>
 	{
 		super(gui);
 		label = new UILabel(gui);
-		setText(text);
 		label.setDrawShadow(true);
+		label.setParent(this);
+
+		setText(text);
 		setSize(width);
 
 		shape = new XYResizableGuiShape();
@@ -165,17 +167,20 @@ public class UIButton extends UIComponent<UIButton>
 		}
 
 		label.setColor(isHovered() ? 0xFFFFA0 : 0xFFFFFF);
-		label.setPosition(screenX() + x, screenY() + y);
+		label.setPosition(x, y);
 		label.draw(renderer, mouseX, mouseY, partialTick);
 	}
 
 	@Subscribe
 	public void onClick(MouseEvent.ButtonStateEvent event)
 	{
+		if (event.getButton() != MouseButton.LEFT)
+			return;
+
 		if (event instanceof DoubleClick)
 			return;
 
-		if (event instanceof Press && event.getButton() == MouseButton.LEFT)
+		if (event instanceof Press)
 		{
 			isPressed = true;
 			return;

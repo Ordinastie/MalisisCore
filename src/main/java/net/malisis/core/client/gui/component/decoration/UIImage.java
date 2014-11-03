@@ -130,9 +130,9 @@ public class UIImage extends UIComponent<UIImage>
 	}
 
 	@Override
-	public String toString()
+	public String getPropertyString()
 	{
-		return this.getClass().getName() + "[ texture=" + this.texture + ", " + this.getPropertyString() + " ]";
+		return "texture=" + this.texture + " | " + super.getPropertyString();
 	}
 
 }
