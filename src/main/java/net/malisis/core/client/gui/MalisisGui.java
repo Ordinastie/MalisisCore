@@ -34,6 +34,8 @@ import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
 import net.malisis.core.packet.InventoryActionMessage;
+import net.malisis.core.renderer.animation.Animation;
+import net.malisis.core.renderer.animation.AnimationRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.RenderHelper;
@@ -82,6 +84,10 @@ public class MalisisGui extends GuiScreen
 	 */
 	protected MalisisInventoryContainer inventoryContainer;
 	/**
+	 *
+	 */
+	private AnimationRenderer ar;
+	/**
 	 * Currently hovered child component
 	 */
 	protected UIComponent hoveredComponent;
@@ -103,6 +109,8 @@ public class MalisisGui extends GuiScreen
 	{
 		this.renderer = new GuiRenderer();
 		this.screen = new UIContainer(this);
+		this.ar = new AnimationRenderer(renderer);
+		this.ar.autoClearAnimations();
 		this.screen.setClipContent(false);
 		startTime = System.currentTimeMillis();
 		Keyboard.enableRepeatEvents(true);
@@ -149,11 +157,12 @@ public class MalisisGui extends GuiScreen
 	/**
 	 * Adds container to the screen.
 	 *
-	 * @param container
+	 * @param component
 	 */
-	protected void addToScreen(UIComponent container)
+	protected void addToScreen(UIComponent component)
 	{
-		screen.add(container);
+		screen.add(component);
+		component.onAddedToScreen();
 	}
 
 	/**
@@ -351,6 +360,7 @@ public class MalisisGui extends GuiScreen
 	public void drawScreen(int mouseX, int mouseY, float partialTicks)
 	{
 		elaspedTime = System.currentTimeMillis() - startTime;
+		ar.animate();
 
 		//if we ignore scaling, use real mouse position on screen
 		if (renderer.isIgnoreScale())
@@ -369,6 +379,9 @@ public class MalisisGui extends GuiScreen
 		GL11.glDisable(GL11.GL_LIGHTING);
 
 		renderer.drawScreen(screen, mouseX, mouseY, partialTicks);
+
+		//		if (hoveredComponent != null)
+		//			renderer.drawString(hoveredComponent.toString(), 5, 5, 0, 0xFFFFFF, true);
 
 		if (inventoryContainer != null)
 		{
@@ -400,6 +413,12 @@ public class MalisisGui extends GuiScreen
 	 */
 	public void updateGui()
 	{}
+
+	public void animate(Animation animation)
+	{
+		animation.setDelay((int) ar.getElapsedTime());
+		ar.addAnimation(animation);
+	}
 
 	@Override
 	public boolean doesGuiPauseGame()
