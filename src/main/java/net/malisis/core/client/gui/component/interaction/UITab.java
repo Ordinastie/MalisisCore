@@ -29,7 +29,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UITabGroup;
-import net.malisis.core.client.gui.component.container.UITabGroup.Position;
+import net.malisis.core.client.gui.component.container.UITabGroup.TabPosition;
 import net.malisis.core.client.gui.component.container.UITabGroup.TabChangeEvent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
@@ -79,8 +79,8 @@ public class UITab extends UIComponent<UITab>
 	{
 		if (parent == null)
 			return true;
-		Position pos = ((UITabGroup) parent).getTabPosition();
-		return pos == Position.TOP || pos == Position.BOTTOM;
+		TabPosition pos = ((UITabGroup) parent).getTabPosition();
+		return pos == TabPosition.TOP || pos == TabPosition.BOTTOM;
 	}
 
 	/**
@@ -225,7 +225,7 @@ public class UITab extends UIComponent<UITab>
 	/**
 	 * @return this {@link UITab} position around the container.
 	 */
-	public Position getTabPosition()
+	public TabPosition getTabPosition()
 	{
 		return ((UITabGroup) parent).getTabPosition();
 	}

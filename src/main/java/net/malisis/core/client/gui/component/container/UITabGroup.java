@@ -38,20 +38,20 @@ import net.malisis.core.client.gui.icon.GuiIcon;
  */
 public class UITabGroup extends UIContainer<UITabGroup>
 {
-	public enum Position
+	public enum TabPosition
 	{
 		TOP, RIGHT, LEFT, BOTTOM
 	}
 
 	protected Map<UITab, UIContainer> listTabs = new LinkedHashMap<>();
 	protected UITab activeTab;
-	protected Position tabPosition = Position.TOP;
+	protected TabPosition tabPosition = TabPosition.TOP;
 	protected UIContainer attachedContainer;
 	protected int offset = 3;
 	protected GuiIcon[] windowIcons;
 	protected GuiIcon[] panelIcons;
 
-	public UITabGroup(MalisisGui gui, Position tabPosition)
+	public UITabGroup(MalisisGui gui, TabPosition tabPosition)
 	{
 		super(gui);
 		this.tabPosition = tabPosition;
@@ -73,13 +73,13 @@ public class UITabGroup extends UIContainer<UITabGroup>
 
 	public UITabGroup(MalisisGui gui)
 	{
-		this(gui, Position.TOP);
+		this(gui, TabPosition.TOP);
 	}
 
 	/**
 	 * @return the relative position of the tabs around their containers.
 	 */
-	public Position getTabPosition()
+	public TabPosition getTabPosition()
 	{
 		return tabPosition;
 	}
@@ -119,7 +119,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 
 		for (UITab tab : listTabs.keySet())
 		{
-			if (tabPosition == Position.TOP || tabPosition == Position.BOTTOM)
+			if (tabPosition == TabPosition.TOP || tabPosition == TabPosition.BOTTOM)
 			{
 				tab.setPosition(w + offset, 1);
 				w += tab.getWidth();
@@ -133,7 +133,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 			}
 		}
 
-		boolean isHorizontal = tabPosition == Position.TOP || tabPosition == Position.BOTTOM;
+		boolean isHorizontal = tabPosition == TabPosition.TOP || tabPosition == TabPosition.BOTTOM;
 		for (UITab tab : listTabs.keySet())
 			tab.setSize(isHorizontal ? 0 : w, isHorizontal ? h : 0);
 
@@ -194,21 +194,21 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		int cw = container.getRawWidth();
 		int ch = container.getRawHeight();
 
-		if (tabPosition == Position.TOP)
+		if (tabPosition == TabPosition.TOP)
 		{
 			cy += getHeight() - 1;
 			ch = container.getRawHeight() - getHeight();
 		}
-		else if (tabPosition == Position.BOTTOM)
+		else if (tabPosition == TabPosition.BOTTOM)
 		{
 			ch = container.getRawHeight() - getHeight() + 1;
 		}
-		else if (tabPosition == Position.LEFT)
+		else if (tabPosition == TabPosition.LEFT)
 		{
 			cx += getWidth() - 1;
 			cw = container.getRawWidth() - getWidth();
 		}
-		else if (tabPosition == Position.RIGHT)
+		else if (tabPosition == TabPosition.RIGHT)
 		{
 			cw = container.getRawWidth() - getWidth() + 1;
 		}
