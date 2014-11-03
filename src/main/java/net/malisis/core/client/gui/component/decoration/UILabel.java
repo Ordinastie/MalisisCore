@@ -36,21 +36,17 @@ import net.malisis.core.client.gui.component.UIComponent;
 public class UILabel extends UIComponent<UILabel>
 {
 	/**
-	 * Text of this <code>UILabel</code>.
+	 * Text of this {@link UILabel}.
 	 */
 	protected String text;
 	/**
-	 * Color to use to draw the text of this <code>UILabel</code>.
+	 * Color to use to draw the text of this {@link UILabel}.
 	 */
 	protected int color = 0x404040;
 	/**
 	 * Determines if the text is drawn with drop shadow.
 	 */
 	protected boolean drawShadow;
-	/**
-	 * Determines if the width of this <code>UILabel</code> is dependent of the text
-	 */
-	protected boolean autoWidth = true;
 	/**
 	 * Width of the text
 	 */
@@ -63,43 +59,41 @@ public class UILabel extends UIComponent<UILabel>
 	 * Scale of the font
 	 */
 	protected float fontScale = 1;
+	/**
+	 *
+	 */
+	protected boolean canInteract = false;
 
-	public UILabel(MalisisGui gui, String text, int width)
+	public UILabel(MalisisGui gui, String text)
 	{
-		super(gui);
+		this(gui);
 		this.setText(text);
-		this.setSize(0);
 	}
 
 	public UILabel(MalisisGui gui)
 	{
-		this(gui, null, 0);
-	}
-
-	public UILabel(MalisisGui gui, String text)
-	{
-		this(gui, text, 0);
+		super(gui);
 	}
 
 	// #region getters/setters
 	/**
-	 * Sets the text of this <code>UILabel</code>. If no width was previously set, it will be recalculated for this text.
+	 * Sets the text of this {@link UILabel}. If no width was previously set, it will be recalculated for this text.
 	 *
 	 * @param text
-	 * @return this <code>UILabel</code>
+	 * @return this {@link UILabel}
 	 */
 	public UILabel setText(String text)
 	{
 		this.text = text;
 		this.textWidth = GuiRenderer.getStringWidth(text, fontScale);
 		this.textHeight = GuiRenderer.getStringHeight(fontScale);
-		if (autoWidth)
-			setSize(0);
+		setSize(textWidth, textHeight);
+
 		return this;
 	}
 
 	/**
-	 * @return text of this <code>UILabel</code>
+	 * @return text of this {@link UILabel}
 	 */
 	public String getText()
 	{
@@ -107,34 +101,7 @@ public class UILabel extends UIComponent<UILabel>
 	}
 
 	/**
-	 * Sets the width of this <code>UILabel</code>. Height is defined by text height.
-	 *
-	 * @param width
-	 * @return this <code>UILabel</code>
-	 */
-	public UILabel setSize(int width)
-	{
-		this.autoWidth = width <= 0;
-		this.width = autoWidth ? textWidth : width;
-		this.height = textHeight;
-		return this;
-	}
-
-	/**
-	 * Sets the width of this <code>UILabel</code>. Height parameter is ignored and defined by text height.
-	 *
-	 * @param width
-	 * @param height ignored
-	 * @return this <code>UILabel</code>
-	 */
-	@Override
-	public UILabel setSize(int width, int height)
-	{
-		return setSize(width);
-	}
-
-	/**
-	 * Sets the color of the text of this <code>UILabel</code>.
+	 * Sets the color of the text of this {@link UILabel}.
 	 *
 	 * @param color
 	 */
@@ -145,15 +112,31 @@ public class UILabel extends UIComponent<UILabel>
 	}
 
 	@Override
-	public void setFocused(boolean focused)
+	public UIComponent getComponentAt(int x, int y)
 	{
-		// Labels can't take focus
-		if (parent != null)
-			parent.setFocused(focused);
+		return canInteract ? super.getComponentAt(x, y) : null;
 	}
 
+	/*	@Override
+		public void setFocused(boolean focused)
+		{
+			if (canInteract)
+				super.setFocused(focused);
+			else if (parent != null)
+				parent.setFocused(focused);
+		}
+
+		@Override
+		public void setHovered(boolean hovered)
+		{
+			if (canInteract)
+				super.setHovered(hovered);
+			else if (parent != null)
+				parent.setHovered(hovered);
+		}
+	*/
 	/**
-	 * Set the drop shadow for the text of this <code>UILabel</code>.
+	 * Set the drop shadow for the text of this {@link UILabel}.
 	 *
 	 * @param drawShadow
 	 */
@@ -164,7 +147,7 @@ public class UILabel extends UIComponent<UILabel>
 	}
 
 	/**
-	 * Sets the scale of the font to use for this <code>UILabel</code>
+	 * Sets the scale of the font to use for this {@link UILabel}
 	 *
 	 * @param scale
 	 * @return
@@ -176,7 +159,7 @@ public class UILabel extends UIComponent<UILabel>
 	}
 
 	/**
-	 * @return the fontScale used by this <code>UILabel</code>
+	 * @return the fontScale used by this {@link UILabel}
 	 */
 	public float getFontScale()
 	{
@@ -196,10 +179,9 @@ public class UILabel extends UIComponent<UILabel>
 	}
 
 	@Override
-	public String toString()
+	public String getPropertyString()
 	{
-		return this.getClass().getName() + "[ text=" + text + ", color=0x" + Integer.toHexString(this.color) + ", "
-				+ this.getPropertyString() + " ]";
+		return "text=" + text + " | color=0x" + Integer.toHexString(this.color) + " | " + super.getPropertyString();
 	}
 
 }

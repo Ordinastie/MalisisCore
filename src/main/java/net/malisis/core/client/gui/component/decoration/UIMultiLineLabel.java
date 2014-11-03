@@ -24,78 +24,112 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.control.IScrollable;
+import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
 import net.minecraft.util.StatCollector;
+
+import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
  *
  */
-public class UIMultiLineLabel extends UILabel
+public class UIMultiLineLabel extends UILabel implements IScrollable
 {
-	protected String[] lines;
+	protected List<String> lines = new LinkedList<>();
 	protected boolean autoHeight;
-
-	public UIMultiLineLabel(MalisisGui gui, int width, int height, String... text)
-	{
-		super(gui);
-		this.setText(text);
-		this.setSize(width, height);
-	}
+	protected int lineOffset;
+	protected int lineSpacing;
 
 	public UIMultiLineLabel(MalisisGui gui)
 	{
-		this(gui, 0, 0);
+		super(gui);
+		canInteract = true;
 	}
 
-	public UIMultiLineLabel(MalisisGui gui, String... text)
+	public UIMultiLineLabel(MalisisGui gui, String text)
 	{
-		this(gui, 0, 0, text);
+		this(gui);
+		this.setText(text);
 	}
 
 	@Override
 	public UIMultiLineLabel setText(String text)
 	{
-		return this.setText(new String[] { text });
-	}
+		this.text = text;
+		buildLines();
 
-	public UIMultiLineLabel setText(String... text)
-	{
-		this.lines = text;
-		this.textWidth = GuiRenderer.getMaxStringWidth(text);
-		this.textHeight = (GuiRenderer.FONT_HEIGHT + 1) * text.length;
-		setSize(autoWidth ? 0 : width, autoHeight ? 0 : height);
 		return this;
 	}
 
-	@Override
 	public UILabel setSize(int width)
 	{
-		return setSize(width, textHeight);
+		return setSize(width, height);
+	}
+
+	public int getLineHeight()
+	{
+		return GuiRenderer.FONT_HEIGHT + lineSpacing;
 	}
 
 	@Override
-	public UILabel setSize(int width, int height)
+	public int getContentWidth()
 	{
-		this.autoWidth = width <= 0;
-		this.autoHeight = height <= 0;
-		this.width = autoWidth ? textWidth : width;
-		this.height = autoHeight ? textHeight : height;
-		return this;
+		return getWidth();
+	}
+
+	@Override
+	public int getContentHeight()
+	{
+		return lines.size() * (GuiRenderer.FONT_HEIGHT + 1);
+	}
+
+	@Override
+	public void setOffsetX(float offsetX, int delta)
+	{}
+
+	@Override
+	public void setOffsetY(float offsetY, int delta)
+	{
+		lineOffset = (int) (offsetY * (lines.size() - visibleLines()));
+		lineOffset = Math.max(0, Math.min(lines.size(), lineOffset));
+	}
+
+	private int visibleLines()
+	{
+		return getHeight() / getLineHeight();
+	}
+
+	private void buildLines()
+	{
+		lines.clear();
+		if (text == null)
+			return;
+
+		String[] texts = text.split("\r");
+		int width = getWidth();
+		for (String str : texts)
+			lines.addAll(GuiRenderer.wrapText(StatCollector.translateToLocal(str), width));
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int i = 0;
-		for (String line : lines)
+		for (int i = lineOffset; i < lineOffset + visibleLines() && i < lines.size(); i++)
 		{
-			List<String> lines = GuiRenderer.wrapText(StatCollector.translateToLocal(line), width);
-			for (String str : lines)
-				renderer.drawText(str, 0, (GuiRenderer.FONT_HEIGHT + 1) * i++, color, drawShadow);
+			int h = (i - lineOffset) * getLineHeight();
+			renderer.drawText(lines.get(i), 0, h, color, drawShadow);
 		}
+	}
+
+	@Subscribe
+	public void onSizeChange(SizeChangeEvent<UIMultiLineLabel> event)
+	{
+		buildLines();
 	}
 }
