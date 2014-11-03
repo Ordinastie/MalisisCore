@@ -41,11 +41,11 @@ import net.minecraft.client.Minecraft;
 public class AnimationRenderer
 {
 	private BaseRenderer renderer;
-	private long startTime;
-	private long worldTotalTime;
-	private float partialTick;
-	private float elapsedTime;
+	private long startTime = -1;
+	private boolean clearFinished = false;
 	private LinkedList<Animation> animations = new LinkedList<>();
+	private List<ITransformable> tranformables = new ArrayList<>();
+	private List<Animation> toClear = new ArrayList<>();
 
 	public AnimationRenderer(BaseRenderer renderer)
 	{
@@ -55,19 +55,18 @@ public class AnimationRenderer
 	public void setStartTime(long start)
 	{
 		this.startTime = start;
-		this.worldTotalTime = Minecraft.getMinecraft().theWorld.getTotalWorldTime();
-		this.partialTick = this.renderer.getPartialTick();
-		this.elapsedTime = worldTotalTime - startTime + partialTick;
 	}
 
 	public long getStartTime()
 	{
+		if (startTime == -1)
+			startTime = Minecraft.getMinecraft().theWorld.getTotalWorldTime();
 		return startTime;
 	}
 
 	public float getElapsedTime()
 	{
-		return elapsedTime;
+		return Minecraft.getMinecraft().theWorld.getTotalWorldTime() - getStartTime() + renderer.getPartialTick();
 	}
 
 	public void addAnimation(Animation animation)
@@ -75,19 +74,35 @@ public class AnimationRenderer
 		animations.add(animation);
 	}
 
+	public void deleteAnimation(Animation animation)
+	{
+		animations.remove(animation);
+	}
+
 	public void clearAnimations()
 	{
 		animations.clear();
 	}
 
+	public void autoClearAnimations()
+	{
+		clearFinished = true;
+	}
+
 	public List<ITransformable> animate(Animation... animations)
 	{
-		List<ITransformable> tranformables = new ArrayList<>();
+		ITransformable tr = null;
+		float elapsedTime = getElapsedTime();
+		tranformables.clear();
+		toClear.clear();
 		for (Animation animation : animations)
 		{
-			ITransformable tr = animation.animate(elapsedTime);
+			tr = animation.animate(elapsedTime);
 			if (tr != null)
 				tranformables.add(tr);
+
+			if (animation.isFinished() && clearFinished)
+				toClear.add(animation);
 		}
 
 		return tranformables;
@@ -95,7 +110,12 @@ public class AnimationRenderer
 
 	public List<ITransformable> animate()
 	{
-		return animate(animations.toArray(new Animation[0]));
+		List<ITransformable> anims = animate(animations.toArray(new Animation[0]));
+
+		for (Animation animation : toClear)
+			animations.remove(animation);
+
+		return anims;
 	}
 
 	public void animate(Shape shape, Transformation animation)
@@ -103,7 +123,7 @@ public class AnimationRenderer
 		if (shape == null)
 			return;
 
-		animation.transform(shape, elapsedTime);
+		animation.transform(shape, getElapsedTime());
 	}
 
 }
