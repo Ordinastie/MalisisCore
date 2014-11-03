@@ -35,6 +35,7 @@ public class Animation
 {
 	private ITransformable transformable;
 	private Transformation transform;
+	private int delay;
 	private boolean started = false;
 	private boolean finished = false;
 
@@ -63,12 +64,17 @@ public class Animation
 		return finished;
 	}
 
+	public void setDelay(int delay)
+	{
+		this.delay = delay;
+	}
+
 	public ITransformable animate(float elapsedTime)
 	{
 		if (transform == null)
 			return transformable;
 
-		float elapsed = elapsedTime;
+		float elapsed = elapsedTime - delay;
 		started = elapsed > transform.getDelay();
 		finished = elapsed > transform.totalDuration() && transform.getLoops() != -1;
 
