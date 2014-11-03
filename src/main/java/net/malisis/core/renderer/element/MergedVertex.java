@@ -227,15 +227,6 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
-	 * @return the color of this {@link MergedVertex}.
-	 */
-	@Override
-	public int getColor()
-	{
-		return base.getColor();
-	}
-
-	/**
 	 * Sets the color for this {@link MergedVertex}.
 	 *
 	 * @param color
@@ -245,15 +236,6 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	{
 		for (Vertex v : this)
 			v.setColor(color);
-	}
-
-	/**
-	 * @return the alpha value for this {@link MergedVertex}.
-	 */
-	@Override
-	public int getAlpha()
-	{
-		return base.getAlpha();
 	}
 
 	/**
@@ -268,12 +250,11 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 			v.setAlpha(alpha);
 	}
 
-	@Override
-	public int getBrightness()
-	{
-		return base.getBrightness();
-	}
-
+	/**
+	 * Sets the brightness for this {@link MergedVertex}.
+	 *
+	 * @param brightness
+	 */
 	@Override
 	public void setBrightness(int brightness)
 	{
