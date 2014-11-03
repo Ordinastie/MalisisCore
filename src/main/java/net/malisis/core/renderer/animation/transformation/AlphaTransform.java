@@ -32,18 +32,11 @@ public class AlphaTransform extends Transformation<AlphaTransform, ITransformabl
 {
 	protected int fromAlpha;
 	protected int toAlpha;
-	protected boolean relative = false;
 
 	public AlphaTransform(int fromAlpa, int toAlpha)
 	{
 		this.fromAlpha = fromAlpa;
 		this.toAlpha = toAlpha;
-	}
-
-	public AlphaTransform(int toAlpha)
-	{
-		this.toAlpha = toAlpha;
-		relative = true;
 	}
 
 	@Override
@@ -53,7 +46,6 @@ public class AlphaTransform extends Transformation<AlphaTransform, ITransformabl
 			return;
 
 		float from = reversed ? toAlpha : fromAlpha;
-		from = relative ? transformable.getAlpha() : from;
 		float to = reversed ? fromAlpha : toAlpha;
 
 		transformable.setAlpha((int) (from + (to - from) * comp));

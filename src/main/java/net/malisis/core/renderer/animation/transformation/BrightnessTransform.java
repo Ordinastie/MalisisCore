@@ -32,18 +32,11 @@ public class BrightnessTransform extends Transformation<BrightnessTransform, ITr
 {
 	protected int fromBrightness;
 	protected int toBrightness;
-	protected boolean relative = false;
 
 	public BrightnessTransform(int fromBrightness, int toBrightness)
 	{
 		this.fromBrightness = fromBrightness;
 		this.toBrightness = toBrightness;
-	}
-
-	public BrightnessTransform(int toBrightness)
-	{
-		this.toBrightness = toBrightness;
-		this.relative = true;
 	}
 
 	@Override
@@ -53,8 +46,8 @@ public class BrightnessTransform extends Transformation<BrightnessTransform, ITr
 			return;
 
 		float from = reversed ? toBrightness : fromBrightness;
-		from = relative ? transformable.getBrightness() : from;
 		float to = reversed ? fromBrightness : toBrightness;
+
 		transformable.setBrightness((int) (from + (to - from) * comp));
 	}
 }

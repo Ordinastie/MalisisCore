@@ -32,18 +32,11 @@ public class ColorTransform extends Transformation<ColorTransform, ITransformabl
 {
 	protected int fromColor;
 	protected int toColor;
-	protected boolean relative = false;
 
 	public ColorTransform(int fromColor, int toColor)
 	{
 		this.fromColor = fromColor;
 		this.toColor = toColor;
-	}
-
-	public ColorTransform(int toColor)
-	{
-		this.toColor = toColor;
-		this.relative = true;
 	}
 
 	private int red(int color)
@@ -68,7 +61,6 @@ public class ColorTransform extends Transformation<ColorTransform, ITransformabl
 			return;
 
 		int from = reversed ? toColor : fromColor;
-		from = relative ? transformable.getColor() : from;
 		int to = reversed ? fromColor : toColor;
 
 		int r = (int) (red(from) + (red(to) - red(from)) * comp);
