@@ -217,33 +217,15 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	}
 
 	@Override
-	public int getAlpha()
-	{
-		return alpha.get();
-	}
-
-	@Override
 	public void setAlpha(int alpha)
 	{
 		this.alpha.set(alpha);
 	}
 
 	@Override
-	public int getColor()
-	{
-		return colorMultiplier.get();
-	}
-
-	@Override
 	public void setColor(int color)
 	{
 		this.colorMultiplier.set(color);
-	}
-
-	@Override
-	public int getBrightness()
-	{
-		return brightness.get();
 	}
 
 	@Override
