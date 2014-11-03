@@ -25,7 +25,6 @@
 package net.malisis.core.client.gui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.malisis.core.client.gui.component.UIComponent;
@@ -197,6 +196,8 @@ public class GuiRenderer extends BaseRenderer
 				GL11.glPushMatrix();
 				GL11.glScalef(1F / scaleFactor, 1F / scaleFactor, 1);
 			}
+
+			enableBlending();
 
 			startDrawing();
 
@@ -586,18 +587,9 @@ public class GuiRenderer extends BaseRenderer
 		return Math.round(FONT_HEIGHT * fontScale);
 	}
 
-	/**
-	 * Gets max rendering width of an array of string
-	 *
-	 * @param strings
-	 * @return
-	 */
 	public static int getMaxStringWidth(List<String> strings)
 	{
-		int width = 0;
-		for (String str : strings)
-			width = Math.max(width, getStringWidth(str));
-		return width;
+		return getMaxStringWidth(strings, 1);
 	}
 
 	/**
@@ -606,9 +598,12 @@ public class GuiRenderer extends BaseRenderer
 	 * @param strings
 	 * @return
 	 */
-	public static int getMaxStringWidth(String[] strings)
+	public static int getMaxStringWidth(List<String> strings, float fontScale)
 	{
-		return getMaxStringWidth(Arrays.asList(strings));
+		int width = 0;
+		for (String str : strings)
+			width = Math.max(width, getStringWidth(str, fontScale));
+		return width;
 	}
 
 	/**
