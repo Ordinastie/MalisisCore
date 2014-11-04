@@ -94,11 +94,12 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	}
 
 	/**
-	 * Adds tab and its corresponding container to this <code>UITabGroup</code>.<br />
+	 * Adds tab and its corresponding container to this <code>UITabGroup</code>.<br>
 	 * Also sets the width of this <code>UITabGroup</code>.
 	 *
 	 * @param tab
 	 * @param container
+	 * @return this {@link UITab}
 	 */
 	public UITab addTab(UITab tab, UIContainer container)
 	{
@@ -176,8 +177,8 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 * Attach the container to this <code>UITabGroup</code>.
 	 *
 	 * @param container
-	 * @param resize
-	 * @return
+	 * @param displace
+	 * @return this {@link UITab}
 	 */
 	public UITabGroup attachTo(UIContainer container, boolean displace)
 	{

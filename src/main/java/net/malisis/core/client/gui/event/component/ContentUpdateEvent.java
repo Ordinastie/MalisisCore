@@ -28,11 +28,18 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.event.ComponentEvent;
 
 /**
- * @author Ordinastie
+ * The Class ContentUpdateEvent.
  *
+ * @author Ordinastie
+ * @param <T> the type of {@link UIComponent} firing this event
  */
 public class ContentUpdateEvent<T extends UIComponent> extends ComponentEvent<T>
 {
+	/**
+	 * Instantiates a new {@link ContentUpdateEvent}.
+	 *
+	 * @param component the component
+	 */
 	public ContentUpdateEvent(T component)
 	{
 		super(component);

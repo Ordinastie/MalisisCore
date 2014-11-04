@@ -45,10 +45,23 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
+/**
+ * Message to update the slots in the opened {@link MalisisInventoryContainer} on the client.
+ *
+ * @author Ordinastie
+ *
+ */
 public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInventorySlotsMessage.Packet, IMessage>
 {
 	public static int PICKEDITEM = -1;
 
+	/**
+	 * Handles the received {@link Packet} on the client. Updates the slots.
+	 *
+	 * @param message the message
+	 * @param ctx the ctx
+	 * @return the i message
+	 */
 	@Override
 	public IMessage onMessage(Packet message, MessageContext ctx)
 	{
@@ -59,11 +72,11 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 	}
 
 	/**
-	 * Handle the reception of packets that update the inventory of the client.
+	 * Handles the reception of packets that update the inventory of the client.
 	 *
-	 * @param type
-	 * @param slots
-	 * @param windowId
+	 * @param inventoryId the inventory id
+	 * @param slots the slots
+	 * @param windowId the window id
 	 */
 	@SideOnly(Side.CLIENT)
 	private void updateSlots(int inventoryId, HashMap<Integer, ItemStack> slots, int windowId)
@@ -94,11 +107,11 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 	}
 
 	/**
-	 * Sends a packet to player to update the picked itemStack
+	 * Sends a packet to player to update the picked itemStack.
 	 *
-	 * @param itemStack
-	 * @param player
-	 * @param windowId
+	 * @param itemStack the item stack
+	 * @param player the player
+	 * @param windowId the window id
 	 */
 	public static void updatePickedItemStack(ItemStack itemStack, EntityPlayerMP player, int windowId)
 	{
@@ -108,12 +121,12 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 	}
 
 	/**
-	 * Sends a packet to player to update the inventory slots
+	 * Sends a packet to player to update the inventory slots.
 	 *
-	 * @param type
-	 * @param slots
-	 * @param player
-	 * @param windowId
+	 * @param inventoryId the inventory id
+	 * @param slots the slots
+	 * @param player the player
+	 * @param windowId the window id
 	 */
 	public static void updateSlots(int inventoryId, ArrayList<MalisisSlot> slots, EntityPlayerMP player, int windowId)
 	{

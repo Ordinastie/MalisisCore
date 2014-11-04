@@ -24,28 +24,59 @@
 
 package net.malisis.core.util;
 
+/**
+ *
+ * @author Ordinastie
+ *
+ */
 public class Ray
 {
+	/** Origin {@link Point} of this {@link Ray}. */
 	public Point origin;
+
+	/** Direction of this {@link Ray}. */
 	public Vector direction;
 
+	/**
+	 * Instantiates a new ray.
+	 *
+	 * @param p the p
+	 * @param v the v
+	 */
 	public Ray(Point p, Vector v)
 	{
 		origin = p;
 		direction = v;
 	}
 
+	/**
+	 * Instantiates a new ray.
+	 *
+	 * @param r the r
+	 */
 	public Ray(Ray r)
 	{
 		origin = new Point(r.origin);
 		direction = new Vector(r.direction);
 	}
 
+	/**
+	 * Gets the {@link Point} at the specified distance.
+	 *
+	 * @param t the distance
+	 * @return the point at the distance t
+	 */
 	public Point getPointAt(double t)
 	{
 		return new Point(origin.x + t * direction.x, origin.y + t * direction.y, origin.z + t * direction.z);
 	}
 
+	/**
+	 * Gets the distance to the plane at x.
+	 *
+	 * @param x the x plane
+	 * @return the distance
+	 */
 	public double intersectX(double x)
 	{
 		if (direction.x == 0)
@@ -53,6 +84,12 @@ public class Ray
 		return (x - origin.x) / direction.x;
 	}
 
+	/**
+	 * Gets the distance to the plane at y.
+	 *
+	 * @param y the y plane
+	 * @return the distance
+	 */
 	public double intersectY(double y)
 	{
 		if (direction.y == 0)
@@ -60,6 +97,12 @@ public class Ray
 		return (y - origin.y) / direction.y;
 	}
 
+	/**
+	 * Gets the distance to the plane at z.
+	 *
+	 * @param z the z plane
+	 * @return the distance
+	 */
 	public double intersectZ(double z)
 	{
 		if (direction.z == 0)

@@ -24,17 +24,28 @@
 
 package net.malisis.core.packet;
 
+import net.malisis.core.MalisisCore;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 
+/**
+ * Global handler for {@link MalisisCore} messages.
+ *
+ * @author Ordinastie
+ *
+ */
 public class NetworkHandler
 {
 	public static int OPENINVENTORY = 1;
 	public static int UPDATEINVENTORYSLOTS = 2;
 	public static int INVENTORYACTION = 3;
-
 	public static SimpleNetworkWrapper network;
 
+	/**
+	 * Initializes the handle. Creates the network wrapper and registers the different handlers.
+	 *
+	 * @param channelName the channel name
+	 */
 	public static void init(String channelName)
 	{
 		network = new SimpleNetworkWrapper(channelName);

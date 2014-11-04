@@ -41,8 +41,6 @@ import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
-import net.malisis.core.client.gui.event.component.StateChangeEvent;
-import net.malisis.core.client.gui.event.component.StateChangeEvent.DisabledStateChange;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 
@@ -50,63 +48,45 @@ import org.lwjgl.opengl.GL11;
 
 import com.google.common.eventbus.Subscribe;
 
+// TODO: Auto-generated Javadoc
 /**
- * {@link UIContainer} are the base for components holding other components.<br />
- * Child components are drawn in the foreground.<br />
- * Mouse events received are passed to the child concerned (getComponentAt()).<br />
+ * {@link UIContainer} are the base for components holding other components.<br>
+ * Child components are drawn in the foreground.<br>
+ * Mouse events received are passed to the child concerned (getComponentAt()).<br>
  * Keyboard event are passed to all the children.
  *
  * @author Ordinastie, PaleoCrafter
+ * @param <T> type of UIContainer
  */
 public class UIContainer<T extends UIContainer> extends UIComponent<T> implements IClipable, IScrollable, ICloseable, ITransformable.Color
 {
-	/**
-	 * List of {@link UIComponent} inside this {@link UIContainer}.
-	 */
+	/** List of {@link UIComponent} inside this {@link UIContainer}. */
 	protected final Set<UIComponent> components;
-	/**
-	 * Horizontal padding to apply to this {@link UIContainer}.
-	 */
+	/** Horizontal padding to apply to this {@link UIContainer}. */
 	protected int horizontalPadding;
-	/**
-	 * Vertical padding to apply to this {@link UIContainer}.
-	 */
+	/** Vertical padding to apply to this {@link UIContainer}. */
 	protected int verticalPadding;
-	/**
-	 * Background color multiplier.
-	 */
+	/** Background color multiplier. */
 	protected int backgroundColor = -1;
-	/**
-	 * Label for the title of this {@link UIContainer}.
-	 */
+	/** Label for the title of this {@link UIContainer}. */
 	protected UILabel titleLabel;
 	//IClipable
-	/**
-	 * Determines whether this {@link UIContainer} should clip its contents to its drawn area.
-	 */
+	/** Determines whether this {@link UIContainer} should clip its contents to its drawn area. */
 	protected boolean clipContent = true;
 	//IScrollable
-	/**
-	 * Width of the contents of this {@link UIContainer}.
-	 */
+	/** Width of the contents of this {@link UIContainer}. */
 	protected int contentWidth;
-	/**
-	 * Height of the contents of this {@link UIContainer}.
-	 */
+	/** Height of the contents of this {@link UIContainer}. */
 	protected int contentHeight;
-	/**
-	 * X Offset for the contents of this {@link UIContainer} from 0 to 1.
-	 */
+	/** X Offset for the contents of this {@link UIContainer} from 0 to 1. */
 	protected int xOffset;
-	/**
-	 * Y Offset for the contents of this {@link UIContainer} from 0 to 1.
-	 */
+	/** Y Offset for the contents of this {@link UIContainer} from 0 to 1. */
 	protected int yOffset;
-
-	public boolean drawContentSize = false;
 
 	/**
 	 * Default constructor, creates the components list.
+	 *
+	 * @param gui the gui
 	 */
 	public UIContainer(MalisisGui gui)
 	{
@@ -117,18 +97,39 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		titleLabel = new UILabel(gui);
 	}
 
+	/**
+	 * Instantiates a new {@link UIContainer}.
+	 *
+	 * @param gui the gui
+	 * @param title the title
+	 */
 	public UIContainer(MalisisGui gui, String title)
 	{
 		this(gui);
 		setTitle(title);
 	}
 
+	/**
+	 * Instantiates a new {@link UIContainer}.
+	 *
+	 * @param gui the gui
+	 * @param width the width
+	 * @param height the height
+	 */
 	public UIContainer(MalisisGui gui, int width, int height)
 	{
 		this(gui);
 		setSize(width, height);
 	}
 
+	/**
+	 * Instantiates a new {@link UIContainer}.
+	 *
+	 * @param gui the gui
+	 * @param title the title
+	 * @param width the width
+	 * @param height the height
+	 */
 	public UIContainer(MalisisGui gui, String title, int width, int height)
 	{
 		this(gui);
@@ -137,6 +138,12 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	}
 
 	// #region getters/setters
+	/**
+	 * Sets the visible.
+	 *
+	 * @param visible the visible
+	 * @return the t
+	 */
 	@Override
 	public T setVisible(boolean visible)
 	{
@@ -155,6 +162,12 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		return (T) this;
 	}
 
+	/**
+	 * Sets the disabled.
+	 *
+	 * @param disabled the disabled
+	 * @return the t
+	 */
 	@Override
 	public T setDisabled(boolean disabled)
 	{
@@ -173,8 +186,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	/**
 	 * Set the padding for this {@link UIContainer}.
 	 *
-	 * @param horizontal
-	 * @param vertical
+	 * @param horizontal the horizontal
+	 * @param vertical the vertical
 	 */
 	public void setPadding(int horizontal, int vertical)
 	{
@@ -183,6 +196,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	}
 
 	/**
+	 * Gets the horizontal padding.
+	 *
 	 * @return horizontal padding of this {@link UIContainer}.
 	 */
 	public int getHorizontalPadding()
@@ -191,6 +206,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	}
 
 	/**
+	 * Gets the vertical padding.
+	 *
 	 * @return horizontal padding of this {@link UIContainer}.
 	 */
 	public int getVerticalPadding()
@@ -201,8 +218,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	/**
 	 * Sets the background color for {@link UIContainer}.
 	 *
-	 * @param color
-	 * @return
+	 * @param color the color
+	 * @return the UI container
 	 */
 	public UIContainer setBackgroundColor(int color)
 	{
@@ -211,6 +228,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	}
 
 	/**
+	 * Gets the background color.
+	 *
 	 * @return the background color for {@link UIContainer}.
 	 */
 	public int getBackgroundColor()
@@ -219,11 +238,11 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	}
 
 	/**
-	 * Sets the title for {@link UIContainer}.<br />
+	 * Sets the title for {@link UIContainer}.<br>
 	 * Creates a {@link UILabel} and adds it inside {@link UIContainer}.
 	 *
-	 * @param title
-	 * @return
+	 * @param title the title
+	 * @return the UI container
 	 */
 	public UIContainer setTitle(String title)
 	{
@@ -239,6 +258,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	}
 
 	/**
+	 * Gets the title.
+	 *
 	 * @return the title for this {@link UIContainer}.
 	 */
 	public String getTitle()
@@ -251,8 +272,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	/**
 	 * Gets the relative position of the specified {@link UIComponent} inside this {@link UIContainer}.
 	 *
-	 * @param component
-	 * @return
+	 * @param component the component
+	 * @return the coordinate
 	 */
 	@Override
 	public int componentX(UIComponent component)
@@ -273,8 +294,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	/**
 	 * Gets the relative position of the specified {@link UIComponent} inside this {@link UIContainer}.
 	 *
-	 * @param component
-	 * @return
+	 * @param component the component
+	 * @return the coordinate
 	 */
 	@Override
 	public int componentY(UIComponent component)
@@ -292,11 +313,11 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	}
 
 	/**
-	 * Gets the component at the specified coordinates.<br />
+	 * Gets the component at the specified coordinates.<br>
 	 * Selects the component with the highest z-index from the components overlapping the coordinates.
 	 *
-	 * @param x
-	 * @param y
+	 * @param x the x
+	 * @param y the y
 	 * @return the child component in this {@link UIContainer}, this {@link UIContainer} if none, or null if outside its bounds.
 	 */
 	@Override
@@ -330,12 +351,18 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		return component;
 	}
 
+	/**
+	 * Called when this {@link UIComponent} gets its content updated.
+	 */
 	public void onContentUpdate()
 	{
 		calculateContentSize();
 		fireEvent(new ContentUpdateEvent(this));
 	}
 
+	/**
+	 * Calculates content size.
+	 */
 	public void calculateContentSize()
 	{
 		int contentWidth = 0;
@@ -355,18 +382,33 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	}
 
 	//#region IClipable
+	/**
+	 * Gets the {@link ClipArea}.
+	 *
+	 * @return the clip area
+	 */
 	@Override
 	public ClipArea getClipArea()
 	{
 		return new ClipArea(this);
 	}
 
+	/**
+	 * Sets whether this {@link UIContainer} should clip its contents
+	 *
+	 * @param clipContent if true, clip contents
+	 */
 	@Override
 	public void setClipContent(boolean clipContent)
 	{
 		this.clipContent = clipContent;
 	}
 
+	/**
+	 * Checks whether this {@link UIContainer} should clip its contents
+	 *
+	 * @return true, if should clip contents
+	 */
 	@Override
 	public boolean shouldClipContent()
 	{
@@ -376,24 +418,46 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	//#end IClipable
 
 	//#region IScrollable
+	/**
+	 * Gets the content width.
+	 *
+	 * @return the content width
+	 */
 	@Override
 	public int getContentWidth()
 	{
 		return contentWidth;
 	}
 
+	/**
+	 * Gets the content height.
+	 *
+	 * @return the content height
+	 */
 	@Override
 	public int getContentHeight()
 	{
 		return contentHeight;
 	}
 
+	/**
+	 * Sets the offset x.
+	 *
+	 * @param offsetX the offset x
+	 * @param delta the delta
+	 */
 	@Override
 	public void setOffsetX(float offsetX, int delta)
 	{
 		this.xOffset = (int) ((getContentWidth() - getWidth() + delta) * offsetX);
 	}
 
+	/**
+	 * Sets the offset y.
+	 *
+	 * @param offsetY the offset y
+	 * @param delta the delta
+	 */
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
@@ -405,7 +469,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	/**
 	 * Adds components to this {@link UIContainer}.
 	 *
-	 * @param component
+	 * @param components the components
 	 */
 	public void add(UIComponent... components)
 	{
@@ -421,7 +485,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	/**
 	 * Removes the component from this {@link UIContainer}.
 	 *
-	 * @param component
+	 * @param component the component
 	 */
 	public void remove(UIComponent component)
 	{
@@ -460,10 +524,18 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 			((UIContainer) getParent()).remove(this);
 	}
 
+	/**
+	 * Draws the background.
+	 *
+	 * @param renderer the renderer
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
+	 */
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (backgroundColor == -1 && !drawContentSize)
+		if (backgroundColor == -1)
 			return;
 
 		rp.colorMultiplier.set(backgroundColor);
@@ -473,17 +545,17 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		renderer.drawShape(shape, rp);
 		renderer.next();
 
-		if (drawContentSize)
-		{
-			shape.resetState();
-			shape.setSize(contentWidth, contentHeight);
-			rp.colorMultiplier.set(0xFFCCCC);
-			renderer.drawShape(shape, rp);
-			renderer.next();
-		}
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
+	/**
+	 * Draws the foreground.
+	 *
+	 * @param renderer the renderer
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
+	 */
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
@@ -502,19 +574,33 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		return true;
 	}
 
+	/**
+	 * Called when a child {@link UIComponent} gets its visibility changed
+	 *
+	 * @param event the event
+	 */
 	@Subscribe
-	public void onComponentStateChange(StateChangeEvent event)
+	public void onComponentStateChange(VisibleStateChange event)
 	{
-		if (event instanceof VisibleStateChange || event instanceof DisabledStateChange)
-			onContentUpdate();
+		onContentUpdate();
 	}
 
+	/**
+	 * Called when a child {@link UIComponent} gets its size or position changed
+	 *
+	 * @param event the event
+	 */
 	@Subscribe
 	public void onComponentSpaceChange(SpaceChangeEvent event)
 	{
 		onContentUpdate();
 	}
 
+	/**
+	 * Sets the background color of this {@link UIContainer}.
+	 *
+	 * @param color the new color
+	 */
 	@Override
 	public void setColor(int color)
 	{

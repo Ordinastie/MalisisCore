@@ -47,11 +47,23 @@ import org.lwjgl.util.vector.Vector3f;
 public class MergedVertex implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale, ITransformable.Alpha,
 		ITransformable.Color, ITransformable.Brightness, Iterable<Vertex>
 {
+	/** Name of this {@link MergedVertex}. */
 	protected String name;
+
+	/** Base {@link Vertex}. */
 	protected Vertex base;
+
+	/** Matrix holding the tranformations applied to this {@link MergedVertex}. */
 	protected Matrix4f transformMatrix;
+
+	/** List of {@link Vertex vertexes} that share the same position. */
 	private Set<Vertex> vertexes = new HashSet<>();
 
+	/**
+	 * Instantiates a new {@link MergedVertex}.
+	 *
+	 * @param vertex the vertex
+	 */
 	public MergedVertex(Vertex vertex)
 	{
 		this.name = vertex.baseName();
@@ -60,6 +72,8 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
+	 * Gets the name of this {@link MergedVertex}.
+	 *
 	 * @return the name of this {@link MergedVertex}.
 	 */
 	public String getName()
@@ -68,6 +82,8 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
+	 * Gets the X coordinate of this {@link MergedVertex}.
+	 *
 	 * @return the X coordinate of this {@link MergedVertex}.
 	 */
 	public double getX()
@@ -76,6 +92,8 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
+	 * Gets the Y coordinate of this {@link MergedVertex}
+	 *
 	 * @return the Y coordinate of this {@link MergedVertex}.
 	 */
 	public double getY()
@@ -84,6 +102,8 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
+	 * Gets the Z coordinate of this {@link MergedVertex}
+	 *
 	 * @return the Z coordinate of this {@link MergedVertex}.
 	 */
 	public double getZ()
@@ -94,8 +114,8 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	/**
 	 * Checks whether this {@link MergedVertex} matches one of the <b>names</b> specified.
 	 *
-	 * @param names
-	 * @return
+	 * @param names the names
+	 * @return true, if successful
 	 */
 	public boolean is(String... names)
 	{
@@ -110,7 +130,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	/**
 	 * Adds a {@link Vertex} to this {@link MergedVertex}. The <code>Vertex</code> base name must match this <code>MergedVertex</code> name.
 	 *
-	 * @param vertex
+	 * @param vertex the vertex
 	 */
 	public void addVertex(Vertex vertex)
 	{
@@ -123,7 +143,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	/**
 	 * Removes a {@link Vertex} from this {@link MergedVertex}.
 	 *
-	 * @param vertex
+	 * @param vertex the vertex
 	 */
 	public void removeVertex(Vertex vertex)
 	{
@@ -134,7 +154,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	 * Gets the transform matrix of this {@link MergedVertex}. Creates it if it doesn't exist already.<br>
 	 * The matrix is translated by 0.5F, 0.5F, 0.5F upon creation.
 	 *
-	 * @return
+	 * @return the matrix4f
 	 */
 	private Matrix4f matrix()
 	{
@@ -149,8 +169,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	/**
 	 * Copies the transformation from a {@link Shape shape} to this <code>Shape</code>.
 	 *
-	 * @param shape
-	 * @return
+	 * @param matrix the matrix
 	 */
 	public void copyMatrix(Matrix4f matrix)
 	{
@@ -159,8 +178,6 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 
 	/**
 	 * Applies the transformations matrices to this {@link MergedVertex}. This modifies the position of the vertexes.
-	 *
-	 * @return
 	 */
 	public void applyMatrix()
 	{
@@ -179,10 +196,9 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	/**
 	 * Translates this {@link MergedVertex}.
 	 *
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 */
 	@Override
 	public void translate(float x, float y, float z)
@@ -193,14 +209,13 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	/**
 	 * Rotates this {@link MergedVertex} around the given axis the specified angle. Offsets the origin for the rotation.
 	 *
-	 * @param angle
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param offsetX
-	 * @param offsetY
-	 * @param offsetZ
-	 * @return
+	 * @param angle the angle
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param offsetX the offset x
+	 * @param offsetY the offset y
+	 * @param offsetZ the offset z
 	 */
 	@Override
 	public void rotate(float angle, float x, float y, float z, float offsetX, float offsetY, float offsetZ)
@@ -213,10 +228,12 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	/**
 	 * Scales this {@link MergedVertex}.
 	 *
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param offsetX the offset x
+	 * @param offsetY the offset y
+	 * @param offsetZ the offset z
 	 */
 	@Override
 	public void scale(float x, float y, float z, float offsetX, float offsetY, float offsetZ)
@@ -229,7 +246,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	/**
 	 * Sets the color for this {@link MergedVertex}.
 	 *
-	 * @param color
+	 * @param color the new color
 	 */
 	@Override
 	public void setColor(int color)
@@ -241,7 +258,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	/**
 	 * Sets the alpha value for this {@link MergedVertex}.
 	 *
-	 * @param alpha
+	 * @param alpha the new alpha
 	 */
 	@Override
 	public void setAlpha(int alpha)
@@ -253,7 +270,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	/**
 	 * Sets the brightness for this {@link MergedVertex}.
 	 *
-	 * @param brightness
+	 * @param brightness the new brightness
 	 */
 	@Override
 	public void setBrightness(int brightness)
@@ -264,6 +281,8 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 
 	/**
 	 * Gets the {@link Iterator} for this {@link MergedVertex}.
+	 *
+	 * @return the iterator
 	 */
 	@Override
 	public Iterator<Vertex> iterator()
@@ -274,7 +293,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	/**
 	 * Gets the list of {@link MergedVertex} for a {@link Shape}.
 	 *
-	 * @param shape
+	 * @param shape the shape
 	 * @return a {@link HashMap} where the key is the {@link Vertex#baseName()} of the vertexes merged.
 	 */
 	public static Map<String, MergedVertex> getMergedVertexes(Shape shape)

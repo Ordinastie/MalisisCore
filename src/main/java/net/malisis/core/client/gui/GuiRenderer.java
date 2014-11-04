@@ -49,61 +49,44 @@ import net.minecraft.util.StatCollector;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+/**
+ * Renderer to use for {@link MalisisGui}.
+ *
+ * @author Ordinastie
+ *
+ */
 public class GuiRenderer extends BaseRenderer
 {
-	/**
-	 * Font renderer used to draw strings.
-	 */
+	/** Font renderer used to draw strings. */
 	public static FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-	/**
-	 * RenderItem used to draw itemStacks.
-	 */
+	/** RenderItem used to draw itemStacks. */
 	public static RenderItem itemRenderer = new RenderItem();
-	/**
-	 * Font height.
-	 */
+	/** Font height. */
 	public static int FONT_HEIGHT = fontRenderer.FONT_HEIGHT;
-	/**
-	 * Current component being drawn.
-	 */
+	/** Current component being drawn. */
 	public UIComponent currentComponent;
-	/**
-	 * Width of the Minecraft window.
-	 */
+	/** Width of the Minecraft window. */
 	private int displayWidth;
-	/**
-	 * Height of the Minecraft window.
-	 */
+	/** Height of the Minecraft window. */
 	private int displayHeight;
-	/**
-	 * Multiplying factor between GUI size and pixel size.
-	 */
+	/** Multiplying factor between GUI size and pixel size. */
 	private int scaleFactor;
-	/**
-	 * Should the rendering be done according to scaleFactor
-	 */
+	/** Should the rendering be done according to scaleFactor. */
 	private boolean ignoreScale = false;
-	/**
-	 * Scale to use when drawing fonts
-	 */
+	/** Scale to use when drawing fonts. */
 	private float fontScale = 1F;
-	/**
-	 * Current X position of the mouse.
-	 */
+	/** Current X position of the mouse. */
 	public int mouseX;
-	/**
-	 * Current Y position of the mouse.
-	 */
+	/** Current Y position of the mouse. */
 	public int mouseY;
-	/**
-	 * Default texture to use for current gui.
-	 */
+	/** Default {@link GuiTexture} to use for current {@link MalisisGui}. */
 	private GuiTexture defaultGuiTexture;
-	/**
-	 * Determines whether the texture has been changed.
-	 */
+	/** Determines whether the texture has been changed. */
 	private boolean defaultTexture = true;
 
+	/**
+	 * Instantiates a new {@link GuiRenderer}.
+	 */
 	public GuiRenderer()
 	{
 		defaultGuiTexture = new GuiTexture(new ResourceLocation("malisiscore", "textures/gui/gui.png"), 300, 100);
@@ -111,6 +94,8 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
+	 * Gets the default {@link GuiTexture}.
+	 *
 	 * @return the defaultGuiTexture
 	 */
 	public GuiTexture getGuiTexture()
@@ -119,10 +104,10 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Sets whether to ignore default Minecraft GUI scale factor.<br />
+	 * Sets whether to ignore default Minecraft GUI scale factor.<br>
 	 * If set to true, 1 pixel size will be equal to 1 pixel on screen.
 	 *
-	 * @param ignore
+	 * @param ignore the new ignore scale
 	 */
 	public void setIgnoreScale(boolean ignore)
 	{
@@ -130,7 +115,9 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * @return is the scale ignored
+	 * Checks if Minecraft GUI scale is ignored
+	 *
+	 * @return true if ignored
 	 */
 	public boolean isIgnoreScale()
 	{
@@ -140,7 +127,7 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Sets a custom font scale factor.
 	 *
-	 * @param scale
+	 * @param scale the new font scale
 	 */
 	public void setFontScale(float scale)
 	{
@@ -148,9 +135,9 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Sets the width, height and scale factor for this <code>GuiRenderer</code>.
+	 * Sets the width, height and scale factor for this {@link GuiRenderer}.
 	 *
-	 * @return
+	 * @return the the scale factor calculated
 	 */
 	public int updateGuiScale()
 	{
@@ -164,9 +151,9 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Sets the mouse position and the partial tick.
 	 *
-	 * @param mouseX
-	 * @param mouseY
-	 * @param partialTicks
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTicks the partial ticks
 	 */
 	public void set(int mouseX, int mouseY, float partialTicks)
 	{
@@ -178,10 +165,10 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Draws the component to the screen.
 	 *
-	 * @param container
-	 * @param mouseX
-	 * @param mouseY
-	 * @param partialTick
+	 * @param container the container
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
 	 */
 	public void drawScreen(UIContainer container, int mouseX, int mouseY, float partialTick)
 	{
@@ -211,9 +198,9 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Draws a tooltip to the screen
+	 * Draws a {@link UITooltip} to the screen.
 	 *
-	 * @param tooltip
+	 * @param tooltip the tooltip
 	 */
 	public void drawTooltip(UITooltip tooltip)
 	{
@@ -226,11 +213,10 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Draws a shape to the GUI with the specified parameters.
+	 * Draws a {@link Shape} to the GUI with the specified {@link RenderParameters}.
 	 *
-	 * @param s
-	 * @param params
-	 * @param icons
+	 * @param s the s
+	 * @param params the params
 	 */
 	public void drawShape(GuiShape s, RenderParameters params)
 	{
@@ -250,6 +236,12 @@ public class GuiRenderer extends BaseRenderer
 			drawFace(face, face.getParameters());
 	}
 
+	/**
+	 * Applies the texture the {@link Shape}.
+	 *
+	 * @param shape the shape
+	 * @param parameters the parameters
+	 */
 	@Override
 	public void applyTexture(Shape shape, RenderParameters parameters)
 	{
@@ -267,9 +259,9 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Clips a string to fit in the specified width. The string is translated before clipping.
 	 *
-	 * @param text
-	 * @param width
-	 * @return
+	 * @param text the text
+	 * @param width the width
+	 * @return the string
 	 */
 	public String clipString(String text, int width)
 	{
@@ -294,8 +286,8 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Splits the string in multiple lines to fit in the specified maxWidth.
 	 *
-	 * @param text
-	 * @param maxWidth
+	 * @param text the text
+	 * @param maxWidth the max width
 	 * @return list of lines that won't exceed maxWidth limit
 	 */
 	public static List<String> wrapText(String text, int maxWidth)
@@ -344,7 +336,7 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Draws a white text on the GUI without shadow.
 	 *
-	 * @param text
+	 * @param text the text
 	 */
 	public void drawText(String text)
 	{
@@ -354,9 +346,9 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Draws a text on the GUI with specified color and shadow.
 	 *
-	 * @param text
-	 * @param color
-	 * @param shadow
+	 * @param text the text
+	 * @param color the color
+	 * @param shadow the shadow
 	 */
 	public void drawText(String text, int color, boolean shadow)
 	{
@@ -366,11 +358,11 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Draws a text on the GUI at the specified coordinates, relative to its parent container, with color and shadow.
 	 *
-	 * @param text
-	 * @param x
-	 * @param y
-	 * @param color
-	 * @param shadow
+	 * @param text the text
+	 * @param x the x
+	 * @param y the y
+	 * @param color the color
+	 * @param shadow the shadow
 	 */
 	public void drawText(String text, int x, int y, int color, boolean shadow)
 	{
@@ -380,12 +372,12 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Draws a text on the GUI at the specified coordinates, relative to its parent container, with zIndex, color and shadow.
 	 *
-	 * @param text
-	 * @param x
-	 * @param y
-	 * @param zIndex
-	 * @param color
-	 * @param shadow
+	 * @param text the text
+	 * @param x the x
+	 * @param y the y
+	 * @param zIndex the z index
+	 * @param color the color
+	 * @param shadow the shadow
 	 */
 	public void drawText(String text, int x, int y, int zIndex, int color, boolean shadow)
 	{
@@ -396,12 +388,12 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Draws a string at the specified coordinates, with color and shadow. The string gets translated. Uses FontRenderer.drawString().
 	 *
-	 * @param text
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param color
-	 * @param shadow
+	 * @param text the text
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param color the color
+	 * @param shadow the shadow
 	 */
 	public void drawString(String text, int x, int y, int z, int color, boolean shadow)
 	{
@@ -429,9 +421,9 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Draws an itemStack to the GUI. Uses RenderItem.renderItemAndEffectIntoGUI() and RenderItem.renderItemOverlayIntoGUI();
 	 *
-	 * @param itemStack
-	 * @param x
-	 * @param y
+	 * @param itemStack the item stack
+	 * @param x the x
+	 * @param y the y
 	 */
 	public void drawItemStack(ItemStack itemStack, int x, int y)
 	{
@@ -442,10 +434,10 @@ public class GuiRenderer extends BaseRenderer
 	 * Draws itemStack to the GUI. Uses RenderItem.renderItemAndEffectIntoGUI() and RenderItem.renderItemOverlayIntoGUI(); TODO: use
 	 * currrentComponent position
 	 *
-	 * @param itemStack
-	 * @param x
-	 * @param y
-	 * @param format
+	 * @param itemStack the item stack
+	 * @param x the x
+	 * @param y the y
+	 * @param format the format
 	 */
 	public void drawItemStack(ItemStack itemStack, int x, int y, EnumChatFormatting format)
 	{
@@ -478,7 +470,7 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Starts clipping an area to prevent drawing outside of it.
 	 *
-	 * @param area
+	 * @param area the area
 	 */
 	public void startClipping(ClipArea area)
 	{
@@ -499,7 +491,7 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Ends the clipping.
 	 *
-	 * @param area
+	 * @param area the area
 	 */
 	public void endClipping(ClipArea area)
 	{
@@ -511,9 +503,9 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Calculate GUI scale factor.
+	 * Calculates GUI scale factor.
 	 *
-	 * @param guiScale
+	 * @param guiScale the gui scale
 	 */
 	private void calcScaleFactor(int guiScale)
 	{
@@ -529,7 +521,7 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Render the picked up itemStack at the cursor position.
 	 *
-	 * @param itemStack
+	 * @param itemStack the item stack
 	 */
 	public void renderPickedItemStack(ItemStack itemStack)
 	{
@@ -546,8 +538,8 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Gets rendering width of a string.
 	 *
-	 * @param str
-	 * @return
+	 * @param str the str
+	 * @return the string width
 	 */
 	public static int getStringWidth(String str)
 	{
@@ -555,10 +547,11 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Gets rendering width of a string according to fontScale
+	 * Gets rendering width of a string according to fontScale.
 	 *
-	 * @param str
-	 * @return
+	 * @param str the str
+	 * @param fontScale the font scale
+	 * @return the string width
 	 */
 	public static int getStringWidth(String str, float fontScale)
 	{
@@ -567,9 +560,9 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Gets the rendering height of strings
+	 * Gets the rendering height of strings.
 	 *
-	 * @return
+	 * @return the string height
 	 */
 	public static int getStringHeight()
 	{
@@ -577,26 +570,33 @@ public class GuiRenderer extends BaseRenderer
 	}
 
 	/**
-	 * Gets the rendering height of strings according to fontscale
+	 * Gets the rendering height of strings according to fontscale.
 	 *
-	 * @param fontScale
-	 * @return
+	 * @param fontScale the font scale
+	 * @return the string height
 	 */
 	public static int getStringHeight(float fontScale)
 	{
 		return Math.round(FONT_HEIGHT * fontScale);
 	}
 
+	/**
+	 * Gets the max string width.
+	 *
+	 * @param strings the strings
+	 * @return the max string width
+	 */
 	public static int getMaxStringWidth(List<String> strings)
 	{
 		return getMaxStringWidth(strings, 1);
 	}
 
 	/**
-	 * Gets max rendering width of an array of string
+	 * Gets max rendering width of an array of string.
 	 *
-	 * @param strings
-	 * @return
+	 * @param strings the strings
+	 * @param fontScale the font scale
+	 * @return the max string width
 	 */
 	public static int getMaxStringWidth(List<String> strings, float fontScale)
 	{
@@ -609,8 +609,8 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Gets the rendering width of a char.
 	 *
-	 * @param c
-	 * @return
+	 * @param c the c
+	 * @return the char width
 	 */
 	public static int getCharWidth(char c)
 	{
@@ -620,7 +620,7 @@ public class GuiRenderer extends BaseRenderer
 	/**
 	 * Bind a new texture for rendering.
 	 *
-	 * @param texture
+	 * @param texture the texture
 	 */
 	public void bindTexture(GuiTexture texture)
 	{
@@ -640,6 +640,9 @@ public class GuiRenderer extends BaseRenderer
 		defaultTexture = true;
 	}
 
+	/**
+	 * Next.
+	 */
 	@Override
 	public void next()
 	{

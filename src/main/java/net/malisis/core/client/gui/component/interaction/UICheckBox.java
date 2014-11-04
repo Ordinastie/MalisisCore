@@ -84,7 +84,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	}
 
 	/**
-	 * @return whether this <code>UICheckbox</code> is checked or not.
+	 * @return whether this {@link UICheckBox} is checked or not.
 	 */
 	public boolean isChecked()
 	{
@@ -92,10 +92,10 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	}
 
 	/**
-	 * Sets the state for this <code>UICheckbox</code>. Does not fire CheckEvent.
+	 * Sets the state for this {@link UICheckBox}. Does not fire CheckEvent.
 	 *
 	 * @param checked
-	 * @return
+	 * @return this {@link UIComponent}
 	 */
 	public UICheckBox setChecked(boolean checked)
 	{
@@ -193,8 +193,8 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	}
 
 	/**
-	 * Event fired when a checkbox is checked or unchecked.<br />
-	 * <i>checked</i> holds the new state of the checkbox. When catching the event, the state is not applied to the checkbox yet.<br />
+	 * Event fired when a checkbox is checked or unchecked.<br>
+	 * <i>checked</i> holds the new state of the checkbox. When catching the event, the state is not applied to the checkbox yet.<br>
 	 * Cancelling the event will prevent the state to be set for the checkbox.
 	 *
 	 * @author Ordinastie

@@ -115,9 +115,9 @@ public class ConnectedTextureIcon extends MalisisIcon
 	}
 
 	/**
-	 * Gets the icon with no connection on any side.
+	 * Gets the {@link IIcon} with no connection on any side.
 	 *
-	 * @return
+	 * @return the full icon
 	 */
 	public IIcon getFullIcon()
 	{
@@ -132,7 +132,7 @@ public class ConnectedTextureIcon extends MalisisIcon
 	 * @param y
 	 * @param z
 	 * @param side
-	 * @return
+	 * @return the icon
 	 */
 	public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side)
 	{
@@ -142,13 +142,13 @@ public class ConnectedTextureIcon extends MalisisIcon
 
 	/**
 	 * Determines the connections available at this position for the specified <b>side</b>
-	 * 
+	 *
 	 * @param world
 	 * @param x
 	 * @param y
 	 * @param z
 	 * @param side
-	 * @return
+	 * @return the connections
 	 */
 	private int getConnections(IBlockAccess world, int x, int y, int z, int side)
 	{

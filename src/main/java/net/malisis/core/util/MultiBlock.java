@@ -37,7 +37,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * This class handle MultiBlock structures. Primary aim is to emulate block bigger than 1x1x1 so that the logic is only concerning the
- * original block.<br />
+ * original block.<br>
  * IProviders should only do processes for the one tied to the original placed block.<br >
  * Renderers should check for original block/tileEntity before rendering.
  *
@@ -113,7 +113,7 @@ public class MultiBlock
 	}
 
 	/**
-	 * Sets the world object for this <code>MultiBlock</code>.<br />
+	 * Sets the world object for this <code>MultiBlock</code>.<br>
 	 * To be called from the TileEntity.setWorldObj() providing this <code>MultiBlock</code>.
 	 *
 	 * @param world
@@ -144,7 +144,7 @@ public class MultiBlock
 	 * @param x
 	 * @param y
 	 * @param z
-	 * @return
+	 * @return true, if the coordinates match the origin
 	 */
 	public boolean isOrigin(int x, int y, int z)
 	{
@@ -171,7 +171,7 @@ public class MultiBlock
 	}
 
 	/**
-	 * Sets a bounding box for this <code>MultiBlock</code>. To be used when the origin needs not to be in a corner.<br />
+	 * Sets a bounding box for this <code>MultiBlock</code>. To be used when the origin needs not to be in a corner.<br>
 	 * The AxisAlignedBB must englobe origin point.
 	 *
 	 * @param aabb
@@ -194,9 +194,6 @@ public class MultiBlock
 		this.aabb = aabb.copy();
 	}
 
-	/**
-	 *
-	 */
 	public AxisAlignedBB getBounds()
 	{
 		if (this.aabb == null)
@@ -229,13 +226,9 @@ public class MultiBlock
 	}
 
 	/**
-	 * Gets a list of block position for this <code>MultiBlock</code>. Does not include original block position.
+	 * Gets a list of {@link ChunkPosition} for this {@link MultiBlock}. Does not include original block position.
 	 *
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param dir
-	 * @return
+	 * @return the list of positions
 	 */
 	protected ChunkPosition[] getListPositions()
 	{
@@ -264,14 +257,11 @@ public class MultiBlock
 	}
 
 	/**
-	 * Place Block for every To be called from inside block.onBlockPlacedBy()
+	 * Place Block for every position occupied by this {@link MultiBlock}.<br>
+	 * To be called from inside
+	 * {@link Block#onBlockPlacedBy(World, int, int, int, net.minecraft.entity.EntityLivingBase, net.minecraft.item.ItemStack)}.
 	 *
-	 * @param world
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param player
-	 * @param itemStack
+	 * @return true, if all the blocks could be placed, false otherwise
 	 */
 	public boolean placeBlocks()
 	{
@@ -311,13 +301,7 @@ public class MultiBlock
 	/**
 	 * Removes the blocks composing this <code>MultiBlock</code>, including the origin.
 	 *
-	 * @param world
-	 * @param player
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param willHarvest
-	 * @return
+	 * @return true
 	 */
 	public boolean removeBlocks()
 	{
@@ -349,11 +333,10 @@ public class MultiBlock
 	}
 
 	/**
-	 * Creates MultiBlock structure using the provided NBTTagCompound.<br />
+	 * Creates MultiBlock structure using the provided NBTTagCompound.<br>
 	 * To be used from tileEntity.readNBT()
 	 *
 	 * @param tag
-	 * @return
 	 */
 	public void readFromNBT(NBTTagCompound tag)
 	{
@@ -376,8 +359,8 @@ public class MultiBlock
 	}
 
 	/**
-	 * Destroy this <code>MultiBlock</code>. <br />
-	 * Will remove all the blocks composing this <code>MultiBlock</code> structure.<br />
+	 * Destroy this <code>MultiBlock</code>. <br>
+	 * Will remove all the blocks composing this <code>MultiBlock</code> structure.<br>
 	 * To be called from inside Block.removedByPlayer().
 	 *
 	 * @param world
@@ -408,13 +391,13 @@ public class MultiBlock
 	}
 
 	/**
-	 * Gets the <code>MultiBlock</code> instance at the specified coordinates.<br />
+	 * Gets the <code>MultiBlock</code> instance at the specified coordinates.<br>
 	 *
 	 * @param world
 	 * @param x
 	 * @param y
 	 * @param z
-	 * @return
+	 * @return the MultiBlock
 	 */
 	public static MultiBlock getMultiBlock(IBlockAccess world, int x, int y, int z)
 	{
@@ -432,7 +415,7 @@ public class MultiBlock
 	 * @param x
 	 * @param y
 	 * @param z
-	 * @return
+	 * @return true, if the specified coordinates match the origin
 	 */
 	public static boolean isOrigin(IBlockAccess world, int x, int y, int z)
 	{

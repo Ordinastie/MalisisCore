@@ -30,37 +30,36 @@ import net.malisis.core.util.ItemUtils.ItemStacksMerger;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+/**
+ * Slots contained by {@link MalisisInventory}
+ *
+ * @author Ordinastie
+ *
+ */
 public class MalisisSlot
 {
-	/**
-	 * Inventory containing this {@link MalisisSlot}.
-	 */
+	/** Inventory containing this {@link MalisisSlot}. */
 	private MalisisInventory inventory;
-	/**
-	 * ItemStack held by this {@link MalisisSlot}
-	 */
+	/** ItemStack held by this {@link MalisisSlot}. */
 	private ItemStack itemStack;
-	/**
-	 * ItemStack cached to detect changes
-	 */
+	/** ItemStack cached to detect changes. */
 	private ItemStack cachedItemStack;
-	/**
-	 * ItemStack currently dragged into the slot
-	 */
+	/** ItemStack currently dragged into the slot. */
 	private ItemStack draggedItemStack;
-	/**
-	 * ItemStack cached to detect changes
-	 */
+	/** ItemStack cached to detect changes. */
 	private ItemStack cachedDraggedItemStack;
-	/**
-	 * Slot position within its {@link MalisisInventory}
-	 */
+	/** Slot position within its {@link MalisisInventory}. */
 	public int slotNumber;
-	/**
-	 * {@link InventoryState} of this slot.
-	 */
+	/** {@link InventoryState} of this slot. */
 	protected InventoryState state = new InventoryState();
 
+	/**
+	 * Instantiates a new {@link MalisisSlot}.
+	 *
+	 * @param inventory the inventory
+	 * @param itemStack the item stack
+	 * @param index the index
+	 */
 	public MalisisSlot(MalisisInventory inventory, ItemStack itemStack, int index)
 	{
 		this.inventory = inventory;
@@ -68,11 +67,22 @@ public class MalisisSlot
 		this.itemStack = itemStack;
 	}
 
+	/**
+	 * Instantiates a new {@link MalisisSlot}
+	 *
+	 * @param inventory the inventory
+	 * @param index the index
+	 */
 	public MalisisSlot(MalisisInventory inventory, int index)
 	{
 		this(inventory, null, index);
 	}
 
+	/**
+	 * Instantiates a new {@link MalisisSlot}
+	 *
+	 * @param index the index
+	 */
 	public MalisisSlot(int index)
 	{
 		this(null, null, index);
@@ -81,7 +91,7 @@ public class MalisisSlot
 	/**
 	 * Registers an object to inventory changes.
 	 *
-	 * @param object
+	 * @param object the object
 	 */
 	public void register(Object object)
 	{
@@ -92,7 +102,7 @@ public class MalisisSlot
 	/**
 	 * Sets the inventory containing this {@link MalisisSlot}.
 	 *
-	 * @param inventory
+	 * @param inventory the new inventory
 	 */
 	public void setInventory(MalisisInventory inventory)
 	{
@@ -102,7 +112,7 @@ public class MalisisSlot
 	/**
 	 * Gets the {@link MalisisInventory} of this {@link MalisisSlot}.
 	 *
-	 * @return
+	 * @return the inventory
 	 */
 	public MalisisInventory getInventory()
 	{
@@ -112,7 +122,7 @@ public class MalisisSlot
 	/**
 	 * Gets the id of the {@link MalisisInventory} of this {@link MalisisSlot} inside the {@link MalisisInventoryContainer}.
 	 *
-	 * @return
+	 * @return the inventory id
 	 */
 	public int getInventoryId()
 	{
@@ -122,7 +132,7 @@ public class MalisisSlot
 	/**
 	 * Sets the itemStack contained by this {@link MalisisSlot}. Does not check for slot validity, max stack size etc...
 	 *
-	 * @param itemStack
+	 * @param itemStack the new item stack
 	 */
 	public void setItemStack(ItemStack itemStack)
 	{
@@ -130,6 +140,8 @@ public class MalisisSlot
 	}
 
 	/**
+	 * Gets the item stack.
+	 *
 	 * @return the itemStack contained by this {@link MalisisSlot}.
 	 */
 	public ItemStack getItemStack()
@@ -140,7 +152,7 @@ public class MalisisSlot
 	/**
 	 * Sets the currently dragged ItemStack for this {@link MalisisSlot}.
 	 *
-	 * @param itemStack
+	 * @param itemStack the new dragged item stack
 	 */
 	public void setDraggedItemStack(ItemStack itemStack)
 	{
@@ -148,6 +160,8 @@ public class MalisisSlot
 	}
 
 	/**
+	 * Gets the dragged item stack.
+	 *
 	 * @return the currently dragged ItemStack for this {@link MalisisSlot}
 	 */
 	public ItemStack getDraggedItemStack()
@@ -164,7 +178,9 @@ public class MalisisSlot
 	}
 
 	/**
-	 * @return whether this {@link MalisisSlot} is an output slot (if {@link InventoryState state} denies inserts)
+	 * Checks whether this {@link MalisisSlot} is an output slot (if {@link InventoryState state} denies inserts)
+	 *
+	 * @return true if is output slot, false otherwise
 	 */
 	public boolean isOutputSlot()
 	{
@@ -174,8 +190,8 @@ public class MalisisSlot
 	/**
 	 * Checks whether this {@link MalisisSlot} is allowed for the <b>state</b>.
 	 *
-	 * @param state
-	 * @return false if either the inventory or the slot denies the state.
+	 * @param state the state
+	 * @return true if both the {@link MalisisInventory} and this {@link MalisisSlot} allow the state, false otherwise.
 	 */
 	public boolean isState(int state)
 	{
@@ -185,6 +201,7 @@ public class MalisisSlot
 	/**
 	 * Checks if this {@link MalisisSlot} can contain itemStack. Defers the test to this {@link MalisisInventory inventory}.
 	 *
+	 * @param itemStack the item stack
 	 * @return true if the itemStack can be container in this {@link MalisisSlot}
 	 */
 	public boolean isItemValid(ItemStack itemStack)
@@ -198,7 +215,7 @@ public class MalisisSlot
 	/**
 	 * Checks if this {@link MalisisSlot} can accept more itemStack.
 	 *
-	 * @return
+	 * @return true, if is full
 	 */
 	public boolean isFull()
 	{
@@ -208,7 +225,7 @@ public class MalisisSlot
 	/**
 	 * Checks if this {@link MalisisSlot} is empty.
 	 *
-	 * @return
+	 * @return true, if is empty
 	 */
 	public boolean isEmpty()
 	{
@@ -224,16 +241,22 @@ public class MalisisSlot
 	}
 
 	/**
-	 * Called when itemStack is picked up from this {@link MalisisSlot}
+	 * Called when itemStack is picked up from this {@link MalisisSlot}.
 	 *
-	 * @param player
-	 * @param itemStack
+	 * @param player the player
+	 * @param itemStack the item stack
 	 */
 	public void onPickupFromSlot(EntityPlayer player, ItemStack itemStack)
 	{
 		onSlotChanged();
 	}
 
+	/**
+	 * Sets the item stack size.
+	 *
+	 * @param stackSize the stack size
+	 * @return the amount of items that were added to the slot.
+	 */
 	public int setItemStackSize(int stackSize)
 	{
 		if (itemStack == null)
@@ -246,6 +269,12 @@ public class MalisisSlot
 		return itemStack.stackSize - start;
 	}
 
+	/**
+	 * Adds the item stack size.
+	 *
+	 * @param stackSize the stack size
+	 * @return the amount of items that were added to the slot
+	 */
 	public int addItemStackSize(int stackSize)
 	{
 		if (itemStack == null)
@@ -254,6 +283,12 @@ public class MalisisSlot
 		return setItemStackSize(itemStack.stackSize + stackSize);
 	}
 
+	/**
+	 * Extract a specified <b>amoun</b> from this {@link MalisisSlot}.
+	 *
+	 * @param amount the amount
+	 * @return the {@link ItemStack} extracted
+	 */
 	public ItemStack extract(int amount)
 	{
 		ItemStackSplitter iss = new ItemUtils.ItemStackSplitter(getItemStack());
@@ -264,16 +299,38 @@ public class MalisisSlot
 		return iss.split;
 	}
 
+	/**
+	 * Inserts an {@link ItemStack} into this {@link MalisisSlot}.
+	 *
+	 * @param insert the itemStack to insert
+	 * @return the itemStack that couldn't fit into the slot
+	 */
 	public ItemStack insert(ItemStack insert)
 	{
 		return insert(insert, insert != null ? insert.stackSize : 0, false);
 	}
 
+	/**
+	 * Inserts a specified <b>amount</b> of {@link ItemStack} into this {@link MalisisSlot}.
+	 *
+	 * @param insert the itemStack to insert
+	 * @param amount the amount to insert
+	 * @return the itemStack that couldn't fit into the slot
+	 */
 	public ItemStack insert(ItemStack insert, int amount)
 	{
 		return insert(insert, amount, false);
 	}
 
+	/**
+	 * Inserts a specified <b>amount</b> of {@link ItemStack} into this {@link MalisisSlot}.<br>
+	 * If <b>force</b> is <code>true</code>, the current <code>ItemStack</code> in the slot will be replaced if it cannot be merged.
+	 *
+	 * @param insert the itemStack to insert
+	 * @param amount the amount to insert
+	 * @param force whether the itemStack should be forced in the slot
+	 * @return the itemStack that couldn't fit into the slot
+	 */
 	public ItemStack insert(ItemStack insert, int amount, boolean force)
 	{
 		if (insert == null)
@@ -309,7 +366,9 @@ public class MalisisSlot
 	}
 
 	/**
-	 * @return the maximum stackSize available for this slot. Gets the value from this {@link MalisisInventory inventory}.
+	 * Gets the maximum stackSize available for this slot. Gets the value from this {@link MalisisInventory inventory}.
+	 *
+	 * @return the slot stack limit.
 	 */
 	public int getSlotStackLimit()
 	{
@@ -319,12 +378,20 @@ public class MalisisSlot
 		return this.inventory.getInventoryStackLimit();
 	}
 
+	/**
+	 * Checks whether this slot has changed.
+	 *
+	 * @return true, if changed, false otherwise
+	 */
 	public boolean hasChanged()
 	{
 		return !ItemStack.areItemStacksEqual(itemStack, cachedItemStack)
 				|| !ItemStack.areItemStacksEqual(draggedItemStack, cachedDraggedItemStack);
 	}
 
+	/**
+	 * Update the cached {@link ItemStack itemStacks} of this {@link MalisisSlot}.
+	 */
 	public void updateCache()
 	{
 		cachedItemStack = itemStack != null ? itemStack.copy() : null;

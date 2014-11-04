@@ -39,41 +39,41 @@ public interface IControlComponent
 	/**
 	 * Sets the {@link UIComponent} controlled by this {@link IControlComponent}.
 	 *
-	 * @return
+	 * @param component the parent
 	 */
 	public void setParent(UIComponent component);
 
 	/**
 	 * Gets the {@link UIComponent} controlled by this {@link IControlComponent}.
 	 *
-	 * @return
+	 * @return the parent
 	 */
 	public UIComponent getParent();
 
 	/**
 	 * Gets the component at the specified coordinates. See {@link UIComponent#getComponentAt(int, int)}.
 	 *
-	 * @param x
-	 * @param y
-	 * @return
+	 * @param x the x
+	 * @param y the y
+	 * @return the component at
 	 */
 	public UIComponent getComponentAt(int x, int y);
 
 	/**
 	 * Fires an event for this {@link IControlComponent}. See {@link UIComponent#fireKeyboardEvent(KeyboardEvent)}.
 	 *
-	 * @param event
+	 * @param event the event
+	 * @return true, if successful
 	 */
 	public boolean fireKeyboardEvent(KeyboardEvent event);
 
 	/**
 	 * Draws this {@link IControlComponent}. See {@link UIComponent#draw(GuiRenderer, int, int, float)}.
 	 *
-	 * @param renderer
-	 * @param mouseX
-	 * @param mouseY
-	 * @param partialTick
+	 * @param renderer the renderer
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
 	 */
 	public void draw(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
-
 }

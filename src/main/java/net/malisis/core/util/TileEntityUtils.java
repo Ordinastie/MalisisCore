@@ -31,16 +31,33 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 /**
- * @author Ordinastie
+ * Utility class for {@link TileEntity}.
  *
+ * @author Ordinastie
  */
 public class TileEntityUtils
 {
+	/** Reference to the {@link TileEntity} currently being use for current opened {@link MalisisGui}. */
 	@SideOnly(Side.CLIENT)
 	private static TileEntity currentTileEntity;
+
+	/** Reference the to currently opened {@link MalisisGui}. */
 	@SideOnly(Side.CLIENT)
 	private static MalisisGui currenGui;
 
+	/**
+	 * Gets the {@link TileEntity} or type <b>T</b> at the specified coordinates.<br>
+	 * If no <code>TileEntity</code> was found at the coordinates, or if the <code>TileEntity</code> is not of type <b>T</b>, returns
+	 * <code>null</code> instead.
+	 *
+	 * @param <T> type of TileEntity requested
+	 * @param type type of TileEntity requested
+	 * @param world the world
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @return the tile entity at the coordinates, or null if no tile entity, or not of type T
+	 */
 	public static <T> T getTileEntity(Class<T> type, IBlockAccess world, int x, int y, int z)
 	{
 		if (world == null)
@@ -60,6 +77,13 @@ public class TileEntityUtils
 		}
 	}
 
+	/**
+	 * Links the {@link TileEntity} to the {@link MalisisGui}.<br>
+	 * Allows the TileEntity to notify the MalisisGui of updates.
+	 *
+	 * @param te the TileEntity
+	 * @param gui the MalisisGui
+	 */
 	@SideOnly(Side.CLIENT)
 	public static void linkTileEntityToGui(TileEntity te, MalisisGui gui)
 	{
@@ -68,6 +92,11 @@ public class TileEntityUtils
 		currenGui.updateGui();
 	}
 
+	/**
+	 * Notifies the currently opened {@link MalisisGui} to update.
+	 *
+	 * @param te the {@link TileEntity} linked to the MalisisGui
+	 */
 	@SideOnly(Side.CLIENT)
 	public static void updateGui(TileEntity te)
 	{

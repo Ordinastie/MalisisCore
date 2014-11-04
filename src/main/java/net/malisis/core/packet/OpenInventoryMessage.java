@@ -27,6 +27,7 @@ package net.malisis.core.packet;
 import io.netty.buffer.ByteBuf;
 import net.malisis.core.inventory.IInventoryProvider;
 import net.malisis.core.inventory.MalisisInventory;
+import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.util.TileEntityUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -40,6 +41,12 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
+/**
+ * Message to tell the client to open a GUI.
+ *
+ * @author Ordinastie
+ *
+ */
 public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessage.Packet, IMessage>
 {
 	public enum ContainerType
@@ -47,6 +54,13 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 		TYPE_TILEENTITY, TYPE_ITEM;
 	}
 
+	/**
+	 * Handles the received {@link Packet} on the client. Opens the GUI.
+	 *
+	 * @param message the message
+	 * @param ctx the ctx
+	 * @return the i message
+	 */
 	@Override
 	public IMessage onMessage(Packet message, MessageContext ctx)
 	{
@@ -56,13 +70,13 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 	}
 
 	/**
-	 * Open a the GUI for the container.
+	 * Open a the GUI for the {@link MalisisInventoryContainer}.
 	 *
-	 * @param type
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param windowId
+	 * @param type the type
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param windowId the window id
 	 */
 	@SideOnly(Side.CLIENT)
 	private void openGui(ContainerType type, int x, int y, int z, int windowId)
@@ -88,11 +102,11 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 	}
 
 	/**
-	 * Send a packet to client to notify it to open a {@link MalisisInventory}.
+	 * Sends a packet to client to notify it to open a {@link MalisisInventory}.
 	 *
-	 * @param container
-	 * @param player
-	 * @param windowId
+	 * @param container the container
+	 * @param player the player
+	 * @param windowId the window id
 	 */
 	public static void send(IInventoryProvider container, EntityPlayerMP player, int windowId)
 	{

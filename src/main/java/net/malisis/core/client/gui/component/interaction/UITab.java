@@ -29,8 +29,8 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UITabGroup;
-import net.malisis.core.client.gui.component.container.UITabGroup.TabPosition;
 import net.malisis.core.client.gui.component.container.UITabGroup.TabChangeEvent;
+import net.malisis.core.client.gui.component.container.UITabGroup.TabPosition;
 import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.MouseEvent;
@@ -87,7 +87,7 @@ public class UITab extends UIComponent<UITab>
 	 * Sets the color for this {@link UITab}. Also sets the color for its {@link UIContainer}.
 	 *
 	 * @param color
-	 * @return
+	 * @return this {@link UITab}
 	 */
 	public UITab setColor(int color)
 	{
@@ -132,7 +132,7 @@ public class UITab extends UIComponent<UITab>
 	/**
 	 * Calculates the width of this {@link UITab} based on its contents.
 	 *
-	 * @return
+	 * @return the width
 	 */
 	private int calcAutoWidth()
 	{
@@ -155,7 +155,7 @@ public class UITab extends UIComponent<UITab>
 	/**
 	 * Calculates the height of this {@link UITab} base on its contents.
 	 *
-	 * @return
+	 * @return the height
 	 */
 	private int calcAutoHeight()
 	{
@@ -179,7 +179,7 @@ public class UITab extends UIComponent<UITab>
 	 * Sets the label for this {@link UITab}. Removes the image if was previously set.
 	 *
 	 * @param label
-	 * @return
+	 * @return this {@link UITab}
 	 */
 	public UITab setLabel(String label)
 	{
@@ -196,7 +196,7 @@ public class UITab extends UIComponent<UITab>
 	 * Sets the image {@link UITab}. Removes the label if was previously set.
 	 *
 	 * @param image
-	 * @return
+	 * @return this {@link UITab}
 	 */
 	public UITab setImage(UIImage image)
 	{
@@ -214,7 +214,7 @@ public class UITab extends UIComponent<UITab>
 	 * Set the {@link UIContainer} linked with this {@link UITab}.
 	 *
 	 * @param container
-	 * @return
+	 * @return this {@link UITab}
 	 */
 	public UITab setContainer(UIContainer container)
 	{

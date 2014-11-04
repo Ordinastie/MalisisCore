@@ -36,8 +36,10 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 /**
- * @author Ordinastie
+ * The Class Setting.
  *
+ * @author Ordinastie
+ * @param <T> the generic type
  */
 public abstract class Setting<T>
 {
@@ -49,6 +51,12 @@ public abstract class Setting<T>
 	protected T defaultValue;
 	protected T value;
 
+	/**
+	 * Instantiates a new setting.
+	 *
+	 * @param key the key
+	 * @param defaultValue the default value
+	 */
 	public Setting(String key, T defaultValue)
 	{
 		this.type = Property.Type.STRING;
@@ -56,26 +64,51 @@ public abstract class Setting<T>
 		this.defaultValue = Preconditions.checkNotNull(defaultValue);
 	}
 
+	/**
+	 * Sets the category.
+	 *
+	 * @param category the new category
+	 */
 	public void setCategory(String category)
 	{
 		this.category = category;
 	}
 
+	/**
+	 * Sets the comment.
+	 *
+	 * @param comment the new comment
+	 */
 	public void setComment(String... comment)
 	{
 		this.comments = comment;
 	}
 
+	/**
+	 * Sets the value.
+	 *
+	 * @param value the value
+	 */
 	public void set(T value)
 	{
 		this.value = Preconditions.checkNotNull(value);
 	}
 
+	/**
+	 * Gets the value.
+	 *
+	 * @return the t
+	 */
 	public T get()
 	{
 		return value;
 	}
 
+	/**
+	 * Loads the configuration.
+	 *
+	 * @param config the config
+	 */
 	public void load(Configuration config)
 	{
 		String comment = null;
@@ -87,23 +120,54 @@ public abstract class Setting<T>
 			throw new NullPointerException("readPropertyValue should not return null!");
 	}
 
+	/**
+	 * Save the configuration.
+	 */
 	public void save()
 	{
 		property.set(writeValue(value));
 	}
 
+	/**
+	 * Gets the comments.
+	 *
+	 * @return the comments
+	 */
 	public String[] getComments()
 	{
 		return comments;
 	}
 
+	/**
+	 * Reads the value.
+	 *
+	 * @param stringValue the string value
+	 * @return the t
+	 */
 	public abstract T readValue(String stringValue);
 
+	/**
+	 * Writes the value.
+	 *
+	 * @param value the value
+	 * @return the string
+	 */
 	public abstract String writeValue(T value);
 
+	/**
+	 * Gets the component.
+	 *
+	 * @param gui the gui
+	 * @return the component
+	 */
 	@SideOnly(Side.CLIENT)
 	public abstract UIComponent getComponent(MalisisGui gui);
 
+	/**
+	 * Gets the value from component.
+	 *
+	 * @return the value from component
+	 */
 	@SideOnly(Side.CLIENT)
 	public abstract T getValueFromComponent();
 }

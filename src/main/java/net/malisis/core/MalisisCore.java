@@ -72,24 +72,49 @@ import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class MalisisCore.
+ */
 public class MalisisCore extends DummyModContainer implements IMalisisMod
 {
+	/** Mod ID. */
 	public static final String modid = "malisiscore";
+
+	/** Mod name. */
 	public static final String modname = "Malisis Core";
-	public static final String version = MalisisCore.class.getPackage().getImplementationVersion() != null ? MalisisCore.class.getPackage().getImplementationVersion() : "UNKNOWN";
+
+	/** Current version. */
+	public static final String version = MalisisCore.class.getPackage().getImplementationVersion() != null ? MalisisCore.class.getPackage()
+			.getImplementationVersion() : "UNKNOWN";
+
+	/** Url for the mod. */
 	public static final String url = "";
+
+	/** Path for the mod. */
 	public static File coremodLocation;
 
+	/** Reference to the mod instance */
 	public static MalisisCore instance;
+
+	/** Logger for the mod. */
 	public static Logger log;
 
+	/** List of {@link IMalisisMod} registered. */
 	private HashMap<String, IMalisisMod> registeredMods = new HashMap<>();
 
+	/** Whether the mod is currently running in obfuscated environment or not. */
 	public static boolean isObfEnv = false;
 
+	/** List of original {@link Block} being replaced. The key is the replacement, the value is the Vanilla {@code Block}. */
 	private HashMap<Block, Block> originals = new HashMap<>();
+
+	/** Whether the configuration Gui should be kept opened */
 	private boolean keepConfigurationGuiOpen;
 
+	/**
+	 * Instantiates MalisisCore.
+	 */
 	public MalisisCore()
 	{
 		super(new ModMetadata());
@@ -129,16 +154,32 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		return null;
 	}
 
+	/**
+	 * Registers a {@link IMalisisMod} mod.
+	 *
+	 * @param mod the mod to register
+	 */
 	public static void registerMod(IMalisisMod mod)
 	{
 		instance.registeredMods.put(mod.getModId(), mod);
 	}
 
+	/**
+	 * Gets the a registered {@link IMalisisMod} by his id.
+	 *
+	 * @param id the id of the mod
+	 * @return the mod registered, null if no mod with the specified id is found
+	 */
 	public static IMalisisMod getMod(String id)
 	{
 		return instance.registeredMods.get(id);
 	}
 
+	/**
+	 * Gets a list of registered {@link IMalisisMod} ids.
+	 *
+	 * @return set of ids.
+	 */
 	public static Set<String> listModId()
 	{
 		return instance.registeredMods.keySet();
@@ -151,6 +192,11 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		return true;
 	}
 
+	/**
+	 * Pre-initialization event
+	 *
+	 * @param event the event
+	 */
 	@Subscribe
 	public static void preInit(FMLPreInitializationEvent event)
 	{
@@ -160,6 +206,11 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		GameRegistry.registerTileEntity(MultiBlockTileEntity.class, "MalisisCoreMultiBlockTileEntity");
 	}
 
+	/**
+	 * Initialization event
+	 *
+	 * @param event the event
+	 */
 	@Subscribe
 	public static void init(FMLInitializationEvent event)
 	{
@@ -167,6 +218,13 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		ClientCommandHandler.instance.registerCommand(new MalisisCommand());
 	}
 
+	/**
+	 * Texture stitch event.<br>
+	 * Used to register the icons of the replaced vanilla blocks since they're not in the registry anymore and won't be called to register
+	 * their icons.
+	 *
+	 * @param event the event
+	 */
 	@SideOnly(Side.CLIENT)
 	@SubscribeEvent
 	public void onTextureStitchEvent(TextureStitchEvent.Pre event)
@@ -181,6 +239,12 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		}
 	}
 
+	/**
+	 * Gui close event.<br>
+	 * Used to cancel the closing of the configuration GUI when opened from command line.
+	 *
+	 * @param event the event
+	 */
 	@SideOnly(Side.CLIENT)
 	@SubscribeEvent
 	public void onGuiClose(GuiOpenEvent event)
@@ -192,20 +256,36 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		event.setCanceled(true);
 	}
 
+	/**
+	 * Open the configuration GUI for the {@link IMalisisMod}.
+	 *
+	 * @param mod the mod to open the GUI for
+	 * @return true, if a the mod had {@link Settings} and the GUI was opened, false otherwise
+	 */
 	@SideOnly(Side.CLIENT)
-	public static boolean openConfigurationGui(IMalisisMod mod, boolean keepOpen)
+	public static boolean openConfigurationGui(IMalisisMod mod)
 	{
 		Settings settings = mod.getSettings();
 		if (settings == null)
 			return false;
 
-		instance.keepConfigurationGuiOpen = keepOpen;
+		instance.keepConfigurationGuiOpen = true;
 		(new ConfigurationGui(settings)).display();
 
 		return true;
 	}
 
-	public static void replaceVanillaBlock(int id, String name, String srgFieldName, Block block, Block vanilla)
+	/**
+	 * Replaces vanilla block with another one.<br>
+	 * Changes the registry by removing the vanilla block and adding the replacement.
+	 *
+	 * @param id the id
+	 * @param name the name
+	 * @param srgFieldName the srg field name
+	 * @param replacement the block
+	 * @param vanilla the vanilla
+	 */
+	public static void replaceVanillaBlock(int id, String name, String srgFieldName, Block replacement, Block vanilla)
 	{
 		try
 		{
@@ -215,14 +295,14 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 			Class[] types = { Integer.TYPE, String.class, Object.class };
 			Method method = ReflectionHelper.findMethod(FMLControlledNamespacedRegistry.class, (FMLControlledNamespacedRegistry) null,
 					new String[] { "addObjectRaw" }, types);
-			method.invoke(Block.blockRegistry, id, "minecraft:" + name, block);
+			method.invoke(Block.blockRegistry, id, "minecraft:" + name, replacement);
 
 			// modify reference in Blocks class
 			Field f = ReflectionHelper.findField(Blocks.class, isObfEnv ? srgFieldName : name);
 			Field modifiers = Field.class.getDeclaredField("modifiers");
 			modifiers.setAccessible(true);
 			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-			f.set(null, block);
+			f.set(null, replacement);
 
 			if (ib != null)
 			{
@@ -230,10 +310,10 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 				modifiers = Field.class.getDeclaredField("modifiers");
 				modifiers.setAccessible(true);
 				modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-				f.set(ib, block);
+				f.set(ib, replacement);
 			}
 
-			instance.originals.put(block, vanilla);
+			instance.originals.put(replacement, vanilla);
 
 		}
 		catch (ReflectiveOperationException e)
@@ -242,11 +322,35 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		}
 	}
 
+	/**
+	 * Gets the original/vanilla block for the specified one.
+	 *
+	 * @param block the block
+	 * @return the block
+	 */
 	public static Block orignalBlock(Block block)
 	{
 		return instance.originals.get(block);
 	}
 
+	/**
+	 * Displays a text in the chat.
+	 *
+	 * @param text the text
+	 */
+	public static void message(Object text)
+	{
+		message(text, (Object) null);
+	}
+
+	/**
+	 * Displays a text in the chat.<br>
+	 * Client side calls will display italic and grey text.<br>
+	 * Server side calls will display white text. The text will be sent to all clients connected.
+	 *
+	 * @param text
+	 * @param data
+	 */
 	public static void message(Object text, Object... data)
 	{
 		if (text == null)

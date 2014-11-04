@@ -47,50 +47,46 @@ import org.lwjgl.opengl.GL11;
 import com.google.common.eventbus.Subscribe;
 
 /**
- * UITextField
+ * UITextField.
  *
  * @author Ordinastie
  */
 public class UITextField extends UIComponent<UITextField>
 {
+	/** Current text of this {@link UITextField}. */
+	private StringBuilder text = new StringBuilder();
+	/** Current cursor position. */
+	private int cursorPosition;
+	/** Current selection cursor position. If -1, no selection is active. */
+	protected int selectionPosition = -1;
+	/** Number of characters offset out of this {@link UITextField} when drawn. */
+	private int charOffset = 0;
+	/** Cursor blink timer. */
+	private long startTimer;
+	/** Filter for the inputs. */
+	private Pattern filter;
+	/** Whether this {@link UITextField} should select the text when release left mouse button. */
+	private boolean selectAllOnRelease = false;
+	/** Whether this {@link UITextField} should auto select the text when gaining focus. */
+	protected boolean autoSelectOnFocus = false;
+	/** Color of the text for this {@link UITextField}. */
+	private int textColor = 0xFFFFFF;
+	/** Shape used to draw the cursor of this {@link UITextField}. */
+	private GuiShape cursorShape;
+	/** Shape used to draw the selection box. */
+	private GuiShape selectShape;
+	/** Icon used to draw this {@link UITextField}. */
 	protected GuiIcon iconTextfield;
+	/** Icon used to draw this {@link UITextField} when disabled. */
 	protected GuiIcon iconTextfieldDisabled;
 
 	/**
-	 * Current text of this <code>UITextField</code>
+	 * Instantiates a new {@link UITextField}.
+	 *
+	 * @param gui the gui
+	 * @param width the width
+	 * @param text the text
 	 */
-	private StringBuilder text = new StringBuilder();
-	/**
-	 * Current cursor position.
-	 */
-	private int cursorPosition;
-	/**
-	 * Current selection cursor position. If -1, no selection is active.
-	 */
-	protected int selectionPosition = -1;
-	/**
-	 * Number of characters offset out of this <code>UITextField</code> when drawn.
-	 */
-	private int charOffset = 0;
-	/**
-	 * Cursor blink timer
-	 */
-	private long startTimer;
-
-	private Pattern filter;
-
-	private boolean selectAllOnRelease = false;
-
-	protected boolean autoSelectOnFocus = false;
-
-	/**
-	 * Color of the text for this <code>UITextField</code>
-	 */
-	private int textColor = 0xFFFFFF;
-
-	private GuiShape cursorShape;
-	private GuiShape selectShape;
-
 	public UITextField(MalisisGui gui, int width, String text)
 	{
 		super(gui);
@@ -109,15 +105,21 @@ public class UITextField extends UIComponent<UITextField>
 		iconTextfieldDisabled = gui.getGuiTexture().getXResizableIcon(200, 42, 9, 12, 3);
 	}
 
+	/**
+	 * Instantiates a new {@link UITextField}.
+	 *
+	 * @param gui the gui
+	 * @param width the width
+	 */
 	public UITextField(MalisisGui gui, int width)
 	{
 		this(gui, width, null);
 	}
 
 	/**
-	 * Clamps the position <i>pos</i> between 0 and text length
+	 * Clamps the position <i>pos</i> between 0 and text length.
 	 *
-	 * @param pos
+	 * @param pos the pos
 	 * @return position clamped
 	 */
 	private int clamp(int pos)
@@ -126,9 +128,9 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	/**
-	 * Determines the cursor position for a given x coordinate
+	 * Determines the cursor position for a given x coordinate.
 	 *
-	 * @param x
+	 * @param x the x coordinate
 	 * @return position
 	 */
 	private int cursorPositionFromX(int x)
@@ -148,6 +150,8 @@ public class UITextField extends UIComponent<UITextField>
 
 	/**
 	 * Adds text at current cursor position. If some text is selected, it's deleted first.
+	 *
+	 * @param text the text
 	 */
 	public void addText(String text)
 	{
@@ -169,6 +173,13 @@ public class UITextField extends UIComponent<UITextField>
 		setCursorPosition(cursorPosition + text.length());
 	}
 
+	/**
+	 * Gets the width of the part of this {@link #text} delimited by <b>start</b> and <b>end</b>.
+	 *
+	 * @param start the start
+	 * @param end the end
+	 * @return the width
+	 */
 	private int stringWidth(int start, int end)
 	{
 		if (end <= start)
@@ -177,6 +188,12 @@ public class UITextField extends UIComponent<UITextField>
 		return GuiRenderer.getStringWidth(text.substring(clamp(start), clamp(end)));
 	}
 
+	/**
+	 * Checks against {@link #filter} if text is valid
+	 *
+	 * @param text the text
+	 * @return true, if input is valid
+	 */
 	protected boolean validateText(String text)
 	{
 		if (filter == null)
@@ -188,7 +205,9 @@ public class UITextField extends UIComponent<UITextField>
 
 	// #region getters/setters
 	/**
-	 * @return the text of this <code>UITextField</code>.
+	 * Gets the text of this {@link UITextField}.
+	 *
+	 * @return the text
 	 */
 	public String getText()
 	{
@@ -196,7 +215,9 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	/**
-	 * Sets the text of this <code>UITextField</code> and place the cursor at the end.
+	 * Sets the text of this {@link UITextField} and place the cursor at the end.
+	 *
+	 * @param text the new text
 	 */
 	public void setText(String text)
 	{
@@ -225,7 +246,9 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	/**
-	 * @return the current position of the cursor.
+	 * Gets the current cursor position.
+	 *
+	 * @return the position of the cursor.
 	 */
 	public int getCursorPosition()
 	{
@@ -233,9 +256,9 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	/**
-	 * Sets the position of the cursor to the provided index.
+	 * Sets the position of the cursor at the specified <b>position</b>
 	 *
-	 * @param position
+	 * @param position the new cursor position
 	 */
 	public void setCursorPosition(int position)
 	{
@@ -248,9 +271,10 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	/**
-	 * Sets the text color for this <code>UITextField</code>.
+	 * Sets the text color for this {@link UITextField}.
 	 *
-	 * @return this <code>UITextField</code>
+	 * @param color the color
+	 * @return this {@link UITextField}
 	 */
 	public UITextField setTextColor(int color)
 	{
@@ -259,13 +283,21 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	/**
-	 * @return the text color of this <code>UITextField</code>.
+	 * Gets the text color.
+	 *
+	 * @return the text color of this {@link UITextField}.
 	 */
 	public int getTextColor()
 	{
 		return textColor;
 	}
 
+	/**
+	 * Sets the filter for this {@link UITextField}.
+	 *
+	 * @param regex the regex
+	 * @return this {@link UITextField}
+	 */
 	public UITextField setFilter(String regex)
 	{
 		if (regex == null || regex.length() == 0)
@@ -275,6 +307,12 @@ public class UITextField extends UIComponent<UITextField>
 		return this;
 	}
 
+	/**
+	 * Sets whether this {@link UIComponent} should automatically select its {@link #text} when focused
+	 *
+	 * @param auto the auto
+	 * @return this {@link UITextField}
+	 */
 	public UITextField setAutoSelectOnFocus(boolean auto)
 	{
 		autoSelectOnFocus = auto;
@@ -284,7 +322,9 @@ public class UITextField extends UIComponent<UITextField>
 	// #end getters/setters
 
 	/**
-	 * @return the text currently selected.
+	 * Gets the currently selected text.
+	 *
+	 * @return the text selected.
 	 */
 	public String getSelectedText()
 	{
@@ -298,7 +338,7 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	/**
-	 * Deletes the text currently selected
+	 * Deletes the text currently selected.
 	 */
 	public void deleteSelectedText()
 	{
@@ -311,7 +351,7 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	/**
-	 * Clear the text selection
+	 * Clears the text selection.
 	 */
 	public void unselectText()
 	{
@@ -319,7 +359,10 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	/**
-	 * Deletes the selected text, otherwise deletes characters from either side of the cursor. params: delete num
+	 * Deletes the specified <b>amount</b> of characters. Negative numbers will delete characters left of the cursor.<br>
+	 * If text is already selected, delete that text instead.
+	 *
+	 * @param amount the amount of characters to delete
 	 */
 	public void deleteFromCursor(int amount)
 	{
@@ -334,12 +377,20 @@ public class UITextField extends UIComponent<UITextField>
 
 	/**
 	 * Deletes the specified number of words starting at the cursor position. Negative numbers will delete words left of the cursor.
+	 *
+	 * @param amount the amount
 	 */
 	public void deleteWords(int amount)
 	{
 		this.deleteFromCursor(nextSpacePosition(amount < 0));
 	}
 
+	/**
+	 * Gets the next position with a space character
+	 *
+	 * @param backwards whether to look left of the cursor
+	 * @return the space position
+	 */
 	public int nextSpacePosition(boolean backwards)
 	{
 		int pos = cursorPosition + (backwards ? -1 : 1);
@@ -358,7 +409,9 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	/**
-	 * Moves the text cursor by a specified number of characters and clears the selection
+	 * Moves the text cursor by a specified number of characters and clears the selection.
+	 *
+	 * @param amount the amount
 	 */
 	public void moveCursorBy(int amount)
 	{
@@ -370,7 +423,7 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	/**
-	 * sets the cursors position to the beginning
+	 * Sets the cursor position to the beginning.
 	 */
 	public void jumpToBegining()
 	{
@@ -382,7 +435,7 @@ public class UITextField extends UIComponent<UITextField>
 	}
 
 	/**
-	 * sets the cursors position to after the text
+	 * Sets the cursor position to after the text.
 	 */
 	public void jumpToEnd()
 	{
@@ -395,6 +448,8 @@ public class UITextField extends UIComponent<UITextField>
 
 	/**
 	 * Starts text selection. The selection anchor is set to current cursor position, and the cursor is moved to the new position.
+	 *
+	 * @param pos the new selection position
 	 */
 	public void setSelectionPosition(int pos)
 	{
@@ -403,6 +458,14 @@ public class UITextField extends UIComponent<UITextField>
 		setCursorPosition(pos);
 	}
 
+	/**
+	 * Draws the background.
+	 *
+	 * @param renderer the renderer
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
+	 */
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
@@ -412,6 +475,14 @@ public class UITextField extends UIComponent<UITextField>
 		renderer.drawShape(shape, rp);
 	}
 
+	/**
+	 * Draws the foreground.
+	 *
+	 * @param renderer the renderer
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
+	 */
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
@@ -423,6 +494,11 @@ public class UITextField extends UIComponent<UITextField>
 			drawCursor(renderer);
 	}
 
+	/**
+	 * Draws the text of this {@link UITextField}.
+	 *
+	 * @param renderer the renderer
+	 */
 	public void drawText(GuiRenderer renderer)
 	{
 		int end = text.length();
@@ -431,6 +507,11 @@ public class UITextField extends UIComponent<UITextField>
 		renderer.drawText(text.substring(charOffset, end), 2, 2, isDisabled() ? 0xAAAAAA : textColor, true);
 	}
 
+	/**
+	 * Draws the cursor of this {@link UITextField}.
+	 *
+	 * @param renderer the renderer
+	 */
 	public void drawCursor(GuiRenderer renderer)
 	{
 		long elaspedTime = startTimer - System.currentTimeMillis();
@@ -452,6 +533,11 @@ public class UITextField extends UIComponent<UITextField>
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
+	/**
+	 * Draw the selection box of this {@link UITextField}.
+	 *
+	 * @param renderer the renderer
+	 */
 	public void drawSelectionBox(GuiRenderer renderer)
 	{
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -477,6 +563,11 @@ public class UITextField extends UIComponent<UITextField>
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
+	/**
+	 * Called when a mouse button is pressed over this {@link UITextField}.
+	 *
+	 * @param event the event
+	 */
 	@Subscribe
 	public void onClick(MouseEvent.Press event)
 	{
@@ -492,6 +583,11 @@ public class UITextField extends UIComponent<UITextField>
 		// selectAllOnRelease = false;
 	}
 
+	/**
+	 * Called when a mouse button is released over this {@link UITextField}.
+	 *
+	 * @param event the event
+	 */
 	@Subscribe
 	public void onClick(MouseEvent.Release event)
 	{
@@ -504,6 +600,11 @@ public class UITextField extends UIComponent<UITextField>
 		selectAllOnRelease = false;
 	}
 
+	/**
+	 * Called when a mouse button is dragged over this {@link UITextField}.
+	 *
+	 * @param event the event
+	 */
 	@Subscribe
 	public void onDrag(MouseEvent.Drag event)
 	{
@@ -514,6 +615,11 @@ public class UITextField extends UIComponent<UITextField>
 		selectAllOnRelease = false;
 	}
 
+	/**
+	 * Called when a mouse button is double clicked over this {@link UITextField}.
+	 *
+	 * @param event the event
+	 */
 	@Subscribe
 	public void onDoubleClick(MouseEvent.DoubleClick event)
 	{
@@ -530,6 +636,11 @@ public class UITextField extends UIComponent<UITextField>
 
 	}
 
+	/**
+	 * Called when a key is pressed.
+	 *
+	 * @param event the event
+	 */
 	@Subscribe
 	public void keyTyped(KeyboardEvent event)
 	{
@@ -574,6 +685,12 @@ public class UITextField extends UIComponent<UITextField>
 		}
 	}
 
+	/**
+	 * Handles the key typed while a control key is pressed
+	 *
+	 * @param keyCode the key code
+	 * @return true, if successful
+	 */
 	protected boolean handleCtrlKeyDown(int keyCode)
 	{
 		if (!GuiScreen.isCtrlKeyDown())

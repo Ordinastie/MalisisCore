@@ -30,18 +30,27 @@ import net.malisis.core.client.gui.component.UIComponent;
  * Base for events fired by {@link UIComponent}.
  *
  * @author Ordinastie, PaleoCrafter
+ * @param <T> Type of the <code>UIComponent</code> firing this Event
  */
 public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 {
+	/** {@link UIComponent} firing this {@link ComponentEvent} */
 	protected T component;
 
+	/**
+	 * Instantiates a new {@link ComponentEvent}
+	 *
+	 * @param component the component
+	 */
 	public ComponentEvent(T component)
 	{
 		this.component = component;
 	}
 
 	/**
-	 * @return the {@link UIComponent} that fired this {@link ComponentEvent}
+	 * Gets the {@link UIComponent} that fired this {@link ComponentEvent}.
+	 *
+	 * @return the component
 	 */
 	public T getComponent()
 	{
@@ -51,16 +60,24 @@ public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 	/**
 	 * Fired when a {@link UIComponent} gets it's value changed.
 	 *
-	 * @author Ordinastie
 	 *
 	 * @param <T> the type of <code>UIComponent</code> that fired this event.
 	 * @param <S> the type of the value being changed.
 	 */
 	public static class ValueChange<T extends UIComponent, S> extends ComponentEvent<T>
 	{
+		/** The old value. */
 		protected S oldValue;
+		/** The new value. */
 		protected S newValue;
 
+		/**
+		 * Instantiates a new {@link net.malisis.core.client.gui.event.ComponentEvent.ValueChange}
+		 *
+		 * @param component the component
+		 * @param oldValue the old value
+		 * @param newValue the new value
+		 */
 		public ValueChange(T component, S oldValue, S newValue)
 		{
 			super(component);
@@ -69,7 +86,9 @@ public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 		}
 
 		/**
-		 * @return the value being changed for the {@link UIComponent}
+		 * Gets the value being changed for the {@link UIComponent}.
+		 *
+		 * @return the old value
 		 */
 		public S getOldValue()
 		{
@@ -77,7 +96,9 @@ public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 		}
 
 		/**
-		 * @return the being set for the {@link UIComponent}
+		 * Gets the value being set for the {@link UIComponent}.
+		 *
+		 * @return the new value
 		 */
 		public S getNewValue()
 		{

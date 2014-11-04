@@ -33,52 +33,45 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 
+/**
+ * RayTrace class that offers more control to handle raytracing.
+ *
+ * @author Ordinastie
+ *
+ */
 public class Raytrace
 {
-	/**
-	 * Number of blocks before we consider ray trace failed
-	 */
+	/** Number of blocks before we consider ray trace failed. */
 	private static int MAX_BLOCKS = 200;
-	/**
-	 * World object (needed for ray tracing inside each block)
-	 */
+
+	/** World object (needed for ray tracing inside each block). */
 	private World world;
-	/**
-	 * Source of the ray trace
-	 */
+
+	/** Source of the ray trace. */
 	private Point src;
-	/**
-	 * Destination of tey ray trace
-	 */
+
+	/** Destination of the ray trace. */
 	private Point dest;
-	/**
-	 * Ray describing the ray trace
-	 */
+
+	/** Ray describing the ray trace. */
 	private Ray ray;
-	/**
-	 * Vector describing the direction of steps to take when reaching limits of a block
-	 */
+
+	/** Vector describing the direction of steps to take when reaching limits of a block. */
 	private Vector step;
-	/**
-	 * The block coordinates of the source
-	 */
+
+	/** The block coordinates of the source. */
 	private ChunkPosition blockSrc;
-	/**
-	 * The block coordinates of the destination
-	 */
+
+	/** The block coordinates of the destination. */
 	private ChunkPosition blockDest;
 
-	/**
-	 * Current X coordinates of the block being ray traced
-	 */
+	/** Current X coordinate of the block being ray traced. */
 	private int currentX;
-	/**
-	 * Current Y coordinates of the block being ray traced
-	 */
+
+	/** Current Y coordinate of the block being ray traced. */
 	private int currentY;
-	/**
-	 * Current Z coordinates of the block being ray traced
-	 */
+
+	/** Current Z coordinate of the block being ray traced. */
 	private int currentZ;
 
 	/**
@@ -91,11 +84,15 @@ public class Raytrace
 	 */
 	public HashMap<ChunkPosition, MovingObjectPosition> blockPassed;
 
-	/**
-	 * Options of ray trace
-	 */
+	/** Options for the ray tracing. */
 	public int options = 0;
 
+	/**
+	 * Instantiates a new {@link Raytrace}.
+	 *
+	 * @param ray the ray
+	 * @param options the options
+	 */
 	public Raytrace(Ray ray, int options)
 	{
 		this.world = Minecraft.getMinecraft().theWorld;
@@ -119,21 +116,46 @@ public class Raytrace
 			blockPassed = new HashMap<ChunkPosition, MovingObjectPosition>();
 	}
 
+	/**
+	 * Instantiates a new {@link Raytrace}.
+	 *
+	 * @param ray the ray
+	 */
 	public Raytrace(Ray ray)
 	{
 		this(ray, 0);
 	}
 
+	/**
+	 * Instantiates a new {@link Raytrace}.
+	 *
+	 * @param src the src
+	 * @param v the v
+	 * @param options the options
+	 */
 	public Raytrace(Point src, Vector v, int options)
 	{
 		this(new Ray(src, v), options);
 	}
 
+	/**
+	 * Instantiates a new {@link Raytrace}.
+	 *
+	 * @param src the src
+	 * @param v the v
+	 */
 	public Raytrace(Point src, Vector v)
 	{
 		this(new Ray(src, v), 0);
 	}
 
+	/**
+	 * Instantiates a new {@link Raytrace}.
+	 *
+	 * @param src the src
+	 * @param dest the dest
+	 * @param options the options
+	 */
 	public Raytrace(Point src, Point dest, int options)
 	{
 		this(new Ray(src, new Vector(src, dest)), options);
@@ -141,6 +163,12 @@ public class Raytrace
 		blockDest = new ChunkPosition(dest.toVec3());
 	}
 
+	/**
+	 * Instantiates a new {@link Raytrace}.
+	 *
+	 * @param src the src
+	 * @param dest the dest
+	 */
 	public Raytrace(Point src, Point dest)
 	{
 		this(new Ray(src, new Vector(src, dest)), 0);
@@ -149,9 +177,9 @@ public class Raytrace
 	}
 
 	/**
-	 * Get the direction vector of the ray
-	 * 
-	 * @return
+	 * Gets the direction vector of the ray.
+	 *
+	 * @return the direction
 	 */
 	public Vector direction()
 	{
@@ -159,9 +187,9 @@ public class Raytrace
 	}
 
 	/**
-	 * Get the length of the ray
-	 * 
-	 * @return
+	 * Gets the length of the ray.
+	 *
+	 * @return the distance
 	 */
 	public double distance()
 	{
@@ -169,10 +197,10 @@ public class Raytrace
 	}
 
 	/**
-	 * Check if the option <code>opt</code> is set
-	 * 
-	 * @param opt
-	 * @return
+	 * Checks if the option <code>opt</code> is set.
+	 *
+	 * @param opt the option to check
+	 * @return true, if option is present, false otherwise
 	 */
 	public boolean hasOption(int opt)
 	{
@@ -180,10 +208,10 @@ public class Raytrace
 	}
 
 	/**
-	 * Do the ray tracing.
-	 * 
-	 * @return <code>MovingObjectPosition</code> with <code>typeOfHit</code> <b>BLOCK</b> if a ray hits a block in the way, or <b>MISS</b>
-	 *         if it reaches <code>dest</code> without any hit
+	 * Does the raytracing.
+	 *
+	 * @return {@link MovingObjectPosition} with <code>typeOfHit</code> <b>BLOCK</b> if a ray hits a block in the way, or <b>MISS</b> if it
+	 *         reaches <code>dest</code> without any hit
 	 */
 	public MovingObjectPosition trace()
 	{
@@ -240,11 +268,11 @@ public class Raytrace
 	}
 
 	/**
-	 * Get the minimum value of <code>x</code>, <code>y</code>, <code>z</code>
-	 * 
-	 * @param x
-	 * @param y
-	 * @param z
+	 * Gets the minimum value of <code>x</code>, <code>y</code>, <code>z</code>.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 * @return <code>Double.NaN</code> if <code>x</code>, <code>y</code> and <code>z</code> are all three are <code>Double.NaN</code>
 	 */
 	public double getMin(double x, double y, double z)
@@ -270,12 +298,14 @@ public class Raytrace
 	}
 
 	/**
-	 * Ray trace inside an actual block area. Calls <code>Block.collisionRayTrace()</code>
-	 * 
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
+	 * Raytraces inside an actual block area. Calls
+	 * {@link Block#collisionRayTrace(World, int, int, int, net.minecraft.util.Vec3, net.minecraft.util.Vec3)}
+	 *
+	 * @param x the x coordinate of the block to trace
+	 * @param y the y coordinate of the block to trace
+	 * @param z the z coordinate of the block to trace
+	 * @param exit the exit
+	 * @return the {@link MovingObjectPosition} return by block raytrace
 	 */
 	public MovingObjectPosition rayTraceBlock(int x, int y, int z, Point exit)
 	{
@@ -289,23 +319,21 @@ public class Raytrace
 		return block.collisionRayTrace(world, x, y, z, src.toVec3(), exit.toVec3());
 	}
 
+	/**
+	 * The Class Options.
+	 */
 	public static class Options
 	{
-		/**
-		 * Ray tracing through liquids returns a hit
-		 */
+		/** Ray tracing through liquids returns a hit. */
 		public static int HIT_LIQUIDS = 1 << 0;
-		/**
-		 * Don't stop ray tracing on hit
-		 */
+
+		/** Don't stop ray tracing on hit. */
 		public static int PASS_THROUGH = 1 << 1;
-		/**
-		 * Don't hit the block source of ray tracing
-		 */
+
+		/** Don't hit the block source of ray tracing. */
 		public static int IGNORE_FIRST_BLOCK = 1 << 2;
-		/**
-		 * Store list of blocks passed through ray trace
-		 */
+
+		/** Store list of blocks passed through ray trace. */
 		public static int LOG_BLOCK_PASSED = 1 << 3;
 
 	}

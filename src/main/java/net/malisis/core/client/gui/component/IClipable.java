@@ -27,8 +27,8 @@ package net.malisis.core.client.gui.component;
 import net.malisis.core.client.gui.ClipArea;
 
 /**
- * ICipable indicate an object (usually {@link UIComponent}) that they should provide a ClipArea.<br>
- * That area will be use to clip content with glScissor
+ * ICipable indicates an object (usually {@link UIComponent}) that they need to provide a ClipArea.<br>
+ * That area will be used to clip content with glScissor.
  *
  * @author Ordinastie
  *
@@ -36,50 +36,58 @@ import net.malisis.core.client.gui.ClipArea;
 public interface IClipable
 {
 	/**
-	 * @return the {@link ClipArea} to be used for glScissor.
+	 * Gets {@link ClipArea} to be used for glScissor
+	 *
+	 * @return the clip area.
 	 */
 	public ClipArea getClipArea();
 
 	/**
 	 * Sets whether this {@link IClipable} should clip or not.
+	 *
+	 * @param clip the new clip content
 	 */
 	public void setClipContent(boolean clip);
 
 	/**
-	 * @return whether this {@link IClipable} should clip or not.
+	 * Checks whether this {@link IClipable} should clip or not.
+	 *
+	 * @return true, if should clip
 	 */
 	public boolean shouldClipContent();
 
 	/**
 	 * Gets the X position on the screen. See {@link UIComponent#screenX()}.
 	 *
-	 * @return
+	 * @return the coordinate
 	 */
 	public int screenX();
 
 	/**
 	 * Gets the Y position on the screen. See {@link UIComponent#screenY()}.
 	 *
-	 * @return
+	 * @return the coordinate
 	 */
 	public int screenY();
 
 	/**
 	 * Gets the with of this {@link IClipable}. See {@link UIComponent#getWidth()}.
 	 *
-	 * @return
+	 * @return the width
 	 */
 	public int getWidth();
 
 	/**
 	 * Gets the with of this {@link IClipable}. See {@link UIComponent#getHeight()}.
 	 *
-	 * @return
+	 * @return the height
 	 */
 	public int getHeight();
 
 	/**
-	 * @return the parent {@link UIComponent} of this {@link IClipable}.
+	 * Gets the parent {@link UIComponent} of this {@link IClipable}.
+	 *
+	 * @return the parent
 	 */
 	public UIComponent getParent();
 }

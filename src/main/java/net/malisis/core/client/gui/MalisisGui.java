@@ -117,7 +117,7 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Sets the inventory container for this <code>MalisisGui</code>.
+	 * Sets the inventory container for this {@link MalisisGui}.
 	 *
 	 * @param container
 	 */
@@ -127,9 +127,9 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Gets the inventory container for this <code>MalisisGui</code>.
+	 * Gets the {@link MalisisInventoryContainer} for this {@link MalisisGui}.
 	 *
-	 * @return
+	 * @return inventory container
 	 */
 	public MalisisInventoryContainer getInventoryContainer()
 	{
@@ -147,7 +147,7 @@ public class MalisisGui extends GuiScreen
 	/**
 	 * Gets elapsed time since the GUI was opened.
 	 *
-	 * @return
+	 * @return the time
 	 */
 	public long getElapsedTime()
 	{
@@ -174,11 +174,11 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Gets the current component at the specified coordinates inside this {@link MalisisGui}.
+	 * Gets the {@link UIContainer} at the specified coordinates inside this {@link MalisisGui}.
 	 *
 	 * @param x
 	 * @param y
-	 * @return
+	 * @return the component, null if component is {@link #screen}
 	 */
 	public UIComponent getComponentAt(int x, int y)
 	{
@@ -190,7 +190,7 @@ public class MalisisGui extends GuiScreen
 	 * Fires a {@link GuiEvent} for this {@link MalisisGui}.
 	 *
 	 * @param event
-	 * @return
+	 * @return true if the event should propagate, false if cancelled
 	 */
 	protected boolean fireEvent(GuiEvent event)
 	{
@@ -456,7 +456,7 @@ public class MalisisGui extends GuiScreen
 	/**
 	 * Gets the current {@link MalisisGui} displayed.
 	 *
-	 * @return null if no GUI being displayed or if not a <code>MalisisGui</code>
+	 * @return null if no GUI being displayed or if not a {@link MalisisGui}
 	 */
 	public static MalisisGui currentGui()
 	{
@@ -498,7 +498,7 @@ public class MalisisGui extends GuiScreen
 	 *
 	 * @param component
 	 * @param hovered
-	 * @return
+	 * @return true, if the state was changed
 	 */
 	public static boolean setHoveredComponent(UIComponent component, boolean hovered)
 	{
@@ -524,9 +524,9 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Gets the currently focused
+	 * Gets the currently focused {@link UIComponent}
 	 *
-	 * @return
+	 * @return the component
 	 */
 	public static UIComponent getFocusedComponent()
 	{

@@ -44,6 +44,12 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 
+/**
+ * Complete rewrite of {@link Container}.
+ *
+ * @author Ordinastie
+ *
+ */
 public class MalisisInventoryContainer extends Container
 {
 	//@formatter:off
@@ -68,6 +74,11 @@ public class MalisisInventoryContainer extends Container
 		DROP_SLOT_ONE,
 		DROP_SLOT_STACK;
 
+		/**
+		 * Checks if this {@link ActionType} is a drag action.
+		 *
+		 * @return true, if is a drag action
+		 */
 		public boolean isDragAction()
 		{
 			return this == DRAG_START_LEFT_CLICK || this == DRAG_START_RIGHT_CLICK || this == DRAG_START_PICKUP ||
@@ -76,68 +87,38 @@ public class MalisisInventoryContainer extends Container
 	}
 	//@formatter:on
 
-	/**
-	 * Dragging the itemStack to be spread evenly among all crossed slots
-	 */
+	/** Dragging the itemStack to be spread evenly among all crossed slots. */
 	public static final int DRAG_TYPE_SPREAD = 0;
-	/**
-	 * Dragging the itemStack to leave only one item per crossed slot
-	 */
+	/** Dragging the itemStack to leave only one item per crossed slot. */
 	public static final int DRAG_TYPE_ONE = 1;
-	/**
-	 * Dragging the itemStack to pick up itemStacks held by crossed slots
-	 */
+	/** Dragging the itemStack to pick up itemStacks held by crossed slots. */
 	public static final int DRAG_TYPE_PICKUP = 2;
 
-	/**
-	 * Player that opened this <code>MalisisInventoryContainer</code>
-	 */
+	/** Player that opened this {@link MalisisInventoryContainer}. */
 	protected EntityPlayer owner;
-	/**
-	 * Id to use for the next inventory added
-	 */
+	/** Id to use for the next inventory added. */
 	private int nexInventoryId = 0;
-	/**
-	 * List of inventories handled by this container
-	 */
+	/** List of inventories handled by this container. */
 	protected HashMap<Integer, MalisisInventory> inventories = new HashMap<>();
-	/**
-	 * Base inventory for this <code>MalisisInventoryContainer</code>
-	 */
-	//protected MalisisInventory inventory;
-	/**
-	 * Inventory of the player that opened this <code>MalisisInventoryContainer</code>
-	 */
-	//protected MalisisInventory playerInventory;
-	/**
-	 * ItemStack cache for base inventory. Used to know what itemStacks need to be sent to client
-	 */
-	protected HashMap<Integer, MalisisInventory> inventoryCache = new HashMap<>();
-	/**
-	 * ItemStack currently picked and following the cursor
-	 */
+	/** ItemStack currently picked and following the cursor. */
 	protected ItemStack pickedItemStack;
-	/**
-	 * Cache for the itemStack currently picked
-	 */
+	/** Cache for the itemStack currently picked. */
 	protected ItemStack pickedItemStackCache;
-	/**
-	 * Stack size when dragging started
-	 */
+	/** Stack size when dragging started. */
 	protected int draggedAmount = 0;
-	/**
-	 *
-	 */
+	/** The dragged slots. */
 	protected Set<MalisisSlot> draggedSlots = new HashSet<>();
-	/**
-	 * Type drag action. Can be DRAG_TYPE_SPREAD, DRAG_TYPE_ONE or DRAG_TYPE_PICKUP. Set to -1 if not currently dragging.
-	 */
+	/** Type drag action. Can be DRAG_TYPE_SPREAD, DRAG_TYPE_ONE or DRAG_TYPE_PICKUP. Set to -1 if not currently dragging. */
 	protected int dragType = -1;
-	/**
-	 * Stores the last itemStack that was shift clicked. Used for shift double click.
-	 */
+	/** Stores the last itemStack that was shift clicked. Used for shift double click. */
 	protected ItemStack lastShiftClicked;
 
+	/**
+	 * Instantiates a new {@link MalisisInventoryContainer}.
+	 *
+	 * @param player the player
+	 * @param windowId the window id
+	 */
 	public MalisisInventoryContainer(EntityPlayer player, int windowId)
 	{
 		// if server
@@ -155,11 +136,16 @@ public class MalisisInventoryContainer extends Container
 		this.owner.openContainer = this;
 	}
 
+	/**
+	 * Adds the {@link MalisisInventory} to this {@link MalisisInventoryContainer}.<br>
+	 *
+	 * @param inventory the inventory
+	 * @return the inventoryId for the inventory
+	 */
 	public int addInventory(MalisisInventory inventory)
 	{
 		inventory.setInventoryId(nexInventoryId);
 		inventories.put(nexInventoryId, inventory);
-		inventoryCache.put(nexInventoryId, inventory);
 
 		//do not add container to current player inventory
 		if (nexInventoryId != 0)
@@ -168,6 +154,11 @@ public class MalisisInventoryContainer extends Container
 		return nexInventoryId++;
 	}
 
+	/**
+	 * Removes the {@link MalisisInventory} from this {@link MalisisInventoryContainer}.
+	 *
+	 * @param inventory the inventory
+	 */
 	public void removeInventory(MalisisInventory inventory)
 	{
 		//do not remove player inventory
@@ -176,12 +167,14 @@ public class MalisisInventoryContainer extends Container
 
 		inventory.removeOpenedContainer(this);
 		inventories.remove(inventory.getInventoryId());
-		inventoryCache.remove(inventory.getInventoryId());
 	}
 
 	// #region getters/setters
 	/**
-	 * @return the inventory of this <code>MalisisInventoryContainer</code> with the specified id.
+	 * Gets the {@link MalisisInventory} of this {@link MalisisInventoryContainer} with the specified id.
+	 *
+	 * @param id the id
+	 * @return the inventory
 	 */
 	public MalisisInventory getInventory(int id)
 	{
@@ -189,7 +182,9 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
-	 * @return player's inventory of this <code>MalisisInventoryContainer</code>.
+	 * Gets player's inventory of this {@link MalisisInventoryContainer}.
+	 *
+	 * @return the inventory
 	 */
 	public MalisisInventory getPlayerInventory()
 	{
@@ -199,8 +194,7 @@ public class MalisisInventoryContainer extends Container
 	/**
 	 * Sets the currently picked itemStack. Update player inventory.
 	 *
-	 * @param itemStack
-	 * @param player
+	 * @param itemStack the new picked item stack
 	 */
 	public void setPickedItemStack(ItemStack itemStack)
 	{
@@ -209,6 +203,8 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
+	 * Gets the picked item stack.
+	 *
 	 * @return currently picked itemStack
 	 */
 	public ItemStack getPickedItemStack()
@@ -217,7 +213,9 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
-	 * @return true if currently dragging an itemStack.
+	 * Checks if currently dragging an itemStack.
+	 *
+	 * @return true, if currently dragging an itemStack.
 	 */
 	public boolean isDraggingItemStack()
 	{
@@ -225,10 +223,10 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
-	 * Check if the dragging should end based on the mouse button clicked.
+	 * Checks if the dragging should end based on the mouse button clicked.
 	 *
-	 * @param button
-	 * @return
+	 * @param button the button
+	 * @return true, if dragging should end
 	 */
 	public boolean shouldEndDrag(int button)
 	{
@@ -242,10 +240,10 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
-	 * Check if the dragging should be reset based on the mouse button clicked.
+	 * Checks if the dragging should be reset based on the mouse button clicked.
 	 *
-	 * @param button
-	 * @return
+	 * @param button the button
+	 * @return true, if dragging should reset
 	 */
 	public boolean shouldResetDrag(int button)
 	{
@@ -261,6 +259,8 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
+	 * Gets the dragging type.
+	 *
 	 * @return the current dragging type.
 	 */
 	public int getDragType()
@@ -304,9 +304,9 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
-	 * Sends all changes for the inventory determined by {@link SlotType type}.
+	 * Sends all changes for the {@link MalisisInventory}.
 	 *
-	 * @param type
+	 * @param inventory the inventory
 	 */
 	public void detectAndSendInventoryChanges(MalisisInventory inventory)
 	{
@@ -351,6 +351,11 @@ public class MalisisInventoryContainer extends Container
 
 	// #end network
 
+	/**
+	 * Called when this {@link MalisisInventoryContainer} is closed.
+	 *
+	 * @param owner the owner
+	 */
 	@Override
 	public void onContainerClosed(EntityPlayer owner)
 	{
@@ -361,12 +366,12 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
-	 * Handle the action for this <code>MalisisInventoryContainer</code>. See {@link ActionType} for possible actions.
+	 * Handles the action for this {@link MalisisInventoryContainer}. See {@link ActionType} for possible actions.
 	 *
-	 * @param action
-	 * @param slotNumber
-	 * @param code
-	 * @param isPlayerInv
+	 * @param action the action
+	 * @param inventoryId the inventory id
+	 * @param slotNumber the slot number
+	 * @param code the code
 	 * @return itemStack resulting of the actions. Should be used to check client/server coherence.
 	 */
 	public ItemStack handleAction(ActionType action, int inventoryId, int slotNumber, int code)
@@ -445,10 +450,10 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
-	 * Drops one or the full itemStack currently picked up
+	 * Drops one or the full itemStack currently picked up.
 	 *
-	 * @param fullStack
-	 * @return
+	 * @param fullStack the full stack
+	 * @return the item stack
 	 */
 	private ItemStack handleDropPickedStack(boolean fullStack)
 	{
@@ -464,9 +469,9 @@ public class MalisisInventoryContainer extends Container
 	/**
 	 * Handles the normal left or right click.
 	 *
-	 * @param slot
-	 * @param fullStack
-	 * @return
+	 * @param slot the slot
+	 * @param fullStack the full stack
+	 * @return the item stack
 	 */
 	private ItemStack handleNormalClick(MalisisSlot slot, boolean fullStack)
 	{
@@ -490,10 +495,11 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
-	 * Handles shift clicking a slot
+	 * Handles shift clicking a slot.
 	 *
-	 * @param slot
-	 * @return
+	 * @param inventoryId the inventory id
+	 * @param slot the slot
+	 * @return the item stack
 	 */
 	private ItemStack handleShiftClick(int inventoryId, MalisisSlot slot)
 	{
@@ -542,11 +548,11 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
-	 * Handles player pressing 1-9 key while hovering a slot
+	 * Handles player pressing 1-9 key while hovering a slot.
 	 *
-	 * @param slot
-	 * @param num
-	 * @return
+	 * @param slot the slot
+	 * @param num the num
+	 * @return the item stack
 	 */
 	private ItemStack handleHotbar(MalisisSlot slot, int num)
 	{
@@ -588,11 +594,11 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
-	 * Drops itemStack from hovering slot
+	 * Drops itemStack from hovering slot.
 	 *
-	 * @param slot
-	 * @param player
-	 * @return
+	 * @param slot the slot
+	 * @param fullStack the full stack
+	 * @return the item stack
 	 */
 	private ItemStack handleDropSlot(MalisisSlot slot, boolean fullStack)
 	{
@@ -619,9 +625,10 @@ public class MalisisInventoryContainer extends Container
 	/**
 	 * Handle double clicking on a slot.
 	 *
-	 * @param slot
-	 * @param shiftClick
-	 * @return
+	 * @param inventoryId the inventory id
+	 * @param slot the slot
+	 * @param shiftClick the shift click
+	 * @return the item stack
 	 */
 	private ItemStack handleDoubleClick(int inventoryId, MalisisSlot slot, boolean shiftClick)
 	{
@@ -698,8 +705,8 @@ public class MalisisInventoryContainer extends Container
 	/**
 	 * Picks up the itemStack in the slot.
 	 *
-	 * @param slot
-	 * @return
+	 * @param slot the slot
+	 * @return the item stack
 	 */
 	private ItemStack handlePickBlock(MalisisSlot slot)
 	{
@@ -716,9 +723,10 @@ public class MalisisInventoryContainer extends Container
 	/**
 	 * Handles all drag actions.
 	 *
-	 * @param action
-	 * @param slot
-	 * @return
+	 * @param action the action
+	 * @param inventoryId the inventory id
+	 * @param slot the slot
+	 * @return the item stack
 	 */
 	private ItemStack handleDrag(ActionType action, int inventoryId, MalisisSlot slot)
 	{
@@ -759,13 +767,6 @@ public class MalisisInventoryContainer extends Container
 						s.insert(s.getDraggedItemStack());
 						s.setDraggedItemStack(null);
 					}
-					//					ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(s.getDraggedItemStack(), s.getItemStack());
-					//					ism.merge();
-					//					amountMerged += ism.nbMerged;
-					//					s.setItemStack(ism.into);
-					//					s.setDraggedItemStack(null);
-					//					if (s.hasChanged())
-					//						s.onSlotChanged();
 				}
 			}
 
@@ -858,7 +859,7 @@ public class MalisisInventoryContainer extends Container
 	}
 
 	/**
-	 * Reset the dragging state
+	 * Resets the dragging state.
 	 */
 	private void resetDrag()
 	{
@@ -881,6 +882,12 @@ public class MalisisInventoryContainer extends Container
 	 * COMPATIBILITY
 	 */
 
+	/**
+	 * Can interact with.
+	 *
+	 * @param var1 the var1
+	 * @return true, if successful
+	 */
 	@Override
 	public boolean canInteractWith(EntityPlayer var1)
 	{

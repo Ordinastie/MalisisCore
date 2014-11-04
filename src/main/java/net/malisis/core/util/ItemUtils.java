@@ -26,28 +26,66 @@ package net.malisis.core.util;
 
 import net.minecraft.item.ItemStack;
 
+/**
+ * Utility class for items.
+ *
+ * @author Ordinastie
+ *
+ */
 public class ItemUtils
 {
+	/** Defines a full stack amount to process. */
 	public static final int FULL_STACK = -1;
+
+	/** Defines a half stack amount to process. */
 	public static final int HALF_STACK = -2;
 
+	/**
+	 * Utility class to help merge {@link ItemStack itemStacks}.<br>
+	 * After calling {@link ItemStacksMerger#merge() merge()}, {@link ItemStacksMerger#merge merge} and {@link ItemStacksMerger#into into}
+	 * will hold the results. An empty itemStack will automatically be converted to <code>null</code>.
+	 */
 	public static class ItemStacksMerger
 	{
+		/** The {@link ItemStack} to merge. */
 		public ItemStack merge;
+
+		/** The targetted {@link ItemStack} receiving the merge. */
 		public ItemStack into;
+
+		/** Amount of the {@link ItemStack} that was merged. -1 until {@link ItemStacksMerger#merge() merge()} is called. */
 		public int nbMerged = -1;
 
+		/**
+		 * Instantiates the {@link ItemStacksMerger}.
+		 *
+		 * @param merge the merge
+		 * @param into the into
+		 */
 		public ItemStacksMerger(ItemStack merge, ItemStack into)
 		{
 			this.merge = merge;
 			this.into = into;
 		}
 
+		/**
+		 * Merges the full amount for the {@link ItemStacksMerger#merge merge} {@link ItemStack}.
+		 *
+		 * @return true, if stacks could be merged, false otherwise
+		 */
 		public boolean merge()
 		{
 			return merge(FULL_STACK);
 		}
 
+		/**
+		 * Merges the specified amount for the {@link ItemStacksMerger#merge merge} {@link ItemStack}.<br>
+		 * Amount will be capped to the {@link ItemStack#getMaxStackSize()} amount, or 64 if both {@link ItemStacksMerger#merge merge} and
+		 * {@link ItemStacksMerger#into into} are <code>null</code>.
+		 *
+		 * @param amount the amount to be merged
+		 * @return true, if stacks could be merged, false otherwise
+		 */
 		public boolean merge(int amount)
 		{
 			int max = 64;
@@ -58,6 +96,14 @@ public class ItemUtils
 			return merge(amount, max);
 		}
 
+		/**
+		 * Merges the specified amount for the {@link ItemStacksMerger#merge merge} {@link ItemStack}.<br>
+		 * Amount will be capped by <b>intoMaxStackSize</b> (used for inventory slots for example).
+		 *
+		 * @param amount the amount to be merged
+		 * @param intoMaxStackSize max amount the into itemStack can hold
+		 * @return true, if successful
+		 */
 		public boolean merge(int amount, int intoMaxStackSize)
 		{
 			nbMerged = 0;
@@ -94,6 +140,9 @@ public class ItemUtils
 			return true;
 		}
 
+		/**
+		 * @return true, if {@link ItemStacksMerger#merge merge} and {@link ItemStacksMerger#into into} can be merged.
+		 */
 		public boolean canMerge()
 		{
 			if (merge == null || into == null)
@@ -102,17 +151,37 @@ public class ItemUtils
 		}
 	}
 
+	/**
+	 * Utility class to help split an {@link ItemStack}.<br>
+	 * An empty itemStack will automatically be converted to <code>null</code>.
+	 */
 	public static class ItemStackSplitter
 	{
+		/** The {@link ItemStack} to be split. */
 		public ItemStack source;
+
+		/** The restulting {@link ItemStack} after the split. */
 		public ItemStack split;
+
+		/** The amount of items to split. */
 		public int amount;
 
+		/**
+		 * Instantiates the {@link ItemStackSplitter}.
+		 *
+		 * @param source the source
+		 */
 		public ItemStackSplitter(ItemStack source)
 		{
 			this.source = source;
 		}
 
+		/**
+		 * Splits the {@link ItemStackSplitter#source} by the specified amount.
+		 *
+		 * @param amount the amount
+		 * @return the item stack
+		 */
 		public ItemStack split(int amount)
 		{
 			if (source == null)
@@ -136,6 +205,13 @@ public class ItemUtils
 		}
 	}
 
+	/**
+	 * Checks whether two {@link ItemStack itemStacks} can be stacked together
+	 *
+	 * @param stack1 first itemStack
+	 * @param stack2 second itemStack
+	 * @return true, if the itemStack can be stacked, false otherwise
+	 */
 	public static boolean areItemStacksStackable(ItemStack stack1, ItemStack stack2)
 	{
 		if (stack1 == null || stack2 == null)

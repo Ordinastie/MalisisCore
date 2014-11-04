@@ -29,47 +29,44 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 
 /**
- * UILabel
+ * UILabel.
  *
- * @author PaleoCrafter
+ * @author Ordinastie
  */
 public class UILabel extends UIComponent<UILabel>
 {
-	/**
-	 * Text of this {@link UILabel}.
-	 */
+	/** Text of this {@link UILabel}. */
 	protected String text;
-	/**
-	 * Color to use to draw the text of this {@link UILabel}.
-	 */
+	/** Color to use to draw the text of this {@link UILabel}. */
 	protected int color = 0x404040;
-	/**
-	 * Determines if the text is drawn with drop shadow.
-	 */
+	/** Determines if the text is drawn with drop shadow. */
 	protected boolean drawShadow;
-	/**
-	 * Width of the text
-	 */
+	/** Width of the text. */
 	protected int textWidth;
-	/**
-	 * Height of the text
-	 */
+	/** Height of the text. */
 	protected int textHeight;
-	/**
-	 * Scale of the font
-	 */
+	/** Scale of the font. */
 	protected float fontScale = 1;
-	/**
-	 *
-	 */
+	/** Whether this {@link UILabel} can be interacted with. */
 	protected boolean canInteract = false;
 
+	/**
+	 * Instantiates a new {@link UILabel}.
+	 *
+	 * @param gui the gui
+	 * @param text the text
+	 */
 	public UILabel(MalisisGui gui, String text)
 	{
 		this(gui);
 		this.setText(text);
 	}
 
+	/**
+	 * Instantiates a new {@link UILabel}.
+	 *
+	 * @param gui the gui
+	 */
 	public UILabel(MalisisGui gui)
 	{
 		super(gui);
@@ -79,7 +76,7 @@ public class UILabel extends UIComponent<UILabel>
 	/**
 	 * Sets the text of this {@link UILabel}. If no width was previously set, it will be recalculated for this text.
 	 *
-	 * @param text
+	 * @param text the text
 	 * @return this {@link UILabel}
 	 */
 	public UILabel setText(String text)
@@ -93,6 +90,8 @@ public class UILabel extends UIComponent<UILabel>
 	}
 
 	/**
+	 * Gets the text.
+	 *
 	 * @return text of this {@link UILabel}
 	 */
 	public String getText()
@@ -103,7 +102,8 @@ public class UILabel extends UIComponent<UILabel>
 	/**
 	 * Sets the color of the text of this {@link UILabel}.
 	 *
-	 * @param color
+	 * @param color the color
+	 * @return the UI label
 	 */
 	public UILabel setColor(int color)
 	{
@@ -111,6 +111,13 @@ public class UILabel extends UIComponent<UILabel>
 		return this;
 	}
 
+	/**
+	 * Gets the component at.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @return the component at
+	 */
 	@Override
 	public UIComponent getComponentAt(int x, int y)
 	{
@@ -138,7 +145,8 @@ public class UILabel extends UIComponent<UILabel>
 	/**
 	 * Set the drop shadow for the text of this {@link UILabel}.
 	 *
-	 * @param drawShadow
+	 * @param drawShadow the draw shadow
+	 * @return the UI label
 	 */
 	public UILabel setDrawShadow(boolean drawShadow)
 	{
@@ -147,10 +155,10 @@ public class UILabel extends UIComponent<UILabel>
 	}
 
 	/**
-	 * Sets the scale of the font to use for this {@link UILabel}
+	 * Sets the scale of the font to use for this {@link UILabel}.
 	 *
-	 * @param scale
-	 * @return
+	 * @param scale the scale
+	 * @return the UI label
 	 */
 	public UILabel setFontScale(float scale)
 	{
@@ -159,6 +167,8 @@ public class UILabel extends UIComponent<UILabel>
 	}
 
 	/**
+	 * Gets the font scale.
+	 *
 	 * @return the fontScale used by this {@link UILabel}
 	 */
 	public float getFontScale()
@@ -168,10 +178,26 @@ public class UILabel extends UIComponent<UILabel>
 
 	// #end getters/setters
 
+	/**
+	 * Draws the background.
+	 *
+	 * @param renderer the renderer
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
+	 */
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{}
 
+	/**
+	 * Draws the foreground.
+	 *
+	 * @param renderer the renderer
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
+	 */
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{

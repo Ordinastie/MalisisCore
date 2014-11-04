@@ -52,43 +52,40 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
+/**
+ *
+ * @author Ordinastie
+ *
+ */
 public class MalisisInventory implements IInventory
 {
+	/** List of {@link MalisisInventory} that is currently containing this {@link MalisisInventory}. */
 	protected Set<MalisisInventoryContainer> containers = Collections.newSetFromMap(new WeakHashMap<MalisisInventoryContainer, Boolean>());
-	/**
-	 * The inventory id inside the container.
-	 */
+	/** The inventory id inside the container. */
 	protected int inventoryId;
-	/**
-	 * Object containing this {@link MalisisInventory}.
-	 */
+	/** Object containing this {@link MalisisInventory}. */
 	protected IInventoryProvider inventoryProvider;
-	/**
-	 * ItemStack holding the inventory when inventoryProvider is an Item
-	 */
+	/** ItemStack holding the inventory when inventoryProvider is an Item. */
 	protected ItemStack itemStackProvider;
-
-	/**
-	 * Slots for this {@link MalisisInventory}.
-	 */
+	/** Slots for this {@link MalisisInventory}. */
 	protected MalisisSlot[] slots;
-	/**
-	 * Name for this inventory
-	 */
+	/** Name of this {@link MalisisInventory}. */
 	protected String name;
-	/**
-	 * Size of this {@link MalisisInventory}.
-	 */
+	/** Number of slots inside this {@link MalisisInventory}. */
 	protected int size;
-	/**
-	 * Maximum stack size for the slots
-	 */
+	/** Maximum stack size for the slots. */
 	protected int slotMaxStackSize = 64;
-
+	/** Event bus on which inventory events will be fired. */
 	private EventBus bus = new EventBus();
-
+	/** Current inventory state. */
 	public InventoryState state = new InventoryState();
 
+	/**
+	 * Instantiates a new {@link MalisisInventory}.
+	 *
+	 * @param provider the provider
+	 * @param size the size
+	 */
 	public MalisisInventory(IInventoryProvider provider, int size)
 	{
 		this.inventoryProvider = provider;
@@ -99,6 +96,12 @@ public class MalisisInventory implements IInventory
 		setSlots(slots);
 	}
 
+	/**
+	 * Instantiates a new {@link MalisisInventory}.
+	 *
+	 * @param provider the provider
+	 * @param slots the slots
+	 */
 	public MalisisInventory(IInventoryProvider provider, MalisisSlot[] slots)
 	{
 		this.inventoryProvider = provider;
@@ -106,7 +109,9 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * @return the {@link IInventoryProvider} of this {@link MalisisInventory}.
+	 * Gets the {@link IInventoryProvider} of this {@link MalisisInventory}.
+	 *
+	 * @return the provider.
 	 */
 	public IInventoryProvider getProvider()
 	{
@@ -116,7 +121,7 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Sets the slots for this {@link MalisisInventory}.
 	 *
-	 * @param slots
+	 * @param slots the new slots
 	 */
 	public void setSlots(MalisisSlot[] slots)
 	{
@@ -129,8 +134,8 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Overrides a specific slot with a new one.
 	 *
-	 * @param slot
-	 * @param slotNumber
+	 * @param slot the slot
+	 * @param slotNumber the slot number
 	 */
 	public void overrideSlot(MalisisSlot slot, int slotNumber)
 	{
@@ -144,7 +149,7 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Registers an object for the events fired by this {@link MalisisInventory}.
 	 *
-	 * @param object
+	 * @param object the object
 	 */
 	public void register(Object object)
 	{
@@ -154,7 +159,7 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Sets the id of this {@link MalisisInventory} inside its container.
 	 *
-	 * @param id
+	 * @param id the new inventory id
 	 */
 	public void setInventoryId(int id)
 	{
@@ -172,7 +177,9 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * @return the id of this {@link MalisisInventory} inside the {@link MalisisInventoryContainer}.
+	 * Gets the id of this {@link MalisisInventory} inside the {@link MalisisInventoryContainer}.
+	 *
+	 * @return the inventory id.
 	 */
 	public int getInventoryId()
 	{
@@ -180,17 +187,32 @@ public class MalisisInventory implements IInventory
 	}
 
 	// #region getters/setters
+	/**
+	 * Sets the name.
+	 *
+	 * @param name the new name
+	 */
 	public void setName(String name)
 	{
 		this.name = name;
 	}
 
+	/**
+	 * Gets the inventory name.
+	 *
+	 * @return the inventory name
+	 */
 	@Override
 	public String getInventoryName()
 	{
 		return name;
 	}
 
+	/**
+	 * Checks for custom inventory name.
+	 *
+	 * @return true, if successful
+	 */
 	@Override
 	public boolean hasCustomInventoryName()
 	{
@@ -200,8 +222,8 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Gets the slot at position slotNumber.
 	 *
-	 * @param slotNumber
-	 * @return
+	 * @param slotNumber the slot number
+	 * @return the slot
 	 */
 	public MalisisSlot getSlot(int slotNumber)
 	{
@@ -212,6 +234,8 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
+	 * Gets the slots.
+	 *
 	 * @return all slots from this {@link MalisisInventory}.
 	 */
 	public MalisisSlot[] getSlots()
@@ -222,8 +246,8 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Gets the itemStack from the slot at position slotNumber.
 	 *
-	 * @param slotNumber
-	 * @return
+	 * @param slotNumber the slot number
+	 * @return the item stack
 	 */
 	public ItemStack getItemStack(int slotNumber)
 	{
@@ -234,8 +258,8 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Sets the itemStack for the slot at position slotNumber.
 	 *
-	 * @param slotNumber
-	 * @param itemStack
+	 * @param slotNumber the slot number
+	 * @param itemStack the item stack
 	 */
 	public void setItemStack(int slotNumber, ItemStack itemStack)
 	{
@@ -256,6 +280,11 @@ public class MalisisInventory implements IInventory
 		slot.onSlotChanged();
 	}
 
+	/**
+	 * Gets the item stack list.
+	 *
+	 * @return the item stack list
+	 */
 	public List<ItemStack> getItemStackList()
 	{
 		ArrayList<ItemStack> list = new ArrayList<>();
@@ -269,9 +298,9 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Checks whether itemStack can be contained by slot.
 	 *
-	 * @param slot
-	 * @param itemStack
-	 * @return
+	 * @param slot the slot
+	 * @param itemStack the item stack
+	 * @return true, if successful
 	 */
 	public boolean itemValidForSlot(MalisisSlot slot, ItemStack itemStack)
 	{
@@ -280,6 +309,10 @@ public class MalisisInventory implements IInventory
 
 	/**
 	 * Checks whether itemStack can be contained by the slot at position slotNumber.
+	 *
+	 * @param slotNumber the slot number
+	 * @param itemStack the item stack
+	 * @return true, if is item valid for slot
 	 */
 	@Override
 	public boolean isItemValidForSlot(int slotNumber, ItemStack itemStack)
@@ -291,6 +324,8 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
+	 * Gets the size inventory.
+	 *
 	 * @return size of this {@link MalisisInventory}.
 	 */
 	@Override
@@ -300,6 +335,8 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
+	 * Gets the inventory stack limit.
+	 *
 	 * @return stack size limit for the slots
 	 */
 	@Override
@@ -308,16 +345,21 @@ public class MalisisInventory implements IInventory
 		return slotMaxStackSize;
 	}
 
+	/**
+	 * Sets the inventory stack limit.
+	 *
+	 * @param limit the new inventory stack limit
+	 */
 	public void setInventoryStackLimit(int limit)
 	{
 		slotMaxStackSize = limit;
 	}
 
 	/**
-	 * Set this {@link MalisisInventory} contents based on the itemStack NBT. <br />
+	 * Set this {@link MalisisInventory} contents based on the itemStack NBT. <br>
 	 * The inventoryProvider need to be an Item.
 	 *
-	 * @param itemStack
+	 * @param itemStack the new item stack provider
 	 */
 	public void setItemStackProvider(ItemStack itemStack)
 	{
@@ -336,11 +378,21 @@ public class MalisisInventory implements IInventory
 		readFromNBT(itemStack.getTagCompound());
 	}
 
+	/**
+	 * Adds the opened container.
+	 *
+	 * @param container the container
+	 */
 	public void addOpenedContainer(MalisisInventoryContainer container)
 	{
 		containers.add(container);
 	}
 
+	/**
+	 * Removes the opened container.
+	 *
+	 * @param container the container
+	 */
 	public void removeOpenedContainer(MalisisInventoryContainer container)
 	{
 		containers.remove(container);
@@ -348,6 +400,11 @@ public class MalisisInventory implements IInventory
 			itemStackProvider.stackTagCompound.removeTag("inventoryId");
 	}
 
+	/**
+	 * Gets the opened containers.
+	 *
+	 * @return the opened containers
+	 */
 	public Set<MalisisInventoryContainer> getOpenedContainers()
 	{
 		return containers;
@@ -356,7 +413,7 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Checks if at least one itemStack is present in inventory.
 	 *
-	 * @return
+	 * @return true, if is empty
 	 */
 	public boolean isEmpty()
 	{
@@ -366,7 +423,7 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Checks if at least one slot is not full.
 	 *
-	 * @return
+	 * @return true, if is full
 	 */
 	public boolean isFull()
 	{
@@ -380,9 +437,9 @@ public class MalisisInventory implements IInventory
 	// #end getters/setters
 
 	/**
-	 * Called when itemStack change in slot
+	 * Called when itemStack change in slot.
 	 *
-	 * @param malisisSlot
+	 * @param slot the slot
 	 */
 	public void onSlotChanged(MalisisSlot slot)
 	{
@@ -400,9 +457,9 @@ public class MalisisInventory implements IInventory
 	{}
 
 	/**
-	 * Gets the first slot containing an itemStack.
+	 * Gets the first {@link MalisisSlot} containing an {@link ItemStack}.
 	 *
-	 * @return
+	 * @return the first occupied slot
 	 */
 	public MalisisSlot getFirstOccupiedSlot()
 	{
@@ -413,9 +470,9 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Removes the first itemStack in the inventory and returns it.
+	 * Removes the first {@link ItemStack} in this {@link MalisisInventory} and returns it.
 	 *
-	 * @return
+	 * @return the item stack
 	 */
 	public ItemStack pullItemStack()
 	{
@@ -430,10 +487,10 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Transfer itemStack inside this {@link MalisisInventory}.
+	 * Transfers an {@link ItemStack} inside this {@link MalisisInventory}.
 	 *
-	 * @param itemStack that could not fit inside this {@link MalisisInventory}
-	 * @return
+	 * @param itemStack the item stack
+	 * @return the itemStack that could not fit inside this inventory
 	 */
 	public ItemStack transferInto(ItemStack itemStack)
 	{
@@ -441,11 +498,11 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Transfer itemStack inside this {@link MalisisInventory}.
+	 * Transfers itemStack inside this {@link MalisisInventory}.
 	 *
-	 * @param itemStack that could not fit inside this {@link MalisisInventory}
+	 * @param itemStack
 	 * @param reversed start filling slots from the last slot
-	 * @return
+	 * @return the itemStack that could not fit inside this inventory
 	 */
 	public ItemStack transferInto(ItemStack itemStack, boolean reversed)
 	{
@@ -460,14 +517,14 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Transfer itemStack inside this {@link MalisisInventory} into slots at position from start to end. If start > end, the slots will be
-	 * filled backwards.
+	 * Transfer itemStack inside this {@link MalisisInventory} into slots at position from start to end. If <b>start</b> > <b>end</b>, the
+	 * slots will be filled backwards.
 	 *
-	 * @param itemStack
-	 * @param emptySlot
-	 * @param start
-	 * @param end
-	 * @return
+	 * @param itemStack the item stack
+	 * @param emptySlot whether to fill empty slots only
+	 * @param start the start
+	 * @param end the end
+	 * @return the itemStack that could not fit inside this inventory
 	 */
 	protected ItemStack transferInto(ItemStack itemStack, boolean emptySlot, int start, int end)
 	{
@@ -501,7 +558,12 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Spills out all the itemStack contained inside this <code>MalisisInvnetory</code>
+	 * Spills out all the itemStack contained inside this {@link MalisisInventory}.
+	 *
+	 * @param world the world
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 */
 	public void breakInventory(World world, int x, int y, int z)
 	{
@@ -510,9 +572,9 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Read this {@link MalisisInventory} data from tagCompound
+	 * Reads this {@link MalisisInventory} data from tagCompound.
 	 *
-	 * @param tagCompound
+	 * @param tagCompound the tag compound
 	 */
 	public void readFromNBT(NBTTagCompound tagCompound)
 	{
@@ -531,9 +593,9 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Writes this {@link MalisisInventory} data inside tagCompound
+	 * Writes this {@link MalisisInventory} data inside tagCompound.
 	 *
-	 * @param tagCompound
+	 * @param tagCompound the tag compound
 	 */
 	public void writeToNBT(NBTTagCompound tagCompound)
 	{
@@ -566,11 +628,12 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Open this {@link MalisisInventory}. Called server-side only
+	 * Opens this {@link MalisisInventory}. Called server-side only
 	 *
-	 * @param player
-	 * @return
-	 *
+	 * @param player the player
+	 * @param inventoryProvider the inventory provider
+	 * @param data the data
+	 * @return the malisis inventory container
 	 */
 	public static MalisisInventoryContainer open(EntityPlayerMP player, IInventoryProvider inventoryProvider, Object... data)
 	{
@@ -595,11 +658,13 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Open this {@link MalisisInventory}. Called client-side only.
+	 * Opens this {@link MalisisInventory}. Called client-side only.
 	 *
-	 * @param player
-	 * @param windowId
-	 * @return
+	 * @param player the player
+	 * @param inventoryProvider the inventory provider
+	 * @param windowId the window id
+	 * @param data the data
+	 * @return the malisis inventory container
 	 */
 	@SideOnly(Side.CLIENT)
 	public static MalisisInventoryContainer open(EntityClientPlayerMP player, IInventoryProvider inventoryProvider, int windowId, Object... data)
@@ -630,7 +695,10 @@ public class MalisisInventory implements IInventory
 	// #region Unused
 
 	/**
-	 * Unused
+	 * Unused.
+	 *
+	 * @param player the player
+	 * @return true, if is useable by player
 	 */
 	@Override
 	public boolean isUseableByPlayer(EntityPlayer player)
@@ -639,21 +707,25 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Unused
+	 * Unused.
 	 */
 	@Override
 	public void closeInventory()
 	{}
 
 	/**
-	 * Unused
+	 * Unused.
 	 */
 	@Override
 	public void markDirty()
 	{}
 
 	/**
-	 * Unused : always returns null
+	 * Unused : always returns null.
+	 *
+	 * @param slot the slot
+	 * @param count the count
+	 * @return the item stack
 	 */
 	@Override
 	public ItemStack decrStackSize(int slot, int count)
@@ -662,7 +734,10 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Unused : always returns null
+	 * Unused : always returns null.
+	 *
+	 * @param slot the slot
+	 * @return the stack in slot on closing
 	 */
 	@Override
 	public ItemStack getStackInSlotOnClosing(int slot)
@@ -672,6 +747,9 @@ public class MalisisInventory implements IInventory
 
 	/**
 	 * Use MalisisInventory.getItemStack(int slotNumber);
+	 *
+	 * @param slotNumber the slot number
+	 * @return the stack in slot
 	 */
 	@Override
 	@Deprecated
@@ -682,6 +760,9 @@ public class MalisisInventory implements IInventory
 
 	/**
 	 * Use MalisisInventory.setItemStack(int slotNumber, ItemStack itemStack)
+	 *
+	 * @param slotNumber the slot number
+	 * @param itemStack the item stack
 	 */
 	@Override
 	@Deprecated

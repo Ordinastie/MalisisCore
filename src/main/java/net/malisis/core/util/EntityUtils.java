@@ -36,9 +36,24 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
+/**
+ * Utility class for Entities.
+ *
+ * @author Ordinastie
+ *
+ */
 public class EntityUtils
 {
 
+	/**
+	 * Eject a new item corresponding to the {@link ItemStack}.
+	 *
+	 * @param world the world
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param itemStack the item stack
+	 */
 	public static void spawnEjectedItem(World world, int x, int y, int z, ItemStack itemStack)
 	{
 		float rx = world.rand.nextFloat() * 0.8F + 0.1F;
@@ -55,6 +70,12 @@ public class EntityUtils
 
 	}
 
+	/**
+	 * Finds a player by its UUID.
+	 *
+	 * @param uuid the uuid
+	 * @return the player
+	 */
 	public static EntityPlayerMP findPlayerFromUUID(UUID uuid)
 	{
 		List<EntityPlayerMP> listPlayers = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
@@ -66,11 +87,26 @@ public class EntityUtils
 		return null;
 	}
 
+	/**
+	 * Gets the {@link ForgeDirection} the {@link Entity} is currently facing.
+	 *
+	 * @param entity the entity
+	 * @return the direction
+	 */
 	public static ForgeDirection getEntityFacing(Entity entity)
 	{
 		return getEntityFacing(entity, false);
 	}
 
+	/**
+	 * Gets the {@link ForgeDirection} the {@link Entity} is currently facing.<br>
+	 * If <b>sixWays</b> is <code>true</code>, the direction can be {@link ForgeDirection#UP UP} or {@link ForgeDirection#DOWN DOWN} if the
+	 * entity is looking up or down.
+	 *
+	 * @param entity the entity
+	 * @param sixWays whether to consider UP and DOWN for directions
+	 * @return the direction
+	 */
 	public static ForgeDirection getEntityFacing(Entity entity, boolean sixWays)
 	{
 		float pitch = entity.rotationPitch;

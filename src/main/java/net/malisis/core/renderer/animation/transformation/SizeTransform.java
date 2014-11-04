@@ -27,25 +27,49 @@ package net.malisis.core.renderer.animation.transformation;
 import net.malisis.core.renderer.animation.transformation.ITransformable.Position;
 
 /**
- * @author Ordinastie
  *
+ * @author Ordinastie
+ * @param <T> the generic type
  */
 public class SizeTransform<T> extends Transformation<PositionTransform, ITransformable.Position<T>>
 {
+	/** Starting size. */
 	protected int fromWidth, fromHeight;
+	/** Target size. */
 	protected int toWidth, toHeight;
 
+	/**
+	 * Instantiates a new {@link SizeTransform}.
+	 *
+	 * @param width the width
+	 * @param height the height
+	 */
 	public SizeTransform(int width, int height)
 	{
 		to(width, height);
 	}
 
+	/**
+	 * Instantiates a new {@link SizeTransform}
+	 *
+	 * @param fromWidth the from width
+	 * @param fromHeight the from height
+	 * @param toWidth the to width
+	 * @param toHeight the to height
+	 */
 	public SizeTransform(int fromWidth, int fromHeight, int toWidth, int toHeight)
 	{
 		from(fromWidth, fromHeight);
 		to(toWidth, toHeight);
 	}
 
+	/**
+	 * Sets the starting size.
+	 *
+	 * @param width the width
+	 * @param height the height
+	 * @return this {@link SizeTransform}
+	 */
 	public SizeTransform<T> from(int width, int height)
 	{
 		fromWidth = width;
@@ -53,6 +77,13 @@ public class SizeTransform<T> extends Transformation<PositionTransform, ITransfo
 		return this;
 	}
 
+	/**
+	 * Sets the target size.
+	 *
+	 * @param width the width
+	 * @param height the height
+	 * @return this {@link SizeTransform}
+	 */
 	public SizeTransform<T> to(int width, int height)
 	{
 		toWidth = width;
@@ -60,6 +91,12 @@ public class SizeTransform<T> extends Transformation<PositionTransform, ITransfo
 		return this;
 	}
 
+	/**
+	 * Calculates the transformation
+	 *
+	 * @param transformable the transformable
+	 * @param comp the comp
+	 */
 	@Override
 	protected void doTransform(Position<T> transformable, float comp)
 	{

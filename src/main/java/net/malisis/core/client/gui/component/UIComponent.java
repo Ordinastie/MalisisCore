@@ -56,89 +56,63 @@ import org.lwjgl.opengl.GL14;
 import com.google.common.eventbus.EventBus;
 
 /**
- * {@link UIComponent} is the base of everything drawn onto a GUI.<br />
- * The drawing is separated between background and foreground.<br />
+ * {@link UIComponent} is the base of everything drawn onto a GUI.<br>
+ * The drawing is separated between background and foreground.<br>
  * Most of the events are launched from UIComponent.
  *
  * @author Ordinastie, PaleoCrafter
+ * @param <T> the type of <code>UIComponent</code>
  */
 public abstract class UIComponent<T extends UIComponent> implements ITransformable.Position<T>, ITransformable.Size<T>,
 		ITransformable.Alpha
 {
 	public final static int INHERITED = 0;
-	/**
-	 * Reference to the {@link MalisisGui} this {@link UIComponent} was added to
-	 */
+
+	/** Reference to the {@link MalisisGui} this {@link UIComponent} was added to. */
 	private final MalisisGui gui;
-	/**
-	 * List of {@link UIComponent components} controling this {@link UIContainer}.
-	 */
+	/** List of {@link UIComponent components} controling this {@link UIContainer}. */
 	private final Set<IControlComponent> controlComponents;
-	/**
-	 * Position of this {@link UIComponent}
-	 */
+	/** Position of this {@link UIComponent}. */
 	protected int x, y;
-	/**
-	 * Z index of the component
-	 */
+	/** Z index of the component. */
 	protected int zIndex = INHERITED;
-	/**
-	 * Position anchor for this {@link UIComponent}. See {@link Anchor}
-	 */
+	/** Position anchor for this {@link UIComponent}. See {@link Anchor} */
 	protected int anchor = Anchor.NONE;
-	/**
-	 * Size of this {@link UIComponent}
-	 */
+	/** Size of this {@link UIComponent}. */
 	protected int width = INHERITED, height = INHERITED;
-	/**
-	 * Event bus on which event listeners are registered
-	 */
+	/** Event bus on which event listeners are registered. */
 	private EventBus bus;
-	/**
-	 * The parent {@link UIContainer} of this {@link UIComponent} Can be used to pass through things or manipulate the parent's other
-	 * children.
-	 */
+	/** The parent {@link UIComponent} of this <code>UIComponent</code>. */
 	protected UIComponent parent;
-	/**
-	 * The name of this {@link UIComponent} Can be used to retrieve this back from a container.
-	 */
+	/** The name of this {@link UIComponent} Can be used to retrieve this back from a container. */
 	protected String name;
-	/**
-	 * The tooltip for this {@link UIComponent} Automatically displayed when the {@link UIComponent} is hovered.
-	 */
+	/** The tooltip for this {@link UIComponent} Automatically displayed when the {@link UIComponent} is hovered. */
 	protected UITooltip tooltip;
-	/**
-	 * Determines whether this {@link UIComponent} is visible. If set to false, {@link #size size} will be ignored by most layout managers.
-	 */
+	/** Determines whether this {@link UIComponent} is visible. */
 	protected boolean visible = true;
 	/**
 	 * Determines whether this {@link UIComponent} is enabled. If set to false, will cancel any
 	 * {@link net.malisis.core.client.gui.event.GuiEvent events} received.
 	 */
 	protected boolean disabled = false;
-	/**
-	 * Hover state of this {@link UIComponent}
-	 */
+	/** Hover state of this {@link UIComponent}. */
 	protected boolean hovered = false;
-	/**
-	 * Focus state of this {@link UIComponent}
-	 */
+	/** Focus state of this {@link UIComponent}. */
 	protected boolean focused = false;
-	/**
-	 * GuiShape used to draw this {@link UIComponent}
-	 */
+	/** GuiShape used to draw this {@link UIComponent}. */
 	protected GuiShape shape;
-	/**
-	 * {@link RenderParameters} used to draw this {@link UIComponent}
-	 */
+	/** {@link RenderParameters} used to draw this {@link UIComponent}. */
 	protected RenderParameters rp;
-	/**
-	 * {@link GuiIcon} used to draw this {@link UIComponent}
-	 */
+	/** {@link GuiIcon} used to draw this {@link UIComponent}. */
 	protected GuiIcon icon;
-
+	/** Alpha transparency of this {@link UIComponent}. */
 	protected int alpha = 255;
 
+	/**
+	 * Instantiates a new {@link UIComponent}.
+	 *
+	 * @param gui the gui
+	 */
 	public UIComponent(MalisisGui gui)
 	{
 		this.gui = gui;
@@ -151,7 +125,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 
 	// #region getters/setters
 	/**
-	 * @return the {@link MalisisGui} this {@link UIComponent} was added to.
+	 * Gets the {@link MalisisGui} this {@link UIComponent} was added to.
+	 *
+	 * @return the gui
 	 */
 	public MalisisGui getGui()
 	{
@@ -159,10 +135,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Set the position of this {@link UIComponent}
+	 * Sets the position of this {@link UIComponent}.
 	 *
-	 * @param x
-	 * @param y
+	 * @param x the x
+	 * @param y the y
 	 * @return this {@link UIComponent}
 	 */
 	@Override
@@ -172,11 +148,11 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Set the position of this {@link UIComponent} relative to an anchor.
+	 * Sets the position of this {@link UIComponent} relative to an anchor.
 	 *
-	 * @param x
-	 * @param y
-	 * @param anchor
+	 * @param x the x
+	 * @param y the y
+	 * @param anchor the anchor
 	 * @return this {@link UIComponent}
 	 */
 	public T setPosition(int x, int y, int anchor)
@@ -203,7 +179,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return the X coordinate of this {@link UIComponent}'s position
+	 * Gets the X coordinate of this {@link UIComponent}'s position.
+	 *
+	 * @return the coordinate
 	 */
 	public int getX()
 	{
@@ -211,7 +189,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return the Y coordinate of this {@link UIComponent}'s position
+	 * Gets the Y coordinate of this {@link UIComponent}'s position.
+	 *
+	 * @return the coordinate
 	 */
 	public int getY()
 	{
@@ -221,8 +201,8 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	/**
 	 * Sets the zIndex for this {@link UIComponent}.
 	 *
-	 * @param zIndex
-	 * @return
+	 * @param zIndex the z index
+	 * @return this {@link UIComponent}
 	 */
 	public T setZIndex(int zIndex)
 	{
@@ -231,7 +211,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return the zIndex of this {@link UIComponent}.
+	 * Gets the zIndex of this {@link UIComponent}.
+	 *
+	 * @return the zIndex
 	 */
 	public int getZIndex()
 	{
@@ -239,10 +221,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Sets the anchor for this {@link UIComponent}'s position
+	 * Sets the anchor for this {@link UIComponent}'s position.
 	 *
-	 * @param anchor
-	 * @return
+	 * @param anchor the anchor
+	 * @return this {@link UIComponent}
 	 */
 	public T setAnchor(int anchor)
 	{
@@ -259,6 +241,8 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
+	 * Gets the anchor.
+	 *
 	 * @return the anchor of this {@link UIComponent}'s position
 	 */
 	public int getAnchor()
@@ -267,10 +251,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Sets the size of this {@link UIComponent}
+	 * Sets the size of this {@link UIComponent}.
 	 *
-	 * @param width
-	 * @param height
+	 * @param width the width
+	 * @param height the height
 	 * @return this {@link UIComponent}
 	 */
 	@Override
@@ -294,7 +278,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return the raw width of this {@link UIComponent}
+	 * Gets the raw width of this {@link UIComponent}
+	 *
+	 * @return the width
 	 */
 	public int getRawWidth()
 	{
@@ -302,7 +288,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return the width of this {@link UIComponent}
+	 * Gets the width of this {@link UIComponent}.
+	 *
+	 * @return the width, or 0 for relative width without a parent
 	 */
 	public int getWidth()
 	{
@@ -321,7 +309,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return true if the width of this {@link UIComponent} is relative to its parent <code>UIComponent</code>.
+	 * Checks if the width of this {@link UIComponent} is relative to its parent <code>UIComponent</code>.
+	 *
+	 * @return true, if the width is relative
 	 */
 	public boolean isRelativeWidth()
 	{
@@ -329,7 +319,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return the raw width of this {@link UIComponent}
+	 * Gets the raw height of this {@link UIComponent}.
+	 *
+	 * @return the height
 	 */
 	public int getRawHeight()
 	{
@@ -337,7 +329,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return the height of this {@link UIComponent}
+	 * Gets the height of this {@link UIComponent}.
+	 *
+	 * @return the height, or 0 for relative width without a parent
 	 */
 	public int getHeight()
 	{
@@ -356,7 +350,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return true if the height of this {@link UIComponent} is relative to its parent <code>UIComponent</code>.
+	 * Checks if the height of this {@link UIComponent} is relative to its parent <code>UIComponent</code>.
+	 *
+	 * @return true, if the height is relative
 	 */
 	public boolean isRelativeHeight()
 	{
@@ -364,9 +360,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Set the <code>hovered</code> state of this {@link UIComponent}
+	 * Sets the <code>hovered</code> state of this {@link UIComponent}.
 	 *
-	 * @param hovered
+	 * @param hovered the new state
 	 */
 	public void setHovered(boolean hovered)
 	{
@@ -380,9 +376,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Get the <code>hovered</code> state of this {@link UIComponent}
+	 * Gets the <code>hovered</code> state of this {@link UIComponent}.
 	 *
-	 * @return hovered state
+	 * @return true, this component is hovered
 	 */
 	public boolean isHovered()
 	{
@@ -390,9 +386,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Set the <code>focused</code> state of this {@link UIComponent}
+	 * Sets the <code>focused</code> state of this {@link UIComponent}.
 	 *
-	 * @param focused
+	 * @param focused the state
 	 */
 	public void setFocused(boolean focused)
 	{
@@ -409,9 +405,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Get the <code>focused</code> state of this {@link UIComponent}
+	 * Gets the <code>focused</code> state of this {@link UIComponent}.
 	 *
-	 * @return focused state
+	 * @return true, if this component if focused
 	 */
 	public boolean isFocused()
 	{
@@ -419,8 +415,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return the parent of this {@link UIComponent}
-	 * @see #parent
+	 * Gets the parent of this {@link UIComponent}.
+	 *
+	 * @return the parent
 	 */
 	public UIComponent getParent()
 	{
@@ -428,10 +425,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Set the parent of this {@link UIComponent}
+	 * Sets the parent of this {@link UIComponent}.
 	 *
-	 * @param parent the parent to be used
-	 * @see #parent
+	 * @param parent the parent
 	 */
 	public void setParent(UIComponent parent)
 	{
@@ -440,7 +436,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return the visibility of this component
+	 * Checks if this {@link UIComponent} is visible.
+	 *
+	 * @return true, if visible
 	 */
 	public boolean isVisible()
 	{
@@ -448,9 +446,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Set the visibility of this component.
+	 * Sets the visibility of this {@link UIComponent}.
 	 *
 	 * @param visible the visibility for this component
+	 * @return this {@link UIComponent}
 	 */
 	public T setVisible(boolean visible)
 	{
@@ -471,7 +470,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return the state of this component
+	 * Checks if this {@link UIComponent} is disabled
+	 *
+	 * @return true if disabled
 	 */
 	public boolean isDisabled()
 	{
@@ -479,9 +480,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Set the state of this {@link UIComponent}
+	 * Set the state of this {@link UIComponent}.
 	 *
-	 * @param enabled true for the component to be enabled
+	 * @param disabled the new state
+	 * @return this {@link UIComponent}
 	 */
 	public T setDisabled(boolean disabled)
 	{
@@ -501,8 +503,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return the name of this {@link UIComponent}
-	 * @see #name
+	 * Gets the name of this {@link UIComponent}.
+	 *
+	 * @return the name
 	 */
 	public String getName()
 	{
@@ -510,10 +513,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Set the name of this {@link UIComponent}
+	 * Sets the name of this {@link UIComponent}.
 	 *
 	 * @param name the name to be used
-	 * @see #name
 	 */
 	public void setName(String name)
 	{
@@ -521,8 +523,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * @return the tooltip of this {@link UIComponent}
-	 * @see #tooltip
+	 * Gets the {@link UITooltip} for this {@link UIComponent}.
+	 *
+	 * @return the tooltip
 	 */
 	public UITooltip getTooltip()
 	{
@@ -530,10 +533,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Set the tooltip of this {@link UIComponent}
+	 * Sets the {@link UITooltip} of this {@link UIComponent}.
 	 *
-	 * @param tooltip the tooltip for this {@link UIComponent}
-	 * @see #tooltip
+	 * @param tooltip the tooltip
+	 * @return this {@link UIComponent}
 	 */
 	public T setTooltip(UITooltip tooltip)
 	{
@@ -541,12 +544,22 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		return (T) this;
 	}
 
+	/**
+	 * Sets the alpha transparency for this {@link UIComponent}.
+	 *
+	 * @param alpha the new alpha
+	 */
 	@Override
 	public void setAlpha(int alpha)
 	{
 		this.alpha = alpha;
 	}
 
+	/**
+	 * Gets the alpha transparency for this {@link UIComponent}.
+	 *
+	 * @return the alpha
+	 */
 	public int getAlpha()
 	{
 		if (getParent() == null)
@@ -558,9 +571,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	// #end getters/setters
 
 	/**
-	 * Registers an <code>object</code> to handle events received by this {@link UIComponent}
+	 * Registers an <code>object</code> to handle events received by this {@link UIComponent}.
 	 *
 	 * @param object object whose handler methods should be registered
+	 * @return this {@link UIComponent}
 	 */
 	public T register(Object object)
 	{
@@ -569,10 +583,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Unregister an <code>object</code> to stop receiving events for this {@link UIComponent}
+	 * Unregister an <code>object</code> to stop receiving events for this {@link UIComponent}.
 	 *
-	 * @param object
-	 * @return
+	 * @param object the object
+	 * @return this {@link UIComponent}
 	 */
 	public T unregister(Object object)
 	{
@@ -581,10 +595,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Fires a {@link ComponentEvent}
+	 * Fires a {@link ComponentEvent}.
 	 *
-	 * @param event
-	 * @return
+	 * @param event the event
+	 * @return true, if the even can propagate, false if cancelled
 	 */
 	public boolean fireEvent(ComponentEvent event)
 	{
@@ -593,10 +607,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Fires a {@link MouseEvent}
+	 * Fires a {@link MouseEvent}.
 	 *
-	 * @param event
-	 * @return
+	 * @param event the event
+	 * @return true, if the even can propagate, false if cancelled
 	 */
 	public boolean fireMouseEvent(MouseEvent event)
 	{
@@ -608,10 +622,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Fires a {@link KeyboardEvent}
+	 * Fires a {@link KeyboardEvent}.
 	 *
-	 * @param event
-	 * @return
+	 * @param event the event
+	 * @return true, if the even can propagate, false if cancelled
 	 */
 	public boolean fireKeyboardEvent(KeyboardEvent event)
 	{
@@ -626,11 +640,11 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Check if supplied coordinates are inside this {@link UIComponent} bounds.
+	 * Checks if supplied coordinates are inside this {@link UIComponent} bounds.
 	 *
-	 * @param x
-	 * @param y
-	 * @return true if coordinates are inside bounds
+	 * @param x the x
+	 * @param y the y
+	 * @return true, if coordinates are inside bounds
 	 */
 	public boolean isInsideBounds(int x, int y)
 	{
@@ -640,11 +654,11 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Gets the component at the specified coordinates.<br />
-	 * Checks if inside bounds, visible and not disabled.
+	 * Gets the {@link UIComponent} at the specified coordinates.<br>
+	 * Will return a {@link IControlComponent} if any. Checks if inside bounds, visible and not disabled.
 	 *
-	 * @param x
-	 * @param y
+	 * @param x the x
+	 * @param y the y
 	 * @return this {@link UIComponent} or null if outside its bounds.
 	 */
 	public UIComponent getComponentAt(int x, int y)
@@ -661,10 +675,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Get the X coordinate relative to this {@link UIComponent}
+	 * Gets the X coordinate relative to this {@link UIComponent}.
 	 *
-	 * @param x
-	 * @return
+	 * @param x the x
+	 * @return the coordinate
 	 */
 	public int relativeX(int x)
 	{
@@ -672,10 +686,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Get the Y coordinate relative to this {@link UIComponent}
+	 * Gets the Y coordinate relative to this {@link UIComponent}.
 	 *
-	 * @param y
-	 * @return
+	 * @param y the y
+	 * @return the coordinate
 	 */
 	public int relativeY(int y)
 	{
@@ -685,8 +699,8 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	/**
 	 * Gets the X coordinate of a {@link UIComponent} inside this <code>UIComponent</code>.
 	 *
-	 * @param component
-	 * @return
+	 * @param component the component
+	 * @return the coordinate
 	 */
 	public int componentX(UIComponent component)
 	{
@@ -703,8 +717,8 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	/**
 	 * Gets the Y coordinate of a {@link UIComponent} inside this <code>UIComponent</code>.
 	 *
-	 * @param component
-	 * @return
+	 * @param component the component
+	 * @return the coordinate
 	 */
 	public int componentY(UIComponent component)
 	{
@@ -719,9 +733,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Get the X coordinate of this {@link UIComponent} relative to its parent.
+	 * Gets the X coordinate of this {@link UIComponent} relative to its parent.
 	 *
-	 * @return
+	 * @return the coordinate
 	 */
 	public int parentX()
 	{
@@ -731,7 +745,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	/**
 	 * Get the Y coordinate of this {@link UIComponent} relative to its parent.
 	 *
-	 * @return
+	 * @return the coordinate
 	 */
 	public int parentY()
 	{
@@ -739,9 +753,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Get the X coordinate of this {@link UIComponent} relative to the screen.
+	 * Gets the X coordinate of this {@link UIComponent} relative to the screen.
 	 *
-	 * @return
+	 * @return the the coordinate
 	 */
 	public int screenX()
 	{
@@ -752,9 +766,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Get the Y coordinate of this {@link UIComponent} relative to the screen.
+	 * Gets the Y coordinate of this {@link UIComponent} relative to the screen.
 	 *
-	 * @return
+	 * @return the coordinate
 	 */
 	public int screenY()
 	{
@@ -765,9 +779,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Adds a control component to this {@link UIContainer}.
+	 * Adds a {@link IControlComponent} component to this {@link UIComponent}.
 	 *
-	 * @param component
+	 * @param component the component
 	 */
 	public void addControlComponent(IControlComponent component)
 	{
@@ -776,9 +790,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Removes the component from this {@link UIContainer}.
+	 * Removes the {@link IControlComponent} from this {@link UIComponent}.
 	 *
-	 * @param component
+	 * @param component the component
 	 */
 	public void removeControlComponent(IControlComponent component)
 	{
@@ -790,7 +804,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Removes all the control components from this {@link UIContainer}. Does not remove regular components
+	 * Removes all the {@link IControlComponent} from this {@link UIContainer}.
 	 */
 	public void removeAllControlComponents()
 	{
@@ -799,22 +813,26 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		controlComponents.clear();
 	}
 
+	/**
+	 * Called when this {@link UIComponent} is added to screen.<br>
+	 * Triggers a {@link SizeChangeEvent} is this component size is relative.
+	 */
 	public void onAddedToScreen()
 	{
-		if (width <= 0)
+		if (width <= 0 || height <= 0)
 			fireEvent(new SizeChangeEvent<UIComponent>(this, getWidth(), getHeight()));
 	}
 
 	/**
-	 * Draw this {@link UIComponent} Called by {@link #parent} container.<br />
-	 * Will set the size of <i>shape</i> according to the size of this {@link UIComponent} <br />
+	 * Draws this {@link UIComponent} Called by {@link #parent} component.<br>
+	 * Will set the size of {@link #shape} according to the size of this <code>UIComponent</code><br>
 	 * Rendering is surrounded by glPushAttrib(GL_ALL_ATTRIB_BITS) so no state should bleed between components. Also, a draw() is triggered
 	 * between background and foreground.
 	 *
-	 * @param renderer
-	 * @param mouseX
-	 * @param mouseY
-	 * @param partialTick
+	 * @param renderer the renderer
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
 	 */
 	public void draw(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
@@ -838,7 +856,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		drawBackground(renderer, mouseX, mouseY, partialTick);
 		renderer.next();
 
-		//draw forgeground
+		//draw foreground
 		renderer.currentComponent = this;
 
 		ClipArea area = this instanceof IClipable ? ((IClipable) this).getClipArea() : null;
@@ -860,35 +878,40 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		GL11.glPopAttrib();
 	}
 
-	@Override
-	public String toString()
-	{
-		return (this.name == null ? getClass().getSimpleName() : this.name) + " : [" + getPropertyString() + "]";
-	}
-
+	/**
+	 * Gets the property string.
+	 *
+	 * @return the property string
+	 */
 	public String getPropertyString()
 	{
 		return "parent=" + (parent != null ? parent.getClass().getSimpleName() : "null") + ", size=" + width + "," + height
 				+ " | position=" + x + "," + y + " | container=" + parentX() + "," + parentY() + " | screen=" + screenX() + "," + screenY();
 	}
 
+	@Override
+	public String toString()
+	{
+		return (this.name == null ? getClass().getSimpleName() : this.name) + " : [" + getPropertyString() + "]";
+	}
+
 	/**
-	 * Called first when drawing this {@link UIComponent}
+	 * Called first when drawing this {@link UIComponent}.
 	 *
-	 * @param renderer
-	 * @param mouseX
-	 * @param mouseY
-	 * @param partialTick
+	 * @param renderer the renderer
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
 	 */
 	public abstract void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
 
 	/**
-	 * Called last when drawing this {@link UIComponent}
+	 * Called last when drawing this {@link UIComponent}.
 	 *
-	 * @param renderer
-	 * @param mouseX
-	 * @param mouseY
-	 * @param partialTick
+	 * @param renderer the renderer
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
 	 */
 	public abstract void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
 

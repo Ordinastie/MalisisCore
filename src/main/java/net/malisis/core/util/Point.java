@@ -26,12 +26,30 @@ package net.malisis.core.util;
 
 import net.minecraft.util.Vec3;
 
+/**
+ *
+ * @author Ordinastie
+ *
+ */
 public class Point
 {
+
+	/** x coordinate of this {@link Point}. */
 	public double x;
+
+	/** y coordinate of this {@link Point}. */
 	public double y;
+
+	/** z coordinate of this {@link Point}. */
 	public double z;
 
+	/**
+	 * Instantiates a new point.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 */
 	public Point(double x, double y, double z)
 	{
 		this.x = x;
@@ -39,6 +57,11 @@ public class Point
 		this.z = z;
 	}
 
+	/**
+	 * Instantiates a new point.
+	 *
+	 * @param p the p
+	 */
 	public Point(Point p)
 	{
 		x = p.x;
@@ -46,6 +69,11 @@ public class Point
 		z = p.z;
 	}
 
+	/**
+	 * Instantiates a new point.
+	 *
+	 * @param v the v
+	 */
 	public Point(Vec3 v)
 	{
 		x = v.xCoord;
@@ -54,11 +82,11 @@ public class Point
 	}
 
 	/**
-	 * Set this point to x, y and z
-	 * 
-	 * @param x
-	 * @param y
-	 * @param z
+	 * Sets this point to x, y and z coordinates.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 */
 	public void set(double x, double y, double z)
 	{
@@ -68,9 +96,10 @@ public class Point
 	}
 
 	/**
-	 * Move point according to vector
-	 * 
-	 * @param v
+	 * Moves this {@link Point} according to vector.
+	 *
+	 * @param v the v
+	 * @return the point
 	 */
 	public Point add(Vector v)
 	{
@@ -80,6 +109,14 @@ public class Point
 		return this;
 	}
 
+	/**
+	 * Adds the x, y and z coordinates to this {@link Point}.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @return the point
+	 */
 	public Point add(double x, double y, double z)
 	{
 		this.x += x;
@@ -89,9 +126,20 @@ public class Point
 	}
 
 	/**
-	 * Test if this is equal to p
-	 * 
-	 * @param
+	 * Creates a {@link Vec3} from this {@link Point} coordinates.
+	 *
+	 * @return the vec3
+	 */
+	public Vec3 toVec3()
+	{
+		return Vec3.createVectorHelper(x, y, z);
+	}
+
+	/**
+	 * Checks if this {@link Point} is equal to the specified one.
+	 *
+	 * @param p the point to check
+	 * @return true, if equal, false otherwise
 	 */
 	public boolean equals(Point p)
 	{
@@ -100,11 +148,18 @@ public class Point
 		return ((x == p.x) && (y == p.y) && (z == p.z));
 	}
 
+	@Override
+	public String toString()
+	{
+		return "[" + x + ", " + y + ", " + z + "]";
+	}
+
 	/**
-	 * Calculate the distance between two points squared
-	 * 
-	 * @param p1
-	 * @param p2
+	 * Calculates the squared distance between two {@link Point points}.
+	 *
+	 * @param p1 fist point
+	 * @param p2 second point
+	 * @return the distance squared
 	 */
 	public static double distanceSquared(Point p1, Point p2)
 	{
@@ -115,7 +170,11 @@ public class Point
 	}
 
 	/**
-	 * Calculate the distance between two points
+	 * Calculates the distance between two {@link Point points}.
+	 *
+	 * @param p1 fist point
+	 * @param p2 second point
+	 * @return the distance
 	 */
 	public static double distance(Point p1, Point p2)
 	{
@@ -124,16 +183,4 @@ public class Point
 		double z = p2.z - p1.z;
 		return Math.sqrt(x * x + y * y + z * z);
 	}
-
-	@Override
-	public String toString()
-	{
-		return "[" + x + ", " + y + ", " + z + "]";
-	}
-
-	public Vec3 toVec3()
-	{
-		return Vec3.createVectorHelper(x, y, z);
-	}
-
 }

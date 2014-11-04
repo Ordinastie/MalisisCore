@@ -117,7 +117,7 @@ public class UIButton extends UIComponent<UIButton>
 	 *
 	 * @param width
 	 * @param height
-	 * @return
+	 * @return this {@link UIButton}
 	 */
 	@Override
 	public UIButton setSize(int width, int height)

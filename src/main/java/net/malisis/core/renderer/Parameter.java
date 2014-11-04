@@ -27,39 +27,82 @@ package net.malisis.core.renderer;
 import java.lang.reflect.Array;
 
 /**
+ *
  * @author Ordinastie
- * 
+ * @param <T> type of value held by the {@link Parameter}
  */
 public class Parameter<T>
 {
+	/** Default value. */
 	private T defaultValue;
+
+	/** Current alue. */
 	private T value;
 
+	/**
+	 * Instantiates a new parameter.
+	 *
+	 * @param defaultValue the default value
+	 */
 	public Parameter(T defaultValue)
 	{
 		this.defaultValue = defaultValue;
 	}
 
+	/**
+	 * Gets the default value.
+	 *
+	 * @return the default
+	 */
 	public T getDefault()
 	{
 		return defaultValue;
 	}
 
+	/**
+	 * Gets the current value.
+	 *
+	 * @return the value
+	 */
 	public T getValue()
 	{
 		return value;
 	}
 
+	/**
+	 * Resets the value to its default.
+	 */
 	public void reset()
 	{
 		value = null;
 	}
 
+	/**
+	 * Gets the value of this {@link Parameter}. If not value was set, default value is returned.
+	 *
+	 * @return the value
+	 */
 	public T get()
 	{
 		return value != null ? value : defaultValue;
 	}
 
+	/**
+	 * Sets the value for this {@link Parameter}.
+	 *
+	 * @param value the value
+	 */
+	public void set(T value)
+	{
+		this.value = value;
+	}
+
+	/**
+	 * Gets the value of the specified index in the array held by this {@link Parameter}.
+	 *
+	 * @param index the index
+	 * @return the object
+	 */
 	public Object get(int index)
 	{
 		if (value == null)
@@ -74,11 +117,11 @@ public class Parameter<T>
 		return Array.get(value, index);
 	}
 
-	public void set(T value)
-	{
-		this.value = value;
-	}
-
+	/**
+	 * Merge this {@link Parameter} with the specified one. The value will only be overridden if it is default.
+	 *
+	 * @param parameter the parameter
+	 */
 	public void merge(Parameter<T> parameter)
 	{
 		if (parameter.getValue() != null)

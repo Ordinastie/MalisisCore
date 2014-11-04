@@ -137,7 +137,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	 *
 	 * @param horizontal
 	 * @param vertical
-	 * @return
+	 * @return this {@link MalisisIcon}
 	 */
 	public MalisisIcon flip(boolean horizontal, boolean vertical)
 	{
@@ -210,7 +210,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	 *
 	 * @param offsetX
 	 * @param offsetY
-	 * @return
+	 * @return this {@link MalisisIcon}
 	 */
 	public MalisisIcon offset(int offsetX, int offsetY)
 	{
@@ -225,7 +225,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	 * @param offsetY
 	 * @param width
 	 * @param height
-	 * @return
+	 * @return this {@link MalisisIcon}
 	 */
 	public MalisisIcon clip(int offsetX, int offsetY, int width, int height)
 	{
@@ -244,7 +244,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	 * @param offsetYFactor
 	 * @param widthFactor
 	 * @param heightFactor
-	 * @return
+	 * @return this {@link MalisisIcon}
 	 */
 	public MalisisIcon clip(float offsetXFactor, float offsetYFactor, float widthFactor, float heightFactor)
 	{
@@ -308,7 +308,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	/**
 	 * Creates a new {@link MalisisIcon} from this <code>MalisisIcon</code>.
 	 *
-	 * @return
+	 * @return the new {@link MalisisIcon}
 	 */
 	public MalisisIcon copy()
 	{
@@ -322,7 +322,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	 * that registered icon will be returned instead.
 	 *
 	 * @param register
-	 * @return
+	 * @return this {@link MalisisIcon} if not already registered, otherwise, the MalisisIcon already inside the registry.
 	 */
 	public MalisisIcon register(TextureMap register)
 	{

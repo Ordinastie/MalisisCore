@@ -28,34 +28,63 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.malisis.core.configuration.Settings;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 
+// TODO: Auto-generated Javadoc
+/**
+ * Commands handler for {@link MalisisCore} mod.
+ *
+ * @author Ordinastie
+ *
+ */
 public class MalisisCommand extends CommandBase
 {
+	/** List of parameters available for this {@link MalisisCommand}. */
 	Set<String> parameters = new HashSet<>();
 
+	/**
+	 * Instantiates the command
+	 */
 	public MalisisCommand()
 	{
 		parameters.add("config");
 		parameters.add("version");
 	}
 
+	/**
+	 * Gets the command name.
+	 *
+	 * @return the command name
+	 */
 	@Override
 	public String getCommandName()
 	{
 		return "malisis";
 	}
 
+	/**
+	 * Gets the command usage.
+	 *
+	 * @param sender the sender
+	 * @return the command usage
+	 */
 	@Override
 	public String getCommandUsage(ICommandSender sender)
 	{
 		return "malisiscore.commands.usage";
 	}
 
+	/**
+	 * Processes the command.
+	 *
+	 * @param sender the sender
+	 * @param params the params
+	 */
 	@Override
 	public void processCommand(ICommandSender sender, String[] params)
 	{
@@ -118,6 +147,13 @@ public class MalisisCommand extends CommandBase
 		return false;
 	}
 
+	/**
+	 * Handles the config command.<br>
+	 * Opens the configuration GUI for the {@link IMalisisMod} with the id specified as parameter, if the mod as {@link Settings} available.
+	 *
+	 * @param sender the sender
+	 * @param params the params
+	 */
 	public void configCommand(ICommandSender sender, String[] params)
 	{
 		if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
@@ -137,7 +173,7 @@ public class MalisisCommand extends CommandBase
 		}
 		if (mod != null)
 		{
-			if (!MalisisCore.openConfigurationGui(mod, true))
+			if (!MalisisCore.openConfigurationGui(mod))
 				MalisisCore.message("malisiscore.commands.noconfiguration", mod.getName());
 		}
 	}

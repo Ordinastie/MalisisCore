@@ -411,11 +411,10 @@ public class Vertex
 	}
 
 	/**
-	 * Calculate AoMatrix for a vertex based on the vertex position and the face it belongs. Only works for regular N/S/E/W/T/B faces
+	 * Calculates AoMatrix for a vertex based on the vertex position and the face it belongs. Only works for regular N/S/E/W/T/B faces
 	 *
-	 * @param vertex
-	 * @param offset
-	 * @return
+	 * @param offset the offset
+	 * @return the matrix
 	 */
 	public int[][] getAoMatrix(ForgeDirection offset)
 	{

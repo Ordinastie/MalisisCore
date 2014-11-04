@@ -51,26 +51,43 @@ import org.lwjgl.opengl.GL11;
 import com.google.common.eventbus.Subscribe;
 
 /**
- * @author Ordinastie
+ * The Class UISelect.
  *
+ * @author Ordinastie
  */
 public class UISelect extends UIComponent<UISelect>
 {
-	protected GuiIcon iconsSelect;
-	protected GuiIcon iconsSelectDisabled;
-	protected GuiIcon iconsExpanded;
-	protected GuiIcon arrowIcon;
-
+	/** The options container. */
 	protected OptionsContainer optionsContainer;
-
+	/** Currently selected option index. */
 	protected int selectedOption = -1;
+	/** Max width of the option container. */
 	protected int maxExpandedWidth = -1;
+	/** Max number displayed options. */
 	protected int maxDisplayedOptions = -1;
+	/** Whether this {@link UISelect} is expanded. */
 	protected boolean expanded = false;
+	/** Pattern to use for options labels. */
 	protected String labelPattern;
 
+	/** Shape used to draw the arrow. */
 	protected GuiShape arrowShape;
+	/** Icon used to draw this {@link UISelect}. */
+	protected GuiIcon iconsSelect;
+	/** Icon used to draw this {@link UISelect} when disabled. */
+	protected GuiIcon iconsSelectDisabled;
+	/** Icon used to draw the option container. */
+	protected GuiIcon iconsExpanded;
+	/** Icon used to draw the arrow. */
+	protected GuiIcon arrowIcon;
 
+	/**
+	 * Instantiates a new {@link UISelect}
+	 *
+	 * @param gui the gui
+	 * @param width the width
+	 * @param options the options
+	 */
 	public UISelect(MalisisGui gui, int width, HashMap<Integer, Option> options)
 	{
 		super(gui);
@@ -90,6 +107,12 @@ public class UISelect extends UIComponent<UISelect>
 
 	}
 
+	/**
+	 * Instantiates a new {@link UISelect}.
+	 *
+	 * @param gui the gui
+	 * @param width the width
+	 */
 	public UISelect(MalisisGui gui, int width)
 	{
 		this(gui, width, null);
@@ -113,8 +136,8 @@ public class UISelect extends UIComponent<UISelect>
 	/**
 	 * Sets a pattern that will be used to format the option label.
 	 *
-	 * @param labelPattern
-	 * @return
+	 * @param labelPattern the label pattern
+	 * @return this {@link UISelect}
 	 */
 	public UISelect setLabelPattern(String labelPattern)
 	{
@@ -128,10 +151,10 @@ public class UISelect extends UIComponent<UISelect>
 	}
 
 	/**
-	 * Sets the max width of the option container
+	 * Sets the max width of the option container.
 	 *
-	 * @param width
-	 * @return
+	 * @param width the width
+	 * @return this {@link UISelect}
 	 */
 	public UISelect maxExpandedWidth(int width)
 	{
@@ -141,23 +164,23 @@ public class UISelect extends UIComponent<UISelect>
 	}
 
 	/**
-	 * Sets the maximum number options displayed when expanded
+	 * Sets the maximum number of options displayed when expanded.
 	 *
-	 * @param nb
-	 * @return
+	 * @param amount the amount
+	 * @return this {@link UISelect}
 	 */
-	public UISelect maxDisplayedOptions(int nb)
+	public UISelect maxDisplayedOptions(int amount)
 	{
-		maxDisplayedOptions = nb;
+		maxDisplayedOptions = amount;
 		optionsContainer.calcExpandedSize();
 		return this;
 	}
 
 	/**
-	 * Set the options to use for this <code>UISelect</code>
+	 * Set the {@link Option options} to use for this {@link UISelect}
 	 *
-	 * @param options
-	 * @return
+	 * @param options the options
+	 * @return this {@link UISelect}
 	 */
 	public UISelect setOptions(HashMap<Integer, Option> options)
 	{
@@ -166,9 +189,9 @@ public class UISelect extends UIComponent<UISelect>
 	}
 
 	/**
-	 * Sets the selected option from its position in the list
+	 * Sets the selected {@link Option} from its position in the list.
 	 *
-	 * @param index
+	 * @param index the new selected option
 	 */
 	public void setSelectedOption(int index)
 	{
@@ -176,9 +199,9 @@ public class UISelect extends UIComponent<UISelect>
 	}
 
 	/**
-	 * Sets the selected option from it's containing key
+	 * Sets the selected {@link Option} from its containing key.
 	 *
-	 * @param obj
+	 * @param obj the new selected option
 	 */
 	public void setSelectedOption(Object obj)
 	{
@@ -187,10 +210,10 @@ public class UISelect extends UIComponent<UISelect>
 	}
 
 	/**
-	 * Gets the option at the specified index
+	 * Gets the {@link Option} at the specified index.
 	 *
-	 * @param index
-	 * @return
+	 * @param index the index
+	 * @return the option
 	 */
 	public Option getOption(int index)
 	{
@@ -198,10 +221,10 @@ public class UISelect extends UIComponent<UISelect>
 	}
 
 	/**
-	 * Gets the option corresponding to the object
+	 * Gets the {@link Option} corresponding to the object.
 	 *
-	 * @param obj
-	 * @return
+	 * @param obj the obj
+	 * @return the option
 	 */
 	public Option getOption(Object obj)
 	{
@@ -209,9 +232,9 @@ public class UISelect extends UIComponent<UISelect>
 	}
 
 	/**
-	 * Gets the currently selected option
+	 * Gets the currently selected {@link Option}.
 	 *
-	 * @return
+	 * @return the selected option
 	 */
 	public Option getSelectedOption()
 	{
@@ -219,10 +242,10 @@ public class UISelect extends UIComponent<UISelect>
 	}
 
 	/**
-	 * Select the option using the index
+	 * Select the {@link Option} using the index.
 	 *
-	 * @param index
-	 * @return
+	 * @param index the index
+	 * @return the option
 	 */
 	public Option select(int index)
 	{
@@ -240,10 +263,10 @@ public class UISelect extends UIComponent<UISelect>
 	}
 
 	/**
-	 * Select the option corresponding to the object
+	 * Select the {@link Option} corresponding to the object.
 	 *
-	 * @param obj
-	 * @return
+	 * @param obj the obj
+	 * @return the option
 	 */
 	public Option select(Object obj)
 	{
@@ -304,6 +327,11 @@ public class UISelect extends UIComponent<UISelect>
 		renderer.endClipping(area);
 	}
 
+	/**
+	 * On click.
+	 *
+	 * @param event the event
+	 */
 	@Subscribe
 	public void onClick(MouseEvent.Release event)
 	{
@@ -326,6 +354,11 @@ public class UISelect extends UIComponent<UISelect>
 
 	}
 
+	/**
+	 * On scroll wheel.
+	 *
+	 * @param event the event
+	 */
 	@Subscribe
 	public void onScrollWheel(MouseEvent.ScrollWheel event)
 	{
@@ -337,6 +370,11 @@ public class UISelect extends UIComponent<UISelect>
 		}
 	}
 
+	/**
+	 * On key typed.
+	 *
+	 * @param event the event
+	 */
 	@Subscribe
 	public void onKeyTyped(KeyboardEvent event)
 	{
@@ -363,12 +401,26 @@ public class UISelect extends UIComponent<UISelect>
 		}
 	}
 
+	/**
+	 * The Class OptionsContainer.
+	 */
 	private class OptionsContainer extends UIContainer
 	{
+
+		/** The gui. */
 		protected MalisisGui gui;
+
+		/** The options. */
 		protected HashMap<Integer, Option> options;
+
+		/** The options label. */
 		protected ArrayList<UILabel> optionsLabel = new ArrayList<>();
 
+		/**
+		 * Instantiates a new options container.
+		 *
+		 * @param gui the gui
+		 */
 		public OptionsContainer(MalisisGui gui)
 		{
 			super(gui);
@@ -379,9 +431,9 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Sets the options
+		 * Sets the options.
 		 *
-		 * @param options
+		 * @param options the options
 		 */
 		private void setOptions(HashMap<Integer, Option> options)
 		{
@@ -403,7 +455,7 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Calculates the size of this container base on the options
+		 * Calculates the size of this container base on the options.
 		 */
 		private void calcExpandedSize()
 		{
@@ -417,10 +469,10 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Gets the option at the index
+		 * Gets the option at the index.
 		 *
-		 * @param index
-		 * @return
+		 * @param index the index
+		 * @return the option
 		 */
 		private Option getOption(int index)
 		{
@@ -430,10 +482,10 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Gets the options corresponding to the object
+		 * Gets the options corresponding to the object.
 		 *
-		 * @param obj
-		 * @return
+		 * @param obj the obj
+		 * @return the option
 		 */
 		public Option getOption(Object obj)
 		{
@@ -447,6 +499,11 @@ public class UISelect extends UIComponent<UISelect>
 			return null;
 		}
 
+		/**
+		 * Sets the focused.
+		 *
+		 * @param focused the new focused
+		 */
 		@Override
 		public void setFocused(boolean focused)
 		{
@@ -454,30 +511,58 @@ public class UISelect extends UIComponent<UISelect>
 				UISelect.this.setFocused(focused);
 		}
 
+		/**
+		 * Checks if is visible.
+		 *
+		 * @return true, if is visible
+		 */
 		@Override
 		public boolean isVisible()
 		{
 			return expanded;
 		}
 
+		/**
+		 * Screen x.
+		 *
+		 * @return the int
+		 */
 		@Override
 		public int screenX()
 		{
 			return UISelect.this.screenX();
 		}
 
+		/**
+		 * Screen y.
+		 *
+		 * @return the int
+		 */
 		@Override
 		public int screenY()
 		{
 			return UISelect.this.screenY() + 12;
 		}
 
+		/**
+		 * Gets the clip area.
+		 *
+		 * @return the clip area
+		 */
 		@Override
 		public ClipArea getClipArea()
 		{
 			return new ClipArea(this, 0, false);
 		}
 
+		/**
+		 * Draw background.
+		 *
+		 * @param renderer the renderer
+		 * @param mouseX the mouse x
+		 * @param mouseY the mouse y
+		 * @param partialTick the partial tick
+		 */
 		@Override
 		public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 		{
@@ -509,6 +594,14 @@ public class UISelect extends UIComponent<UISelect>
 
 		}
 
+		/**
+		 * Draw foreground.
+		 *
+		 * @param renderer the renderer
+		 * @param mouseX the mouse x
+		 * @param mouseY the mouse y
+		 * @param partialTick the partial tick
+		 */
 		@Override
 		public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 		{
@@ -524,12 +617,30 @@ public class UISelect extends UIComponent<UISelect>
 
 	}
 
+	/**
+	 * The Class Option.
+	 *
+	 * @param <T> the generic type
+	 */
 	public static class Option<T>
 	{
+
+		/** The index. */
 		private int index;
+
+		/** The key. */
 		private T key;
+
+		/** The label. */
 		private String label;
 
+		/**
+		 * Instantiates a new option.
+		 *
+		 * @param index the index
+		 * @param key the key
+		 * @param value the value
+		 */
 		public Option(int index, T key, String value)
 		{
 			this.index = index;
@@ -538,9 +649,9 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Gets the index of this <code>Option</code>
+		 * Gets the index of this <code>Option</code>.
 		 *
-		 * @return
+		 * @return the index
 		 */
 		public int getIndex()
 		{
@@ -548,9 +659,9 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Gets the key of this <code>Option</code>
+		 * Gets the key of this <code>Option</code>.
 		 *
-		 * @return
+		 * @return the key
 		 */
 		public T getKey()
 		{
@@ -558,10 +669,10 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Gets the label of this <code>Option</code> using a pattern
+		 * Gets the label of this <code>Option</code> using a pattern.
 		 *
-		 * @param pattern
-		 * @return
+		 * @param pattern the pattern
+		 * @return the label
 		 */
 		public String getLabel(String pattern)
 		{
@@ -572,9 +683,9 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Gets the base label of this <code>Option</code>
+		 * Gets the base label of this <code>Option</code>.
 		 *
-		 * @return
+		 * @return the label
 		 */
 		public String getLabel()
 		{
@@ -582,10 +693,11 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Creates an option HashMap for UISelect.setOptions() from a list of keys.<br />
+		 * Creates an option HashMap for UISelect.setOptions() from a list of keys.<br>
 		 *
-		 * @param list
-		 * @return
+		 * @param <T> the generic type
+		 * @param list the list
+		 * @return the hash map
 		 */
 		public static <T> HashMap<Integer, Option> fromList(List<T> list)
 		{
@@ -602,10 +714,11 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Creates an option HashMap for UISelect.setOptions() from a HashMap of keys -> labels.<br />
+		 * Creates an option HashMap for UISelect.setOptions() from a HashMap of keys -> labels.<br>
 		 *
-		 * @param list
-		 * @return
+		 * @param <T> the generic type
+		 * @param list the list
+		 * @return the hash map
 		 */
 		public static <T> HashMap<Integer, Option> fromList(HashMap<T, String> list)
 		{
@@ -625,8 +738,10 @@ public class UISelect extends UIComponent<UISelect>
 		/**
 		 * Creates an option HashMap for UISelect.setOptions() from an Enum
 		 *
-		 * @param enumClass
-		 * @return
+		 * @param <T> the generic type
+		 * @param <E> the element type
+		 * @param enumClass the enum class
+		 * @return the hash map
 		 */
 		public static <T, E extends Enum> HashMap<Integer, Option> fromEnum(Class<E> enumClass)
 		{

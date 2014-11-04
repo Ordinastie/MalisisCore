@@ -301,8 +301,8 @@ public class Face
 	/**
 	 * Automatically calculate AoMatrix for this {@link Face}. Only works for regular N/S/E/W/T/B faces
 	 *
-	 * @param face
-	 * @param offset
+	 * @param offset the offset
+	 * @return the aoMatrix
 	 */
 	public int[][][] calculateAoMatrix(ForgeDirection offset)
 	{
@@ -359,7 +359,7 @@ public class Face
 	 * Gets a {@link Face} name from a {@link ForgeDirection}.
 	 *
 	 * @param dir
-	 * @return
+	 * @return the name
 	 */
 	public static String nameFromDirection(ForgeDirection dir)
 	{

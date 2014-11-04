@@ -35,10 +35,21 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
+/**
+ * Message to handle the inventory actions sent from a GUI.
+ *
+ * @author Ordinastie
+ *
+ */
 public class InventoryActionMessage implements IMessageHandler<InventoryActionMessage.Packet, IMessage>
 {
 	/**
-	 * Handles the packet received from the client. Pass the action to the container, and send the changes back to the client.
+	 * Handles the {@link Packet} received from the client. Pass the action to the {@link MalisisInventoryContainer}, and send the changes
+	 * back to the client.
+	 *
+	 * @param message the message
+	 * @param ctx the ctx
+	 * @return the i message
 	 */
 	@Override
 	public IMessage onMessage(Packet message, MessageContext ctx)
@@ -58,12 +69,12 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 	}
 
 	/**
-	 * Sends GUI action to the server MalisisInventoryContainer.
+	 * Sends GUI action to the server {@link MalisisInventoryContainer}.
 	 *
-	 * @param action
-	 * @param slotNumber
-	 * @param code
-	 * @param playerInventory
+	 * @param action the action
+	 * @param inventoryId the inventory id
+	 * @param slotNumber the slot number
+	 * @param code the code
 	 */
 	@SideOnly(Side.CLIENT)
 	public static void sendAction(ActionType action, int inventoryId, int slotNumber, int code)
@@ -73,6 +84,9 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 		NetworkHandler.network.sendToServer(packet);
 	}
 
+	/**
+	 * The packet holding the data
+	 */
 	public static class Packet implements IMessage
 	{
 		private ActionType action;

@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.malisis.core.renderer.BaseRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.minecraft.util.AxisAlignedBB;
@@ -38,27 +39,56 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+/**
+ * Base class for anything drawn with a {@link BaseRenderer}. Supports basic transformations like scaling, translation and rotations.
+ *
+ * @author Ordinastie
+ *
+ */
 public class Shape implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale
 {
+	/** {@link Face Faces} making up this {@link Shape} */
 	protected Face[] faces;
+
+	/** The matrix containing all the transformations applied to this {@link Shape}. */
 	protected Matrix4f transformMatrix;
+
+	/** The merged vertexes making up this {@link Shape}. */
 	protected Map<String, MergedVertex> mergedVertexes;
 
+	/**
+	 * Instantiates a new {@link Shape}.
+	 */
 	public Shape()
 	{
 		this.faces = new Face[0];
 	}
 
+	/**
+	 * Instantiates a new {@link Shape}.
+	 *
+	 * @param faces the faces
+	 */
 	public Shape(Face... faces)
 	{
 		this.faces = faces;
 	}
 
+	/**
+	 * Instantiates a new {@link Shape}.
+	 *
+	 * @param faces the faces
+	 */
 	public Shape(List<Face> faces)
 	{
 		this(faces.toArray(new Face[0]));
 	}
 
+	/**
+	 * Instantiates a new {@link Shape}.
+	 *
+	 * @param s the s
+	 */
 	public Shape(Shape s)
 	{
 		Face[] shapeFaces = s.getFaces();
@@ -72,8 +102,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Adds {@link Face faces} to this {@link Shape}.
 	 *
-	 * @param faces
-	 * @return
+	 * @param faces the faces
+	 * @return this {@link Shape}
 	 */
 	public Shape addFaces(Face[] faces)
 	{
@@ -83,9 +113,9 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Adds {@link Face faces} to this {@link Shape} with the specified <b>groupName</b>.
 	 *
-	 * @param faces
-	 * @param groupName
-	 * @return
+	 * @param faces the faces
+	 * @param groupName the group name
+	 * @return this {@link Shape}
 	 */
 	public Shape addFaces(Face[] faces, String groupName)
 	{
@@ -103,7 +133,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Gets the {@link Face faces} that make up this {@link Shape}.
 	 *
-	 * @return
+	 * @return the faces
 	 */
 	public Face[] getFaces()
 	{
@@ -113,8 +143,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Gets the {@link Face faces} that make up this {@link Shape} which match the specified <b>name</b>.
 	 *
-	 * @param name
-	 * @return
+	 * @param name the name
+	 * @return the faces
 	 */
 	public List<Face> getFaces(String name)
 	{
@@ -126,10 +156,10 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	}
 
 	/**
-	 * Gets a face from its name
+	 * Gets a face from its name.
 	 *
-	 * @param name
-	 * @return
+	 * @param name the name
+	 * @return the face
 	 */
 	public Face getFace(String name)
 	{
@@ -140,8 +170,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Removes a {@link Face} from this {@link Shape}. Has no effect if the <code>Face</code> doesn't belong to this <code>Shape</code>.
 	 *
-	 * @param face
-	 * @return
+	 * @param face the face
+	 * @return this {@link Shape}
 	 */
 	public Shape removeFace(Face face)
 	{
@@ -181,8 +211,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Gets a list of {@link Vertex} with a base name containing <b>name</b>.
 	 *
-	 * @param name
-	 * @return
+	 * @param name the name
+	 * @return the vertexes
 	 */
 	public List<Vertex> getVertexes(String name)
 	{
@@ -201,8 +231,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Gets a list of {@link Vertex} with a base name containing {@link Face} name.
 	 *
-	 * @param face
-	 * @return
+	 * @param face the face
+	 * @return the vertexes
 	 */
 	public List<Vertex> getVertexes(Face face)
 	{
@@ -215,8 +245,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Gets a list of {@link Vertex} with a base name containing the {@link ForgeDirection} name.
 	 *
-	 * @param direction
-	 * @return
+	 * @param direction the direction
+	 * @return the vertexes
 	 */
 	public List<Vertex> getVertexes(ForgeDirection direction)
 	{
@@ -226,8 +256,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Gets the {@link MergedVertex} for the specified {@link Vertex}.
 	 *
-	 * @param vertex
-	 * @return
+	 * @param vertex the vertex
+	 * @return the merged vertex
 	 */
 	public MergedVertex getMergedVertex(Vertex vertex)
 	{
@@ -239,8 +269,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Gets a list of {@link MergedVertex} with a name containing the specified <b>name</b>.
 	 *
-	 * @param name
-	 * @return
+	 * @param names the names
+	 * @return the merged vertexes
 	 */
 	public List<MergedVertex> getMergedVertexes(String... names)
 	{
@@ -260,8 +290,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Gets a list of {@link MergedVertex} with a base name containing {@link Face} name.
 	 *
-	 * @param face
-	 * @return
+	 * @param face the face
+	 * @return the merged vertexes
 	 */
 	public List<MergedVertex> getMergedVertexes(Face face)
 	{
@@ -274,8 +304,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Gets a list of {@link MergedVertex} with a base name containing the {@link ForgeDirection} name.
 	 *
-	 * @param direction
-	 * @return
+	 * @param direction the direction
+	 * @return the merged vertexes
 	 */
 	public List<MergedVertex> getMergedVertexes(ForgeDirection direction)
 	{
@@ -288,7 +318,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	 * Gets the transform matrix of this {@link Shape}. Creates it if it doesn't exist already.<br>
 	 * The matrix is translated by 0.5F, 0.5F, 0.5F upon creation.
 	 *
-	 * @return
+	 * @return the matrix4f
 	 */
 	private Matrix4f matrix()
 	{
@@ -303,8 +333,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Copies the transformation matrix from a {@link Shape shape} to this <code>Shape</code>.
 	 *
-	 * @param shape
-	 * @return
+	 * @param shape the shape
+	 * @return the shape
 	 */
 	public Shape copyMatrix(Shape shape)
 	{
@@ -317,7 +347,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	 * Applies the transformations matrix to this {@link Shape}. This modifies the position of the {@link Vertex vertexes} making up the
 	 * {@link Face faces} of this <code>Shape</code>.
 	 *
-	 * @return
+	 * @return the shape
 	 */
 	public Shape applyMatrix()
 	{
@@ -345,6 +375,13 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		return this;
 	}
 
+	/**
+	 * Sets the parameters for all the {@link Face faces} making up this {@link Shape}.
+	 *
+	 * @param params the params
+	 * @param merge the merge
+	 * @return this {@link Shape}
+	 */
 	public Shape setParameters(RenderParameters params, boolean merge)
 	{
 		for (Face f : faces)
@@ -360,10 +397,10 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	 * Set {@link RenderParameters} for {@link Face faces} matching the specified <b>name</b>. If <b>merge</b> is true, the parameters will
 	 * be merge with the <code>face</code> parameters instead of completely overriding them.
 	 *
-	 * @param face
-	 * @param params
-	 * @param merge
-	 * @return
+	 * @param name the name
+	 * @param params the params
+	 * @param merge the merge
+	 * @return this {@link Shape}
 	 */
 	public Shape setParameters(String name, RenderParameters params, boolean merge)
 	{
@@ -382,10 +419,10 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	 * Sets the size of this {@link Shape}. <b>width</b> represents East-West axis, <b>height</b> represents Bottom-Top axis and
 	 * <b>Depth</b> represents North-South axis. The calculations are based on {@link Vertex#baseName()}.
 	 *
-	 * @param width
-	 * @param height
-	 * @param depth
-	 * @return
+	 * @param width the width
+	 * @param height the height
+	 * @param depth the depth
+	 * @return this {@link Shape}
 	 */
 	public Shape setSize(float width, float height, float depth)
 	{
@@ -410,13 +447,13 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Sets the bounds for this {@link Shape}. Calculations are based on {@link Vertex#baseName()}.
 	 *
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param X
-	 * @param Y
-	 * @param Z
-	 * @return
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param X the x
+	 * @param Y the y
+	 * @param Z the z
+	 * @return this {@link Shape}
 	 */
 	public Shape setBounds(float x, float y, float z, float X, float Y, float Z)
 	{
@@ -445,8 +482,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Limits this {@link Shape} to the bounding box passed.
 	 *
-	 * @param aabb
-	 * @return
+	 * @param aabb the aabb
+	 * @return this {@link Shape}
 	 */
 	public Shape limit(AxisAlignedBB aabb)
 	{
@@ -456,13 +493,13 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Limits this {@link Shape} to the bounding box passed.
 	 *
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param X
-	 * @param Y
-	 * @param Z
-	 * @return
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param X the x
+	 * @param Y the y
+	 * @param Z the z
+	 * @return the shape
 	 */
 	public Shape limit(double x, double y, double z, double X, double Y, double Z)
 	{
@@ -481,10 +518,9 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Translates this {@link Shape}.
 	 *
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 */
 	@Override
 	public void translate(float x, float y, float z)
@@ -501,14 +537,20 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Scales this {@link Shape} on all axis.
 	 *
-	 * @param f
-	 * @return
+	 * @param factor the factor
 	 */
-	public void scale(float f)
+	public void scale(float factor)
 	{
-		scale(f, f, f, 0, 0, 0);
+		scale(factor, factor, factor, 0, 0, 0);
 	}
 
+	/**
+	 * Scale.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 */
 	public void scale(float x, float y, float z)
 	{
 		scale(x, y, z, 0, 0, 0);
@@ -517,10 +559,12 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Scales this {@link Shape}.
 	 *
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param offsetX the offset x
+	 * @param offsetY the offset y
+	 * @param offsetZ the offset z
 	 */
 	@Override
 	public void scale(float x, float y, float z, float offsetX, float offsetY, float offsetZ)
@@ -541,11 +585,10 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Rotates this {@link Shape} around the given axis the specified angle.
 	 *
-	 * @param angle
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
+	 * @param angle the angle
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 */
 	public void rotate(float angle, float x, float y, float z)
 	{
@@ -555,14 +598,13 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Rotates this {@link Shape} around the given axis the specified angle. Offsets the origin for the rotation.
 	 *
-	 * @param angle
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param offsetX
-	 * @param offsetY
-	 * @param offsetZ
-	 * @return
+	 * @param angle the angle
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param offsetX the offset x
+	 * @param offsetY the offset y
+	 * @param offsetZ the offset z
 	 */
 	@Override
 	public void rotate(float angle, float x, float y, float z, float offsetX, float offsetY, float offsetZ)
@@ -583,7 +625,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Stores the current state of each {@link Vertex} making up this {@link Shape}.
 	 *
-	 * @return
+	 * @return this {@link Shape}
 	 */
 	public Shape storeState()
 	{
@@ -599,7 +641,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Resets the state of each {@link Vertex} making up this {@link Shape} to a previously stored one.
 	 *
-	 * @return
+	 * @return this {@link Shape}
 	 */
 	public Shape resetState()
 	{
@@ -613,9 +655,9 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	}
 
 	/**
-	 * Interpolates the UVs of each vertex making up this {@link Shape} base on their position and the {@link Face} orientation.
+	 * Interpolates the UVs of each vertex making up this {@link Shape} based on their position and the {@link Face} orientation.
 	 *
-	 * @return
+	 * @return this {@link Shape}
 	 */
 	public Shape interpolateUV()
 	{
@@ -626,11 +668,12 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	}
 
 	/**
-	 * Shrinks the face matching <b>face</b> name by a certain <b>factor</b>. The vertexes of connected faces are moved too.
+	 * Shrinks the {@link Face} matching <b>face</b> name by a certain <b>factor</b>. The {@link Vertex vertexes} of connected faces are
+	 * moved too.
 	 *
-	 * @param face
-	 * @param factor
-	 * @return
+	 * @param dir the dir
+	 * @param factor the factor
+	 * @return the shape
 	 */
 	public Shape shrink(ForgeDirection dir, float factor)
 	{
@@ -663,10 +706,10 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	}
 
 	/**
-	 * Builds a Shape from multiple ones.
+	 * Builds a {@link Shape} from multiple ones.
 	 *
-	 * @param shapes
-	 * @return
+	 * @param shapes the shapes
+	 * @return the shape
 	 */
 	public static Shape fromShapes(Shape... shapes)
 	{

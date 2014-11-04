@@ -27,16 +27,39 @@ package net.malisis.core;
 import net.malisis.core.configuration.Settings;
 
 /**
+ * Interface to allow {@link MalisisCore} to have some automatic handling for mods.<br>
+ * Allows to display the version of the registered, and automatic configuration GUI if {@link Settings} are provided.
+ *
  * @author Ordinastie
- * 
  */
 public interface IMalisisMod
 {
+
+	/**
+	 * Gets the mod id.
+	 *
+	 * @return the mod id
+	 */
 	public String getModId();
 
+	/**
+	 * Gets the mod name.
+	 *
+	 * @return the mod name
+	 */
 	public String getName();
 
+	/**
+	 * Gets the mod version.
+	 *
+	 * @return the version
+	 */
 	public String getVersion();
 
+	/**
+	 * Gets the configuration settings.
+	 *
+	 * @return the configuration settings
+	 */
 	public Settings getSettings();
 }

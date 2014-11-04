@@ -41,12 +41,10 @@ public class GuiEvent
 	/**
 	 * Marks this {@link GuiEvent} as cancelled.
 	 *
-	 * @return
 	 */
-	public boolean cancel()
+	public void cancel()
 	{
 		cancelled = true;
-		return true;
 	}
 
 	/**

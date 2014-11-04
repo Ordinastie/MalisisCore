@@ -27,20 +27,38 @@ package net.malisis.core.renderer.animation.transformation;
 import net.malisis.core.renderer.animation.transformation.ITransformable.Position;
 
 /**
- * @author Ordinastie
  *
+ * @author Ordinastie
+ * @param <T> the generic type of the Transformable
  */
 public class PositionTransform<T> extends Transformation<PositionTransform, ITransformable.Position<T>>
 {
+	/** Starting position. */
 	protected int fromX, fromY;
+	/** Target position. */
 	protected int toX, toY;
 
+	/**
+	 * Instantiates a new {@link PositionTransform}.
+	 *
+	 * @param fromX the from x
+	 * @param fromY the from y
+	 * @param toX the to x
+	 * @param toY the to y
+	 */
 	public PositionTransform(int fromX, int fromY, int toX, int toY)
 	{
 		from(fromX, fromY);
 		to(toX, toY);
 	}
 
+	/**
+	 * Sets the starting position.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @return this {@link PositionTransform}
+	 */
 	public PositionTransform<T> from(int x, int y)
 	{
 		fromX = x;
@@ -48,6 +66,13 @@ public class PositionTransform<T> extends Transformation<PositionTransform, ITra
 		return this;
 	}
 
+	/**
+	 * Sets the target position
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @return this {@link PositionTransform}
+	 */
 	public PositionTransform<T> to(int x, int y)
 	{
 		toX = x;
@@ -55,6 +80,12 @@ public class PositionTransform<T> extends Transformation<PositionTransform, ITra
 		return this;
 	}
 
+	/**
+	 * Calculates the transformation
+	 *
+	 * @param transformable the transformable
+	 * @param comp the comp
+	 */
 	@Override
 	protected void doTransform(Position<T> transformable, float comp)
 	{
