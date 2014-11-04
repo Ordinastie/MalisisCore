@@ -45,6 +45,7 @@ group = 'net.malisis'
 archivesBaseName = 'malisiscore'
 version = '1.7.10-0.10.1-SNAPSHOT'
 ext.packaging = 'jar'
+ext.isReleaseVersion = false
 
 // Extended project information
 ext.projectName = 'Malisis\' Core'
@@ -63,6 +64,10 @@ ext.commit = project.hasProperty("commit") ? commit : 'unknown'
 // MinecraftForge version
 minecraft {
     version = "1.7.10-10.13.2.1230"
+    if(file("../../run").exists()) 
+		runDir = "../../run/assets"
+	else
+		runDir = "run/assets"
 }
 
 // Filter, process, and include resources
@@ -122,7 +127,7 @@ uploadArchives {
         }
 
         // Tasks and variables based on if release or snapshot
-        if (version.endsWith('-SNAPSHOT')) {
+        if (!isReleaseVersion) {
             // Set variable to snapshots repository URL
             ext.sonatypeUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
         } else {
