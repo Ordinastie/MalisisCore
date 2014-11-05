@@ -35,6 +35,7 @@ import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.util.IIcon;
 
@@ -92,8 +93,12 @@ public class UITab extends UIComponent<UITab>
 	public UITab setColor(int color)
 	{
 		this.color = color;
-		if (parent != null && ((UITabGroup) parent).getAttachedContainer() != null)
-			((UITabGroup) parent).getAttachedContainer().setBackgroundColor(color);
+		if (parent != null)
+		{
+			UIContainer cont = ((UITabGroup) parent).getAttachedContainer();
+			if (cont instanceof ITransformable.Color)
+				((Color) cont).setColor(color);
+		}
 		return this;
 	}
 

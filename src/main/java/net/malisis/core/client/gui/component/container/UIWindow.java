@@ -36,6 +36,9 @@ import net.malisis.core.client.gui.element.XYResizableGuiShape;
  */
 public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 {
+	/** Background color multiplier. */
+	protected int backgroundColor = -1;
+
 	public UIWindow(MalisisGui gui, String title, int width, int height, int anchor)
 	{
 		super(gui, title, width, height);
@@ -56,6 +59,28 @@ public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 		this(gui, null, width, height, Anchor.CENTER | Anchor.MIDDLE);
 	}
 
+	/**
+	 * Sets the background color for {@link UIContainer}.
+	 *
+	 * @param color the color
+	 * @return the UI container
+	 */
+	public UIContainer setBackgroundColor(int color)
+	{
+		this.backgroundColor = color;
+		return this;
+	}
+
+	/**
+	 * Gets the background color.
+	 *
+	 * @return the background color for {@link UIContainer}.
+	 */
+	public int getBackgroundColor()
+	{
+		return backgroundColor;
+	}
+
 	@Override
 	public void onClose()
 	{
@@ -67,7 +92,7 @@ public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.colorMultiplier.set(backgroundColor);
+		rp.colorMultiplier.set(getBackgroundColor());
 		rp.icon.set(icon);
 		renderer.drawShape(shape, rp);
 	}

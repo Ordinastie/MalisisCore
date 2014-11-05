@@ -37,14 +37,10 @@ import net.malisis.core.client.gui.component.control.ICloseable;
 import net.malisis.core.client.gui.component.control.IControlComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.decoration.UILabel;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
-import net.malisis.core.renderer.animation.transformation.ITransformable;
-
-import org.lwjgl.opengl.GL11;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -58,7 +54,7 @@ import com.google.common.eventbus.Subscribe;
  * @author Ordinastie, PaleoCrafter
  * @param <T> type of UIContainer
  */
-public class UIContainer<T extends UIContainer> extends UIComponent<T> implements IClipable, IScrollable, ICloseable, ITransformable.Color
+public class UIContainer<T extends UIContainer> extends UIComponent<T> implements IClipable, IScrollable, ICloseable
 {
 	/** List of {@link UIComponent} inside this {@link UIContainer}. */
 	protected final Set<UIComponent> components;
@@ -66,8 +62,6 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	protected int horizontalPadding;
 	/** Vertical padding to apply to this {@link UIContainer}. */
 	protected int verticalPadding;
-	/** Background color multiplier. */
-	protected int backgroundColor = -1;
 	/** Label for the title of this {@link UIContainer}. */
 	protected UILabel titleLabel;
 	//IClipable
@@ -92,8 +86,6 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	{
 		super(gui);
 		components = new LinkedHashSet<>();
-
-		shape = new SimpleGuiShape();
 		titleLabel = new UILabel(gui);
 	}
 
@@ -213,28 +205,6 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	public int getVerticalPadding()
 	{
 		return verticalPadding;
-	}
-
-	/**
-	 * Sets the background color for {@link UIContainer}.
-	 *
-	 * @param color the color
-	 * @return the UI container
-	 */
-	public UIContainer setBackgroundColor(int color)
-	{
-		this.backgroundColor = color;
-		return this;
-	}
-
-	/**
-	 * Gets the background color.
-	 *
-	 * @return the background color for {@link UIContainer}.
-	 */
-	public int getBackgroundColor()
-	{
-		return backgroundColor;
 	}
 
 	/**
@@ -535,17 +505,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (backgroundColor == -1)
-			return;
 
-		rp.colorMultiplier.set(backgroundColor);
-
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-		renderer.drawShape(shape, rp);
-		renderer.next();
-
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
 	/**
@@ -594,16 +554,5 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	public void onComponentSpaceChange(SpaceChangeEvent event)
 	{
 		onContentUpdate();
-	}
-
-	/**
-	 * Sets the background color of this {@link UIContainer}.
-	 *
-	 * @param color the new color
-	 */
-	@Override
-	public void setColor(int color)
-	{
-		setBackgroundColor(color);
 	}
 }

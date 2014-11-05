@@ -28,9 +28,13 @@ import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 
-public class UIPanel extends UIContainer<UIPanel>
+public class UIPanel extends UIContainer<UIPanel> implements ITransformable.Color
 {
+	/** Background color multiplier. */
+	protected int backgroundColor = -1;
+
 	public UIPanel(MalisisGui gui)
 	{
 		super(gui);
@@ -57,6 +61,39 @@ public class UIPanel extends UIContainer<UIPanel>
 		this(gui);
 		setTitle(title);
 		setSize(width, height);
+	}
+
+	/**
+	 * Sets the background color for {@link UIContainer}.
+	 *
+	 * @param color the color
+	 * @return the UI container
+	 */
+	public UIContainer setBackgroundColor(int color)
+	{
+		this.backgroundColor = color;
+		return this;
+	}
+
+	/**
+	 * Gets the background color.
+	 *
+	 * @return the background color for {@link UIContainer}.
+	 */
+	public int getBackgroundColor()
+	{
+		return backgroundColor;
+	}
+
+	/**
+	 * Sets the background color of this {@link UIContainer}.
+	 *
+	 * @param color the new color
+	 */
+	@Override
+	public void setColor(int color)
+	{
+		setBackgroundColor(color);
 	}
 
 	@Override

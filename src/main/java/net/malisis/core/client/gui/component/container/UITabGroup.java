@@ -31,6 +31,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.interaction.UITab;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 
 /**
  * @author Ordinastie
@@ -163,8 +164,8 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		if (tab != null)
 			tab.setActive(true);
 
-		if (attachedContainer != null)
-			attachedContainer.setBackgroundColor(tab.getColor());
+		if (attachedContainer instanceof ITransformable.Color)
+			((ITransformable.Color) attachedContainer).setColor(tab.getColor());
 
 	}
 
@@ -183,9 +184,8 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	public UITabGroup attachTo(UIContainer container, boolean displace)
 	{
 		attachedContainer = container;
-
-		if (activeTab != null)
-			attachedContainer.setBackgroundColor(activeTab.getColor());
+		if (activeTab != null && attachedContainer instanceof ITransformable.Color)
+			((ITransformable.Color) attachedContainer).setColor(activeTab.getColor());
 
 		if (!displace)
 			return this;
