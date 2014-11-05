@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.malisis.core.renderer.BaseRenderer;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.animation.transformation.Transformation;
 import net.malisis.core.renderer.element.Shape;
@@ -40,16 +39,15 @@ import net.minecraft.client.Minecraft;
  */
 public class AnimationRenderer
 {
-	private BaseRenderer renderer;
 	private long startTime = -1;
 	private boolean clearFinished = false;
 	private LinkedList<Animation> animations = new LinkedList<>();
 	private List<ITransformable> tranformables = new ArrayList<>();
 	private List<Animation> toClear = new ArrayList<>();
 
-	public AnimationRenderer(BaseRenderer renderer)
+	public AnimationRenderer()
 	{
-		this.renderer = renderer;
+		setStartTime();
 	}
 
 	public void setStartTime(long start)
@@ -57,16 +55,34 @@ public class AnimationRenderer
 		this.startTime = start;
 	}
 
-	public long getStartTime()
+	public void setStartTime()
 	{
-		if (startTime == -1)
-			startTime = Minecraft.getMinecraft().theWorld.getTotalWorldTime();
-		return startTime;
+		setStartTime(System.nanoTime());
 	}
 
-	public float getElapsedTime()
+	public void setStartTick(long start)
 	{
-		return Minecraft.getMinecraft().theWorld.getTotalWorldTime() - getStartTime() + renderer.getPartialTick();
+		setStartTime(System.nanoTime() - (getWorldTime() - start) * 1000000000 / 20);
+		//		MalisisCore.message("%s - %s = %s > %s / %s", getWorldTime(), start, getWorldTime() - start, getElapsedTime() / 1000000000,
+		//				getElapsedTicks());
+	}
+
+	public long getWorldTime()
+	{
+		if (Minecraft.getMinecraft().theWorld != null)
+			return Minecraft.getMinecraft().theWorld.getTotalWorldTime();
+		else
+			return 0;
+	}
+
+	public long getElapsedTime()
+	{
+		return System.nanoTime() - startTime;
+	}
+
+	public float getElapsedTicks()
+	{
+		return (float) (((double) getElapsedTime() / 1000000000) * 20);
 	}
 
 	public void addAnimation(Animation animation)
@@ -92,7 +108,7 @@ public class AnimationRenderer
 	public List<ITransformable> animate(Animation... animations)
 	{
 		ITransformable tr = null;
-		float elapsedTime = getElapsedTime();
+		long elapsedTime = getElapsedTime();
 		tranformables.clear();
 		toClear.clear();
 		for (Animation animation : animations)

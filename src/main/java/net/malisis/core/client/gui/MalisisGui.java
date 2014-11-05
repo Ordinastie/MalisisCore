@@ -96,23 +96,13 @@ public class MalisisGui extends GuiScreen
 	 */
 	protected UIComponent focusedComponent;
 
-	/**
-	 * Time when the GUI was opened.
-	 */
-	private long startTime;
-	/**
-	 * Elasped time since the GUI was opened. Updated each render tick.
-	 */
-	private long elaspedTime;
-
 	protected MalisisGui()
 	{
 		this.renderer = new GuiRenderer();
 		this.screen = new UIContainer(this);
-		this.ar = new AnimationRenderer(renderer);
+		this.ar = new AnimationRenderer();
 		this.ar.autoClearAnimations();
 		this.screen.setClipContent(false);
-		startTime = System.currentTimeMillis();
 		Keyboard.enableRepeatEvents(true);
 	}
 
@@ -151,7 +141,7 @@ public class MalisisGui extends GuiScreen
 	 */
 	public long getElapsedTime()
 	{
-		return elaspedTime;
+		return ar.getElapsedTime();
 	}
 
 	/**
@@ -359,7 +349,6 @@ public class MalisisGui extends GuiScreen
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks)
 	{
-		elaspedTime = System.currentTimeMillis() - startTime;
 		ar.animate();
 
 		//if we ignore scaling, use real mouse position on screen
@@ -416,7 +405,7 @@ public class MalisisGui extends GuiScreen
 
 	public void animate(Animation animation)
 	{
-		animation.setDelay((int) ar.getElapsedTime());
+		animation.setDelay((int) ar.getElapsedTicks());
 		ar.addAnimation(animation);
 	}
 

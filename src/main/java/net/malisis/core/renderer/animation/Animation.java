@@ -69,12 +69,12 @@ public class Animation
 		this.delay = delay;
 	}
 
-	public ITransformable animate(float elapsedTime)
+	public ITransformable animate(long elapsedTime)
 	{
 		if (transform == null)
 			return transformable;
 
-		float elapsed = elapsedTime - delay;
+		long elapsed = elapsedTime - tickToNano(delay);
 		started = elapsed > transform.getDelay();
 		finished = elapsed > transform.totalDuration() && transform.getLoops() != -1;
 
@@ -85,5 +85,10 @@ public class Animation
 
 		transform.transform(transformable, elapsed);
 		return transformable;
+	}
+
+	public static long tickToNano(long tick)
+	{
+		return tick * 1000000000 / 20;
 	}
 }
