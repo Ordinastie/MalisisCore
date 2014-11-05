@@ -338,6 +338,12 @@ public class Vertex
 		return (x == 1 || x == 0) && (y == 1 || y == 0) && (z == 1 || z == 0);
 	}
 
+	public Vertex setBaseName(String name)
+	{
+		this.baseName = name;
+		return this;
+	}
+
 	public String baseName()
 	{
 		if (baseName == null)
