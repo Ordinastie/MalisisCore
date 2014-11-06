@@ -201,7 +201,9 @@ public class UILabel extends UIComponent<UILabel>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		renderer.setFontScale(fontScale);
 		renderer.drawText(text, color, drawShadow);
+		renderer.setFontScale(1);
 	}
 
 	@Override
