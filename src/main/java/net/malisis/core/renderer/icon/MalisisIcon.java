@@ -85,10 +85,10 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Adds a {@link MalisisIcon} to be dependant on this one. Will call
-	 * {@link MalisisIcon#initIcon(MalisisIcon, int, int, int, int, boolean) icon.initIcon()} when its stiched to the sheet.
+	 * Adds a {@link MalisisIcon} to be dependant on this one. Will call {@link #initIcon(MalisisIcon, int, int, int, int, boolean)} when
+	 * stiched to the sheet.
 	 *
-	 * @param icon
+	 * @param icon the icon
 	 */
 	public void addDependant(MalisisIcon icon)
 	{
@@ -97,10 +97,10 @@ public class MalisisIcon extends TextureAtlasSprite
 
 	//#region getters/setters
 	/**
-	 * Sets the size in pixel of this {@link MalisisIcon}
+	 * Sets the size in pixel of this {@link MalisisIcon}.
 	 *
-	 * @param width
-	 * @param height
+	 * @param width the width
+	 * @param height the height
 	 */
 	public void setSize(int width, int height)
 	{
@@ -135,8 +135,8 @@ public class MalisisIcon extends TextureAtlasSprite
 	/**
 	 * Sets this {@link MalisisIcon} to be flipped.
 	 *
-	 * @param horizontal
-	 * @param vertical
+	 * @param horizontal whether to flip horizontally
+	 * @param vertical whether to flip vertically
 	 * @return this {@link MalisisIcon}
 	 */
 	public MalisisIcon flip(boolean horizontal, boolean vertical)
@@ -173,7 +173,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	/**
 	 * Sets the rotation for this {@link MalisisIcon}. The icon will be rotated <b>rotation</b> x 90° clockwise.
 	 *
-	 * @param rotation
+	 * @param rotation the rotation
 	 */
 	public void setRotation(int rotation)
 	{
@@ -193,12 +193,12 @@ public class MalisisIcon extends TextureAtlasSprite
 	/**
 	 * Initializes this {@link MalisisIcon}. Called from the icon this one depends on, copying the <b>baseIcon</b> values.
 	 *
-	 * @param baseIcon
-	 * @param width
-	 * @param height
-	 * @param x
-	 * @param y
-	 * @param rotated
+	 * @param baseIcon the base icon
+	 * @param width the width
+	 * @param height the height
+	 * @param x the x
+	 * @param y the y
+	 * @param rotated the rotated
 	 */
 	protected void initIcon(MalisisIcon baseIcon, int width, int height, int x, int y, boolean rotated)
 	{
@@ -208,8 +208,8 @@ public class MalisisIcon extends TextureAtlasSprite
 	/**
 	 * Offsets this {@link MalisisIcon} by a specified amount. <b>offsetX</b> and <b>offsetY</b> are specified in pixels.
 	 *
-	 * @param offsetX
-	 * @param offsetY
+	 * @param offsetX the x offset
+	 * @param offsetY the y offset
 	 * @return this {@link MalisisIcon}
 	 */
 	public MalisisIcon offset(int offsetX, int offsetY)
@@ -221,10 +221,10 @@ public class MalisisIcon extends TextureAtlasSprite
 	/**
 	 * Clips this {@link MalisisIcon}. <b>offsetX</b>, <b>offsetY</b>, <b>width</b> and <b>height</b> are specified in pixels.
 	 *
-	 * @param offsetX
-	 * @param offsetY
-	 * @param width
-	 * @param height
+	 * @param offsetX the x offset
+	 * @param offsetY the y offset
+	 * @param width the width
+	 * @param height the height
 	 * @return this {@link MalisisIcon}
 	 */
 	public MalisisIcon clip(int offsetX, int offsetY, int width, int height)
@@ -240,10 +240,10 @@ public class MalisisIcon extends TextureAtlasSprite
 	 * Clips this {@link MalisisIcon}. <b>offsetXFactor</b>, <b>offsetYFactor</b>, <b>widthFactor</b> and <b>heightFactor</b> are values
 	 * from zero to one.
 	 *
-	 * @param offsetXFactor
-	 * @param offsetYFactor
-	 * @param widthFactor
-	 * @param heightFactor
+	 * @param offsetXFactor the x factor for offset
+	 * @param offsetYFactor the y factor for offset
+	 * @param widthFactor the width factor
+	 * @param heightFactor the height factor
 	 * @return this {@link MalisisIcon}
 	 */
 	public MalisisIcon clip(float offsetXFactor, float offsetYFactor, float widthFactor, float heightFactor)
@@ -274,11 +274,11 @@ public class MalisisIcon extends TextureAtlasSprite
 	/**
 	 * Called when the part represented by this {@link MalisisIcon} is stiched to the texture. Sets most of the icon fields.
 	 *
-	 * @param width
-	 * @param height
-	 * @param x
-	 * @param y
-	 * @param rotated
+	 * @param width the width
+	 * @param height the height
+	 * @param x the x
+	 * @param y the y
+	 * @param rotated the rotated
 	 */
 	@Override
 	public void initSprite(int width, int height, int x, int y, boolean rotated)
@@ -293,7 +293,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	/**
 	 * Copies the values from {@link MalisisIcon base} to this {@link MalisisIcon}.
 	 *
-	 * @param base
+	 * @param base the icon to copy from
 	 */
 	public void copyFrom(MalisisIcon base)
 	{
@@ -321,7 +321,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	 * Attempts to register this {@link MalisisIcon} to the {@link TextureMap}. If an {@link IIcon} is already registered with this name,
 	 * that registered icon will be returned instead.
 	 *
-	 * @param register
+	 * @param register the TextureMap
 	 * @return this {@link MalisisIcon} if not already registered, otherwise, the MalisisIcon already inside the registry.
 	 */
 	public MalisisIcon register(TextureMap register)

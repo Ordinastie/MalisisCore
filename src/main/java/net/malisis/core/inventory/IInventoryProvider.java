@@ -42,7 +42,7 @@ public interface IInventoryProvider
 	/**
 	 * Gets the {@link MalisisInventory} for a specific side for this {@link IInventoryProvider}.
 	 *
-	 * @param side
+	 * @param side the side
 	 * @param data null for TileEntity, ItemStack for Item
 	 * @return the inventories
 	 */

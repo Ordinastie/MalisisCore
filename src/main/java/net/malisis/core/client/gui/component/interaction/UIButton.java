@@ -83,7 +83,7 @@ public class UIButton extends UIComponent<UIButton>
 	/**
 	 * Sets the text of this {@link UIButton}. If a width of 0 was previously set, it will be recalculated for this text.
 	 *
-	 * @param text
+	 * @param text the text
 	 * @return this {@link UIButton}
 	 */
 	public UIButton setText(String text)
@@ -104,7 +104,7 @@ public class UIButton extends UIComponent<UIButton>
 	/**
 	 * Sets the width of this {@link UIButton}. Height is fixed 20.
 	 *
-	 * @param width
+	 * @param width the width
 	 * @return this {@link UIButton}
 	 */
 	public UIButton setSize(int width)
@@ -115,8 +115,8 @@ public class UIButton extends UIComponent<UIButton>
 	/**
 	 * Sets the size of this {@link UIButton}.
 	 *
-	 * @param width
-	 * @param height
+	 * @param width the width
+	 * @param height the height
 	 * @return this {@link UIButton}
 	 */
 	@Override

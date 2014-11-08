@@ -714,7 +714,7 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Creates an option HashMap for UISelect.setOptions() from a HashMap of keys -> labels.<br>
+		 * Creates an option HashMap for UISelect.setOptions() from a HashMap of keys -&gt; labels.<br>
 		 *
 		 * @param <T> the generic type
 		 * @param list the list

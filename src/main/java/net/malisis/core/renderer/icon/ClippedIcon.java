@@ -49,10 +49,10 @@ public class ClippedIcon extends MalisisIcon
 	/**
 	 * Sets the clipping for this {@link ClippedIcon}. Has no effect after the parent icon has been stiched.
 	 *
-	 * @param clipX
-	 * @param clipY
-	 * @param clipWidth
-	 * @param clipHeight
+	 * @param clipX x offset
+	 * @param clipY y offset
+	 * @param clipWidth the clip width
+	 * @param clipHeight the clip height
 	 */
 	public void setClipping(float clipX, float clipY, float clipWidth, float clipHeight)
 	{
@@ -65,12 +65,12 @@ public class ClippedIcon extends MalisisIcon
 	/**
 	 * Initializes this {@link ClippedIcon} and clips it based on the clipping set.
 	 *
-	 * @param baseIcon
-	 * @param width
-	 * @param height
-	 * @param x
-	 * @param y
-	 * @param rotated
+	 * @param baseIcon the base icon
+	 * @param width the width
+	 * @param height the height
+	 * @param x the x
+	 * @param y the y
+	 * @param rotated the rotated
 	 */
 	@Override
 	protected void initIcon(MalisisIcon baseIcon, int width, int height, int x, int y, boolean rotated)

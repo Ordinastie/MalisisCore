@@ -348,8 +348,8 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	 * Client side calls will display italic and grey text.<br>
 	 * Server side calls will display white text. The text will be sent to all clients connected.
 	 *
-	 * @param text
-	 * @param data
+	 * @param text the text
+	 * @param data the data
 	 */
 	public static void message(Object text, Object... data)
 	{

@@ -358,7 +358,7 @@ public class Face
 	/**
 	 * Gets a {@link Face} name from a {@link ForgeDirection}.
 	 *
-	 * @param dir
+	 * @param dir the dir
 	 * @return the name
 	 */
 	public static String nameFromDirection(ForgeDirection dir)

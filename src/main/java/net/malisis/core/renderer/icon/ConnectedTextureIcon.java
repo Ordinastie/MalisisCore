@@ -125,13 +125,13 @@ public class ConnectedTextureIcon extends MalisisIcon
 	}
 
 	/**
-	 * Gets the corresponding {@link IIcon} based on the connection available.
+	 * Gets the corresponding {@link IIcon} based on the connections available.
 	 *
-	 * @param world
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param side
+	 * @param world the world
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param side the side
 	 * @return the icon
 	 */
 	public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side)
@@ -141,13 +141,13 @@ public class ConnectedTextureIcon extends MalisisIcon
 	}
 
 	/**
-	 * Determines the connections available at this position for the specified <b>side</b>
+	 * Determines the connections available at this position for the specified <b>side</b>.
 	 *
-	 * @param world
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param side
+	 * @param world the world
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param side the side
 	 * @return the connections
 	 */
 	private int getConnections(IBlockAccess world, int x, int y, int z, int side)

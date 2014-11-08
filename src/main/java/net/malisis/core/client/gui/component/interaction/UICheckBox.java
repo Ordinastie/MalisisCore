@@ -94,7 +94,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	/**
 	 * Sets the state for this {@link UICheckBox}. Does not fire CheckEvent.
 	 *
-	 * @param checked
+	 * @param checked true if checked
 	 * @return this {@link UIComponent}
 	 */
 	public UICheckBox setChecked(boolean checked)

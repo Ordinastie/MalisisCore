@@ -107,9 +107,9 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Sets the inventory container for this {@link MalisisGui}.
+	 * Sets the {@link MalisisInventoryContainer} for this {@link MalisisGui}.
 	 *
-	 * @param container
+	 * @param container the inventory container
 	 */
 	public void setInventoryContainer(MalisisInventoryContainer container)
 	{
@@ -147,7 +147,7 @@ public class MalisisGui extends GuiScreen
 	/**
 	 * Adds container to the screen.
 	 *
-	 * @param component
+	 * @param component the component
 	 */
 	protected void addToScreen(UIComponent component)
 	{
@@ -166,8 +166,8 @@ public class MalisisGui extends GuiScreen
 	/**
 	 * Gets the {@link UIContainer} at the specified coordinates inside this {@link MalisisGui}.
 	 *
-	 * @param x
-	 * @param y
+	 * @param x the x coordinate
+	 * @param y the y coordinate
 	 * @return the component, null if component is {@link #screen}
 	 */
 	public UIComponent getComponentAt(int x, int y)
@@ -179,7 +179,7 @@ public class MalisisGui extends GuiScreen
 	/**
 	 * Fires a {@link GuiEvent} for this {@link MalisisGui}.
 	 *
-	 * @param event
+	 * @param event the event
 	 * @return true if the event should propagate, false if cancelled
 	 */
 	protected boolean fireEvent(GuiEvent event)
@@ -299,9 +299,9 @@ public class MalisisGui extends GuiScreen
 	/**
 	 * Called when a button is double clicked.
 	 *
-	 * @param x
-	 * @param y
-	 * @param button
+	 * @param x the x
+	 * @param y the y
+	 * @param button the button
 	 */
 	protected void doubleClick(int x, int y, int button)
 	{
@@ -390,9 +390,9 @@ public class MalisisGui extends GuiScreen
 	/**
 	 * Called every frame.
 	 *
-	 * @param mouseX
-	 * @param mouseY
-	 * @param partialTick
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
 	 */
 	public void update(int mouseX, int mouseY, float partialTick)
 	{}
@@ -463,9 +463,9 @@ public class MalisisGui extends GuiScreen
 	/**
 	 * Sends a GUI action to the server.
 	 *
-	 * @param action
-	 * @param slot
-	 * @param code
+	 * @param action the action
+	 * @param slot the slot
+	 * @param code the keyboard code
 	 */
 	public static void sendAction(ActionType action, MalisisSlot slot, int code)
 	{
@@ -490,8 +490,8 @@ public class MalisisGui extends GuiScreen
 	/**
 	 * Sets the hovered state for a {@link UIComponent}. If a <code>UIComponent</code> is currently hovered, it will be "unhovered" first.
 	 *
-	 * @param component
-	 * @param hovered
+	 * @param component the component that gets his state changed
+	 * @param hovered the hovered state
 	 * @return true, if the state was changed
 	 */
 	public static boolean setHoveredComponent(UIComponent component, boolean hovered)

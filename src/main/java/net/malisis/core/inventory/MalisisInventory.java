@@ -500,8 +500,8 @@ public class MalisisInventory implements IInventory
 	/**
 	 * Transfers itemStack inside this {@link MalisisInventory}.
 	 *
-	 * @param itemStack
-	 * @param reversed start filling slots from the last slot
+	 * @param itemStack the item stack
+	 * @param reversed if true, start filling slots from the last slot
 	 * @return the itemStack that could not fit inside this inventory
 	 */
 	public ItemStack transferInto(ItemStack itemStack, boolean reversed)
@@ -517,8 +517,8 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Transfer itemStack inside this {@link MalisisInventory} into slots at position from start to end. If <b>start</b> > <b>end</b>, the
-	 * slots will be filled backwards.
+	 * Transfer itemStack inside this {@link MalisisInventory} into slots at position from start to end. If <b>start</b> &gt; <b>end</b>,
+	 * the slots will be filled backwards.
 	 *
 	 * @param itemStack the item stack
 	 * @param emptySlot whether to fill empty slots only

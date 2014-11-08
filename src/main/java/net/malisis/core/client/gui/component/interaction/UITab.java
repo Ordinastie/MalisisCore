@@ -87,7 +87,7 @@ public class UITab extends UIComponent<UITab>
 	/**
 	 * Sets the color for this {@link UITab}. Also sets the color for its {@link UIContainer}.
 	 *
-	 * @param color
+	 * @param color the color
 	 * @return this {@link UITab}
 	 */
 	public UITab setColor(int color)
@@ -183,7 +183,7 @@ public class UITab extends UIComponent<UITab>
 	/**
 	 * Sets the label for this {@link UITab}. Removes the image if was previously set.
 	 *
-	 * @param label
+	 * @param label the label
 	 * @return this {@link UITab}
 	 */
 	public UITab setLabel(String label)
@@ -200,7 +200,7 @@ public class UITab extends UIComponent<UITab>
 	/**
 	 * Sets the image {@link UITab}. Removes the label if was previously set.
 	 *
-	 * @param image
+	 * @param image the image
 	 * @return this {@link UITab}
 	 */
 	public UITab setImage(UIImage image)
@@ -218,7 +218,7 @@ public class UITab extends UIComponent<UITab>
 	/**
 	 * Set the {@link UIContainer} linked with this {@link UITab}.
 	 *
-	 * @param container
+	 * @param container the container
 	 * @return this {@link UITab}
 	 */
 	public UITab setContainer(UIContainer container)
@@ -238,7 +238,7 @@ public class UITab extends UIComponent<UITab>
 	/**
 	 * Sets this tab to be active. Enables and sets visibility for its container.
 	 *
-	 * @param active
+	 * @param active true if active
 	 */
 	public void setActive(boolean active)
 	{

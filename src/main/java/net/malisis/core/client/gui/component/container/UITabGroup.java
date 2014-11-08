@@ -95,11 +95,11 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	}
 
 	/**
-	 * Adds tab and its corresponding container to this <code>UITabGroup</code>.<br>
-	 * Also sets the width of this <code>UITabGroup</code>.
+	 * Adds an {@link UITab} and its corresponding {@link UIContainer}to this {@link UITabGroup}.<br>
+	 * Also sets the width of this {@link UITabGroup}.
 	 *
-	 * @param tab
-	 * @param container
+	 * @param tab tab to add to the UITabGroup
+	 * @param container {@link UIContainer} linked to the {@link UITab}
 	 * @return this {@link UITab}
 	 */
 	public UITab addTab(UITab tab, UIContainer container)
@@ -150,7 +150,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	/**
 	 * Activates the tab and deactivates currently active tab.
 	 *
-	 * @param tab
+	 * @param tab the new active tab
 	 */
 	public void setActiveTab(UITab tab)
 	{
@@ -175,10 +175,10 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	}
 
 	/**
-	 * Attach the container to this <code>UITabGroup</code>.
+	 * Attach this {@link UITabGroup} to a {@link UIContainer}.
 	 *
-	 * @param container
-	 * @param displace
+	 * @param container the container to attach to.
+	 * @param displace if true, moves and resize the UIContainer to make place for the UITabGroup
 	 * @return this {@link UITab}
 	 */
 	public UITabGroup attachTo(UIContainer container, boolean displace)

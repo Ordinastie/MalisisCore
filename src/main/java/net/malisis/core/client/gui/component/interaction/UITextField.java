@@ -412,7 +412,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	/**
-	 * Checks against {@link #filter} if text is valid.
+	 * Checks against if text is valid.
 	 *
 	 * @param text the text
 	 * @return true, if input is valid

@@ -103,7 +103,7 @@ public class MultiBlock
 	}
 
 	/**
-	 * @return the Block composing this <code>MultiBlock</code>.
+	 * @return the Block composing this {@link MultiBlock}.
 	 */
 	private Block getBlock()
 	{
@@ -113,10 +113,10 @@ public class MultiBlock
 	}
 
 	/**
-	 * Sets the world object for this <code>MultiBlock</code>.<br>
-	 * To be called from the TileEntity.setWorldObj() providing this <code>MultiBlock</code>.
+	 * Sets the world object for this {@link MultiBlock}.<br>
+	 * To be called from the TileEntity.setWorldObj() providing this {@link MultiBlock}.
 	 *
-	 * @param world
+	 * @param world the world
 	 */
 	public void setWorld(World world)
 	{
@@ -124,9 +124,9 @@ public class MultiBlock
 	}
 
 	/**
-	 * Sets a facing for this <code>MultiBlock</code>.
+	 * Sets a facing for this {@link MultiBlock}.
 	 *
-	 * @param direction
+	 * @param direction the direction
 	 */
 	public void setDirection(ForgeDirection direction)
 	{
@@ -139,11 +139,11 @@ public class MultiBlock
 	}
 
 	/**
-	 * Checks whether the coordinates passed are the origin of this <code>MultiBlock</code>
+	 * Checks whether the coordinates passed are the origin of this {@link MultiBlock}.
 	 *
-	 * @param x
-	 * @param y
-	 * @param z
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 * @return true, if the coordinates match the origin
 	 */
 	public boolean isOrigin(int x, int y, int z)
@@ -152,11 +152,11 @@ public class MultiBlock
 	}
 
 	/**
-	 * Sets the size for this <code>MultiBlock</code>.
+	 * Sets the size for this {@link MultiBlock}.
 	 *
-	 * @param width
-	 * @param height
-	 * @param depth
+	 * @param width the width
+	 * @param height the height
+	 * @param depth the depth
 	 */
 	public void setSize(int width, int height, int depth)
 	{
@@ -171,10 +171,10 @@ public class MultiBlock
 	}
 
 	/**
-	 * Sets a bounding box for this <code>MultiBlock</code>. To be used when the origin needs not to be in a corner.<br>
+	 * Sets a bounding box for this {@link MultiBlock}. To be used when the origin needs not to be in a corner.<br>
 	 * The AxisAlignedBB must englobe origin point.
 	 *
-	 * @param aabb
+	 * @param aabb the new bounds
 	 */
 	public void setBounds(AxisAlignedBB aabb)
 	{
@@ -299,7 +299,7 @@ public class MultiBlock
 	}
 
 	/**
-	 * Removes the blocks composing this <code>MultiBlock</code>, including the origin.
+	 * Removes the blocks composing this {@link MultiBlock}, including the origin.
 	 *
 	 * @return true
 	 */
@@ -314,9 +314,9 @@ public class MultiBlock
 	}
 
 	/**
-	 * Write this <code>MultiBlock</code> informations into the provided NBTTagCompound.
+	 * Write this {@link MultiBlock} informations into the provided NBTTagCompound.
 	 *
-	 * @param tag
+	 * @param tag the tag
 	 */
 	public void writeToNBT(NBTTagCompound tag)
 	{
@@ -336,7 +336,7 @@ public class MultiBlock
 	 * Creates MultiBlock structure using the provided NBTTagCompound.<br>
 	 * To be used from tileEntity.readNBT()
 	 *
-	 * @param tag
+	 * @param tag the tag
 	 */
 	public void readFromNBT(NBTTagCompound tag)
 	{
@@ -359,14 +359,14 @@ public class MultiBlock
 	}
 
 	/**
-	 * Destroy this <code>MultiBlock</code>. <br>
-	 * Will remove all the blocks composing this <code>MultiBlock</code> structure.<br>
+	 * Destroy this {@link MultiBlock}. <br>
+	 * Will remove all the blocks composing this {@link MultiBlock} structure.<br>
 	 * To be called from inside Block.removedByPlayer().
 	 *
-	 * @param world
-	 * @param x
-	 * @param y
-	 * @param z
+	 * @param world the world
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 * @return true if blocks were removed
 	 */
 	public static boolean destroy(World world, int x, int y, int z)
@@ -391,12 +391,12 @@ public class MultiBlock
 	}
 
 	/**
-	 * Gets the <code>MultiBlock</code> instance at the specified coordinates.<br>
+	 * Gets the {@link MultiBlock} instance at the specified coordinates.<br>
 	 *
-	 * @param world
-	 * @param x
-	 * @param y
-	 * @param z
+	 * @param world the world
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 * @return the MultiBlock
 	 */
 	public static MultiBlock getMultiBlock(IBlockAccess world, int x, int y, int z)
@@ -409,12 +409,12 @@ public class MultiBlock
 	}
 
 	/**
-	 * Checks whether the coordinates passed are the origin of a <code>MultiBlock</code>.
+	 * Checks whether the coordinates passed are the origin of a {@link MultiBlock}.
 	 *
-	 * @param world
-	 * @param x
-	 * @param y
-	 * @param z
+	 * @param world the world
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 * @return true, if the specified coordinates match the origin
 	 */
 	public static boolean isOrigin(IBlockAccess world, int x, int y, int z)
@@ -448,14 +448,14 @@ public class MultiBlock
 	public static interface IProvider
 	{
 		/**
-		 * Sets the <code>MultiBlock</code> instance for the provider.
+		 * Sets the {@link MultiBlock} instance for this {@link IProvider}.
 		 *
-		 * @param multiBlock
+		 * @param multiBlock the MultiBlock
 		 */
 		public void setMultiBlock(MultiBlock multiBlock);
 
 		/**
-		 * @return the <code>MultiBlock</code> instance of the provider.
+		 * @return the {@link MultiBlock} instance of the provider.
 		 */
 		public MultiBlock getMultiBlock();
 	}
