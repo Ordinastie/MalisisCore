@@ -82,9 +82,7 @@ public class UILabel extends UIComponent<UILabel>
 	public UILabel setText(String text)
 	{
 		this.text = text;
-		this.textWidth = GuiRenderer.getStringWidth(text, fontScale);
-		this.textHeight = GuiRenderer.getStringHeight(fontScale);
-		setSize(textWidth, textHeight);
+		calculateSize();
 
 		return this;
 	}
@@ -163,6 +161,7 @@ public class UILabel extends UIComponent<UILabel>
 	public UILabel setFontScale(float scale)
 	{
 		this.fontScale = scale;
+		calculateSize();
 		return this;
 	}
 
@@ -177,6 +176,16 @@ public class UILabel extends UIComponent<UILabel>
 	}
 
 	// #end getters/setters
+
+	/**
+	 * Calculate the size of this {@link UILabel}.
+	 */
+	protected void calculateSize()
+	{
+		this.textWidth = GuiRenderer.getStringWidth(text, fontScale);
+		this.textHeight = GuiRenderer.getStringHeight(fontScale);
+		setSize(textWidth, textHeight);
+	}
 
 	/**
 	 * Draws the background.
