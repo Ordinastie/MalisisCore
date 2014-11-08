@@ -24,6 +24,7 @@
 
 package net.malisis.core.client.gui.component.control;
 
+import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -42,8 +43,24 @@ public class UISlimScrollbar extends UIScrollBar
 {
 	public <T extends UIComponent & IScrollable> UISlimScrollbar(MalisisGui gui, T parent, Type type)
 	{
-		super(gui, parent, type, true);
+		super(gui, parent, type);
+	}
 
+	@Override
+	protected void setPosition()
+	{
+		int vp = getScrollable().getVerticalPadding();
+		int hp = getScrollable().getHorizontalPadding();
+
+		if (type == Type.HORIZONTAL)
+			setPosition(hp, -vp, Anchor.BOTTOM);
+		else
+			setPosition(-hp, vp, Anchor.RIGHT);
+	}
+
+	@Override
+	protected void createShape(MalisisGui gui)
+	{
 		scrollThickness = 2;
 		scrollHeight = 15;
 
@@ -56,6 +73,25 @@ public class UISlimScrollbar extends UIScrollBar
 		scrollShape = new SimpleGuiShape();
 		scrollShape.setSize(w, h);
 		scrollShape.storeState();
+	}
+
+	@Override
+	public int getWidth()
+	{
+		int w = super.getWidth();
+		if (type == Type.HORIZONTAL)
+			w -= 2 * getScrollable().getHorizontalPadding();
+		return w;
+	}
+
+	@Override
+	public int getHeight()
+	{
+		int h = super.getHeight();
+		if (type == Type.VERTICAL)
+			h -= 2 * getScrollable().getVerticalPadding();
+		return h;
+
 	}
 
 	@Override
@@ -72,9 +108,9 @@ public class UISlimScrollbar extends UIScrollBar
 		int ox = 0, oy = 0;
 		int l = getLength() - scrollHeight;
 		if (isHorizontal())
-			ox = (int) (offset * l);
+			ox = (int) (getOffset() * l);
 		else
-			oy = (int) (offset * l);
+			oy = (int) (getOffset() * l);
 
 		renderer.disableTextures();
 

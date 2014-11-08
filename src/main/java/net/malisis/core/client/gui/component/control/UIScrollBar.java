@@ -32,7 +32,6 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
@@ -71,28 +70,15 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	protected GuiIcon horizontalDisabledIcon;
 
 	protected Type type;
-	protected float offset;
 
 	public boolean autoHide = false;
 
 	protected GuiShape scrollShape;
 
-	protected <T extends UIComponent & IScrollable> UIScrollBar(MalisisGui gui, T parent, Type type, boolean noShape)
+	public <T extends UIComponent & IScrollable> UIScrollBar(MalisisGui gui, T parent, Type type)
 	{
 		super(gui);
 		this.type = type;
-		int vp = 0;
-		int hp = 0;
-		if (parent instanceof UIContainer)
-		{
-			vp = ((UIContainer) parent).getVerticalPadding();
-			hp = ((UIContainer) parent).getHorizontalPadding();
-		}
-
-		if (type == Type.HORIZONTAL)
-			setPosition(-hp, vp, Anchor.BOTTOM);
-		else
-			setPosition(hp, -vp, Anchor.RIGHT);
 
 		setZIndex(parent.getZIndex() + 1);
 
@@ -100,13 +86,25 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		parent.register(this);
 
 		addScrollbar(parent, this);
+		setPosition();
 		updateScrollbars();
+
+		createShape(gui);
 	}
 
-	public <T extends UIComponent & IScrollable> UIScrollBar(MalisisGui gui, T parent, Type type)
+	protected void setPosition()
 	{
-		this(gui, parent, type, true);
+		int vp = getScrollable().getVerticalPadding();
+		int hp = getScrollable().getHorizontalPadding();
 
+		if (type == Type.HORIZONTAL)
+			setPosition(-hp, vp, Anchor.BOTTOM);
+		else
+			setPosition(hp, -vp, Anchor.RIGHT);
+	}
+
+	protected void createShape(MalisisGui gui)
+	{
 		int w = scrollThickness - 2;
 		int h = scrollHeight;
 		if (type == Type.HORIZONTAL)
@@ -131,7 +129,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		horizontalDisabledIcon = gui.getGuiTexture().getIcon(230, 23, 15, 8);
 	}
 
-	private IScrollable getScrollable()
+	protected IScrollable getScrollable()
 	{
 		return (IScrollable) getParent();
 	}
@@ -175,9 +173,9 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		return null;
 	}
 
-	public void setScrollableLength(int length)
+	public float getOffset()
 	{
-
+		return isHorizontal() ? getScrollable().getOffsetX() : getScrollable().getOffsetY();
 	}
 
 	public void scrollTo(float offset)
@@ -189,7 +187,6 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 			offset = 0;
 		if (offset > 1)
 			offset = 1;
-		this.offset = offset;
 		int delta = hasVisibleOtherScrollbar() ? scrollThickness : 0;
 		if (isHorizontal())
 			getScrollable().setOffsetX(offset, delta);
@@ -199,7 +196,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 
 	public void scrollBy(float amount)
 	{
-		scrollTo(offset + amount);
+		scrollTo(getOffset() + amount);
 	}
 
 	public void updateScrollbars()
@@ -217,7 +214,8 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		else if (scrollable.getContentHeight() <= component.getHeight() - delta)
 			hide = true;
 
-		scrollTo(hide != isDisabled() ? 0 : offset);
+		if (hide != isDisabled())
+			scrollTo(0);
 		setDisabled(hide);
 		if (autoHide)
 			setVisible(!hide);
@@ -239,12 +237,12 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		if (isHorizontal())
 		{
 			icon = isDisabled() ? horizontalDisabledIcon : horizontalIcon;
-			ox = (int) (offset * l);
+			ox = (int) (getOffset() * l);
 		}
 		else
 		{
 			icon = isDisabled() ? verticalDisabledIcon : verticalIcon;
-			oy = (int) (offset * l);
+			oy = (int) (getOffset() * l);
 		}
 
 		scrollShape.resetState();
