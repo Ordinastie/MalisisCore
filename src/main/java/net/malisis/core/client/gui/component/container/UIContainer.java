@@ -192,6 +192,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 *
 	 * @return horizontal padding of this {@link UIContainer}.
 	 */
+	@Override
 	public int getHorizontalPadding()
 	{
 		return horizontalPadding;
@@ -202,6 +203,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 *
 	 * @return horizontal padding of this {@link UIContainer}.
 	 */
+	@Override
 	public int getVerticalPadding()
 	{
 		return verticalPadding;
@@ -388,46 +390,36 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	//#end IClipable
 
 	//#region IScrollable
-	/**
-	 * Gets the content width.
-	 *
-	 * @return the content width
-	 */
 	@Override
 	public int getContentWidth()
 	{
 		return contentWidth;
 	}
 
-	/**
-	 * Gets the content height.
-	 *
-	 * @return the content height
-	 */
 	@Override
 	public int getContentHeight()
 	{
 		return contentHeight;
 	}
 
-	/**
-	 * Sets the offset x.
-	 *
-	 * @param offsetX the offset x
-	 * @param delta the delta
-	 */
+	@Override
+	public float getOffsetX()
+	{
+		return xOffset;
+	}
+
 	@Override
 	public void setOffsetX(float offsetX, int delta)
 	{
 		this.xOffset = (int) ((getContentWidth() - getWidth() + delta) * offsetX);
 	}
 
-	/**
-	 * Sets the offset y.
-	 *
-	 * @param offsetY the offset y
-	 * @param delta the delta
-	 */
+	@Override
+	public float getOffsetY()
+	{
+		return yOffset;
+	}
+
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{

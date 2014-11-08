@@ -90,14 +90,38 @@ public class UIMultiLineLabel extends UILabel implements IScrollable
 	}
 
 	@Override
+	public float getOffsetX()
+	{
+		return 0;
+	}
+
+	@Override
 	public void setOffsetX(float offsetX, int delta)
 	{}
+
+	@Override
+	public float getOffsetY()
+	{
+		return (float) lineOffset / visibleLines();
+	}
 
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
 		lineOffset = (int) (offsetY * (lines.size() - visibleLines()));
 		lineOffset = Math.max(0, Math.min(lines.size(), lineOffset));
+	}
+
+	@Override
+	public int getVerticalPadding()
+	{
+		return 0;
+	}
+
+	@Override
+	public int getHorizontalPadding()
+	{
+		return 0;
 	}
 
 	private int visibleLines()

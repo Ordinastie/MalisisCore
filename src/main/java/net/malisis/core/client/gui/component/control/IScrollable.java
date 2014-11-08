@@ -34,7 +34,16 @@ public interface IScrollable
 
 	public int getContentHeight();
 
+	public float getOffsetX();
+
 	public void setOffsetX(float offsetX, int delta);
 
+	public float getOffsetY();
+
 	public void setOffsetY(float offsetY, int delta);
+
+	public int getVerticalPadding();
+
+	public int getHorizontalPadding();
+
 }
