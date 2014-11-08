@@ -292,6 +292,19 @@ public class GuiRenderer extends BaseRenderer
 	 */
 	public static List<String> wrapText(String text, int maxWidth)
 	{
+		return wrapText(text, maxWidth, 1);
+	}
+
+	/**
+	 * Splits the string in multiple lines to fit in the specified maxWidth using the specified fontScale.
+	 *
+	 * @param text the text
+	 * @param maxWidth the max width
+	 * @param fontScale the font scale
+	 * @return list of lines that won't exceed maxWidth limit
+	 */
+	public static List<String> wrapText(String text, int maxWidth, float fontScale)
+	{
 		List<String> lines = new ArrayList<>();
 		StringBuilder line = new StringBuilder();
 		StringBuilder word = new StringBuilder();
@@ -302,7 +315,7 @@ public class GuiRenderer extends BaseRenderer
 		while (index < text.length())
 		{
 			char c = text.charAt(index);
-			int w = getCharWidth(c);
+			int w = getCharWidth(c, fontScale);
 			lineWidth += w;
 			wordWidth += w;
 			word.append(c);
@@ -401,17 +414,16 @@ public class GuiRenderer extends BaseRenderer
 			return;
 
 		text = StatCollector.translateToLocal(text);
-
+		text = text.replaceAll("\r", "");
 		GL11.glPushMatrix();
-		//if (fontScale != 1)
-		{
-			GL11.glTranslatef(x * (1 - fontScale), y * (1 - fontScale), 0);
-			GL11.glScalef(fontScale, fontScale, 1);
-		}
+		GL11.glTranslatef(x * (1 - fontScale), y * (1 - fontScale), 0);
+		GL11.glScalef(fontScale, fontScale, 1);
 		GL11.glTranslatef(0, 0, z);
 		// GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+
 		fontRenderer.drawString(text, x, y, color, shadow);
+
 		GL11.glPopMatrix();
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 		// GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -556,7 +568,8 @@ public class GuiRenderer extends BaseRenderer
 	public static int getStringWidth(String str, float fontScale)
 	{
 		str = StatCollector.translateToLocal(str);
-		return Math.round(fontRenderer.getStringWidth(str) * fontScale);
+		str = str.replaceAll("\r", "");
+		return (int) Math.ceil(fontRenderer.getStringWidth(str) * fontScale);
 	}
 
 	/**
@@ -614,7 +627,21 @@ public class GuiRenderer extends BaseRenderer
 	 */
 	public static int getCharWidth(char c)
 	{
-		return fontRenderer.getCharWidth(c);
+		if (c == '\r')
+			return 0;
+		return getCharWidth(c, 1);
+	}
+
+	/**
+	 * Gets the rendering width of a char with the specified fontScale.
+	 *
+	 * @param c the c
+	 * @param fontScale the font scale
+	 * @return the char width
+	 */
+	public static int getCharWidth(char c, float fontScale)
+	{
+		return (int) Math.ceil(fontRenderer.getCharWidth(c) * fontScale);
 	}
 
 	/**
