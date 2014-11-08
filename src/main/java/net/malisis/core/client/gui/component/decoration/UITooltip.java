@@ -31,6 +31,8 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.renderer.animation.Animation;
+import net.malisis.core.renderer.animation.transformation.AlphaTransform;
 
 /**
  * UITooltip
@@ -41,22 +43,38 @@ public class UITooltip extends UIComponent
 {
 	protected List<String> lines;
 	protected int padding = 4;
+	protected int delay = 0;
+	protected Animation animation;
 
 	public UITooltip(MalisisGui gui)
 	{
 		super(gui);
 		setSize(16, 16);
 		zIndex = 300;
-		rp.alpha.set(255);
 
 		shape = new XYResizableGuiShape();
 		icon = gui.getGuiTexture().getXYResizableIcon(227, 31, 15, 15, 5);
+
+		animation = new Animation(this, new AlphaTransform(0, 255).forTicks(2));
 	}
 
 	public UITooltip(MalisisGui gui, String text)
 	{
 		this(gui);
 		setText(text);
+	}
+
+	public UITooltip(MalisisGui gui, int delay)
+	{
+		this(gui);
+		setDelay(delay);
+	}
+
+	public UITooltip(MalisisGui gui, String text, int delay)
+	{
+		this(gui);
+		setText(text);
+		setDelay(delay);
 	}
 
 	public UITooltip setText(String text)
@@ -72,6 +90,17 @@ public class UITooltip extends UIComponent
 		this.lines = lines;
 		calcSize();
 		return this;
+	}
+
+	public UITooltip setDelay(int delay)
+	{
+		this.delay = delay;
+		return this;
+	}
+
+	public int getDelay()
+	{
+		return delay;
 	}
 
 	protected void calcSize()
@@ -90,6 +119,15 @@ public class UITooltip extends UIComponent
 	protected int getOffsetY()
 	{
 		return -16;
+	}
+
+	public void animate()
+	{
+		if (delay == 0)
+			return;
+
+		setAlpha(0);
+		getGui().animate(animation, delay);
 	}
 
 	@Override
@@ -115,4 +153,5 @@ public class UITooltip extends UIComponent
 			i++;
 		}
 	}
+
 }

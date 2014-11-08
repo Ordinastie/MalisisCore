@@ -405,7 +405,12 @@ public class MalisisGui extends GuiScreen
 
 	public void animate(Animation animation)
 	{
-		animation.setDelay((int) ar.getElapsedTicks());
+		animate(animation, 0);
+	}
+
+	public void animate(Animation animation, int delay)
+	{
+		animation.setDelay((int) ar.getElapsedTicks() + delay);
 		ar.addAnimation(animation);
 	}
 

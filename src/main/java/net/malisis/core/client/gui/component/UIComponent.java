@@ -373,6 +373,9 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 
 		this.hovered = hovered;
 		fireEvent(new HoveredStateChange(this, hovered));
+
+		if (tooltip != null && hovered)
+			tooltip.animate();
 	}
 
 	/**
