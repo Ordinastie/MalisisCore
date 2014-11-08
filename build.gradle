@@ -109,6 +109,12 @@ jar.manifest.mainAttributes(
 // Artifact deployment
 uploadArchives {
     repositories.mavenDeployer {
+        // Javadoc JAR generation
+        task javadocJar(type: Jar, dependsOn: javadoc) {
+            classifier = 'javadoc'
+            from 'build/docs/javadoc'
+        }
+
         // Source JAR generation
         task sourcesJar(type: Jar) {
             classifier = 'sources'
@@ -173,6 +179,13 @@ uploadArchives {
                     name 'The MIT License'
                     url 'http://www.tldrlegal.com/license/mit-license'
                     distribution 'repo'
+                }
+            }
+
+            developers {
+                developer {
+                    id 'Ordinastie'
+                    name 'Ordinastie'
                 }
             }
 
