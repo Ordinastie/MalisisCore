@@ -107,10 +107,15 @@ public class AnimationRenderer
 
 	public List<ITransformable> animate(Animation... animations)
 	{
-		ITransformable tr = null;
-		long elapsedTime = getElapsedTime();
 		tranformables.clear();
 		toClear.clear();
+
+		if (animations == null || animations.length == 0)
+			return tranformables;
+
+		ITransformable tr = null;
+		long elapsedTime = getElapsedTime();
+
 		for (Animation animation : animations)
 		{
 			tr = animation.animate(elapsedTime);
