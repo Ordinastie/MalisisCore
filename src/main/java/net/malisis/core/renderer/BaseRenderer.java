@@ -848,7 +848,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		if (renderBlocks != null && renderBlocks.renderAllFaces == true)
 			return true;
 		RenderParameters p = face.getParameters();
-		if (p.direction.get() == null)
+		if (p.direction.get() == null || p.renderAllFaces.get())
 			return true;
 
 		boolean b = block.shouldSideBeRendered(world, x + p.direction.get().offsetX, y + p.direction.get().offsetY, z
