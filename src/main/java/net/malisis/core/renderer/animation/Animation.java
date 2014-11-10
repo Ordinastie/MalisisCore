@@ -71,7 +71,7 @@ public class Animation
 
 	public ITransformable animate(long elapsedTime)
 	{
-		if (transform == null)
+		if (transform == null || transformable == null)
 			return transformable;
 
 		long elapsed = elapsedTime - tickToNano(delay);
