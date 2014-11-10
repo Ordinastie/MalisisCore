@@ -26,68 +26,168 @@ package net.malisis.core.renderer.model;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.renderer.BaseRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.model.loader.ObjFileImporter;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.obj.WavefrontObject;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author Ordinastie
+ * This class is a holder for multiple shapes.<br>
+ * If a {@link ResourceLocation} is provided, the model will be populated using the specified {@link IModelLoader}. If no loaded is giver,
+ * it will be determined by the model file extension.
  *
+ * @author Ordinastie
  */
 public class MalisisModel implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale, Iterable<Shape>
 {
-	protected String fileName;
-	protected WavefrontObject wfo;
+	/** ResourceLocation of the model file. */
+	protected ResourceLocation resource;
 
-	protected HashMap<String, Shape> shapes = new HashMap<>();
+	/** Shapes building this {@link MalisisModel}. */
+	protected Map<String, Shape> shapes = new HashMap<>();
 
+	/**
+	 * Instantiates a new empty {@link MalisisModel}.<br>
+	 * Allows {@link Shape shapes} to be added manually to the model.
+	 */
 	public MalisisModel()
 	{
 
 	}
 
+	/**
+	 * Instantiates a new {@link MalisisModel} with the specified {@link IModelLoader}.
+	 *
+	 * @param resource the {@link ResourceLocation} for the model file
+	 * @param loader the loader
+	 */
+	public MalisisModel(ResourceLocation resource, IModelLoader loader)
+	{
+		this.resource = resource;
+		load(loader);
+
+	}
+
+	/**
+	 * Instantiates a new {@link MalisisModel}. The loader will be determined by the model file extension.
+	 *
+	 * @param resource the {@link ResourceLocation} for the model file
+	 */
+	public MalisisModel(ResourceLocation resource)
+	{
+		this.resource = resource;
+		IModelLoader loader = null;
+		if (resource.getResourcePath().endsWith(".obj"))
+			loader = new ObjFileImporter();
+
+		if (loader != null)
+			load(loader);
+		else
+			MalisisCore.log.error("[MalisisModel] No loader determined for {}.", resource.getResourcePath());
+	}
+
+	/**
+	 * Loads this {@link MalisisCore} from the specified {@link IModelLoader}.
+	 *
+	 * @param loader the loader
+	 */
+	protected void load(IModelLoader loader)
+	{
+		loader.load(resource);
+		shapes = loader.getShapes();
+		storeState();
+	}
+
+	/**
+	 * Adds the {@link Shape shapes} to this {@link MalisisModel} with default names.
+	 *
+	 * @param shapes the shapes
+	 */
 	public void addShapes(Shape... shapes)
 	{
 		for (Shape shape : shapes)
 			addShape(shape);
 	}
 
+	/**
+	 * Adds a {@link Shape} to this {@link MalisisModel} with a default name.
+	 *
+	 * @param shape the shape
+	 */
 	public void addShape(Shape shape)
 	{
 		addShape("Shape_" + (shapes.size() + 1), shape);
 	}
 
+	/**
+	 * Adds a {@link Shape} to this {@link MalisisModel} with the specified name.
+	 *
+	 * @param name the name of the shape
+	 * @param shape the shape
+	 */
 	public void addShape(String name, Shape shape)
 	{
 		shapes.put(name.toLowerCase(), shape);
 	}
 
+	/**
+	 * Gets the {@link Shape} with the specified name.
+	 *
+	 * @param name the name of the shape
+	 * @return the shape
+	 */
 	public Shape getShape(String name)
 	{
 		return shapes.get(name.toLowerCase());
 	}
 
+	/**
+	 * Renders all the {@link Shape shapes} of this {@link MalisisModel} using the specified {@link BaseRenderer}.
+	 *
+	 * @param renderer the renderer
+	 */
 	public void render(BaseRenderer renderer)
 	{
 		render(renderer, (RenderParameters) null);
 	}
 
+	/**
+	 * Renders all the {@link Shape shapes} of this {@link MalisisModel} using the specified {@link BaseRenderer} and
+	 * {@link RenderParameters}.
+	 *
+	 * @param renderer the renderer
+	 * @param rp the parameters
+	 */
 	public void render(BaseRenderer renderer, RenderParameters rp)
 	{
 		for (String name : shapes.keySet())
 			render(renderer, name, rp);
 	}
 
+	/**
+	 * Renders a specific {@link Shape} of this {@link MalisisModel} using the specified {@link BaseRenderer}.
+	 *
+	 * @param renderer the renderer
+	 * @param name the name of the shape
+	 */
 	public void render(BaseRenderer renderer, String name)
 	{
 		render(renderer, name, null);
 	}
 
+	/**
+	 * Renders a specific {@link Shape} of this {@link MalisisModel} using the specified {@link BaseRenderer} and {@link RenderParameters}.
+	 *
+	 * @param renderer the renderer
+	 * @param name the name of the shape
+	 * @param rp the paramters
+	 */
 	public void render(BaseRenderer renderer, String name, RenderParameters rp)
 	{
 		Shape shape = shapes.get(name);
@@ -95,12 +195,18 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 			renderer.drawShape(shape, rp);
 	}
 
+	/**
+	 * Stores the state of this {@link MalisisModel}. Stores the state of all the {@link Shape shapes} contained by this model.
+	 */
 	public void storeState()
 	{
 		for (Shape s : this)
 			s.storeState();
 	}
 
+	/**
+	 * Resets the state of this {@link MalisisModel}. Resets the state of all the {@link Shape shapes} contained by this model.
+	 */
 	public void resetState()
 	{
 		for (Shape s : this)
@@ -132,15 +238,6 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	public Iterator<Shape> iterator()
 	{
 		return shapes.values().iterator();
-	}
-
-	public static MalisisModel load(ResourceLocation resource)
-	{
-		ObjFileImporter importer = new ObjFileImporter(resource);
-		MalisisModel model = importer.getModel();
-		model.storeState();
-
-		return model;
 	}
 
 }

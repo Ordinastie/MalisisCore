@@ -29,48 +29,77 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
+import net.malisis.core.renderer.model.IModelLoader;
 import net.malisis.core.renderer.model.MalisisModel;
+import net.malisis.core.util.Vector;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.util.ForgeDirection;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author Ordinastie
+ * Model loader for OBJ files (Wavefront).
  *
+ * @author Ordinastie
  */
-public class ObjFileImporter
+public class ObjFileImporter implements IModelLoader
 {
-	private MalisisModel model;
+	/** Pattern for lines. */
+	protected static Pattern linePattern = Pattern.compile("^(?<type>.*?) (?<data>.*)$");
 
-	protected String fileName;
-	protected Pattern linePattern = Pattern.compile("^(?<type>.*?) (?<data>.*)$");
-	protected Pattern facePattern = Pattern.compile("(?<v>\\d+)(/(?<t>\\d+)?(/(?<n>\\d+))?)?");
+	/** Pattern for face data. */
+	protected static Pattern facePattern = Pattern.compile("(?<v>\\d+)(/(?<t>\\d+)?(/(?<n>\\d+))?)?");
+
+	/** Matcher object. */
 	protected Matcher matcher;
+
+	/** Current line being parsed. */
 	protected String currentLine;
+
+	/** Current line number. */
 	protected int lineNumber;
+
+	/** Current shape name. */
 	protected String currentShape = "Default";
 
+	/** List of {@link Vertex vertexes} used for the {@link MalisisModel}. */
 	protected List<Vertex> vertexes = new ArrayList<>();
+
+	/** List of {@link UV} used for the {@link MalisisModel}. */
 	protected List<UV> uvs = new ArrayList<>();
+
+	/** List of vertex normals used for the {@link MalisisModel}. */
+	protected List<Vector> normals = new ArrayList<>();
+
+	/** List of {@link Face faces} used for the {@link MalisisModel}. */
 	protected List<Face> faces = new ArrayList<>();
 
-	public ObjFileImporter(ResourceLocation resource)
-	{
-		this.fileName = resource.toString();
-		this.model = new MalisisModel();
+	/** Map of the {@link Shape shapes} used for the {@link MalisisModel}. */
+	protected Map<String, Shape> shapes = new HashMap<>();
 
-		IResource res;
+	/**
+	 * Load.
+	 *
+	 * @param resource the resource
+	 */
+	@Override
+	public void load(ResourceLocation resource)
+	{
 		try
 		{
-			res = Minecraft.getMinecraft().getResourceManager().getResource(resource);
+			IResource res = Minecraft.getMinecraft().getResourceManager().getResource(resource);
 			loadObjModel(res.getInputStream());
 		}
 		catch (IOException e)
@@ -80,20 +109,27 @@ public class ObjFileImporter
 
 	}
 
-	public MalisisModel getModel()
+	/**
+	 * Gets the shapes.
+	 *
+	 * @return the shapes
+	 */
+	@Override
+	public Map<String, Shape> getShapes()
 	{
-		return model;
+		return shapes;
 	}
 
-	private void loadObjModel(InputStream inputStream) throws IOException
+	/**
+	 * Loads the model from {@link InputStream}.
+	 *
+	 * @param inputStream the input stream
+	 */
+	private void loadObjModel(InputStream inputStream)
 	{
-		BufferedReader reader = null;
 
-		try
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream)))
 		{
-
-			reader = new BufferedReader(new InputStreamReader(inputStream));
-
 			while ((currentLine = reader.readLine()) != null)
 			{
 				lineNumber++;
@@ -111,7 +147,7 @@ public class ObjFileImporter
 							addVertex(data);
 							break;
 						case "vn":
-							//addVertex(data);
+							addNormal(data);
 							break;
 						case "vt":
 							addUV(data);
@@ -141,20 +177,13 @@ public class ObjFileImporter
 		{
 			MalisisCore.log.error("[ObjFileImporter] An error happened while reading the file : {}", e);
 		}
-		finally
-		{
-			try
-			{
-				reader.close();
-				inputStream.close();
-			}
-			catch (IOException e)
-			{
-				// hush
-			}
-		}
 	}
 
+	/**
+	 * Creates a new {@link Vertex} from data and adds it to {@link #vertexes}.
+	 *
+	 * @param data the data
+	 */
 	private void addVertex(String data)
 	{
 		String coords[] = data.split("\\s+");
@@ -175,6 +204,11 @@ public class ObjFileImporter
 		vertexes.add(new Vertex(x, y, z));
 	}
 
+	/**
+	 * Creates a new {@link UV} from data and adds it to {@link #uvs}.
+	 *
+	 * @param data the data
+	 */
 	private void addUV(String data)
 	{
 		String coords[] = data.split("\\s+");
@@ -182,7 +216,8 @@ public class ObjFileImporter
 		float v = 0;
 		if (coords.length != 2)
 		{
-			MalisisCore.log.error("[ObjFileImporter] Wrong coordinates number {} at line {} : {}", coords.length, lineNumber, currentLine);
+			MalisisCore.log.error("[ObjFileImporter] Wrong UV coordinates number {} at line {} : {}", coords.length, lineNumber,
+					currentLine);
 		}
 		else
 		{
@@ -193,20 +228,57 @@ public class ObjFileImporter
 		uvs.add(new UV(u, v));
 	}
 
+	/**
+	 * Creates a new normal {@link Vector} from data and adds it to {@link #normals}.
+	 *
+	 * @param data the data
+	 */
+	private void addNormal(String data)
+	{
+		String coords[] = data.split("\\s+");
+		float x = 0;
+		float y = 0;
+		float z = 0;
+		if (coords.length != 3)
+		{
+			MalisisCore.log.error("[ObjFileImporter] Wrong Normal coordinates number {} at line {} : {}", coords.length, lineNumber,
+					currentLine);
+		}
+		else
+		{
+			x = Float.parseFloat(coords[0]);
+			y = Float.parseFloat(coords[1]);
+			z = Float.parseFloat(coords[2]);
+		}
+
+		normals.add(new Vector(x, y, z));
+	}
+
+	/**
+	 * Creates a new {@link Face} from data and adds it to {@link #faces}.<br>
+	 * Tries to deduct parameters from the normals provided and disable brightness/AO calculations.
+	 *
+	 * @param data the data
+	 */
 	private void addFace(String data)
 	{
 		matcher = facePattern.matcher(data);
 
 		List<Vertex> faceVertex = new ArrayList<>();
-		int v = 0, t = 0;
-		String strV, strT;
-		Vertex vertex;
-		Vertex vertexCopy;
+		List<Vertex> faceNormals = new ArrayList<>();
+		int v = 0, t = 0, n = 0;
+		String strV, strT, strN;
+		Vertex vertex, vertexCopy;
 		UV uv = null;
+		Vector normal;
 		while (matcher.find())
 		{
+			normal = null;
+			uv = null;
+
 			strV = matcher.group("v");
 			strT = matcher.group("t");
+			strN = matcher.group("n");
 
 			v = Integer.parseInt(strV);
 			vertex = vertexes.get(v > 0 ? v - 1 : vertexes.size() - v - 1);
@@ -222,6 +294,16 @@ public class ObjFileImporter
 						vertexCopy.setUV(uv.u, uv.v);
 				}
 				faceVertex.add(vertexCopy);
+
+				if (strN != null)
+				{
+					n = Integer.parseInt(strN);
+					n = n > 0 ? t - 1 : normals.size() - t - 1;
+					if (n < normals.size())
+						normal = normals.get(n);
+					if (normal != null)
+						faceNormals.add(new Vertex(normal.x, normal.y, normal.z));
+				}
 			}
 			else
 			{
@@ -229,16 +311,30 @@ public class ObjFileImporter
 			}
 		}
 
-		faces.add(new Face(faceVertex));
+		Face f = new Face(faceVertex);
+		f.deductParameters(faceNormals.toArray(new Vector[0]));
+		RenderParameters params = f.getParameters();
+		if (params.direction.get() == ForgeDirection.NORTH || params.direction.get() == ForgeDirection.EAST)
+			params.flipU.set(true);
+		params.renderAllFaces.set(true);
+		params.interpolateUV.set(false);
+		params.calculateAOColor.set(false);
+		params.useBlockBrightness.set(false);
+
+		faces.add(f);
 	}
 
+	/**
+	 * Creates a {@link Shape} and adds it to {@link #shapes}.
+	 *
+	 * @param data the data
+	 */
 	private void addShape(String data)
 	{
 		if (faces.size() != 0)
 		{
 			Shape s = new Shape(faces);
-			s.storeState();
-			model.addShape(currentShape, s);
+			shapes.put(currentShape, s);
 			faces.clear();
 		}
 
@@ -246,15 +342,27 @@ public class ObjFileImporter
 			currentShape = data.substring(0, data.indexOf('_'));
 	}
 
+	/**
+	 * UV holder class
+	 */
 	private class UV
 	{
+		/** U coordinate. */
 		float u;
+		/** V coordinate. */
 		float v;
 
+		/**
+		 * Instantiates a new {@link UV}
+		 *
+		 * @param u the u
+		 * @param v the v
+		 */
 		public UV(float u, float v)
 		{
 			this.u = u;
 			this.v = v;
 		}
 	}
+
 }
