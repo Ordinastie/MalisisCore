@@ -29,20 +29,21 @@ import java.util.List;
 
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.util.Vector;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 
 public class Face
 {
-	protected String baseName;
+	protected String name;
 	protected Vertex[] vertexes;
-	protected RenderParameters params;;
+	protected RenderParameters params;
 
 	public Face(Vertex[] vertexes, RenderParameters params)
 	{
 		this.vertexes = vertexes;
 		this.params = params != null ? params : new RenderParameters();
-		this.baseName();
+		this.name();
 	}
 
 	public Face(Vertex... vertexes)
@@ -67,20 +68,75 @@ public class Face
 		for (int i = 0; i < faceVertexes.length; i++)
 			vertexes[i] = new Vertex(faceVertexes[i]);
 		this.params = params != null ? params : new RenderParameters();
-		baseName = face.baseName;
+		name = face.name;
 	}
 
+	/**
+	 * Sets the base name for this {@link Face}. If the name specified is null, it is automatically determined based on the {@link Vertex}
+	 * positions.
+	 *
+	 * @param name the base name
+	 */
+	public void setBaseName(String name)
+	{
+		if (name == null)
+		{
+			name = "";
+			HashMap<String, Integer> map = new HashMap<String, Integer>();
+			String[] dirs = new String[] { "North", "South", "East", "West", "Top", "Bottom" };
+			for (String dir : dirs)
+			{
+				map.put(dir, 0);
+				for (Vertex v : vertexes)
+				{
+					if (v.name().contains(dir))
+						map.put(dir, map.get(dir) + 1);
+				}
+				if (map.get(dir) == 4)
+					name = dir;
+			}
+		}
+
+		this.name = name;
+	}
+
+	/**
+	 * Gets the base name of this {@link Face}.
+	 *
+	 * @return the base name
+	 */
+	public String name()
+	{
+		return name;
+	}
+
+	/**
+	 * Gets the {@link Vertex vertexes} of this {@link Face}.
+	 *
+	 * @return the vertexes
+	 */
 	public Vertex[] getVertexes()
 	{
 		return vertexes;
 	}
 
+	/**
+	 * Sets the {@link RenderParameters} for this {@link Face}.
+	 *
+	 * @param params the parameters. If {@code null}, sets default parameters
+	 * @return this {@link Face}
+	 */
 	public Face setParameters(RenderParameters params)
 	{
 		this.params = params != null ? params : new RenderParameters();
 		return this;
 	}
 
+	/**
+	 * Gets the {@link RenderParameters} of this {@link Face}.
+	 *
+	 * @return the parameters
+	 */
 	public RenderParameters getParameters()
 	{
 		return params;
@@ -314,45 +370,116 @@ public class Face
 		return aoMatrix;
 	}
 
-	public void setBaseName(String name)
+	/**
+	 * Gets the vertexes normals for this {@link Face}.
+	 *
+	 * @return the vertexes normals
+	 */
+	public Vector[] getVertexNormals()
 	{
-		baseName = name;
-	}
-
-	public String baseName()
-	{
-		if (baseName == null)
-		{
-			baseName = "";
-			HashMap<String, Integer> map = new HashMap<String, Integer>();
-			String[] dirs = new String[] { "North", "South", "East", "West", "Top", "Bottom" };
-			for (String dir : dirs)
-			{
-				map.put(dir, 0);
-				for (Vertex v : vertexes)
-				{
-					if (v.name().contains(dir))
-						map.put(dir, map.get(dir) + 1);
-				}
-				if (map.get(dir) == 4)
-					baseName = dir;
-			}
-		}
-		return baseName;
-	}
-
-	public String name()
-	{
-		String s = baseName() + " {";
+		Vector[] normals = new Vector[vertexes.length];
+		int i = 0;
 		for (Vertex v : vertexes)
-			s += v.name() + ", ";
-		return s + "}";
+			normals[i++] = new Vector(v.getX(), v.getY(), v.getZ());
+		return normals;
+	}
+
+	/**
+	 * Calculates the normal of this {@link Face} based on the vertex coordinates.
+	 */
+	public void calculateNormal()
+	{
+		calculateNormal(getVertexNormals());
+	}
+
+	/**
+	 * Calculates normal of this {@link Face} using the vertex normals provided.
+	 *
+	 * @param normals the normals
+	 * @return the vector
+	 */
+	public Vector calculateNormal(Vector[] normals)
+	{
+		if (normals == null || normals.length != vertexes.length)
+			normals = getVertexNormals();
+
+		double x = 0;
+		double y = 0;
+		double z = 0;
+
+		for (int i = 0; i < vertexes.length; i++)
+		{
+			Vertex current = vertexes[i];
+			Vertex next = vertexes[(i + 1) % vertexes.length];
+
+			x += (current.getY() - next.getY()) * (current.getZ() + next.getZ());
+			y += (current.getZ() - next.getZ()) * (current.getX() + next.getX());
+			z += (current.getX() - next.getX()) * (current.getY() + next.getY());
+		}
+
+		Vector normal = new Vector(x, y, z);
+		normal.normalize();
+		return normal;
+	}
+
+	/**
+	 * Deducts the parameters for this {@link Face} based on the calculated normal.
+	 */
+	public void deductParameters()
+	{
+		deductParameters(getVertexNormals());
+	}
+
+	/**
+	 * Deducts the {@link RenderParameters} for this {@link Face} based on the specified normals
+	 *
+	 * @param normals the vertex normals
+	 */
+	public void deductParameters(Vector[] normals)
+	{
+		Vector normal = calculateNormal(normals);
+		ForgeDirection dir = ForgeDirection.UNKNOWN;
+
+		if (normal.x == 0 && normal.y == 0)
+		{
+			if (normal.z == 1)
+				dir = ForgeDirection.SOUTH;
+			else if (normal.z == -1)
+				dir = ForgeDirection.NORTH;
+		}
+		else if (normal.x == 0 && normal.z == 0)
+		{
+			if (normal.y == 1)
+				dir = ForgeDirection.UP;
+			else if (normal.y == -1)
+				dir = ForgeDirection.DOWN;
+		}
+		else if (normal.y == 0 && normal.z == 0)
+		{
+			if (normal.x == 1)
+				dir = ForgeDirection.EAST;
+			else if (normal.x == -1)
+				dir = ForgeDirection.WEST;
+		}
+
+		if (dir != ForgeDirection.UNKNOWN)
+		{
+			params.direction.set(dir);
+			params.textureSide.set(dir);
+			params.aoMatrix.set(calculateAoMatrix(dir));
+		}
+
+		float f = (float) (Math.abs(normal.x) * 0.6F + Math.abs(normal.z) * 0.8F + Math.abs(normal.y) * (normal.y >= 0 ? 1 : 0.5F));
+		params.colorFactor.set(f);
 	}
 
 	@Override
 	public String toString()
 	{
-		return name();
+		String s = name() + " {";
+		for (Vertex v : vertexes)
+			s += v.name() + ", ";
+		return s + "}";
 	}
 
 	/**

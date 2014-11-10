@@ -150,7 +150,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	{
 		List<Face> list = new ArrayList<>();
 		for (Face f : faces)
-			if (f.baseName().toLowerCase().equals(name.toLowerCase()))
+			if (f.name().toLowerCase().equals(name.toLowerCase()))
 				list.add(f);
 		return list;
 	}
@@ -239,7 +239,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		if (face == null)
 			return new ArrayList<>();
 
-		return getVertexes(face.baseName());
+		return getVertexes(face.name());
 	}
 
 	/**
@@ -298,7 +298,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		if (face == null)
 			return new ArrayList<>();
 
-		return getMergedVertexes(face.baseName());
+		return getMergedVertexes(face.name());
 	}
 
 	/**
