@@ -45,7 +45,7 @@ group = 'net.malisis'
 archivesBaseName = 'malisiscore'
 version = '1.7.10-0.10.1-SNAPSHOT'
 ext.packaging = 'jar'
-ext.isReleaseVersion = false
+ext.isReleaseVersion = project.hasProperty("isReleaseVersion") ? isReleaseVersion : false
 
 // Extended project information
 ext.projectName = 'Malisis\' Core'
@@ -90,13 +90,6 @@ processResources {
     }
 }
 
-// Source compiler configuration
-//configure([compileJava, compileTestJava]) {
-//    options.compilerArgs << '-Xlint:all'
-//    options.compilerArgs << '-Xlint:-path'
-//    options.deprecation = true
-//}
-
 // JAR manifest configuration
 jar.manifest.mainAttributes(
         "Built-By": System.properties['user.name'],
@@ -129,7 +122,7 @@ uploadArchives {
 
         // Set all artifacts
         artifacts {
-            archives deobfJar, sourcesJar
+            archives deobfJar, sourcesJar, javadocJar
         }
 
         // Tasks and variables based on if release or snapshot
