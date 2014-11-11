@@ -171,7 +171,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Sets the rotation for this {@link MalisisIcon}. The icon will be rotated <b>rotation</b> x 90° clockwise.
+	 * Sets the rotation for this {@link MalisisIcon}. The icon will be rotated <b>rotation</b> x 90 degrees clockwise.
 	 *
 	 * @param rotation the rotation
 	 */
