@@ -265,7 +265,7 @@ public class ObjFileImporter implements IModelLoader
 		matcher = facePattern.matcher(data);
 
 		List<Vertex> faceVertex = new ArrayList<>();
-		List<Vertex> faceNormals = new ArrayList<>();
+		List<Vector> faceNormals = new ArrayList<>();
 		int v = 0, t = 0, n = 0;
 		String strV, strT, strN;
 		Vertex vertex, vertexCopy;
@@ -298,11 +298,11 @@ public class ObjFileImporter implements IModelLoader
 				if (strN != null)
 				{
 					n = Integer.parseInt(strN);
-					n = n > 0 ? t - 1 : normals.size() - t - 1;
-					if (n < normals.size())
+					n = n > 0 ? n - 1 : normals.size() - n - 1;
+					if (n >= 0 && n < normals.size())
 						normal = normals.get(n);
 					if (normal != null)
-						faceNormals.add(new Vertex(normal.x, normal.y, normal.z));
+						faceNormals.add(new Vector(normal.x, normal.y, normal.z));
 				}
 			}
 			else
@@ -334,7 +334,7 @@ public class ObjFileImporter implements IModelLoader
 		if (faces.size() != 0)
 		{
 			Shape s = new Shape(faces);
-			shapes.put(currentShape, s);
+			shapes.put(currentShape.toLowerCase(), s);
 			faces.clear();
 		}
 
