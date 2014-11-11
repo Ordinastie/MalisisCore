@@ -122,7 +122,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		if (groupName != null)
 		{
 			for (Face f : faces)
-				f.setBaseName(groupName);
+				f.setName(groupName);
 		}
 
 		this.faces = ArrayUtils.addAll(this.faces, faces);

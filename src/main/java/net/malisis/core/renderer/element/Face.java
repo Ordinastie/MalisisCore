@@ -43,7 +43,7 @@ public class Face
 	{
 		this.vertexes = vertexes;
 		this.params = params != null ? params : new RenderParameters();
-		this.name();
+		this.setName(null);
 	}
 
 	public Face(Vertex... vertexes)
@@ -77,7 +77,7 @@ public class Face
 	 *
 	 * @param name the base name
 	 */
-	public void setBaseName(String name)
+	public void setName(String name)
 	{
 		if (name == null)
 		{
@@ -469,7 +469,10 @@ public class Face
 			params.aoMatrix.set(calculateAoMatrix(dir));
 		}
 
-		float f = (float) (Math.abs(normal.x) * 0.6F + Math.abs(normal.z) * 0.8F + Math.abs(normal.y) * (normal.y >= 0 ? 1 : 0.5F));
+		double fx = Math.asin(Math.abs(normal.x)) / Math.PI * 2 * 0.6F;
+		double fy = Math.asin(Math.abs(normal.y)) / Math.PI * 2 * (normal.y >= 0 ? 1 : 0.5F);
+		double fz = Math.asin(Math.abs(normal.z)) / Math.PI * 2 * 0.8F;
+		float f = (float) (fx + fy + fz);
 		params.colorFactor.set(f);
 	}
 
