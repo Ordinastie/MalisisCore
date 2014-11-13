@@ -43,7 +43,7 @@ defaultTasks 'build'
 // Basic project information
 group = 'net.malisis'
 archivesBaseName = 'malisiscore'
-version = '1.7.10-0.10.1-SNAPSHOT'
+version = '1.7.10-0.10.2-SNAPSHOT'
 ext.packaging = 'jar'
 ext.isReleaseVersion = project.hasProperty("isReleaseVersion") ? isReleaseVersion : false
 
@@ -122,7 +122,7 @@ uploadArchives {
 
         // Set all artifacts
         artifacts {
-            archives deobfJar, sourcesJar, javadocJar
+            archives jar, deobfJar, sourcesJar, javadocJar
         }
 
         // Tasks and variables based on if release or snapshot
@@ -150,7 +150,9 @@ uploadArchives {
 
         // Set login credentials for repository
         repository(url: sonatypeUrl) {
-            authentication(userName: System.getenv("sonatypeUsername"), password: System.getenv("sonatypePassword"))
+        	userName = isReleaseVersion ? sonatypeUsername : System.getenv("sonatypeUsername")
+        	password = isReleaseVersion ? sonatypePassword : System.getenv("sonatypePassword")
+            authentication(userName: userName, password: password)
         }
 
         // Maven POM generation
