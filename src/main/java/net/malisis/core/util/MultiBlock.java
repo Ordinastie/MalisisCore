@@ -102,6 +102,11 @@ public class MultiBlock
 		return z;
 	}
 
+	public void setBlock(Block block)
+	{
+		this.block = block;
+	}
+
 	/**
 	 * @return the Block composing this {@link MultiBlock}.
 	 */
@@ -135,7 +140,7 @@ public class MultiBlock
 
 	public ForgeDirection getDirection()
 	{
-		return direction;
+		return direction != null ? direction : ForgeDirection.UNKNOWN;
 	}
 
 	/**
@@ -265,6 +270,32 @@ public class MultiBlock
 	 */
 	public boolean placeBlocks()
 	{
+		return placeBlocks(false);
+	}
+
+	/**
+	 * Place Block for every position occupied by this {@link MultiBlock}.<br>
+	 * To be called from inside
+	 * {@link Block#onBlockPlacedBy(World, int, int, int, net.minecraft.entity.EntityLivingBase, net.minecraft.item.ItemStack)}.
+	 *
+	 * @param placeOrigin true if the origin block should be place. The block must be already set
+	 * @return true, if all the blocks could be placed, false otherwise
+	 */
+	public boolean placeBlocks(boolean placeOrigin)
+	{
+		if (placeOrigin)
+		{
+			if (getBlock() == null)
+			{
+				MalisisCore.log.error("[MultiBlock] Tried to set multiblock origin at {}, {}, {}, but no block is set.", x, y, z);
+				return false;
+			}
+			if (getBlock().canPlaceBlockAt(world, x, y, z))
+				world.setBlock(x, y, z, getBlock(), 0, 3);
+			else
+				return false;
+		}
+
 		ChunkPosition[] listPos = getListPositions();
 		for (ChunkPosition pos : listPos)
 		{
@@ -436,6 +467,8 @@ public class MultiBlock
 			return null;
 
 		MultiBlock mb = provider.getMultiBlock();
+		if (mb == null)
+			return null;
 		if (provider.xCoord == mb.x && provider.yCoord == mb.y && provider.zCoord == mb.z)
 			return provider;
 
