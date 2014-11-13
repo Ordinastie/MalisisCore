@@ -29,7 +29,9 @@ import java.util.UUID;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
@@ -120,4 +122,13 @@ public class EntityUtils
 		return dirs[facing];
 	}
 
+	public static boolean isEquipped(EntityPlayer player, Item item)
+	{
+		return player != null && player.getCurrentEquippedItem() != null && player.getCurrentEquippedItem().getItem() == item;
+	}
+
+	public static boolean isEquipped(EntityPlayer player, ItemStack itemStack)
+	{
+		return isEquipped(player, itemStack != null ? itemStack.getItem() : null);
+	}
 }
