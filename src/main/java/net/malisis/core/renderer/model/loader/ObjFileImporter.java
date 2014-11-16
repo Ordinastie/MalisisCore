@@ -125,7 +125,7 @@ public class ObjFileImporter implements IModelLoader
 	 *
 	 * @param inputStream the input stream
 	 */
-	private void loadObjModel(InputStream inputStream)
+	protected void loadObjModel(InputStream inputStream)
 	{
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream)))
