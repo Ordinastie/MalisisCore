@@ -37,7 +37,7 @@ public class McpMethodMapping extends McpMapping<MethodInsnNode>
 	@Override
 	public MethodInsnNode getInsnNode(int opcode)
 	{
-		return new MethodInsnNode(opcode, getOwner(), getName(), getDescriptor());
+		return new MethodInsnNode(opcode, getOwner(), getName(), getDescriptor(), false);
 	}
 
 }
