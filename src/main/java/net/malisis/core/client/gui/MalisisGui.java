@@ -131,7 +131,7 @@ public class MalisisGui extends GuiScreen
 	 */
 	public GuiTexture getGuiTexture()
 	{
-		return renderer.getGuiTexture();
+		return renderer.getDefaultTexture();
 	}
 
 	/**

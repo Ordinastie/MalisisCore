@@ -81,8 +81,8 @@ public class GuiRenderer extends BaseRenderer
 	public int mouseY;
 	/** Default {@link GuiTexture} to use for current {@link MalisisGui}. */
 	private GuiTexture defaultGuiTexture;
-	/** Determines whether the texture has been changed. */
-	private boolean defaultTexture = true;
+	/** Currently used {@link GuiTexture} */
+	private GuiTexture currentTexture;
 
 	/**
 	 * Instantiates a new {@link GuiRenderer}.
@@ -98,9 +98,14 @@ public class GuiRenderer extends BaseRenderer
 	 *
 	 * @return the defaultGuiTexture
 	 */
-	public GuiTexture getGuiTexture()
+	public GuiTexture getDefaultTexture()
 	{
 		return defaultGuiTexture;
+	}
+
+	public void setDefaultTexture(GuiTexture texture)
+	{
+		this.defaultGuiTexture = texture;
 	}
 
 	/**
@@ -176,7 +181,8 @@ public class GuiRenderer extends BaseRenderer
 
 		if (container != null)
 		{
-			setDefaultTexture();
+			currentTexture = null;
+			bindDefaultTexture();
 
 			if (ignoreScale)
 			{
@@ -427,7 +433,8 @@ public class GuiRenderer extends BaseRenderer
 		GL11.glPopMatrix();
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 		// GL11.glEnable(GL11.GL_DEPTH_TEST);
-		setDefaultTexture();
+		currentTexture = null;
+		bindDefaultTexture();
 	}
 
 	/**
@@ -475,7 +482,8 @@ public class GuiRenderer extends BaseRenderer
 		GL11.glColor4f(1, 1, 1, 1);
 		//	GL11.glDisable(GL11.GL_ALPHA_TEST);
 
-		setDefaultTexture();
+		currentTexture = null;
+		bindDefaultTexture();
 		t.startDrawingQuads();
 	}
 
@@ -651,20 +659,19 @@ public class GuiRenderer extends BaseRenderer
 	 */
 	public void bindTexture(GuiTexture texture)
 	{
-		if (texture == null)
+		if (texture == null || texture == currentTexture)
 			return;
 
-		defaultTexture = false;
 		Minecraft.getMinecraft().getTextureManager().bindTexture(texture.getResourceLocation());
+		currentTexture = texture;
 	}
 
 	/**
-	 * Reset the texture to its default GuiRenderer.GUI_TEXTURE.
+	 * Reset the texture to its {@link #defaultGuiTexture}.
 	 */
-	public void setDefaultTexture()
+	public void bindDefaultTexture()
 	{
 		bindTexture(defaultGuiTexture);
-		defaultTexture = true;
 	}
 
 	/**
@@ -674,7 +681,6 @@ public class GuiRenderer extends BaseRenderer
 	public void next()
 	{
 		super.next();
-		if (!defaultTexture)
-			setDefaultTexture();
+		bindDefaultTexture();
 	}
 }
