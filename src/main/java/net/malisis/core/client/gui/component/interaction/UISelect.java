@@ -24,17 +24,17 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.component.interaction.UISelect.Option;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
@@ -45,6 +45,7 @@ import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -55,10 +56,10 @@ import com.google.common.eventbus.Subscribe;
  *
  * @author Ordinastie
  */
-public class UISelect extends UIComponent<UISelect>
+public class UISelect extends UIComponent<UISelect> implements Iterable<Option>, IClipable
 {
-	/** The options container. */
-	protected OptionsContainer optionsContainer;
+	/** The {@link Option options} of this {@link UISelect}. */
+	protected HashMap<Integer, Option> options;
 	/** Currently selected option index. */
 	protected int selectedOption = -1;
 	/** Max width of the option container. */
@@ -67,11 +68,19 @@ public class UISelect extends UIComponent<UISelect>
 	protected int maxDisplayedOptions = -1;
 	/** Whether this {@link UISelect} is expanded. */
 	protected boolean expanded = false;
+	/** Width of displayed {@link Option} box */
+	protected int optionsWidth = 0;
+	/** Height of displayed {@link Option} box */
+	protected int optionsHeight = 0;
 	/** Pattern to use for options labels. */
 	protected String labelPattern;
 
 	/** Shape used to draw the arrow. */
 	protected GuiShape arrowShape;
+	/** Shape used to draw the {@link Option options} box */
+	protected GuiShape optionsShape;
+	/** Shape used to draw the hovered {@link Option} background **/
+	protected GuiShape optionBackground;
 	/** Icon used to draw this {@link UISelect}. */
 	protected GuiIcon iconsSelect;
 	/** Icon used to draw this {@link UISelect} when disabled. */
@@ -92,19 +101,19 @@ public class UISelect extends UIComponent<UISelect>
 	{
 		super(gui);
 		setSize(width, 12);
-		this.optionsContainer = new OptionsContainer(gui);
 		setOptions(options);
 
 		shape = new XResizableGuiShape(3);
 		arrowShape = new SimpleGuiShape();
 		arrowShape.setSize(7, 4);
 		arrowShape.storeState();
+		optionsShape = new XYResizableGuiShape(1);
+		optionBackground = new SimpleGuiShape();
 
 		iconsSelect = gui.getGuiTexture().getXResizableIcon(200, 30, 9, 12, 3);
 		iconsSelectDisabled = gui.getGuiTexture().getXResizableIcon(200, 42, 9, 12, 3);
-		iconsExpanded = gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 3);
+		iconsExpanded = gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1);
 		arrowIcon = gui.getGuiTexture().getIcon(209, 48, 7, 4);
-
 	}
 
 	/**
@@ -116,13 +125,6 @@ public class UISelect extends UIComponent<UISelect>
 	public UISelect(MalisisGui gui, int width)
 	{
 		this(gui, width, null);
-	}
-
-	@Override
-	public void setParent(UIComponent parent)
-	{
-		super.setParent(parent);
-		this.optionsContainer.setParent(parent);
 	}
 
 	@Override
@@ -142,11 +144,7 @@ public class UISelect extends UIComponent<UISelect>
 	public UISelect setLabelPattern(String labelPattern)
 	{
 		this.labelPattern = labelPattern;
-		for (Option option : optionsContainer.options.values())
-		{
-			optionsContainer.optionsLabel.get(option.getIndex()).setText(String.format(labelPattern, option.label));
-		}
-		optionsContainer.calcExpandedSize();
+		calcOptionsSize();
 		return this;
 	}
 
@@ -156,11 +154,27 @@ public class UISelect extends UIComponent<UISelect>
 	 * @param width the width
 	 * @return this {@link UISelect}
 	 */
-	public UISelect maxExpandedWidth(int width)
+	public UISelect setMaxExpandedWidth(int width)
 	{
 		maxExpandedWidth = width;
-		optionsContainer.calcExpandedSize();
+		calcOptionsSize();
 		return this;
+	}
+
+	/**
+	 * Calculates the size of this container base on the options. TODO : handle maximum display options
+	 */
+	private void calcOptionsSize()
+	{
+		optionsWidth = getWidth();
+		for (Option<?> option : this)
+			optionsWidth = Math.max(optionsWidth, GuiRenderer.getStringWidth(option.getLabel(labelPattern)));
+
+		optionsWidth += 4;
+		if (maxExpandedWidth > 0)
+			optionsWidth = Math.min(maxExpandedWidth, optionsWidth);
+
+		optionsHeight = 10 * (maxDisplayedOptions == -1 ? options.size() : maxDisplayedOptions) + 2;
 	}
 
 	/**
@@ -172,7 +186,7 @@ public class UISelect extends UIComponent<UISelect>
 	public UISelect maxDisplayedOptions(int amount)
 	{
 		maxDisplayedOptions = amount;
-		optionsContainer.calcExpandedSize();
+		calcOptionsSize();
 		return this;
 	}
 
@@ -184,7 +198,8 @@ public class UISelect extends UIComponent<UISelect>
 	 */
 	public UISelect setOptions(HashMap<Integer, Option> options)
 	{
-		optionsContainer.setOptions(options);
+		this.options = options;
+		calcOptionsSize();
 		return this;
 	}
 
@@ -210,25 +225,34 @@ public class UISelect extends UIComponent<UISelect>
 	}
 
 	/**
-	 * Gets the {@link Option} at the specified index.
+	 * Gets the option at the index.
 	 *
 	 * @param index the index
 	 * @return the option
 	 */
-	public Option getOption(int index)
+	private Option getOption(int index)
 	{
-		return optionsContainer.getOption(index);
+		if (index < 0 || index >= options.size())
+			return null;
+		return options.get(index);
 	}
 
 	/**
 	 * Gets the {@link Option} corresponding to the object.
 	 *
-	 * @param obj the obj
+	 * @param obj the key of the Option
 	 * @return the option
 	 */
 	public Option getOption(Object obj)
 	{
-		return optionsContainer.getOption(obj);
+		for (Entry<Integer, UISelect.Option> entry : options.entrySet())
+		{
+			UISelect.Option option = entry.getValue();
+
+			if (option.getKey() == obj)
+				return option;
+		}
+		return null;
 	}
 
 	/**
@@ -238,7 +262,7 @@ public class UISelect extends UIComponent<UISelect>
 	 */
 	public Option getSelectedOption()
 	{
-		return optionsContainer.getOption(selectedOption);
+		return getOption(selectedOption);
 	}
 
 	/**
@@ -262,6 +286,17 @@ public class UISelect extends UIComponent<UISelect>
 		return newValue;
 	}
 
+	public Option select(Option option)
+	{
+		if (option == null)
+			return null;
+
+		if (options.get(option.getIndex()) != option)
+			return null;
+
+		return select(option.getIndex());
+	}
+
 	/**
 	 * Select the {@link Option} corresponding to the object.
 	 *
@@ -274,25 +309,68 @@ public class UISelect extends UIComponent<UISelect>
 		return select(opt != null ? opt.index : -1);
 	}
 
-	@Override
-	public boolean isInsideBounds(int x, int y)
+	protected Option getHoveredOption(int mouseX, int mouseY)
 	{
-		return super.isInsideBounds(x, y) || optionsContainer.isInsideBounds(x, y);
+		if (!isInsideBounds(mouseX, mouseY))
+			return null;
+
+		int y = relativeY(mouseY - 13);
+		if (y < 0)
+			return null;
+
+		return getOption(relativeY(mouseY - 13) / 10);
 	}
 
 	@Override
-	public UIComponent getComponentAt(int x, int y)
+	public int getWidth()
 	{
-		if (super.isInsideBounds(x, y))
-			return this;
-		else if (optionsContainer.isInsideBounds(x, y))
-			return optionsContainer.getComponentAt(x, y);
-		return null;
+		if (expanded)
+			return optionsWidth;
+
+		return super.getWidth();
+	}
+
+	@Override
+	public int getHeight()
+	{
+		if (expanded)
+			return 14 + optionsHeight;
+
+		return super.getHeight();
+	}
+
+	@Override
+	public int getZIndex()
+	{
+		return super.getZIndex() + (expanded ? 300 : 0);
+	}
+
+	public boolean isOptionHovered(Option option)
+	{
+		return false;
+	}
+
+	@Override
+	public ClipArea getClipArea()
+	{
+		return new ClipArea(this, 0, false);
+	}
+
+	@Override
+	public void setClipContent(boolean clip)
+	{}
+
+	@Override
+	public boolean shouldClipContent()
+	{
+		return expanded;
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		shape.resetState();
+		shape.setSize(super.getWidth(), super.getHeight());
 		rp.icon.set(isDisabled() ? iconsSelectDisabled : iconsSelect);
 		renderer.drawShape(shape, rp);
 	}
@@ -312,17 +390,54 @@ public class UISelect extends UIComponent<UISelect>
 		if (selectedOption != -1)
 		{
 			String text = getOption(selectedOption).getLabel(labelPattern);
-			if (text != null && text.length() != 0)
-				renderer.drawText(renderer.clipString(text, width - 15), 2, 2, 0xFFFFFF, true);
+			if (!StringUtils.isEmpty(text))
+				renderer.drawText(renderer.clipString(text, width - 15), 2, 2, getZIndex(), 0xFFFFFF, true);
 		}
-		// MalisisCore.message(this.optionsContainer.options.get(0).isHovered());
+
+		if (!expanded)
+			return;
 
 		renderer.next();
 
-		ClipArea area = optionsContainer.getClipArea();
+		ClipArea area = getClipArea();
 		renderer.startClipping(area);
 
-		optionsContainer.draw(renderer, mouseX, mouseY, partialTick);
+		optionsShape.resetState();
+		optionsShape.setSize(optionsWidth, optionsHeight);
+		optionsShape.translate(0, 12, getZIndex() + 1);
+		rp.icon.set(iconsExpanded);
+		rp.colorMultiplier.reset();
+
+		renderer.drawShape(optionsShape, rp);
+		renderer.next();
+
+		int y = 14;
+		Option hover = getHoveredOption(mouseX, mouseY);
+		for (Option option : this)
+		{
+			if (option == hover)
+			{
+				renderer.next();
+
+				GL11.glDisable(GL11.GL_TEXTURE_2D);
+
+				shape.resetState();
+				shape.setSize(optionsWidth - 2, 10);
+				shape.translate(1, y - 1, getZIndex() + 1);
+
+				rp.colorMultiplier.set(0x5E789F);
+				renderer.drawShape(shape, rp);
+				renderer.next();
+
+				GL11.glEnable(GL11.GL_TEXTURE_2D);
+
+			}
+
+			int color = option == hover ? (option.getIndex() == selectedOption ? 0xDED89F : 0xFFFFFF) : (option.getIndex() == selectedOption ? 0x9EA8DF : 0xFFFFFF);
+			String text = option.getLabel(labelPattern);
+			renderer.drawText(text, 2, y, getZIndex() + 2, color, true);
+			y += 10;
+		}
 
 		renderer.endClipping(area);
 	}
@@ -338,20 +453,17 @@ public class UISelect extends UIComponent<UISelect>
 		if (event.getButton() != MouseButton.LEFT)
 			return;
 
-		if (super.isInsideBounds(event.getX(), event.getY()))
+		if (!expanded)
 		{
-			if (!expanded)
-				optionsContainer.setFocused(true);
-			expanded = !expanded;
-		}
-		else if (expanded)
-		{
-			int selected = ((optionsContainer.relativeY(event.getY()) - 1) / 10);
-			select(selected);
-			expanded = false;
-			setFocused(true);
+			expanded = true;
+			return;
 		}
 
+		Option opt = getHoveredOption(event.getX(), event.getY());
+		if (opt != null)
+			select(opt);
+		expanded = false;
+		setFocused(true);
 	}
 
 	/**
@@ -365,7 +477,7 @@ public class UISelect extends UIComponent<UISelect>
 		if (isFocused() && isHovered())
 		{
 			int selected = selectedOption + event.getDelta() * -1;
-			selected = Math.max(0, Math.min(optionsContainer.optionsLabel.size() - 1, selected));
+			selected = Math.max(0, Math.min(options.size() - 1, selected));
 			select(selected);
 		}
 	}
@@ -389,232 +501,22 @@ public class UISelect extends UIComponent<UISelect>
 					select(selectedOption - 1);
 				break;
 			case Keyboard.KEY_DOWN:
-				if (selectedOption < optionsContainer.options.size() - 1)
+				if (selectedOption < options.size() - 1)
 					select(selectedOption + 1);
 				break;
 			case Keyboard.KEY_HOME:
 				select(0);
 				break;
 			case Keyboard.KEY_END:
-				select(optionsContainer.optionsLabel.size() - 1);
+				select(options.size() - 1);
 				break;
 		}
 	}
 
-	/**
-	 * The Class OptionsContainer.
-	 */
-	private class OptionsContainer extends UIContainer
+	@Override
+	public Iterator<Option> iterator()
 	{
-
-		/** The gui. */
-		protected MalisisGui gui;
-
-		/** The options. */
-		protected HashMap<Integer, Option> options;
-
-		/** The options label. */
-		protected ArrayList<UILabel> optionsLabel = new ArrayList<>();
-
-		/**
-		 * Instantiates a new options container.
-		 *
-		 * @param gui the gui
-		 */
-		public OptionsContainer(MalisisGui gui)
-		{
-			super(gui);
-			this.gui = gui;
-			this.zIndex = 101;
-
-			shape = new XYResizableGuiShape(3);
-		}
-
-		/**
-		 * Sets the options.
-		 *
-		 * @param options the options
-		 */
-		private void setOptions(HashMap<Integer, Option> options)
-		{
-			this.options = options;
-			for (UILabel label : this.optionsLabel)
-				unregister(label);
-			this.optionsLabel.clear();
-			int i = 0;
-
-			for (Entry<Integer, UISelect.Option> entry : options.entrySet())
-			{
-				UILabel label = new UILabel(gui, entry.getValue().getLabel(labelPattern)).setPosition(2, 1 + 10 * i++)
-						.setZIndex(zIndex + 1).setDrawShadow(true).register(UISelect.this);
-				this.optionsLabel.add(label);
-				this.add(label);
-			}
-
-			calcExpandedSize();
-		}
-
-		/**
-		 * Calculates the size of this container base on the options.
-		 */
-		private void calcExpandedSize()
-		{
-			width = UISelect.this.width;
-			height = 10 * (maxDisplayedOptions == -1 ? optionsLabel.size() : maxDisplayedOptions) + 1;
-			//if (maxDisplayedOptions != -1 && maxDisplayedOptions < optionsLabel.size())
-			for (UILabel label : optionsLabel)
-				width = Math.max(width, label.getWidth() + 4);
-			if (maxExpandedWidth > 0)
-				width = Math.min(maxExpandedWidth, width);
-		}
-
-		/**
-		 * Gets the option at the index.
-		 *
-		 * @param index the index
-		 * @return the option
-		 */
-		private Option getOption(int index)
-		{
-			if (index < 0 || index >= options.size())
-				return null;
-			return options.get(index);
-		}
-
-		/**
-		 * Gets the options corresponding to the object.
-		 *
-		 * @param obj the obj
-		 * @return the option
-		 */
-		public Option getOption(Object obj)
-		{
-			for (Entry<Integer, UISelect.Option> entry : options.entrySet())
-			{
-				UISelect.Option option = entry.getValue();
-
-				if (option.getKey() == obj)
-					return option;
-			}
-			return null;
-		}
-
-		/**
-		 * Sets the focused.
-		 *
-		 * @param focused the new focused
-		 */
-		@Override
-		public void setFocused(boolean focused)
-		{
-			if (focused)
-				UISelect.this.setFocused(focused);
-		}
-
-		/**
-		 * Checks if is visible.
-		 *
-		 * @return true, if is visible
-		 */
-		@Override
-		public boolean isVisible()
-		{
-			return expanded;
-		}
-
-		/**
-		 * Screen x.
-		 *
-		 * @return the int
-		 */
-		@Override
-		public int screenX()
-		{
-			return UISelect.this.screenX();
-		}
-
-		/**
-		 * Screen y.
-		 *
-		 * @return the int
-		 */
-		@Override
-		public int screenY()
-		{
-			return UISelect.this.screenY() + 12;
-		}
-
-		/**
-		 * Gets the clip area.
-		 *
-		 * @return the clip area
-		 */
-		@Override
-		public ClipArea getClipArea()
-		{
-			return new ClipArea(this, 0, false);
-		}
-
-		/**
-		 * Draw background.
-		 *
-		 * @param renderer the renderer
-		 * @param mouseX the mouse x
-		 * @param mouseY the mouse y
-		 * @param partialTick the partial tick
-		 */
-		@Override
-		public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-		{
-			rp.icon.set(iconsExpanded);
-			renderer.drawShape(shape, rp);
-
-			for (UILabel label : optionsLabel)
-			{
-				if (label.isHovered())
-				{
-					renderer.next();
-
-					GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-					shape.resetState();
-					shape.setSize(label.getWidth(), label.getHeight());
-					shape.setPosition(componentX(label) - 1, componentY(label));
-
-					rp.colorMultiplier.set(0x5E789F);
-					rp.useTexture.set(false);
-					renderer.drawShape(shape, rp);
-
-					renderer.next();
-
-					GL11.glEnable(GL11.GL_TEXTURE_2D);
-
-				}
-			}
-
-		}
-
-		/**
-		 * Draw foreground.
-		 *
-		 * @param renderer the renderer
-		 * @param mouseX the mouse x
-		 * @param mouseY the mouse y
-		 * @param partialTick the partial tick
-		 */
-		@Override
-		public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-		{
-			int i = 0;
-			for (UILabel label : optionsLabel)
-			{
-				int color = label.isHovered() ? (i == selectedOption ? 0xDED89F : 0xFFFFFF) : (i == selectedOption ? 0x9EA8DF : 0xFFFFFF);
-				label.setColor(color);
-				label.draw(renderer, mouseX, mouseY, partialTick);
-				i++;
-			}
-		}
-
+		return options.values().iterator();
 	}
 
 	/**
@@ -624,18 +526,15 @@ public class UISelect extends UIComponent<UISelect>
 	 */
 	public static class Option<T>
 	{
-
 		/** The index. */
 		private int index;
-
 		/** The key. */
 		private T key;
-
 		/** The label. */
 		private String label;
 
 		/**
-		 * Instantiates a new option.
+		 * Instantiates a new {@link Option}.
 		 *
 		 * @param index the index
 		 * @param key the key
@@ -649,7 +548,7 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Gets the index of this <code>Option</code>.
+		 * Gets the index of this {@link Option}.
 		 *
 		 * @return the index
 		 */
@@ -659,7 +558,7 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Gets the key of this <code>Option</code>.
+		 * Gets the key of this {@link Option}.
 		 *
 		 * @return the key
 		 */
@@ -669,7 +568,7 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Gets the label of this <code>Option</code> using a pattern.
+		 * Gets the label of this {@link Option} using a pattern.
 		 *
 		 * @param pattern the pattern
 		 * @return the label
@@ -683,7 +582,7 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Gets the base label of this <code>Option</code>.
+		 * Gets the base label of this {@link Option}.
 		 *
 		 * @return the label
 		 */
@@ -693,7 +592,7 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Creates an option HashMap for UISelect.setOptions() from a list of keys.<br>
+		 * Creates an option HashMap for {@link UISelect#setOptions(HashMap)} from a list of keys.<br>
 		 *
 		 * @param <T> the generic type
 		 * @param list the list
@@ -714,7 +613,7 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Creates an option HashMap for UISelect.setOptions() from a HashMap of keys -&gt; labels.<br>
+		 * Creates an option HashMap for {@link UISelect#setOptions(HashMap)} from a HashMap of keys -&gt; labels.<br>
 		 *
 		 * @param <T> the generic type
 		 * @param list the list
@@ -736,7 +635,7 @@ public class UISelect extends UIComponent<UISelect>
 		}
 
 		/**
-		 * Creates an option HashMap for UISelect.setOptions() from an Enum
+		 * Creates an option HashMap for {@link UISelect#setOptions(HashMap)} from an Enum
 		 *
 		 * @param <T> the generic type
 		 * @param <E> the element type
