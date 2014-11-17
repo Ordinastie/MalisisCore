@@ -77,7 +77,7 @@ public class ObjFileImporter implements IModelLoader
 	/** List of {@link Vertex vertexes} used for the {@link MalisisModel}. */
 	protected List<Vertex> vertexes = new ArrayList<>();
 
-	/** List of {@link UV} used for the {@link MalisisModel}. */
+	/** List of UV used for the {@link MalisisModel}. */
 	protected List<UV> uvs = new ArrayList<>();
 
 	/** List of vertex normals used for the {@link MalisisModel}. */
