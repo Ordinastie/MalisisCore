@@ -607,6 +607,14 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}
 
+	/**
+	 * Enables textures
+	 */
+	public void enableTextures()
+	{
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+
 	// #end prepare()
 
 	/**
