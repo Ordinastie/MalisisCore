@@ -52,7 +52,6 @@ import org.lwjgl.opengl.GL11;
 
 import com.google.common.eventbus.Subscribe;
 
-// TODO: Auto-generated Javadoc
 /**
  * UITextField.
  *
@@ -62,7 +61,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 {
 	/** Current text of this {@link UITextField}. */
 	protected StringBuilder text = new StringBuilder();
-
 	/** Different lines if {@link #multiLine} is <code>true</code>. */
 	protected List<String> lines = new LinkedList<>();
 	/** Whether this {@link UITextField} handles multiline text. */
@@ -261,8 +259,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	public void setLineOffset(int line)
 	{
 		this.lineOffset = line;
-		//TODO: notify scrollbars
-		//fireEvent(new ContentUpdateEvent(this));
 	}
 
 	/**
@@ -755,8 +751,11 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		int y = relativeY(event.getY());
 		if (GuiScreen.isShiftKeyDown())
 		{
-			selectingText = true;
-			selectionPosition.set(cursorPosition);
+			if (!selectingText)
+			{
+				selectingText = true;
+				selectionPosition.set(cursorPosition);
+			}
 		}
 		else
 			selectingText = false;
