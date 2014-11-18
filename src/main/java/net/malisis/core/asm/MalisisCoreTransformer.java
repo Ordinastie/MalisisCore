@@ -45,6 +45,7 @@ public class MalisisCoreTransformer extends MalisisClassTransformer
 		register(userAttackEntityEventHook());
 	}
 
+	@SuppressWarnings("deprecation")
 	public AsmHook userAttackEntityEventHook()
 	{
 		McpMethodMapping attackEntity = new McpMethodMapping("attackEntity", "func_78764_a",
@@ -60,8 +61,8 @@ public class MalisisCoreTransformer extends MalisisClassTransformer
 		insert1.add(new VarInsnNode(ALOAD, 1));
 		insert1.add(new VarInsnNode(ALOAD, 2));
 		insert1.add(new MethodInsnNode(INVOKESPECIAL, "net/malisis/core/event/user/UserAttackEvent", "<init>",
-				"(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/entity/Entity;)V", false));
-		insert1.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/event/user/UserAttackEvent", "post", "()Z", false));
+				"(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/entity/Entity;)V"));
+		insert1.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/event/user/UserAttackEvent", "post", "()Z"));
 		insert1.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert1.add(new InsnNode(RETURN));
 		insert1.add(falseLabel);
@@ -71,6 +72,7 @@ public class MalisisCoreTransformer extends MalisisClassTransformer
 		return ah;
 	}
 
+	@SuppressWarnings("deprecation")
 	public AsmHook keyboardEventHook()
 	{
 		McpMethodMapping runTick = new McpMethodMapping("runTick", "func_71407_l", "net.minecraft.client.Minecraft", "()V");
@@ -84,21 +86,21 @@ public class MalisisCoreTransformer extends MalisisClassTransformer
 		InsnList insert1 = new InsnList();
 		insert1.add(new TypeInsnNode(NEW, "net/malisis/core/event/user/KeyboardEvent"));
 		insert1.add(new InsnNode(DUP));
-		insert1.add(new MethodInsnNode(INVOKESPECIAL, "net/malisis/core/event/user/KeyboardEvent", "<init>", "()V", false));
-		insert1.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/event/user/KeyboardEvent", "post", "()Z", false));
+		insert1.add(new MethodInsnNode(INVOKESPECIAL, "net/malisis/core/event/user/KeyboardEvent", "<init>", "()V"));
+		insert1.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/event/user/KeyboardEvent", "post", "()Z"));
 		insert1.add(new JumpInsnNode(IFNE, falseLabel));
 
 		// L1844: KeyBinding.setKeyBindState(Keyboard.getEventKey(), Keyboard.getEventKeyState());
 		InsnList match1 = new InsnList();
-		match1.add(new MethodInsnNode(INVOKESTATIC, "org/lwjgl/input/Keyboard", "getEventKey", "()I", false));
-		match1.add(new MethodInsnNode(INVOKESTATIC, "org/lwjgl/input/Keyboard", "getEventKeyState", "()Z", false));
+		match1.add(new MethodInsnNode(INVOKESTATIC, "org/lwjgl/input/Keyboard", "getEventKey", "()I"));
+		match1.add(new MethodInsnNode(INVOKESTATIC, "org/lwjgl/input/Keyboard", "getEventKeyState", "()Z"));
 		match1.add(setKeyBindState.getInsnNode(INVOKESTATIC));
 
 		// L1973: FMLCommonHandler.instance().fireKeyInput()
 		InsnList match2 = new InsnList();
 		match2.add(new MethodInsnNode(INVOKESTATIC, "cpw/mods/fml/common/FMLCommonHandler", "instance",
-				"()Lcpw/mods/fml/common/FMLCommonHandler;", false));
-		match2.add(new MethodInsnNode(INVOKEVIRTUAL, "cpw/mods/fml/common/FMLCommonHandler", "fireKeyInput", "()V", false));
+				"()Lcpw/mods/fml/common/FMLCommonHandler;"));
+		match2.add(new MethodInsnNode(INVOKEVIRTUAL, "cpw/mods/fml/common/FMLCommonHandler", "fireKeyInput", "()V"));
 
 		ah.jumpAfter(match1).insert(insert1).jumpAfter(match2).insert(falseLabel);
 

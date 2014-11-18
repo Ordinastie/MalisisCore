@@ -34,10 +34,11 @@ public class McpMethodMapping extends McpMapping<MethodInsnNode>
 		super(mcp, srg, owner, descriptor);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public MethodInsnNode getInsnNode(int opcode)
 	{
-		return new MethodInsnNode(opcode, getOwner(), getName(), getDescriptor(), false);
+		return new MethodInsnNode(opcode, getOwner(), getName(), getDescriptor());
 	}
 
 }
