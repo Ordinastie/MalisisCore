@@ -33,7 +33,6 @@ public class ClipArea
 	public int y;
 	public int X;
 	public int Y;
-	public int clipPadding;
 
 	public ClipArea(IClipable container)
 	{
@@ -47,15 +46,20 @@ public class ClipArea
 
 	public ClipArea(IClipable container, int clipPadding, boolean intersect)
 	{
+		this(container, container.screenX() + clipPadding, container.screenY() + clipPadding, container.screenX() + container.getWidth()
+				- clipPadding, container.screenY() + container.getHeight() - clipPadding, intersect);
+	}
+
+	public ClipArea(IClipable container, int x, int y, int X, int Y, boolean intersect)
+	{
 		if (!container.shouldClipContent())
 			this.noClip = true;
 		else
 		{
-			this.x = container.screenX() + clipPadding;
-			this.y = container.screenY() + clipPadding;
-			this.X = this.x + container.getWidth() - clipPadding * 2;
-			this.Y = this.y + container.getHeight() - clipPadding * 2;
-			this.clipPadding = clipPadding;
+			this.x = x;
+			this.y = y;
+			this.X = X;
+			this.Y = Y;
 		}
 
 		if (intersect && container.getParent() instanceof IClipable)
@@ -70,7 +74,6 @@ public class ClipArea
 			y = area.y;
 			X = area.X;
 			Y = area.Y;
-			this.clipPadding = area.clipPadding;
 		}
 		else if (!area.noClip)
 		{
