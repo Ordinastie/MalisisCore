@@ -196,7 +196,7 @@ public class MultiBlock
 		if (aabb.maxZ - aabb.minZ < 1)
 			throw new IllegalArgumentException("Width need to be greater or equal to 1");
 
-		this.aabb = aabb.copy();
+		this.aabb = AxisAlignedBB.getBoundingBox(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ);
 	}
 
 	public AxisAlignedBB getBounds()
@@ -204,7 +204,8 @@ public class MultiBlock
 		if (this.aabb == null)
 			return null;
 
-		AxisAlignedBB aabb = this.aabb.copy();
+		AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(this.aabb.minX, this.aabb.minY, this.aabb.minZ, this.aabb.maxX, this.aabb.maxY,
+				this.aabb.maxZ);
 
 		if (direction != null)
 		{
@@ -336,6 +337,8 @@ public class MultiBlock
 	 */
 	public boolean removeBlocks()
 	{
+		if (world == null)
+			return false;
 		ChunkPosition[] listPos = getListPositions();
 		for (ChunkPosition pos : listPos)
 			world.setBlock(pos.chunkPosX, pos.chunkPosY, pos.chunkPosZ, Blocks.air, 0, 2);
@@ -416,9 +419,7 @@ public class MultiBlock
 			return false;
 		}
 
-		mb.removeBlocks();
-
-		return true;
+		return mb.removeBlocks();
 	}
 
 	/**
@@ -475,7 +476,12 @@ public class MultiBlock
 		TileEntity te = provider.getWorldObj().getTileEntity(mb.x, mb.y, mb.z);
 		if (te == null || !(te instanceof IProvider))
 			return null;
-		return (T) te;
+
+		if (provider.getClass().isAssignableFrom(te.getClass()))
+			return (T) te;
+
+		return null;
+
 	}
 
 	public static interface IProvider
