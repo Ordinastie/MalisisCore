@@ -322,21 +322,15 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	}
 
 	@Override
-	public int getWidth()
+	public boolean isInsideBounds(int x, int y)
 	{
-		if (expanded)
-			return optionsWidth;
+		if (super.isInsideBounds(x, y))
+			return true;
 
-		return super.getWidth();
-	}
+		if (!expanded || !isVisible())
+			return false;
 
-	@Override
-	public int getHeight()
-	{
-		if (expanded)
-			return 14 + optionsHeight;
-
-		return super.getHeight();
+		return x >= screenX() && x <= screenX() + optionsWidth && y >= screenY() + 12 && y <= screenY() + 12 + optionsHeight;
 	}
 
 	@Override
@@ -353,7 +347,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	@Override
 	public ClipArea getClipArea()
 	{
-		return new ClipArea(this, 0, false);
+		return new ClipArea(this, screenX(), screenY(), screenX() + optionsWidth, screenY() + optionsHeight + 12, false);
 	}
 
 	@Override
