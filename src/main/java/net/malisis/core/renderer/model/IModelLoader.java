@@ -27,7 +27,6 @@ package net.malisis.core.renderer.model;
 import java.util.Map;
 
 import net.malisis.core.renderer.element.Shape;
-import net.minecraft.util.ResourceLocation;
 
 /**
  * Interface for model loaders.
@@ -36,14 +35,6 @@ import net.minecraft.util.ResourceLocation;
  */
 public interface IModelLoader
 {
-
-	/**
-	 * Loads a {@link ResourceLocation} to build the {@link Shape shapes} for the model.
-	 *
-	 * @param resource the resource
-	 */
-	public void load(ResourceLocation resource);
-
 	/**
 	 * Gets the list of {@link Shape} for the model.
 	 *

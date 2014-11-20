@@ -46,9 +46,6 @@ import net.minecraft.util.ResourceLocation;
  */
 public class MalisisModel implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale, Iterable<Shape>
 {
-	/** ResourceLocation of the model file. */
-	protected ResourceLocation resource;
-
 	/** Shapes building this {@link MalisisModel}. */
 	protected Map<String, Shape> shapes = new HashMap<>();
 
@@ -64,14 +61,11 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	/**
 	 * Instantiates a new {@link MalisisModel} with the specified {@link IModelLoader}.
 	 *
-	 * @param resource the {@link ResourceLocation} for the model file
 	 * @param loader the loader
 	 */
-	public MalisisModel(ResourceLocation resource, IModelLoader loader)
+	public MalisisModel(IModelLoader loader)
 	{
-		this.resource = resource;
 		load(loader);
-
 	}
 
 	/**
@@ -81,10 +75,12 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	 */
 	public MalisisModel(ResourceLocation resource)
 	{
-		this.resource = resource;
+		if (resource == null)
+			return;
+
 		IModelLoader loader = null;
 		if (resource.getResourcePath().endsWith(".obj"))
-			loader = new ObjFileImporter();
+			loader = new ObjFileImporter(resource);
 
 		if (loader != null)
 			load(loader);
@@ -93,13 +89,15 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
-	 * Loads this {@link MalisisCore} from the specified {@link IModelLoader}.
+	 * Loads this {@link MalisisModel} from the specified {@link IModelLoader}.
 	 *
 	 * @param loader the loader
 	 */
 	protected void load(IModelLoader loader)
 	{
-		loader.load(resource);
+		if (loader == null)
+			return;
+
 		shapes = loader.getShapes();
 		storeState();
 	}

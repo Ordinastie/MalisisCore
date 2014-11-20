@@ -90,23 +90,23 @@ public class ObjFileImporter implements IModelLoader
 	protected Map<String, Shape> shapes = new HashMap<>();
 
 	/**
-	 * Load.
+	 * Instantiates a new {@link ObjFileImporter} from a {@link ResourceLocation}.
 	 *
-	 * @param resource the resource
+	 * @param resourceLocation the resource location
 	 */
-	@Override
-	public void load(ResourceLocation resource)
+	public ObjFileImporter(ResourceLocation resourceLocation)
 	{
-		try
-		{
-			IResource res = Minecraft.getMinecraft().getResourceManager().getResource(resource);
-			loadObjModel(res.getInputStream());
-		}
-		catch (IOException e)
-		{
-			MalisisCore.log.error("[ObjFileImporter] An error happened while reading the file : {}", e);
-		}
+		load(resourceLocation);
+	}
 
+	/**
+	 * Instantiates a new {@link ObjFileImporter} from {@link InputStream}.
+	 *
+	 * @param inputStream the input stream
+	 */
+	public ObjFileImporter(InputStream inputStream)
+	{
+		load(inputStream);
 	}
 
 	/**
@@ -121,11 +121,30 @@ public class ObjFileImporter implements IModelLoader
 	}
 
 	/**
-	 * Loads the model from {@link InputStream}.
+	 * Load the shapes from a {@link ResourceLocation}.
+	 *
+	 * @param resourceLocation the resource location
+	 */
+	public void load(ResourceLocation resourceLocation)
+	{
+		try
+		{
+			IResource res = Minecraft.getMinecraft().getResourceManager().getResource(resourceLocation);
+			load(res.getInputStream());
+		}
+		catch (IOException e)
+		{
+			MalisisCore.log.error("[ObjFileImporter] An error happened while reading the file : {}", e);
+		}
+
+	}
+
+	/**
+	 * Loads the shapes from {@link InputStream}.
 	 *
 	 * @param inputStream the input stream
 	 */
-	private void loadObjModel(InputStream inputStream)
+	public void load(InputStream inputStream)
 	{
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream)))
