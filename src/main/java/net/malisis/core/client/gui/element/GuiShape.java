@@ -34,7 +34,7 @@ import net.malisis.core.renderer.element.Vertex;
  */
 public abstract class GuiShape extends Shape
 {
-	public GuiShape(GuiFace... faces)
+	public GuiShape(Face... faces)
 	{
 		super(faces);
 	}
@@ -85,7 +85,7 @@ public abstract class GuiShape extends Shape
 
 	public abstract void scale(float x, float y);
 
-	protected static class GuiFace extends Face
+	public static class GuiFace extends Face
 	{
 		public GuiFace()
 		{
