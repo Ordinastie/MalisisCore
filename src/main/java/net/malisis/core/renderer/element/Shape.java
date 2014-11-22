@@ -368,7 +368,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		for (Face f : faces)
 		{
 			for (Vertex v : f.getVertexes())
-				v.applyMatrix(transformMatrix);
+				if (v != null)
+					v.applyMatrix(transformMatrix);
 		}
 
 		transformMatrix = null;
@@ -633,7 +634,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		for (Face f : faces)
 		{
 			for (Vertex v : f.getVertexes())
-				v.setInitialState();
+				if (v != null)
+					v.setInitialState();
 		}
 		return this;
 	}
@@ -649,7 +651,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		for (Face f : faces)
 		{
 			for (Vertex v : f.getVertexes())
-				v.resetState();
+				if (v != null)
+					v.resetState();
 		}
 		return this;
 	}

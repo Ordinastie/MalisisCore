@@ -296,9 +296,12 @@ public class Face
 	{
 		for (Vertex v : vertexes)
 		{
-			v.factorX(fx);
-			v.factorY(fy);
-			v.factorZ(fz);
+			if (v != null)
+			{
+				v.factorX(fx);
+				v.factorY(fy);
+				v.factorZ(fz);
+			}
 		}
 		return this;
 	}
