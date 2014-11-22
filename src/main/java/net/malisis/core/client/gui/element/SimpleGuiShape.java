@@ -24,16 +24,23 @@
 
 package net.malisis.core.client.gui.element;
 
+import net.malisis.core.renderer.element.Face;
+
 /**
  * @author Ordinastie
  *
  */
 public class SimpleGuiShape extends GuiShape
 {
+	public SimpleGuiShape(Face face)
+	{
+		super(face);
+		storeState();
+	}
+
 	public SimpleGuiShape()
 	{
-		super(new GuiFace());
-		storeState();
+		this(new GuiFace());
 	}
 
 	@Override
