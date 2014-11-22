@@ -764,7 +764,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		drawVertexes(face.getVertexes());
 
 		//we need to separate each face
-		if (drawMode == GL11.GL_POLYGON)
+		if (drawMode == GL11.GL_POLYGON || drawMode == GL11.GL_LINE || drawMode == GL11.GL_LINE_STRIP || drawMode == GL11.GL_LINE_LOOP)
 			next();
 	}
 
@@ -776,11 +776,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	protected void drawVertexes(Vertex[] vertexes)
 	{
 		for (int i = 0; i < vertexes.length; i++)
-		{
 			drawVertex(vertexes[i], i);
-			if (drawMode == GL11.GL_LINE_STRIP)
-				drawVertex(vertexes[i == vertexes.length - 1 ? 0 : i + 1], i);
-		}
 	}
 
 	/**
@@ -791,6 +787,9 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected void drawVertex(Vertex vertex, int number)
 	{
+		if (vertex == null)
+			vertex = new Vertex(0, 0, 0);
+
 		// brightness
 		int brightness = calcVertexBrightness(vertex, (int[][]) params.aoMatrix.get(number));
 		vertex.setBrightness(brightness);
@@ -806,7 +805,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		t.setColorRGBA_I(vertex.getColor(), vertex.getAlpha());
 		t.setBrightness(vertex.getBrightness());
 
-		if (drawMode != GL11.GL_LINE && params.useTexture.get())
+		if (params.useTexture.get())
 			t.addVertexWithUV(vertex.getX(), vertex.getY(), vertex.getZ(), vertex.getU(), vertex.getV());
 		else
 			t.addVertex(vertex.getX(), vertex.getY(), vertex.getZ());
