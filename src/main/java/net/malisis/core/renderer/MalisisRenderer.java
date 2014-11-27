@@ -79,18 +79,6 @@ import cpw.mods.fml.relauncher.ReflectionHelper;
  */
 public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpleBlockRenderingHandler, IItemRenderer, IRenderWorldLast
 {
-	//TODO: make an enum
-	/** Defines rendering for world. */
-	public static final int TYPE_ISBRH_WORLD = 1;
-	/** Defines rendering for inventory with ISBRH. */
-	public static final int TYPE_ISBRH_INVENTORY = 2;
-	/** Defines rendering for inventory with IItemRenderer. */
-	public static final int TYPE_ITEM_INVENTORY = 3;
-	/** Defines rendering for TESR. */
-	public static final int TYPE_TESR_WORLD = 4;
-	/** Defines rendering for IRWL. */
-	public static final int TYPE_IRWL = 5;
-
 	/** Font renderer used to draw strings. */
 	public static FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
 
@@ -99,7 +87,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	private static Map damagedBlocks;
 	/** The damaged icons. */
 	protected static IIcon[] damagedIcons;
-	/** Whether this {@link MalisisRenderer} initialized. (initialiaze() already called */
+	/** Whether this {@link MalisisRenderer} initialized. (initialize() already called */
 	private boolean initialized = false;
 	/** Id of this {@link MalisisRenderer}. */
 	protected int renderId = -1;
@@ -127,11 +115,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	protected ItemRenderType itemRenderType;
 	/** RenderGlobal reference (IRWL) */
 	protected RenderGlobal renderGlobal;
-	/**
-	 * Type of rendering : <code>TYPE_ISBRH_WORLD</code>, <code>TYPE_ISBRH_INVENTORY</code>, <code>TYPE_ITEM_INVENTORY</code> or
-	 * <code>TYPE_TESR_WORLD</code>.
-	 */
-	protected int renderType;
+	/** Type of rendering. */
+	protected RenderType renderType;
 	/** Mode of rendering (GL constant). */
 	protected int drawMode;
 	/** Current shape being rendered. */
@@ -180,7 +165,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void reset()
 	{
-		this.renderType = 0;
+		this.renderType = RenderType.UNSET;
 		this.drawMode = 0;
 		this.world = null;
 		this.block = null;
@@ -308,7 +293,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	{
 		set(block, metadata);
 		renderBlocks = renderer;
-		prepare(TYPE_ISBRH_INVENTORY);
+		prepare(RenderType.ISBRH_INVENTORY);
 		render();
 		clean();
 	}
@@ -333,7 +318,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 		renderBlocks = renderer;
 		vertexDrawn = false;
 
-		prepare(TYPE_ISBRH_WORLD);
+		prepare(RenderType.ISBRH_WORLD);
 		if (renderer.hasOverrideBlockTexture())
 			overrideTexture = renderer.overrideBlockTexture;
 		render();
@@ -394,7 +379,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data)
 	{
 		set(type, item);
-		prepare(TYPE_ITEM_INVENTORY);
+		prepare(RenderType.ITEM_INVENTORY);
 		render();
 		clean();
 	}
@@ -415,7 +400,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	public void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTick)
 	{
 		set(te, partialTick);
-		prepare(TYPE_TESR_WORLD, x, y, z);
+		prepare(RenderType.TESR_WORLD, x, y, z);
 		render();
 		if (getBlockDamage)
 		{
@@ -462,7 +447,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 			z = -(p.lastTickPosZ + (p.posZ - p.lastTickPosZ) * partialTick);
 		}
 
-		prepare(TYPE_IRWL, x, y, z);
+		prepare(RenderType.WORLD_LAST, x, y, z);
 
 		render();
 
@@ -479,26 +464,26 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 * @param renderType the render type
 	 * @param data the data
 	 */
-	public void prepare(int renderType, double... data)
+	public void prepare(RenderType renderType, double... data)
 	{
 		_initialize();
 
 		this.renderType = renderType;
-		if (renderType == TYPE_ISBRH_WORLD)
+		if (renderType == RenderType.ISBRH_WORLD)
 		{
 			tessellatorShift();
 		}
-		else if (renderType == TYPE_ISBRH_INVENTORY)
+		else if (renderType == RenderType.ISBRH_INVENTORY)
 		{
 			GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
 			startDrawing();
 		}
-		else if (renderType == TYPE_ITEM_INVENTORY)
+		else if (renderType == RenderType.ITEM_INVENTORY)
 		{
 			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
 			startDrawing();
 		}
-		else if (renderType == TYPE_TESR_WORLD)
+		else if (renderType == RenderType.TESR_WORLD)
 		{
 			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
 			RenderHelper.disableStandardItemLighting();
@@ -512,7 +497,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 
 			startDrawing();
 		}
-		else if (renderType == TYPE_IRWL)
+		else if (renderType == RenderType.WORLD_LAST)
 		{
 			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
 			RenderHelper.disableStandardItemLighting();
@@ -579,27 +564,27 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void clean()
 	{
-		if (renderType == TYPE_ISBRH_WORLD)
+		if (renderType == RenderType.ISBRH_WORLD)
 		{
 			tessellatorUnshift();
 		}
-		else if (renderType == TYPE_ISBRH_INVENTORY)
+		else if (renderType == RenderType.ISBRH_INVENTORY)
 		{
 			draw();
 			GL11.glTranslatef(0.5F, 0.5F, 0.5F);
 		}
-		else if (renderType == TYPE_ITEM_INVENTORY)
+		else if (renderType == RenderType.ITEM_INVENTORY)
 		{
 			draw();
 			GL11.glPopAttrib();
 		}
-		else if (renderType == TYPE_TESR_WORLD)
+		else if (renderType == RenderType.TESR_WORLD)
 		{
 			draw();
 			GL11.glPopMatrix();
 			GL11.glPopAttrib();
 		}
-		else if (renderType == TYPE_IRWL)
+		else if (renderType == RenderType.WORLD_LAST)
 		{
 			draw();
 			GL11.glPopMatrix();
@@ -637,7 +622,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void enableBlending()
 	{
-		if (renderType == TYPE_ISBRH_WORLD)
+		if (renderType == RenderType.ISBRH_WORLD)
 			return;
 
 		GL11.glEnable(GL11.GL_BLEND);
@@ -675,7 +660,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	/**
 	 * _initialize.
 	 */
-	private final void _initialize()
+	protected final void _initialize()
 	{
 		if (initialized)
 			return;
@@ -797,7 +782,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 			return;
 
 		int vertexCount = f.getVertexes().length;
-		if (vertexCount != 4 && renderType == TYPE_ISBRH_WORLD)
+		if (vertexCount != 4 && renderType == RenderType.ISBRH_WORLD)
 		{
 			MalisisCore.log.error("[BaseRenderer] Attempting to render a face containing {} vertexes in ISBRH. Ignored", vertexCount);
 			return;
@@ -810,7 +795,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 			return;
 
 		//use normals if available
-		if ((renderType == TYPE_ITEM_INVENTORY || renderType == TYPE_ISBRH_INVENTORY || params.useNormals.get())
+		if ((renderType == RenderType.ITEM_INVENTORY || renderType == RenderType.ISBRH_INVENTORY || params.useNormals.get())
 				&& params.direction.get() != null)
 			t.setNormal(params.direction.get().offsetX, params.direction.get().offsetY, params.direction.get().offsetZ);
 
@@ -939,7 +924,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	protected boolean shouldRenderFace(Face face)
 	{
-		if (renderType != TYPE_ISBRH_WORLD || world == null || block == null)
+		if (renderType != RenderType.ISBRH_WORLD || world == null || block == null)
 			return true;
 		if (rp != null && rp.renderAllFaces.get())
 			return true;
@@ -1013,7 +998,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 
 		if (drawMode == GL11.GL_LINE) //no AO for lines
 			return color;
-		if (renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD) //no AO for item/inventories
+		if (renderType != RenderType.ISBRH_WORLD && renderType != RenderType.TESR_WORLD) //no AO for item/inventories
 			return color;
 
 		float factor = 1;
@@ -1052,7 +1037,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	protected int getBaseBrightness()
 	{
 		//not in world
-		if ((renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD) || world == null || !params.useBlockBrightness.get())
+		if ((renderType != RenderType.ISBRH_WORLD && renderType != RenderType.TESR_WORLD) || world == null
+				|| !params.useBlockBrightness.get())
 			return params.brightness.get();
 
 		//no direction, we can only use current block brightness
@@ -1099,7 +1085,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 			return vertex.getBrightness();
 		if (drawMode == GL11.GL_LINE) //no AO for lines
 			return baseBrightness;
-		if (renderType != TYPE_ISBRH_WORLD && renderType != TYPE_TESR_WORLD) //not in world
+		if (renderType != RenderType.ISBRH_WORLD && renderType != RenderType.TESR_WORLD) //not in world
 			return baseBrightness;
 		if (!params.calculateBrightness.get() || aoMatrix == null) //no data
 			return baseBrightness;
@@ -1246,7 +1232,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	protected DestroyBlockProgress getBlockDestroyProgress()
 	{
-		if (renderType != TYPE_TESR_WORLD)
+		if (renderType != RenderType.TESR_WORLD)
 			return null;
 		Map damagedBlocks = getDamagedBlocks();
 		if (damagedBlocks == null || damagedBlocks.isEmpty())

@@ -34,6 +34,7 @@ import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.RenderType;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.minecraft.client.Minecraft;
@@ -167,6 +168,37 @@ public class GuiRenderer extends MalisisRenderer
 		this.partialTick = partialTicks;
 	}
 
+	@Override
+	public void prepare(RenderType renderType, double... data)
+	{
+		_initialize();
+		this.renderType = renderType;
+
+		currentTexture = null;
+		bindDefaultTexture();
+
+		if (ignoreScale)
+		{
+			GL11.glPushMatrix();
+			GL11.glScalef(1F / scaleFactor, 1F / scaleFactor, 1);
+		}
+
+		enableBlending();
+
+		startDrawing();
+	}
+
+	@Override
+	public void clean()
+	{
+		draw();
+
+		if (ignoreScale)
+			GL11.glPopMatrix();
+
+		reset();
+	}
+
 	/**
 	 * Draws the component to the screen.
 	 *
@@ -177,30 +209,15 @@ public class GuiRenderer extends MalisisRenderer
 	 */
 	public void drawScreen(UIContainer container, int mouseX, int mouseY, float partialTick)
 	{
+		if (container == null)
+			return;
+
 		set(mouseX, mouseY, partialTick);
+		prepare(RenderType.GUI);
 
-		if (container != null)
-		{
-			currentTexture = null;
-			bindDefaultTexture();
+		container.draw(this, mouseX, mouseY, partialTick);
 
-			if (ignoreScale)
-			{
-				GL11.glPushMatrix();
-				GL11.glScalef(1F / scaleFactor, 1F / scaleFactor, 1);
-			}
-
-			enableBlending();
-
-			startDrawing();
-
-			container.draw(this, mouseX, mouseY, partialTick);
-
-			draw();
-
-			if (ignoreScale)
-				GL11.glPopMatrix();
-		}
+		clean();
 	}
 
 	/**
