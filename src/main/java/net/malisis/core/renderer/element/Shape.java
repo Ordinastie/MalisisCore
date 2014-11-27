@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.malisis.core.renderer.BaseRenderer;
+import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.minecraft.util.AxisAlignedBB;
@@ -40,7 +40,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 /**
- * Base class for anything drawn with a {@link BaseRenderer}. Supports basic transformations like scaling, translation and rotations.
+ * Base class for anything drawn with a {@link MalisisRenderer}. Supports basic transformations like scaling, translation and rotations.
  *
  * @author Ordinastie
  *

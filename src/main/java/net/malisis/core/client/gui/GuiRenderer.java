@@ -32,7 +32,7 @@ import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.icon.GuiIcon;
-import net.malisis.core.renderer.BaseRenderer;
+import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
@@ -55,7 +55,7 @@ import org.lwjgl.opengl.GL12;
  * @author Ordinastie
  *
  */
-public class GuiRenderer extends BaseRenderer
+public class GuiRenderer extends MalisisRenderer
 {
 	/** Font renderer used to draw strings. */
 	public static FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;

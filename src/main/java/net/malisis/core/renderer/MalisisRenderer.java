@@ -77,7 +77,7 @@ import cpw.mods.fml.relauncher.ReflectionHelper;
  * @author Ordinastie
  *
  */
-public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBlockRenderingHandler, IItemRenderer, IRenderWorldLast
+public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpleBlockRenderingHandler, IItemRenderer, IRenderWorldLast
 {
 	//TODO: make an enum
 	/** Defines rendering for world. */
@@ -99,9 +99,9 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	private static Map damagedBlocks;
 	/** The damaged icons. */
 	protected static IIcon[] damagedIcons;
-	/** Whether this {@link BaseRenderer} initialized. (initialiaze() already called */
+	/** Whether this {@link MalisisRenderer} initialized. (initialiaze() already called */
 	private boolean initialized = false;
-	/** Id of this {@link BaseRenderer}. */
+	/** Id of this {@link MalisisRenderer}. */
 	protected int renderId = -1;
 	/** Tessellator reference. */
 	protected Tessellator t = Tessellator.instance;
@@ -147,7 +147,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	/** An override texture set by the renderer. */
 	protected IIcon overrideTexture;
 
-	/** Whether the damage for the blocks should be handled by this {@link BaseRenderer} (for TESR). */
+	/** Whether the damage for the blocks should be handled by this {@link MalisisRenderer} (for TESR). */
 	protected boolean getBlockDamage = false;
 	/** Current block destroy progression (for TESR). */
 	protected DestroyBlockProgress destroyBlockProgress = null;
@@ -156,9 +156,9 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	protected boolean vertexDrawn = false;
 
 	/**
-	 * Instantiates a new {@link BaseRenderer}.
+	 * Instantiates a new {@link MalisisRenderer}.
 	 */
-	public BaseRenderer()
+	public MalisisRenderer()
 	{
 		this.renderId = RenderingRegistry.getNextAvailableRenderId();
 		this.t = Tessellator.instance;
@@ -176,7 +176,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	// #region set()
 	/**
-	 * Resets data so this {@link BaseRenderer} can be reused.
+	 * Resets data so this {@link MalisisRenderer} can be reused.
 	 */
 	public void reset()
 	{
@@ -193,7 +193,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Sets informations for this {@link BaseRenderer}.
+	 * Sets informations for this {@link MalisisRenderer}.
 	 *
 	 * @param world the world
 	 * @param block the block
@@ -213,7 +213,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Sets informations for this {@link BaseRenderer}.
+	 * Sets informations for this {@link MalisisRenderer}.
 	 *
 	 * @param world the world
 	 */
@@ -223,7 +223,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Sets informations for this {@link BaseRenderer}.
+	 * Sets informations for this {@link MalisisRenderer}.
 	 *
 	 * @param block the block
 	 */
@@ -233,7 +233,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Sets informations for this {@link BaseRenderer}.
+	 * Sets informations for this {@link MalisisRenderer}.
 	 *
 	 * @param blockMetadata the block metadata
 	 */
@@ -243,7 +243,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Sets informations for this {@link BaseRenderer}.
+	 * Sets informations for this {@link MalisisRenderer}.
 	 *
 	 * @param block the block
 	 * @param blockMetadata the block metadata
@@ -254,7 +254,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Sets informations for this {@link BaseRenderer}.
+	 * Sets informations for this {@link MalisisRenderer}.
 	 *
 	 * @param x the x
 	 * @param y the y
@@ -266,7 +266,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Sets informations for this {@link BaseRenderer}.
+	 * Sets informations for this {@link MalisisRenderer}.
 	 *
 	 * @param te the te
 	 * @param partialTick the partial tick
@@ -279,7 +279,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Sets informations for this {@link BaseRenderer}.
+	 * Sets informations for this {@link MalisisRenderer}.
 	 *
 	 * @param type the type
 	 * @param itemStack the item stack
@@ -342,10 +342,10 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Checks whether this {@link BaseRenderer} should handle the rendering in inventory
+	 * Checks whether this {@link MalisisRenderer} should handle the rendering in inventory
 	 *
 	 * @param modelId renderId
-	 * @return true, if this {@link BaseRenderer} should be used for rendering the block in inventory
+	 * @return true, if this {@link MalisisRenderer} should be used for rendering the block in inventory
 	 */
 	@Override
 	public boolean shouldRender3DInInventory(int modelId)
@@ -357,11 +357,11 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	// #region IItemRenderer
 	/**
-	 * Checks whether to use this {@link BaseRenderer} for the specified {@link net.minecraftforge.client.IItemRenderer.ItemRenderType}.
+	 * Checks whether to use this {@link MalisisRenderer} for the specified {@link net.minecraftforge.client.IItemRenderer.ItemRenderType}.
 	 *
 	 * @param item the item
 	 * @param type ItemRenderType
-	 * @return true, if this {@link BaseRenderer} should be used for rendering the block in inventory
+	 * @return true, if this {@link MalisisRenderer} should be used for rendering the block in inventory
 	 */
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type)
@@ -370,7 +370,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Checks whether a render helper should be used for this {@link BaseRenderer}.
+	 * Checks whether a render helper should be used for this {@link MalisisRenderer}.
 	 *
 	 * @param type the type
 	 * @param item the item
@@ -548,7 +548,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Triggers a draw and restart drawing with current {@link BaseRenderer#drawMode}.
+	 * Triggers a draw and restart drawing with current {@link MalisisRenderer#drawMode}.
 	 */
 	public void next()
 	{
@@ -684,7 +684,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Initializes this {@link BaseRenderer}. Does nothing by default.<br>
+	 * Initializes this {@link MalisisRenderer}. Does nothing by default.<br>
 	 * Called the first time a rendering is done and should be overridden if some setup is needed for the rendering (building shape and
 	 * parameters).
 	 */
@@ -728,7 +728,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Renders the destroy progress manually for TESR. Called if {@link BaseRenderer#destroyBlockProgress} is not <code>null</code>.
+	 * Renders the destroy progress manually for TESR. Called if {@link MalisisRenderer#destroyBlockProgress} is not <code>null</code>.
 	 */
 	public void renderDestroyProgress()
 	{
@@ -1275,7 +1275,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Gets the render id of this {@link BaseRenderer}.
+	 * Gets the render id of this {@link MalisisRenderer}.
 	 *
 	 * @return the render id
 	 */
@@ -1286,7 +1286,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Registers this {@link BaseRenderer} to be used for rendering for specified classes.<br>
+	 * Registers this {@link MalisisRenderer} to be used for rendering for specified classes.<br>
 	 * Classes have to extend Block or TileEntity.<br>
 	 * <font color="990000">A static <b>renderId</b> field is required inside the class extending Block !</font>
 	 *
@@ -1318,7 +1318,7 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	}
 
 	/**
-	 * Registers this {@link BaseRenderer} to be used for rendering the specified <b>item</b>.
+	 * Registers this {@link MalisisRenderer} to be used for rendering the specified <b>item</b>.
 	 *
 	 * @param item the item
 	 */

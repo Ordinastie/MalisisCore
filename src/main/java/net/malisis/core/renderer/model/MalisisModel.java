@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.renderer.BaseRenderer;
+import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.element.Shape;
@@ -146,47 +146,47 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
-	 * Renders all the {@link Shape shapes} of this {@link MalisisModel} using the specified {@link BaseRenderer}.
+	 * Renders all the {@link Shape shapes} of this {@link MalisisModel} using the specified {@link MalisisRenderer}.
 	 *
 	 * @param renderer the renderer
 	 */
-	public void render(BaseRenderer renderer)
+	public void render(MalisisRenderer renderer)
 	{
 		render(renderer, (RenderParameters) null);
 	}
 
 	/**
-	 * Renders all the {@link Shape shapes} of this {@link MalisisModel} using the specified {@link BaseRenderer} and
+	 * Renders all the {@link Shape shapes} of this {@link MalisisModel} using the specified {@link MalisisRenderer} and
 	 * {@link RenderParameters}.
 	 *
 	 * @param renderer the renderer
 	 * @param rp the parameters
 	 */
-	public void render(BaseRenderer renderer, RenderParameters rp)
+	public void render(MalisisRenderer renderer, RenderParameters rp)
 	{
 		for (String name : shapes.keySet())
 			render(renderer, name, rp);
 	}
 
 	/**
-	 * Renders a specific {@link Shape} of this {@link MalisisModel} using the specified {@link BaseRenderer}.
+	 * Renders a specific {@link Shape} of this {@link MalisisModel} using the specified {@link MalisisRenderer}.
 	 *
 	 * @param renderer the renderer
 	 * @param name the name of the shape
 	 */
-	public void render(BaseRenderer renderer, String name)
+	public void render(MalisisRenderer renderer, String name)
 	{
 		render(renderer, name, null);
 	}
 
 	/**
-	 * Renders a specific {@link Shape} of this {@link MalisisModel} using the specified {@link BaseRenderer} and {@link RenderParameters}.
+	 * Renders a specific {@link Shape} of this {@link MalisisModel} using the specified {@link MalisisRenderer} and {@link RenderParameters}.
 	 *
 	 * @param renderer the renderer
 	 * @param name the name of the shape
 	 * @param rp the paramters
 	 */
-	public void render(BaseRenderer renderer, String name, RenderParameters rp)
+	public void render(MalisisRenderer renderer, String name, RenderParameters rp)
 	{
 		Shape shape = shapes.get(name);
 		if (shape != null)
