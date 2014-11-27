@@ -38,6 +38,8 @@ import net.malisis.core.renderer.element.shape.Cube;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderBlocks;
@@ -52,12 +54,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
@@ -71,96 +77,78 @@ import cpw.mods.fml.relauncher.ReflectionHelper;
  * @author Ordinastie
  *
  */
-public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBlockRenderingHandler, IItemRenderer
+public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBlockRenderingHandler, IItemRenderer, IRenderWorldLast
 {
+	//TODO: make an enum
 	/** Defines rendering for world. */
 	public static final int TYPE_ISBRH_WORLD = 1;
-
 	/** Defines rendering for inventory with ISBRH. */
 	public static final int TYPE_ISBRH_INVENTORY = 2;
-
 	/** Defines rendering for inventory with IItemRenderer. */
 	public static final int TYPE_ITEM_INVENTORY = 3;
-
 	/** Defines rendering for TESR. */
 	public static final int TYPE_TESR_WORLD = 4;
+	/** Defines rendering for IRWL. */
+	public static final int TYPE_IRWL = 5;
+
+	/** Font renderer used to draw strings. */
+	public static FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
 
 	//Reference to Minecraft.renderGlobal.damagedBlocks (lazy loaded)
 	/** The damaged blocks. */
 	private static Map damagedBlocks;
-
 	/** The damaged icons. */
 	protected static IIcon[] damagedIcons;
-
 	/** Whether this {@link BaseRenderer} initialized. (initialiaze() already called */
 	private boolean initialized = false;
-
 	/** Id of this {@link BaseRenderer}. */
 	protected int renderId = -1;
-
 	/** Tessellator reference. */
 	protected Tessellator t = Tessellator.instance;
-
-	/** Current world reference (ISBRH/TESR). */
+	/** Current world reference (ISBRH/TESR/IRWL). */
 	protected IBlockAccess world;
-
 	/** RenderBlocks reference (ISBRH). */
 	protected RenderBlocks renderBlocks;
-
+	/** Whether render coordinates already shifted (ISBRH). */
+	protected boolean isShifted = false;
 	/** Block to render (ISBRH/TESR). */
 	protected Block block;
-
 	/** Metadata of the block to render (ISBRH/TESR). */
 	protected int blockMetadata;
-
 	/** Position of the block (ISBRH/TESR). */
 	protected int x, y, z;
-
+	/** TileEntity currently drawing (for TESR). */
+	protected TileEntity tileEntity;
+	/** Partial tick time (TESR/IRWL). */
+	protected float partialTick = 0;
 	/** ItemStack to render (ITEM). */
 	protected ItemStack itemStack;
-
 	/** ItemRenderType of item rendering (ITEM). */
 	protected ItemRenderType itemRenderType;
-
+	/** RenderGlobal reference (IRWL) */
+	protected RenderGlobal renderGlobal;
 	/**
 	 * Type of rendering : <code>TYPE_ISBRH_WORLD</code>, <code>TYPE_ISBRH_INVENTORY</code>, <code>TYPE_ITEM_INVENTORY</code> or
 	 * <code>TYPE_TESR_WORLD</code>.
 	 */
 	protected int renderType;
-
 	/** Mode of rendering (GL constant). */
 	protected int drawMode;
-
-	/** Whether render coordinates already shifted (ISBRH). */
-	protected boolean isShifted = false;
-
 	/** Current shape being rendered. */
 	protected Shape shape = new Cube();
-
 	/** Current face being rendered. */
 	protected Face face;
-
 	/** Current parameters for the shape being rendered. */
 	protected RenderParameters rp = new RenderParameters();
-
 	/** Current parameters for the face being rendered. */
 	protected RenderParameters params;
-
 	/** Base brightness of the block. */
 	protected int baseBrightness;
-
 	/** An override texture set by the renderer. */
 	protected IIcon overrideTexture;
 
-	/** TileEntity currently drawing (for TESR). */
-	protected TileEntity tileEntity;
-
-	/** Partial tick time (for TESR). */
-	protected float partialTick = 0;
-
 	/** Whether the damage for the blocks should be handled by this {@link BaseRenderer} (for TESR). */
 	protected boolean getBlockDamage = false;
-
 	/** Current block destroy progression (for TESR). */
 	protected DestroyBlockProgress destroyBlockProgress = null;
 
@@ -222,6 +210,16 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 		this.x = x;
 		this.y = y;
 		this.z = z;
+	}
+
+	/**
+	 * Sets informations for this {@link BaseRenderer}.
+	 *
+	 * @param world the world
+	 */
+	public void set(IBlockAccess world)
+	{
+		this.world = world;
 	}
 
 	/**
@@ -442,10 +440,41 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 
 	// #end TESR
 
+	// #region IRenderWorldLast
+	@Override
+	public boolean shouldSetViewportPosition()
+	{
+		return true;
+	};
+
+	@Override
+	public void renderWorldLastEvent(RenderWorldLastEvent event, IBlockAccess world)
+	{
+		set(world);
+		partialTick = event.partialTicks;
+		renderGlobal = event.context;
+		double x = 0, y = 0, z = 0;
+		if (shouldSetViewportPosition())
+		{
+			EntityClientPlayerMP p = Minecraft.getMinecraft().thePlayer;
+			x = -(p.lastTickPosX + (p.posX - p.lastTickPosX) * partialTick);
+			y = -(p.lastTickPosY + (p.posY - p.lastTickPosY) * partialTick);
+			z = -(p.lastTickPosZ + (p.posZ - p.lastTickPosZ) * partialTick);
+		}
+
+		prepare(TYPE_IRWL, x, y, z);
+
+		render();
+
+		clean();
+	}
+
+	// #end IRenderWorldLast
+
 	// #region prepare()
 	/**
-	 * Prepares the {@link Tessellator} and the GL states for the <b>renderType</b>. <b>data</b> is only used for TESR.<br>
-	 * TESR rendering is surrounded by glPushAttrib(GL_LIGHTING_BIT) and block texture sheet is bound.
+	 * Prepares the {@link Tessellator} and the GL states for the <b>renderType</b>. <b>data</b> is only used for TESR and IRWL.<br>
+	 * TESR and IRWL rendering are surrounded by glPushAttrib(GL_LIGHTING_BIT) and block texture sheet is bound.
 	 *
 	 * @param renderType the render type
 	 * @param data the data
@@ -470,6 +499,20 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			startDrawing();
 		}
 		else if (renderType == TYPE_TESR_WORLD)
+		{
+			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
+			RenderHelper.disableStandardItemLighting();
+			GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+			GL11.glShadeModel(GL11.GL_SMOOTH);
+
+			GL11.glPushMatrix();
+			GL11.glTranslated(data[0], data[1], data[2]);
+
+			bindTexture(TextureMap.locationBlocksTexture);
+
+			startDrawing();
+		}
+		else if (renderType == TYPE_IRWL)
 		{
 			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
 			RenderHelper.disableStandardItemLighting();
@@ -556,6 +599,12 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			GL11.glPopMatrix();
 			GL11.glPopAttrib();
 		}
+		else if (renderType == TYPE_IRWL)
+		{
+			draw();
+			GL11.glPopMatrix();
+			GL11.glPopAttrib();
+		}
 		reset();
 	}
 
@@ -613,6 +662,12 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	public void enableTextures()
 	{
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+
+	@Override
+	protected void bindTexture(ResourceLocation resourceLocaltion)
+	{
+		Minecraft.getMinecraft().getTextureManager().bindTexture(resourceLocaltion);
 	}
 
 	// #end prepare()
@@ -811,6 +866,42 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 			t.addVertex(vertex.getX(), vertex.getY(), vertex.getZ());
 
 		vertexDrawn = true;
+	}
+
+	/**
+	 * Draws a string at the specified coordinates, with color and shadow. The string gets translated. Uses FontRenderer.drawString().
+	 *
+	 * @param text the text
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param color the color
+	 * @param shadow the shadow
+	 */
+	public void drawString(String text, float x, float y, float z, int color, boolean shadow)
+	{
+		if (fontRenderer == null)
+		{
+			fontRenderer = Minecraft.getMinecraft().fontRenderer;
+			if (fontRenderer == null)
+				return;
+		}
+
+		text = StatCollector.translateToLocal(text);
+		text = text.replaceAll("\r", "");
+		GL11.glPushMatrix();
+		float s = 0.010F;
+		GL11.glTranslatef(x, y, z);
+		GL11.glScalef(s, -s, s);
+
+		// GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+
+		fontRenderer.drawString(text, 0, 0, color, shadow);
+
+		GL11.glPopMatrix();
+		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+		// GL11.glEnable(GL11.GL_DEPTH_TEST);
 	}
 
 	/**
@@ -1107,6 +1198,9 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	 */
 	protected void calcVertexesPosition(AxisAlignedBB bounds)
 	{
+		if (bounds == null)
+			return;
+
 		for (Face f : shape.getFaces())
 			for (Vertex v : f.getVertexes())
 				v.interpolateCoord(bounds);
@@ -1231,5 +1325,33 @@ public class BaseRenderer extends TileEntitySpecialRenderer implements ISimpleBl
 	public void registerFor(Item item)
 	{
 		MinecraftForgeClient.registerItemRenderer(item, this);
+	}
+
+	public void registerForRenderWorldLast()
+	{
+		RenderWorldEventHandler.register(this);
+	}
+
+	/**
+	 * Gets rendering width of a string.
+	 *
+	 * @param str the str
+	 * @return the string width
+	 */
+	public static int getStringWidth(String str)
+	{
+		str = StatCollector.translateToLocal(str);
+		str = str.replaceAll("\r", "");
+		return (int) Math.ceil(fontRenderer.getStringWidth(str) * 0.01F);
+	}
+
+	/**
+	 * Gets the rendering height of strings according to fontscale.
+	 *
+	 * @return the string height
+	 */
+	public static int getStringHeight()
+	{
+		return (int) Math.ceil(fontRenderer.FONT_HEIGHT * 0.01F);
 	}
 }
