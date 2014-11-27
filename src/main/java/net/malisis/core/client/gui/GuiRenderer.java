@@ -598,7 +598,7 @@ public class GuiRenderer extends BaseRenderer
 	 */
 	public static int getStringHeight(float fontScale)
 	{
-		return Math.round(FONT_HEIGHT * fontScale);
+		return (int) Math.ceil(FONT_HEIGHT * fontScale);
 	}
 
 	/**
