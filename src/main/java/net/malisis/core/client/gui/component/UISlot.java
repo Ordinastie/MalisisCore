@@ -53,28 +53,29 @@ import com.google.common.eventbus.Subscribe;
 
 public class UISlot extends UIComponent<UISlot>
 {
-	/**
-	 * Icon to use for the background of this <code>UISlot</code>
-	 */
+	/** Icon to use for the background of this {@link UISlot} */
 	protected GuiIcon icon;
+	/** Icon for Mojang fix */
 	protected GuiIcon iconLeft;
+	/** Icon for Mojang fix */
 	protected GuiIcon iconTop;
 
-	/**
-	 * Whether the mouse button has been released at least once.
-	 */
+	/** Whether the mouse button has been released at least once. */
 	public static boolean buttonRelased = true;
-	/**
-	 * Slot to draw containing the itemStack
-	 */
+	/** Slot to draw containing the itemStack */
 	protected MalisisSlot slot;
+	/** */
+	protected UITooltip defaultTooltip;
 
-	protected MalisisGui gui;
-
+	/**
+	 * Instantiates a new {@link UISlot}.
+	 *
+	 * @param gui the gui
+	 * @param slot the slot
+	 */
 	public UISlot(MalisisGui gui, MalisisSlot slot)
 	{
 		super(gui);
-		this.gui = gui;
 		this.slot = slot;
 		this.width = 18;
 		this.height = 18;
@@ -88,32 +89,34 @@ public class UISlot extends UIComponent<UISlot>
 
 	}
 
+	/**
+	 * Instantiates a new {@link UISlot}.
+	 *
+	 * @param gui the gui
+	 */
 	public UISlot(MalisisGui gui)
 	{
 		this(gui, null);
 	}
 
-	@Subscribe
-	public void onHovered(HoveredStateChange<UISlot> event)
+	@Override
+	public UISlot setTooltip(UITooltip tooltip)
 	{
-		updateTooltip();
-
-		if (event.getState() && MalisisGui.currentGui().getInventoryContainer().isDraggingItemStack())
-		{
-			//if (MalisisGui.currentGui().getInventoryContainer().getDraggedItemstack(slot) == null)
-			MalisisGui.sendAction(ActionType.DRAG_ADD_SLOT, slot, 0);
-		}
-
+		defaultTooltip = tooltip;
+		if (tooltip == null)
+			tooltip = defaultTooltip;
+		return this;
 	}
 
 	/**
-	 * Update the tooltip of this <code>UISlot</code> based on the contained ItemStack
+	 * Updates the {@link UITooltip} of this {@link UISlot} based on the contained ItemStack.<br>
+	 * If no ItemStack is present in slot, revert the tooltip back to default one.
 	 */
 	protected void updateTooltip()
 	{
 		if (slot.getItemStack() == null)
 		{
-			tooltip = null;
+			tooltip = defaultTooltip;
 			return;
 		}
 
@@ -124,7 +127,7 @@ public class UISlot extends UIComponent<UISlot>
 		for (int i = 1; i < lines.size(); i++)
 			lines.set(i, EnumChatFormatting.GRAY + lines.get(i));
 
-		tooltip = new UITooltip(gui).setText(lines);
+		tooltip = new UITooltip(getGui()).setText(lines);
 	}
 
 	@Override
@@ -287,5 +290,18 @@ public class UISlot extends UIComponent<UISlot>
 		if (event.getSlot() != slot)
 			return;
 		updateTooltip();
+	}
+
+	@Subscribe
+	public void onHovered(HoveredStateChange<UISlot> event)
+	{
+		updateTooltip();
+
+		if (event.getState() && MalisisGui.currentGui().getInventoryContainer().isDraggingItemStack())
+		{
+			//if (MalisisGui.currentGui().getInventoryContainer().getDraggedItemstack(slot) == null)
+			MalisisGui.sendAction(ActionType.DRAG_ADD_SLOT, slot, 0);
+		}
+
 	}
 }

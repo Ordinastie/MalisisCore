@@ -548,6 +548,18 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
+	 * Sets the {@link UITooltip} of this {@link UIComponent}.
+	 *
+	 * @param text the text of the tooltip
+	 * @return the t
+	 */
+	public T setTooltip(String text)
+	{
+		setTooltip(new UITooltip(getGui(), text));
+		return (T) this;
+	}
+
+	/**
 	 * Sets the alpha transparency for this {@link UIComponent}.
 	 *
 	 * @param alpha the new alpha
