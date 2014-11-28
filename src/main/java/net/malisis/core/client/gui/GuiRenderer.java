@@ -47,6 +47,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
+import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -590,6 +591,9 @@ public class GuiRenderer extends MalisisRenderer
 	 */
 	public static int getStringWidth(String str, float fontScale)
 	{
+		if (StringUtils.isEmpty(str))
+			return 0;
+
 		str = StatCollector.translateToLocal(str);
 		str = str.replaceAll("\r", "");
 		return (int) Math.ceil(MalisisRenderer.getFontRenderer().getStringWidth(str) * fontScale);
