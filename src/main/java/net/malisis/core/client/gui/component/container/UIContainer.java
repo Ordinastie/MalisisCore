@@ -437,9 +437,12 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	{
 		for (UIComponent component : components)
 		{
-			this.components.add(component);
-			component.setParent(this);
-			component.register(this);
+			if (component != null)
+			{
+				this.components.add(component);
+				component.setParent(this);
+				component.register(this);
+			}
 		}
 		onContentUpdate();
 	}
