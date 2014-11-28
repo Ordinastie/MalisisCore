@@ -97,6 +97,7 @@ public class UIImage extends UIComponent<UIImage>
 		this.icon = null;
 		this.texture = null;
 		this.itemStack = itemStack;
+		setSize(16, 16);
 		return this;
 	}
 
@@ -108,6 +109,14 @@ public class UIImage extends UIComponent<UIImage>
 	public ItemStack getItemStack()
 	{
 		return itemStack;
+	}
+
+	@Override
+	public UIImage setSize(int width, int height)
+	{
+		if (itemStack != null)
+			return this;//UIImage for itemStack have a fixed 16*16 size
+		return super.setSize(width, height);
 	}
 
 	@Override
