@@ -24,6 +24,12 @@
 
 package net.malisis.core.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.Vec3;
+
 /**
  *
  * @author Ordinastie
@@ -33,15 +39,14 @@ public class Ray
 {
 	/** Origin {@link Point} of this {@link Ray}. */
 	public Point origin;
-
 	/** Direction of this {@link Ray}. */
 	public Vector direction;
 
 	/**
-	 * Instantiates a new ray.
+	 * Instantiates a new {@link Ray}.
 	 *
-	 * @param p the p
-	 * @param v the v
+	 * @param p the origin {@link Point}
+	 * @param v the direction {@link Vector}
 	 */
 	public Ray(Point p, Vector v)
 	{
@@ -50,14 +55,26 @@ public class Ray
 	}
 
 	/**
-	 * Instantiates a new ray.
+	 * Instantiates a new {@link Ray} from a specified one.
 	 *
-	 * @param r the r
+	 * @param r the ray to copy
 	 */
 	public Ray(Ray r)
 	{
 		origin = new Point(r.origin);
 		direction = new Vector(r.direction);
+	}
+
+	/**
+	 * Instantiates a new {@link Ray} from two {@link Vec3}.
+	 *
+	 * @param src the src
+	 * @param dest the dest
+	 */
+	public Ray(Vec3 src, Vec3 dest)
+	{
+		origin = new Point(src);
+		direction = new Vector(origin, new Point(dest));
 	}
 
 	/**
@@ -68,6 +85,8 @@ public class Ray
 	 */
 	public Point getPointAt(double t)
 	{
+		if (Double.isNaN(t))
+			return null;
 		return new Point(origin.x + t * direction.x, origin.y + t * direction.y, origin.z + t * direction.z);
 	}
 
@@ -108,6 +127,34 @@ public class Ray
 		if (direction.z == 0)
 			return Double.NaN;
 		return (z - origin.z) / direction.z;
+	}
+
+	public List<Point> intersect(AxisAlignedBB aabb)
+	{
+		Point interx = getPointAt(intersectX(aabb.minX));
+		Point interX = getPointAt(intersectX(aabb.maxX));
+		Point intery = getPointAt(intersectY(aabb.minY));
+		Point interY = getPointAt(intersectY(aabb.maxY));
+		Point interz = getPointAt(intersectZ(aabb.minZ));
+		Point interZ = getPointAt(intersectZ(aabb.maxZ));
+
+		List<Point> list = new ArrayList<>();
+		if (interx != null && interx.isInside(aabb))
+			list.add(interx);
+		if (interX != null && interX.isInside(aabb))
+			list.add(interX);
+
+		if (intery != null && intery.isInside(aabb))
+			list.add(intery);
+		if (interY != null && interY.isInside(aabb))
+			list.add(interY);
+
+		if (interz != null && interz.isInside(aabb))
+			list.add(interz);
+		if (interZ != null && interZ.isInside(aabb))
+			list.add(interZ);
+
+		return list;
 	}
 
 }

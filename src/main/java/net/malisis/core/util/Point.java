@@ -24,6 +24,7 @@
 
 package net.malisis.core.util;
 
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 
 /**
@@ -123,6 +124,17 @@ public class Point
 		this.y += y;
 		this.z += z;
 		return this;
+	}
+
+	/**
+	 * Checks if this {@link Point} is inside the {@link AxisAlignedBB}.
+	 *
+	 * @param aabb the aabb
+	 * @return true, if it is inside
+	 */
+	public boolean isInside(AxisAlignedBB aabb)
+	{
+		return x >= aabb.minX && x <= aabb.maxX && y >= aabb.minY && y <= aabb.maxY && z >= aabb.minZ && z <= aabb.maxZ;
 	}
 
 	/**
