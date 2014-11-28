@@ -61,7 +61,10 @@ public class RenderWorldEventHandler
 	public void onRenderLast(RenderWorldLastEvent event)
 	{
 		for (IRenderWorldLast renderer : renderers)
-			renderer.renderWorldLastEvent(event, Minecraft.getMinecraft().theWorld);
+		{
+			if (renderer.shouldRender(event, Minecraft.getMinecraft().theWorld))
+				renderer.renderWorldLastEvent(event, Minecraft.getMinecraft().theWorld);
+		}
 	}
 
 	public static void register(IRenderWorldLast renderer)

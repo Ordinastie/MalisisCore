@@ -38,9 +38,18 @@ public interface IRenderWorldLast
 	/**
 	 * Whether to set the translations based on player current position and partialTick.
 	 *
-	 * @return true, if successful
+	 * @return true, if the renderer should set the translations
 	 */
 	public boolean shouldSetViewportPosition();
+
+	/**
+	 * Whether the renderer should render.
+	 *
+	 * @param event the event
+	 * @param world the world
+	 * @return true, if rendering should be done
+	 */
+	public boolean shouldRender(RenderWorldLastEvent event, IBlockAccess world);
 
 	/**
 	 * Renders when {@link RenderWorldLastEvent} is called.
