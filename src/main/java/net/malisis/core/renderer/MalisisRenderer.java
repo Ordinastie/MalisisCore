@@ -79,9 +79,6 @@ import cpw.mods.fml.relauncher.ReflectionHelper;
  */
 public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpleBlockRenderingHandler, IItemRenderer, IRenderWorldLast
 {
-	/** Font renderer used to draw strings. */
-	public static FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-
 	//Reference to Minecraft.renderGlobal.damagedBlocks (lazy loaded)
 	/** The damaged blocks. */
 	private static Map damagedBlocks;
@@ -430,7 +427,13 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	public boolean shouldSetViewportPosition()
 	{
 		return true;
-	};
+	}
+
+	@Override
+	public boolean shouldRender(RenderWorldLastEvent event, IBlockAccess world)
+	{
+		return true;
+	}
 
 	@Override
 	public void renderWorldLastEvent(RenderWorldLastEvent event, IBlockAccess world)
@@ -865,12 +868,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void drawString(String text, float x, float y, float z, int color, boolean shadow)
 	{
-		if (fontRenderer == null)
-		{
-			fontRenderer = Minecraft.getMinecraft().fontRenderer;
-			if (fontRenderer == null)
-				return;
-		}
+		if (MalisisRenderer.getFontRenderer() == null)
+			return;
 
 		text = StatCollector.translateToLocal(text);
 		text = text.replaceAll("\r", "");
@@ -882,7 +881,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 		// GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
 
-		fontRenderer.drawString(text, 0, 0, color, shadow);
+		getFontRenderer().drawString(text, 0, 0, color, shadow);
 
 		GL11.glPopMatrix();
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
@@ -1313,9 +1312,17 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 		MinecraftForgeClient.registerItemRenderer(item, this);
 	}
 
+	/**
+	 * Registers this {@link MalisisRenderer} to be used for {@link RenderWorldLastEvent}.
+	 */
 	public void registerForRenderWorldLast()
 	{
 		RenderWorldEventHandler.register(this);
+	}
+
+	public static FontRenderer getFontRenderer()
+	{
+		return Minecraft.getMinecraft().fontRenderer;
 	}
 
 	/**
@@ -1328,7 +1335,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	{
 		str = StatCollector.translateToLocal(str);
 		str = str.replaceAll("\r", "");
-		return (int) Math.ceil(fontRenderer.getStringWidth(str) * 0.01F);
+		return (int) Math.ceil(getFontRenderer().getStringWidth(str) * 0.01F);
 	}
 
 	/**
@@ -1338,6 +1345,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public static int getStringHeight()
 	{
-		return (int) Math.ceil(fontRenderer.FONT_HEIGHT * 0.01F);
+		return (int) Math.ceil(getFontRenderer().FONT_HEIGHT * 0.01F);
 	}
 }

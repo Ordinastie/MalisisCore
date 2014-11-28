@@ -58,12 +58,10 @@ import org.lwjgl.opengl.GL12;
  */
 public class GuiRenderer extends MalisisRenderer
 {
-	/** Font renderer used to draw strings. */
-	public static FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
 	/** RenderItem used to draw itemStacks. */
 	public static RenderItem itemRenderer = new RenderItem();
 	/** Font height. */
-	public static int FONT_HEIGHT = fontRenderer.FONT_HEIGHT;
+	public static int FONT_HEIGHT = MalisisRenderer.getFontRenderer().FONT_HEIGHT;
 	/** Current component being drawn. */
 	public UIComponent currentComponent;
 	/** Width of the Minecraft window. */
@@ -433,7 +431,7 @@ public class GuiRenderer extends MalisisRenderer
 	 */
 	public void drawString(String text, int x, int y, int z, int color, boolean shadow)
 	{
-		if (fontRenderer == null)
+		if (MalisisRenderer.getFontRenderer() == null)
 			return;
 
 		text = StatCollector.translateToLocal(text);
@@ -445,7 +443,7 @@ public class GuiRenderer extends MalisisRenderer
 		// GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
 
-		fontRenderer.drawString(text, x, y, color, shadow);
+		MalisisRenderer.getFontRenderer().drawString(text, x, y, color, shadow);
 
 		GL11.glPopMatrix();
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
@@ -482,7 +480,7 @@ public class GuiRenderer extends MalisisRenderer
 
 		FontRenderer fontRenderer = itemStack.getItem().getFontRenderer(itemStack);
 		if (fontRenderer == null)
-			fontRenderer = GuiRenderer.fontRenderer;
+			fontRenderer = MalisisRenderer.getFontRenderer();
 
 		String s = null;
 		if (format != null)
@@ -594,7 +592,7 @@ public class GuiRenderer extends MalisisRenderer
 	{
 		str = StatCollector.translateToLocal(str);
 		str = str.replaceAll("\r", "");
-		return (int) Math.ceil(fontRenderer.getStringWidth(str) * fontScale);
+		return (int) Math.ceil(MalisisRenderer.getFontRenderer().getStringWidth(str) * fontScale);
 	}
 
 	/**
@@ -666,7 +664,7 @@ public class GuiRenderer extends MalisisRenderer
 	 */
 	public static int getCharWidth(char c, float fontScale)
 	{
-		return (int) Math.ceil(fontRenderer.getCharWidth(c) * fontScale);
+		return (int) Math.ceil(MalisisRenderer.getFontRenderer().getCharWidth(c) * fontScale);
 	}
 
 	/**
