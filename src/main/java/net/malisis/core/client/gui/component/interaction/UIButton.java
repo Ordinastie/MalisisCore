@@ -27,7 +27,7 @@ package net.malisis.core.client.gui.component.interaction;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
@@ -49,20 +49,22 @@ public class UIButton extends UIComponent<UIButton>
 	protected GuiIcon iconHovered;
 	protected GuiIcon iconDisabled;
 
-	private UILabel label;
+	private String text;
+	private UIImage image;
 	private boolean autoWidth = true;
 	private boolean isPressed = false;
 
 	// this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
-	public UIButton(MalisisGui gui, String text, int width)
+
+	/**
+	 * Instantiates a new {@link UIButton}.
+	 *
+	 * @param gui the gui
+	 */
+	public UIButton(MalisisGui gui)
 	{
 		super(gui);
-		label = new UILabel(gui);
-		label.setDrawShadow(true);
-		label.setParent(this);
-
-		setText(text);
-		setSize(width);
+		setSize(60);
 
 		shape = new XYResizableGuiShape();
 		icon = gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5);
@@ -70,14 +72,28 @@ public class UIButton extends UIComponent<UIButton>
 		iconDisabled = gui.getGuiTexture().getXYResizableIcon(0, 0, 200, 20, 5);
 	}
 
+	/**
+	 * Instantiates a new {@link UIButton}.
+	 *
+	 * @param gui the gui
+	 * @param text the text
+	 */
 	public UIButton(MalisisGui gui, String text)
 	{
-		this(gui, text, 60);
+		this(gui);
+		setText(text);
 	}
 
-	public UIButton(MalisisGui gui)
+	/**
+	 * Instantiates a new {@link UIButton}.
+	 *
+	 * @param gui the gui
+	 * @param image the image
+	 */
+	public UIButton(MalisisGui gui, UIImage image)
 	{
-		this(gui, null, 60);
+		this(gui);
+		setImage(image);
 	}
 
 	/**
@@ -88,21 +104,38 @@ public class UIButton extends UIComponent<UIButton>
 	 */
 	public UIButton setText(String text)
 	{
-		label.setText(text);
+		this.text = text;
 		setSize(autoWidth ? 0 : width);
+		image = null;
 		return this;
 	}
 
 	/**
+	 * Gets the text of this {@link UIButton}.
+	 *
 	 * @return the text of this {@link UIButton}.
 	 */
 	public String getText()
 	{
-		return label.getText();
+		return text;
 	}
 
 	/**
-	 * Sets the width of this {@link UIButton}. Height is fixed 20.
+	 * Sets the {@link UIImage} for this {@link UIButton}. If a width of 0 was previously set, it will be recalculated for this image.
+	 *
+	 * @param image the image
+	 * @return this {@link UIButton}
+	 */
+	public UIButton setImage(UIImage image)
+	{
+		this.image = image;
+		setSize(autoWidth ? 0 : width);
+		text = null;
+		return this;
+	}
+
+	/**
+	 * Sets the width of this {@link UIButton} with a default height of 20px.
 	 *
 	 * @param width the width
 	 * @return this {@link UIButton}
@@ -123,18 +156,24 @@ public class UIButton extends UIComponent<UIButton>
 	public UIButton setSize(int width, int height)
 	{
 		autoWidth = width == 0;
-		int extraWidth = label.getWidth() % 2 == 0 ? 6 : 7;
-		this.width = Math.max(width, label.getWidth() + extraWidth);
+		if (image != null)
+		{
+			int w = image.getWidth();
+			int h = image.getHeight();
+			width = Math.max(width, w + 6);
+			height = Math.max(height, h + 6);
+		}
+		else
+		{
+			int w = GuiRenderer.getStringWidth(text);
+			int h = GuiRenderer.getStringHeight();
+			width = Math.max(width, w + 6);
+			height = Math.max(height, h + 6);
+		}
+
+		this.width = width;
 		this.height = height;
-		return this;
 
-	}
-
-	@Override
-	public UIButton setZIndex(int zIndex)
-	{
-		super.setZIndex(zIndex);
-		label.setZIndex(zIndex + 1);
 		return this;
 	}
 
@@ -158,17 +197,38 @@ public class UIButton extends UIComponent<UIButton>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int x = (width - label.getWidth()) / 2;
-		int y = (height - label.getHeight() + 2) / 2;
+		int w = 0;
+		int h = 0;
+		if (image != null)
+		{
+			w = image.getWidth();
+			h = image.getHeight();
+		}
+		else
+		{
+			w = GuiRenderer.getStringWidth(text);
+			h = GuiRenderer.getStringHeight();
+		}
+
+		int x = (width - w) / 2;
+		int y = (height - h) / 2;
 		if (isPressed)
 		{
 			x += 1;
 			y += 1;
 		}
 
-		label.setColor(isHovered() ? 0xFFFFA0 : 0xFFFFFF);
-		label.setPosition(x, y);
-		label.draw(renderer, mouseX, mouseY, partialTick);
+		if (image != null)
+		{
+			image.setPosition(screenX() + x, screenY() + y);
+			image.setZIndex(zIndex);
+			image.draw(renderer, mouseX, mouseY, partialTick);
+		}
+		else
+		{
+			renderer.drawText(text, x, y, isHovered() ? 0xFFFFA0 : 0xFFFFFF, true);
+		}
+
 	}
 
 	@Subscribe
@@ -194,9 +254,9 @@ public class UIButton extends UIComponent<UIButton>
 	}
 
 	@Override
-	public String toString()
+	public String getPropertyString()
 	{
-		return this.getClass().getSimpleName() + "[ text=" + label.getText() + ", " + this.getPropertyString() + " ]";
+		return (image != null ? "{" + image + "}" : text) + " , " + super.getPropertyString();
 	}
 
 	public static class ClickEvent extends ComponentEvent<UIButton>
