@@ -39,38 +39,28 @@ import net.minecraft.world.World;
  * @author Ordinastie
  *
  */
-public class Raytrace
+public class RaytraceWorld
 {
 	/** Number of blocks before we consider ray trace failed. */
 	private static int MAX_BLOCKS = 200;
-
 	/** World object (needed for ray tracing inside each block). */
 	private World world;
-
 	/** Source of the ray trace. */
 	private Point src;
-
 	/** Destination of the ray trace. */
 	private Point dest;
-
 	/** Ray describing the ray trace. */
 	private Ray ray;
-
 	/** Vector describing the direction of steps to take when reaching limits of a block. */
 	private Vector step;
-
 	/** The block coordinates of the source. */
 	private ChunkPosition blockSrc;
-
 	/** The block coordinates of the destination. */
 	private ChunkPosition blockDest;
-
 	/** Current X coordinate of the block being ray traced. */
 	private int currentX;
-
 	/** Current Y coordinate of the block being ray traced. */
 	private int currentY;
-
 	/** Current Z coordinate of the block being ray traced. */
 	private int currentZ;
 
@@ -79,21 +69,18 @@ public class Raytrace
 	 * <code>typeOfHit</code> = <b>MISS</b>
 	 */
 	public MovingObjectPosition firstHit;
-	/**
-	 * List of blocks passed by the ray trace. Only set if options <code>LOG_BLOCK_PASSED</code> is set
-	 */
+	/** List of blocks passed by the ray trace. Only set if options <code>LOG_BLOCK_PASSED</code> is set */
 	public HashMap<ChunkPosition, MovingObjectPosition> blockPassed;
-
 	/** Options for the ray tracing. */
 	public int options = 0;
 
 	/**
-	 * Instantiates a new {@link Raytrace}.
+	 * Instantiates a new {@link RaytraceWorld}.
 	 *
 	 * @param ray the ray
 	 * @param options the options
 	 */
-	public Raytrace(Ray ray, int options)
+	public RaytraceWorld(Ray ray, int options)
 	{
 		this.world = Minecraft.getMinecraft().theWorld;
 		this.src = ray.origin;
@@ -117,46 +104,46 @@ public class Raytrace
 	}
 
 	/**
-	 * Instantiates a new {@link Raytrace}.
+	 * Instantiates a new {@link RaytraceWorld}.
 	 *
 	 * @param ray the ray
 	 */
-	public Raytrace(Ray ray)
+	public RaytraceWorld(Ray ray)
 	{
 		this(ray, 0);
 	}
 
 	/**
-	 * Instantiates a new {@link Raytrace}.
+	 * Instantiates a new {@link RaytraceWorld}.
 	 *
 	 * @param src the src
 	 * @param v the v
 	 * @param options the options
 	 */
-	public Raytrace(Point src, Vector v, int options)
+	public RaytraceWorld(Point src, Vector v, int options)
 	{
 		this(new Ray(src, v), options);
 	}
 
 	/**
-	 * Instantiates a new {@link Raytrace}.
+	 * Instantiates a new {@link RaytraceWorld}.
 	 *
 	 * @param src the src
 	 * @param v the v
 	 */
-	public Raytrace(Point src, Vector v)
+	public RaytraceWorld(Point src, Vector v)
 	{
 		this(new Ray(src, v), 0);
 	}
 
 	/**
-	 * Instantiates a new {@link Raytrace}.
+	 * Instantiates a new {@link RaytraceWorld}.
 	 *
 	 * @param src the src
 	 * @param dest the dest
 	 * @param options the options
 	 */
-	public Raytrace(Point src, Point dest, int options)
+	public RaytraceWorld(Point src, Point dest, int options)
 	{
 		this(new Ray(src, new Vector(src, dest)), options);
 		this.dest = dest;
@@ -164,16 +151,36 @@ public class Raytrace
 	}
 
 	/**
-	 * Instantiates a new {@link Raytrace}.
+	 * Instantiates a new {@link RaytraceWorld}.
 	 *
 	 * @param src the src
 	 * @param dest the dest
 	 */
-	public Raytrace(Point src, Point dest)
+	public RaytraceWorld(Point src, Point dest)
 	{
 		this(new Ray(src, new Vector(src, dest)), 0);
 		this.dest = dest;
 		blockDest = new ChunkPosition(dest.toVec3());
+	}
+
+	/**
+	 * Gets the source of this {@link RaytraceWorld}
+	 *
+	 * @return the source
+	 */
+	public Point getSource()
+	{
+		return src;
+	}
+
+	/**
+	 * Gets the destination of this {@link RaytraceWorld}.
+	 *
+	 * @return the destination
+	 */
+	public Point getDestination()
+	{
+		return dest;
 	}
 
 	/**
@@ -194,6 +201,17 @@ public class Raytrace
 	public double distance()
 	{
 		return ray.direction.length();
+	}
+
+	/**
+	 * Sets the length of this {@link RaytraceWorld}.
+	 *
+	 * @param length the new length
+	 */
+	public void setLength(double length)
+	{
+		dest = ray.getPointAt(length);
+		blockDest = new ChunkPosition(dest.toVec3());
 	}
 
 	/**
@@ -262,7 +280,7 @@ public class Raytrace
 		if (firstHit == null && dest != null)
 			firstHit = new MovingObjectPosition(currentX, currentY, currentZ, -1, dest.toVec3(), false);
 
-		if (dest != null)
+		if (!ret)
 			MalisisCore.message("Trace fail : " + MAX_BLOCKS + " passed (" + currentX + "," + currentY + "," + currentZ + ")");
 		return firstHit;
 	}
@@ -311,12 +329,11 @@ public class Raytrace
 	{
 		Block block = world.getBlock(x, y, z);
 		int metadata = world.getBlockMetadata(x, y, z);
-		if (block.getCollisionBoundingBoxFromPool(world, x, y, z) == null)
+		if (hasOption(Options.CHECK_COLLISION) && block.getCollisionBoundingBoxFromPool(world, x, y, z) == null)
 			return null;
 		if (!block.canCollideCheck(metadata, hasOption(Options.HIT_LIQUIDS)))
 			return null;
-
-		return block.collisionRayTrace(world, x, y, z, src.toVec3(), exit.toVec3());
+		return RaytraceBlock.set(src, exit, x, y, z).trace();
 	}
 
 	/**
@@ -326,15 +343,14 @@ public class Raytrace
 	{
 		/** Ray tracing through liquids returns a hit. */
 		public static int HIT_LIQUIDS = 1 << 0;
-
 		/** Don't stop ray tracing on hit. */
 		public static int PASS_THROUGH = 1 << 1;
-
 		/** Don't hit the block source of ray tracing. */
 		public static int IGNORE_FIRST_BLOCK = 1 << 2;
-
-		/** Store list of blocks passed through ray trace. */
+		/** Stores list of blocks passed through ray trace. */
 		public static int LOG_BLOCK_PASSED = 1 << 3;
+		/** Whether a block has to have a collision bounding box to rayTrace it. */
+		public static int CHECK_COLLISION = 1 << 5;
 
 	}
 
