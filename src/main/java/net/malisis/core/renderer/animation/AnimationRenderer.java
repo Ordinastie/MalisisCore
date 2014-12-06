@@ -57,12 +57,12 @@ public class AnimationRenderer
 
 	public void setStartTime()
 	{
-		setStartTime(System.nanoTime());
+		setStartTime(System.currentTimeMillis());
 	}
 
 	public void setStartTick(long start)
 	{
-		setStartTime(System.nanoTime() - (getWorldTime() - start) * 1000000000 / 20);
+		setStartTime(System.currentTimeMillis() - (getWorldTime() - start) * 1000 / 20);
 		//		MalisisCore.message("%s - %s = %s > %s / %s", getWorldTime(), start, getWorldTime() - start, getElapsedTime() / 1000000000,
 		//				getElapsedTicks());
 	}
@@ -77,12 +77,12 @@ public class AnimationRenderer
 
 	public long getElapsedTime()
 	{
-		return System.nanoTime() - startTime;
+		return System.currentTimeMillis() - startTime;
 	}
 
 	public float getElapsedTicks()
 	{
-		return (float) (((double) getElapsedTime() / 1000000000) * 20);
+		return (float) (((double) getElapsedTime() / 1000) * 20);
 	}
 
 	public void addAnimation(Animation animation)

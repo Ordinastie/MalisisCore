@@ -26,7 +26,7 @@ package net.malisis.core.renderer.animation.transformation;
 
 import java.util.List;
 
-import net.malisis.core.renderer.animation.Animation;
+import net.malisis.core.util.Timer;
 
 public abstract class Transformation<T extends Transformation, S extends ITransformable>
 {
@@ -47,20 +47,20 @@ public abstract class Transformation<T extends Transformation, S extends ITransf
 
 	public T delay(int delay)
 	{
-		this.delay = Animation.tickToNano(delay);
+		this.delay = Timer.tickToTime(delay);
 		return (T) this;
 	}
 
 	public T forTicks(int duration)
 	{
-		this.duration = Animation.tickToNano(duration);
+		this.duration = Timer.tickToTime(duration);
 		return (T) this;
 	}
 
 	public T forTicks(int duration, int delay)
 	{
-		this.duration = Animation.tickToNano(duration);
-		this.delay = Animation.tickToNano(delay);
+		this.duration = Timer.tickToTime(duration);
+		this.delay = Timer.tickToTime(delay);
 
 		return (T) this;
 	}

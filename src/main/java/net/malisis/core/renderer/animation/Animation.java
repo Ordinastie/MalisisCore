@@ -26,6 +26,7 @@ package net.malisis.core.renderer.animation;
 
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.animation.transformation.Transformation;
+import net.malisis.core.util.Timer;
 
 /**
  * @author Ordinastie
@@ -74,7 +75,7 @@ public class Animation
 		if (transform == null || transformable == null)
 			return transformable;
 
-		long elapsed = elapsedTime - tickToNano(delay);
+		long elapsed = elapsedTime - Timer.tickToTime(delay);
 		started = elapsed > transform.getDelay();
 		finished = elapsed > transform.totalDuration() && transform.getLoops() != -1;
 
@@ -85,10 +86,5 @@ public class Animation
 
 		transform.transform(transformable, elapsed);
 		return transformable;
-	}
-
-	public static long tickToNano(long tick)
-	{
-		return tick * 1000000000 / 20;
 	}
 }
