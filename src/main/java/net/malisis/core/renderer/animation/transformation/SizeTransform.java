@@ -24,14 +24,14 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
-import net.malisis.core.renderer.animation.transformation.ITransformable.Position;
+import net.malisis.core.renderer.animation.transformation.ITransformable.Size;
 
 /**
  *
  * @author Ordinastie
  * @param <T> the generic type
  */
-public class SizeTransform<T> extends Transformation<PositionTransform, ITransformable.Position<T>>
+public class SizeTransform<T> extends Transformation<SizeTransform, ITransformable.Size<T>>
 {
 	/** Starting size. */
 	protected int fromWidth, fromHeight;
@@ -98,14 +98,14 @@ public class SizeTransform<T> extends Transformation<PositionTransform, ITransfo
 	 * @param comp the comp
 	 */
 	@Override
-	protected void doTransform(Position<T> transformable, float comp)
+	protected void doTransform(Size<T> transformable, float comp)
 	{
 		int fromWidth = reversed ? this.toWidth : this.fromWidth;
 		int toWidth = reversed ? this.fromWidth : this.toWidth;
 		int fromHeight = reversed ? this.toHeight : this.fromHeight;
 		int toHeight = reversed ? this.fromHeight : this.toHeight;
 
-		transformable.setPosition((int) (fromWidth + (toWidth - fromWidth) * comp), (int) (fromHeight + (toHeight - fromHeight) * comp));
+		transformable.setSize((int) (fromWidth + (toWidth - fromWidth) * comp), (int) (fromHeight + (toHeight - fromHeight) * comp));
 	}
 
 }
