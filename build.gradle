@@ -38,7 +38,7 @@ dependencies {
 }
 
 // Gradle default tasks
-defaultTasks 'build'
+defaultTasks 'build', 'install'
 
 // Basic project information
 group = 'net.malisis'
