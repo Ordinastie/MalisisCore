@@ -105,7 +105,7 @@ public class UIButton extends UIComponent<UIButton>
 	public UIButton setText(String text)
 	{
 		this.text = text;
-		setSize(autoWidth ? 0 : width);
+		setSize(autoWidth ? 0 : width, height);
 		image = null;
 		return this;
 	}
@@ -129,7 +129,7 @@ public class UIButton extends UIComponent<UIButton>
 	public UIButton setImage(UIImage image)
 	{
 		this.image = image;
-		setSize(autoWidth ? 0 : width);
+		setSize(autoWidth ? 0 : width, height);
 		text = null;
 		return this;
 	}
