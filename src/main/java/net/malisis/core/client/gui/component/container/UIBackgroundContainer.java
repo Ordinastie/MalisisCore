@@ -371,7 +371,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param alpha the new alpha
 	 */
-	public void setBakgroundAlpha(int alpha)
+	public void setBackgroundAlpha(int alpha)
 	{
 		setTopAlpha(alpha);
 		setBottomAlpha(alpha);
