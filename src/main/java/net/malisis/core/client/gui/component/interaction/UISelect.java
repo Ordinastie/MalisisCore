@@ -39,7 +39,7 @@ import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
-import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
@@ -273,16 +273,12 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 */
 	public Option select(int index)
 	{
-		Option oldValue = getOption(selectedOption);
 		Option newValue = getOption(index);
 
-		selectedOption = newValue != null ? newValue.index : -1;
+		if (!fireEvent(new SelectEvent(this, newValue)))
+			return getSelectedOption();
 
-		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
-		{
-			selectedOption = oldValue.index;
-			return oldValue;
-		}
+		selectedOption = newValue != null ? newValue.index : -1;
 		return newValue;
 	}
 
@@ -650,4 +646,26 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		}
 	}
 
+	/**
+	 * Event fired when a {@link UISelect} changes its selected {@link Option}.<br>
+	 * When catching the event, the state is not applied to the {@code UISelect} yet.<br>
+	 * Cancelling the event will prevent the {@code Option} to be set for the {@code UISelect} .
+	 */
+	public static class SelectEvent extends ValueChange<UISelect, Option>
+	{
+		public SelectEvent(UISelect component, Option newOption)
+		{
+			super(component, component.getSelectedOption(), newOption);
+		}
+
+		/**
+		 * Gets the new {@link Option} to be set.
+		 *
+		 * @return the new option
+		 */
+		public Option getOption()
+		{
+			return newValue;
+		}
+	}
 }

@@ -28,7 +28,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
@@ -193,21 +193,15 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	}
 
 	/**
-	 * Event fired when a checkbox is checked or unchecked.<br>
-	 * <i>checked</i> holds the new state of the checkbox. When catching the event, the state is not applied to the checkbox yet.<br>
-	 * Cancelling the event will prevent the state to be set for the checkbox.
-	 *
-	 * @author Ordinastie
-	 *
+	 * Event fired when a {@link UICheckBox} is checked or unchecked.<br>
+	 * When catching the event, the state is not applied to the {@code UICheckbox} yet.<br>
+	 * Cancelling the event will prevent the state to be set for the {@code UICheckbox} .
 	 */
-	public static class CheckEvent extends ComponentEvent<UICheckBox>
+	public static class CheckEvent extends ValueChange<UICheckBox, Boolean>
 	{
-		private boolean checked;
-
 		public CheckEvent(UICheckBox component, boolean checked)
 		{
-			super(component);
-			this.checked = checked;
+			super(component, component.isChecked(), checked);
 		}
 
 		/**
@@ -215,7 +209,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		 */
 		public boolean isChecked()
 		{
-			return checked;
+			return newValue;
 		}
 	}
 
