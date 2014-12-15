@@ -36,29 +36,31 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 
 /**
- * UIImage
+ * UIImage.
  *
- * @author PaleoCrafter
+ * @author Ordinastie
  */
 public class UIImage extends UIComponent<UIImage>
 {
+	/** {@link ResourceLocation} for Block textures. */
 	public static final ResourceLocation BLOCKS_TEXTURE = TextureMap.locationBlocksTexture;
+	/** {@link ResourceLocation} for Item textures. */
 	public static final ResourceLocation ITEMS_TEXTURE = TextureMap.locationItemsTexture;
 
-	/**
-	 * {@link GuiTexture} to use for the icon.
-	 */
+	/** {@link GuiTexture} to use for the icon. */
 	private GuiTexture texture;
-	/**
-	 * IIcon to use for the texture
-	 */
+	/** {@link IIcon} to use for the texture. */
 	private IIcon icon = null;
-
-	/**
-	 * ItemStack to render
-	 */
+	/** {@link ItemStack} to render. */
 	private ItemStack itemStack;
 
+	/**
+	 * Instantiates a new {@link UIImage}.
+	 *
+	 * @param gui the gui
+	 * @param texture the texture
+	 * @param icon the icon
+	 */
 	public UIImage(MalisisGui gui, GuiTexture texture, IIcon icon)
 	{
 		super(gui);
@@ -68,6 +70,12 @@ public class UIImage extends UIComponent<UIImage>
 		shape = new SimpleGuiShape();
 	}
 
+	/**
+	 * Instantiates a new {@link UIImage}.
+	 *
+	 * @param gui the gui
+	 * @param itemStack the item stack
+	 */
 	public UIImage(MalisisGui gui, ItemStack itemStack)
 	{
 		super(gui);
@@ -77,6 +85,12 @@ public class UIImage extends UIComponent<UIImage>
 		shape = new SimpleGuiShape();
 	}
 
+	/**
+	 * Sets the icon for this {@link UIImage}.
+	 *
+	 * @param icon the icon
+	 * @return this UIImage
+	 */
 	public UIImage setIcon(IIcon icon)
 	{
 		this.itemStack = null;
@@ -84,6 +98,13 @@ public class UIImage extends UIComponent<UIImage>
 		return this;
 	}
 
+	/**
+	 * Sets the icon for this {@link UIImage} to be used with the specified {@link GuiTexture}.
+	 *
+	 * @param texture the texture
+	 * @param icon the icon
+	 * @return this UIImage
+	 */
 	public UIImage setIcon(GuiTexture texture, IIcon icon)
 	{
 		this.itemStack = null;
@@ -92,6 +113,12 @@ public class UIImage extends UIComponent<UIImage>
 		return this;
 	}
 
+	/**
+	 * Sets the {@link ItemStack} to render.
+	 *
+	 * @param itemStack the item stack
+	 * @return this UIImage
+	 */
 	public UIImage setItemStack(ItemStack itemStack)
 	{
 		this.icon = null;
@@ -101,16 +128,44 @@ public class UIImage extends UIComponent<UIImage>
 		return this;
 	}
 
+	/**
+	 * Gets the {@link IIcon} for this {@link UIImage}.
+	 *
+	 * @return the icon
+	 */
 	public IIcon getIcon()
 	{
 		return icon;
 	}
 
+	/**
+	 * Gets the {@link GuiTexture} for this {@link UIImage}.
+	 *
+	 * @return the texture
+	 */
+	public GuiTexture getTexture()
+	{
+		return texture;
+	}
+
+	/**
+	 * Gets the {@link ItemStack} for this {@link UIImage}.
+	 *
+	 * @return the item stack
+	 */
 	public ItemStack getItemStack()
 	{
 		return itemStack;
 	}
 
+	/**
+	 * Sets the size for this {@link UIImage}.<br>
+	 * Has no effect if rendering an {@link ItemStack}.
+	 *
+	 * @param width the width
+	 * @param height the height
+	 * @return the UI image
+	 */
 	@Override
 	public UIImage setSize(int width, int height)
 	{
@@ -141,7 +196,7 @@ public class UIImage extends UIComponent<UIImage>
 	@Override
 	public String getPropertyString()
 	{
-		return "texture=" + this.texture + " | " + super.getPropertyString();
+		return (itemStack != null ? itemStack : ("texture : " + this.texture + ", " + " icon : " + icon)) + super.getPropertyString();
 	}
 
 }
