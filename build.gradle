@@ -79,7 +79,7 @@ processResources {
     from 'LICENSE.txt'
 
     // Replace variables
-    from('resources/mcmod.info') {
+    from('src/main/resources/mcmod.info') {
         expand 'modid': archivesBaseName,
                 'name': projectName,
                 'description': project.ext.description,
