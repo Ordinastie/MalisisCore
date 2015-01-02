@@ -434,7 +434,8 @@ public class MalisisGui extends GuiScreen
 	public void close()
 	{
 		Keyboard.enableRepeatEvents(false);
-		this.mc.thePlayer.closeScreen();
+		if (this.mc.thePlayer != null)
+			this.mc.thePlayer.closeScreen();
 		this.mc.displayGuiScreen((GuiScreen) null);
 		this.mc.setIngameFocus();
 		return;
