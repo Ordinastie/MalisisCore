@@ -295,7 +295,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		if ((isHorizontal() != GuiScreen.isShiftKeyDown()) && !isHovered())
 			return;
 
-		scrollBy(-event.getDelta() * (GuiScreen.isCtrlKeyDown() ? 0.125F : 0.025F));
+		scrollBy(-event.getDelta() * (GuiScreen.isCtrlKeyDown() ? 0.5F : 0.25F));
 	}
 
 	@Subscribe
