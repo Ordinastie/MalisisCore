@@ -86,6 +86,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	protected boolean autoSelectOnFocus = false;
 	/** Color of the text for this {@link UITextField}. */
 	protected int textColor = 0xFFFFFF;
+	/** Scrollbar of the textfield **/
+	protected UISlimScrollbar scrollBar;
 
 	/** Font scale used to draw the text *. */
 	protected float fontScale = 1;
@@ -117,7 +119,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		createShape(gui);
 
 		if (multiLine)
-			new UISlimScrollbar(gui, this, Type.VERTICAL);
+			scrollBar = new UISlimScrollbar(gui, this, Type.VERTICAL);
 	}
 
 	/**
@@ -339,7 +341,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	/**
-	 * Sets whether this {@link UIComponent} should automatically select its {@link #text} when focused.
+	 * Sets whether this {@link UITextField} should automatically select its {@link #text} when focused.
 	 *
 	 * @param auto the auto
 	 * @return this {@link UITextField}
@@ -348,6 +350,16 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	{
 		autoSelectOnFocus = auto;
 		return this;
+	}
+
+	/**
+	 * Gets the {@link UISlimScrollbar} of this {@link UITextField}.
+	 *
+	 * @return the scrollbar
+	 */
+	public UISlimScrollbar getScrollbar()
+	{
+		return scrollBar;
 	}
 
 	// #end getters/setters
