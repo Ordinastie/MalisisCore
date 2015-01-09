@@ -143,7 +143,7 @@ public class UIMultiLineLabel extends UILabel implements IScrollable
 		if (text == null)
 			return;
 
-		String[] texts = text.split("\r");
+		String[] texts = text.split("(?<=\r)\n?");
 		int width = getWidth();
 		for (String str : texts)
 			lines.addAll(GuiRenderer.wrapText(StatCollector.translateToLocal(str), width));
