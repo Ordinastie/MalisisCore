@@ -504,7 +504,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public int getContentHeight()
 	{
-		return multiLine ? lines.size() * getLineHeight() - 4 : 12;
+		return multiLine ? lines.size() * getLineHeight() + 4 : 12;
 	}
 
 	@Override
@@ -538,8 +538,15 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
-		lineOffset = (int) (offsetY * (lines.size() - visibleLines()));
+		lineOffset = Math.round(offsetY / getScrollStep());
 		lineOffset = Math.max(0, Math.min(lines.size(), lineOffset));
+	}
+
+	@Override
+	public float getScrollStep()
+	{
+		float step = (float) 1 / (lines.size() - visibleLines());
+		return (GuiScreen.isCtrlKeyDown() ? 5 * step : step);
 	}
 
 	/**

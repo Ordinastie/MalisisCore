@@ -31,6 +31,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.StatCollector;
 
 import com.google.common.eventbus.Subscribe;
@@ -102,14 +103,21 @@ public class UIMultiLineLabel extends UILabel implements IScrollable
 	@Override
 	public float getOffsetY()
 	{
-		return (float) lineOffset / visibleLines();
+		return (float) lineOffset / (lines.size() - visibleLines());
 	}
 
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
-		lineOffset = (int) (offsetY * (lines.size() - visibleLines()));
+		lineOffset = Math.round(offsetY / getScrollStep());
 		lineOffset = Math.max(0, Math.min(lines.size(), lineOffset));
+	}
+
+	@Override
+	public float getScrollStep()
+	{
+		float step = (float) 1 / (lines.size() - visibleLines());
+		return (GuiScreen.isCtrlKeyDown() ? 5 * step : step);
 	}
 
 	@Override

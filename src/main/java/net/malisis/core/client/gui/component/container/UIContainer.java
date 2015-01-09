@@ -41,6 +41,7 @@ import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
+import net.minecraft.client.gui.GuiScreen;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -424,6 +425,12 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	public void setOffsetY(float offsetY, int delta)
 	{
 		this.yOffset = (int) ((getContentHeight() - getHeight() + delta) * offsetY);
+	}
+
+	@Override
+	public float getScrollStep()
+	{
+		return (GuiScreen.isCtrlKeyDown() ? 0.125F : 0.025F);
 	}
 
 	//#end IScrollable

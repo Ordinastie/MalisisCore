@@ -42,8 +42,9 @@ public interface IScrollable
 
 	public void setOffsetY(float offsetY, int delta);
 
+	public float getScrollStep();
+
 	public int getVerticalPadding();
 
 	public int getHorizontalPadding();
-
 }
