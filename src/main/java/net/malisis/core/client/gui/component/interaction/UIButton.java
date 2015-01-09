@@ -129,6 +129,7 @@ public class UIButton extends UIComponent<UIButton>
 	public UIButton setImage(UIImage image)
 	{
 		this.image = image;
+		image.setParent(this);
 		setSize(autoWidth ? 0 : width, height);
 		text = null;
 		return this;
@@ -158,8 +159,8 @@ public class UIButton extends UIComponent<UIButton>
 		autoWidth = width == 0;
 		if (image != null)
 		{
-			int w = image.getWidth();
-			int h = image.getHeight();
+			int w = image.getRawWidth();
+			int h = image.getRawHeight();
 			width = Math.max(width, w + 6);
 			height = Math.max(height, h + 6);
 		}
@@ -220,7 +221,7 @@ public class UIButton extends UIComponent<UIButton>
 
 		if (image != null)
 		{
-			image.setPosition(screenX() + x, screenY() + y);
+			image.setPosition(x, y);
 			image.setZIndex(zIndex);
 			image.draw(renderer, mouseX, mouseY, partialTick);
 		}
