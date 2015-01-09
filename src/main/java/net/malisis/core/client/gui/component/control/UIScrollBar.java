@@ -92,6 +92,19 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		createShape(gui);
 	}
 
+	/**
+	 * Sets the scroll size.
+	 *
+	 * @param thickness the thickness
+	 * @param height the height
+	 */
+	public void setScrollSize(int thickness, int height)
+	{
+		scrollThickness = thickness;
+		scrollHeight = height;
+		createShape(getGui());
+	}
+
 	protected void setPosition()
 	{
 		int vp = getScrollable().getVerticalPadding();

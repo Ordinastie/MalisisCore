@@ -41,9 +41,15 @@ import com.google.common.eventbus.Subscribe;
  */
 public class UISlimScrollbar extends UIScrollBar
 {
+	/** Background color of the scroll. */
+	protected int backgroundColor = 0x999999;
+	/** Scroll color **/
+	protected int scrollColor = 0xFFFFFF;
+
 	public <T extends UIComponent & IScrollable> UISlimScrollbar(MalisisGui gui, T parent, Type type)
 	{
 		super(gui, parent, type);
+		setScrollSize(2, 15);
 	}
 
 	@Override
@@ -61,9 +67,6 @@ public class UISlimScrollbar extends UIScrollBar
 	@Override
 	protected void createShape(MalisisGui gui)
 	{
-		scrollThickness = 2;
-		scrollHeight = 15;
-
 		int w = type == Type.HORIZONTAL ? scrollHeight : scrollThickness;
 		int h = type == Type.HORIZONTAL ? scrollThickness : scrollHeight;
 
@@ -94,11 +97,33 @@ public class UISlimScrollbar extends UIScrollBar
 
 	}
 
+	/**
+	 * Sets the color of the scroll.
+	 *
+	 * @param scrollColor the new color
+	 */
+	public void setColor(int scrollColor)
+	{
+		setColor(scrollColor, backgroundColor);
+	}
+
+	/**
+	 * Sets the color of the scroll and the background.
+	 *
+	 * @param scrollColor the scroll color
+	 * @param backgroundColor the background color
+	 */
+	public void setColor(int scrollColor, int backgroundColor)
+	{
+		this.scrollColor = scrollColor;
+		this.backgroundColor = backgroundColor;
+	}
+
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		renderer.disableTextures();
-		rp.colorMultiplier.set(0x999999);
+		rp.colorMultiplier.set(backgroundColor);
 		renderer.drawShape(shape, rp);
 	}
 
@@ -116,7 +141,7 @@ public class UISlimScrollbar extends UIScrollBar
 
 		scrollShape.resetState();
 		scrollShape.setPosition(ox, oy);
-		rp.colorMultiplier.set(0xFFFFFF);
+		rp.colorMultiplier.set(scrollColor);
 		renderer.drawShape(scrollShape, rp);
 	}
 
