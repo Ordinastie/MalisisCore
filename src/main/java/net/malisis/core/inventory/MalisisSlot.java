@@ -284,7 +284,7 @@ public class MalisisSlot
 	}
 
 	/**
-	 * Extract a specified <b>amoun</b> from this {@link MalisisSlot}.
+	 * Extract a specified <b>amount</b> from this {@link MalisisSlot}.
 	 *
 	 * @param amount the amount
 	 * @return the {@link ItemStack} extracted

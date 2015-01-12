@@ -32,7 +32,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.RenderParameters;
@@ -163,7 +163,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 	{
 		if (event.getButton() == MouseButton.LEFT)
 		{
-			if (fireEvent(new ComponentEvent.ValueChange(this, this, getSelected(name))))
+			if (fireEvent(new UIRadioButton.SelectEvent(this)))
 				setSelected();
 		}
 	}
@@ -186,5 +186,23 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 			if (rb.selected)
 				return rb;
 		return null;
+	}
+
+	public static UIRadioButton getSelected(UIRadioButton rb)
+	{
+		return getSelected(rb.name);
+	}
+
+	/**
+	 * Event fired when a {@link UIRadioButton} changes its selection.<br>
+	 * When catching the event, the state is not applied to the {@code UIRadioButton} yet.<br>
+	 * Cancelling the event will prevent the value to be changed.
+	 */
+	public static class SelectEvent extends ValueChange<UIRadioButton, UIRadioButton>
+	{
+		public SelectEvent(UIRadioButton component)
+		{
+			super(component, getSelected(component), component);
+		}
 	}
 }
