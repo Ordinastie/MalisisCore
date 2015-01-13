@@ -76,8 +76,11 @@ public class ConfigurationGui extends MalisisGui
 
 		for (String category : categories)
 		{
+			windowHeight = Math.max(windowHeight, (settings.getSettings(category).size() * 14 + 40));
 			window.add(createSettingContainer(category));
 		}
+
+		window.setSize(windowWidth, windowHeight);
 
 		comment = new UIMultiLineLabel(this);
 		comment.setColor(0xFFFFFF);
