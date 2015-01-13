@@ -40,6 +40,7 @@ import net.malisis.core.tileentity.MultiBlockTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.server.MinecraftServer;
@@ -107,7 +108,10 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	public static boolean isObfEnv = false;
 
 	/** List of original {@link Block} being replaced. The key is the replacement, the value is the Vanilla {@code Block}. */
-	private HashMap<Block, Block> originals = new HashMap<>();
+	private HashMap<Block, Block> originalBlocks = new HashMap<>();
+
+	/** List of original {@link Item} being replaced. The key is the replacement, the value is the Vanilla {@code Item}. */
+	private HashMap<Item, Item> originalItems = new HashMap<>();
 
 	/** Whether the configuration Gui should be kept opened */
 	private boolean keepConfigurationGuiOpen;
@@ -232,7 +236,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		if (event.map.getTextureType() == 1)
 			return;
 
-		for (Entry<Block, Block> entry : originals.entrySet())
+		for (Entry<Block, Block> entry : originalBlocks.entrySet())
 		{
 			Block block = entry.getValue();
 			block.registerBlockIcons(event.map);
@@ -313,7 +317,33 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 				f.set(ib, replacement);
 			}
 
-			instance.originals.put(replacement, vanilla);
+			instance.originalBlocks.put(replacement, vanilla);
+
+		}
+		catch (ReflectiveOperationException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public static void replaceVanillaItem(int id, String name, String srgFieldName, Item replacement, Item vanilla)
+	{
+		try
+		{
+			// add block to registry
+			Class[] types = { Integer.TYPE, String.class, Object.class };
+			Method method = ReflectionHelper.findMethod(FMLControlledNamespacedRegistry.class, (FMLControlledNamespacedRegistry) null,
+					new String[] { "addObjectRaw" }, types);
+			method.invoke(Item.itemRegistry, id, "minecraft:" + name, replacement);
+
+			// modify reference in Item class
+			Field f = ReflectionHelper.findField(Items.class, isObfEnv ? srgFieldName : name);
+			Field modifiers = Field.class.getDeclaredField("modifiers");
+			modifiers.setAccessible(true);
+			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
+			f.set(null, replacement);
+
+			instance.originalItems.put(replacement, vanilla);
 
 		}
 		catch (ReflectiveOperationException e)
@@ -330,7 +360,18 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	 */
 	public static Block orignalBlock(Block block)
 	{
-		return instance.originals.get(block);
+		return instance.originalBlocks.get(block);
+	}
+
+	/**
+	 * Gets the orginal/vanilla item for the specified one.
+	 *
+	 * @param item the item
+	 * @return the item
+	 */
+	public static Item originalItem(Item item)
+	{
+		return instance.originalItems.get(item);
 	}
 
 	/**
