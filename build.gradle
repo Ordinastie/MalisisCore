@@ -43,7 +43,7 @@ defaultTasks 'build', 'install'
 // Basic project information
 group = 'net.malisis'
 archivesBaseName = 'malisiscore'
-version = '1.7.10-0.10.5-SNAPSHOT'
+version = '1.7.10-0.10.6-SNAPSHOT'
 ext.isReleaseVersion = !version.endsWith("-SNAPSHOT")
 ext.packaging = 'jar'
 
@@ -95,7 +95,7 @@ jar.manifest.mainAttributes(
         "Built-By": System.properties['user.name'],
         "Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
         "Implementation-Title": name,
-        "Implementation-Version": version + "+" + ciSystem + "-b" + buildNumber + ".git-" + commit,
+        "Implementation-Version": version,
         "Implementation-Vendor": url,
         "FMLCorePlugin": "net.malisis.core.asm.MalisisCorePlugin")
 
