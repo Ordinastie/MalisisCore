@@ -25,24 +25,15 @@
 package net.malisis.core;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import net.malisis.core.configuration.ConfigurationGui;
 import net.malisis.core.configuration.Settings;
 import net.malisis.core.packet.NetworkHandler;
 import net.malisis.core.tileentity.MultiBlockTileEntity;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
@@ -50,7 +41,6 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.GuiOpenEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
 
 import org.apache.logging.log4j.Logger;
@@ -67,9 +57,7 @@ import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -106,12 +94,6 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 
 	/** Whether the mod is currently running in obfuscated environment or not. */
 	public static boolean isObfEnv = false;
-
-	/** List of original {@link Block} being replaced. The key is the replacement, the value is the Vanilla {@code Block}. */
-	private HashMap<Block, Block> originalBlocks = new HashMap<>();
-
-	/** List of original {@link Item} being replaced. The key is the replacement, the value is the Vanilla {@code Item}. */
-	private HashMap<Item, Item> originalItems = new HashMap<>();
 
 	/** Whether the configuration Gui should be kept opened */
 	private boolean keepConfigurationGuiOpen;
@@ -193,6 +175,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	public boolean registerBus(EventBus bus, LoadController controller)
 	{
 		bus.register(this);
+		bus.register(ReplacementTool.instance());
 		return true;
 	}
 
@@ -220,27 +203,6 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	{
 		NetworkHandler.init(modid);
 		ClientCommandHandler.instance.registerCommand(new MalisisCommand());
-	}
-
-	/**
-	 * Texture stitch event.<br>
-	 * Used to register the icons of the replaced vanilla blocks since they're not in the registry anymore and won't be called to register
-	 * their icons.
-	 *
-	 * @param event the event
-	 */
-	@SideOnly(Side.CLIENT)
-	@SubscribeEvent
-	public void onTextureStitchEvent(TextureStitchEvent.Pre event)
-	{
-		if (event.map.getTextureType() == 1)
-			return;
-
-		for (Entry<Block, Block> entry : originalBlocks.entrySet())
-		{
-			Block block = entry.getValue();
-			block.registerBlockIcons(event.map);
-		}
 	}
 
 	/**
@@ -277,101 +239,6 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		(new ConfigurationGui(settings)).display();
 
 		return true;
-	}
-
-	/**
-	 * Replaces vanilla block with another one.<br>
-	 * Changes the registry by removing the vanilla block and adding the replacement.
-	 *
-	 * @param id the id
-	 * @param name the name
-	 * @param srgFieldName the srg field name
-	 * @param replacement the block
-	 * @param vanilla the vanilla
-	 */
-	public static void replaceVanillaBlock(int id, String name, String srgFieldName, Block replacement, Block vanilla)
-	{
-		try
-		{
-			ItemBlock ib = (ItemBlock) Item.getItemFromBlock(vanilla);
-
-			// add block to registry
-			Class[] types = { Integer.TYPE, String.class, Object.class };
-			Method method = ReflectionHelper.findMethod(FMLControlledNamespacedRegistry.class, (FMLControlledNamespacedRegistry) null,
-					new String[] { "addObjectRaw" }, types);
-			method.invoke(Block.blockRegistry, id, "minecraft:" + name, replacement);
-
-			// modify reference in Blocks class
-			Field f = ReflectionHelper.findField(Blocks.class, isObfEnv ? srgFieldName : name);
-			Field modifiers = Field.class.getDeclaredField("modifiers");
-			modifiers.setAccessible(true);
-			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-			f.set(null, replacement);
-
-			if (ib != null)
-			{
-				f = ReflectionHelper.findField(ItemBlock.class, "field_150939_a");
-				modifiers = Field.class.getDeclaredField("modifiers");
-				modifiers.setAccessible(true);
-				modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-				f.set(ib, replacement);
-			}
-
-			instance.originalBlocks.put(replacement, vanilla);
-
-		}
-		catch (ReflectiveOperationException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	public static void replaceVanillaItem(int id, String name, String srgFieldName, Item replacement, Item vanilla)
-	{
-		try
-		{
-			// add block to registry
-			Class[] types = { Integer.TYPE, String.class, Object.class };
-			Method method = ReflectionHelper.findMethod(FMLControlledNamespacedRegistry.class, (FMLControlledNamespacedRegistry) null,
-					new String[] { "addObjectRaw" }, types);
-			method.invoke(Item.itemRegistry, id, "minecraft:" + name, replacement);
-
-			// modify reference in Item class
-			Field f = ReflectionHelper.findField(Items.class, isObfEnv ? srgFieldName : name);
-			Field modifiers = Field.class.getDeclaredField("modifiers");
-			modifiers.setAccessible(true);
-			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-			f.set(null, replacement);
-
-			instance.originalItems.put(replacement, vanilla);
-
-		}
-		catch (ReflectiveOperationException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Gets the original/vanilla block for the specified one.
-	 *
-	 * @param block the block
-	 * @return the block
-	 */
-	public static Block orignalBlock(Block block)
-	{
-		return instance.originalBlocks.get(block);
-	}
-
-	/**
-	 * Gets the orginal/vanilla item for the specified one.
-	 *
-	 * @param item the item
-	 * @return the item
-	 */
-	public static Item originalItem(Item item)
-	{
-		return instance.originalItems.get(item);
 	}
 
 	/**
