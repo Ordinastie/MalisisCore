@@ -175,7 +175,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	public boolean registerBus(EventBus bus, LoadController controller)
 	{
 		bus.register(this);
-		bus.register(ReplacementTool.instance());
+
 		return true;
 	}
 
@@ -188,6 +188,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	public static void preInit(FMLPreInitializationEvent event)
 	{
 		MinecraftForge.EVENT_BUS.register(instance);
+		MinecraftForge.EVENT_BUS.register(ReplacementTool.instance());
 		log = event.getModLog();
 
 		GameRegistry.registerTileEntity(MultiBlockTileEntity.class, "MalisisCoreMultiBlockTileEntity");
