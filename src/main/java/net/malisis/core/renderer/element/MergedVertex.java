@@ -54,7 +54,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	protected Vertex base;
 
 	/** Matrix holding the tranformations applied to this {@link MergedVertex}. */
-	protected Matrix4f transformMatrix;
+	protected Matrix4f transformMatrix = new Matrix4f();
 
 	/** List of {@link Vertex vertexes} that share the same position. */
 	private Set<Vertex> vertexes = new HashSet<>();
@@ -150,20 +150,10 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 		vertexes.remove(vertex);
 	}
 
-	/**
-	 * Gets the transform matrix of this {@link MergedVertex}. Creates it if it doesn't exist already.<br>
-	 * The matrix is translated by 0.5F, 0.5F, 0.5F upon creation.
-	 *
-	 * @return the matrix4f
-	 */
-	private Matrix4f matrix()
+	private void resetMatrix()
 	{
-		if (transformMatrix == null)
-		{
-			transformMatrix = new Matrix4f();
-			transformMatrix.translate(new Vector3f(0.5F, 0.5F, 0.5F));
-		}
-		return transformMatrix;
+		transformMatrix.setIdentity();
+		transformMatrix.translate(new Vector3f(0.5F, 0.5F, 0.5F));
 	}
 
 	/**
@@ -181,15 +171,13 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	 */
 	public void applyMatrix()
 	{
-		if (transformMatrix == null)
-			return;
-
 		transformMatrix.translate(new Vector3f(-0.5F, -0.5F, -0.5F));
 
 		for (Vertex v : vertexes)
 			v.applyMatrix(transformMatrix);
 
-		transformMatrix = null;
+		resetMatrix();
+
 		return;
 	}
 
@@ -203,7 +191,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	@Override
 	public void translate(float x, float y, float z)
 	{
-		matrix().translate(new Vector3f(x, y, z));
+		transformMatrix.translate(new Vector3f(x, y, z));
 	}
 
 	/**
@@ -221,7 +209,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	public void rotate(float angle, float x, float y, float z, float offsetX, float offsetY, float offsetZ)
 	{
 		translate(offsetX, offsetY, offsetZ);
-		matrix().rotate((float) Math.toRadians(angle), new Vector3f(x, y, z));
+		transformMatrix.rotate((float) Math.toRadians(angle), new Vector3f(x, y, z));
 		translate(-offsetX, -offsetY, -offsetZ);
 	}
 
@@ -239,7 +227,7 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	public void scale(float x, float y, float z, float offsetX, float offsetY, float offsetZ)
 	{
 		translate(offsetX, offsetY, offsetZ);
-		matrix().scale(new Vector3f(x, y, z));
+		transformMatrix.scale(new Vector3f(x, y, z));
 		translate(-offsetX, -offsetY, -offsetZ);
 	}
 

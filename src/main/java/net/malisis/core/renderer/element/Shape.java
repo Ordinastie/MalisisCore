@@ -51,10 +51,14 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	protected Face[] faces;
 
 	/** The matrix containing all the transformations applied to this {@link Shape}. */
-	protected Matrix4f transformMatrix;
+	protected Matrix4f transformMatrix = new Matrix4f();
 
 	/** The merged vertexes making up this {@link Shape}. */
 	protected Map<String, MergedVertex> mergedVertexes;
+
+	{
+		resetMatrix();
+	}
 
 	/**
 	 * Instantiates a new {@link Shape}.
@@ -201,11 +205,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 
 		this.mergedVertexes = MergedVertex.getMergedVertexes(this);
 		//transfer current transforms into the mergedVertexes if any
-		if (transformMatrix != null)
-		{
-			for (MergedVertex mv : mergedVertexes.values())
-				mv.copyMatrix(transformMatrix);
-		}
+		for (MergedVertex mv : mergedVertexes.values())
+			mv.copyMatrix(transformMatrix);
 	}
 
 	/**
@@ -314,20 +315,11 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 
 	//#end VERTEXES
 
-	/**
-	 * Gets the transform matrix of this {@link Shape}. Creates it if it doesn't exist already.<br>
-	 * The matrix is translated by 0.5F, 0.5F, 0.5F upon creation.
-	 *
-	 * @return the matrix4f
-	 */
-	private Matrix4f matrix()
+	private void resetMatrix()
 	{
-		if (transformMatrix == null)
-		{
-			transformMatrix = new Matrix4f();
-			transformMatrix.translate(new Vector3f(0.5F, 0.5F, 0.5F));
-		}
-		return transformMatrix;
+		transformMatrix.setIdentity();
+		transformMatrix.translate(new Vector3f(0.5F, 0.5F, 0.5F));
+
 	}
 
 	/**
@@ -338,8 +330,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	 */
 	public Shape copyMatrix(Shape shape)
 	{
-		if (shape.transformMatrix != null)
-			this.transformMatrix = new Matrix4f(shape.transformMatrix);
+		this.transformMatrix = new Matrix4f(shape.transformMatrix);
 		return this;
 	}
 
@@ -359,9 +350,6 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 			return this;
 		}
 
-		if (transformMatrix == null)
-			return this;
-
 		//transform back to original place
 		transformMatrix.translate(new Vector3f(-0.5F, -0.5F, -0.5F));
 
@@ -372,7 +360,8 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 					v.applyMatrix(transformMatrix);
 		}
 
-		transformMatrix = null;
+		resetMatrix();
+
 		return this;
 	}
 
@@ -532,7 +521,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 				mv.translate(x, y, z);
 		}
 		else
-			matrix().translate(new Vector3f(x, y, z));
+			transformMatrix.translate(new Vector3f(x, y, z));
 	}
 
 	/**
@@ -578,7 +567,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		else
 		{
 			translate(offsetX, offsetY, offsetZ);
-			matrix().scale(new Vector3f(x, y, z));
+			transformMatrix.scale(new Vector3f(x, y, z));
 			translate(-offsetX, -offsetY, -offsetZ);
 		}
 	}
@@ -618,7 +607,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		else
 		{
 			translate(offsetX, offsetY, offsetZ);
-			matrix().rotate((float) Math.toRadians(angle), new Vector3f(x, y, z));
+			transformMatrix.rotate((float) Math.toRadians(angle), new Vector3f(x, y, z));
 			translate(-offsetX, -offsetY, -offsetZ);
 		}
 	}
@@ -647,7 +636,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	 */
 	public Shape resetState()
 	{
-		transformMatrix = null;
+		resetMatrix();
 		for (Face f : faces)
 		{
 			for (Vertex v : f.getVertexes())
