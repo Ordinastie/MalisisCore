@@ -44,7 +44,6 @@ defaultTasks 'build', 'install'
 group = 'net.malisis'
 archivesBaseName = 'malisiscore'
 version = '1.7.10-0.10.6-SNAPSHOT'
-ext.isReleaseVersion = !version.endsWith("-SNAPSHOT")
 ext.packaging = 'jar'
 
 // Extended project information
@@ -90,8 +89,10 @@ processResources {
     }
 }
 
+
 // JAR manifest configuration
-jar.manifest.mainAttributes(
+def commonManifest = {
+    mainAttributes(
         "Built-By": System.properties['user.name'],
         "Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
         "Implementation-Title": name,
@@ -99,61 +100,63 @@ jar.manifest.mainAttributes(
         "Implementation-Vendor": url,
         "FMLCorePlugin": "net.malisis.core.asm.MalisisCorePlugin")
 
+}
+
+jar.manifest commonManifest
+
+// Javadoc JAR generation
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+// Source JAR generation
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.java.srcDirs
+}
+
+// Create a JAR based on deobfuscated code
+task deobfJar(type: Jar) {
+	manifest commonManifest
+    from sourceSets.main.output
+    classifier = 'dev'
+}
+
+// Set all artifacts
+artifacts {
+    archives deobfJar, sourcesJar, javadocJar
+}
+
+
+// Deployment signing
+signing {
+    // Check if uploadArchives task is used
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+
+    // Sign JAR artifacts
+    sign configurations.archives
+}
+
 // Artifact deployment
 uploadArchives {
     repositories.mavenDeployer {
-        // Javadoc JAR generation
-        task javadocJar(type: Jar, dependsOn: javadoc) {
-            classifier = 'javadoc'
-            from 'build/docs/javadoc'
-        }
 
-        // Source JAR generation
-        task sourcesJar(type: Jar) {
-            classifier = 'sources'
-            from sourceSets.main.java.srcDirs
-        }
+        // Sign Maven POM
+		beforeDeployment { MavenDeployment deployment ->
+			signing.signPom(deployment)
+		}
 
-        // Create a JAR based on deobfuscated code
-        task deobfJar(type: Jar) {
-            from sourceSets.main.output
-            classifier = 'dev'
-        }
+		def username = System.getenv("sonatypeUsername");
+		def password = System.getenv("sonatypePassword");
 
-        // Set all artifacts
-        artifacts {
-            archives jar, deobfJar, sourcesJar, javadocJar
-        }
-
-        // Tasks and variables based on if release or snapshot
-        if (!isReleaseVersion) {
-            // Set variable to snapshots repository URL
-            ext.sonatypeUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
-        } else {
-            // Set variable to releases repository URL
-            ext.sonatypeUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
-
-            // Deployment signing
-            signing {
-                // Check if uploadArchives task is used
-                required { gradle.taskGraph.hasTask("uploadArchives") }
-
-                // Sign JAR artifacts
-                sign configurations.archives
-
-                // Sign Maven POM
-                beforeDeployment {
-                    org.gradle.api.artifacts.maven.MavenDeployment deployment -> signing.signPom(deployment)
-                }
-            }
-        }
-
-        // Set login credentials for repository
-        repository(url: sonatypeUrl) {
-        	userName = isReleaseVersion ? sonatypeUsername : System.getenv("sonatypeUsername")
-        	password = isReleaseVersion ? sonatypePassword : System.getenv("sonatypePassword")
-            authentication(userName: userName, password: password)
-        }
+        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+			authentication(userName: username, password: password)
+		}
+		
+		repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+			authentication(userName: username, password: password)
+		}
 
         // Maven POM generation
         pom.project {
