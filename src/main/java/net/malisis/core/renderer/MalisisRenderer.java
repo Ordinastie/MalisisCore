@@ -759,8 +759,11 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 		if (rp.applyTexture.get())
 			applyTexture(s, rp);
 
-		for (Face face : s.getFaces())
+		for (Face f : s.getFaces())
+		{
+			face = f;
 			drawFace(face, face.getParameters());
+		}
 	}
 
 	/**
@@ -791,7 +794,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 			return;
 		}
 
-		face = f;
 		params = RenderParameters.merge(rp, faceParams);
 
 		if (!shouldRenderFace(face))
@@ -963,6 +965,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 		//shape.applyMatrix();
 		for (Face f : shape.getFaces())
 		{
+			face = f;
 			RenderParameters params = RenderParameters.merge(f.getParameters(), parameters);
 			IIcon icon = getIcon(params);
 			if (icon != null)
@@ -1187,8 +1190,11 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 			return;
 
 		for (Face f : shape.getFaces())
+		{
+			face = f;
 			for (Vertex v : f.getVertexes())
 				v.interpolateCoord(bounds);
+		}
 	}
 
 	/**
