@@ -8,8 +8,8 @@ script: gradle build -PbuildNumber=$TRAVIS_BUILD_NUMBER -PciSystem=travis -Pcomm
 
 # Perform steps after compilation/test success
 after_success:
-  # Check if commit s not a pull request, if git repo is official, and if branch is master. If checks pass, add libs and deploy artifacts to Maven repository.
-  - "[[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_REPO_SLUG == Ordinastie/MalisisCore ]] && [[ $TRAVIS_BRANCH == master ]] && gradle uploadArchives"
+  # Check if commit s not a pull request, if git repo is official, and if branch is 1.7. If checks pass, add libs and deploy artifacts to Maven repository.
+  - "[[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_REPO_SLUG == Ordinastie/MalisisCore ]] && [[ $TRAVIS_BRANCH == 1.7 ]] && gradle uploadArchives"
 
 # Notification services
 notifications:
