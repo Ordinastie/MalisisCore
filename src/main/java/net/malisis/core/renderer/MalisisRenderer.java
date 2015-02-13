@@ -760,10 +760,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 			applyTexture(s, rp);
 
 		for (Face f : s.getFaces())
-		{
-			face = f;
-			drawFace(face, face.getParameters());
-		}
+			drawFace(f, f.getParameters());
 	}
 
 	/**
@@ -794,6 +791,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 			return;
 		}
 
+		face = f;
 		params = RenderParameters.merge(rp, faceParams);
 
 		if (!shouldRenderFace(face))
