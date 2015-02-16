@@ -38,6 +38,9 @@ import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 
 import com.google.common.eventbus.Subscribe;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * UIButton
@@ -48,13 +51,12 @@ public class UIButton extends UIComponent<UIButton>
 {
 	protected GuiIcon iconHovered;
 	protected GuiIcon iconDisabled;
+	protected GuiIcon iconPressed;
 
 	private String text;
 	private UIImage image;
 	private boolean autoWidth = true;
 	private boolean isPressed = false;
-
-	// this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
 
 	/**
 	 * Instantiates a new {@link UIButton}.
@@ -70,6 +72,7 @@ public class UIButton extends UIComponent<UIButton>
 		icon = gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5);
 		iconHovered = gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5);
 		iconDisabled = gui.getGuiTexture().getXYResizableIcon(0, 0, 200, 20, 5);
+		iconPressed = (GuiIcon) gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5).flip(true, true);
 	}
 
 	/**
@@ -189,8 +192,23 @@ public class UIButton extends UIComponent<UIButton>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		GuiIcon icon = isDisabled() ? iconDisabled : (isHovered() ? iconHovered : this.icon);
-		icon.flip(isPressed, isPressed);
+		final GuiIcon icon;
+		if (isDisabled())
+		{
+			icon = iconDisabled;
+		}
+		else if (isPressed)
+		{
+			icon = iconPressed;
+		}
+		else if (isHovered())
+		{
+			icon = iconHovered;
+		}
+		else
+		{
+			icon = this.icon;
+		}
 		rp.icon.set(icon);
 		renderer.drawShape(shape, rp);
 	}
@@ -251,6 +269,7 @@ public class UIButton extends UIComponent<UIButton>
 			return;
 
 		isPressed = false;
+		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
 		fireEvent(new ClickEvent(this, (Release) event));
 	}
 
