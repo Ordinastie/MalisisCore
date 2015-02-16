@@ -57,45 +57,29 @@ public class MalisisGui extends GuiScreen
 {
 	public static GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.locationBlocksTexture);
 	public static GuiTexture ITEM_TEXTURE = new GuiTexture(TextureMap.locationItemsTexture);
-	/**
-	 * Renderer drawing the components.
-	 */
+
+	/** Whether or not to cancel the next gui close event. */
+	public static boolean cancelClose = false;
+
+	/** Renderer drawing the components. */
 	protected GuiRenderer renderer;
-	/**
-	 * Top level container which hold the user components. Spans across the whole screen.
-	 */
+	/** Top level container which hold the user components. Spans across the whole screen. */
 	private UIContainer screen;
-	/**
-	 * Determines if the screen should be darkened when the GUI is opened.
-	 */
+	/** Determines if the screen should be darkened when the GUI is opened. */
 	protected boolean guiscreenBackground = true;
-	/**
-	 * Last known position of the mouse.
-	 */
+	/** Last known position of the mouse. */
 	protected int lastMouseX, lastMouseY;
-	/**
-	 *
-	 */
+	/** Last clicked button */
 	protected long lastClickButton = -1;
-	/**
-	 * How long since last click.
-	 */
+	/** How long since last click. */
 	protected long lastClickTime = 0;
-	/**
-	 * Inventory container that handles the inventories and slots actions.
-	 */
+	/** Inventory container that handles the inventories and slots actions. */
 	protected MalisisInventoryContainer inventoryContainer;
-	/**
-	 *
-	 */
+	/** {@link AnimationRenderer} */
 	private AnimationRenderer ar;
-	/**
-	 * Currently hovered child component
-	 */
+	/** Currently hovered child component. */
 	protected UIComponent hoveredComponent;
-	/**
-	 * Currently focused child component
-	 */
+	/** Currently focused child component */
 	protected UIComponent focusedComponent;
 
 	protected MalisisGui()
@@ -427,6 +411,17 @@ public class MalisisGui extends GuiScreen
 	 */
 	public void display()
 	{
+		display(false);
+	}
+
+	/**
+	 * Display this {@link MalisisGui}.
+	 *
+	 * @param cancelClose the wether or not to cancel the next Gui close event (used for when the GUI is opened from command)
+	 */
+	public void display(boolean cancelClose)
+	{
+		MalisisGui.cancelClose = false;
 		Minecraft.getMinecraft().displayGuiScreen(this);
 	}
 

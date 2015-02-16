@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
 
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.configuration.ConfigurationGui;
 import net.malisis.core.configuration.Settings;
 import net.malisis.core.packet.NetworkHandler;
@@ -61,7 +62,6 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class MalisisCore.
  */
@@ -94,9 +94,6 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 
 	/** Whether the mod is currently running in obfuscated environment or not. */
 	public static boolean isObfEnv = false;
-
-	/** Whether the configuration Gui should be kept opened */
-	private boolean keepConfigurationGuiOpen;
 
 	/**
 	 * Instantiates MalisisCore.
@@ -216,10 +213,10 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	@SubscribeEvent
 	public void onGuiClose(GuiOpenEvent event)
 	{
-		if (!keepConfigurationGuiOpen || event.gui != null)
+		if (!MalisisGui.cancelClose || event.gui != null)
 			return;
 
-		keepConfigurationGuiOpen = false;
+		MalisisGui.cancelClose = false;
 		event.setCanceled(true);
 	}
 
@@ -236,8 +233,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		if (settings == null)
 			return false;
 
-		instance.keepConfigurationGuiOpen = true;
-		(new ConfigurationGui(settings)).display();
+		(new ConfigurationGui(settings)).display(true);
 
 		return true;
 	}
