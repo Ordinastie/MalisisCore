@@ -420,7 +420,8 @@ public class Face
 			z += (current.getX() - next.getX()) * (current.getY() + next.getY());
 		}
 
-		Vector normal = new Vector(x, y, z);
+		Vector normal = new Vector((float) Math.round(x * 10000) / 10000, (float) Math.round(y * 10000) / 10000,
+				(float) Math.round(z * 10000) / 10000);
 		normal.normalize();
 		return normal;
 	}

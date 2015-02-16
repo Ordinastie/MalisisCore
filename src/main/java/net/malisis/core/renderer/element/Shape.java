@@ -697,6 +697,12 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 		return this;
 	}
 
+	public void deductParameters()
+	{
+		for (Face f : faces)
+			f.deductParameters();
+	}
+
 	/**
 	 * Builds a {@link Shape} from multiple ones.
 	 *
