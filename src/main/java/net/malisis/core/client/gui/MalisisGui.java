@@ -421,7 +421,7 @@ public class MalisisGui extends GuiScreen
 	 */
 	public void display(boolean cancelClose)
 	{
-		MalisisGui.cancelClose = false;
+		MalisisGui.cancelClose = cancelClose;
 		Minecraft.getMinecraft().displayGuiScreen(this);
 	}
 

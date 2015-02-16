@@ -161,8 +161,8 @@ public class UIButton extends UIComponent<UIButton>
 		{
 			int w = image.getRawWidth();
 			int h = image.getRawHeight();
-			width = Math.max(width, w + 6);
-			height = Math.max(height, h + 6);
+			width = Math.max(width, w);
+			height = Math.max(height, h);
 		}
 		else
 		{
