@@ -37,10 +37,12 @@ import net.malisis.core.packet.InventoryActionMessage;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.AnimationRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -549,5 +551,15 @@ public class MalisisGui extends GuiScreen
 
 		gui.focusedComponent = component;
 		return true;
+	}
+
+	public static void playSound(String name)
+	{
+		playSound(name, 1.0F);
+	}
+
+	public static void playSound(String name, float level)
+	{
+		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation(name), level));
 	}
 }

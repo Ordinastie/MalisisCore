@@ -38,9 +38,6 @@ import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 
 import com.google.common.eventbus.Subscribe;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraft.util.ResourceLocation;
 
 /**
  * UIButton
@@ -194,21 +191,14 @@ public class UIButton extends UIComponent<UIButton>
 	{
 		final GuiIcon icon;
 		if (isDisabled())
-		{
 			icon = iconDisabled;
-		}
 		else if (isPressed)
-		{
 			icon = iconPressed;
-		}
 		else if (isHovered())
-		{
 			icon = iconHovered;
-		}
 		else
-		{
 			icon = this.icon;
-		}
+
 		rp.icon.set(icon);
 		renderer.drawShape(shape, rp);
 	}
@@ -269,7 +259,7 @@ public class UIButton extends UIComponent<UIButton>
 			return;
 
 		isPressed = false;
-		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
+		MalisisGui.playSound("gui.button.press");
 		fireEvent(new ClickEvent(this, (Release) event));
 	}
 
