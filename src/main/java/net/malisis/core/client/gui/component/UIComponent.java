@@ -37,6 +37,7 @@ import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.event.ComponentExceptionHandler;
 import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
@@ -66,6 +67,8 @@ import com.google.common.eventbus.EventBus;
 public abstract class UIComponent<T extends UIComponent> implements ITransformable.Position<T>, ITransformable.Size<T>,
 		ITransformable.Alpha
 {
+	/** The Exception handler for all Compoenent events. */
+	private static final ComponentExceptionHandler exceptionHandler = new ComponentExceptionHandler();
 	public final static int INHERITED = 0;
 
 	/** Reference to the {@link MalisisGui} this {@link UIComponent} was added to. */
@@ -116,7 +119,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	public UIComponent(MalisisGui gui)
 	{
 		this.gui = gui;
-		bus = new EventBus();
+		bus = new EventBus(exceptionHandler);
 		bus.register(this);
 		controlComponents = new LinkedHashSet<>();
 		rp = new RenderParameters();
