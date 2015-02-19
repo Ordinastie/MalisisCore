@@ -23,4 +23,4 @@ env:
     - TERM=dumb
     # Super secure, encrypted variables! Ssssh!
     - secure: eLRcYXZuIG57lRbCtCIVw9nvLYntFyt6sTSJtjHWD1qa8xaJScHVvBBMZ2iga6KnFwgALNkhCqXpjVzabY0okr2ehf0XhIIQbD91ei2xY/d3WuivtkrD1ECjOaDQCnLMBsNJ/jfydV0vRePXaSL/f/5nZY7xa5evrPpEjhBn36U=
-    - secure: 1e3AVn9sskiWTbM8lJC94dIc2DHq/a/AM+5JGYF0CMmlFLeCkSqPhIaBylPAf1DvbAATY/PIhRGIswiOopBtuGnyZSJRPsLEdcD/bz9lHaVZQZoYuxvR/otWWuI3Y9An0GK4jCHMj0+EaJEb3LtdOHUapmezmiIgl/lOufty7YQ=
+    - secure: J3MwV09XmvNw3nUfKrV7/FnPqgRnv/rsC6LFnNh10+ExT/xXCtRW4K9B05ET8gmw8z2c3xvA3GklFMfNqJYE+WigrBqd0lFuZWsYbnuz0azeczQuc7ps8UL7NPxNLDFiqJMc8QdEodW6GOXptYbUFerlVQW4iPHck+WKtplUEUw=
