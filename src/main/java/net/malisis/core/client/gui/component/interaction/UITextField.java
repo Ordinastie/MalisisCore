@@ -606,7 +606,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			else if (text.length() != 0)
 			{
 				//charOffset = 0;
-				while (GuiRenderer.getStringWidth(text.substring(charOffset, cursorPosition.textPosition), fontScale) >= width - 4)
+				while (GuiRenderer.getStringWidth(text.substring(charOffset, cursorPosition.textPosition), fontScale) >= getWidth() - 4)
 					charOffset++;
 			}
 		}
