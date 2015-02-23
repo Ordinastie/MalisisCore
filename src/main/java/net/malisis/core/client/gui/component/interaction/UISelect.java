@@ -27,6 +27,7 @@ package net.malisis.core.client.gui.component.interaction;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import net.malisis.core.client.gui.ClipArea;
@@ -59,7 +60,7 @@ import com.google.common.eventbus.Subscribe;
 public class UISelect extends UIComponent<UISelect> implements Iterable<Option>, IClipable
 {
 	/** The {@link Option options} of this {@link UISelect}. */
-	protected HashMap<Integer, Option> options;
+	protected Map<Integer, Option> options;
 	/** Currently selected option index. */
 	protected int selectedOption = -1;
 	/** Max width of the option container. */
@@ -97,7 +98,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 * @param width the width
 	 * @param options the options
 	 */
-	public UISelect(MalisisGui gui, int width, HashMap<Integer, Option> options)
+	public UISelect(MalisisGui gui, int width, Map<Integer, Option> options)
 	{
 		super(gui);
 		setSize(width, 12);
@@ -196,7 +197,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 * @param options the options
 	 * @return this {@link UISelect}
 	 */
-	public UISelect setOptions(HashMap<Integer, Option> options)
+	public UISelect setOptions(Map<Integer, Option> options)
 	{
 		this.options = options;
 		calcOptionsSize();
@@ -582,15 +583,15 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		}
 
 		/**
-		 * Creates an option HashMap for {@link UISelect#setOptions(HashMap)} from a list of keys.<br>
+		 * Creates an option Map for {@link UISelect#setOptions(Map)} from a list of keys.<br>
 		 *
 		 * @param <T> the generic type
 		 * @param list the list
 		 * @return the hash map
 		 */
-		public static <T> HashMap<Integer, Option> fromList(List<T> list)
+		public static <T> Map<Integer, Option> fromList(List<T> list)
 		{
-			HashMap<Integer, Option> options = new HashMap<>();
+			Map<Integer, Option> options = new HashMap<>();
 			int index = 0;
 			for (T opt : list)
 			{
@@ -603,15 +604,15 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		}
 
 		/**
-		 * Creates an option HashMap for {@link UISelect#setOptions(HashMap)} from a HashMap of keys -&gt; labels.<br>
+		 * Creates an option Map for {@link UISelect#setOptions(Map)} from a HashMap of keys -&gt; labels.<br>
 		 *
 		 * @param <T> the generic type
 		 * @param list the list
 		 * @return the hash map
 		 */
-		public static <T> HashMap<Integer, Option> fromList(HashMap<T, String> list)
+		public static <T> Map<Integer, Option> fromList(Map<T, String> list)
 		{
-			HashMap<Integer, Option> options = new HashMap<>();
+			Map<Integer, Option> options = new HashMap<>();
 			int index = 0;
 
 			for (Entry<T, String> entry : list.entrySet())
@@ -625,16 +626,16 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		}
 
 		/**
-		 * Creates an option HashMap for {@link UISelect#setOptions(HashMap)} from an Enum
+		 * Creates an option Map for {@link UISelect#setOptions(Map)} from an Enum
 		 *
 		 * @param <T> the generic type
 		 * @param <E> the element type
 		 * @param enumClass the enum class
 		 * @return the hash map
 		 */
-		public static <T, E extends Enum> HashMap<Integer, Option> fromEnum(Class<E> enumClass)
+		public static <T, E extends Enum> Map<Integer, Option> fromEnum(Class<E> enumClass)
 		{
-			HashMap<Integer, Option> options = new HashMap<>();
+			Map<Integer, Option> options = new HashMap<>();
 			for (E e : enumClass.getEnumConstants())
 			{
 				Option<T> option = new Option(e.ordinal(), e, e.toString());
