@@ -497,7 +497,7 @@ public class GuiRenderer extends MalisisRenderer
 		}
 
 		text = StatCollector.translateToLocal(text);
-		text = text.replaceAll("\r", "");
+		text = text.replaceAll("\r?\n", "");
 		GL11.glPushMatrix();
 		GL11.glTranslatef(x * (1 - fontScale), y * (1 - fontScale), 0);
 		GL11.glScalef(fontScale, fontScale, 1);
@@ -703,7 +703,7 @@ public class GuiRenderer extends MalisisRenderer
 			return 0;
 
 		str = StatCollector.translateToLocal(str);
-		str = str.replaceAll("\r", "");
+		str = str.replaceAll("\r?\n", "");
 		return (int) Math.ceil(MalisisRenderer.getFontRenderer().getStringWidth(str) * fontScale);
 	}
 
@@ -762,7 +762,7 @@ public class GuiRenderer extends MalisisRenderer
 	 */
 	public static float getCharWidth(char c)
 	{
-		if (c == '\r')
+		if (c == '\r' || c == '\n')
 			return 0;
 		return getCharWidth(c, 1);
 	}

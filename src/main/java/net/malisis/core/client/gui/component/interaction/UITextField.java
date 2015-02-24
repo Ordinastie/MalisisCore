@@ -385,12 +385,12 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			return;
 		}
 
-		String[] texts = text.toString().split("(?<=\r)\n?");
+		String[] texts = text.toString().split("\r?(?<=\n)");
 		int width = getWidth() - 4;
 		for (String str : texts)
 			lines.addAll(GuiRenderer.wrapText(StatCollector.translateToLocal(str), width, fontScale));
 
-		if (text.charAt(text.length() - 1) == '\r')
+		if (text.charAt(text.length() - 1) == '\n')
 			lines.add("");
 
 		fireEvent(new ContentUpdateEvent<UITextField>(this));
@@ -926,8 +926,12 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			case Keyboard.KEY_DELETE:
 				this.deleteFromCursor(1);
 				return;
+			case Keyboard.KEY_RETURN:
+				if (multiLine)
+					this.addText("\n");
+				break;
 			default:
-				if (ChatAllowedCharacters.isAllowedCharacter(keyChar) || (multiLine && keyCode == Keyboard.KEY_RETURN))
+				if (ChatAllowedCharacters.isAllowedCharacter(keyChar))
 					this.addText(Character.toString(keyChar));
 				return;
 		}
@@ -1108,7 +1112,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		public void jumpToLineEnd()
 		{
 			textPosition -= character;
-			character = currentLineText().length() - (currentLineText().endsWith("\r") ? 1 : 0);
+			character = currentLineText().length() - (currentLineText().endsWith("\n") ? 1 : 0);
 			textPosition += character;
 			onCursorUpdated();
 		}
@@ -1125,7 +1129,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			{
 				line--;
 				character = currentLineText().length();
-				if (currentLineText().endsWith("\r"))
+				if (currentLineText().endsWith("\n"))
 				{
 					character--;
 					textPosition--;
@@ -1145,7 +1149,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		{
 			if (textPosition == text.length())
 				return;
-			if (currentLineText().endsWith("\r"))
+			if (currentLineText().endsWith("\n"))
 				jumpBy(1);
 			else
 			{
@@ -1189,7 +1193,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				line = Math.max(0, line - 1);
 			else
 				line = Math.min(line + 1, lines.size() - 1);
-			character = Math.min(character, currentLineText().length() - 1);
+			character = Math.min(character, currentLineText().length());
 			updateTextPosition();
 
 		}
