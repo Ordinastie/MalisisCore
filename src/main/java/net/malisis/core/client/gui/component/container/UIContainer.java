@@ -45,7 +45,6 @@ import net.minecraft.client.gui.GuiScreen;
 
 import com.google.common.eventbus.Subscribe;
 
-// TODO: Auto-generated Javadoc
 /**
  * {@link UIContainer} are the base for components holding other components.<br>
  * Child components are drawn in the foreground.<br>
