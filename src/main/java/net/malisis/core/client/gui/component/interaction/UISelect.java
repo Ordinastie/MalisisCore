@@ -76,6 +76,19 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	/** Pattern to use for options labels. */
 	protected String labelPattern;
 
+	/** Text color. */
+	protected int textColor = 0xFFFFFF;
+	/** Background color */
+	protected int bgColor = 0xFFFFFF;
+	/** Hovered text color */
+	protected int hoverTextColor = 0xDED89F;
+	/** Hovered background color */
+	protected int hoverBgColor = 0x5E789F;
+	/** Selected text color */
+	protected int selectTextColor = 0x9EA8DF;
+	/** Text shadow */
+	protected boolean textShadow = true;
+
 	/** Shape used to draw the arrow. */
 	protected GuiShape arrowShape;
 	/** Shape used to draw the {@link Option options} box */
@@ -127,6 +140,81 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	{
 		this(gui, width, null);
 	}
+
+	//#region Getters/Setters
+	public int getTextColor()
+	{
+		return textColor;
+	}
+
+	public void setTextColor(int textColor)
+	{
+		this.textColor = textColor;
+	}
+
+	public int getBgColor()
+	{
+		return bgColor;
+	}
+
+	public void setBgColor(int bgColor)
+	{
+		this.bgColor = bgColor;
+	}
+
+	public int getHoverTextColor()
+	{
+		return hoverTextColor;
+	}
+
+	public void setHoverTextColor(int hoverTextColor)
+	{
+		this.hoverTextColor = hoverTextColor;
+	}
+
+	public int getHoverBgColor()
+	{
+		return hoverBgColor;
+	}
+
+	public void setHoverBgColor(int hoverBgColor)
+	{
+		this.hoverBgColor = hoverBgColor;
+	}
+
+	public int getSelectTextColor()
+	{
+		return selectTextColor;
+	}
+
+	public void setSelectTextColor(int selectTextColor)
+	{
+		this.selectTextColor = selectTextColor;
+	}
+
+	public boolean isTextShadow()
+	{
+		return textShadow;
+	}
+
+	public void setTextShadow(boolean textShadow)
+	{
+		this.textShadow = textShadow;
+	}
+
+	public UISelect setColors(int textColor, int bgColor, int hoverTextColor, int hoverBgColor, int selectTextColor, boolean textShadow)
+	{
+		this.textColor = textColor;
+		this.bgColor = bgColor;
+		this.hoverTextColor = hoverTextColor;
+		this.hoverBgColor = hoverBgColor;
+		this.textShadow = textShadow;
+		this.selectTextColor = selectTextColor;
+
+		return this;
+	}
+
+	//#end Getters/Setters
 
 	@Override
 	public void setFocused(boolean focused)
@@ -363,6 +451,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		shape.resetState();
 		shape.setSize(super.getWidth(), super.getHeight());
 		rp.icon.set(isDisabled() ? iconsSelectDisabled : iconsSelect);
+		rp.colorMultiplier.set(bgColor);
 		renderer.drawShape(shape, rp);
 	}
 
@@ -382,7 +471,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		{
 			String text = getOption(selectedOption).getLabel(labelPattern);
 			if (!StringUtils.isEmpty(text))
-				renderer.drawText(renderer.clipString(text, width - 15), 2, 2, 1, 0xFFFFFF, true, true);
+				renderer.drawText(renderer.clipString(text, width - 15), 2, 2, 1, textColor, textShadow, true);
 		}
 
 		if (!expanded)
@@ -397,7 +486,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		optionsShape.setSize(optionsWidth, optionsHeight);
 		optionsShape.translate(0, 12, 1);
 		rp.icon.set(iconsExpanded);
-		rp.colorMultiplier.reset();
+		rp.colorMultiplier.set(bgColor);
 
 		renderer.drawShape(optionsShape, rp);
 		renderer.next();
@@ -416,17 +505,18 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 				shape.setSize(optionsWidth - 2, 10);
 				shape.translate(1, y - 1, 1);
 
-				rp.colorMultiplier.set(0x5E789F);
+				rp.colorMultiplier.set(hoverBgColor);
 				renderer.drawShape(shape, rp);
 				renderer.next();
 
 				GL11.glEnable(GL11.GL_TEXTURE_2D);
-
 			}
 
-			int color = option == hover ? (option.getIndex() == selectedOption ? 0xDED89F : 0xFFFFFF) : (option.getIndex() == selectedOption ? 0x9EA8DF : 0xFFFFFF);
+			int color = option.getIndex() == selectedOption ? selectTextColor : textColor;
+			if (option == hover)
+				color = hoverTextColor;;
 			String text = option.getLabel(labelPattern);
-			renderer.drawText(text, 2, y, 2, color, true, true);
+			renderer.drawText(text, 2, y, 2, color, textShadow, true);
 			y += 10;
 		}
 
