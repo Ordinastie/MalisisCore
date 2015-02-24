@@ -452,10 +452,30 @@ public class MalisisGui extends GuiScreen
 	 */
 	public static MalisisGui currentGui()
 	{
+		return currentGui(MalisisGui.class);
+	}
+
+	/**
+	 * Gets the current {@link MalisisGui} of the specified type displayed.<br>
+	 * If the current gu is not of <i>type</i>, null is returned.
+	 *
+	 * @param <T> the generic type
+	 * @param type the type
+	 * @return the t
+	 */
+	public static <T extends MalisisGui> T currentGui(Class<T> type)
+	{
 		GuiScreen gui = Minecraft.getMinecraft().currentScreen;
-		if (gui instanceof MalisisGui)
-			return (MalisisGui) gui;
-		return null;
+		if (gui == null || !(gui instanceof MalisisGui))
+			return null;
+		try
+		{
+			return type.cast(gui);
+		}
+		catch (ClassCastException e)
+		{
+			return null;
+		}
 	}
 
 	/**
@@ -507,6 +527,8 @@ public class MalisisGui extends GuiScreen
 			}
 			return false;
 		}
+		else if (!hovered)
+			return false;
 
 		if (gui.hoveredComponent != null)
 			gui.hoveredComponent.setHovered(false);
