@@ -84,10 +84,19 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	private boolean selectAllOnRelease = false;
 	/** Whether this {@link UITextField} should auto select the text when gaining focus. */
 	protected boolean autoSelectOnFocus = false;
-	/** Color of the text for this {@link UITextField}. */
-	protected int textColor = 0xFFFFFF;
 	/** Scrollbar of the textfield **/
 	protected UISlimScrollbar scrollBar;
+
+	/** Color of the text for this {@link UITextField}. */
+	protected int textColor = 0xFFFFFF;
+	/** Background color of this {@link UITextField. */
+	protected int bgColor = 0xFFFFFF;
+	/** Cursor color for this {@link UITextField}. */
+	protected int cursorColor = 0xD0D0D0;
+	/** Selection color for this {@link UITextField}. */
+	protected int selectColor = 0x0000FF;
+	/** Text shadow */
+	protected boolean textShadow = true;
 
 	/** Font scale used to draw the text *. */
 	protected float fontScale = 1;
@@ -160,6 +169,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	// #region getters/setters
+
 	/**
 	 * Gets the text of this {@link UITextField}.
 	 *
@@ -168,6 +178,57 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	public String getText()
 	{
 		return text.toString();
+	}
+
+	public void setTextColor(int color)
+	{
+		this.textColor = color;
+	}
+
+	public int getTextColor()
+	{
+		return textColor;
+	}
+
+	public int getCursorColor()
+	{
+		return cursorColor;
+	}
+
+	public void setCursorColor(int cursorColor)
+	{
+		this.cursorColor = cursorColor;
+	}
+
+	public int getSelectColor()
+	{
+		return selectColor;
+	}
+
+	public void setSelectColor(int selectColor)
+	{
+		this.selectColor = selectColor;
+	}
+
+	public boolean isTextShadow()
+	{
+		return textShadow;
+	}
+
+	public void setTextShadow(boolean textShadow)
+	{
+		this.textShadow = textShadow;
+	}
+
+	public UITextField setColors(int textColor, int bgColor, int cursorColor, int selectColor, boolean textShadow)
+	{
+		this.textColor = textColor;
+		this.bgColor = bgColor;
+		this.cursorColor = cursorColor;
+		this.selectColor = selectColor;
+		this.textShadow = textShadow;
+
+		return this;
 	}
 
 	/**
@@ -318,28 +379,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		cursorPosition.setPosition(x, y);
 
 		startTimer = System.currentTimeMillis();
-	}
-
-	/**
-	 * Sets the text color for this {@link UITextField}.
-	 *
-	 * @param color the color
-	 * @return this {@link UITextField}
-	 */
-	public UITextField setTextColor(int color)
-	{
-		this.textColor = color;
-		return this;
-	}
-
-	/**
-	 * Gets the text color.
-	 *
-	 * @return the text color of this {@link UITextField}.
-	 */
-	public int getTextColor()
-	{
-		return textColor;
 	}
 
 	/**
@@ -637,6 +676,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		rp.useTexture.reset();
 		rp.colorMultiplier.reset();
 		rp.icon.set(isDisabled() ? iconTextfieldDisabled : iconTextfield);
+		rp.colorMultiplier.set(bgColor);
 		renderer.drawShape(shape, rp);
 	}
 
@@ -673,14 +713,14 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			int w = GuiRenderer.getStringWidth(text.substring(charOffset, end), fontScale);
 			while (w > getWidth())
 				w = GuiRenderer.getStringWidth(text.substring(charOffset, end--), fontScale);
-			renderer.drawText(text.substring(charOffset, end), 2, 2, isDisabled() ? 0xAAAAAA : textColor, true);
+			renderer.drawText(text.substring(charOffset, end), 2, 2, isDisabled() ? 0xAAAAAA : textColor, textShadow);
 		}
 		else
 		{
 			for (int i = lineOffset; i < lineOffset + visibleLines() && i < lines.size(); i++)
 			{
 				int h = (i - lineOffset) * getLineHeight();
-				renderer.drawText(lines.get(i), 2, h + 2, isDisabled() ? 0xAAAAAA : textColor, true);
+				renderer.drawText(lines.get(i), 2, h + 2, isDisabled() ? 0xAAAAAA : textColor, textShadow);
 			}
 		}
 		renderer.setFontScale(1);
@@ -707,7 +747,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		cursorShape.setPosition(cursorPosition.getXOffset() + 1, cursorPosition.getYOffset() + 1);
 
 		rp.useTexture.set(false);
-		rp.colorMultiplier.set(0xD0D0D0);
+		rp.colorMultiplier.set(cursorColor);
 
 		renderer.drawShape(cursorShape, rp);
 		renderer.next();
@@ -748,7 +788,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				selectShape.setPosition(x + 2, y + 1);
 
 				rp.useTexture.set(false);
-				rp.colorMultiplier.set(0x0000FF);
+				rp.colorMultiplier.set(selectColor);
 
 				renderer.drawShape(selectShape, rp);
 			}
