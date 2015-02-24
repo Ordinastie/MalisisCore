@@ -289,12 +289,12 @@ public class GuiRenderer extends MalisisRenderer
 	{
 		text = StatCollector.translateToLocal(text);
 		StringBuilder ret = new StringBuilder();
-		int strWidth = 0;
+		float strWidth = 0;
 		int index = 0;
 		while (index < text.length())
 		{
 			char c = text.charAt(index);
-			strWidth += getCharWidth(c);
+			strWidth += getCharWidth(c) * fontScale;
 			if (strWidth < width)
 				ret.append(c);
 			else
