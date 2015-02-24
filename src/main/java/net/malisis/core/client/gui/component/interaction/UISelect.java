@@ -90,6 +90,8 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	protected GuiIcon iconsExpanded;
 	/** Icon used to draw the arrow. */
 	protected GuiIcon arrowIcon;
+	/** Whether to draw the text with shadow or not **/
+	private boolean drawShadow;
 
 	/**
 	 * Instantiates a new {@link UISelect}
@@ -382,7 +384,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		{
 			String text = getOption(selectedOption).getLabel(labelPattern);
 			if (!StringUtils.isEmpty(text))
-				renderer.drawText(renderer.clipString(text, width - 15), 2, 2, getZIndex(), 0xFFFFFF, true);
+				renderer.drawText(renderer.clipString(text, width - 15), 2, 2, getZIndex(), 0xFFFFFF, drawShadow);
 		}
 
 		if (!expanded)
@@ -426,7 +428,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 
 			int color = option == hover ? (option.getIndex() == selectedOption ? 0xDED89F : 0xFFFFFF) : (option.getIndex() == selectedOption ? 0x9EA8DF : 0xFFFFFF);
 			String text = option.getLabel(labelPattern);
-			renderer.drawText(text, 2, y, getZIndex() + 2, color, true);
+			renderer.drawText(text, 2, y, getZIndex() + 2, color, drawShadow);
 			y += 10;
 		}
 
@@ -508,6 +510,18 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	public Iterator<Option> iterator()
 	{
 		return options.values().iterator();
+	}
+
+	/**
+	 * Set the drop shadow for the text of this {@link UITextField}.
+	 *
+	 * @param drawShadow the draw shadow
+	 * @return the UITextField
+	 */
+	public UISelect setDrawShadow(boolean drawShadow)
+	{
+		this.drawShadow = drawShadow;
+		return this;
 	}
 
 	/**

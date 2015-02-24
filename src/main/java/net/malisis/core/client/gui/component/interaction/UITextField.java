@@ -99,6 +99,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	protected GuiIcon iconTextfield;
 	/** Icon used to draw this {@link UITextField} when disabled. */
 	protected GuiIcon iconTextfieldDisabled;
+	/** Whether to draw the text with shadow or not **/
+	protected boolean drawShadow;
 
 	/**
 	 * Instantiates a new {@link UITextField}.
@@ -383,7 +385,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			return;
 		}
 
-		String[] texts = text.toString().split("(?<=\r)\n?");
+		String[] texts = text.toString().split("\\r?\\n");
 		int width = getWidth() - 4;
 		for (String str : texts)
 			lines.addAll(GuiRenderer.wrapText(StatCollector.translateToLocal(str), width, fontScale));
@@ -606,7 +608,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			else if (text.length() != 0)
 			{
 				//charOffset = 0;
-				while (GuiRenderer.getStringWidth(text.substring(charOffset, cursorPosition.textPosition), fontScale) >= getWidth() - 4)
+				while (GuiRenderer.getStringWidth(text.substring(charOffset, cursorPosition.textPosition), fontScale) >= width - 4)
 					charOffset++;
 			}
 		}
@@ -671,14 +673,14 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			int w = GuiRenderer.getStringWidth(text.substring(charOffset, end), fontScale);
 			while (w > getWidth())
 				w = GuiRenderer.getStringWidth(text.substring(charOffset, end--), fontScale);
-			renderer.drawText(text.substring(charOffset, end), 2, 2, isDisabled() ? 0xAAAAAA : textColor, true);
+			renderer.drawText(text.substring(charOffset, end), 2, 2, isDisabled() ? 0xAAAAAA : textColor, drawShadow);
 		}
 		else
 		{
 			for (int i = lineOffset; i < lineOffset + visibleLines() && i < lines.size(); i++)
 			{
 				int h = (i - lineOffset) * getLineHeight();
-				renderer.drawText(lines.get(i), 2, h + 2, isDisabled() ? 0xAAAAAA : textColor, true);
+				renderer.drawText(lines.get(i), 2, h + 2, isDisabled() ? 0xAAAAAA : textColor, drawShadow);
 			}
 		}
 		renderer.setFontScale(1);
@@ -998,6 +1000,18 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	/**
+	 * Set the drop shadow for the text of this {@link UITextField}.
+	 *
+	 * @param drawShadow the draw shadow
+	 * @return the UITextField
+	 */
+	public UITextField setDrawShadow(boolean drawShadow)
+	{
+		this.drawShadow = drawShadow;
+		return this;
+	}
+
+	/**
 	 * The Class CursorPosition.
 	 */
 	protected class CursorPosition
@@ -1293,7 +1307,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		{
 			return (line - lineOffset) * getLineHeight();
 		}
-
 	}
 
 }
