@@ -162,7 +162,7 @@ public class UISlot extends UIComponent<UISlot>
 		}
 
 		if (itemStack != null)
-			renderer.drawItemStack(itemStack, screenX() + 1, screenY() + 1, format);
+			renderer.drawItemStack(itemStack, 1, 1, format);
 
 		// draw the white shade over the slot
 		if (hovered || draggedItemStack != null)

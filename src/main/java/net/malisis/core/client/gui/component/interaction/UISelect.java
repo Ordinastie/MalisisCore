@@ -382,7 +382,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		{
 			String text = getOption(selectedOption).getLabel(labelPattern);
 			if (!StringUtils.isEmpty(text))
-				renderer.drawText(renderer.clipString(text, width - 15), 2, 2, getZIndex(), 0xFFFFFF, true);
+				renderer.drawText(renderer.clipString(text, width - 15), 2, 2, 0xFFFFFF, true);
 		}
 
 		if (!expanded)
@@ -426,7 +426,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 
 			int color = option == hover ? (option.getIndex() == selectedOption ? 0xDED89F : 0xFFFFFF) : (option.getIndex() == selectedOption ? 0x9EA8DF : 0xFFFFFF);
 			String text = option.getLabel(labelPattern);
-			renderer.drawText(text, 2, y, getZIndex() + 2, color, true);
+			renderer.drawText(text, 2, y, 2, color, true, true);
 			y += 10;
 		}
 

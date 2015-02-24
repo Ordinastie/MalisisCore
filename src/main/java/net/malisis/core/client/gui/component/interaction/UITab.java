@@ -319,7 +319,7 @@ public class UITab extends UIComponent<UITab>
 		if (label != null)
 		{
 			int color = isHovered() ? 0xFFFFA0 : (active ? 0xFFFFFF : 0x404040);
-			renderer.drawText(label, x, y, zIndex, color, active);
+			renderer.drawText(label, x, y, color, active);
 		}
 		else if (image != null)
 		{

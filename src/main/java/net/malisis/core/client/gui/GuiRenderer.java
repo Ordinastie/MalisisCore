@@ -25,7 +25,10 @@
 package net.malisis.core.client.gui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
@@ -63,6 +66,8 @@ public class GuiRenderer extends MalisisRenderer
 	public static RenderItem itemRenderer = new RenderItem();
 	/** Font height. */
 	public static int FONT_HEIGHT = MalisisRenderer.getFontRenderer().FONT_HEIGHT;
+	/** Map of EnumChatFormatting **/
+	public static Map<Character, EnumChatFormatting> charFormats = new HashMap<>();
 	/** Current component being drawn. */
 	public UIComponent currentComponent;
 	/** Width of the Minecraft window. */
@@ -83,6 +88,13 @@ public class GuiRenderer extends MalisisRenderer
 	private GuiTexture defaultGuiTexture;
 	/** Currently used {@link GuiTexture} */
 	private GuiTexture currentTexture;
+
+	static
+	{
+		//could reflect to get EnumChatFormatting.formattingCodeMapping instead
+		for (EnumChatFormatting ecf : EnumChatFormatting.values())
+			charFormats.put(ecf.getFormattingCode(), ecf);
+	}
 
 	/**
 	 * Instantiates a new {@link GuiRenderer}.
@@ -294,7 +306,7 @@ public class GuiRenderer extends MalisisRenderer
 		while (index < text.length())
 		{
 			char c = text.charAt(index);
-			strWidth += getCharWidth(c) * fontScale;
+			strWidth += getCharWidth(c, fontScale);
 			if (strWidth < width)
 				ret.append(c);
 			else
@@ -328,19 +340,35 @@ public class GuiRenderer extends MalisisRenderer
 	public static List<String> wrapText(String text, int maxWidth, float fontScale)
 	{
 		List<String> lines = new ArrayList<>();
+		List<EnumChatFormatting> modifiers = new LinkedList<>();
+		EnumChatFormatting ecf;
 		StringBuilder line = new StringBuilder();
 		StringBuilder word = new StringBuilder();
 
-		int lineWidth = 0;
-		int wordWidth = 0;
+		float lineWidth = 0;
+		float wordWidth = 0;
 		int index = 0;
 		while (index < text.length())
 		{
+			while ((ecf = getFormatting(text, index)) != null)
+			{
+				if (ecf == EnumChatFormatting.RESET || ecf.isColor())
+					modifiers.clear();
+				if (ecf != EnumChatFormatting.RESET)
+					modifiers.add(ecf);
+				index += 2;
+				word.append(ecf.toString());
+				if (index >= text.length())
+					break;
+			}
+
 			char c = text.charAt(index);
-			int w = getCharWidth(c, fontScale);
+
+			float w = getCharWidth(c, fontScale);
 			lineWidth += w;
 			wordWidth += w;
 			word.append(c);
+			//we just ended a new word, add it to the current line
 			if (c == ' ' || c == '-' || c == '.')
 			{
 				line.append(word);
@@ -349,14 +377,21 @@ public class GuiRenderer extends MalisisRenderer
 			}
 			if (lineWidth >= maxWidth)
 			{
+				//the first word on the line is too large, split anyway
 				if (line.length() == 0)
 				{
 					line.append(word);
 					word.setLength(0);
 					wordWidth = 0;
 				}
+				//make a new line
 				lines.add(line.toString());
 				line.setLength(0);
+
+				//add modifiers to the new line
+				for (int i = 0; i < modifiers.size(); i++)
+					line.insert(i * 2, modifiers.get(i));
+
 				lineWidth = wordWidth;
 			}
 			index++;
@@ -369,13 +404,33 @@ public class GuiRenderer extends MalisisRenderer
 	}
 
 	/**
+	 * Gets the {@link EnumChatFormatting} at the specified position in the text.<br>
+	 * Returns null if
+	 *
+	 * @param text the text
+	 * @param index the index
+	 * @return the formatting
+	 */
+	private static EnumChatFormatting getFormatting(String text, int index)
+	{
+		if (text == null || index >= text.length() - 3)
+			return null;
+
+		char c = text.charAt(index);
+		if (c != '\u00a7')
+			return null;
+		return charFormats.get(text.charAt(index + 1));
+	}
+
+	//#region drawText()
+	/**
 	 * Draws a white text on the GUI without shadow.
 	 *
 	 * @param text the text
 	 */
 	public void drawText(String text)
 	{
-		drawText(text, 0, 0, 0, 0xFFFFFF, false);
+		drawText(text, 0, 0, 0, 0xFFFFFF, false, true);
 	}
 
 	/**
@@ -387,7 +442,19 @@ public class GuiRenderer extends MalisisRenderer
 	 */
 	public void drawText(String text, int color, boolean shadow)
 	{
-		drawText(text, 0, 0, 0, color, shadow);
+		drawText(text, 0, 0, 0, color, shadow, true);
+	}
+
+	/**
+	 * Draws a white text on the GUI without shadow, at the specified coordinates, relative to its parent container.
+	 *
+	 * @param text the text
+	 * @param x the x
+	 * @param y the y
+	 */
+	public void drawText(String text, int x, int y)
+	{
+		drawText(text, x, y, 0, 0xFFFFFF, false, true);
 	}
 
 	/**
@@ -401,27 +468,13 @@ public class GuiRenderer extends MalisisRenderer
 	 */
 	public void drawText(String text, int x, int y, int color, boolean shadow)
 	{
-		drawText(text, x, y, 0, color, shadow);
+		drawText(text, x, y, 0, color, shadow, true);
 	}
 
 	/**
-	 * Draws a text on the GUI at the specified coordinates, relative to its parent container, with zIndex, color and shadow.
-	 *
-	 * @param text the text
-	 * @param x the x
-	 * @param y the y
-	 * @param zIndex the z index
-	 * @param color the color
-	 * @param shadow the shadow
-	 */
-	public void drawText(String text, int x, int y, int zIndex, int color, boolean shadow)
-	{
-		drawString(text, currentComponent.screenX() + x, currentComponent.screenY() + y, currentComponent.getZIndex() + zIndex, color,
-				shadow);
-	}
-
-	/**
-	 * Draws a string at the specified coordinates, with color and shadow. The string gets translated. Uses FontRenderer.drawString().
+	 * Draws a string at the specified coordinates, with color and shadow.<br>
+	 * The string gets translated.<br>
+	 * Uses FontRenderer.drawString().
 	 *
 	 * @param text the text
 	 * @param x the x
@@ -429,11 +482,19 @@ public class GuiRenderer extends MalisisRenderer
 	 * @param z the z
 	 * @param color the color
 	 * @param shadow the shadow
+	 * @param relative true if the coordinates are relatives to current component
 	 */
-	public void drawString(String text, int x, int y, int z, int color, boolean shadow)
+	public void drawText(String text, int x, int y, int z, int color, boolean shadow, boolean relative)
 	{
 		if (MalisisRenderer.getFontRenderer() == null)
 			return;
+
+		if (relative && currentComponent != null)
+		{
+			x += currentComponent.screenX();
+			y += currentComponent.screenY();
+			z += currentComponent.getZIndex();
+		}
 
 		text = StatCollector.translateToLocal(text);
 		text = text.replaceAll("\r", "");
@@ -453,8 +514,20 @@ public class GuiRenderer extends MalisisRenderer
 		bindDefaultTexture();
 	}
 
+	//#end drawText()
+
 	/**
-	 * Draws an itemStack to the GUI. Uses RenderItem.renderItemAndEffectIntoGUI() and RenderItem.renderItemOverlayIntoGUI();
+	 * Draws an itemStack to the GUI.
+	 *
+	 * @param itemStack the item stack
+	 */
+	public void drawItemStack(ItemStack itemStack)
+	{
+		drawItemStack(itemStack, 0, 0, null, null, true);
+	}
+
+	/**
+	 * Draws an itemStack to the GUI at the specified coordinates.
 	 *
 	 * @param itemStack the item stack
 	 * @param x the x
@@ -462,12 +535,11 @@ public class GuiRenderer extends MalisisRenderer
 	 */
 	public void drawItemStack(ItemStack itemStack, int x, int y)
 	{
-		drawItemStack(itemStack, x, y, null);
+		drawItemStack(itemStack, x, y, null, null, true);
 	}
 
 	/**
-	 * Draws itemStack to the GUI. Uses RenderItem.renderItemAndEffectIntoGUI() and RenderItem.renderItemOverlayIntoGUI(); TODO: use
-	 * currrentComponent position
+	 * Draws an itemStack to the GUI at the specified coordinates with a custom format for the label.
 	 *
 	 * @param itemStack the item stack
 	 * @param x the x
@@ -476,23 +548,59 @@ public class GuiRenderer extends MalisisRenderer
 	 */
 	public void drawItemStack(ItemStack itemStack, int x, int y, EnumChatFormatting format)
 	{
+		drawItemStack(itemStack, x, y, null, format, true);
+	}
+
+	/**
+	 * Draws an itemStack to the GUI at the specified coordinates with a custom label.
+	 *
+	 * @param itemStack the item stack
+	 * @param x the x
+	 * @param y the y
+	 * @param label the label
+	 */
+	public void drawItemStack(ItemStack itemStack, int x, int y, String label)
+	{
+		drawItemStack(itemStack, x, y, label, null, true);
+	}
+
+	/**
+	 * Draws itemStack to the GUI at the specified coordinates with a custom formatted label.<br>
+	 * Uses RenderItem.renderItemAndEffectIntoGUI() and RenderItem.renderItemOverlayIntoGUI()
+	 *
+	 * @param itemStack the item stack
+	 * @param x the x
+	 * @param y the y
+	 * @param label the label to display, if null display the stack size
+	 * @param format the format
+	 * @param relative if true, coordinates are relative to current component
+	 */
+	public void drawItemStack(ItemStack itemStack, int x, int y, String label, EnumChatFormatting format, boolean relative)
+	{
 		if (itemStack == null)
 			return;
+
+		if (relative && currentComponent != null)
+		{
+			x += currentComponent.screenX();
+			y += currentComponent.screenY();
+		}
 
 		FontRenderer fontRenderer = itemStack.getItem().getFontRenderer(itemStack);
 		if (fontRenderer == null)
 			fontRenderer = MalisisRenderer.getFontRenderer();
 
-		String s = null;
+		if (label == null)
+			label = Integer.toString(itemStack.stackSize);
 		if (format != null)
-			s = format + Integer.toString(itemStack.stackSize);
+			label += format;
 
 		t.draw();
 		RenderHelper.enableGUIStandardItemLighting();
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 
 		itemRenderer.renderItemAndEffectIntoGUI(fontRenderer, Minecraft.getMinecraft().getTextureManager(), itemStack, x, y);
-		itemRenderer.renderItemOverlayIntoGUI(fontRenderer, Minecraft.getMinecraft().getTextureManager(), itemStack, x, y, s);
+		itemRenderer.renderItemOverlayIntoGUI(fontRenderer, Minecraft.getMinecraft().getTextureManager(), itemStack, x, y, label);
 
 		RenderHelper.disableStandardItemLighting();
 		GL11.glColor4f(1, 1, 1, 1);
@@ -566,7 +674,7 @@ public class GuiRenderer extends MalisisRenderer
 
 		itemRenderer.zLevel = 100;
 		t.startDrawingQuads();
-		drawItemStack(itemStack, mouseX - 8, mouseY - 8, itemStack.stackSize == 0 ? EnumChatFormatting.YELLOW : null);
+		drawItemStack(itemStack, mouseX - 8, mouseY - 8, null, itemStack.stackSize == 0 ? EnumChatFormatting.YELLOW : null, false);
 		t.draw();
 		itemRenderer.zLevel = 0;
 	}
@@ -652,7 +760,7 @@ public class GuiRenderer extends MalisisRenderer
 	 * @param c the c
 	 * @return the char width
 	 */
-	public static int getCharWidth(char c)
+	public static float getCharWidth(char c)
 	{
 		if (c == '\r')
 			return 0;
@@ -666,9 +774,10 @@ public class GuiRenderer extends MalisisRenderer
 	 * @param fontScale the font scale
 	 * @return the char width
 	 */
-	public static int getCharWidth(char c, float fontScale)
+	public static float getCharWidth(char c, float fontScale)
 	{
-		return (int) Math.ceil(MalisisRenderer.getFontRenderer().getCharWidth(c) * fontScale);
+		float s = MalisisRenderer.getFontRenderer().getCharWidth(c) * fontScale;
+		return s >= 0 ? s : 0;
 	}
 
 	/**
