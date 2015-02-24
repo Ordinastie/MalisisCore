@@ -84,6 +84,8 @@ public class GuiRenderer extends MalisisRenderer
 	/** Currently used {@link GuiTexture} */
 	private GuiTexture currentTexture;
 
+	public static final int CODE_COLOR_BEGIN = 167;
+
 	/**
 	 * Instantiates a new {@link GuiRenderer}.
 	 */
@@ -334,9 +336,38 @@ public class GuiRenderer extends MalisisRenderer
 		int lineWidth = 0;
 		int wordWidth = 0;
 		int index = 0;
+
+		StringBuilder currentColorCode = new StringBuilder();
+		boolean skipLine = false;
+		boolean prefixColorCode = false;
+
 		while (index < text.length())
 		{
 			char c = text.charAt(index);
+
+			if (line.length() == 0) {
+				if (prefixColorCode) {
+					if (!skipLine) {
+						line.insert(0, currentColorCode.toString(), 0, currentColorCode.length());
+					} else {
+						skipLine = false;
+					}
+				}
+			}
+
+			//Figure out if a valid character code is being presented
+			if (c == CODE_COLOR_BEGIN) {
+				currentColorCode.setLength(0);
+				currentColorCode.append(c);
+
+				if (index + 1 < text.length()) {
+					currentColorCode.append(text.charAt(index + 1));
+				}
+
+				prefixColorCode = currentColorCode.length() == 2 && currentColorCode.charAt(1) != 'r';
+				skipLine = true;
+			}
+
 			int w = getCharWidth(c, fontScale);
 			lineWidth += w;
 			wordWidth += w;
@@ -355,6 +386,7 @@ public class GuiRenderer extends MalisisRenderer
 					word.setLength(0);
 					wordWidth = 0;
 				}
+
 				lines.add(line.toString());
 				line.setLength(0);
 				lineWidth = wordWidth;
@@ -363,8 +395,12 @@ public class GuiRenderer extends MalisisRenderer
 		}
 
 		line.append(word);
+		if (prefixColorCode) {
+			if (!skipLine) {
+				line.insert(0, currentColorCode.toString(), 0, currentColorCode.length());
+			}
+		}
 		lines.add(line.toString());
-
 		return lines;
 	}
 
