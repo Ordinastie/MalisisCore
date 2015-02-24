@@ -149,7 +149,7 @@ public class UITooltip extends UIComponent
 			int sy = y;
 			if (i > 0)
 				sy += 2;
-			renderer.drawString(s, x, sy + (GuiRenderer.FONT_HEIGHT + 1) * i, zIndex + 1, 0xFFFFFF, true);
+			renderer.drawText(s, x, sy + (GuiRenderer.FONT_HEIGHT + 1) * i, zIndex + 1, 0xFFFFFF, true, false);
 			i++;
 		}
 	}

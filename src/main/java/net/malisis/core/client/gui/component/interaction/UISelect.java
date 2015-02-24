@@ -395,7 +395,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 
 		optionsShape.resetState();
 		optionsShape.setSize(optionsWidth, optionsHeight);
-		optionsShape.translate(0, 12, getZIndex() + 1);
+		optionsShape.translate(0, 12, 1);
 		rp.icon.set(iconsExpanded);
 		rp.colorMultiplier.reset();
 
@@ -414,7 +414,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 
 				shape.resetState();
 				shape.setSize(optionsWidth - 2, 10);
-				shape.translate(1, y - 1, getZIndex() + 1);
+				shape.translate(1, y - 1, 1);
 
 				rp.colorMultiplier.set(0x5E789F);
 				renderer.drawShape(shape, rp);

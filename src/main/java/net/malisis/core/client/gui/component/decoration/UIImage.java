@@ -192,7 +192,7 @@ public class UIImage extends UIComponent<UIImage>
 		}
 		else if (itemStack != null)
 		{
-			renderer.drawItemStack(itemStack, screenX(), screenY());
+			renderer.drawItemStack(itemStack);
 		}
 	}
 
