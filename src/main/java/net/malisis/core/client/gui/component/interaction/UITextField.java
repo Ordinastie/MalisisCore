@@ -184,6 +184,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		this.text.append(text);
 		buildLines();
 		selectingText = false;
+		charOffset = 0;
+		lineOffset = 0;
 		if (focused)
 			cursorPosition.jumpToEnd();
 		// fireEvent(new TextChanged(this));
