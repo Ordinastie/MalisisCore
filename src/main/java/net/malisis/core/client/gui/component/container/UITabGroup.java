@@ -27,6 +27,7 @@ package net.malisis.core.client.gui.component.container;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.interaction.UITab;
 import net.malisis.core.client.gui.event.ComponentEvent;
@@ -194,23 +195,31 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		int cy = container.getY();
 		int cw = container.getRawWidth();
 		int ch = container.getRawHeight();
+		int av = Anchor.vertical(container.getAnchor());
+		int ah = Anchor.horizontal(container.getAnchor());
 
 		if (tabPosition == TabPosition.TOP)
 		{
-			cy += getHeight() - 1;
+			if (av == Anchor.TOP)
+				cy += getHeight() - 1;
 			ch = container.getRawHeight() - getHeight();
 		}
 		else if (tabPosition == TabPosition.BOTTOM)
 		{
+			if (av == Anchor.BOTTOM)
+				cy -= getHeight() - 1;
 			ch = container.getRawHeight() - getHeight() + 1;
 		}
 		else if (tabPosition == TabPosition.LEFT)
 		{
-			cx += getWidth() - 1;
+			if (ah == Anchor.LEFT)
+				cx += getWidth() - 1;
 			cw = container.getRawWidth() - getWidth();
 		}
 		else if (tabPosition == TabPosition.RIGHT)
 		{
+			if (ah == Anchor.RIGHT)
+				cx -= getWidth() - 1;
 			cw = container.getRawWidth() - getWidth() + 1;
 		}
 
