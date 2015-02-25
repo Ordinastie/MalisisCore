@@ -229,6 +229,11 @@ public class GuiTexture
 		return new GuiIcon(icons);
 	}
 
+	public void delete()
+	{
+		Minecraft.getMinecraft().getTextureManager().deleteTexture(resourceLocation);
+	}
+
 	@Override
 	public String toString()
 	{
