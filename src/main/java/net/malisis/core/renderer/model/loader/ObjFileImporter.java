@@ -134,7 +134,7 @@ public class ObjFileImporter implements IModelLoader
 		}
 		catch (IOException e)
 		{
-			MalisisCore.log.error("[ObjFileImporter] An error happened while reading the file : {}", e);
+			MalisisCore.log.error("[ObjFileImporter] An error happened while reading the file : {}", resourceLocation, e);
 		}
 
 	}
