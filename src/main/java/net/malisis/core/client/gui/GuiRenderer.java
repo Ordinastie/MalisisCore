@@ -496,6 +496,8 @@ public class GuiRenderer extends MalisisRenderer
 			z += currentComponent.getZIndex();
 		}
 
+		draw();
+
 		text = StatCollector.translateToLocal(text);
 		text = text.replaceAll("\r?\n", "");
 		GL11.glPushMatrix();
@@ -512,6 +514,8 @@ public class GuiRenderer extends MalisisRenderer
 		// GL11.glEnable(GL11.GL_DEPTH_TEST);
 		currentTexture = null;
 		bindDefaultTexture();
+
+		startDrawing();
 	}
 
 	//#end drawText()
