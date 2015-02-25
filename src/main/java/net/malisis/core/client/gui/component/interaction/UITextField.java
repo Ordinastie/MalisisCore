@@ -84,6 +84,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	private boolean selectAllOnRelease = false;
 	/** Whether this {@link UITextField} should auto select the text when gaining focus. */
 	protected boolean autoSelectOnFocus = false;
+	/** Whether this {@link UITextField} is editable. */
+	protected boolean editable = true;
 	/** Scrollbar of the textfield **/
 	protected UISlimScrollbar scrollBar;
 
@@ -394,6 +396,17 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	public UITextField setAutoSelectOnFocus(boolean auto)
 	{
 		autoSelectOnFocus = auto;
+		return this;
+	}
+
+	public boolean isEditable()
+	{
+		return editable;
+	}
+
+	public UITextField setEditable(boolean editable)
+	{
+		this.editable = editable;
 		return this;
 	}
 
@@ -965,17 +978,19 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				cursorPosition.jumpToLineEnd();
 				return;
 			case Keyboard.KEY_BACK:
-				this.deleteFromCursor(-1);
+				if (editable)
+					this.deleteFromCursor(-1);
 				return;
 			case Keyboard.KEY_DELETE:
-				this.deleteFromCursor(1);
+				if (editable)
+					this.deleteFromCursor(1);
 				return;
 			case Keyboard.KEY_RETURN:
-				if (multiLine)
+				if (multiLine && editable)
 					this.addText("\n");
 				break;
 			default:
-				if (ChatAllowedCharacters.isAllowedCharacter(keyChar))
+				if (ChatAllowedCharacters.isAllowedCharacter(keyChar) && editable)
 					this.addText(Character.toString(keyChar));
 				return;
 		}
@@ -1003,10 +1018,12 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				cursorPosition.jumpToNextSpace(false);
 				return true;
 			case Keyboard.KEY_BACK:
-				this.deleteWord(true);
+				if (editable)
+					this.deleteWord(true);
 				return true;
 			case Keyboard.KEY_DELETE:
-				this.deleteWord(false);
+				if (editable)
+					this.deleteWord(false);
 				return true;
 			case Keyboard.KEY_HOME:
 				startSelecting();
@@ -1025,11 +1042,13 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				GuiScreen.setClipboardString(getSelectedText());
 				return true;
 			case Keyboard.KEY_V:
-				addText(GuiScreen.getClipboardString());
+				if (editable)
+					addText(GuiScreen.getClipboardString());
 				return true;
 			case Keyboard.KEY_X:
 				GuiScreen.setClipboardString(getSelectedText());
-				addText("");
+				if (editable)
+					addText("");
 				return true;
 			default:
 				return false;
