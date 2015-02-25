@@ -121,9 +121,10 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param topLeftColor the new top left color
 	 */
-	public void setTopLeftColor(int topLeftColor)
+	public UIBackgroundContainer setTopLeftColor(int topLeftColor)
 	{
 		this.topLeftColor = topLeftColor;
+		return this;
 	}
 
 	/**
@@ -141,9 +142,10 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param topRightColor the new top right color
 	 */
-	public void setTopRightColor(int topRightColor)
+	public UIBackgroundContainer setTopRightColor(int topRightColor)
 	{
 		this.topRightColor = topRightColor;
+		return this;
 	}
 
 	/**
@@ -161,9 +163,10 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param bottomLeftColor the new bottom left color
 	 */
-	public void setBottomLeftColor(int bottomLeftColor)
+	public UIBackgroundContainer setBottomLeftColor(int bottomLeftColor)
 	{
 		this.bottomLeftColor = bottomLeftColor;
+		return this;
 	}
 
 	/**
@@ -181,9 +184,10 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param bottomRightColor the new bottom right color
 	 */
-	public void setBottomRightColor(int bottomRightColor)
+	public UIBackgroundContainer setBottomRightColor(int bottomRightColor)
 	{
 		this.bottomRightColor = bottomRightColor;
+		return this;
 	}
 
 	/**
@@ -191,10 +195,11 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param color the new top color
 	 */
-	public void setTopColor(int color)
+	public UIBackgroundContainer setTopColor(int color)
 	{
 		setTopLeftColor(color);
 		setTopRightColor(color);
+		return this;
 	}
 
 	/**
@@ -202,10 +207,11 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param color the new bottom color
 	 */
-	public void setBottomColor(int color)
+	public UIBackgroundContainer setBottomColor(int color)
 	{
 		setBottomLeftColor(color);
 		setBottomRightColor(color);
+		return this;
 	}
 
 	/**
@@ -213,10 +219,11 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param color the new left color
 	 */
-	public void setLeftColor(int color)
+	public UIBackgroundContainer setLeftColor(int color)
 	{
 		setTopLeftColor(color);
 		setBottomLeftColor(color);
+		return this;
 	}
 
 	/**
@@ -224,10 +231,11 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param color the new right color
 	 */
-	public void setRightColor(int color)
+	public UIBackgroundContainer setRightColor(int color)
 	{
 		setTopRightColor(color);
 		setBottomRightColor(color);
+		return this;
 	}
 
 	/**
@@ -257,9 +265,10 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param topLeftAlpha the new top left alpha
 	 */
-	public void setTopLeftAlpha(int topLeftAlpha)
+	public UIBackgroundContainer setTopLeftAlpha(int topLeftAlpha)
 	{
 		this.topLeftAlpha = topLeftAlpha;
+		return this;
 	}
 
 	/**
@@ -277,9 +286,10 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param topRightAlpha the new top right alpha
 	 */
-	public void setTopRightAlpha(int topRightAlpha)
+	public UIBackgroundContainer setTopRightAlpha(int topRightAlpha)
 	{
 		this.topRightAlpha = topRightAlpha;
+		return this;
 	}
 
 	/**
@@ -297,9 +307,10 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param bottomLeftAlpha the new bottom left alpha
 	 */
-	public void setBottomLeftAlpha(int bottomLeftAlpha)
+	public UIBackgroundContainer setBottomLeftAlpha(int bottomLeftAlpha)
 	{
 		this.bottomLeftAlpha = bottomLeftAlpha;
+		return this;
 	}
 
 	/**
@@ -317,9 +328,10 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param bottomRightAlpha the new bottom right alpha
 	 */
-	public void setBottomRightAlpha(int bottomRightAlpha)
+	public UIBackgroundContainer setBottomRightAlpha(int bottomRightAlpha)
 	{
 		this.bottomRightAlpha = bottomRightAlpha;
+		return this;
 	}
 
 	/**
@@ -327,10 +339,11 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param alpha the new top alpha
 	 */
-	public void setTopAlpha(int alpha)
+	public UIBackgroundContainer setTopAlpha(int alpha)
 	{
 		setTopLeftAlpha(alpha);
 		setTopRightAlpha(alpha);
+		return this;
 	}
 
 	/**
@@ -338,10 +351,11 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param alpha the new bottom alpha
 	 */
-	public void setBottomAlpha(int alpha)
+	public UIBackgroundContainer setBottomAlpha(int alpha)
 	{
 		setBottomLeftAlpha(alpha);
 		setBottomRightAlpha(alpha);
+		return this;
 	}
 
 	/**
@@ -349,10 +363,11 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param alpha the new left alpha
 	 */
-	public void setLeftAlpha(int alpha)
+	public UIBackgroundContainer setLeftAlpha(int alpha)
 	{
 		setTopLeftAlpha(alpha);
 		setBottomLeftAlpha(alpha);
+		return this;
 	}
 
 	/**
@@ -360,10 +375,11 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param alpha the new right alpha
 	 */
-	public void setRightAlpha(int alpha)
+	public UIBackgroundContainer setRightAlpha(int alpha)
 	{
 		setTopRightAlpha(alpha);
 		setBottomRightAlpha(alpha);
+		return this;
 	}
 
 	/**
@@ -371,10 +387,11 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param alpha the new alpha
 	 */
-	public void setBackgroundAlpha(int alpha)
+	public UIBackgroundContainer setBackgroundAlpha(int alpha)
 	{
 		setTopAlpha(alpha);
 		setBottomAlpha(alpha);
+		return this;
 	}
 
 	@Override
