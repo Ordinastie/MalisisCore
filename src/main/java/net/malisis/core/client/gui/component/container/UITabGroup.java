@@ -200,7 +200,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 
 		if (tabPosition == TabPosition.TOP)
 		{
-			if (av == Anchor.TOP)
+			if (av == Anchor.TOP || av == Anchor.NONE)
 				cy += getHeight() - 1;
 			ch = container.getRawHeight() - getHeight();
 		}
@@ -212,7 +212,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		}
 		else if (tabPosition == TabPosition.LEFT)
 		{
-			if (ah == Anchor.LEFT)
+			if (ah == Anchor.LEFT || ah == Anchor.NONE)
 				cx += getWidth() - 1;
 			cw = container.getRawWidth() - getWidth();
 		}
