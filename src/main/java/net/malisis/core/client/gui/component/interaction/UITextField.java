@@ -180,14 +180,15 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		return text.toString();
 	}
 
-	public void setTextColor(int color)
-	{
-		this.textColor = color;
-	}
-
 	public int getTextColor()
 	{
 		return textColor;
+	}
+
+	public UITextField setTextColor(int color)
+	{
+		this.textColor = color;
+		return this;
 	}
 
 	public int getCursorColor()
@@ -195,9 +196,10 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		return cursorColor;
 	}
 
-	public void setCursorColor(int cursorColor)
+	public UITextField setCursorColor(int cursorColor)
 	{
 		this.cursorColor = cursorColor;
+		return this;
 	}
 
 	public int getSelectColor()
@@ -205,9 +207,10 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		return selectColor;
 	}
 
-	public void setSelectColor(int selectColor)
+	public UITextField setSelectColor(int selectColor)
 	{
 		this.selectColor = selectColor;
+		return this;
 	}
 
 	public boolean isTextShadow()
@@ -215,9 +218,10 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		return textShadow;
 	}
 
-	public void setTextShadow(boolean textShadow)
+	public UITextField setTextShadow(boolean textShadow)
 	{
 		this.textShadow = textShadow;
+		return this;
 	}
 
 	public UITextField setColors(int textColor, int bgColor, int cursorColor, int selectColor, boolean textShadow)

@@ -147,9 +147,10 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		return textColor;
 	}
 
-	public void setTextColor(int textColor)
+	public UISelect setTextColor(int textColor)
 	{
 		this.textColor = textColor;
+		return this;
 	}
 
 	public int getBgColor()
@@ -157,9 +158,10 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		return bgColor;
 	}
 
-	public void setBgColor(int bgColor)
+	public UISelect setBgColor(int bgColor)
 	{
 		this.bgColor = bgColor;
+		return this;
 	}
 
 	public int getHoverTextColor()
@@ -167,9 +169,10 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		return hoverTextColor;
 	}
 
-	public void setHoverTextColor(int hoverTextColor)
+	public UISelect setHoverTextColor(int hoverTextColor)
 	{
 		this.hoverTextColor = hoverTextColor;
+		return this;
 	}
 
 	public int getHoverBgColor()
@@ -177,9 +180,10 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		return hoverBgColor;
 	}
 
-	public void setHoverBgColor(int hoverBgColor)
+	public UISelect setHoverBgColor(int hoverBgColor)
 	{
 		this.hoverBgColor = hoverBgColor;
+		return this;
 	}
 
 	public int getSelectTextColor()
@@ -187,9 +191,10 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		return selectTextColor;
 	}
 
-	public void setSelectTextColor(int selectTextColor)
+	public UISelect setSelectTextColor(int selectTextColor)
 	{
 		this.selectTextColor = selectTextColor;
+		return this;
 	}
 
 	public boolean isTextShadow()
@@ -197,9 +202,10 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		return textShadow;
 	}
 
-	public void setTextShadow(boolean textShadow)
+	public UISelect setTextShadow(boolean textShadow)
 	{
 		this.textShadow = textShadow;
+		return this;
 	}
 
 	public UISelect setColors(int textColor, int bgColor, int hoverTextColor, int hoverBgColor, int selectTextColor, boolean textShadow)
