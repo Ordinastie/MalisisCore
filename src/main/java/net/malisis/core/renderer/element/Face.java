@@ -240,10 +240,10 @@ public class Face
 
 	private double getFactorU(Vertex vertex)
 	{
-		if (params.textureSide.get() == null)
+		if (params.direction.get() == null)
 			return vertex.getU();
 
-		switch (params.textureSide.get())
+		switch (params.direction.get())
 		{
 			case EAST:
 				return vertex.getZ();
@@ -262,10 +262,10 @@ public class Face
 
 	private double getFactorV(Vertex vertex)
 	{
-		if (params.textureSide.get() == null)
+		if (params.direction.get() == null)
 			return vertex.getV();
 
-		switch (params.textureSide.get())
+		switch (params.direction.get())
 		{
 			case EAST:
 			case WEST:
