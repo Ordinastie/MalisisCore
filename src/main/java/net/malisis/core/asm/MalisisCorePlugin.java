@@ -29,6 +29,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.asm.transformer.ChunkCollisionTransformer;
 
 import org.apache.logging.log4j.LogManager;
 
@@ -45,7 +46,7 @@ public class MalisisCorePlugin implements IFMLLoadingPlugin
 	@Override
 	public String[] getASMTransformerClass()
 	{
-		return new String[] { MalisisCoreTransformer.class.getName() };
+		return new String[] { MalisisCoreTransformer.class.getName(), ChunkCollisionTransformer.class.getName() };
 	}
 
 	@Override

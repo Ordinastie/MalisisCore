@@ -22,13 +22,17 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.block;
+package net.malisis.core.util.chunkcollision;
+
+import net.malisis.core.block.BoundingBoxType;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.IBlockAccess;
 
 /**
  * @author Ordinastie
  *
  */
-public enum BoundingBoxType
+public interface IChunkCollidable
 {
-	SELECTION, COLLISION, RAYTRACE, RENDER, CHUNKCOLLISION
+	public AxisAlignedBB[] getBoundingBox(IBlockAccess world, int x, int y, int z, BoundingBoxType type);
 }

@@ -34,6 +34,7 @@ import net.malisis.core.configuration.ConfigurationGui;
 import net.malisis.core.configuration.Settings;
 import net.malisis.core.network.MalisisNetwork;
 import net.malisis.core.tileentity.MultiBlockTileEntity;
+import net.malisis.core.util.chunkcollision.ChunkCollision;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
@@ -185,6 +186,8 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	{
 		MinecraftForge.EVENT_BUS.register(instance);
 		MinecraftForge.EVENT_BUS.register(ReplacementTool.instance());
+		MinecraftForge.EVENT_BUS.register(ChunkCollision.server);
+		MinecraftForge.EVENT_BUS.register(ChunkCollision.client);
 
 		log = event.getModLog();
 
