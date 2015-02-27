@@ -50,10 +50,23 @@ public class UIButton extends UIComponent<UIButton>
 	protected GuiIcon iconDisabled;
 	protected GuiIcon iconPressed;
 
-	private String text;
-	private UIImage image;
-	private boolean autoWidth = true;
-	private boolean isPressed = false;
+	/** Text used for this {@link UIButton}. Exclusive with {@link #image}. */
+	protected String text;
+	/** Image used for this {@link UIButton}. Exclusive with {@link #text}. */
+	protected UIImage image;
+	/** Whether the size of this {@link UIButton} is automatically calculated based on its contents. */
+	protected boolean autoSize = true;
+	/** Whether this {@link UIButton} is currently being pressed. */
+	protected boolean isPressed = false;
+
+	/** The background color of this {@link UIButton}. */
+	protected int bgColor = 0xFFFFFF;
+	/** The text color of this {@link UIButton}. */
+	protected int textColor = 0xFFFFFF;
+	/** The hovered text color of this {@link UIButton}. */
+	protected int hoverTextColor = 0xFFFFA0;
+	/** Whether to use shadow for the text of this {@link UIButton}. */
+	protected boolean textShadow = true;
 
 	/**
 	 * Instantiates a new {@link UIButton}.
@@ -63,7 +76,7 @@ public class UIButton extends UIComponent<UIButton>
 	public UIButton(MalisisGui gui)
 	{
 		super(gui);
-		setSize(60);
+		//setSize(60);
 
 		shape = new XYResizableGuiShape();
 		icon = gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5);
@@ -96,8 +109,130 @@ public class UIButton extends UIComponent<UIButton>
 		setImage(image);
 	}
 
+	//#region Getters/Setters
 	/**
-	 * Sets the text of this {@link UIButton}. If a width of 0 was previously set, it will be recalculated for this text.
+	 * Checks if is width is automatically calculated.<br>
+	 * If true, this {@link UIButton} cannot be smaller that its contents.
+	 *
+	 * @return the autoWidth
+	 */
+	public boolean isAutoSize()
+	{
+		return autoSize;
+	}
+
+	/**
+	 * Sets whether the size of this {@link UIButton} should be calculated automatically.
+	 *
+	 * @param autoSize the autoSize to set
+	 */
+	public UIButton setAutoSize(boolean autoSize)
+	{
+		this.autoSize = autoSize;
+		setSize(width, height);
+		return this;
+	}
+
+	/**
+	 * Gets the background color of this {@link UIButton}.
+	 *
+	 * @return the bg color
+	 */
+	public int getBgColor()
+	{
+		return bgColor;
+	}
+
+	/**
+	 * Sets the background color of this {@link UIButton}.
+	 *
+	 * @param bgColor the bg color
+	 * @return the UI button
+	 */
+	public UIButton setBgColor(int bgColor)
+	{
+		this.bgColor = bgColor;
+		return this;
+	}
+
+	/**
+	 * Gets the text color of this {@link UIButton}.
+	 *
+	 * @return the text color
+	 */
+	public int getTextColor()
+	{
+		return textColor;
+	}
+
+	/**
+	 * Sets the text color of this {@link UIButton}.
+	 *
+	 * @param textColor the text color
+	 * @return the UI button
+	 */
+	public UIButton setTextColor(int textColor)
+	{
+		this.textColor = textColor;
+		return this;
+	}
+
+	/**
+	 * Gets the hovered text color of this {@link UIButton}.
+	 *
+	 * @return the hover text color
+	 */
+	public int getHoverTextColor()
+	{
+		return hoverTextColor;
+	}
+
+	/**
+	 * Sets the hover text color of this {@link UIButton}.
+	 *
+	 * @param hoverTextColor the hover text color
+	 * @return the UI button
+	 */
+	public UIButton setHoverTextColor(int hoverTextColor)
+	{
+		this.hoverTextColor = hoverTextColor;
+		return this;
+	}
+
+	/**
+	 * Whether the text of this {@link UIButton} is drawn with shadow.
+	 *
+	 * @return true, if is text shadow
+	 */
+	public boolean isTextShadow()
+	{
+		return textShadow;
+	}
+
+	/**
+	 * Sets the text shadow for this {@link UIButton}.
+	 *
+	 * @param textShadow the text shadow
+	 * @return the UI button
+	 */
+	public UIButton setTextShadow(boolean textShadow)
+	{
+		this.textShadow = textShadow;
+		return this;
+	}
+
+	public UIButton setColors(int textColor, int hoverTextColor, int bgColor, boolean textShadow)
+	{
+		this.textColor = textColor;
+		this.hoverTextColor = hoverTextColor;
+		this.bgColor = bgColor;
+		this.textShadow = textShadow;
+		return this;
+	}
+
+	//#end Getters/Setters
+	/**
+	 * Sets the text of this {@link UIButton}.
 	 *
 	 * @param text the text
 	 * @return this {@link UIButton}
@@ -105,7 +240,7 @@ public class UIButton extends UIComponent<UIButton>
 	public UIButton setText(String text)
 	{
 		this.text = text;
-		setSize(autoWidth ? 0 : width, height);
+		setSize(width, height);
 		image = null;
 		return this;
 	}
@@ -130,7 +265,7 @@ public class UIButton extends UIComponent<UIButton>
 	{
 		this.image = image;
 		image.setParent(this);
-		setSize(autoWidth ? 0 : width, height);
+		setSize(width, height);
 		text = null;
 		return this;
 	}
@@ -156,20 +291,22 @@ public class UIButton extends UIComponent<UIButton>
 	@Override
 	public UIButton setSize(int width, int height)
 	{
-		autoWidth = width == 0;
-		if (image != null)
+		if (autoSize)
 		{
-			int w = image.getRawWidth();
-			int h = image.getRawHeight();
-			width = Math.max(width, w);
-			height = Math.max(height, h);
-		}
-		else
-		{
-			int w = GuiRenderer.getStringWidth(text);
-			int h = GuiRenderer.getStringHeight();
-			width = Math.max(width, w + 6);
-			height = Math.max(height, h + 6);
+			if (image != null)
+			{
+				int w = image.getRawWidth();
+				int h = image.getRawHeight();
+				width = Math.max(width, w + 2);
+				height = Math.max(height, h + 2);
+			}
+			else
+			{
+				int w = GuiRenderer.getStringWidth(text);
+				int h = GuiRenderer.getStringHeight();
+				width = Math.max(width, w + 6);
+				height = Math.max(height, h + 6);
+			}
 		}
 
 		this.width = width;
@@ -200,6 +337,7 @@ public class UIButton extends UIComponent<UIButton>
 			icon = this.icon;
 
 		rp.icon.set(icon);
+		rp.colorMultiplier.set(bgColor);
 		renderer.drawShape(shape, rp);
 	}
 
@@ -221,6 +359,10 @@ public class UIButton extends UIComponent<UIButton>
 
 		int x = (width - w) / 2;
 		int y = (height - h) / 2;
+		if (x == 0)
+			x = 1;
+		if (y == 0)
+			y = 1;
 		if (isPressed)
 		{
 			x += 1;
@@ -235,7 +377,7 @@ public class UIButton extends UIComponent<UIButton>
 		}
 		else
 		{
-			renderer.drawText(text, x, y, isHovered() ? 0xFFFFA0 : 0xFFFFFF, true);
+			renderer.drawText(text, x, y, isHovered() ? hoverTextColor : textColor, textShadow);
 		}
 
 	}
@@ -269,39 +411,45 @@ public class UIButton extends UIComponent<UIButton>
 		return (image != null ? "{" + image + "}" : text) + " , " + super.getPropertyString();
 	}
 
+	/**
+	 * Event fired when a {@link UIButton} is clicked.
+	 */
 	public static class ClickEvent extends ComponentEvent<UIButton>
 	{
+		/** Position of the mouse when clicked . */
 		private int x, y;
-		private MouseButton button;
-		private int buttonCode;
 
+		/**
+		 * Instantiates a new {@link ClickEvent}.
+		 *
+		 * @param component the component
+		 * @param mouseEvent the mouse event
+		 */
 		public ClickEvent(UIButton component, MouseEvent.Release mouseEvent)
 		{
 			super(component);
 			this.x = mouseEvent.getX();
 			this.y = mouseEvent.getY();
-			this.button = mouseEvent.getButton();
-			this.buttonCode = mouseEvent.getButtonCode();
 		}
 
+		/**
+		 * Gets the x coordinate of the mouse.
+		 *
+		 * @return the x
+		 */
 		public int getX()
 		{
 			return x;
 		}
 
+		/**
+		 * Gets the y coordinate of the mouse.
+		 *
+		 * @return the y
+		 */
 		public int getY()
 		{
 			return y;
-		}
-
-		public MouseButton getButton()
-		{
-			return button;
-		}
-
-		public int getButtonCode()
-		{
-			return buttonCode;
 		}
 
 	}
