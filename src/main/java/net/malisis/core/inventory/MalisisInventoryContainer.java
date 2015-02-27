@@ -34,9 +34,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.inventory.message.UpdateInventorySlotsMessage;
 import net.malisis.core.inventory.player.PlayerInventory;
 import net.malisis.core.inventory.player.PlayerInventorySlot;
-import net.malisis.core.packet.UpdateInventorySlotsMessage;
 import net.malisis.core.util.ItemUtils;
 import net.malisis.core.util.ItemUtils.ItemStacksMerger;
 import net.minecraft.entity.player.EntityPlayer;

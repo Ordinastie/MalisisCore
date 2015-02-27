@@ -32,8 +32,8 @@ import java.util.WeakHashMap;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.inventory.message.OpenInventoryMessage;
 import net.malisis.core.inventory.player.PlayerInventory;
-import net.malisis.core.packet.OpenInventoryMessage;
 import net.malisis.core.util.EntityUtils;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;

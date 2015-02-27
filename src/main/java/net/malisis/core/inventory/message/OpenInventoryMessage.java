@@ -22,9 +22,10 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.packet;
+package net.malisis.core.inventory.message;
 
 import io.netty.buffer.ByteBuf;
+import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.IInventoryProvider;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisInventoryContainer;
@@ -49,6 +50,13 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessage.Packet, IMessage>
 {
+	public static OpenInventoryMessage instance = new OpenInventoryMessage();
+
+	public OpenInventoryMessage()
+	{
+		MalisisCore.network.registerMessage(this, Packet.class, Side.CLIENT);
+	}
+
 	public enum ContainerType
 	{
 		TYPE_TILEENTITY, TYPE_ITEM;
@@ -111,7 +119,7 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 	public static void send(IInventoryProvider container, EntityPlayerMP player, int windowId)
 	{
 		Packet packet = new Packet(container, windowId);
-		NetworkHandler.network.sendTo(packet, player);
+		MalisisCore.network.sendTo(packet, player);
 	}
 
 	public static class Packet implements IMessage

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.packet;
+package net.malisis.core.inventory.message;
 
 import io.netty.buffer.ByteBuf;
 
@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisSlot;
@@ -53,7 +54,14 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInventorySlotsMessage.Packet, IMessage>
 {
+	public static UpdateInventorySlotsMessage instance = new UpdateInventorySlotsMessage();
+
 	public static int PICKEDITEM = -1;
+
+	public UpdateInventorySlotsMessage()
+	{
+		MalisisCore.network.registerMessage(this, Packet.class, Side.CLIENT);
+	}
 
 	/**
 	 * Handles the received {@link Packet} on the client. Updates the slots.
@@ -117,7 +125,7 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 	{
 		Packet packet = new Packet(PICKEDITEM, windowId);
 		packet.draggedItemStack(itemStack);
-		NetworkHandler.network.sendTo(packet, player);
+		MalisisCore.network.sendTo(packet, player);
 	}
 
 	/**
@@ -133,7 +141,7 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 		Packet packet = new Packet(inventoryId, windowId);
 		for (MalisisSlot slot : slots)
 			packet.addSlot(slot);
-		NetworkHandler.network.sendTo(packet, player);
+		MalisisCore.network.sendTo(packet, player);
 	}
 
 	public static class Packet implements IMessage

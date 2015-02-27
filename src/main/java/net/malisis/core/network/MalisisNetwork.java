@@ -22,37 +22,44 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.packet;
+package net.malisis.core.network;
 
-import net.malisis.core.MalisisCore;
+import net.malisis.core.IMalisisMod;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 
 /**
- * Global handler for {@link MalisisCore} messages.
- *
  * @author Ordinastie
  *
  */
-public class NetworkHandler
+public class MalisisNetwork extends SimpleNetworkWrapper
 {
-	public static int OPENINVENTORY = 1;
-	public static int UPDATEINVENTORYSLOTS = 2;
-	public static int INVENTORYACTION = 3;
-	public static SimpleNetworkWrapper network;
+	private static int discriminator = 0;
 
-	/**
-	 * Initializes the handle. Creates the network wrapper and registers the different handlers.
-	 *
-	 * @param channelName the channel name
-	 */
-	public static void init(String channelName)
+	public MalisisNetwork(String channelName)
 	{
-		network = new SimpleNetworkWrapper(channelName);
+		super(channelName);
+	}
 
-		network.registerMessage(OpenInventoryMessage.class, OpenInventoryMessage.Packet.class, OPENINVENTORY, Side.CLIENT);
-		network.registerMessage(UpdateInventorySlotsMessage.class, UpdateInventorySlotsMessage.Packet.class, UPDATEINVENTORYSLOTS,
-				Side.CLIENT);
-		network.registerMessage(InventoryActionMessage.class, InventoryActionMessage.Packet.class, INVENTORYACTION, Side.SERVER);
+	public MalisisNetwork(IMalisisMod mod)
+	{
+		super(mod.getModId());
+	}
+
+	public <REQ extends IMessage, REPLY extends IMessage> void registerMessage(Class<? extends IMessageHandler<REQ, REPLY>> messageHandler, Class<REQ> requestMessageType, Side side)
+	{
+		super.registerMessage(messageHandler, requestMessageType, discriminator++, side);
+	}
+
+	public <REQ extends IMessage, REPLY extends IMessage> void registerMessage(IMessageHandler<? super REQ, ? extends REPLY> messageHandler, Class<REQ> requestMessageType, Side side)
+	{
+		super.registerMessage(messageHandler, requestMessageType, discriminator++, side);
+	}
+
+	public int getNetDiscriminator()
+	{
+		return discriminator++;
 	}
 }

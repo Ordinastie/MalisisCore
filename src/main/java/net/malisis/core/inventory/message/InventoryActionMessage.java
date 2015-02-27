@@ -22,9 +22,10 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.packet;
+package net.malisis.core.inventory.message;
 
 import io.netty.buffer.ByteBuf;
+import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.minecraft.client.Minecraft;
@@ -43,6 +44,13 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class InventoryActionMessage implements IMessageHandler<InventoryActionMessage.Packet, IMessage>
 {
+	public static InventoryActionMessage instance = new InventoryActionMessage();
+
+	public InventoryActionMessage()
+	{
+		MalisisCore.network.registerMessage(this, Packet.class, Side.SERVER);
+	}
+
 	/**
 	 * Handles the {@link Packet} received from the client. Pass the action to the {@link MalisisInventoryContainer}, and send the changes
 	 * back to the client.
@@ -81,7 +89,7 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 	{
 		int windowId = Minecraft.getMinecraft().thePlayer.openContainer.windowId;
 		Packet packet = new Packet(action, inventoryId, slotNumber, code, windowId);
-		NetworkHandler.network.sendToServer(packet);
+		MalisisCore.network.sendToServer(packet);
 	}
 
 	/**

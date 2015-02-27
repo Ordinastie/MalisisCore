@@ -32,7 +32,7 @@ import java.util.Set;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.configuration.ConfigurationGui;
 import net.malisis.core.configuration.Settings;
-import net.malisis.core.packet.NetworkHandler;
+import net.malisis.core.network.MalisisNetwork;
 import net.malisis.core.tileentity.MultiBlockTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
@@ -69,25 +69,21 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 {
 	/** Mod ID. */
 	public static final String modid = "malisiscore";
-
 	/** Mod name. */
 	public static final String modname = "Malisis Core";
-
 	/** Current version. */
 	public static final String version = MalisisCore.class.getPackage().getImplementationVersion() != null ? MalisisCore.class.getPackage()
 			.getImplementationVersion() : "UNKNOWN";
-
 	/** Url for the mod. */
 	public static final String url = "";
-
 	/** Path for the mod. */
 	public static File coremodLocation;
-
 	/** Reference to the mod instance */
 	public static MalisisCore instance;
-
 	/** Logger for the mod. */
 	public static Logger log;
+	/** Network for the mod */
+	public static MalisisNetwork network;
 
 	/** List of {@link IMalisisMod} registered. */
 	private HashMap<String, IMalisisMod> registeredMods = new HashMap<>();
@@ -113,6 +109,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		instance = this;
 	}
 
+	//#region IMalisisMod
 	@Override
 	public String getModId()
 	{
@@ -136,6 +133,8 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	{
 		return null;
 	}
+
+	//#end IMalisisMod
 
 	/**
 	 * Registers a {@link IMalisisMod} mod.
@@ -186,6 +185,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	{
 		MinecraftForge.EVENT_BUS.register(instance);
 		MinecraftForge.EVENT_BUS.register(ReplacementTool.instance());
+
 		log = event.getModLog();
 
 		GameRegistry.registerTileEntity(MultiBlockTileEntity.class, "MalisisCoreMultiBlockTileEntity");
@@ -199,7 +199,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	@Subscribe
 	public static void init(FMLInitializationEvent event)
 	{
-		NetworkHandler.init(modid);
+		network = new MalisisNetwork(instance);
 		ClientCommandHandler.instance.registerCommand(new MalisisCommand());
 	}
 
