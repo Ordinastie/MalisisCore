@@ -28,6 +28,8 @@ import static org.objectweb.asm.tree.AbstractInsnNode.*;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collections;
+import java.util.ListIterator;
 
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -48,7 +50,7 @@ public class AsmUtils
 {
 	/**
 	 * find the method with the given name. If multiple methods with the same parameters exist, the first one will be returned
-	 * 
+	 *
 	 * @param clazz the class
 	 * @param name the method name to search for
 	 * @return the first method with the given name or null if no such method is found
@@ -67,7 +69,7 @@ public class AsmUtils
 
 	/**
 	 * find the method with the given name and method descriptor.
-	 * 
+	 *
 	 * @param clazz the class
 	 * @param name the method name to search for
 	 * @param desc the method descriptor to search for
@@ -88,7 +90,12 @@ public class AsmUtils
 
 	public static AbstractInsnNode findInstruction(MethodNode method, InsnList matches)
 	{
-		AbstractInsnNode node = method.instructions.getFirst();
+		return findInstruction(method, matches, 0);
+	}
+
+	public static AbstractInsnNode findInstruction(MethodNode method, InsnList matches, int index)
+	{
+		AbstractInsnNode node = method.instructions.get(index);
 		AbstractInsnNode match = matches.getFirst();
 		while (node != null)
 		{
@@ -197,4 +204,13 @@ public class AsmUtils
 		return sw.toString();
 	}
 
+	public static InsnList cloneList(InsnList list)
+	{
+		InsnList clone = new InsnList();
+		ListIterator<AbstractInsnNode> it = list.iterator();
+		while (it.hasNext())
+			clone.add(it.next().clone(Collections.EMPTY_MAP));
+
+		return clone;
+	}
 }

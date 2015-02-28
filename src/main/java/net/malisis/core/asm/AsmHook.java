@@ -121,7 +121,7 @@ public class AsmHook
 			{
 				case FIND:
 					InsnList match = matches.remove(0);
-					AbstractInsnNode node = AsmUtils.findInstruction(methodNode, match);
+					AbstractInsnNode node = AsmUtils.findInstruction(methodNode, match, index);
 					if (node == null)
 						return false;
 					else
