@@ -221,7 +221,7 @@ public class UIButton extends UIComponent<UIButton>
 		return this;
 	}
 
-	public UIButton setColors(int textColor, int hoverTextColor, int bgColor, boolean textShadow)
+	public UIButton setOptions(int textColor, int hoverTextColor, int bgColor, boolean textShadow)
 	{
 		this.textColor = textColor;
 		this.hoverTextColor = hoverTextColor;

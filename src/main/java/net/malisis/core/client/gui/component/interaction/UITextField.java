@@ -226,7 +226,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		return this;
 	}
 
-	public UITextField setColors(int textColor, int bgColor, int cursorColor, int selectColor, boolean textShadow)
+	public UITextField setOptions(int textColor, int bgColor, int cursorColor, int selectColor, boolean textShadow)
 	{
 		this.textColor = textColor;
 		this.bgColor = bgColor;
