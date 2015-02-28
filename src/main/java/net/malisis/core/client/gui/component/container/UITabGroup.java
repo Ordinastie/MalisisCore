@@ -45,14 +45,29 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		TOP, RIGHT, LEFT, BOTTOM
 	}
 
+	/** The list of {@link UITab} added to this {@link UITabGroup}. */
 	protected Map<UITab, UIContainer> listTabs = new LinkedHashMap<>();
+	/** The currently active {@link UITab}. */
 	protected UITab activeTab;
+	/** The position of this {@link UITabGroup} relative to its {@link #attachedContainer}. */
 	protected TabPosition tabPosition = TabPosition.TOP;
+	/** The {@link UIContainer} this {@link UITabGroup} is attached to. */
 	protected UIContainer attachedContainer;
+	/** Number of pixels this {@link UITabGroup} is offset to the border of the {@link #attachedContainer}. */
 	protected int offset = 3;
+	/** Number of pixels between each tab. */
+	protected int spacing = 0;
+	/** Icons to use if this {@link UITabGroup} is attached to a {@link UIWindow}. */
 	protected GuiIcon[] windowIcons;
+	/** Icons to use if this {@link UITabGroup} is attached to a {@link UIPanel}. */
 	protected GuiIcon[] panelIcons;
 
+	/**
+	 * Instantiates a new {@link UITabGroup}.
+	 *
+	 * @param gui the gui
+	 * @param tabPosition the tab position
+	 */
 	public UITabGroup(MalisisGui gui, TabPosition tabPosition)
 	{
 		super(gui);
@@ -73,31 +88,96 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		//@formatter:on
 	}
 
+	/**
+	 * Instantiates a new {@link UITabGroup}.
+	 *
+	 * @param gui the gui
+	 */
 	public UITabGroup(MalisisGui gui)
 	{
 		this(gui, TabPosition.TOP);
 	}
 
 	/**
-	 * @return the relative position of the tabs around their containers.
+	 * Gets the relative position of the tabs around their containers.
+	 *
+	 * @return the tab position
 	 */
 	public TabPosition getTabPosition()
 	{
 		return tabPosition;
 	}
 
+	/**
+	 * Gets the icons for this {@link UITabGroup}
+	 *
+	 * @return the icons
+	 */
 	public GuiIcon getIcons()
 	{
 		if (attachedContainer instanceof UIWindow)
 			return windowIcons[tabPosition.ordinal()];
 		else
 			return panelIcons[tabPosition.ordinal()];
-
 	}
 
 	/**
-	 * Adds an {@link UITab} and its corresponding {@link UIContainer}to this {@link UITabGroup}.<br>
-	 * Also sets the width of this {@link UITabGroup}.
+	 * Gets the attached container for this {@link UITabGroup}.
+	 *
+	 * @return the attached container
+	 */
+	public UIContainer getAttachedContainer()
+	{
+		return attachedContainer;
+	}
+
+	/**
+	 * Gets the offset for this {@link UITabGroup}.
+	 *
+	 * @return the offset
+	 */
+	public int getOffset()
+	{
+		return offset;
+	}
+
+	/**
+	 * Sets the offset for this {@link UITabGroup}.
+	 *
+	 * @param offset the offset
+	 * @return this {@link UITabGroup}
+	 */
+	public UITabGroup setOffset(int offset)
+	{
+		this.offset = offset;
+		return this;
+	}
+
+	/**
+	 * Gets the spacing for this {@link UITabGroup}.
+	 *
+	 * @return the spacing
+	 */
+	public int getSpacing()
+	{
+		return spacing;
+	}
+
+	/**
+	 * Sets the spacing for this {@link UITabGroup}.
+	 *
+	 * @param spacing the spacing
+	 * @return this {@link UITabGroup}
+	 */
+	public UITabGroup setSpacing(int spacing)
+	{
+		this.spacing = spacing;
+		return this;
+	}
+
+	/**
+	 * Adds a {@link UITab} and its corresponding {@link UIContainer} to this {@link UITabGroup}.<br>
+	 * Also sets the width of this {@code UITabGroup}.
 	 *
 	 * @param tab tab to add to the UITabGroup
 	 * @param container {@link UIContainer} linked to the {@link UITab}
@@ -115,25 +195,31 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		return tab;
 	}
 
-	public void calculateTabPosition()
+	/**
+	 * Calculates the {@link UITab} position.<br>
+	 * Sets the width and height of this {@link UITabGroup}.
+	 */
+	protected void calculateTabPosition()
 	{
 		int w = 0;
 		int h = 0;
+		int s = 0;
 
 		for (UITab tab : listTabs.keySet())
 		{
 			if (tabPosition == TabPosition.TOP || tabPosition == TabPosition.BOTTOM)
 			{
-				tab.setPosition(w + offset, 1);
-				w += tab.getWidth();
+				tab.setPosition(w + offset + s, 1);
+				w += tab.getWidth() + s;
 				h = Math.max(h, tab.getHeight());
 			}
 			else
 			{
-				tab.setPosition(1, h + offset);
+				tab.setPosition(1, h + offset + s);
 				w = Math.max(w, tab.getWidth());
-				h += tab.getHeight();
+				h += tab.getHeight() + s;
 			}
+			s = spacing;
 		}
 
 		boolean isHorizontal = tabPosition == TabPosition.TOP || tabPosition == TabPosition.BOTTOM;
@@ -149,7 +235,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	}
 
 	/**
-	 * Activates the tab and deactivates currently active tab.
+	 * Activates the {@link UITab} and deactivates currently active one.
 	 *
 	 * @param tab the new active tab
 	 */
@@ -166,13 +252,8 @@ public class UITabGroup extends UIContainer<UITabGroup>
 			tab.setActive(true);
 
 		if (attachedContainer instanceof ITransformable.Color)
-			((ITransformable.Color) attachedContainer).setColor(tab.getColor());
+			((ITransformable.Color) attachedContainer).setColor(tab.getBgColor());
 
-	}
-
-	public UIContainer getAttachedContainer()
-	{
-		return attachedContainer;
 	}
 
 	/**
@@ -186,7 +267,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	{
 		attachedContainer = container;
 		if (activeTab != null && attachedContainer instanceof ITransformable.Color)
-			((ITransformable.Color) attachedContainer).setColor(activeTab.getColor());
+			((ITransformable.Color) attachedContainer).setColor(activeTab.getBgColor());
 
 		if (!displace)
 			return this;

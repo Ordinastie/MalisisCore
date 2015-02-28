@@ -47,14 +47,39 @@ import com.google.common.eventbus.Subscribe;
  */
 public class UITab extends UIComponent<UITab>
 {
-	protected String label;
-	protected UIImage image;
-	protected boolean autoWidth = false;
-	protected boolean autoHeight = false;
-	protected UIContainer container;
-	protected boolean active = false;
-	protected int color = 0xFFFFFF;
 
+	/** Label for this {@link UITab}. */
+	protected String label;
+	/** Image for this {@link UITab}. */
+	protected UIImage image;
+	/** Whether the width of this {@link UITab} is calculated based on the {@link #label} or {@link #image} . */
+	protected boolean autoWidth = false;
+	/** Whether the height of this {@link UITab} is calculated based on the {@link #label} or {@link #image} . */
+	protected boolean autoHeight = false;
+	/** The container this {@link UITab} is linked to. */
+	protected UIContainer container;
+	/** Whether this {@link UITab} is currently active. */
+	protected boolean active = false;
+
+	/** Text color for this {@link UITab} when not active. */
+	protected int textColor = 0x404040;
+	/** Text color for this {@link UITab} when active. */
+	protected int activeTextColor = 0xFFFFFF;
+	/** Text color for this {@link UITab} when hovered. */
+	protected int hoverTextColor = 0xFFFFA0;
+	/** Text shadow for this {@link UITab} when not active. */
+	protected boolean textShadow = false;
+	/** Text shadow for this {@link UITab} when active. */
+	protected boolean activeTextShadow = true;
+	/** Background color for this {@link UITab}. */
+	protected int bgColor = 0xFFFFFF;
+
+	/**
+	 * Instantiates a new {@link UITab}.
+	 *
+	 * @param gui the gui
+	 * @param label the label
+	 */
 	public UITab(MalisisGui gui, String label)
 	{
 		super(gui);
@@ -64,6 +89,12 @@ public class UITab extends UIComponent<UITab>
 		shape = new XYResizableGuiShape();
 	}
 
+	/**
+	 * Instantiates a new {@link UITab}.
+	 *
+	 * @param gui the gui
+	 * @param image the image
+	 */
 	public UITab(MalisisGui gui, UIImage image)
 	{
 		super(gui);
@@ -73,115 +104,11 @@ public class UITab extends UIComponent<UITab>
 		shape = new XYResizableGuiShape();
 	}
 
+	//#region Getters/Setters
 	/**
-	 * @return whether this {@link UITab} is horizontally positioned.
-	 */
-	protected boolean isHorizontal()
-	{
-		if (parent == null)
-			return true;
-		TabPosition pos = ((UITabGroup) parent).getTabPosition();
-		return pos == TabPosition.TOP || pos == TabPosition.BOTTOM;
-	}
-
-	/**
-	 * Sets the color for this {@link UITab}. Also sets the color for its {@link UIContainer}.
-	 *
-	 * @param color the color
-	 * @return this {@link UITab}
-	 */
-	public UITab setColor(int color)
-	{
-		this.color = color;
-		if (parent != null)
-		{
-			UIContainer cont = ((UITabGroup) parent).getAttachedContainer();
-			if (cont instanceof ITransformable.Color)
-				((Color) cont).setColor(color);
-		}
-		return this;
-	}
-
-	/**
-	 * @return the color of this {@link UITab}.
-	 */
-	public int getColor()
-	{
-		return color;
-	}
-
-	@Override
-	public void setParent(UIComponent parent)
-	{
-		if (!(parent instanceof UITabGroup))
-			throw new IllegalArgumentException("UITabs can only be added to UITabGroup");
-
-		super.setParent(parent);
-	}
-
-	@Override
-	public UITab setSize(int width, int height)
-	{
-		this.autoWidth = width == 0;
-		this.width = autoWidth ? calcAutoWidth() : width;
-
-		this.autoHeight = height == 0;
-		this.height = autoHeight ? calcAutoHeight() : height;
-
-		if (shape != null)
-			shape.setSize(this.width, this.height);
-
-		return this;
-	}
-
-	/**
-	 * Calculates the width of this {@link UITab} based on its contents.
-	 *
-	 * @return the width
-	 */
-	private int calcAutoWidth()
-	{
-		if (label != null)
-			return GuiRenderer.getStringWidth(label) + (isHorizontal() ? 10 : 8);
-		else if (image != null)
-			return image.getWidth() + 10;
-		else
-			return 8;
-	}
-
-	/**
-	 * @return whether the width should be calculated automatically.
-	 */
-	public boolean isAutoWidth()
-	{
-		return autoWidth;
-	}
-
-	/**
-	 * Calculates the height of this {@link UITab} base on its contents.
-	 *
-	 * @return the height
-	 */
-	private int calcAutoHeight()
-	{
-		if (label != null)
-			return GuiRenderer.FONT_HEIGHT + (isHorizontal() ? 8 : 10);
-		else if (image != null)
-			return image.getHeight() + 10;
-		else
-			return 8;
-	}
-
-	/**
-	 * @return whether the height should be calculated automatically.
-	 */
-	public boolean isAutoHeight()
-	{
-		return autoHeight;
-	}
-
-	/**
-	 * Sets the label for this {@link UITab}. Removes the image if was previously set.
+	 * Sets the label for this {@link UITab}.<br>
+	 * Removes the image if previously set.<br>
+	 * Recalculates the width if {@link #autoWidth} is true, the height if {@link #autoHeight} is true.
 	 *
 	 * @param label the label
 	 * @return this {@link UITab}
@@ -198,7 +125,9 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	/**
-	 * Sets the image {@link UITab}. Removes the label if was previously set.
+	 * Sets the image {@link UITab}.<br>
+	 * Removes the label if previously set.<br>
+	 * Recalculates the width if {@link #autoWidth} is true, the height if {@link #autoHeight} is true.
 	 *
 	 * @param image the image
 	 * @return this {@link UITab}
@@ -216,6 +145,64 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	/**
+	 * Sets the parent for this {@link UITab}.<br>
+	 *
+	 * @param parent the new parent
+	 * @exception IllegalArgumentException if the parent is not a {@link UITabGroup}
+	 */
+	@Override
+	public void setParent(UIComponent parent)
+	{
+		if (!(parent instanceof UITabGroup))
+			throw new IllegalArgumentException("UITabs can only be added to UITabGroup");
+
+		super.setParent(parent);
+	}
+
+	/**
+	 * Sets the size of this {@link UITab}.<br>
+	 * If width or height is 0, it will be automatically calculated base on {@link #label} or {@link #image}.
+	 *
+	 * @param width the width
+	 * @param height the height
+	 * @return this {@link UITab}
+	 */
+	@Override
+	public UITab setSize(int width, int height)
+	{
+		this.autoWidth = width == 0;
+		this.width = autoWidth ? calcAutoWidth() : width;
+
+		this.autoHeight = height == 0;
+		this.height = autoHeight ? calcAutoHeight() : height;
+
+		if (shape != null)
+			shape.setSize(this.width, this.height);
+
+		return this;
+	}
+
+	/**
+	 * Checks if the width is calculated automatically.
+	 *
+	 * @return true if the width is calculated automatically.
+	 */
+	public boolean isAutoWidth()
+	{
+		return autoWidth;
+	}
+
+	/**
+	 * Checks if height is calculated automatically.
+	 *
+	 * @return true if the height is calculated automatically.
+	 */
+	public boolean isAutoHeight()
+	{
+		return autoHeight;
+	}
+
+	/**
 	 * Set the {@link UIContainer} linked with this {@link UITab}.
 	 *
 	 * @param container the container
@@ -228,12 +215,168 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	/**
-	 * @return this {@link UITab} position around the container.
+	 * Gets the {@link TabPosition} of this {@link UITab}.
+	 *
+	 * @return the tab position
 	 */
 	public TabPosition getTabPosition()
 	{
 		return ((UITabGroup) parent).getTabPosition();
 	}
+
+	/**
+	 * Gets the text color for this {@link UITab} when not {@link #active}.
+	 *
+	 * @return the text color
+	 */
+	public int getTextColor()
+	{
+		return textColor;
+	}
+
+	/**
+	 * Sets the text color for this {@link UITab} when not {@link #active}.
+	 *
+	 * @param textColor the text color
+	 * @return the UI tab
+	 */
+	public UITab setTextColor(int textColor)
+	{
+		this.textColor = textColor;
+		return this;
+	}
+
+	/**
+	 * Gets the text color for this {@link UITab} when {@link #active}.
+	 *
+	 * @return the active text color
+	 */
+	public int getActiveTextColor()
+	{
+		return activeTextColor;
+	}
+
+	/**
+	 * Sets the text shadow for this {@link UITab} when {@link #active}.
+	 *
+	 * @param activeTextColor the active text color
+	 * @return this {@link UITab}
+	 */
+	public UITab setActiveTextColor(int activeTextColor)
+	{
+		this.activeTextColor = activeTextColor;
+		return this;
+	}
+
+	/**
+	 * Gets the text color for this {@link UITab} when not hovered.
+	 *
+	 * @return the text color
+	 */
+	public int getHoverTextColor()
+	{
+		return hoverTextColor;
+	}
+
+	/**
+	 * Sets the text color for this {@link UITab} when hovered.
+	 *
+	 * @param hovertextColor the text color
+	 * @return the UI tab
+	 */
+	public UITab setHoveredTextColor(int hovertextColor)
+	{
+		this.hoverTextColor = hovertextColor;
+		return this;
+	}
+
+	/**
+	 * Checks if text shadow is used for this {@link UITab} when not {@link #active}.
+	 *
+	 * @return true, if text shadow is used
+	 */
+	public boolean isTextShadow()
+	{
+		return textShadow;
+	}
+
+	/**
+	 * Sets the text shadow for this {@link UITab} when not {@link #active}.
+	 *
+	 * @param textShadow the text shadow
+	 * @return this {@link UITab}
+	 */
+	public UITab setTextShadow(boolean textShadow)
+	{
+		this.textShadow = textShadow;
+		return this;
+	}
+
+	/**
+	 * Checks if text shadow is used for this {@link UITab} when not {@link #active}.
+	 *
+	 * @return true, if active text shadow is used
+	 */
+	public boolean isActiveTextShadow()
+	{
+		return activeTextShadow;
+	}
+
+	/**
+	 * Sets the text shadow for this {@link UITab} when {@link #active}.
+	 *
+	 * @param activeTextShadow the active text shadow
+	 * @return the UI tab
+	 */
+	public UITab setActiveTextShadow(boolean activeTextShadow)
+	{
+		this.activeTextShadow = activeTextShadow;
+		return this;
+	}
+
+	/**
+	 * Gets the background color for this {@link UITab}.
+	 *
+	 * @return the color of this {@link UITab}.
+	 */
+	public int getBgColor()
+	{
+		return bgColor;
+	}
+
+	/**
+	 * Sets the baground color for this {@link UITab}.<br>
+	 * Also sets the bacground color for its {@link #container}.
+	 *
+	 * @param color the color
+	 * @return this {@link UITab}
+	 */
+	public UITab setBgColor(int color)
+	{
+		this.bgColor = color;
+		if (parent != null)
+		{
+			UIContainer cont = ((UITabGroup) parent).getAttachedContainer();
+			if (cont instanceof ITransformable.Color)
+				((Color) cont).setColor(color);
+		}
+		return this;
+	}
+
+	public UITab setOptions(int textColor, int activeTextColor, int hoverTextColor, int bgColor, boolean textShadow, boolean activeTextShadow)
+	{
+		this.textColor = textColor;
+		this.activeTextColor = activeTextColor;
+		this.hoverTextColor = hoverTextColor;
+		this.textShadow = textShadow;
+		this.activeTextShadow = activeTextShadow;
+
+		setBgColor(bgColor);
+
+		return this;
+	}
+
+	//#end Getters/Setters
 
 	/**
 	 * Sets this tab to be active. Enables and sets visibility for its container.
@@ -271,6 +414,8 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	/**
+	 * Gets the {@link IIcon} to use for this {@link UITab}.
+	 *
 	 * @return the icons to render.
 	 */
 	private IIcon getIcon()
@@ -281,10 +426,53 @@ public class UITab extends UIComponent<UITab>
 		return ((UITabGroup) parent).getIcons();
 	}
 
+	/**
+	 * Checks whether this {@link UITab} is horizontally positioned.
+	 *
+	 * @return true, if is horizontal
+	 */
+	protected boolean isHorizontal()
+	{
+		if (parent == null)
+			return true;
+		TabPosition pos = ((UITabGroup) parent).getTabPosition();
+		return pos == TabPosition.TOP || pos == TabPosition.BOTTOM;
+	}
+
+	/**
+	 * Calculates the width of this {@link UITab} based on its contents.
+	 *
+	 * @return the width
+	 */
+	private int calcAutoWidth()
+	{
+		if (label != null)
+			return GuiRenderer.getStringWidth(label) + (isHorizontal() ? 10 : 8);
+		else if (image != null)
+			return image.getWidth() + 10;
+		else
+			return 8;
+	}
+
+	/**
+	 * Calculates the height of this {@link UITab} base on its contents.
+	 *
+	 * @return the height
+	 */
+	private int calcAutoHeight()
+	{
+		if (label != null)
+			return GuiRenderer.FONT_HEIGHT + (isHorizontal() ? 8 : 10);
+		else if (image != null)
+			return image.getHeight() + 10;
+		else
+			return 8;
+	}
+
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.colorMultiplier.set(color);
+		rp.colorMultiplier.set(bgColor);
 		rp.icon.set(getIcon());
 		renderer.drawShape(shape, rp);
 	}
@@ -318,8 +506,9 @@ public class UITab extends UIComponent<UITab>
 
 		if (label != null)
 		{
-			int color = isHovered() ? 0xFFFFA0 : (active ? 0xFFFFFF : 0x404040);
-			renderer.drawText(label, x, y, 1, color, active, true);
+			int color = isHovered() ? hoverTextColor : (active ? activeTextColor : textColor);
+			boolean shadow = active ? activeTextShadow : textShadow;
+			renderer.drawText(label, x, y, 1, color, shadow, true);
 		}
 		else if (image != null)
 		{
