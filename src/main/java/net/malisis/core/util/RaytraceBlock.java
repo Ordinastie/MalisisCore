@@ -29,6 +29,7 @@ import java.util.List;
 
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.MalisisBlock;
+import net.malisis.core.util.chunkcollision.IChunkCollidable;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.AxisAlignedBB;
@@ -188,7 +189,7 @@ public class RaytraceBlock
 	{
 		points.clear();
 
-		if (!(block instanceof MalisisBlock))
+		if (!(block instanceof MalisisBlock || block instanceof IChunkCollidable))
 			return block.collisionRayTrace(world, x, y, z, ray.origin.toVec3(), dest.toVec3());
 
 		MalisisBlock block = (MalisisBlock) this.block;

@@ -29,7 +29,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.asm.transformer.ChunkCollisionTransformer;
+import net.malisis.core.util.chunkcollision.ChunkCollisionTransformer;
 
 import org.apache.logging.log4j.LogManager;
 

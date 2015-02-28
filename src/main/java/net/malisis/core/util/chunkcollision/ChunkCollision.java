@@ -24,29 +24,32 @@
 
 package net.malisis.core.util.chunkcollision;
 
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.hash.TIntHashSet;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import net.malisis.core.block.BoundingBoxType;
+import net.malisis.core.util.Point;
+import net.malisis.core.util.RaytraceBlock;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
-
-import com.google.common.primitives.Ints;
-
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 
@@ -61,7 +64,11 @@ public class ChunkCollision
 
 	// /!\ Logical side!
 	private Side side;
-	private Map<Chunk, Set<Integer>> chunks = new WeakHashMap();
+	private Map<Chunk, TIntHashSet> chunks = new WeakHashMap();
+	private CoordProcedure coordProcedure = new CoordProcedure();
+	private Set<Position> blocks = new HashSet<>();
+	private Point src = null;
+	private Point dest = null;
 
 	private ChunkCollision(Side side)
 	{
@@ -70,10 +77,10 @@ public class ChunkCollision
 
 	private void addCoord(Chunk chunk, int coord)
 	{
-		Set<Integer> coords = chunks.get(chunk);
+		TIntHashSet coords = chunks.get(chunk);
 		if (coords == null)
 		{
-			coords = new HashSet<>();
+			coords = new TIntHashSet();
 			chunks.put(chunk, coords);
 		}
 		coords.add(coord);
@@ -81,16 +88,32 @@ public class ChunkCollision
 
 	private void removeCoord(Chunk chunk, int coord)
 	{
-		Set<Integer> coords = chunks.get(chunk);
+		TIntHashSet coords = chunks.get(chunk);
 		if (coords == null)
 			return;
 		coords.remove(coord);
 		if (coords.size() == 0)
 			chunks.remove(chunk);
-
 	}
 
-	public List<AxisAlignedBB> getCollisionBoxes(World world, AxisAlignedBB mask, Entity entity)
+	private void setBlocksForChunks(World world, int minX, int minZ, int maxX, int maxZ)
+	{
+		blocks.clear();
+		for (int cx = minX; cx <= maxX; ++cx)
+		{
+			for (int cz = minZ; cz <= maxZ; ++cz)
+			{
+				TIntHashSet coords = chunks.get(world.getChunkFromChunkCoords(cx, cz));
+				if (coords != null)
+				{
+					coordProcedure.setChunk(cx, cz);
+					coords.forEach(coordProcedure);
+				}
+			}
+		}
+	}
+
+	private List<AxisAlignedBB> getCollisionBoxes(World world, AxisAlignedBB mask, Entity entity)
 	{
 		int tminX = MathHelper.floor_double(mask.minX);
 		int tmaxX = MathHelper.floor_double(mask.maxX);
@@ -103,32 +126,15 @@ public class ChunkCollision
 		int maxZ = chunkZ(tmaxZ) + 1;
 
 		List<AxisAlignedBB> list = new ArrayList<>();
+		setBlocksForChunks(world, minX, minZ, maxX, maxZ);
 
-		for (int cx = minX; cx <= maxX; ++cx)
+		for (Position p : blocks)
 		{
-			for (int cz = minZ; cz <= maxZ; ++cz)
+			Block block = world.getBlock(p.x, p.y, p.z);
+			if (block instanceof IChunkCollidable)
 			{
-				Set<Integer> coords = chunks.get(world.getChunkFromChunkCoords(cx, cz));
-				if (coords != null)
-				{
-					Iterator<Integer> iterator = coords.iterator();
-					while (iterator.hasNext())
-					{
-						int coord = iterator.next();
-						int x = getX(cx, coord);
-						int y = getY(coord);
-						int z = getZ(cz, coord);
-						Block block = world.getBlock(x, y, z);
-						if (block instanceof IChunkCollidable)
-						{
-							AxisAlignedBB[] aabbs = ((IChunkCollidable) block).getBoundingBox(world, x, y, z,
-									BoundingBoxType.CHUNKCOLLISION);
-							filter(list, mask, aabbs, x, y, z);
-						}
-						else
-							iterator.remove();
-					}
-				}
+				AxisAlignedBB[] aabbs = ((IChunkCollidable) block).getBoundingBox(world, p.x, p.y, p.z, BoundingBoxType.CHUNKCOLLISION);
+				filter(list, mask, aabbs, p.x, p.y, p.z);
 			}
 		}
 
@@ -145,13 +151,65 @@ public class ChunkCollision
 		}
 	}
 
+	private void setRayTraceInfos(Vec3 src, Vec3 dest)
+	{
+		if (src == null || dest == null)
+			return;
+		this.src = new Point(src);
+		this.dest = new Point(dest);
+	}
+
+	private MovingObjectPosition getRayTrace(World world, MovingObjectPosition mop)
+	{
+		if (src == null || dest == null)
+			return null;
+
+		int tminX = MathHelper.floor_double(Math.min(src.x, dest.x));
+		int tmaxX = MathHelper.floor_double(Math.max(src.x, dest.x)) + 1;
+		int tminZ = MathHelper.floor_double(Math.min(src.z, dest.z));
+		int tmaxZ = MathHelper.floor_double(Math.max(src.z, dest.z)) + 1;
+
+		int minX = chunkX(tminX);
+		int maxX = chunkX(tmaxX);
+		int minZ = chunkZ(tminZ);
+		int maxZ = chunkZ(tmaxZ);
+
+		setBlocksForChunks(world, minX, minZ, maxX, maxZ);
+		for (Position p : blocks)
+		{
+			RaytraceBlock rt = RaytraceBlock.set(src, dest, p.x, p.y, p.z);
+			mop = getClosest(src, rt.trace(), mop);
+		}
+
+		dest = null;
+		src = null;
+		return mop;
+	}
+
+	private MovingObjectPosition getClosest(Point src, MovingObjectPosition mop1, MovingObjectPosition mop2)
+	{
+		if (mop1 == null)
+			return mop2;
+		if (mop2 == null)
+			return mop1;
+
+		if (mop1.typeOfHit == MovingObjectType.MISS && mop2.typeOfHit != MovingObjectType.MISS)
+			return mop2;
+		if (mop1.typeOfHit != MovingObjectType.MISS && mop2.typeOfHit == MovingObjectType.MISS)
+			return mop1;
+
+		if (Point.distanceSquared(src, new Point(mop1.hitVec)) > Point.distanceSquared(src, new Point(mop2.hitVec)))
+			return mop2;
+		return mop1;
+	}
+
 	public void setCoords(int chunkX, int chunkZ, int[] coords)
 	{
 		if (side != Side.CLIENT)
 			return;
 
 		Chunk chunk = Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(chunkX, chunkZ);
-		chunks.put(chunk, new HashSet<>(Ints.asList(coords)));
+		chunks.put(chunk, new TIntHashSet(coords));
 	}
 
 	@SubscribeEvent
@@ -165,7 +223,7 @@ public class ChunkCollision
 			return;
 
 		int[] coords = nbt.getIntArray("chunkCollision");
-		chunks.put(event.getChunk(), new HashSet(Ints.asList(coords)));
+		chunks.put(event.getChunk(), new TIntHashSet(coords));
 	}
 
 	@SubscribeEvent
@@ -174,23 +232,23 @@ public class ChunkCollision
 		if (side == Side.CLIENT)
 			return;
 
-		Collection<Integer> coords = chunks.get(event.getChunk());
+		TIntHashSet coords = chunks.get(event.getChunk());
 		if (coords == null || coords.size() == 0)
 			return;
 
 		NBTTagCompound nbt = event.getData();
-		nbt.setIntArray("chunkCollision", Ints.toArray(coords));
+		nbt.setIntArray("chunkCollision", coords.toArray());
 	}
 
 	@SubscribeEvent
 	public void onChunkWatched(ChunkWatchEvent.Watch event)
 	{
 		Chunk chunk = event.player.worldObj.getChunkFromChunkCoords(event.chunk.chunkXPos, event.chunk.chunkZPos);
-		Collection<Integer> coords = chunks.get(chunk);
+		TIntHashSet coords = chunks.get(chunk);
 		if (coords == null || coords.size() == 0)
 			return;
 
-		ChunkCollisionMessage.sendCoords(chunk, Ints.toArray(coords), event.player);
+		ChunkCollisionMessage.sendCoords(chunk, coords.toArray(), event.player);
 	}
 
 	public static ChunkCollision get(World world)
@@ -211,6 +269,16 @@ public class ChunkCollision
 	public static int getInt(int x, int y, int z)
 	{
 		return (x & 15) | ((y & 255) << 4) | ((z & 15) << 12);
+	}
+
+	public static int[] getIntArray(Chunk chunk, int coord)
+	{
+		return getIntArray(chunk.xPosition, chunk.zPosition, coord);
+	}
+
+	public static int[] getIntArray(int chunkX, int chunkZ, int coord)
+	{
+		return new int[] { getX(chunkX, coord), getY(coord), getZ(chunkZ, coord) };
 	}
 
 	public static int getX(Chunk chunk, int coord)
@@ -276,4 +344,64 @@ public class ChunkCollision
 		list.addAll(get(world).getCollisionBoxes(world, mask, entity));
 	}
 
+	public static void setRayTraceInfos(World world, Vec3 src, Vec3 dest)
+	{
+		get(world).setRayTraceInfos(src, dest);
+	}
+
+	public static MovingObjectPosition getRayTraceResult(World world, MovingObjectPosition mop)
+	{
+		return get(world).getRayTrace(world, mop);
+	}
+
+	private class CoordProcedure implements TIntProcedure
+	{
+		private int chunkX = 0;
+		private int chunkZ = 0;
+
+		public void setChunk(Chunk chunk)
+		{
+			setChunk(chunk.xPosition, chunk.zPosition);
+		}
+
+		public void setChunk(int x, int z)
+		{
+			this.chunkX = x;
+			this.chunkZ = z;
+		}
+
+		@Override
+		public boolean execute(int coord)
+		{
+			blocks.add(new Position(chunkX, chunkZ, coord));
+			return true;
+		}
+	}
+
+	private static class Position
+	{
+		int x, y, z;
+		int cx, cz;
+
+		public Position(Chunk chunk, int coord)
+		{
+			this(chunk.xPosition, chunk.zPosition, coord);
+		}
+
+		public Position(int cx, int cz, int coord)
+		{
+			this.cx = cx;
+			this.cz = cz;
+			this.x = (cx << 4) + (coord & 15);
+			this.y = (coord >> 4) & 255;
+			this.z = (cz << 4) + ((coord >> 12) & 15);
+		}
+
+		@Override
+		public String toString()
+		{
+			return x + "," + y + "," + z + " (" + cx + "," + cz + ")";
+		}
+
+	}
 }
