@@ -124,7 +124,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		insert.add(new VarInsnNode(ILOAD, 13));
 		insert.add(new VarInsnNode(ALOAD, 8));
 		insert.add(new VarInsnNode(ALOAD, 4));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "updateChunkCollision",
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "updateCollisionCoordinates",
 				"(Lnet/minecraft/world/chunk/Chunk;IIILnet/minecraft/block/Block;Lnet/minecraft/block/Block;)V"));
 
 		ah.jumpAfter(match).jumpAfter(match).insert(insert);

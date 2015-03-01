@@ -187,7 +187,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		MinecraftForge.EVENT_BUS.register(instance);
 		MinecraftForge.EVENT_BUS.register(ReplacementTool.instance());
 		MinecraftForge.EVENT_BUS.register(ChunkCollision.server);
-		MinecraftForge.EVENT_BUS.register(ChunkCollision.client);
+		//MinecraftForge.EVENT_BUS.register(ChunkCollision.client);
 
 		log = event.getModLog();
 

@@ -56,7 +56,7 @@ public class ChunkCollisionMessage implements IMessageHandler<ChunkCollisionMess
 		return null;
 	}
 
-	public static void sendCoords(Chunk chunk, int[] coords, EntityPlayerMP player)
+	public static void sendCoords(Chunk chunk, long[] coords, EntityPlayerMP player)
 	{
 		MalisisCore.network.sendTo(new Packet(chunk, coords), player);
 	}
@@ -65,12 +65,12 @@ public class ChunkCollisionMessage implements IMessageHandler<ChunkCollisionMess
 	{
 		private int x;
 		private int z;
-		private int[] coords;
+		private long[] coords;
 
 		public Packet()
 		{}
 
-		public Packet(Chunk chunk, int[] coords)
+		public Packet(Chunk chunk, long[] coords)
 		{
 			this.x = chunk.xPosition;
 			this.z = chunk.zPosition;
@@ -82,7 +82,7 @@ public class ChunkCollisionMessage implements IMessageHandler<ChunkCollisionMess
 		{
 			x = buf.readInt();
 			z = buf.readInt();
-			coords = new int[buf.readInt()];
+			coords = new long[buf.readInt()];
 			for (int i = 0; i < coords.length; i++)
 				coords[i] = buf.readInt();
 		}
@@ -93,9 +93,8 @@ public class ChunkCollisionMessage implements IMessageHandler<ChunkCollisionMess
 			buf.writeInt(x);
 			buf.writeInt(z);
 			buf.writeInt(coords.length);
-			for (int c : coords)
-				buf.writeInt(c);
+			for (long c : coords)
+				buf.writeLong(c);
 		}
-
 	}
 }
