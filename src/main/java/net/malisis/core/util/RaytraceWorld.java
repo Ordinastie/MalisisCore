@@ -27,6 +27,7 @@ package net.malisis.core.util;
 import java.util.HashMap;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.util.chunkcollision.ChunkCollision;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.MovingObjectPosition;
@@ -280,8 +281,11 @@ public class RaytraceWorld
 		if (firstHit == null && dest != null)
 			firstHit = new MovingObjectPosition(currentX, currentY, currentZ, -1, dest.toVec3(), false);
 
+		ChunkCollision.setRayTraceInfos(world, src, dest);
+		firstHit = ChunkCollision.getRayTraceResult(world, mop);
+
 		if (!ret)
-			MalisisCore.message("Trace fail : " + MAX_BLOCKS + " passed (" + currentX + "," + currentY + "," + currentZ + ")");
+			MalisisCore.message("Trace fail : " + MAX_BLOCKS + " blocks passed (" + currentX + "," + currentY + "," + currentZ + ")");
 		return firstHit;
 	}
 
