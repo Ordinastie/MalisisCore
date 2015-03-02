@@ -35,6 +35,7 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
@@ -51,6 +52,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		register(getBoundingBoxesHook());
 		register(updateCoordsHook());
 		register(rayTraceHook());
+		register(placeBlockHook());
 	}
 
 	@SuppressWarnings("deprecation")
@@ -79,10 +81,10 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 				"(Lnet/minecraft/world/World;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;)V"));
 
 		//LDC 0.25
-		//DSTORE 9
+		//DSTORE 9/13 <= depends on NEI installed
 		InsnList match = new InsnList();
 		match.add(new LdcInsnNode(0.25));
-		match.add(new VarInsnNode(DSTORE, 13));
+		//		match.add(new VarInsnNode(DSTORE, 13));
 
 		ah.jumpTo(match).jump(-1).insert(insert);
 
@@ -211,6 +213,41 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 			.jumpTo(returnMop1).insert(insertMop1) //L1367
 			.jumpTo(returnMop2OrNull).insert(insertMop_3); //L1377
 		//@formatter:on
+
+		return ah;
+	}
+
+	@SuppressWarnings("deprecation")
+	private AsmHook placeBlockHook()
+	{
+		McpMethodMapping canPlaceEntityOnSide = new McpMethodMapping("canPlaceEntityOnSide", "func_147472_a", "net.minecraft.world.World",
+				"(Lnet/minecraft/block/Block;IIIZILnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)Z");
+
+		AsmHook ah = new AsmHook(canPlaceEntityOnSide);
+
+		//if(canPlaceBlockAt(Lnet/minecraft/world/World;Lnet/minecraft/block/Block;IIILnet/minecraft/util/AxisAlignedBB;)Z)
+		//	return false;
+		//		 IFNE L1
+		//		   L2
+		//		    LINENUMBER 412 L2
+		//		    ICONST_0
+		//		    IRETURN
+		//		   L1
+		InsnList insert = new InsnList();
+		LabelNode label = new LabelNode();
+		insert.add(new VarInsnNode(ALOAD, 0));
+		insert.add(new VarInsnNode(ALOAD, 1));
+		insert.add(new VarInsnNode(ILOAD, 2));
+		insert.add(new VarInsnNode(ILOAD, 3));
+		insert.add(new VarInsnNode(ILOAD, 4));
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "canPlaceBlockAt",
+				"(Lnet/minecraft/world/World;Lnet/minecraft/block/Block;III)Z"));
+		insert.add(new JumpInsnNode(IFNE, label));
+		insert.add(new InsnNode(ICONST_0));
+		insert.add(new InsnNode(IRETURN));
+		insert.add(label);
+
+		ah.insert(insert);
 
 		return ah;
 	}
