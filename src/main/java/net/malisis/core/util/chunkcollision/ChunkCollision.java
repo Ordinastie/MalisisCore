@@ -80,7 +80,6 @@ public class ChunkCollision
 	private static final long Z_MASK = (1L << NUM_Z_BITS) - 1L;
 
 	// /!\ Logical side!
-	@SuppressWarnings("unused")
 	private Side side;
 	private Map<Chunk, TLongHashSet> chunks = new WeakHashMap();
 	private CollisionProcedure collisionProcedure = new CollisionProcedure();
@@ -327,7 +326,7 @@ public class ChunkCollision
 	}
 
 	//#end getRayTraceResult
-	
+
 	//#region canPlaceBlockAt
 	/**
 	 * Checks whether the block can be placed at the position.<br>
@@ -516,7 +515,6 @@ public class ChunkCollision
 
 	//#end Events
 
-
 	/**
 	 * Gets the right {@link ChunkCollision} instance base on {@link World#isRemote}.
 	 *
@@ -606,6 +604,8 @@ public class ChunkCollision
 
 			if (chunk.xPosition != chunkX(x) || chunk.zPosition != chunkZ(z) || !(block instanceof IChunkCollidable))
 			{
+				MalisisCore.log.info("[ChunkCollision]  Removing invalid {} coordinate : {} in chunk {} (block {})", side,
+						printCoord(coord), printChunk(chunk), block);
 				removeCoord(chunk, coord);
 				return false;
 			}

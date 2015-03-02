@@ -84,7 +84,7 @@ public class ChunkCollisionMessage implements IMessageHandler<ChunkCollisionMess
 			z = buf.readInt();
 			coords = new long[buf.readInt()];
 			for (int i = 0; i < coords.length; i++)
-				coords[i] = buf.readInt();
+				coords[i] = buf.readLong();
 		}
 
 		@Override
