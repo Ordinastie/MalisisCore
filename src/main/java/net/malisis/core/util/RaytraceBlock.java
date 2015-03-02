@@ -195,10 +195,18 @@ public class RaytraceBlock
 		MalisisBlock block = (MalisisBlock) this.block;
 		AxisAlignedBB[] aabbs = block.getBoundingBox(world, x, y, z, BoundingBoxType.RAYTRACE);
 
+		double maxDist = Point.distanceSquared(src, dest);
 		for (AxisAlignedBB aabb : aabbs)
 		{
-			aabb.offset(x, y, z);
-			points.addAll(ray.intersect(aabb));
+			if (aabb != null)
+			{
+				aabb.offset(x, y, z);
+				for (Point p : ray.intersect(aabb))
+				{
+					if (Point.distanceSquared(src, p) < maxDist)
+						points.add(p);
+				}
+			}
 		}
 
 		if (points.size() == 0)
