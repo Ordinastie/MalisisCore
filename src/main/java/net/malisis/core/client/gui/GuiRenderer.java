@@ -594,8 +594,10 @@ public class GuiRenderer extends MalisisRenderer
 		if (fontRenderer == null)
 			fontRenderer = MalisisRenderer.getFontRenderer();
 
-		if (label == null && itemStack.stackSize > 1)
+		if (label == null && (itemStack.stackSize > 1 || format != null))
 			label = Integer.toString(itemStack.stackSize);
+		if (label == null)
+			label = "";
 		if (format != null)
 			label = format + label;
 
