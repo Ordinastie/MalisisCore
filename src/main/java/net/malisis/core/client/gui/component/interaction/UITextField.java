@@ -27,7 +27,6 @@ package net.malisis.core.client.gui.component.interaction;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -466,10 +465,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (!validateText(newValue))
 			return;
 
-		MalisisCore.message("Firing event");
 		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
 			return;
-		MalisisCore.message("Event fired");
 
 		this.text.insert(position, text);
 		buildLines();
