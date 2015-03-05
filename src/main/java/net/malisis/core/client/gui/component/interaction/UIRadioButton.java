@@ -33,14 +33,10 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.util.MouseButton;
 
 import org.lwjgl.opengl.GL11;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
@@ -158,14 +154,12 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 		}
 	}
 
-	@Subscribe
-	public void onButtonRelease(MouseEvent.Release event)
+	@Override
+	public boolean onClick(int x, int y)
 	{
-		if (event.getButton() == MouseButton.LEFT)
-		{
-			if (fireEvent(new UIRadioButton.SelectEvent(this)))
-				setSelected();
-		}
+		if (fireEvent(new UIRadioButton.SelectEvent(this)))
+			setSelected();
+		return true;
 	}
 
 	public static void addRadioButton(UIRadioButton rb)

@@ -30,14 +30,8 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
-import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.client.gui.event.MouseEvent.DoubleClick;
-import net.malisis.core.client.gui.event.MouseEvent.Press;
-import net.malisis.core.client.gui.event.MouseEvent.Release;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * UIButton
@@ -319,8 +313,8 @@ public class UIButton extends UIComponent<UIButton>
 	public void setHovered(boolean hovered)
 	{
 		super.setHovered(hovered);
-		if (!hovered)
-			isPressed = false;
+		//		if (!hovered)
+		//			isPressed = false;
 	}
 
 	@Override
@@ -329,7 +323,7 @@ public class UIButton extends UIComponent<UIButton>
 		final GuiIcon icon;
 		if (isDisabled())
 			icon = iconDisabled;
-		else if (isPressed)
+		else if (isPressed && isHovered())
 			icon = iconPressed;
 		else if (isHovered())
 			icon = iconHovered;
@@ -363,7 +357,7 @@ public class UIButton extends UIComponent<UIButton>
 			x = 1;
 		if (y == 0)
 			y = 1;
-		if (isPressed)
+		if (isPressed && isHovered())
 		{
 			x += 1;
 			y += 1;
@@ -382,27 +376,28 @@ public class UIButton extends UIComponent<UIButton>
 
 	}
 
-	@Subscribe
-	public void onClick(MouseEvent.ButtonStateEvent event)
+	@Override
+	public boolean onButtonPress(int x, int y, MouseButton button)
 	{
-		if (event.getButton() != MouseButton.LEFT)
-			return;
-
-		if (event instanceof DoubleClick)
-			return;
-
-		if (event instanceof Press)
-		{
+		if (button == MouseButton.LEFT)
 			isPressed = true;
-			return;
-		}
+		return super.onButtonPress(x, y, button);
+	}
 
-		if (event instanceof Release && !isPressed)
-			return;
+	@Override
+	public boolean onButtonRelease(int x, int y, MouseButton button)
+	{
+		if (button == MouseButton.LEFT)
+			isPressed = false;
+		return super.onButtonRelease(x, y, button);
+	}
 
-		isPressed = false;
+	@Override
+	public boolean onClick(int x, int y)
+	{
 		MalisisGui.playSound("gui.button.press");
-		fireEvent(new ClickEvent(this, (Release) event));
+		fireEvent(new ClickEvent(this, x, y));
+		return true;
 	}
 
 	@Override
@@ -423,13 +418,15 @@ public class UIButton extends UIComponent<UIButton>
 		 * Instantiates a new {@link ClickEvent}.
 		 *
 		 * @param component the component
-		 * @param mouseEvent the mouse event
+		 * @param x the x coordinate of the mouse
+		 * @param y the y coordinate of the mouse
+		 * @param button the mouse button
 		 */
-		public ClickEvent(UIButton component, MouseEvent.Release mouseEvent)
+		public ClickEvent(UIButton component, int x, int y)
 		{
 			super(component);
-			this.x = mouseEvent.getX();
-			this.y = mouseEvent.getY();
+			this.x = x;
+			this.y = y;
 		}
 
 		/**

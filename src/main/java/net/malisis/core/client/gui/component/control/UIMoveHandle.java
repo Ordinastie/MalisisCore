@@ -29,10 +29,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.util.MouseButton;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
@@ -74,28 +71,29 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 		this(gui, parent, Type.BOTH);
 	}
 
-	@Subscribe
-	public void onDrag(MouseEvent.Drag event)
+	@Override
+	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
 	{
-		if (event.getButton() != MouseButton.LEFT)
-			return;
+		if (button != MouseButton.LEFT)
+			return super.onDrag(lastX, lastY, x, y, button);
 
 		UIComponent parentCont = getParent().getParent();
 		if (parentCont == null)
-			return;
+			return super.onDrag(lastX, lastY, x, y, button);
 
-		int x = parent.getX();
+		int px = parent.getX();
 		if (type == Type.BOTH || type == Type.HORIZONTAL)
-			x = parentCont.relativeX(event.getX() /*- parentCont.getHorizontalPadding()*/);
-		int y = parent.getY();
+			px = parentCont.relativeX(x /*- parentCont.getHorizontalPadding()*/);
+		int py = parent.getY();
 		if (type == Type.BOTH || type == Type.VERTICAL)
-			y = parentCont.relativeY(event.getY() /*- parentCont.getVerticalPadding()*/);
-		if (x < 0)
-			x = 0;
-		if (y < 0)
-			y = 0;
+			py = parentCont.relativeY(y /*- parentCont.getVerticalPadding()*/);
+		if (px < 0)
+			px = 0;
+		if (py < 0)
+			py = 0;
 
-		getParent().setPosition(x, y, Anchor.NONE);
+		getParent().setPosition(px, py, Anchor.NONE);
+		return true;
 	}
 
 	@Override

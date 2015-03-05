@@ -35,8 +35,6 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
-import net.malisis.core.client.gui.event.KeyboardEvent;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
@@ -274,55 +272,62 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		updateScrollbars();
 	}
 
-	@Subscribe
-	public void onClick(MouseEvent.Press event)
+	@Override
+	public boolean onButtonPress(int x, int y, MouseButton button)
 	{
-		if (event.getButton() != MouseButton.LEFT)
-			return;
+		if (button != MouseButton.LEFT)
+			return onButtonPress(x, y, button);
 
-		if (isInsideBounds(event.getX(), event.getY()))
-			onScrollTo(event);
+		onScrollTo(x, y);
+		return true;
 	}
 
-	@Subscribe
-	public void onDrag(MouseEvent.Drag event)
+	@Override
+	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
 	{
-		if (event.getButton() != MouseButton.LEFT)
-			return;
+		if (button != MouseButton.LEFT)
+			return super.onDrag(lastX, lastY, x, y, button);
 
 		if (isFocused())
-			onScrollTo(event);
+			onScrollTo(x, y);
+		return true;
 	}
 
-	private void onScrollTo(MouseEvent event)
+	private void onScrollTo(int x, int y)
 	{
 		int l = getLength() - scrollHeight - 2;
-		int pos = isHorizontal() ? relativeX(event.getX()) : relativeY(event.getY());
+		int pos = isHorizontal() ? relativeX(x) : relativeY(y);
 		pos -= scrollHeight / 2;
 		scrollTo((float) pos / l);
 	}
 
-	@Subscribe
-	public void onScrollWheel(MouseEvent.ScrollWheel event)
+	@Override
+	public boolean onScrollWheel(int x, int y, int delta)
 	{
 		if ((isHorizontal() != GuiScreen.isShiftKeyDown()) && !isHovered())
-			return;
+			return super.onScrollWheel(x, y, delta);
 
-		scrollBy(-event.getDelta() * getScrollable().getScrollStep());
+		scrollBy(-delta * getScrollable().getScrollStep());
+		return true;
 	}
 
-	@Subscribe
-	public void onKeyTyped(KeyboardEvent event)
+	@Override
+	public boolean onKeyTyped(char keyChar, int keyCode)
 	{
-		if (!isHovered() && !getParent().isHovered())
-			return;
-		if (isHorizontal() != GuiScreen.isShiftKeyDown())
-			return;
+		if (MalisisGui.isGuiCloseKey(keyCode))
+			return super.onKeyTyped(keyChar, keyCode);
 
-		if (event.getKeyCode() == Keyboard.KEY_HOME)
+		if (!isHovered() && !getParent().isHovered())
+			return super.onKeyTyped(keyChar, keyCode);
+		if (isHorizontal() != GuiScreen.isShiftKeyDown())
+			return super.onKeyTyped(keyChar, keyCode);
+
+		if (keyCode == Keyboard.KEY_HOME)
 			scrollTo(0);
-		else if (event.getKeyCode() == Keyboard.KEY_END)
+		else if (keyCode == Keyboard.KEY_END)
 			scrollTo(1);
+
+		return true;
 	}
 
 	@Override

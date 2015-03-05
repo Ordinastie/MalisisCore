@@ -27,6 +27,7 @@ package net.malisis.core.client.gui.component.interaction;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -37,8 +38,6 @@ import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
-import net.malisis.core.client.gui.event.KeyboardEvent;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
@@ -49,8 +48,6 @@ import net.minecraft.util.StatCollector;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * UITextField.
@@ -469,8 +466,10 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (!validateText(newValue))
 			return;
 
+		MalisisCore.message("Firing event");
 		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
 			return;
+		MalisisCore.message("Event fired");
 
 		this.text.insert(position, text);
 		buildLines();
@@ -515,6 +514,12 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 
 		int start = Math.min(selectionPosition.textPosition, cursorPosition.textPosition);
 		int end = Math.max(selectionPosition.textPosition, cursorPosition.textPosition);
+
+		String oldValue = this.text.toString();
+		String newValue = new StringBuilder(oldValue).substring(start, end).toString();
+
+		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
+			return;
 
 		text.delete(start, end);
 		selectingText = false;
@@ -817,16 +822,13 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
-	/**
-	 * Called when a mouse button is pressed over this {@link UITextField}.
-	 *
-	 * @param event the event
-	 */
-	@Subscribe
-	public void onMousePress(MouseEvent.Press event)
+	@Override
+	public boolean onButtonPress(int x, int y, MouseButton button)
 	{
-		int x = relativeX(event.getX());
-		int y = relativeY(event.getY());
+		if (button != MouseButton.LEFT)
+			return super.onButtonRelease(x, y, button);
+		x = relativeX(x);
+		y = relativeY(y);
 		if (GuiScreen.isShiftKeyDown())
 		{
 			if (!selectingText)
@@ -840,37 +842,28 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 
 		cursorPosition.setPosition(x, y);
 
-		// selectAllOnRelease = false;
+		return true;
 	}
 
-	/**
-	 * Called when a mouse button is released over this {@link UITextField}.
-	 *
-	 * @param event the event
-	 */
-	@Subscribe
-	public void onMouseRelease(MouseEvent.Release event)
+	@Override
+	public boolean onButtonRelease(int x, int y, MouseButton button)
 	{
-		if (!autoSelectOnFocus || !selectAllOnRelease)
-			return;
+		if (!autoSelectOnFocus || !selectAllOnRelease || button != MouseButton.LEFT)
+			return super.onButtonRelease(x, y, button);
 
 		selectingText = true;
 		selectionPosition.jumpTo(0);
 		cursorPosition.jumpTo(text.length());
 
 		selectAllOnRelease = false;
+		return true;
 	}
 
-	/**
-	 * Called when a mouse button is dragged over this {@link UITextField}.
-	 *
-	 * @param event the event
-	 */
-	@Subscribe
-	public void onDrag(MouseEvent.Drag event)
+	@Override
+	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
 	{
-		if (!this.focused || event.getButton() != MouseButton.LEFT)
-			return;
+		if (!isFocused() || button != MouseButton.LEFT)
+			return super.onDrag(lastX, lastY, x, y, button);
 
 		if (!selectingText)
 		{
@@ -878,21 +871,18 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			selectionPosition.set(cursorPosition);
 		}
 
-		int x = relativeX(event.getX());
-		int y = relativeY(event.getY());
+		x = relativeX(x);
+		y = relativeY(y);
 		cursorPosition.setPosition(x, y);
 
 		selectAllOnRelease = false;
+		return true;
 	}
 
-	/**
-	 * Called when a mouse button is double clicked over this {@link UITextField}.
-	 *
-	 * @param event the event
-	 */
-	@Subscribe
-	public void onDoubleClick(MouseEvent.DoubleClick event)
+	@Override
+	public boolean onDoubleClick(int x, int y, MouseButton button)
 	{
+		return super.onDoubleClick(x, y, button);
 		//TODO:
 		//		int pos = cursorPositionFromX(relativeX(event.getX()));
 		//		if (pos > 0 && text.charAt(pos - 1) == ' ')
@@ -904,7 +894,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		//			setCursorPosition(pos);
 		//		else
 		//			setCursorPosition(pos + nextSpacePosition(false) - 1);
-
 	}
 
 	/**
@@ -923,68 +912,58 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			selectingText = false;
 	}
 
-	/**
-	 * Called when a key is pressed.
-	 *
-	 * @param event the event
-	 */
-	@Subscribe
-	public void keyTyped(KeyboardEvent event)
+	@Override
+	public boolean onKeyTyped(char keyChar, int keyCode)
 	{
-		if (!focused)
-			return;
-
-		char keyChar = event.getKeyChar();
-		int keyCode = event.getKeyCode();
+		if (!isFocused())
+			return false;
 
 		if (keyCode == Keyboard.KEY_ESCAPE)
-			return;
-
-		event.cancel();
+			return true; //we don't want to close the GUI
 
 		if (handleCtrlKeyDown(keyCode))
-			return;
+			return true;
 
 		switch (keyCode)
 		{
 			case Keyboard.KEY_LEFT:
 				startSelecting();
 				cursorPosition.shiftLeft();
-				return;
+				break;
 			case Keyboard.KEY_RIGHT:
 				startSelecting();
 				cursorPosition.shiftRight();
-				return;
+				break;
 			case Keyboard.KEY_UP:
 				if (multiLine)
 				{
 					startSelecting();
 					cursorPosition.jumpLine(true);
 				}
-				return;
+				break;
 			case Keyboard.KEY_DOWN:
 				if (multiLine)
 				{
 					startSelecting();
 					cursorPosition.jumpLine(false);
 				}
-				return;
+				break;
 			case Keyboard.KEY_HOME:
 				startSelecting();
 				cursorPosition.jumpToLineStart();
-				return;
+				break;
 			case Keyboard.KEY_END:
 				startSelecting();
 				cursorPosition.jumpToLineEnd();
-				return;
+				break;
 			case Keyboard.KEY_BACK:
 				if (editable)
 					this.deleteFromCursor(-1);
-				return;
+				break;
 			case Keyboard.KEY_DELETE:
 				if (editable)
 					this.deleteFromCursor(1);
-				return;
+				break;
 			case Keyboard.KEY_RETURN:
 				if (multiLine && editable)
 					this.addText("\n");
@@ -992,8 +971,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			default:
 				if (ChatAllowedCharacters.isAllowedCharacter(keyChar) && editable)
 					this.addText(Character.toString(keyChar));
-				return;
+				break;
 		}
+		return true;
 	}
 
 	/**

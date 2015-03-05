@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 PaleoCrafter, Ordinastie
+ * Copyright (c) 2014 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,34 +22,30 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.event;
-
-
+package net.malisis.core.client.gui;
 
 /**
- * KeyTypedEvent
+ * @author Ordinastie
  *
- * @author PaleoCrafter
  */
-public class KeyboardEvent extends GuiEvent
+public enum ComponentPosition
 {
+	TOP(true), RIGHT(false), LEFT(false), BOTTOM(true);
 
-    private final char keyChar;
-    private final int keyCode;
+	private boolean horizontal;
 
-    public KeyboardEvent(char keyChar, int keyCode)
-    {
-        this.keyChar = keyChar;
-        this.keyCode = keyCode;
-    }
+	private ComponentPosition(boolean horizontal)
+	{
+		this.horizontal = horizontal;
+	}
 
-    public char getKeyChar()
-    {
-        return keyChar;
-    }
+	public boolean isHorizontal()
+	{
+		return horizontal;
+	}
 
-    public int getKeyCode()
-    {
-        return keyCode;
-    }
+	public boolean isVertical()
+	{
+		return !horizontal;
+	}
 }

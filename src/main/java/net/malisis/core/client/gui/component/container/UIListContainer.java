@@ -27,9 +27,6 @@ package net.malisis.core.client.gui.component.container;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.client.gui.event.MouseEvent;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
@@ -137,19 +134,21 @@ public class UIListContainer extends UIContainer<UIListContainer>
 		}
 	}
 
-	@Subscribe
-	public void onClick(MouseEvent.Press event)
+	@Override
+	public boolean onClick(int x, int y)
 	{
-		UIComponent component = getComponentAt(event.getX(), event.getY());
+		UIComponent component = getComponentAt(x, y);
 		if (!canUnselect())
 		{
 			if (component == null || component == getSelected())
-				return;
+				return super.onClick(x, y);
 		}
 
 		if (component == getSelected() || component == this)
 			component = null;
 		select(component);
+
+		return true;
 	}
 
 	/**

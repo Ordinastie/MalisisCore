@@ -41,16 +41,11 @@ import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.client.gui.event.KeyboardEvent;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
-import net.malisis.core.util.MouseButton;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * The Class UISelect.
@@ -529,58 +524,38 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		renderer.endClipping(area);
 	}
 
-	/**
-	 * On click.
-	 *
-	 * @param event the event
-	 */
-	@Subscribe
-	public void onClick(MouseEvent.Release event)
+	@Override
+	public boolean onClick(int x, int y)
 	{
-		if (event.getButton() != MouseButton.LEFT)
-			return;
-
 		if (!expanded)
 		{
 			expanded = true;
-			return;
+			return true;
 		}
 
-		Option opt = getHoveredOption(event.getX(), event.getY());
+		Option opt = getHoveredOption(x, y);
 		if (opt != null)
 			select(opt);
 		expanded = false;
 		setFocused(true);
+		return true;
 	}
 
-	/**
-	 * On scroll wheel.
-	 *
-	 * @param event the event
-	 */
-	@Subscribe
-	public void onScrollWheel(MouseEvent.ScrollWheel event)
+	@Override
+	public boolean onScrollWheel(int x, int y, int delta)
 	{
-		if (isFocused() && isHovered())
-		{
-			int selected = selectedOption + event.getDelta() * -1;
-			selected = Math.max(0, Math.min(options.size() - 1, selected));
-			select(selected);
-		}
+		int selected = selectedOption + delta * -1;
+		selected = Math.max(0, Math.min(options.size() - 1, selected));
+		select(selected);
+		return true;
 	}
 
-	/**
-	 * On key typed.
-	 *
-	 * @param event the event
-	 */
-	@Subscribe
-	public void onKeyTyped(KeyboardEvent event)
+	@Override
+	public boolean onKeyTyped(char keyChar, int keyCode)
 	{
 		if (!isFocused())
-			return;
+			return super.onKeyTyped(keyChar, keyCode);
 
-		int keyCode = event.getKeyCode();
 		switch (keyCode)
 		{
 			case Keyboard.KEY_UP:
@@ -598,6 +573,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 				select(options.size() - 1);
 				break;
 		}
+		return true;
 	}
 
 	@Override

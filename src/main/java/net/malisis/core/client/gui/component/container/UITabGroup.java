@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.malisis.core.client.gui.Anchor;
+import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.interaction.UITab;
 import net.malisis.core.client.gui.event.ComponentEvent;
@@ -40,17 +41,13 @@ import net.malisis.core.renderer.animation.transformation.ITransformable;
  */
 public class UITabGroup extends UIContainer<UITabGroup>
 {
-	public enum TabPosition
-	{
-		TOP, RIGHT, LEFT, BOTTOM
-	}
 
 	/** The list of {@link UITab} added to this {@link UITabGroup}. */
 	protected Map<UITab, UIContainer> listTabs = new LinkedHashMap<>();
 	/** The currently active {@link UITab}. */
 	protected UITab activeTab;
 	/** The position of this {@link UITabGroup} relative to its {@link #attachedContainer}. */
-	protected TabPosition tabPosition = TabPosition.TOP;
+	protected ComponentPosition tabPosition = ComponentPosition.TOP;
 	/** The {@link UIContainer} this {@link UITabGroup} is attached to. */
 	protected UIContainer attachedContainer;
 	/** Number of pixels this {@link UITabGroup} is offset to the border of the {@link #attachedContainer}. */
@@ -68,7 +65,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 * @param gui the gui
 	 * @param tabPosition the tab position
 	 */
-	public UITabGroup(MalisisGui gui, TabPosition tabPosition)
+	public UITabGroup(MalisisGui gui, ComponentPosition tabPosition)
 	{
 		super(gui);
 		this.tabPosition = tabPosition;
@@ -95,7 +92,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 */
 	public UITabGroup(MalisisGui gui)
 	{
-		this(gui, TabPosition.TOP);
+		this(gui, ComponentPosition.TOP);
 	}
 
 	/**
@@ -103,7 +100,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 *
 	 * @return the tab position
 	 */
-	public TabPosition getTabPosition()
+	public ComponentPosition getTabPosition()
 	{
 		return tabPosition;
 	}
@@ -185,6 +182,9 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 */
 	public UITab addTab(UITab tab, UIContainer container)
 	{
+		if (tab.isActive())
+			activeTab = tab;
+
 		add(tab);
 		tab.setContainer(container);
 		tab.setActive(false);
@@ -207,22 +207,23 @@ public class UITabGroup extends UIContainer<UITabGroup>
 
 		for (UITab tab : listTabs.keySet())
 		{
-			if (tabPosition == TabPosition.TOP || tabPosition == TabPosition.BOTTOM)
+			int sa = tab.isActive() ? 2 : 0;
+			if (tabPosition == ComponentPosition.TOP || tabPosition == ComponentPosition.BOTTOM)
 			{
 				tab.setPosition(w + offset + s, 1);
 				w += tab.getWidth() + s;
-				h = Math.max(h, tab.getHeight());
+				h = Math.max(h, tab.getHeight() - sa);
 			}
 			else
 			{
 				tab.setPosition(1, h + offset + s);
-				w = Math.max(w, tab.getWidth());
+				w = Math.max(w, tab.getWidth() - sa);
 				h += tab.getHeight() + s;
 			}
 			s = spacing;
 		}
 
-		boolean isHorizontal = tabPosition == TabPosition.TOP || tabPosition == TabPosition.BOTTOM;
+		boolean isHorizontal = tabPosition == ComponentPosition.TOP || tabPosition == ComponentPosition.BOTTOM;
 		for (UITab tab : listTabs.keySet())
 			tab.setSize(isHorizontal ? 0 : w, isHorizontal ? h : 0);
 
@@ -241,6 +242,12 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 */
 	public void setActiveTab(UITab tab)
 	{
+		if (attachedContainer == null)
+		{
+			activeTab = tab;
+			return;
+		}
+
 		if (activeTab == tab)
 			return;
 
@@ -279,25 +286,25 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		int av = Anchor.vertical(container.getAnchor());
 		int ah = Anchor.horizontal(container.getAnchor());
 
-		if (tabPosition == TabPosition.TOP)
+		if (tabPosition == ComponentPosition.TOP)
 		{
 			if (av == Anchor.TOP || av == Anchor.NONE)
 				cy += getHeight() - 1;
 			ch = container.getRawHeight() - getHeight();
 		}
-		else if (tabPosition == TabPosition.BOTTOM)
+		else if (tabPosition == ComponentPosition.BOTTOM)
 		{
 			if (av == Anchor.BOTTOM)
 				cy -= getHeight() - 1;
 			ch = container.getRawHeight() - getHeight() + 1;
 		}
-		else if (tabPosition == TabPosition.LEFT)
+		else if (tabPosition == ComponentPosition.LEFT)
 		{
 			if (ah == Anchor.LEFT || ah == Anchor.NONE)
 				cx += getWidth() - 1;
 			cw = container.getRawWidth() - getWidth();
 		}
-		else if (tabPosition == TabPosition.RIGHT)
+		else if (tabPosition == ComponentPosition.RIGHT)
 		{
 			if (ah == Anchor.RIGHT)
 				cx -= getWidth() - 1;
@@ -307,6 +314,13 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		//tab.setSize(w, h);
 		container.setSize(cw, ch);
 		container.setPosition(cx, cy);
+
+		if (activeTab != null)
+		{
+			UITab tab = activeTab;
+			activeTab = null;
+			setActiveTab(tab);
+		}
 		return this;
 	}
 

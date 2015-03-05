@@ -24,22 +24,18 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
+import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UITabGroup;
 import net.malisis.core.client.gui.component.container.UITabGroup.TabChangeEvent;
-import net.malisis.core.client.gui.component.container.UITabGroup.TabPosition;
 import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.malisis.core.util.MouseButton;
 import net.minecraft.util.IIcon;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
@@ -215,11 +211,11 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	/**
-	 * Gets the {@link TabPosition} of this {@link UITab}.
+	 * Gets the {@link ComponentPosition} of this {@link UITab}.
 	 *
 	 * @return the tab position
 	 */
-	public TabPosition getTabPosition()
+	public ComponentPosition getTabPosition()
 	{
 		return ((UITabGroup) parent).getTabPosition();
 	}
@@ -378,15 +374,23 @@ public class UITab extends UIComponent<UITab>
 
 	//#end Getters/Setters
 
+	public boolean isActive()
+	{
+		return active;
+	}
+
 	/**
 	 * Sets this tab to be active. Enables and sets visibility for its container.
 	 *
 	 * @param active true if active
 	 */
-	public void setActive(boolean active)
+	public UITab setActive(boolean active)
 	{
 		if (container == null)
-			return;
+		{
+			this.active = active;
+			return this;
+		}
 
 		if (this.active != active)
 		{
@@ -411,6 +415,7 @@ public class UITab extends UIComponent<UITab>
 		this.zIndex = container.getZIndex() + (active ? 1 : 0);
 
 		fireEvent(new ActiveStateChange(this, active));
+		return this;
 	}
 
 	/**
@@ -435,8 +440,8 @@ public class UITab extends UIComponent<UITab>
 	{
 		if (parent == null)
 			return true;
-		TabPosition pos = ((UITabGroup) parent).getTabPosition();
-		return pos == TabPosition.TOP || pos == TabPosition.BOTTOM;
+		ComponentPosition pos = ((UITabGroup) parent).getTabPosition();
+		return pos == ComponentPosition.TOP || pos == ComponentPosition.BOTTOM;
 	}
 
 	/**
@@ -518,19 +523,22 @@ public class UITab extends UIComponent<UITab>
 		}
 	}
 
-	@Subscribe
-	public void onClick(MouseEvent.Release event)
+	@Override
+	public boolean onClick(int x, int y)
 	{
-		if (event.getButton() != MouseButton.LEFT)
-			return;
-
 		if (!(parent instanceof UITabGroup))
-			return;
+			return super.onClick(x, y);
 
 		if (!fireEvent(new TabChangeEvent((UITabGroup) parent, this)))
-			return;
+			return super.onClick(x, y);
 
 		((UITabGroup) parent).setActiveTab(this);
+		return true;
+	}
 
+	@Override
+	public String getPropertyString()
+	{
+		return "Label : " + label + " | " + super.getPropertyString();
 	}
 }

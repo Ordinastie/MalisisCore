@@ -29,16 +29,11 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.client.gui.event.KeyboardEvent;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
-import net.malisis.core.util.MouseButton;
 import net.minecraft.client.renderer.OpenGlHelper;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * UICheckBox
@@ -163,27 +158,27 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		}
 	}
 
-	@Subscribe
-	public void onButtonRelease(MouseEvent.Release event)
+	@Override
+	public boolean onClick(int x, int y)
 	{
-		if (event.getButton() == MouseButton.LEFT)
-		{
-			if (fireEvent(new CheckEvent(this, !checked)))
-				checked = !checked;
-		}
+		if (fireEvent(new CheckEvent(this, !checked)))
+			checked = !checked;
+		return true;
 	}
 
-	@Subscribe
-	public void onKeyTyped(KeyboardEvent event)
+	@Override
+	public boolean onKeyTyped(char keyChar, int keyCode)
 	{
-		if (!this.focused)
-			return;
+		if (!isFocused())
+			return super.onKeyTyped(keyChar, keyCode);
 
-		if (event.getKeyCode() == Keyboard.KEY_SPACE)
+		if (keyCode == Keyboard.KEY_SPACE)
 		{
 			if (fireEvent(new CheckEvent(this, !checked)))
 				checked = !checked;
 		}
+
+		return true;
 	}
 
 	@Override

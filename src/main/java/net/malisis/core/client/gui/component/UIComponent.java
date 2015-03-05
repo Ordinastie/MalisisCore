@@ -38,8 +38,6 @@ import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.ComponentExceptionHandler;
-import net.malisis.core.client.gui.event.KeyboardEvent;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.PositionChangeEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
@@ -50,6 +48,7 @@ import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleState
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
+import net.malisis.core.util.MouseButton;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
@@ -624,38 +623,112 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		return !event.isCancelled();
 	}
 
-	/**
-	 * Fires a {@link MouseEvent}.
-	 *
-	 * @param event the event
-	 * @return true, if the even can propagate, false if cancelled
-	 */
-	public boolean fireMouseEvent(MouseEvent event)
+	//	//TODO: clean
+	//	/**
+	//	 * Fires a {@link MouseEvent}.
+	//	 *
+	//	 * @param event the event
+	//	 * @return true, if the even can propagate, false if cancelled
+	//	 */
+	//	public boolean fireMouseEvent(MouseEvent event)
+	//	{
+	//		if (isDisabled() || !isVisible())
+	//			return false;
+	//
+	//		bus.post(event);
+	//		return !event.isCancelled();
+	//	}
+
+	//#region Inputs
+
+	public boolean onMouseMove(int lastX, int lastY, int x, int y)
 	{
-		if (isDisabled() || !isVisible())
+		if (isDisabled())
 			return false;
 
-		bus.post(event);
-		return !event.isCancelled();
+		return parent != null ? parent.onMouseMove(lastX, lastY, x, y) : false;
 	}
 
-	/**
-	 * Fires a {@link KeyboardEvent}.
-	 *
-	 * @param event the event
-	 * @return true, if the even can propagate, false if cancelled
-	 */
-	public boolean fireKeyboardEvent(KeyboardEvent event)
+	public boolean onButtonPress(int x, int y, MouseButton button)
+	{
+		if (isDisabled())
+			return false;
+
+		return parent != null ? parent.onButtonPress(x, y, button) : false;
+	}
+
+	public boolean onButtonRelease(int x, int y, MouseButton button)
+	{
+		if (isDisabled())
+			return false;
+
+		return parent != null ? parent.onButtonRelease(x, y, button) : false;
+	}
+
+	public boolean onClick(int x, int y)
+	{
+		if (isDisabled())
+			return false;
+
+		return parent != null ? parent.onClick(x, y) : false;
+	}
+
+	public boolean onRightClick(int x, int y)
+	{
+		if (isDisabled())
+			return false;
+
+		return parent != null ? parent.onRightClick(x, y) : false;
+	}
+
+	public boolean onDoubleClick(int x, int y, MouseButton button)
+	{
+		if (isDisabled())
+			return false;
+
+		return parent != null ? parent.onDoubleClick(x, y, button) : false;
+	}
+
+	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
+	{
+		if (isDisabled())
+			return false;
+
+		return parent != null ? parent.onDrag(lastX, lastY, x, y, button) : false;
+	}
+
+	public boolean onScrollWheel(int x, int y, int delta)
 	{
 		if (isDisabled())
 			return false;
 
 		for (IControlComponent c : controlComponents)
-			c.fireKeyboardEvent(event);
+			if (c.onScrollWheel(x, y, delta))
+				return true;
 
-		bus.post(event);
-		return !event.isCancelled();
+		return parent != null && !(this instanceof IControlComponent) ? parent.onScrollWheel(x, y, delta) : false;
 	}
+
+	/**
+	 * Called when a key is typed while this {@link UIComponent} is focused or hovered.<br>
+	 *
+	 * @param keyChar the key char
+	 * @param keyCode the key code
+	 * @return true, if successful
+	 */
+	public boolean onKeyTyped(char keyChar, int keyCode)
+	{
+		if (isDisabled())
+			return false;
+
+		for (IControlComponent c : controlComponents)
+			if (c.onKeyTyped(keyChar, keyCode))
+				return true;
+
+		return parent != null && !(this instanceof IControlComponent) ? parent.onKeyTyped(keyChar, keyCode) : false;
+	}
+
+	//#end Inputs
 
 	/**
 	 * Checks if supplied coordinates are inside this {@link UIComponent} bounds.
@@ -935,5 +1008,4 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	 * @param partialTick the partial tick
 	 */
 	public abstract void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
-
 }

@@ -29,10 +29,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.util.MouseButton;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
@@ -74,11 +71,11 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		this(gui, parent, Type.BOTH);
 	}
 
-	@Subscribe
-	public void onDrag(MouseEvent.Drag event)
+	@Override
+	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
 	{
-		if (event.getButton() != MouseButton.LEFT)
-			return;
+		if (button != MouseButton.LEFT)
+			return super.onDrag(lastX, lastY, x, y, button);
 
 		UIComponent p = getParent();
 		if (p.getAnchor() != Anchor.NONE)
@@ -87,15 +84,17 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		int w = parent.getWidth();
 		int h = parent.getHeight();
 		if (type == Type.BOTH || type == Type.HORIZONTAL)
-			w += event.getDeltaX();
+			w += x - lastX;
 		if (type == Type.BOTH || type == Type.VERTICAL)
-			h += event.getDeltaY();
+			h += y - lastY;
 		if (w < 10)
 			w = 10;
 		if (h < 10)
 			h = 10;
 
 		getParent().setSize(w, h);
+
+		return true;
 	}
 
 	@Override

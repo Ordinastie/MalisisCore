@@ -26,7 +26,6 @@ package net.malisis.core.client.gui.component.control;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.event.KeyboardEvent;
 
 /**
  * IControlledComponent are special components designed to affect other {@link UIComponent}.
@@ -60,12 +59,25 @@ public interface IControlComponent
 	public UIComponent getComponentAt(int x, int y);
 
 	/**
-	 * Fires an event for this {@link IControlComponent}. See {@link UIComponent#fireKeyboardEvent(KeyboardEvent)}.
+	 * Called when a key is pressed when this {@link IControlComponent} or its parent is focused or hovered.<br>
+	 * See {@link UIComponent#onKeyTyped(char, int)}.
 	 *
-	 * @param event the event
+	 * @param keyChar the key char
+	 * @param keyCode the key code
 	 * @return true, if successful
 	 */
-	public boolean fireKeyboardEvent(KeyboardEvent event);
+	public boolean onKeyTyped(char keyChar, int keyCode);
+
+	/**
+	 * Called when the scrollwheel is used when this {@link IControlComponent} or its parent is focused or hovered.<br>
+	 * See {@link UIComponent#onScrollWheel(int, int, int)}
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param delta the delta
+	 * @return true, if successful
+	 */
+	public boolean onScrollWheel(int x, int y, int delta);
 
 	/**
 	 * Draws this {@link IControlComponent}. See {@link UIComponent#draw(GuiRenderer, int, int, float)}.

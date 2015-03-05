@@ -31,6 +31,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
+import net.malisis.core.util.bbcode.BBString;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.StatCollector;
 
@@ -46,6 +47,7 @@ public class UIMultiLineLabel extends UILabel implements IScrollable
 	protected boolean autoHeight;
 	protected int lineOffset;
 	protected int lineSpacing;
+	protected BBString bbText;
 
 	public UIMultiLineLabel(MalisisGui gui)
 	{
@@ -59,13 +61,34 @@ public class UIMultiLineLabel extends UILabel implements IScrollable
 		this.setText(text);
 	}
 
+	public UIMultiLineLabel(MalisisGui gui, BBString text)
+	{
+		this(gui);
+		this.setText(text);
+	}
+
 	@Override
 	public UIMultiLineLabel setText(String text)
 	{
 		this.text = text;
+		this.bbText = null;
 		buildLines();
 
 		return this;
+	}
+
+	public UIMultiLineLabel setText(BBString text)
+	{
+		this.bbText = text;
+		this.text = null;
+		buildLines();
+
+		return this;
+	}
+
+	public BBString getBBText()
+	{
+		return bbText;
 	}
 
 	public UILabel setSize(int width)
@@ -140,6 +163,12 @@ public class UIMultiLineLabel extends UILabel implements IScrollable
 	private void buildLines()
 	{
 		lines.clear();
+		if (bbText != null)
+		{
+			bbText.buildLines(getWidth());
+			return;
+		}
+
 		if (text == null)
 			return;
 
@@ -152,6 +181,20 @@ public class UIMultiLineLabel extends UILabel implements IScrollable
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		if (bbText != null)
+		{
+			try
+			{
+				bbText.render(renderer, screenX(), screenY(), getZIndex(), lineOffset, visibleLines(), getLineHeight());
+				return;
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace(System.err);
+				return;
+			}
+		}
+
 		for (int i = lineOffset; i < lineOffset + visibleLines() && i < lines.size(); i++)
 		{
 			int h = (i - lineOffset) * getLineHeight();

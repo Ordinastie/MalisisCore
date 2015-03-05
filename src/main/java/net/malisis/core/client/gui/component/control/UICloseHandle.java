@@ -29,10 +29,6 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.event.MouseEvent;
-import net.malisis.core.util.MouseButton;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
@@ -61,13 +57,11 @@ public class UICloseHandle extends UIComponent<UICloseHandle> implements IContro
 		icon = gui.getGuiTexture().getIcon(268, 30, 15, 15);
 	}
 
-	@Subscribe
-	public void onClick(MouseEvent.Release event)
+	@Override
+	public boolean onClick(int x, int y)
 	{
-		if (event.getButton() != MouseButton.LEFT)
-			return;
-
 		((ICloseable) getParent()).onClose();
+		return true;
 	}
 
 	@Override

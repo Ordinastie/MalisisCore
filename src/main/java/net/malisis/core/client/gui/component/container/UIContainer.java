@@ -37,7 +37,6 @@ import net.malisis.core.client.gui.component.control.ICloseable;
 import net.malisis.core.client.gui.component.control.IControlComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.decoration.UILabel;
-import net.malisis.core.client.gui.event.KeyboardEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
@@ -522,17 +521,6 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	{
 		for (UIComponent c : components)
 			c.draw(renderer, mouseX, mouseY, partialTick);
-	}
-
-	@Override
-	public boolean fireKeyboardEvent(KeyboardEvent event)
-	{
-		if (!super.fireKeyboardEvent(event))
-			return false;
-
-		for (UIComponent c : components)
-			c.fireKeyboardEvent(event);
-		return true;
 	}
 
 	/**

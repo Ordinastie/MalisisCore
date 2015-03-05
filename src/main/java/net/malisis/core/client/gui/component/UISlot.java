@@ -30,8 +30,6 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.event.KeyboardEvent;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.inventory.InventoryEvent;
@@ -204,84 +202,157 @@ public class UISlot extends UIComponent<UISlot>
 
 	}
 
-	@Subscribe
-	public void clickSlot(MouseEvent.ButtonStateEvent event)
+	@Override
+	public boolean onClick(int x, int y)
 	{
-		if (event instanceof MouseEvent.DoubleClick)
-			return;
-
-		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
-		ActionType action = null;
-
-		if (((container.getPickedItemStack() == null) == (event instanceof MouseEvent.Press)) && buttonRelased)
-		{
-			if (event.getButton() == MouseButton.LEFT)
-				action = GuiScreen.isShiftKeyDown() ? ActionType.SHIFT_LEFT_CLICK : ActionType.LEFT_CLICK;
-
-			if (event.getButton() == MouseButton.RIGHT)
-				action = GuiScreen.isShiftKeyDown() ? ActionType.SHIFT_RIGHT_CLICK : ActionType.RIGHT_CLICK;
-
-			if (event.getButtonCode() == Minecraft.getMinecraft().gameSettings.keyBindPickBlock.getKeyCode() + 100)
-				action = ActionType.PICKBLOCK;
-
-			buttonRelased = false;
-		}
-
-		if (event instanceof MouseEvent.Release)
-			buttonRelased = true;
-
-		MalisisGui.sendAction(action, slot, event.getButtonCode());
+		return super.onClick(x, y);
 	}
 
-	@Subscribe
-	public void dragStack(MouseEvent.Drag event)
+	@Override
+	public boolean onRightClick(int x, int y)
+	{
+		return super.onRightClick(x, y);
+	}
+
+	@Override
+	public boolean onButtonPress(int x, int y, MouseButton button)
+	{
+		ActionType action = null;
+		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
+
+		if (container.getPickedItemStack() != null)
+			return super.onButtonPress(x, y, button);
+
+		if (button == MouseButton.LEFT)
+			action = GuiScreen.isShiftKeyDown() ? ActionType.SHIFT_LEFT_CLICK : ActionType.LEFT_CLICK;
+
+		if (button == MouseButton.RIGHT)
+			action = GuiScreen.isShiftKeyDown() ? ActionType.SHIFT_RIGHT_CLICK : ActionType.RIGHT_CLICK;
+
+		buttonRelased = false;
+		MalisisGui.sendAction(action, slot, button.getCode());
+		return true;
+
+	}
+
+	@Override
+	public boolean onButtonRelease(int x, int y, MouseButton button)
+	{
+		ActionType action = null;
+		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
+
+		if (container.getPickedItemStack() == null || !buttonRelased)
+		{
+			buttonRelased = true;
+			return super.onButtonPress(x, y, button);
+		}
+
+		if (button == MouseButton.LEFT)
+			action = GuiScreen.isShiftKeyDown() ? ActionType.SHIFT_LEFT_CLICK : ActionType.LEFT_CLICK;
+
+		if (button == MouseButton.RIGHT)
+			action = GuiScreen.isShiftKeyDown() ? ActionType.SHIFT_RIGHT_CLICK : ActionType.RIGHT_CLICK;
+
+		MalisisGui.sendAction(action, slot, button.getCode());
+		return true;
+	}
+
+	//	{
+	//		if (event instanceof MouseEvent.DoubleClick)
+	//			return;
+	//
+	//		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
+	//		ActionType action = null;
+	//
+	//		if (((container.getPickedItemStack() == null) == (event instanceof MouseEvent.Press)) && buttonRelased)
+	//		{
+	//			if (event.getButton() == MouseButton.LEFT)
+	//				action = GuiScreen.isShiftKeyDown() ? ActionType.SHIFT_LEFT_CLICK : ActionType.LEFT_CLICK;
+	//
+	//			if (event.getButton() == MouseButton.RIGHT)
+	//				action = GuiScreen.isShiftKeyDown() ? ActionType.SHIFT_RIGHT_CLICK : ActionType.RIGHT_CLICK;
+	//
+	//			if (event.getButtonCode() == Minecraft.getMinecraft().gameSettings.keyBindPickBlock.getKeyCode() + 100)
+	//				action = ActionType.PICKBLOCK;
+	//
+	//			buttonRelased = false;
+	//		}
+	//
+	//		if (event instanceof MouseEvent.Release)
+	//			buttonRelased = true;
+	//
+	//		MalisisGui.sendAction(action, slot, event.getButtonCode());
+	//	}
+
+	@Override
+	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
 	{
 		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
 		ActionType action = null;
 
 		if (container.getPickedItemStack() != null && !container.isDraggingItemStack() && buttonRelased)
 		{
-			if (event.getButton() == MouseButton.LEFT)
+			if (button == MouseButton.LEFT)
 				action = GuiScreen.isCtrlKeyDown() ? ActionType.DRAG_START_PICKUP : ActionType.DRAG_START_LEFT_CLICK;
 
-			if (event.getButton() == MouseButton.RIGHT)
+			if (button == MouseButton.RIGHT)
 				action = ActionType.DRAG_START_RIGHT_CLICK;
 		}
 
-		MalisisGui.sendAction(action, slot, event.getButtonCode());
+		MalisisGui.sendAction(action, slot, button.getCode());
+		return true;
 	}
 
-	@Subscribe
-	public void doubleClick(MouseEvent.DoubleClick event)
+	//	{
+	//		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
+	//		ActionType action = null;
+	//
+	//		if (container.getPickedItemStack() != null && !container.isDraggingItemStack() && buttonRelased)
+	//		{
+	//			if (event.getButton() == MouseButton.LEFT)
+	//				action = GuiScreen.isCtrlKeyDown() ? ActionType.DRAG_START_PICKUP : ActionType.DRAG_START_LEFT_CLICK;
+	//
+	//			if (event.getButton() == MouseButton.RIGHT)
+	//				action = ActionType.DRAG_START_RIGHT_CLICK;
+	//		}
+	//
+	//		MalisisGui.sendAction(action, slot, event.getButtonCode());
+	//	}
+
+	@Override
+	public boolean onDoubleClick(int x, int y, MouseButton button)
 	{
-		if (event.getButton() != MouseButton.LEFT)
-			return;
+		if (button != MouseButton.LEFT)
+			return super.onDoubleClick(x, y, button);
+
 		ActionType action = GuiScreen.isShiftKeyDown() ? ActionType.DOUBLE_SHIFT_LEFT_CLICK : ActionType.DOUBLE_LEFT_CLICK;
-		MalisisGui.sendAction(action, slot, event.getButtonCode());
-		buttonRelased = false;
+		MalisisGui.sendAction(action, slot, button.getCode());
+		//buttonRelased = false;
+		return true;
 	}
 
-	@Subscribe
-	public void onKeyTyped(KeyboardEvent event)
+	@Override
+	public boolean onKeyTyped(char keyChar, int keyCode)
 	{
-		if (!hovered)
-			return;
+		if (!isHovered() || keyCode == Keyboard.KEY_ESCAPE || keyChar == Keyboard.KEY_TAB)
+			return super.onKeyTyped(keyChar, keyCode);
 
 		ActionType action = null;
-		int code = event.getKeyCode();
-		if (event.getKeyCode() == Minecraft.getMinecraft().gameSettings.keyBindDrop.getKeyCode())
+		int code = keyCode;
+		if (keyCode == Minecraft.getMinecraft().gameSettings.keyBindDrop.getKeyCode())
 			action = GuiScreen.isShiftKeyDown() ? ActionType.DROP_SLOT_STACK : ActionType.DROP_SLOT_ONE;
 
-		if (event.getKeyCode() == Minecraft.getMinecraft().gameSettings.keyBindPickBlock.getKeyCode())
+		if (keyCode == Minecraft.getMinecraft().gameSettings.keyBindPickBlock.getKeyCode())
 			action = ActionType.PICKBLOCK;
 
-		if (event.getKeyCode() >= Keyboard.KEY_1 && event.getKeyCode() <= Keyboard.KEY_9)
+		if (keyCode >= Keyboard.KEY_1 && keyCode <= Keyboard.KEY_9)
 		{
 			action = ActionType.HOTBAR;
 			code -= 2;
 		}
 
 		MalisisGui.sendAction(action, slot, code);
+		return true;
 	}
 
 	@Subscribe

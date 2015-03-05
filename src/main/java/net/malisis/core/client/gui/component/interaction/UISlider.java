@@ -31,11 +31,8 @@ import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
@@ -79,33 +76,31 @@ public class UISlider extends UIComponent<UISlider>
 		this(gui, width, min, max, null);
 	}
 
-	@Subscribe
-	public void onClick(MouseEvent.Press event)
+	@Override
+	public boolean onClick(int x, int y)
 	{
-		if (event.getButton() != MouseButton.LEFT)
-			return;
-
-		int l = width - SLIDER_WIDTH;
-		int pos = relativeX(event.getX());
-		pos = Math.max(0, Math.min(pos - SLIDER_WIDTH / 2, l));
-		slideTo((float) pos / l);
+		slideTo(x);
+		return true;
 	}
 
-	@Subscribe
-	public void onScrollWheel(MouseEvent.ScrollWheel event)
+	@Override
+	public boolean onScrollWheel(int x, int y, int delta)
 	{
-		if (isFocused())
-			slideBy(event.getDelta());
+		slideBy(delta);
+		return true;
 	}
 
-	@Subscribe
-	public void onDrag(MouseEvent.Drag event)
+	@Override
+	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
 	{
-		if (event.getButton() != MouseButton.LEFT)
-			return;
+		slideTo(x);
+		return true;
+	}
 
+	public void slideTo(int x)
+	{
 		int l = width - SLIDER_WIDTH;
-		int pos = relativeX(event.getX());
+		int pos = relativeX(x);
 		pos = Math.max(0, Math.min(pos - SLIDER_WIDTH / 2, l));
 		slideTo((float) pos / l);
 	}

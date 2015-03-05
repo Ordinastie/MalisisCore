@@ -27,15 +27,13 @@ package net.malisis.core.client.gui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.event.GuiEvent;
-import net.malisis.core.client.gui.event.KeyboardEvent;
-import net.malisis.core.client.gui.event.MouseEvent;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
-import net.malisis.core.inventory.message.InventoryActionMessage;
 import net.malisis.core.inventory.MalisisSlot;
+import net.malisis.core.inventory.message.InventoryActionMessage;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.AnimationRenderer;
+import net.malisis.core.util.MouseButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiScreen;
@@ -163,34 +161,6 @@ public class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Fires a {@link GuiEvent} for this {@link MalisisGui}.
-	 *
-	 * @param event the event
-	 * @return true if the event should propagate, false if cancelled
-	 */
-	protected boolean fireEvent(GuiEvent event)
-	{
-		if (event instanceof MouseEvent)
-		{
-			MouseEvent me = (MouseEvent) event;
-			UIComponent component = getComponentAt(me.getX(), me.getY());
-			if (component != null && !component.isDisabled())
-			{
-				if (me instanceof MouseEvent.Press)
-					component.setFocused(true);
-				else if (me instanceof MouseEvent.Move)
-					component.setHovered(true);
-				component.fireMouseEvent(me);
-			}
-			else
-				setHoveredComponent(null, false);
-		}
-		else if (event instanceof KeyboardEvent)
-			screen.fireKeyboardEvent((KeyboardEvent) event);
-		return !event.isCancelled();
-	}
-
-	/**
 	 * Called every frame to handle mouse input.
 	 */
 	@Override
@@ -202,7 +172,16 @@ public class MalisisGui extends GuiScreen
 		int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
 
 		if (lastMouseX != mouseX || lastMouseY != mouseY)
-			fireEvent(new MouseEvent.Move(lastMouseX, lastMouseY, mouseX, mouseY));
+		{
+			UIComponent component = getComponentAt(mouseX, mouseY);
+			if (component != null && !component.isDisabled())
+			{
+				component.onMouseMove(lastMouseX, lastMouseY, mouseX, mouseY);
+				component.setHovered(true);
+			}
+			else
+				setHoveredComponent(null, false);
+		}
 
 		lastMouseX = mouseX;
 		lastMouseY = mouseY;
@@ -215,7 +194,11 @@ public class MalisisGui extends GuiScreen
 		else if (delta < -1)
 			delta = -1;
 
-		fireEvent(new MouseEvent.ScrollWheel(mouseX, mouseY, delta));
+		UIComponent component = getComponentAt(mouseX, mouseY);
+		if (component != null && !component.isDisabled())
+		{
+			component.onScrollWheel(mouseX, mouseY, delta);
+		}
 	}
 
 	/**
@@ -225,15 +208,22 @@ public class MalisisGui extends GuiScreen
 	protected void mouseClicked(int x, int y, int button)
 	{
 		long time = System.currentTimeMillis();
-		if (button == lastClickButton && time - lastClickTime < 250)
-		{
-			doubleClick(x, y, button);
-			lastClickTime = 0;
-			return;
-		}
-
 		if (screen.isInsideBounds(x, y))
-			fireEvent(new MouseEvent.Press(x, y, button));
+		{
+			UIComponent component = getComponentAt(x, y);
+			if (component != null && !component.isDisabled())
+			{
+				component.onButtonPress(x, y, MouseButton.getButton(button));
+				//double click
+
+				if (button == lastClickButton && time - lastClickTime < 250)
+				{
+					component.onDoubleClick(x, y, MouseButton.getButton(button));
+					lastClickTime = 0;
+				}
+				component.setFocused(true);
+			}
+		}
 		else
 		{
 			setFocusedComponent(null, true);
@@ -255,7 +245,8 @@ public class MalisisGui extends GuiScreen
 	protected void mouseClickMove(int x, int y, int button, long timer)
 	{
 		if (focusedComponent != null)
-			focusedComponent.fireMouseEvent(new MouseEvent.Drag(lastMouseX, lastMouseY, x, y, button));
+			focusedComponent.onDrag(lastMouseX, lastMouseY, x, y, MouseButton.getButton(button));
+
 	}
 
 	/**
@@ -279,19 +270,19 @@ public class MalisisGui extends GuiScreen
 			}
 		}
 
-		fireEvent(new MouseEvent.Release(x, y, button));
-	}
-
-	/**
-	 * Called when a button is double clicked.
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param button the button
-	 */
-	protected void doubleClick(int x, int y, int button)
-	{
-		fireEvent(new MouseEvent.DoubleClick(x, y, button));
+		UIComponent component = getComponentAt(x, y);
+		if (component != null && !component.isDisabled())
+		{
+			MouseButton mb = MouseButton.getButton(button);
+			component.onButtonRelease(x, y, mb);
+			if (component == focusedComponent)
+			{
+				if (mb == MouseButton.LEFT)
+					component.onClick(x, y);
+				else if (mb == MouseButton.RIGHT)
+					component.onRightClick(x, y);
+			}
+		}
 	}
 
 	/**
@@ -300,16 +291,14 @@ public class MalisisGui extends GuiScreen
 	@Override
 	protected void keyTyped(char keyChar, int keyCode)
 	{
-		KeyboardEvent event = new KeyboardEvent(keyChar, keyCode);
-		fireEvent(event);
-
-		if (event.isCancelled())
+		if (focusedComponent != null && focusedComponent.onKeyTyped(keyChar, keyCode))
 			return;
 
-		if (keyCode == Keyboard.KEY_ESCAPE || inventoryContainer != null && keyCode == this.mc.gameSettings.keyBindInventory.getKeyCode())
-		{
+		if (hoveredComponent != null && hoveredComponent.onKeyTyped(keyChar, keyCode))
+			return;
+
+		if (isGuiCloseKey(keyCode))
 			close();
-		}
 	}
 
 	/**
@@ -578,5 +567,12 @@ public class MalisisGui extends GuiScreen
 	public static void playSound(String name, float level)
 	{
 		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation(name), level));
+	}
+
+	public static boolean isGuiCloseKey(int keyCode)
+	{
+		MalisisGui gui = currentGui();
+		return keyCode == Keyboard.KEY_ESCAPE
+				|| (gui != null && gui.inventoryContainer != null && keyCode == gui.mc.gameSettings.keyBindInventory.getKeyCode());
 	}
 }
