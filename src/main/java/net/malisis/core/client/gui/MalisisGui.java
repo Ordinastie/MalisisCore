@@ -24,6 +24,11 @@
 
 package net.malisis.core.client.gui;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+
+import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.client.gui.component.container.UIContainer;
@@ -166,38 +171,46 @@ public class MalisisGui extends GuiScreen
 	@Override
 	public void handleMouseInput()
 	{
-		super.handleMouseInput();
-
-		int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
-		int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
-
-		if (lastMouseX != mouseX || lastMouseY != mouseY)
+		try
 		{
+			super.handleMouseInput();
+
+			int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
+			int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
+
+			if (lastMouseX != mouseX || lastMouseY != mouseY)
+			{
+				UIComponent component = getComponentAt(mouseX, mouseY);
+				if (component != null && !component.isDisabled())
+				{
+					component.onMouseMove(lastMouseX, lastMouseY, mouseX, mouseY);
+					component.setHovered(true);
+				}
+				else
+					setHoveredComponent(null, false);
+			}
+
+			lastMouseX = mouseX;
+			lastMouseY = mouseY;
+
+			int delta = Mouse.getEventDWheel();
+			if (delta == 0)
+				return;
+			else if (delta > 1)
+				delta = 1;
+			else if (delta < -1)
+				delta = -1;
+
 			UIComponent component = getComponentAt(mouseX, mouseY);
 			if (component != null && !component.isDisabled())
 			{
-				component.onMouseMove(lastMouseX, lastMouseY, mouseX, mouseY);
-				component.setHovered(true);
+				component.onScrollWheel(mouseX, mouseY, delta);
 			}
-			else
-				setHoveredComponent(null, false);
 		}
-
-		lastMouseX = mouseX;
-		lastMouseY = mouseY;
-
-		int delta = Mouse.getEventDWheel();
-		if (delta == 0)
-			return;
-		else if (delta > 1)
-			delta = 1;
-		else if (delta < -1)
-			delta = -1;
-
-		UIComponent component = getComponentAt(mouseX, mouseY);
-		if (component != null && !component.isDisabled())
+		catch (Exception e)
 		{
-			component.onScrollWheel(mouseX, mouseY, delta);
+			MalisisCore.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
 	}
 
@@ -207,9 +220,10 @@ public class MalisisGui extends GuiScreen
 	@Override
 	protected void mouseClicked(int x, int y, int button)
 	{
-		long time = System.currentTimeMillis();
-		if (screen.isInsideBounds(x, y))
+		try
 		{
+			long time = System.currentTimeMillis();
+
 			UIComponent component = getComponentAt(x, y);
 			if (component != null && !component.isDisabled())
 			{
@@ -223,19 +237,24 @@ public class MalisisGui extends GuiScreen
 				}
 				component.setFocused(true);
 			}
-		}
-		else
-		{
-			setFocusedComponent(null, true);
-			if (inventoryContainer != null && inventoryContainer.getPickedItemStack() != null)
+			else
 			{
-				ActionType action = button == 1 ? ActionType.DROP_ONE : ActionType.DROP_STACK;
-				MalisisGui.sendAction(action, null, button);
+				setFocusedComponent(null, true);
+				if (inventoryContainer != null && inventoryContainer.getPickedItemStack() != null)
+				{
+					ActionType action = button == 1 ? ActionType.DROP_ONE : ActionType.DROP_STACK;
+					MalisisGui.sendAction(action, null, button);
+				}
 			}
-		}
 
-		lastClickTime = time;
-		lastClickButton = button;
+			lastClickTime = time;
+			lastClickButton = button;
+		}
+		catch (Exception e)
+		{
+			MalisisCore.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+		}
 	}
 
 	/**
@@ -244,8 +263,16 @@ public class MalisisGui extends GuiScreen
 	@Override
 	protected void mouseClickMove(int x, int y, int button, long timer)
 	{
-		if (focusedComponent != null)
-			focusedComponent.onDrag(lastMouseX, lastMouseY, x, y, MouseButton.getButton(button));
+		try
+		{
+			if (focusedComponent != null)
+				focusedComponent.onDrag(lastMouseX, lastMouseY, x, y, MouseButton.getButton(button));
+		}
+		catch (Exception e)
+		{
+			MalisisCore.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+		}
 
 	}
 
@@ -255,33 +282,41 @@ public class MalisisGui extends GuiScreen
 	@Override
 	protected void mouseMovedOrUp(int x, int y, int button)
 	{
-		if (inventoryContainer != null)
+		try
 		{
-			if (inventoryContainer.shouldResetDrag(button))
+			if (inventoryContainer != null)
 			{
-				MalisisGui.sendAction(ActionType.DRAG_RESET, null, 0);
-				UISlot.buttonRelased = false;
-				return;
+				if (inventoryContainer.shouldResetDrag(button))
+				{
+					MalisisGui.sendAction(ActionType.DRAG_RESET, null, 0);
+					UISlot.buttonRelased = false;
+					return;
+				}
+				if (inventoryContainer.shouldEndDrag(button))
+				{
+					MalisisGui.sendAction(ActionType.DRAG_END, null, 0);
+					return;
+				}
 			}
-			if (inventoryContainer.shouldEndDrag(button))
+
+			UIComponent component = getComponentAt(x, y);
+			if (component != null && !component.isDisabled())
 			{
-				MalisisGui.sendAction(ActionType.DRAG_END, null, 0);
-				return;
+				MouseButton mb = MouseButton.getButton(button);
+				component.onButtonRelease(x, y, mb);
+				if (component == focusedComponent)
+				{
+					if (mb == MouseButton.LEFT)
+						component.onClick(x, y);
+					else if (mb == MouseButton.RIGHT)
+						component.onRightClick(x, y);
+				}
 			}
 		}
-
-		UIComponent component = getComponentAt(x, y);
-		if (component != null && !component.isDisabled())
+		catch (Exception e)
 		{
-			MouseButton mb = MouseButton.getButton(button);
-			component.onButtonRelease(x, y, mb);
-			if (component == focusedComponent)
-			{
-				if (mb == MouseButton.LEFT)
-					component.onClick(x, y);
-				else if (mb == MouseButton.RIGHT)
-					component.onRightClick(x, y);
-			}
+			MalisisCore.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
 	}
 
@@ -291,14 +326,22 @@ public class MalisisGui extends GuiScreen
 	@Override
 	protected void keyTyped(char keyChar, int keyCode)
 	{
-		if (focusedComponent != null && focusedComponent.onKeyTyped(keyChar, keyCode))
-			return;
+		try
+		{
+			if (focusedComponent != null && focusedComponent.onKeyTyped(keyChar, keyCode))
+				return;
 
-		if (hoveredComponent != null && hoveredComponent.onKeyTyped(keyChar, keyCode))
-			return;
+			if (hoveredComponent != null && hoveredComponent.onKeyTyped(keyChar, keyCode))
+				return;
 
-		if (isGuiCloseKey(keyCode))
-			close();
+			if (isGuiCloseKey(keyCode))
+				close();
+		}
+		catch (Exception e)
+		{
+			MalisisCore.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+		}
 	}
 
 	/**
@@ -360,6 +403,7 @@ public class MalisisGui extends GuiScreen
 
 		GL11.glEnable(GL11.GL_LIGHTING);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
+
 	}
 
 	/**
@@ -552,7 +596,7 @@ public class MalisisGui extends GuiScreen
 			return false;
 		}
 
-		if (gui.focusedComponent != null && component != null)
+		if (gui.focusedComponent != null)
 			gui.focusedComponent.setFocused(false);
 
 		gui.focusedComponent = component;
