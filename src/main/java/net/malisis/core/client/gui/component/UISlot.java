@@ -257,33 +257,6 @@ public class UISlot extends UIComponent<UISlot>
 		return true;
 	}
 
-	//	{
-	//		if (event instanceof MouseEvent.DoubleClick)
-	//			return;
-	//
-	//		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
-	//		ActionType action = null;
-	//
-	//		if (((container.getPickedItemStack() == null) == (event instanceof MouseEvent.Press)) && buttonRelased)
-	//		{
-	//			if (event.getButton() == MouseButton.LEFT)
-	//				action = GuiScreen.isShiftKeyDown() ? ActionType.SHIFT_LEFT_CLICK : ActionType.LEFT_CLICK;
-	//
-	//			if (event.getButton() == MouseButton.RIGHT)
-	//				action = GuiScreen.isShiftKeyDown() ? ActionType.SHIFT_RIGHT_CLICK : ActionType.RIGHT_CLICK;
-	//
-	//			if (event.getButtonCode() == Minecraft.getMinecraft().gameSettings.keyBindPickBlock.getKeyCode() + 100)
-	//				action = ActionType.PICKBLOCK;
-	//
-	//			buttonRelased = false;
-	//		}
-	//
-	//		if (event instanceof MouseEvent.Release)
-	//			buttonRelased = true;
-	//
-	//		MalisisGui.sendAction(action, slot, event.getButtonCode());
-	//	}
-
 	@Override
 	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
 	{
@@ -303,22 +276,6 @@ public class UISlot extends UIComponent<UISlot>
 		return true;
 	}
 
-	//	{
-	//		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
-	//		ActionType action = null;
-	//
-	//		if (container.getPickedItemStack() != null && !container.isDraggingItemStack() && buttonRelased)
-	//		{
-	//			if (event.getButton() == MouseButton.LEFT)
-	//				action = GuiScreen.isCtrlKeyDown() ? ActionType.DRAG_START_PICKUP : ActionType.DRAG_START_LEFT_CLICK;
-	//
-	//			if (event.getButton() == MouseButton.RIGHT)
-	//				action = ActionType.DRAG_START_RIGHT_CLICK;
-	//		}
-	//
-	//		MalisisGui.sendAction(action, slot, event.getButtonCode());
-	//	}
-
 	@Override
 	public boolean onDoubleClick(int x, int y, MouseButton button)
 	{
@@ -327,7 +284,7 @@ public class UISlot extends UIComponent<UISlot>
 
 		ActionType action = GuiScreen.isShiftKeyDown() ? ActionType.DOUBLE_SHIFT_LEFT_CLICK : ActionType.DOUBLE_LEFT_CLICK;
 		MalisisGui.sendAction(action, slot, button.getCode());
-		//buttonRelased = false;
+		buttonRelased = false;
 		return true;
 	}
 
