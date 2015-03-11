@@ -472,7 +472,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		{
 			String text = getOption(selectedOption).getLabel(labelPattern);
 			if (!StringUtils.isEmpty(text))
-				renderer.drawText(renderer.clipString(text, width - 15), 2, 2, 1, textColor, textShadow, true);
+				renderer.drawText(GuiRenderer.clipString(text, width - 15), 2, 2, 1, textColor, textShadow, true);
 		}
 
 		if (!expanded)
