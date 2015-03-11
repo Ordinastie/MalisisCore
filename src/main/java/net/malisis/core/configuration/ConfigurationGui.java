@@ -35,7 +35,7 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UIPanel;
 import net.malisis.core.client.gui.component.container.UIWindow;
-import net.malisis.core.client.gui.component.decoration.UIMultiLineLabel;
+import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UIButton;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.configuration.setting.Setting;
@@ -57,7 +57,7 @@ public class ConfigurationGui extends MalisisGui
 	protected int windowWidth = 400;
 	protected int windowHeight = 120;
 
-	protected UIMultiLineLabel comment;
+	protected UILabel comment;
 	protected UIButton btnCancel;
 	protected UIButton btnSave;
 
@@ -82,7 +82,7 @@ public class ConfigurationGui extends MalisisGui
 
 		window.setSize(windowWidth, windowHeight);
 
-		comment = new UIMultiLineLabel(this);
+		comment = new UILabel(this, true);
 		comment.setColor(0xFFFFFF);
 		comment.setDrawShadow(true);
 		UIPanel panelComment = new UIPanel(this, 140, windowHeight - 35).setPosition(0, 0, Anchor.RIGHT);

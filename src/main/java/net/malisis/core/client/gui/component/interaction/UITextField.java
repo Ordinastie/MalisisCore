@@ -42,7 +42,6 @@ import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
-import net.minecraft.util.StatCollector;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
@@ -61,21 +60,28 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	protected List<String> lines = new LinkedList<>();
 	/** Whether this {@link UITextField} handles multiline text. */
 	protected boolean multiLine = false;
-	/** Current cursor position. */
-	protected CursorPosition cursorPosition;
-	/** Current selection cursor position. */
-	protected CursorPosition selectionPosition;
 
-	/** Whether currently selecting text. */
-	protected boolean selectingText = false;
+	//text space
 	/** Number of character offset out of this {@link UITextField} when drawn. */
 	protected int charOffset = 0;
 	/** Number of line offset out of this {@link UITextField} when drawn. Always 0 if {@link #multiLine} is false */
 	protected int lineOffset = 0;
 	/** Space used between each line. */
 	protected int lineSpacing = 1;
+	/** Font scale used to draw the text *. */
+	protected float fontScale = 1;
+
+	//cursors
+	/** Whether currently selecting text. */
+	protected boolean selectingText = false;
+	/** Current cursor position. */
+	protected CursorPosition cursorPosition;
+	/** Current selection cursor position. */
+	protected CursorPosition selectionPosition;
 	/** Cursor blink timer. */
 	protected long startTimer;
+
+	//interaction
 	/** Whether this {@link UITextField} should select the text when release left mouse button. */
 	private boolean selectAllOnRelease = false;
 	/** Whether this {@link UITextField} should auto select the text when gaining focus. */
@@ -85,6 +91,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	/** Scrollbar of the textfield **/
 	protected UISlimScrollbar scrollBar;
 
+	//options
 	/** Color of the text for this {@link UITextField}. */
 	protected int textColor = 0xFFFFFF;
 	/** Background color of this {@link UITextField. */
@@ -96,8 +103,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	/** Text shadow */
 	protected boolean textShadow = true;
 
-	/** Font scale used to draw the text *. */
-	protected float fontScale = 1;
+	//drawing
 	/** Shape used to draw the cursor of this {@link UITextField}. */
 	protected GuiShape cursorShape;
 	/** Shape used to draw the selection box. */
@@ -178,6 +184,45 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		return text.toString();
 	}
 
+	/**
+	 * Sets the text of this {@link UITextField} and place the cursor at the end.
+	 *
+	 * @param text the new text
+	 */
+	public void setText(String text)
+	{
+		if (!validateText(text))
+			return;
+
+		this.text.setLength(0);
+		this.text.append(text);
+
+		buildLines();
+
+		selectingText = false;
+		charOffset = 0;
+		lineOffset = 0;
+		if (focused)
+			cursorPosition.jumpToEnd();
+		// fireEvent(new TextChanged(this));
+	}
+
+	/**
+	 * Gets the currently selected text.
+	 *
+	 * @return the text selected.
+	 */
+	public String getSelectedText()
+	{
+		if (!selectingText)
+			return "";
+
+		int start = Math.min(selectionPosition.textPosition, cursorPosition.textPosition);
+		int end = Math.max(selectionPosition.textPosition, cursorPosition.textPosition);
+
+		return this.text.substring(start, end);
+	}
+
 	public int getTextColor()
 	{
 		return textColor;
@@ -231,27 +276,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		this.textShadow = textShadow;
 
 		return this;
-	}
-
-	/**
-	 * Sets the text of this {@link UITextField} and place the cursor at the end.
-	 *
-	 * @param text the new text
-	 */
-	public void setText(String text)
-	{
-		if (!validateText(text))
-			return;
-
-		this.text.setLength(0);
-		this.text.append(text);
-		buildLines();
-		selectingText = false;
-		charOffset = 0;
-		lineOffset = 0;
-		if (focused)
-			cursorPosition.jumpToEnd();
-		// fireEvent(new TextChanged(this));
 	}
 
 	/**
@@ -319,16 +343,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	/**
-	 * Sets the line offset.
-	 *
-	 * @param line the new line offset
-	 */
-	public void setLineOffset(int line)
-	{
-		this.lineOffset = line;
-	}
-
-	/**
 	 * Sets the line spacing for this {@link UITextField}.
 	 *
 	 * @param lineSpacing the lineSpacing to set
@@ -341,13 +355,13 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	/**
-	 * Gets the line height of this {@link UITextField}.
+	 * Sets the line offset.
 	 *
-	 * @return the line height
+	 * @param line the new line offset
 	 */
-	public int getLineHeight()
+	public void setLineOffset(int line)
 	{
-		return (int) Math.ceil((GuiRenderer.FONT_HEIGHT + lineSpacing) * fontScale);
+		this.lineOffset = line;
 	}
 
 	/**
@@ -418,144 +432,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 
 	// #end getters/setters
 
-	/**
-	 * Builds the lines for this {@link UITextField}. Does nothing if {@link #multiLine} is <code>false</code>.
-	 */
-	protected void buildLines()
-	{
-		lines.clear();
-
-		if (text == null || text.length() == 0)
-		{
-			fireEvent(new ContentUpdateEvent<UITextField>(this));
-			return;
-		}
-
-		if (!multiLine)
-		{
-			lines.add(text.toString());
-			return;
-		}
-
-		String[] texts = text.toString().split("\r?(?<=\n)");
-		int width = getWidth() - 4;
-		for (String str : texts)
-			lines.addAll(GuiRenderer.wrapText(StatCollector.translateToLocal(str), width, fontScale));
-
-		if (text.charAt(text.length() - 1) == '\n')
-			lines.add("");
-
-		fireEvent(new ContentUpdateEvent<UITextField>(this));
-	}
-
-	/**
-	 * Adds text at current cursor position. If some text is selected, it's deleted first.
-	 *
-	 * @param text the text
-	 */
-	public void addText(String text)
-	{
-		if (selectingText)
-			deleteSelectedText();
-
-		int position = cursorPosition.textPosition;
-		String oldValue = this.text.toString();
-		String newValue = new StringBuilder(oldValue).insert(position, text).toString();
-
-		if (!validateText(newValue))
-			return;
-
-		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
-			return;
-
-		this.text.insert(position, text);
-		buildLines();
-		cursorPosition.jumpBy(text.length());
-	}
-
-	/**
-	 * Checks against if text is valid.
-	 *
-	 * @param text the text
-	 * @return true, if input is valid
-	 */
-	protected boolean validateText(String text)
-	{
-		//TODO : handle text validator
-		return true;
-	}
-
-	/**
-	 * Gets the currently selected text.
-	 *
-	 * @return the text selected.
-	 */
-	public String getSelectedText()
-	{
-		if (!selectingText)
-			return "";
-
-		int start = Math.min(selectionPosition.textPosition, cursorPosition.textPosition);
-		int end = Math.max(selectionPosition.textPosition, cursorPosition.textPosition);
-
-		return this.text.substring(start, end);
-	}
-
-	/**
-	 * Deletes the text currently selected.
-	 */
-	public void deleteSelectedText()
-	{
-		if (!selectingText)
-			return;
-
-		int start = Math.min(selectionPosition.textPosition, cursorPosition.textPosition);
-		int end = Math.max(selectionPosition.textPosition, cursorPosition.textPosition);
-
-		String oldValue = this.text.toString();
-		String newValue = new StringBuilder(oldValue).substring(start, end).toString();
-
-		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
-			return;
-
-		text.delete(start, end);
-		selectingText = false;
-		buildLines();
-		cursorPosition.jumpTo(start);
-	}
-
-	/**
-	 * Deletes the specified <b>amount</b> of characters. Negative numbers will delete characters left of the cursor.<br>
-	 * If text is already selected, delete that text instead.
-	 *
-	 * @param amount the amount of characters to delete
-	 */
-	public void deleteFromCursor(int amount)
-	{
-		if (!selectingText)
-		{
-			selectingText = true;
-			selectionPosition.set(cursorPosition);
-			selectionPosition.jumpBy(amount);
-		}
-		deleteSelectedText();
-	}
-
-	/**
-	 * Deletes the text from current cursor position to the next space.
-	 *
-	 * @param backwards whether to look left for the next space
-	 */
-	public void deleteWord(boolean backwards)
-	{
-		if (!selectingText)
-		{
-			selectingText = true;
-			selectionPosition.set(cursorPosition);
-			cursorPosition.jumpToNextSpace(backwards);
-		}
-		deleteSelectedText();
-	}
+	//#region IScrollable
 
 	/**
 	 * Gets the content width.
@@ -598,7 +475,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public float getOffsetY()
 	{
-		return (float) lineOffset / (lines.size() - visibleLines());
+		return (float) lineOffset / (lines.size() - getVisibleLines());
 	}
 
 	/**
@@ -617,7 +494,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public float getScrollStep()
 	{
-		float step = (float) 1 / (lines.size() - visibleLines());
+		float step = (float) 1 / (lines.size() - getVisibleLines());
 		return (GuiScreen.isCtrlKeyDown() ? 5 * step : step);
 	}
 
@@ -643,21 +520,172 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		return 1;
 	}
 
+	//#end IScrollable
+
 	/**
 	 * Gets the number of visible lines inside this {@link UITextField}.
 	 *
 	 * @return the int
 	 */
-	protected int visibleLines()
+	public int getVisibleLines()
 	{
 		return multiLine ? (getHeight() - 4) / getLineHeight() : 1;
+	}
+
+	/**
+	 * Gets the line height of this {@link UITextField}.
+	 *
+	 * @return the line height
+	 */
+	public int getLineHeight()
+	{
+		return (int) Math.ceil((GuiRenderer.FONT_HEIGHT + lineSpacing) * fontScale);
+	}
+
+	//#end IBBSRenderer
+
+	/**
+	 * Builds the lines for this {@link UITextField}.
+	 */
+	protected void buildLines()
+	{
+		lines.clear();
+		if (!StringUtils.isEmpty(text))
+		{
+			if (!multiLine)
+				lines.add(text.toString());
+			else
+			{
+				lines = GuiRenderer.wrapText(text.toString(), getWidth() - 4, fontScale);
+
+				if (text.charAt(text.length() - 1) == '\n')
+					lines.add("");
+			}
+		}
+
+		fireEvent(new ContentUpdateEvent<UITextField>(this));
+	}
+
+	/**
+	 * Checks against if text is valid.
+	 *
+	 * @param text the text
+	 * @return true, if input is valid
+	 */
+	protected boolean validateText(String text)
+	{
+		//TODO : handle text validator
+		return true;
+	}
+
+	/**
+	 * Adds text at current cursor position. If some text is selected, it's deleted first.
+	 *
+	 * @param str the text
+	 */
+	public void addText(String str)
+	{
+		if (selectingText)
+			deleteSelectedText();
+
+		int position = cursorPosition.textPosition;
+
+		String oldValue = this.text.toString();
+		String newValue = new StringBuilder(oldValue).insert(position, str).toString();
+
+		if (!validateText(newValue))
+			return;
+
+		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
+			return;
+
+		text.insert(position, str);
+		buildLines();
+		cursorPosition.jumpBy(str.length());
+	}
+
+	/**
+	 * Deletes the text currently selected.
+	 */
+	public void deleteSelectedText()
+	{
+		if (!selectingText)
+			return;
+
+		int start = Math.min(selectionPosition.textPosition, cursorPosition.textPosition);
+		int end = Math.max(selectionPosition.textPosition, cursorPosition.textPosition);
+
+		String oldValue = this.text.toString();
+		String newValue = new StringBuilder(oldValue).delete(start, end).toString();
+
+		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
+			return;
+
+		text.delete(start, end);
+		buildLines();
+		selectingText = false;
+		cursorPosition.jumpTo(start);
+	}
+
+	/**
+	 * Deletes the specified <b>amount</b> of characters. Negative numbers will delete characters left of the cursor.<br>
+	 * If text is already selected, delete that text instead.
+	 *
+	 * @param amount the amount of characters to delete
+	 */
+	public void deleteFromCursor(int amount)
+	{
+		if (!selectingText)
+		{
+			selectingText = true;
+			selectionPosition.set(cursorPosition);
+			selectionPosition.jumpBy(amount);
+		}
+		deleteSelectedText();
+	}
+
+	/**
+	 * Deletes the text from current cursor position to the next space.
+	 *
+	 * @param backwards whether to look left for the next space
+	 */
+	public void deleteWord(boolean backwards)
+	{
+		if (!selectingText)
+		{
+			selectingText = true;
+			selectionPosition.set(cursorPosition);
+			cursorPosition.jumpToNextSpace(backwards);
+		}
+		deleteSelectedText();
+	}
+
+	public void selectWord()
+	{
+		selectWord(cursorPosition.textPosition);
+	}
+
+	public void selectWord(int position)
+	{
+		if (text.length() == 0)
+			return;
+
+		selectingText = true;
+
+		selectionPosition.jumpTo(position);
+		selectionPosition.jumpToNextSpace(true);
+		if (Character.isWhitespace(text.charAt(selectionPosition.textPosition)))
+			selectionPosition.shiftRight();
+
+		cursorPosition.jumpTo(position);
+		cursorPosition.jumpToNextSpace(false);
 	}
 
 	/**
 	 * Called when a cursor is updated.<br>
 	 * Offsets the content to make sure the cursor is still visible.
 	 */
-	public void onCursorUpdated()
+	protected void onCursorUpdated()
 	{
 		if (!multiLine)
 		{
@@ -674,150 +702,30 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		{
 			if (cursorPosition.line < lineOffset)
 				setLineOffset(cursorPosition.line);
-			else if (cursorPosition.line > lineOffset + visibleLines() - 1)
-				setLineOffset(cursorPosition.line - visibleLines() + 1);
+			else if (cursorPosition.line > lineOffset + getVisibleLines() - 1)
+				setLineOffset(cursorPosition.line - getVisibleLines() + 1);
 		}
 
 		startTimer = System.currentTimeMillis();
 	}
 
 	/**
-	 * Draws the background.
-	 *
-	 * @param renderer the renderer
-	 * @param mouseX the mouse x
-	 * @param mouseY the mouse y
-	 * @param partialTick the partial tick
+	 * Starts selecting text if Shift key is pressed.<br>
+	 * Places selection cursor at the current cursor position.
 	 */
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	protected void startSelecting()
 	{
-		rp.useTexture.reset();
-		rp.colorMultiplier.reset();
-		rp.icon.set(isDisabled() ? iconTextfieldDisabled : iconTextfield);
-		rp.colorMultiplier.set(bgColor);
-		renderer.drawShape(shape, rp);
-	}
-
-	/**
-	 * Draws the foreground.
-	 *
-	 * @param renderer the renderer
-	 * @param mouseX the mouse x
-	 * @param mouseY the mouse y
-	 * @param partialTick the partial tick
-	 */
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		if (text.length() != 0)
-			drawText(renderer);
-		if (selectingText && selectionPosition.textPosition != cursorPosition.textPosition)
-			drawSelectionBox(renderer);
-		if (focused)
-			drawCursor(renderer);
-	}
-
-	/**
-	 * Draws the text of this {@link UITextField}.
-	 *
-	 * @param renderer the renderer
-	 */
-	public void drawText(GuiRenderer renderer)
-	{
-		renderer.setFontScale(fontScale);
-		if (!multiLine)
+		if (GuiScreen.isShiftKeyDown())
 		{
-			int end = text.length();
-			int w = GuiRenderer.getStringWidth(text.substring(charOffset, end), fontScale);
-			while (w > getWidth())
-				w = GuiRenderer.getStringWidth(text.substring(charOffset, end--), fontScale);
-			renderer.drawText(text.substring(charOffset, end), 2, 2, isDisabled() ? 0xAAAAAA : textColor, textShadow);
+			if (!selectingText)
+				selectionPosition.set(cursorPosition);
+			selectingText = true;
 		}
 		else
-		{
-			for (int i = lineOffset; i < lineOffset + visibleLines() && i < lines.size(); i++)
-			{
-				int h = (i - lineOffset) * getLineHeight();
-				renderer.drawText(lines.get(i), 2, h + 2, isDisabled() ? 0xAAAAAA : textColor, textShadow);
-			}
-		}
-		renderer.setFontScale(1);
+			selectingText = false;
 	}
 
-	/**
-	 * Draws the cursor of this {@link UITextField}.
-	 *
-	 * @param renderer the renderer
-	 */
-	public void drawCursor(GuiRenderer renderer)
-	{
-		long elaspedTime = startTimer - System.currentTimeMillis();
-		if ((elaspedTime / 500) % 2 != 0)
-			return;
-
-		if (cursorPosition.line < lineOffset || cursorPosition.line >= lineOffset + visibleLines())
-			return;
-
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-		cursorShape.resetState();
-		cursorShape.setSize(1, getLineHeight());
-		cursorShape.setPosition(cursorPosition.getXOffset() + 1, cursorPosition.getYOffset() + 1);
-
-		rp.useTexture.set(false);
-		rp.colorMultiplier.set(cursorColor);
-
-		renderer.drawShape(cursorShape, rp);
-		renderer.next();
-
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-	}
-
-	/**
-	 * Draw the selection box of this {@link UITextField}.
-	 *
-	 * @param renderer the renderer
-	 */
-	public void drawSelectionBox(GuiRenderer renderer)
-	{
-
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_COLOR_LOGIC_OP);
-		GL11.glLogicOp(GL11.GL_OR_REVERSE);
-
-		CursorPosition first = cursorPosition.textPosition < selectionPosition.textPosition ? cursorPosition : selectionPosition;
-		CursorPosition last = cursorPosition == first ? selectionPosition : cursorPosition;
-
-		for (int i = first.line; i <= last.line; i++)
-		{
-			if (i >= lineOffset && i < lineOffset + visibleLines() && i < lines.size())
-			{
-				int x = 0;
-				int y = (i - lineOffset) * getLineHeight();
-				int X = GuiRenderer.getStringWidth(lines.get(i), fontScale);
-
-				if (i == first.line)
-					x = first.getXOffset();
-				if (i == last.line)
-					X = last.getXOffset();
-
-				selectShape.resetState();
-				selectShape.setSize(Math.min(getWidth() - 2, X) - x, getLineHeight());
-				selectShape.setPosition(x + 2, y + 1);
-
-				rp.useTexture.set(false);
-				rp.colorMultiplier.set(selectColor);
-
-				renderer.drawShape(selectShape, rp);
-			}
-		}
-
-		renderer.next();
-
-		GL11.glDisable(GL11.GL_COLOR_LOGIC_OP);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-	}
+	//#region Input
 
 	@Override
 	public boolean onButtonPress(int x, int y, MouseButton button)
@@ -879,34 +787,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public boolean onDoubleClick(int x, int y, MouseButton button)
 	{
-		return super.onDoubleClick(x, y, button);
-		//TODO:
-		//		int pos = cursorPositionFromX(relativeX(event.getX()));
-		//		if (pos > 0 && text.charAt(pos - 1) == ' ')
-		//			selectionPosition = pos;
-		//		else
-		//			selectionPosition = pos + nextSpacePosition(true);
-		//
-		//		if (text.charAt(pos) == ' ')
-		//			setCursorPosition(pos);
-		//		else
-		//			setCursorPosition(pos + nextSpacePosition(false) - 1);
-	}
-
-	/**
-	 * Starts selecting text if Shift key is pressed.<br>
-	 * Places selection cursor at the current cursor position.
-	 */
-	protected void startSelecting()
-	{
-		if (GuiScreen.isShiftKeyDown())
-		{
-			if (!selectingText)
-				selectionPosition.set(cursorPosition);
-			selectingText = true;
-		}
-		else
-			selectingText = false;
+		selectWord();
+		return true;
 	}
 
 	@Override
@@ -916,7 +798,10 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			return false;
 
 		if (keyCode == Keyboard.KEY_ESCAPE)
+		{
+			setFocused(false);
 			return true; //we don't want to close the GUI
+		}
 
 		if (handleCtrlKeyDown(keyCode))
 			return true;
@@ -954,21 +839,30 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				cursorPosition.jumpToLineEnd();
 				break;
 			case Keyboard.KEY_BACK:
-				if (editable)
+				if (isEditable())
 					this.deleteFromCursor(-1);
 				break;
 			case Keyboard.KEY_DELETE:
-				if (editable)
+				if (isEditable())
 					this.deleteFromCursor(1);
 				break;
 			case Keyboard.KEY_RETURN:
-				if (multiLine && editable)
+				if (multiLine && isEditable())
 					this.addText("\n");
 				break;
-			default:
-				if (ChatAllowedCharacters.isAllowedCharacter(keyChar) && editable)
-					this.addText(Character.toString(keyChar));
+			case Keyboard.KEY_TAB:
+				if (isEditable())
+					addText("\t");
 				break;
+			default:
+				if (ChatAllowedCharacters.isAllowedCharacter(keyChar) && isEditable())
+				{
+					this.addText(Character.toString(keyChar));
+					break;
+				}
+				else
+					return super.onKeyTyped(keyChar, keyCode);
+
 		}
 		return true;
 	}
@@ -995,11 +889,11 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				cursorPosition.jumpToNextSpace(false);
 				return true;
 			case Keyboard.KEY_BACK:
-				if (editable)
+				if (isEditable())
 					this.deleteWord(true);
 				return true;
 			case Keyboard.KEY_DELETE:
-				if (editable)
+				if (isEditable())
 					this.deleteWord(false);
 				return true;
 			case Keyboard.KEY_HOME:
@@ -1019,17 +913,145 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				GuiScreen.setClipboardString(getSelectedText());
 				return true;
 			case Keyboard.KEY_V:
-				if (editable)
+				if (isEditable())
 					addText(GuiScreen.getClipboardString());
 				return true;
 			case Keyboard.KEY_X:
 				GuiScreen.setClipboardString(getSelectedText());
-				if (editable)
+				if (isEditable())
 					addText("");
 				return true;
 			default:
 				return false;
 		}
+	}
+
+	//#end Input
+
+	/**
+	 * Draws the background.
+	 *
+	 * @param renderer the renderer
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
+	 */
+	@Override
+	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		rp.useTexture.reset();
+		rp.colorMultiplier.reset();
+		rp.icon.set(isDisabled() ? iconTextfieldDisabled : iconTextfield);
+		rp.colorMultiplier.set(bgColor);
+		renderer.drawShape(shape, rp);
+	}
+
+	/**
+	 * Draws the foreground.
+	 *
+	 * @param renderer the renderer
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @param partialTick the partial tick
+	 */
+	@Override
+	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		if (text.length() != 0)
+			drawText(renderer);
+		if (selectingText && selectionPosition.textPosition != cursorPosition.textPosition)
+			drawSelectionBox(renderer);
+		if (focused)
+			drawCursor(renderer);
+	}
+
+	/**
+	 * Draws the text of this {@link UITextField}.
+	 *
+	 * @param renderer the renderer
+	 */
+	public void drawText(GuiRenderer renderer)
+	{
+		renderer.setFontScale(fontScale);
+		if (!multiLine)
+		{
+			int end = text.length();
+			int w = GuiRenderer.getStringWidth(text.substring(charOffset, end), fontScale);
+			while (w > getWidth())
+				w = GuiRenderer.getStringWidth(text.substring(charOffset, end--), fontScale);
+			renderer.drawText(text.substring(charOffset, end), 2, 2, isDisabled() ? 0xAAAAAA : textColor, textShadow);
+		}
+		else
+		{
+			for (int i = lineOffset; i < lineOffset + getVisibleLines() && i < lines.size(); i++)
+			{
+				int h = (i - lineOffset) * getLineHeight();
+				renderer.drawText(lines.get(i), 2, h + 2, isDisabled() ? 0xAAAAAA : textColor, textShadow);
+			}
+		}
+		renderer.setFontScale(1);
+	}
+
+	/**
+	 * Draws the cursor of this {@link UITextField}.
+	 *
+	 * @param renderer the renderer
+	 */
+	public void drawCursor(GuiRenderer renderer)
+	{
+		long elaspedTime = startTimer - System.currentTimeMillis();
+		if ((elaspedTime / 500) % 2 != 0)
+			return;
+
+		if (cursorPosition.line < lineOffset || cursorPosition.line >= lineOffset + getVisibleLines())
+			return;
+
+		renderer.drawRectangle(cursorPosition.getXOffset() + 1, cursorPosition.getYOffset() + 1, getZIndex(), 1, getLineHeight(),
+				cursorColor, 255, true);
+	}
+
+	/**
+	 * Draw the selection box of this {@link UITextField}.
+	 *
+	 * @param renderer the renderer
+	 */
+	public void drawSelectionBox(GuiRenderer renderer)
+	{
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glEnable(GL11.GL_COLOR_LOGIC_OP);
+		GL11.glLogicOp(GL11.GL_OR_REVERSE);
+
+		CursorPosition first = cursorPosition.textPosition < selectionPosition.textPosition ? cursorPosition : selectionPosition;
+		CursorPosition last = cursorPosition == first ? selectionPosition : cursorPosition;
+
+		for (int i = first.line; i <= last.line; i++)
+		{
+			if (i >= lineOffset && i < lineOffset + getVisibleLines() && i < lines.size())
+			{
+				int x = 0;
+				int y = (i - lineOffset) * getLineHeight();
+				int X = GuiRenderer.getStringWidth(lines.get(i), fontScale);
+
+				if (i == first.line)
+					x = first.getXOffset();
+				if (i == last.line)
+					X = last.getXOffset();
+
+				selectShape.resetState();
+				selectShape.setSize(Math.min(getWidth() - 2, X) - x, getLineHeight());
+				selectShape.setPosition(x + 2, y + 1);
+
+				rp.useTexture.set(false);
+				rp.colorMultiplier.set(selectColor);
+
+				renderer.drawShape(selectShape, rp);
+			}
+		}
+
+		renderer.next();
+
+		GL11.glDisable(GL11.GL_COLOR_LOGIC_OP);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
 	/**
@@ -1043,10 +1065,11 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		return text + " | " + super.getPropertyString();
 	}
 
+	//#region CursorPosition
 	/**
-	 * The Class CursorPosition.
+	 * This class determines a position inside the text divides in lines.
 	 */
-	protected class CursorPosition
+	public class CursorPosition
 	{
 		/** The text position. */
 		protected int textPosition;
@@ -1065,6 +1088,16 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			this.textPosition = position.textPosition;
 			this.character = position.character;
 			this.line = position.line;
+		}
+
+		/**
+		 * Gets the position of this {@link CursorPosition} in the text.
+		 *
+		 * @return the position
+		 */
+		public int getPosition()
+		{
+			return textPosition;
 		}
 
 		/**
@@ -1216,7 +1249,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			int step = backwards ? -1 : 1;
 
 			pos += step;
-			while (pos > 0 && pos < text.length() && !Character.isWhitespace(text.charAt(pos)))
+			while (pos > 0 && pos < text.length() && Character.isLetterOrDigit(text.charAt(pos)))
 				pos += step;
 
 			jumpTo(pos);
@@ -1325,7 +1358,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				return GuiRenderer.getStringWidth(currentLineText(), fontScale);
 			if (currentLineText().length() == 0)
 				return 0;
-			if (charOffset >= character)
+			if (charOffset >= character || charOffset >= currentLineText().length() || character >= currentLineText().length())
 				return 0;
 			return GuiRenderer.getStringWidth(currentLineText().substring(charOffset, character), fontScale);
 		}
@@ -1339,7 +1372,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		{
 			return (line - lineOffset) * getLineHeight();
 		}
-
 	}
+
+	//#end CursorPosition
 
 }

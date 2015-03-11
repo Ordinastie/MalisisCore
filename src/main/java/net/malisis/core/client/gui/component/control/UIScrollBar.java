@@ -326,6 +326,8 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 			scrollTo(0);
 		else if (keyCode == Keyboard.KEY_END)
 			scrollTo(1);
+		else
+			return super.onKeyTyped(keyChar, keyCode);
 
 		return true;
 	}
