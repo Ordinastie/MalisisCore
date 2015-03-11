@@ -34,6 +34,7 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
@@ -89,6 +90,8 @@ public class GuiRenderer extends MalisisRenderer
 	/** Currently used {@link GuiTexture} */
 	private GuiTexture currentTexture;
 
+	private static GuiShape rectangle = new SimpleGuiShape();
+
 	static
 	{
 		//could reflect to get EnumChatFormatting.formattingCodeMapping instead
@@ -103,6 +106,22 @@ public class GuiRenderer extends MalisisRenderer
 	{
 		defaultGuiTexture = new GuiTexture(new ResourceLocation("malisiscore", "textures/gui/gui.png"), 300, 100);
 		updateGuiScale();
+	}
+
+	/**
+	 * Calculates GUI scale factor.
+	 *
+	 * @param guiScale the gui scale
+	 */
+	private void calcScaleFactor(int guiScale)
+	{
+		this.scaleFactor = 1;
+		if (guiScale == 0)
+			guiScale = 1000;
+
+		while (this.scaleFactor < guiScale && this.displayWidth / (this.scaleFactor + 1) >= 320
+				&& this.displayHeight / (this.scaleFactor + 1) >= 240)
+			++this.scaleFactor;
 	}
 
 	/**
@@ -211,6 +230,58 @@ public class GuiRenderer extends MalisisRenderer
 	}
 
 	/**
+	 * Next.
+	 */
+	@Override
+	public void next()
+	{
+		super.next();
+		bindDefaultTexture();
+	}
+
+	/**
+	 * Bind a new texture for rendering.
+	 *
+	 * @param texture the texture
+	 */
+	public void bindTexture(GuiTexture texture)
+	{
+		if (texture == null || texture == currentTexture)
+			return;
+
+		Minecraft.getMinecraft().getTextureManager().bindTexture(texture.getResourceLocation());
+		currentTexture = texture;
+	}
+
+	/**
+	 * Reset the texture to its {@link #defaultGuiTexture}.
+	 */
+	public void bindDefaultTexture()
+	{
+		bindTexture(defaultGuiTexture);
+	}
+
+	/**
+	 * Applies the texture the {@link Shape}.
+	 *
+	 * @param shape the shape
+	 * @param parameters the parameters
+	 */
+	@Override
+	public void applyTexture(Shape shape, RenderParameters parameters)
+	{
+		if (parameters.icon.get() == null)
+			return;
+
+		Face[] faces = shape.getFaces();
+		IIcon icon = parameters.icon.get();
+		boolean isGuiIcon = icon instanceof GuiIcon;
+
+		for (int i = 0; i < faces.length; i++)
+			faces[i].setTexture(isGuiIcon ? ((GuiIcon) icon).getIcon(i) : icon, false, false, false);
+	}
+
+	/**
 	 * Draws the component to the screen.
 	 *
 	 * @param container the container
@@ -229,21 +300,6 @@ public class GuiRenderer extends MalisisRenderer
 		container.draw(this, mouseX, mouseY, partialTick);
 
 		clean();
-	}
-
-	/**
-	 * Draws a {@link UITooltip} to the screen.
-	 *
-	 * @param tooltip the tooltip
-	 */
-	public void drawTooltip(UITooltip tooltip)
-	{
-		if (tooltip != null)
-		{
-			t.startDrawingQuads();
-			tooltip.draw(this, mouseX, mouseY, partialTick);
-			t.draw();
-		}
 	}
 
 	/**
@@ -270,159 +326,55 @@ public class GuiRenderer extends MalisisRenderer
 			drawFace(face, face.getParameters());
 	}
 
-	/**
-	 * Applies the texture the {@link Shape}.
-	 *
-	 * @param shape the shape
-	 * @param parameters the parameters
-	 */
-	@Override
-	public void applyTexture(Shape shape, RenderParameters parameters)
+	public void drawRectangle(int x, int y, int z, int width, int height, int color, int alpha)
 	{
-		if (parameters.icon.get() == null)
-			return;
-
-		Face[] faces = shape.getFaces();
-		IIcon icon = parameters.icon.get();
-		boolean isGuiIcon = icon instanceof GuiIcon;
-
-		for (int i = 0; i < faces.length; i++)
-			faces[i].setTexture(isGuiIcon ? ((GuiIcon) icon).getIcon(i) : icon, false, false, false);
+		drawRectangle(x, y, z, width, height, color, alpha, true);
 	}
 
-	/**
-	 * Clips a string to fit in the specified width. The string is translated before clipping.
-	 *
-	 * @param text the text
-	 * @param width the width
-	 * @return the string
-	 */
-	public String clipString(String text, int width)
+	public void drawRectangle(int x, int y, int z, int width, int height, int color, int alpha, boolean relative)
 	{
-		text = StatCollector.translateToLocal(text);
-		StringBuilder ret = new StringBuilder();
-		float strWidth = 0;
-		int index = 0;
-		while (index < text.length())
+		if (relative && currentComponent != null)
 		{
-			char c = text.charAt(index);
-			strWidth += getCharWidth(c, fontScale);
-			if (strWidth < width)
-				ret.append(c);
-			else
-				return ret.toString();
-			index++;
+			x += currentComponent.screenX();
+			y += currentComponent.screenY();
+			z += currentComponent.getZIndex();
 		}
 
-		return ret.toString();
+		rectangle.resetState();
+		rectangle.setSize(width, height);
+		rectangle.setPosition(x, y);
+		rectangle.getFaces()[0].getParameters().colorMultiplier.set(color);
+		rectangle.getFaces()[0].getParameters().alpha.set(alpha);
+
+		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+		GL11.glPushMatrix();
+
+		disableTextures();
+		enableBlending();
+
+		drawShape(rectangle);
+		next();
+		enableTextures();
+
+		GL11.glPopMatrix();
+		GL11.glPopAttrib();
 	}
 
 	/**
-	 * Splits the string in multiple lines to fit in the specified maxWidth.
+	 * Draws a {@link UITooltip} to the screen.
 	 *
-	 * @param text the text
-	 * @param maxWidth the max width
-	 * @return list of lines that won't exceed maxWidth limit
+	 * @param tooltip the tooltip
 	 */
-	public static List<String> wrapText(String text, int maxWidth)
+	public void drawTooltip(UITooltip tooltip)
 	{
-		return wrapText(text, maxWidth, 1);
-	}
-
-	/**
-	 * Splits the string in multiple lines to fit in the specified maxWidth using the specified fontScale.
-	 *
-	 * @param text the text
-	 * @param maxWidth the max width
-	 * @param fontScale the font scale
-	 * @return list of lines that won't exceed maxWidth limit
-	 */
-	public static List<String> wrapText(String text, int maxWidth, float fontScale)
-	{
-		List<String> lines = new ArrayList<>();
-		List<EnumChatFormatting> modifiers = new LinkedList<>();
-		EnumChatFormatting ecf;
-		StringBuilder line = new StringBuilder();
-		StringBuilder word = new StringBuilder();
-
-		float lineWidth = 0;
-		float wordWidth = 0;
-		int index = 0;
-		while (index < text.length())
+		if (tooltip != null)
 		{
-			while ((ecf = getFormatting(text, index)) != null)
-			{
-				if (ecf == EnumChatFormatting.RESET || ecf.isColor())
-					modifiers.clear();
-				if (ecf != EnumChatFormatting.RESET)
-					modifiers.add(ecf);
-				index += 2;
-				word.append(ecf.toString());
-				if (index >= text.length())
-					break;
-			}
-
-			char c = text.charAt(index);
-
-			float w = getCharWidth(c, fontScale);
-			lineWidth += w;
-			wordWidth += w;
-			word.append(c);
-			//we just ended a new word, add it to the current line
-			if (c == ' ' || c == '-' || c == '.')
-			{
-				line.append(word);
-				word.setLength(0);
-				wordWidth = 0;
-			}
-			if (lineWidth >= maxWidth)
-			{
-				//the first word on the line is too large, split anyway
-				if (line.length() == 0)
-				{
-					line.append(word);
-					word.setLength(0);
-					wordWidth = 0;
-				}
-				//make a new line
-				lines.add(line.toString());
-				line.setLength(0);
-
-				//add modifiers to the new line
-				for (int i = 0; i < modifiers.size(); i++)
-					line.insert(i * 2, modifiers.get(i));
-
-				lineWidth = wordWidth;
-			}
-			index++;
+			t.startDrawingQuads();
+			tooltip.draw(this, mouseX, mouseY, partialTick);
+			t.draw();
 		}
-
-		line.append(word);
-		lines.add(line.toString());
-
-		return lines;
 	}
 
-	/**
-	 * Gets the {@link EnumChatFormatting} at the specified position in the text.<br>
-	 * Returns null if
-	 *
-	 * @param text the text
-	 * @param index the index
-	 * @return the formatting
-	 */
-	private static EnumChatFormatting getFormatting(String text, int index)
-	{
-		if (text == null || index >= text.length() - 3)
-			return null;
-
-		char c = text.charAt(index);
-		if (c != '\u00a7')
-			return null;
-		return charFormats.get(text.charAt(index + 1));
-	}
-
-	//#region drawText()
 	/**
 	 * Draws a white text on the GUI without shadow.
 	 *
@@ -500,6 +452,7 @@ public class GuiRenderer extends MalisisRenderer
 
 		text = StatCollector.translateToLocal(text);
 		text = text.replaceAll("\r?\n", "");
+		text = text.replaceAll("\t", "    ");
 		GL11.glPushMatrix();
 		GL11.glTranslatef(x * (1 - fontScale), y * (1 - fontScale), 0);
 		GL11.glScalef(fontScale, fontScale, 1);
@@ -618,6 +571,23 @@ public class GuiRenderer extends MalisisRenderer
 	}
 
 	/**
+	 * Render the picked up itemStack at the cursor position.
+	 *
+	 * @param itemStack the item stack
+	 */
+	public void renderPickedItemStack(ItemStack itemStack)
+	{
+		if (itemStack == null)
+			return;
+
+		itemRenderer.zLevel = 100;
+		t.startDrawingQuads();
+		drawItemStack(itemStack, mouseX - 8, mouseY - 8, null, itemStack.stackSize == 0 ? EnumChatFormatting.YELLOW : null, false);
+		t.draw();
+		itemRenderer.zLevel = 0;
+	}
+
+	/**
 	 * Starts clipping an area to prevent drawing outside of it.
 	 *
 	 * @param area the area
@@ -652,37 +622,63 @@ public class GuiRenderer extends MalisisRenderer
 		GL11.glPopAttrib();
 	}
 
-	/**
-	 * Calculates GUI scale factor.
-	 *
-	 * @param guiScale the gui scale
-	 */
-	private void calcScaleFactor(int guiScale)
+	public static String processString(String str)
 	{
-		this.scaleFactor = 1;
-		if (guiScale == 0)
-			guiScale = 1000;
-
-		while (this.scaleFactor < guiScale && this.displayWidth / (this.scaleFactor + 1) >= 320
-				&& this.displayHeight / (this.scaleFactor + 1) >= 240)
-			++this.scaleFactor;
+		str = StatCollector.translateToLocal(str);
+		str = str.replaceAll("\r?\n", "").replaceAll("\t", "    ");
+		return str;
 	}
 
 	/**
-	 * Render the picked up itemStack at the cursor position.
+	 * Clips a string to fit in the specified width. The string is translated before clipping.
 	 *
-	 * @param itemStack the item stack
+	 * @param text the text
+	 * @param width the width
+	 * @return the string
 	 */
-	public void renderPickedItemStack(ItemStack itemStack)
+	public static String clipString(String text, int width)
 	{
-		if (itemStack == null)
-			return;
+		return clipString(text, width, 1, false);
+	}
 
-		itemRenderer.zLevel = 100;
-		t.startDrawingQuads();
-		drawItemStack(itemStack, mouseX - 8, mouseY - 8, null, itemStack.stackSize == 0 ? EnumChatFormatting.YELLOW : null, false);
-		t.draw();
-		itemRenderer.zLevel = 0;
+	/**
+	 * Clips a string to fit in the specified width with the fontScale. The string is translated before clipping.
+	 *
+	 * @param text the text
+	 * @param width the width
+	 * @param fontScale the font scale
+	 * @return the string
+	 */
+	public static String clipString(String text, int width, float fontScale)
+	{
+		return clipString(text, width, fontScale, false);
+	}
+
+	public static String clipString(String text, int width, float fontScale, boolean appendPeriods)
+	{
+		text = StatCollector.translateToLocal(text);
+		StringBuilder ret = new StringBuilder();
+		float strWidth = 0;
+		int index = 0;
+
+		if (appendPeriods)
+			width -= 4;
+
+		while (index < text.length())
+		{
+			char c = text.charAt(index);
+			strWidth += getCharWidth(c, fontScale);
+			if (strWidth < width)
+				ret.append(c);
+			else
+				return ret.toString();
+			index++;
+		}
+
+		if (appendPeriods)
+			ret.append("...");
+
+		return ret.toString();
 	}
 
 	/**
@@ -708,8 +704,7 @@ public class GuiRenderer extends MalisisRenderer
 		if (StringUtils.isEmpty(str))
 			return 0;
 
-		str = StatCollector.translateToLocal(str);
-		str = str.replaceAll("\r?\n", "");
+		str = processString(str);
 		return (int) Math.ceil(MalisisRenderer.getFontRenderer().getStringWidth(str) * fontScale);
 	}
 
@@ -768,8 +763,6 @@ public class GuiRenderer extends MalisisRenderer
 	 */
 	public static float getCharWidth(char c)
 	{
-		if (c == '\r' || c == '\n')
-			return 0;
 		return getCharWidth(c, 1);
 	}
 
@@ -782,39 +775,128 @@ public class GuiRenderer extends MalisisRenderer
 	 */
 	public static float getCharWidth(char c, float fontScale)
 	{
+		if (c == '\r' || c == '\n')
+			return 0;
+		if (c == '\t')
+			return getCharWidth(' ', fontScale) * 4;
+
 		float s = MalisisRenderer.getFontRenderer().getCharWidth(c) * fontScale;
 		return s >= 0 ? s : 0;
 	}
 
 	/**
-	 * Bind a new texture for rendering.
+	 * Splits the string in multiple lines to fit in the specified maxWidth.
 	 *
-	 * @param texture the texture
+	 * @param text the text
+	 * @param maxWidth the max width
+	 * @return list of lines that won't exceed maxWidth limit
 	 */
-	public void bindTexture(GuiTexture texture)
+	public static List<String> wrapText(String text, int maxWidth)
 	{
-		if (texture == null || texture == currentTexture)
-			return;
-
-		Minecraft.getMinecraft().getTextureManager().bindTexture(texture.getResourceLocation());
-		currentTexture = texture;
+		return wrapText(text, maxWidth, 1);
 	}
 
 	/**
-	 * Reset the texture to its {@link #defaultGuiTexture}.
+	 * Splits the string in multiple lines to fit in the specified maxWidth using the specified fontScale.
+	 *
+	 * @param text the text
+	 * @param maxWidth the max width
+	 * @param fontScale the font scale
+	 * @return list of lines that won't exceed maxWidth limit
 	 */
-	public void bindDefaultTexture()
+	public static List<String> wrapText(String text, int maxWidth, float fontScale)
 	{
-		bindTexture(defaultGuiTexture);
+		List<String> lines = new ArrayList<>();
+		String[] texts = text.split("\r?(?<=\n)");
+		if (texts.length > 1)
+		{
+			for (String str : texts)
+				lines.addAll(wrapText(str, maxWidth, fontScale));
+			return lines;
+		}
+
+		List<EnumChatFormatting> modifiers = new LinkedList<>();
+		EnumChatFormatting ecf;
+		StringBuilder line = new StringBuilder();
+		StringBuilder word = new StringBuilder();
+
+		float lineWidth = 0;
+		float wordWidth = 0;
+		int index = 0;
+
+		text = StatCollector.translateToLocal(text);
+
+		while (index < text.length())
+		{
+			while ((ecf = getFormatting(text, index)) != null)
+			{
+				if (ecf == EnumChatFormatting.RESET || ecf.isColor())
+					modifiers.clear();
+				if (ecf != EnumChatFormatting.RESET)
+					modifiers.add(ecf);
+				index += 2;
+				word.append(ecf.toString());
+				if (index >= text.length())
+					break;
+			}
+
+			char c = text.charAt(index);
+
+			float w = getCharWidth(c, fontScale);
+			lineWidth += w;
+			wordWidth += w;
+			word.append(c);
+			//we just ended a new word, add it to the current line
+			if (c == ' ' || c == '-' || c == '.')
+			{
+				line.append(word);
+				word.setLength(0);
+				wordWidth = 0;
+			}
+			if (lineWidth >= maxWidth)
+			{
+				//the first word on the line is too large, split anyway
+				if (line.length() == 0)
+				{
+					line.append(word);
+					word.setLength(0);
+					wordWidth = 0;
+				}
+				//make a new line
+				lines.add(line.toString());
+				line.setLength(0);
+
+				//add modifiers to the new line
+				for (int i = 0; i < modifiers.size(); i++)
+					line.insert(i * 2, modifiers.get(i));
+
+				lineWidth = wordWidth;
+			}
+			index++;
+		}
+
+		line.append(word);
+		lines.add(line.toString());
+
+		return lines;
 	}
 
 	/**
-	 * Next.
+	 * Gets the {@link EnumChatFormatting} at the specified position in the text.<br>
+	 * Returns null if
+	 *
+	 * @param text the text
+	 * @param index the index
+	 * @return the formatting
 	 */
-	@Override
-	public void next()
+	private static EnumChatFormatting getFormatting(String text, int index)
 	{
-		super.next();
-		bindDefaultTexture();
+		if (text == null || index >= text.length() - 3)
+			return null;
+
+		char c = text.charAt(index);
+		if (c != '\u00a7')
+			return null;
+		return charFormats.get(text.charAt(index + 1));
 	}
 }
