@@ -61,6 +61,8 @@ public class UIButton extends UIComponent<UIButton>
 	protected int hoverTextColor = 0xFFFFA0;
 	/** Whether to use shadow for the text of this {@link UIButton}. */
 	protected boolean textShadow = true;
+	/** Offset for the contents */
+	protected int offsetX, offsetY;
 
 	/**
 	 * Instantiates a new {@link UIButton}.
@@ -104,6 +106,101 @@ public class UIButton extends UIComponent<UIButton>
 	}
 
 	//#region Getters/Setters
+
+	/**
+	 * Gets the text of this {@link UIButton}.
+	 *
+	 * @return the text of this {@link UIButton}.
+	 */
+	public String getText()
+	{
+		return text;
+	}
+
+	/**
+	 * Sets the text of this {@link UIButton}.
+	 *
+	 * @param text the text
+	 * @return this {@link UIButton}
+	 */
+	public UIButton setText(String text)
+	{
+		this.text = text;
+		setSize(width, height);
+		image = null;
+		return this;
+	}
+
+	/**
+	 * Gets the {@link UIImage} of this {@link UIButton}.
+	 *
+	 * @return the image
+	 */
+	public UIImage getImage()
+	{
+		return this.image;
+	}
+
+	/**
+	 * Sets the {@link UIImage} for this {@link UIButton}. If a width of 0 was previously set, it will be recalculated for this image.
+	 *
+	 * @param image the image
+	 * @return this {@link UIButton}
+	 */
+	public UIButton setImage(UIImage image)
+	{
+		this.image = image;
+		image.setParent(this);
+		setSize(width, height);
+		text = null;
+		return this;
+	}
+
+	/**
+	 * Sets the width of this {@link UIButton} with a default height of 20px.
+	 *
+	 * @param width the width
+	 * @return this {@link UIButton}
+	 */
+	public UIButton setSize(int width)
+	{
+		return setSize(width, 20);
+	}
+
+	/**
+	 * Sets the size of this {@link UIButton}.
+	 *
+	 * @param width the width
+	 * @param height the height
+	 * @return this {@link UIButton}
+	 */
+	@Override
+	public UIButton setSize(int width, int height)
+	{
+		if (autoSize)
+		{
+			if (image != null)
+			{
+				int w = image.getRawWidth();
+				int h = image.getRawHeight();
+				width = Math.max(width, w + 2);
+				height = Math.max(height, h + 2);
+			}
+			else
+			{
+				int w = GuiRenderer.getStringWidth(text);
+				int h = GuiRenderer.getStringHeight();
+				width = Math.max(width, w + 6);
+				height = Math.max(height, h + 6);
+			}
+		}
+
+		this.width = width;
+		this.height = height;
+
+		return this;
+	}
+
 	/**
 	 * Checks if is width is automatically calculated.<br>
 	 * If true, this {@link UIButton} cannot be smaller that its contents.
@@ -215,6 +312,49 @@ public class UIButton extends UIComponent<UIButton>
 		return this;
 	}
 
+	/**
+	 * Gets the text offset of this {@link UIButton}.
+	 *
+	 * @return the text offset x
+	 */
+	public int getOffsetX()
+	{
+		return offsetX;
+	}
+
+	/**
+	 * Gets the text offset of this {@link UIButton}.
+	 *
+	 * @return the text offset y
+	 */
+	public int getOffsetY()
+	{
+		return offsetY;
+	}
+
+	/**
+	 * Sets the text offset of this {@link UIButton}.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @return the UI button
+	 */
+	public UIButton setOffset(int x, int y)
+	{
+		offsetX = x;
+		offsetY = y;
+		return this;
+	}
+
+	/**
+	 * Sets the options for this {@link UIButton}.
+	 *
+	 * @param textColor the text color
+	 * @param hoverTextColor the hover text color
+	 * @param bgColor the bg color
+	 * @param textShadow the text shadow
+	 * @return the UI button
+	 */
 	public UIButton setOptions(int textColor, int hoverTextColor, int bgColor, boolean textShadow)
 	{
 		this.textColor = textColor;
@@ -225,96 +365,13 @@ public class UIButton extends UIComponent<UIButton>
 	}
 
 	//#end Getters/Setters
-	/**
-	 * Sets the text of this {@link UIButton}.
-	 *
-	 * @param text the text
-	 * @return this {@link UIButton}
-	 */
-	public UIButton setText(String text)
-	{
-		this.text = text;
-		setSize(width, height);
-		image = null;
-		return this;
-	}
-
-	/**
-	 * Gets the text of this {@link UIButton}.
-	 *
-	 * @return the text of this {@link UIButton}.
-	 */
-	public String getText()
-	{
-		return text;
-	}
-
-	/**
-	 * Sets the {@link UIImage} for this {@link UIButton}. If a width of 0 was previously set, it will be recalculated for this image.
-	 *
-	 * @param image the image
-	 * @return this {@link UIButton}
-	 */
-	public UIButton setImage(UIImage image)
-	{
-		this.image = image;
-		image.setParent(this);
-		setSize(width, height);
-		text = null;
-		return this;
-	}
-
-	/**
-	 * Sets the width of this {@link UIButton} with a default height of 20px.
-	 *
-	 * @param width the width
-	 * @return this {@link UIButton}
-	 */
-	public UIButton setSize(int width)
-	{
-		return setSize(width, 20);
-	}
-
-	/**
-	 * Sets the size of this {@link UIButton}.
-	 *
-	 * @param width the width
-	 * @param height the height
-	 * @return this {@link UIButton}
-	 */
-	@Override
-	public UIButton setSize(int width, int height)
-	{
-		if (autoSize)
-		{
-			if (image != null)
-			{
-				int w = image.getRawWidth();
-				int h = image.getRawHeight();
-				width = Math.max(width, w + 2);
-				height = Math.max(height, h + 2);
-			}
-			else
-			{
-				int w = GuiRenderer.getStringWidth(text);
-				int h = GuiRenderer.getStringHeight();
-				width = Math.max(width, w + 6);
-				height = Math.max(height, h + 6);
-			}
-		}
-
-		this.width = width;
-		this.height = height;
-
-		return this;
-	}
 
 	@Override
-	public void setHovered(boolean hovered)
+	public boolean onClick(int x, int y)
 	{
-		super.setHovered(hovered);
-		//		if (!hovered)
-		//			isPressed = false;
+		MalisisGui.playSound("gui.button.press");
+		fireEvent(new ClickEvent(this, x, y));
+		return true;
 	}
 
 	@Override
@@ -363,6 +420,9 @@ public class UIButton extends UIComponent<UIButton>
 			y += 1;
 		}
 
+		x += offsetX;
+		y += offsetY;
+
 		if (image != null)
 		{
 			image.setPosition(x, y);
@@ -390,14 +450,6 @@ public class UIButton extends UIComponent<UIButton>
 		if (button == MouseButton.LEFT)
 			isPressed = false;
 		return super.onButtonRelease(x, y, button);
-	}
-
-	@Override
-	public boolean onClick(int x, int y)
-	{
-		MalisisGui.playSound("gui.button.press");
-		fireEvent(new ClickEvent(this, x, y));
-		return true;
 	}
 
 	@Override
