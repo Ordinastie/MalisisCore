@@ -361,7 +361,7 @@ public class MultiBlock
 		if (direction != null)
 			mbTag.setInteger("direction", direction.ordinal());
 		if (aabb != null)
-			NBTUtils.writeToNBT(mbTag, aabb);
+			AABBUtils.writeToNBT(mbTag, aabb);
 
 		tag.setTag("multiBlock", mbTag);
 	}
@@ -385,7 +385,7 @@ public class MultiBlock
 		y = tag.getInteger("y");
 		z = tag.getInteger("z");
 		aabb = AxisAlignedBB.getBoundingBox(0, 0, 0, 1, 1, 1);
-		aabb = NBTUtils.readFromNBT(tag, aabb);
+		aabb = AABBUtils.readFromNBT(tag, aabb);
 		if (tag.hasKey("direction"))
 			direction = ForgeDirection.getOrientation(tag.getInteger("direction"));
 

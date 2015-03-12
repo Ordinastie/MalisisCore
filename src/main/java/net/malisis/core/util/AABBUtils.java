@@ -31,8 +31,60 @@ import net.minecraft.util.AxisAlignedBB;
  * @author Ordinastie
  *
  */
-public class NBTUtils
+public class AABBUtils
 {
+
+	public static AxisAlignedBB[] rotate(AxisAlignedBB[] aabbs, int angle)
+	{
+		for (AxisAlignedBB aabb : aabbs)
+			rotate(aabb, angle);
+		return aabbs;
+	}
+
+	public static AxisAlignedBB rotate(AxisAlignedBB aabb, int angle)
+	{
+		int[] cos = { 1, 0, -1, 0 };
+		int[] sin = { 0, 1, 0, -1 };
+
+		int a = angle % 4;
+		if (a < 0)
+			a += 4;
+
+		AxisAlignedBB copy = AxisAlignedBB.getBoundingBox(1, aabb.minY, 1, 1, aabb.maxY, 1);
+		aabb.offset(-0.5F, 0, -0.5F);
+
+		copy.minX = (aabb.minX * cos[a]) - (aabb.minZ * sin[a]);
+		copy.minZ = (aabb.minX * sin[a]) + (aabb.minZ * cos[a]);
+
+		copy.maxX = (aabb.maxX * cos[a]) - (aabb.maxZ * sin[a]);
+		copy.maxZ = (aabb.maxX * sin[a]) + (aabb.maxZ * cos[a]);
+
+		aabb.setBB(fix(copy));
+		aabb.offset(0.5F, 0, 0.5F);
+
+		return aabb;
+	}
+
+	public static AxisAlignedBB fix(AxisAlignedBB aabb)
+	{
+		double tmp;
+		if (aabb.minX > aabb.maxX)
+		{
+			tmp = aabb.minX;
+			aabb.minX = aabb.maxX;
+			aabb.maxX = tmp;
+		}
+
+		if (aabb.minZ > aabb.maxZ)
+		{
+			tmp = aabb.minZ;
+			aabb.minZ = aabb.maxZ;
+			aabb.maxZ = tmp;
+		}
+
+		return aabb;
+	}
+
 	public static AxisAlignedBB readFromNBT(NBTTagCompound tag, AxisAlignedBB aabb)
 	{
 		return aabb.setBounds(tag.getDouble("minX"), tag.getDouble("minY"), tag.getDouble("minZ"), tag.getDouble("maxX"),
