@@ -671,12 +671,13 @@ public class GuiRenderer extends MalisisRenderer
 			if (strWidth < width)
 				ret.append(c);
 			else
+			{
+				if (appendPeriods)
+					ret.append("...");
 				return ret.toString();
+			}
 			index++;
 		}
-
-		if (appendPeriods)
-			ret.append("...");
 
 		return ret.toString();
 	}
