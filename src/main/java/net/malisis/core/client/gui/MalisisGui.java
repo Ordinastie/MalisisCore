@@ -56,7 +56,7 @@ import org.lwjgl.opengl.GL11;
  *
  * @author Ordinastie
  */
-public class MalisisGui extends GuiScreen
+public abstract class MalisisGui extends GuiScreen
 {
 	public static GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.locationBlocksTexture);
 	public static GuiTexture ITEM_TEXTURE = new GuiTexture(TextureMap.locationItemsTexture);
@@ -84,6 +84,8 @@ public class MalisisGui extends GuiScreen
 	protected UIComponent hoveredComponent;
 	/** Currently focused child component */
 	protected UIComponent focusedComponent;
+	/** Whether this GUI has been constructed */
+	protected boolean constructed = false;
 
 	protected MalisisGui()
 	{
@@ -94,6 +96,12 @@ public class MalisisGui extends GuiScreen
 		this.screen.setClipContent(false);
 		Keyboard.enableRepeatEvents(true);
 	}
+
+	/**
+	 * Called before display() if this {@link MalisisGui} is not constructed yet.<br>
+	 * Called when Ctrl+R is pressed to rebuild the GUI.
+	 */
+	public abstract void construct();
 
 	/**
 	 * Sets the {@link MalisisInventoryContainer} for this {@link MalisisGui}.
@@ -336,12 +344,19 @@ public class MalisisGui extends GuiScreen
 
 			if (isGuiCloseKey(keyCode))
 				close();
+
+			if (!MalisisCore.isObfEnv && isCtrlKeyDown() && keyCode == Keyboard.KEY_R && currentGui() != null)
+			{
+				screen.removeAll();
+				construct();
+			}
 		}
 		catch (Exception e)
 		{
 			MalisisCore.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
+
 	}
 
 	/**
@@ -454,6 +469,12 @@ public class MalisisGui extends GuiScreen
 	 */
 	public void display(boolean cancelClose)
 	{
+		if (!constructed)
+		{
+			construct();
+			constructed = true;
+		}
+
 		MalisisGui.cancelClose = cancelClose;
 		Minecraft.getMinecraft().displayGuiScreen(this);
 	}

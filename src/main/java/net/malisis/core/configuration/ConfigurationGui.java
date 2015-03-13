@@ -64,6 +64,11 @@ public class ConfigurationGui extends MalisisGui
 	public ConfigurationGui(Settings settings)
 	{
 		this.settings = settings;
+	}
+
+	@Override
+	public void construct()
+	{
 
 		Set<String> categories = settings.getCategories();
 
