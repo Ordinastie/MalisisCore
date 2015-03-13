@@ -24,6 +24,7 @@
 
 package net.malisis.core.client.gui.component.container;
 
+import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
@@ -32,13 +33,14 @@ import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
  * @author Ordinastie
  *
  */
-public class UIListContainer extends UIContainer<UIListContainer>
+public abstract class UIListContainer<T extends UIListContainer, S> extends UIComponent<T>
 {
-	private int elementHeight = 0;
-	private int elementSpacing = 0;
-	private int elementY = 0;
-	private UIComponent selected;
-	private boolean unselect = true;
+	protected int elementSpacing = 0;
+	protected boolean unselect = true;
+	protected Iterable<S> elements;
+	protected S hovered;
+	protected S selected;
+	protected S current;
 
 	public UIListContainer(MalisisGui gui)
 	{
@@ -47,17 +49,18 @@ public class UIListContainer extends UIContainer<UIListContainer>
 
 	public UIListContainer(MalisisGui gui, int width, int height)
 	{
-		super(gui, width, height);
+		super(gui);
+		setSize(width, height);
 	}
 
-	public void setFixedHeight(int height)
+	public void setElements(Iterable<S> elements)
 	{
-		elementHeight = height;
+		this.elements = elements;
 	}
 
-	public void setVariableHeight()
+	public Iterable<S> getElements()
 	{
-		elementHeight = 0;
+		return elements;
 	}
 
 	public void setElementSpacing(int elementSpacing)
@@ -75,92 +78,96 @@ public class UIListContainer extends UIContainer<UIListContainer>
 		this.unselect = unselect;
 	}
 
-	private void calculateElementY()
+	public void setSelected(S comp)
 	{
-		elementY = 0;
-		for (UIComponent c : components)
-			elementY += (elementHeight == 0 ? c.getHeight() : elementHeight) + elementSpacing;
-	}
-
-	public void setSelected(UIComponent comp)
-	{
-		if (comp != null && comp.getParent() != this)
-			return;
-
 		selected = comp;
 	}
 
-	public UIComponent getSelected()
+	public S getSelected()
 	{
 		return selected;
 	}
 
-	public boolean isSelected(UIComponent comp)
+	public boolean isSelected(S element)
 	{
-		return comp == selected;
+		return element == selected;
 	}
 
-	public UIComponent select(UIComponent comp)
+	public S select(S element)
 	{
-		if (!fireEvent(new SelectEvent(this, comp)))
+		if (!fireEvent(new SelectEvent<S>(this, element)))
 			return getSelected();
 
-		setSelected(comp);
-		return comp;
+		setSelected(element);
+		return element;
 	}
 
 	@Override
-	public void remove(UIComponent component)
+	public UIComponent getComponentAt(int x, int y)
 	{
-		super.remove(component);
-		calculateElementY();
-	}
+		hovered = null;
+		UIComponent c = super.getComponentAt(x, y);
+		if (c != this)
+			return c;
 
-	@Override
-	public void removeAll()
-	{
-		super.removeAll();
-		calculateElementY();
-	}
-
-	@Override
-	public void add(UIComponent... components)
-	{
-		for (UIComponent c : components)
+		int ey = 0;
+		int cy = relativeY(y);
+		for (S element : elements)
 		{
-			c.setPosition(c.getX(), (elementY) * this.components.size(), c.getAnchor());
-			super.add(c);
-			elementY = (elementHeight == 0 ? c.getHeight() : elementHeight) + elementSpacing;
+			int h = getElementHeight(element);
+			if (ey + h > cy)
+			{
+				hovered = element;
+				return this;
+			}
+			ey += h;
 		}
+
+		return this;
 	}
 
 	@Override
 	public boolean onClick(int x, int y)
 	{
-		UIComponent component = getComponentAt(x, y);
 		if (!canUnselect())
 		{
-			if (component == null || component == getSelected())
+			if (hovered == null || hovered == getSelected())
 				return super.onClick(x, y);
 		}
 
-		if (component == getSelected() || component == this)
-			component = null;
-		select(component);
+		if (hovered == getSelected())
+			hovered = null;
+		select(hovered);
 
 		return true;
 	}
+
+	@Override
+	public void draw(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		int bk = y;
+		for (S element : elements)
+		{
+			current = element;
+			super.draw(renderer, mouseX, mouseY, partialTick);
+			y += getElementHeight(element) + elementSpacing;
+		}
+
+		y = bk;
+	}
+
+	public abstract int getElementHeight(S element);
 
 	/**
 	 * Event fired when a {@link UIListContainer} changes its selected {@link IListElement}.<br>
 	 * When catching the event, the state is not applied to the {@code UISelect} yet.<br>
 	 * Cancelling the event will prevent the {@code Option} to be set for the {@code UISelect} .
 	 */
-	public static class SelectEvent extends ValueChange<UIListContainer, UIComponent>
+	public static class SelectEvent<T> extends ValueChange<UIListContainer, T>
 	{
-		public SelectEvent(UIListContainer component, UIComponent selected)
+		public SelectEvent(UIListContainer component, T selected)
 		{
-			super(component, component.getSelected(), selected);
+			super(component, (T) component.getSelected(), selected);
 		}
 
 		/**
@@ -168,7 +175,7 @@ public class UIListContainer extends UIContainer<UIListContainer>
 		 *
 		 * @return the new option
 		 */
-		public UIComponent getSelected()
+		public T getSelected()
 		{
 			return newValue;
 		}
