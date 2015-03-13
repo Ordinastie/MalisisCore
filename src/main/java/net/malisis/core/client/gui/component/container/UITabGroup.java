@@ -277,7 +277,16 @@ public class UITabGroup extends UIContainer<UITabGroup>
 			((ITransformable.Color) attachedContainer).setColor(activeTab.getBgColor());
 
 		if (!displace)
+		{
+			if (activeTab != null)
+			{
+				UITab tab = activeTab;
+				activeTab = null;
+				setActiveTab(tab);
+			}
+
 			return this;
+		}
 
 		int cx = container.getX();
 		int cy = container.getY();
