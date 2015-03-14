@@ -89,7 +89,7 @@ public class TileEntityUtils
 	{
 		currentTileEntity = te;
 		currenGui = gui;
-		currenGui.updateGui();
+		//currenGui.updateGui();
 	}
 
 	/**
