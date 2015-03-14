@@ -581,8 +581,6 @@ public abstract class MalisisGui extends GuiScreen
 			}
 			return false;
 		}
-		else if (!hovered)
-			return false;
 
 		if (gui.hoveredComponent != null)
 			gui.hoveredComponent.setHovered(false);
