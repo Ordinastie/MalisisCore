@@ -348,7 +348,7 @@ public class GuiRenderer extends MalisisRenderer
 
 		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 		GL11.glPushMatrix();
-
+		GL11.glTranslated(0, 0, z);
 		disableTextures();
 		enableBlending();
 
