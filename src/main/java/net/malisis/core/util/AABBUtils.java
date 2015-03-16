@@ -102,4 +102,22 @@ public class AABBUtils
 		tag.setDouble("maxY", aabb.maxY);
 		tag.setDouble("maxZ", aabb.maxZ);
 	}
+
+	public static AxisAlignedBB combine(AxisAlignedBB[] aabbs)
+	{
+		AxisAlignedBB ret = AxisAlignedBB.getBoundingBox(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MIN_VALUE,
+				Double.MAX_VALUE, Double.MAX_VALUE);
+
+		for (AxisAlignedBB aabb : aabbs)
+		{
+			ret.minX = Math.min(aabb.minX, ret.minX);
+			ret.maxX = Math.max(aabb.maxX, ret.maxX);
+			ret.minY = Math.min(aabb.minY, ret.minY);
+			ret.maxY = Math.max(aabb.maxY, ret.maxY);
+			ret.minZ = Math.min(aabb.minZ, ret.minZ);
+			ret.maxZ = Math.max(aabb.maxZ, ret.maxZ);
+		}
+
+		return ret;
+	}
 }
