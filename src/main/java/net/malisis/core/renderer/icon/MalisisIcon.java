@@ -84,6 +84,20 @@ public class MalisisIcon extends TextureAtlasSprite
 		baseIcon.addDependant(this);
 	}
 
+	public MalisisIcon(String name, float u, float v, float U, float V)
+	{
+		this(name);
+		minU = u;
+		minV = v;
+		maxU = U;
+		maxV = V;
+	}
+
+	public MalisisIcon(IIcon icon)
+	{
+		this(icon.getIconName(), icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV());
+	}
+
 	/**
 	 * Adds a {@link MalisisIcon} to be dependant on this one. Will call {@link #initIcon(MalisisIcon, int, int, int, int, boolean)} when
 	 * stiched to the sheet.
