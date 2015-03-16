@@ -24,11 +24,8 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
-import java.util.EnumSet;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
@@ -42,12 +39,16 @@ import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.icon.GuiIcon;
+import net.minecraft.util.EnumChatFormatting;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 
 /**
@@ -55,12 +56,12 @@ import com.google.common.collect.Iterables;
  *
  * @author Ordinastie
  */
-public class UISelect extends UIComponent<UISelect> implements Iterable<Option>, IClipable
+public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Option<T>>, IClipable
 {
 	/** The {@link Option options} of this {@link UISelect}. */
-	protected Map<Integer, Option> options;
+	protected FluentIterable<Option<T>> options;
 	/** Currently selected option index. */
-	protected int selectedOption = -1;
+	protected Option<T> selectedOption = null;
 	/** Max width of the option container. */
 	protected int maxExpandedWidth = -1;
 	/** Max number displayed options. */
@@ -73,8 +74,24 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	protected int optionsHeight = 0;
 	/** Pattern to use for options labels. */
 	protected String labelPattern;
-	/** Predicate for options label */
-	protected Function<Object, String> labelFunction;
+	/** Function for option creation **/
+	protected Function<T, ? extends Option<T>> optionFunction;
+	/** Function for options label */
+	protected Function<T, String> labelFunction = (Function<T, String>) Functions.toStringFunction();
+	/** Predicate for option disability */
+	protected Predicate<T> disablePredicate = Predicates.alwaysFalse();
+
+	private Function<T, Option<T>> toOption = new Function<T, Option<T>>()
+	{
+		@Override
+		public Option<T> apply(T input)
+		{
+			Option<T> option = optionFunction != null ? optionFunction.apply(input) : new Option(input);
+			option.setLabel(labelFunction.apply(input));
+			option.setDisabled(disablePredicate.apply(input));
+			return option;
+		}
+	};
 
 	/** Text color. */
 	protected int textColor = 0xFFFFFF;
@@ -86,6 +103,8 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	protected int hoverBgColor = 0x5E789F;
 	/** Selected text color */
 	protected int selectTextColor = 0x9EA8DF;
+	/* Disabled text color */
+	protected int disabledTextColor = 0x444444;
 	/** Text shadow */
 	protected boolean textShadow = true;
 
@@ -111,11 +130,11 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 * @param width the width
 	 * @param options the options
 	 */
-	public UISelect(MalisisGui gui, int width, Iterable<Option> options)
+	public UISelect(MalisisGui gui, int width, Iterable<T> values)
 	{
 		super(gui);
 		setSize(width, 12);
-		setOptions(options);
+		setOptions(values);
 
 		shape = new XResizableGuiShape(3);
 		arrowShape = new SimpleGuiShape();
@@ -147,7 +166,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		return textColor;
 	}
 
-	public UISelect setTextColor(int textColor)
+	public UISelect<T> setTextColor(int textColor)
 	{
 		this.textColor = textColor;
 		return this;
@@ -158,7 +177,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		return bgColor;
 	}
 
-	public UISelect setBgColor(int bgColor)
+	public UISelect<T> setBgColor(int bgColor)
 	{
 		this.bgColor = bgColor;
 		return this;
@@ -169,7 +188,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		return hoverTextColor;
 	}
 
-	public UISelect setHoverTextColor(int hoverTextColor)
+	public UISelect<T> setHoverTextColor(int hoverTextColor)
 	{
 		this.hoverTextColor = hoverTextColor;
 		return this;
@@ -180,7 +199,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		return hoverBgColor;
 	}
 
-	public UISelect setHoverBgColor(int hoverBgColor)
+	public UISelect<T> setHoverBgColor(int hoverBgColor)
 	{
 		this.hoverBgColor = hoverBgColor;
 		return this;
@@ -191,9 +210,20 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		return selectTextColor;
 	}
 
-	public UISelect setSelectTextColor(int selectTextColor)
+	public UISelect<T> setSelectTextColor(int selectTextColor)
 	{
 		this.selectTextColor = selectTextColor;
+		return this;
+	}
+
+	public int getDisabledTextColor()
+	{
+		return disabledTextColor;
+	}
+
+	public UISelect<T> setDisabledTextColor(int disabledTextColor)
+	{
+		this.disabledTextColor = disabledTextColor;
 		return this;
 	}
 
@@ -202,21 +232,44 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		return textShadow;
 	}
 
-	public UISelect setTextShadow(boolean textShadow)
+	public UISelect<T> setTextShadow(boolean textShadow)
 	{
 		this.textShadow = textShadow;
 		return this;
 	}
 
-	public UISelect setColors(int textColor, int bgColor, int hoverTextColor, int hoverBgColor, int selectTextColor, boolean textShadow)
+	public UISelect<T> setColors(int textColor, int bgColor, int hoverTextColor, int hoverBgColor, int selectTextColor, int disabledTextColor, boolean textShadow)
 	{
 		this.textColor = textColor;
 		this.bgColor = bgColor;
 		this.hoverTextColor = hoverTextColor;
 		this.hoverBgColor = hoverBgColor;
-		this.textShadow = textShadow;
 		this.selectTextColor = selectTextColor;
+		this.disabledTextColor = disabledTextColor;
+		this.textShadow = textShadow;
 
+		return this;
+	}
+
+	public UISelect<T> setOptionFunction(Function<T, ? extends Option<T>> func)
+	{
+		this.optionFunction = func;
+		return this;
+	}
+
+	public UISelect<T> setLabelFunction(Function<T, String> func)
+	{
+		if (func == null)
+			func = (Function<T, String>) Functions.toStringFunction();
+		this.labelFunction = func;
+		return this;
+	}
+
+	public UISelect<T> setDisablePredicate(Predicate<T> predicate)
+	{
+		if (predicate == null)
+			predicate = Predicates.alwaysFalse();
+		this.disablePredicate = predicate;
 		return this;
 	}
 
@@ -236,7 +289,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 * @param labelPattern the label pattern
 	 * @return this {@link UISelect}
 	 */
-	public UISelect setLabelPattern(String labelPattern)
+	public UISelect<T> setLabelPattern(String labelPattern)
 	{
 		this.labelPattern = labelPattern;
 		calcOptionsSize();
@@ -249,7 +302,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 * @param width the width
 	 * @return this {@link UISelect}
 	 */
-	public UISelect setMaxExpandedWidth(int width)
+	public UISelect<T> setMaxExpandedWidth(int width)
 	{
 		maxExpandedWidth = width;
 		calcOptionsSize();
@@ -268,8 +321,6 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		optionsWidth += 4;
 		if (maxExpandedWidth > 0)
 			optionsWidth = Math.min(maxExpandedWidth, optionsWidth);
-
-		optionsHeight = 10 * (maxDisplayedOptions == -1 ? options.size() : maxDisplayedOptions) + 2;
 	}
 
 	/**
@@ -278,7 +329,7 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 * @param amount the amount
 	 * @return this {@link UISelect}
 	 */
-	public UISelect maxDisplayedOptions(int amount)
+	public UISelect<T> maxDisplayedOptions(int amount)
 	{
 		maxDisplayedOptions = amount;
 		calcOptionsSize();
@@ -291,59 +342,15 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 * @param options the options
 	 * @return this {@link UISelect}
 	 */
-	public UISelect setOptions(Iterable<Option> opts)
+	public UISelect<T> setOptions(Iterable<T> values)
 	{
-		options = new HashMap<>();
-		if (opts == null)
-		{
-			optionsWidth = getWidth();
-			return this;
-		}
+		if (values == null)
+			values = Collections.EMPTY_LIST;
 
-		int i = 0;
-		for (Option opt : opts)
-		{
-			opt.setIndex(i);;
-			options.put(i, opt);
-			i++;
-		}
+		options = FluentIterable.from(values).transform(toOption);
 
 		calcOptionsSize();
 		return this;
-	}
-
-	/**
-	 * Sets the selected {@link Option} from its position in the list.
-	 *
-	 * @param index the new selected option
-	 */
-	public void setSelectedOption(int index)
-	{
-		selectedOption = index;
-	}
-
-	/**
-	 * Sets the selected {@link Option} from its containing key.
-	 *
-	 * @param obj the new selected option
-	 */
-	public void setSelectedOption(Object obj)
-	{
-		Option opt = getOption(obj);
-		setSelectedOption(opt != null ? opt.index : -1);
-	}
-
-	/**
-	 * Gets the option at the index.
-	 *
-	 * @param index the index
-	 * @return the option
-	 */
-	private Option getOption(int index)
-	{
-		if (index < 0 || index >= options.size())
-			return null;
-		return options.get(index);
 	}
 
 	/**
@@ -352,16 +359,38 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 * @param obj the key of the Option
 	 * @return the option
 	 */
-	public Option getOption(Object obj)
+	public Option getOption(T obj)
 	{
-		for (Entry<Integer, UISelect.Option> entry : options.entrySet())
-		{
-			UISelect.Option option = entry.getValue();
-
-			if (option.getKey() == obj)
-				return option;
-		}
+		for (Option<T> opt : this)
+			if (obj == opt.getKey())
+				return opt;
 		return null;
+	}
+
+	public Option getOption(int y)
+	{
+		//TODO
+		return null;
+	}
+
+	/**
+	 * Sets the selected {@link Option} from its containing key.
+	 *
+	 * @param obj the new selected option
+	 */
+	public void setSelectedOption(T obj)
+	{
+		setSelectedOption(getOption(obj));
+	}
+
+	/**
+	 * Sets the selected {@link Option}.
+	 *
+	 * @param option the new selected option
+	 */
+	public void setSelectedOption(Option<T> option)
+	{
+		selectedOption = option;
 	}
 
 	/**
@@ -371,7 +400,21 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 */
 	public Option getSelectedOption()
 	{
-		return getOption(selectedOption);
+		return selectedOption;
+	}
+
+	/**
+	 * Gets the value of the {@link #selectedOption}.
+	 *
+	 * @return the selected value
+	 */
+	public T getSelectedValue()
+	{
+		Option<T> opt = getSelectedOption();
+		if (opt == null)
+			return null;
+
+		return opt.getKey();
 	}
 
 	/**
@@ -380,38 +423,67 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 * @param index the index
 	 * @return the option
 	 */
-	public Option select(int index)
+	public T select(Option<T> option)
 	{
-		Option newValue = getOption(index);
+		if (option.isDisabled())
+			option = null;
+		T value = option != null ? option.getKey() : null;
+		if (option == selectedOption)
+			return value;
 
-		if (!fireEvent(new SelectEvent(this, newValue)))
-			return getSelectedOption();
+		if (fireEvent(new SelectEvent<T>(this, value)))
+			setSelectedOption(option);
 
-		selectedOption = newValue != null ? newValue.index : -1;
-		return newValue;
+		return getSelectedValue();
 	}
 
-	public Option select(Option option)
+	public T select(T obj)
 	{
-		if (option == null)
-			return null;
-
-		if (options.get(option.getIndex()) != option)
-			return null;
-
-		return select(option.getIndex());
+		return select(getOption(obj));
 	}
 
-	/**
-	 * Select the {@link Option} corresponding to the object.
-	 *
-	 * @param obj the obj
-	 * @return the option
-	 */
-	public Option select(Object obj)
+	public T selectFirst()
 	{
-		Option opt = getOption(obj);
-		return select(opt != null ? opt.index : -1);
+		return select(Iterables.getFirst(options, null));
+	}
+
+	public T selectLast()
+	{
+		return select(Iterables.getLast(options, null));
+	}
+
+	public T selectPrevious()
+	{
+		if (selectedOption == null)
+			return selectFirst();
+
+		Option<T> option = selectedOption;
+		for (Option<T> opt : this)
+		{
+			if (opt.isDisabled())
+				continue;
+			if (opt == selectedOption)
+				return select(option);
+			option = opt;
+		}
+		//should not happen
+		return null;
+	}
+
+	public T selectNext()
+	{
+		if (selectedOption == null)
+			return selectFirst();
+
+		Option<T> option = selectedOption;
+		for (Option<T> opt : this)
+		{
+			if (option == selectedOption)
+				return select(opt);
+			option = opt;
+		}
+		//should not happen
+		return null;
 	}
 
 	protected Option getHoveredOption(int mouseX, int mouseY)
@@ -423,7 +495,14 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		if (y < 0)
 			return null;
 
-		return getOption(relativeY(mouseY - 13) / 10);
+		int cy = 0;
+		for (Option<T> option : this)
+		{
+			if (cy + option.getHeight() > y)
+				return option;
+			cy += option.getHeight();
+		}
+		return null;
 	}
 
 	@Override
@@ -478,6 +557,13 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		optionsHeight = 10 * (maxDisplayedOptions == -1 ? options.size() : maxDisplayedOptions) + 2;
+		if (optionsHeight < 10)
+			optionsHeight = 10;
+		if (selectedOption != null)
+			select(selectedOption.getKey());
+
+		//draw regular select
 		arrowShape.resetState();
 		arrowShape.setPosition(width - 9, 4);
 		if (isHovered() || expanded)
@@ -487,11 +573,10 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		rp.icon.set(arrowIcon);
 		renderer.drawShape(arrowShape, rp);
 
-		if (selectedOption != -1)
+		//draw selected value
+		if (selectedOption != null)
 		{
-			String text = getOption(selectedOption).getLabel(labelPattern);
-			if (!StringUtils.isEmpty(text))
-				renderer.drawText(GuiRenderer.clipString(text, width - 15), 2, 2, 1, textColor, textShadow, true);
+			selectedOption.draw(this, renderer, 2, 2, 2, partialTick, false, true);
 		}
 
 		if (!expanded)
@@ -515,29 +600,8 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		Option hover = getHoveredOption(mouseX, mouseY);
 		for (Option option : this)
 		{
-			if (option == hover)
-			{
-				renderer.next();
-
-				GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-				shape.resetState();
-				shape.setSize(optionsWidth - 2, 10);
-				shape.translate(1, y - 1, 1);
-
-				rp.colorMultiplier.set(hoverBgColor);
-				renderer.drawShape(shape, rp);
-				renderer.next();
-
-				GL11.glEnable(GL11.GL_TEXTURE_2D);
-			}
-
-			int color = option.getIndex() == selectedOption ? selectTextColor : textColor;
-			if (option == hover)
-				color = hoverTextColor;;
-			String text = option.getLabel(labelPattern);
-			renderer.drawText(text, 2, y, 2, color, textShadow, true);
-			y += 10;
+			option.draw(this, renderer, 0, y, 0, partialTick, option.equals(hover), false);
+			y += option.getHeight();
 		}
 
 		renderer.endClipping(area);
@@ -554,7 +618,15 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 
 		Option opt = getHoveredOption(x, y);
 		if (opt != null)
+		{
+			if (opt.isDisabled())
+			{
+				setFocused(true);
+				return true;
+			}
+
 			select(opt);
+		}
 		expanded = false;
 		setFocused(true);
 		return true;
@@ -563,9 +635,13 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	@Override
 	public boolean onScrollWheel(int x, int y, int delta)
 	{
-		int selected = selectedOption + delta * -1;
-		selected = Math.max(0, Math.min(options.size() - 1, selected));
-		select(selected);
+		if (!isFocused())
+			return super.onScrollWheel(x, y, delta);
+
+		if (delta > 0)
+			selectNext();
+		else
+			selectPrevious();
 		return true;
 	}
 
@@ -578,27 +654,27 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		switch (keyCode)
 		{
 			case Keyboard.KEY_UP:
-				if (selectedOption > 0)
-					select(selectedOption - 1);
+				selectPrevious();
 				break;
 			case Keyboard.KEY_DOWN:
-				if (selectedOption < options.size() - 1)
-					select(selectedOption + 1);
+				selectNext();
 				break;
 			case Keyboard.KEY_HOME:
-				select(0);
+				selectFirst();
 				break;
 			case Keyboard.KEY_END:
-				select(options.size() - 1);
+				selectLast();
 				break;
+			default:
+				return super.onKeyTyped(keyChar, keyCode);
 		}
 		return true;
 	}
 
 	@Override
-	public Iterator<Option> iterator()
+	public Iterator<Option<T>> iterator()
 	{
-		return options.values().iterator();
+		return options.iterator();
 	}
 
 	/**
@@ -608,12 +684,12 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 */
 	public static class Option<T>
 	{
-		/** The index. */
-		private int index;
 		/** The key. */
 		private T key;
 		/** The label. */
 		private String label;
+		/** Whether this option is disabled */
+		private boolean disabled;
 
 		/**
 		 * Instantiates a new {@link Option}.
@@ -622,31 +698,15 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		 * @param key the key
 		 * @param value the value
 		 */
-		public Option(T key, String value)
+		public Option(T key)
 		{
 			this.key = key;
-			this.label = value;
 		}
 
-		/**
-		 * Sets the index for this {@link Option}.<br>
-		 * The index is set when the {@link UISelect} sets its options.
-		 *
-		 * @param index the new index
-		 */
-		private void setIndex(int index)
+		public Option(T key, String label)
 		{
-			this.index = index;
-		}
-
-		/**
-		 * Gets the index of this {@link Option}.
-		 *
-		 * @return the index
-		 */
-		public int getIndex()
-		{
-			return index;
+			this.key = key;
+			this.label = label;
 		}
 
 		/**
@@ -684,42 +744,73 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 		}
 
 		/**
-		 * Creates an option Map for {@link UISelect#setOptions(Map)} from an Enum
+		 * Sets the label for this {@link Option}.
 		 *
-		 * @param <T> the generic type
-		 * @param <E> the element type
-		 * @param enumClass the enum class
-		 * @return the hash map
+		 * @param label the new label
 		 */
-		public static <T, E extends Enum> Iterable<Option> fromEnum(Class<E> enumClass)
+		public void setLabel(String label)
 		{
-			return fromList(EnumSet.allOf(enumClass), null);
-		}
-
-		public static <T> Iterable<Option> fromList(Iterable<T> list)
-		{
-			return fromList(list, null);
+			this.label = label;
 		}
 
 		/**
-		 * Creates an option Map for {@link UISelect#setOptions(Map)} from a list of keys.<br>
+		 * Checks if this {@link Option} is disabled.
 		 *
-		 * @param <T> the generic type
-		 * @param list the list
-		 * @return the hash map
+		 * @return true, if is disabled
 		 */
-		public static <T> Iterable<Option> fromList(Iterable<T> list, Function<T, Option> func)
+		public boolean isDisabled()
 		{
-			if (func == null)
-				func = new Function<T, Option>()
-				{
-					@Override
-					public Option apply(T input)
-					{
-						return new Option(input, input.toString());
-					}
-				};
-			return Iterables.transform(list, func);
+			return disabled;
+		}
+
+		/**
+		 * Sets the disabled state of this {@link Option}.
+		 *
+		 * @param disabled the new disabled
+		 */
+		public void setDisabled(boolean disabled)
+		{
+			this.disabled = disabled;
+		}
+
+		public int getHeight()
+		{
+			return GuiRenderer.getStringHeight() + 1;
+		}
+
+		public void draw(UISelect select, GuiRenderer renderer, int x, int y, int z, float partialTick, boolean hovered, boolean isTop)
+		{
+			String text = getLabel(select.labelPattern);
+			if (StringUtils.isEmpty(text))
+				return;
+
+			if (hovered && !disabled)
+			{
+				renderer.drawRectangle(x + 1, y - 1, z + 2, select.optionsWidth - 2, getHeight(), select.getHoverBgColor(), 255);
+			}
+
+			if (isTop)
+				text = GuiRenderer.clipString(text, select.getWidth() - 15);
+
+			int color = equals(select.getSelectedOption()) && !isTop ? select.getSelectTextColor() : select.getTextColor();
+			boolean shadow = select.isTextShadow();
+
+			if (hovered)
+				color = select.getHoverTextColor();
+			if (disabled)
+			{
+				text = EnumChatFormatting.ITALIC + text;
+				color = select.getDisabledTextColor();
+				shadow = false;
+			}
+
+			renderer.drawText(text, x + 2, y, z + 2, color, shadow, true);
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			return obj != null && obj instanceof Option && key.equals(((Option) obj).key);
 		}
 	}
 
@@ -728,21 +819,11 @@ public class UISelect extends UIComponent<UISelect> implements Iterable<Option>,
 	 * When catching the event, the state is not applied to the {@code UISelect} yet.<br>
 	 * Cancelling the event will prevent the {@code Option} to be set for the {@code UISelect} .
 	 */
-	public static class SelectEvent extends ValueChange<UISelect, Option>
+	public static class SelectEvent<T> extends ValueChange<UISelect, T>
 	{
-		public SelectEvent(UISelect component, Option newOption)
+		public SelectEvent(UISelect<T> component, T newValue)
 		{
-			super(component, component.getSelectedOption(), newOption);
-		}
-
-		/**
-		 * Gets the new {@link Option} to be set.
-		 *
-		 * @return the new option
-		 */
-		public Option getOption()
-		{
-			return newValue;
+			super(component, component.getSelectedValue(), newValue);
 		}
 	}
 }
