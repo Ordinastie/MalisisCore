@@ -262,6 +262,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		if (func == null)
 			func = (Function<T, String>) Functions.toStringFunction();
 		this.labelFunction = func;
+		calcOptionsSize();
 		return this;
 	}
 
@@ -314,7 +315,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	 */
 	private void calcOptionsSize()
 	{
-		optionsWidth = getWidth();
+		optionsWidth = getWidth() - 4;
 		for (Option<?> option : this)
 			optionsWidth = Math.max(optionsWidth, GuiRenderer.getStringWidth(option.getLabel(labelPattern)));
 
@@ -425,10 +426,10 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	 */
 	public T select(Option<T> option)
 	{
-		if (option.isDisabled())
-			option = null;
+		if (option == null || option.isDisabled())
+			return getSelectedValue();
 		T value = option != null ? option.getKey() : null;
-		if (option == selectedOption)
+		if (option.equals(selectedOption))
 			return value;
 
 		if (fireEvent(new SelectEvent<T>(this, value)))
@@ -457,12 +458,12 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		if (selectedOption == null)
 			return selectFirst();
 
-		Option<T> option = selectedOption;
+		Option<T> option = null;
 		for (Option<T> opt : this)
 		{
 			if (opt.isDisabled())
 				continue;
-			if (opt == selectedOption)
+			if (opt.equals(selectedOption))
 				return select(option);
 			option = opt;
 		}
@@ -475,10 +476,12 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		if (selectedOption == null)
 			return selectFirst();
 
-		Option<T> option = selectedOption;
+		Option<T> option = null;
 		for (Option<T> opt : this)
 		{
-			if (option == selectedOption)
+			if (opt.isDisabled())
+				continue;
+			if (selectedOption.equals(option))
 				return select(opt);
 			option = opt;
 		}
@@ -638,7 +641,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		if (!isFocused())
 			return super.onScrollWheel(x, y, delta);
 
-		if (delta > 0)
+		if (delta < 0)
 			selectNext();
 		else
 			selectPrevious();
