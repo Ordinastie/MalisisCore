@@ -24,6 +24,7 @@
 
 package net.malisis.core.util;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.MalisisGui;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
@@ -58,7 +59,7 @@ public class TileEntityUtils
 	 * @param z the z
 	 * @return the tile entity at the coordinates, or null if no tile entity, or not of type T
 	 */
-	public static <T> T getTileEntity(Class<T> type, IBlockAccess world, int x, int y, int z)
+	public static <T> T getTileEntity(Class<T> clazz, IBlockAccess world, int x, int y, int z)
 	{
 		if (world == null)
 			return null;
@@ -69,10 +70,12 @@ public class TileEntityUtils
 
 		try
 		{
-			return type.cast(te);
+			return clazz.cast(te);
 		}
 		catch (ClassCastException e)
 		{
+			MalisisCore.log.error("Tried to get {} at {},{},{}, but found {} instead.", clazz.getSimpleName(), x, y, z, te.getClass()
+					.getSimpleName());
 			return null;
 		}
 	}
