@@ -469,14 +469,22 @@ public abstract class MalisisGui extends GuiScreen
 	 */
 	public void display(boolean cancelClose)
 	{
-		if (!constructed)
+		try
 		{
-			construct();
-			constructed = true;
-		}
+			if (!constructed)
+			{
+				construct();
+				constructed = true;
+			}
 
-		MalisisGui.cancelClose = cancelClose;
-		Minecraft.getMinecraft().displayGuiScreen(this);
+			MalisisGui.cancelClose = cancelClose;
+			Minecraft.getMinecraft().displayGuiScreen(this);
+		}
+		catch (Exception e)
+		{
+			MalisisCore.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+		}
 	}
 
 	/**
