@@ -36,7 +36,7 @@ import net.minecraft.util.EnumChatFormatting;
  */
 public class BBRenderElement
 {
-	public EnumSet<EnumChatFormatting> styles = EnumSet.<EnumChatFormatting> noneOf(EnumChatFormatting.class);
+	public EnumSet styles = EnumSet.noneOf(EnumChatFormatting.class);
 	public boolean shadow;
 	public int color = 0;
 	public int bgColor = 0;
@@ -83,7 +83,7 @@ public class BBRenderElement
 	public String getFormattedText()
 	{
 		String str = "";
-		for (EnumChatFormatting ecf : styles)
+		for (Object ecf : styles)
 			str += ecf;
 		return str + text;
 	}
