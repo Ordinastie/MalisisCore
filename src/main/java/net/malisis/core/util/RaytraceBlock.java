@@ -49,8 +49,6 @@ public class RaytraceBlock
 	/** Unique instance of {@link RaytraceBlock}. */
 	private static RaytraceBlock instance = new RaytraceBlock();
 
-	/** World object (needed for ray tracing inside each block). */
-	private World world;
 	/** X coordinate of the block being ray traced. */
 	private int x;
 	/** Y coordinate of the block being ray traced. */
@@ -72,9 +70,7 @@ public class RaytraceBlock
 	 * Instantiates a new {@link RaytraceBlock}.
 	 */
 	private RaytraceBlock()
-	{
-		this.world = Minecraft.getMinecraft().theWorld;
-	}
+	{}
 
 	/**
 	 * Sets the parameters for this {@link RaytraceBlock}
@@ -91,7 +87,7 @@ public class RaytraceBlock
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		this.block = world.getBlock(x, y, z);
+		this.block = world().getBlock(x, y, z);
 	}
 
 	/**
@@ -159,6 +155,11 @@ public class RaytraceBlock
 		return instance;
 	}
 
+	public World world()
+	{
+		return Minecraft.getMinecraft().theWorld;
+	}
+
 	/**
 	 * Gets the direction vector of the ray.
 	 *
@@ -190,10 +191,10 @@ public class RaytraceBlock
 		points.clear();
 
 		if (!(block instanceof MalisisBlock || block instanceof IChunkCollidable))
-			return block.collisionRayTrace(world, x, y, z, ray.origin.toVec3(), dest.toVec3());
+			return block.collisionRayTrace(world(), x, y, z, ray.origin.toVec3(), dest.toVec3());
 
 		MalisisBlock block = (MalisisBlock) this.block;
-		AxisAlignedBB[] aabbs = block.getBoundingBox(world, x, y, z, BoundingBoxType.RAYTRACE);
+		AxisAlignedBB[] aabbs = block.getBoundingBox(world(), x, y, z, BoundingBoxType.RAYTRACE);
 
 		double maxDist = Point.distanceSquared(src, dest);
 		for (AxisAlignedBB aabb : aabbs)
