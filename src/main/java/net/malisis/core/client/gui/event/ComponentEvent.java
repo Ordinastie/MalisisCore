@@ -58,6 +58,17 @@ public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 	}
 
 	/**
+	 * Checks if this {@link ComponentEvent} was fired by a {@link UIComponent} with this name.
+	 *
+	 * @param name the name
+	 * @return true, if the name is equals to component's name
+	 */
+	public boolean isFrom(String name)
+	{
+		return name.equals(component.getName());
+	}
+
+	/**
 	 * Fired when a {@link UIComponent} gets it's value changed.
 	 *
 	 *
