@@ -36,7 +36,7 @@ import net.minecraft.util.EnumChatFormatting;
  */
 public class BBRenderElement
 {
-	public EnumSet<EnumChatFormatting> styles = EnumSet.noneOf(EnumChatFormatting.class);
+	public EnumSet<EnumChatFormatting> styles = EnumSet.<EnumChatFormatting> noneOf(EnumChatFormatting.class);
 	public boolean shadow;
 	public int color = 0;
 	public int bgColor = 0;
