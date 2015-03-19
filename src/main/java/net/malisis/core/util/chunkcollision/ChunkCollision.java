@@ -676,7 +676,7 @@ public class ChunkCollision
 			if (!check(coord))
 				return true;
 
-			RaytraceBlock rt = RaytraceBlock.set(src, dest, getX(coord), getY(coord), getZ(coord));
+			RaytraceBlock rt = RaytraceBlock.set(src, dest, x, y, z);
 			mop = getClosest(src, rt.trace(), mop);
 
 			return true;
