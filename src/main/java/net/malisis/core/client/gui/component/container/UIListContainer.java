@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.component.container;
 
+import java.util.Collection;
+
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -37,7 +39,7 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 {
 	protected int elementSpacing = 0;
 	protected boolean unselect = true;
-	protected Iterable<S> elements;
+	protected Collection<S> elements;
 	protected S hovered;
 	protected S selected;
 	protected S current;
@@ -53,7 +55,7 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 		setSize(width, height);
 	}
 
-	public void setElements(Iterable<S> elements)
+	public void setElements(Collection<S> elements)
 	{
 		this.elements = elements;
 	}
@@ -145,6 +147,12 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	@Override
 	public void draw(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		if (elements.size() == 0)
+		{
+			drawEmtpy(renderer, mouseX, mouseY, partialTick);
+			return;
+		}
+
 		int bk = y;
 		for (S element : elements)
 		{
@@ -157,6 +165,8 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	}
 
 	public abstract int getElementHeight(S element);
+
+	public abstract void drawEmtpy(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
 
 	/**
 	 * Event fired when a {@link UIListContainer} changes its selected {@link IListElement}.<br>
