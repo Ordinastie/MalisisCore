@@ -450,9 +450,7 @@ public class GuiRenderer extends MalisisRenderer
 
 		draw();
 
-		text = StatCollector.translateToLocal(text);
-		text = text.replaceAll("\r?\n", "");
-		text = text.replaceAll("\t", "    ");
+		text = processString(text);
 		GL11.glPushMatrix();
 		GL11.glTranslatef(x * (1 - fontScale), y * (1 - fontScale), 0);
 		GL11.glScalef(fontScale, fontScale, 1);
@@ -624,9 +622,12 @@ public class GuiRenderer extends MalisisRenderer
 
 	public static String processString(String str)
 	{
+		EnumChatFormatting ecf = getFormatting(str, 0);
+		if (ecf != null)
+			str = str.substring(2);
 		str = StatCollector.translateToLocal(str);
 		str = str.replaceAll("\r?\n", "").replaceAll("\t", "    ");
-		return str;
+		return (ecf != null ? ecf : "") + str;
 	}
 
 	/**
