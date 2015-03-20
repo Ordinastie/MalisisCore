@@ -52,7 +52,7 @@ public class TileEntityUtils
 	 * <code>null</code> instead.
 	 *
 	 * @param <T> type of TileEntity requested
-	 * @param type type of TileEntity requested
+	 * @param clazz the class of the TileEntity
 	 * @param world the world
 	 * @param x the x
 	 * @param y the y

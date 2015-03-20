@@ -94,7 +94,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	//options
 	/** Color of the text for this {@link UITextField}. */
 	protected int textColor = 0xFFFFFF;
-	/** Background color of this {@link UITextField. */
+	/** Background color of this {@link UITextField}. */
 	protected int bgColor = 0xFFFFFF;
 	/** Cursor color for this {@link UITextField}. */
 	protected int cursorColor = 0xD0D0D0;

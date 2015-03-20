@@ -472,7 +472,6 @@ public class UIButton extends UIComponent<UIButton>
 		 * @param component the component
 		 * @param x the x coordinate of the mouse
 		 * @param y the y coordinate of the mouse
-		 * @param button the mouse button
 		 */
 		public ClickEvent(UIButton component, int x, int y)
 		{

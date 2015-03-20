@@ -189,7 +189,6 @@ public class ChunkCollision
 	 * @param mask the mask
 	 * @param list the list
 	 * @param entity the entity
-	 * @return the collision bounding boxes
 	 */
 	public static void getCollisionBoundingBoxes(World world, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity entity)
 	{

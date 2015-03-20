@@ -124,11 +124,11 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	protected GuiIcon arrowIcon;
 
 	/**
-	 * Instantiates a new {@link UISelect}
+	 * Instantiates a new {@link UISelect}.
 	 *
 	 * @param gui the gui
 	 * @param width the width
-	 * @param options the options
+	 * @param values the values
 	 */
 	public UISelect(MalisisGui gui, int width, Iterable<T> values)
 	{
@@ -338,9 +338,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	}
 
 	/**
-	 * Set the {@link Option options} to use for this {@link UISelect}
+	 * Set the {@link Option options} to use for this {@link UISelect}.
 	 *
-	 * @param options the options
+	 * @param values the values
 	 * @return this {@link UISelect}
 	 */
 	public UISelect<T> setOptions(Iterable<T> values)
@@ -419,10 +419,10 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	}
 
 	/**
-	 * Select the {@link Option} using the index.
+	 * Selects the {@link Option}.
 	 *
-	 * @param index the index
-	 * @return the option
+	 * @param option the option
+	 * @return the option value
 	 */
 	public T select(Option<T> option)
 	{
@@ -438,21 +438,42 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		return getSelectedValue();
 	}
 
+	/**
+	 * Selects the {@link Option} for the specified value.
+	 *
+	 * @param obj the obj
+	 * @return the option value
+	 */
 	public T select(T obj)
 	{
 		return select(getOption(obj));
 	}
 
+	/**
+	 * Selects the first {@link Option} of this {@link UISelect}.
+	 *
+	 * @return the option value
+	 */
 	public T selectFirst()
 	{
 		return select(Iterables.getFirst(options, null));
 	}
 
+	/**
+	 * Selects the last {@link Option} of this {@link UISelect}.
+	 *
+	 * @return the option value
+	 */
 	public T selectLast()
 	{
 		return select(Iterables.getLast(options, null));
 	}
 
+	/**
+	 * Selects the {@link Option} before the currently selected one.
+	 *
+	 * @return the option value
+	 */
 	public T selectPrevious()
 	{
 		if (selectedOption == null)
@@ -471,6 +492,11 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		return null;
 	}
 
+	/**
+	 * Select the {@link Option} after the currently selected one.
+	 *
+	 * @return the t
+	 */
 	public T selectNext()
 	{
 		if (selectedOption == null)
@@ -489,7 +515,14 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		return null;
 	}
 
-	protected Option getHoveredOption(int mouseX, int mouseY)
+	/**
+	 * Gets the {@link Option} at the speicfied coordinates.
+	 *
+	 * @param mouseX the mouse x
+	 * @param mouseY the mouse y
+	 * @return the option
+	 */
+	protected Option getOptionAt(int mouseX, int mouseY)
 	{
 		if (!isInsideBounds(mouseX, mouseY))
 			return null;
@@ -524,11 +557,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public int getZIndex()
 	{
 		return super.getZIndex() + (expanded ? 300 : 0);
-	}
-
-	public boolean isOptionHovered(Option option)
-	{
-		return false;
 	}
 
 	@Override
@@ -600,7 +628,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		renderer.next();
 
 		int y = 14;
-		Option hover = getHoveredOption(mouseX, mouseY);
+		Option hover = getOptionAt(mouseX, mouseY);
 		for (Option option : this)
 		{
 			option.draw(this, renderer, 0, y, 0, partialTick, option.equals(hover), false);
@@ -619,7 +647,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			return true;
 		}
 
-		Option opt = getHoveredOption(x, y);
+		Option opt = getOptionAt(x, y);
 		if (opt != null)
 		{
 			if (opt.isDisabled())
@@ -697,15 +725,19 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		/**
 		 * Instantiates a new {@link Option}.
 		 *
-		 * @param index the index
 		 * @param key the key
-		 * @param value the value
 		 */
 		public Option(T key)
 		{
 			this.key = key;
 		}
 
+		/**
+		 * Instantiates a new {@link Option} with a label.
+		 *
+		 * @param key the key
+		 * @param label the label
+		 */
 		public Option(T key, String label)
 		{
 			this.key = key;

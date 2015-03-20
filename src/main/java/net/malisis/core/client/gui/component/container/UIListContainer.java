@@ -169,9 +169,8 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	public abstract void drawEmtpy(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
 
 	/**
-	 * Event fired when a {@link UIListContainer} changes its selected {@link IListElement}.<br>
-	 * When catching the event, the state is not applied to the {@code UISelect} yet.<br>
-	 * Cancelling the event will prevent the {@code Option} to be set for the {@code UISelect} .
+	 * Event fired when a {@link UIListContainer} changes its selected element.<br>
+	 * Cancelling the event will prevent the element to be selected.
 	 */
 	public static class SelectEvent<T> extends ValueChange<UIListContainer, T>
 	{
@@ -181,7 +180,7 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 		}
 
 		/**
-		 * Gets the new {@link IListElement} to be set.
+		 * Gets the new element to be set.
 		 *
 		 * @return the new option
 		 */
