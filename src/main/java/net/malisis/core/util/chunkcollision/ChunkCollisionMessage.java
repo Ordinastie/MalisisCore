@@ -26,6 +26,7 @@ package net.malisis.core.util.chunkcollision;
 
 import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
+import net.malisis.core.network.MalisisMessage;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.chunk.Chunk;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -37,10 +38,9 @@ import cpw.mods.fml.relauncher.Side;
  * @author Ordinastie
  *
  */
+@MalisisMessage
 public class ChunkCollisionMessage implements IMessageHandler<ChunkCollisionMessage.Packet, IMessage>
 {
-	public static ChunkCollisionMessage instance = new ChunkCollisionMessage();
-
 	public ChunkCollisionMessage()
 	{
 		MalisisCore.network.registerMessage(this, Packet.class, Side.CLIENT);

@@ -34,6 +34,7 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisSlot;
+import net.malisis.core.network.MalisisMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -52,10 +53,9 @@ import cpw.mods.fml.relauncher.SideOnly;
  * @author Ordinastie
  *
  */
+@MalisisMessage
 public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInventorySlotsMessage.Packet, IMessage>
 {
-	public static UpdateInventorySlotsMessage instance = new UpdateInventorySlotsMessage();
-
 	public static int PICKEDITEM = -1;
 
 	public UpdateInventorySlotsMessage()

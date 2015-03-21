@@ -98,6 +98,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	public MalisisCore()
 	{
 		super(new ModMetadata());
+
 		ModMetadata meta = getMetadata();
 		meta.modId = modid;
 		meta.name = modname;
@@ -108,6 +109,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		meta.description = "API rendering and ASM transformations.";
 
 		instance = this;
+		network = new MalisisNetwork(instance);
 	}
 
 	//#region IMalisisMod
@@ -182,7 +184,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	 * @param event the event
 	 */
 	@Subscribe
-	public static void preInit(FMLPreInitializationEvent event)
+	public void preInit(FMLPreInitializationEvent event)
 	{
 		MinecraftForge.EVENT_BUS.register(instance);
 		MinecraftForge.EVENT_BUS.register(ReplacementTool.instance());
@@ -192,6 +194,8 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		log = event.getModLog();
 
 		GameRegistry.registerTileEntity(MultiBlockTileEntity.class, "MalisisCoreMultiBlockTileEntity");
+
+		MalisisNetwork.createMessages(event.getAsmData());
 	}
 
 	/**
@@ -200,9 +204,9 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	 * @param event the event
 	 */
 	@Subscribe
-	public static void init(FMLInitializationEvent event)
+	public void init(FMLInitializationEvent event)
 	{
-		network = new MalisisNetwork(instance);
+
 		ClientCommandHandler.instance.registerCommand(new MalisisCommand());
 	}
 

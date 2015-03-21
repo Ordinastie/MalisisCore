@@ -29,6 +29,7 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.IInventoryProvider;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisInventoryContainer;
+import net.malisis.core.network.MalisisMessage;
 import net.malisis.core.util.TileEntityUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -48,18 +49,17 @@ import cpw.mods.fml.relauncher.SideOnly;
  * @author Ordinastie
  *
  */
+@MalisisMessage
 public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessage.Packet, IMessage>
 {
-	public static OpenInventoryMessage instance = new OpenInventoryMessage();
+	public enum ContainerType
+	{
+		TYPE_TILEENTITY, TYPE_ITEM;
+	}
 
 	public OpenInventoryMessage()
 	{
 		MalisisCore.network.registerMessage(this, Packet.class, Side.CLIENT);
-	}
-
-	public enum ContainerType
-	{
-		TYPE_TILEENTITY, TYPE_ITEM;
 	}
 
 	/**

@@ -28,6 +28,7 @@ import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
+import net.malisis.core.network.MalisisMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.Container;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -42,10 +43,9 @@ import cpw.mods.fml.relauncher.SideOnly;
  * @author Ordinastie
  *
  */
+@MalisisMessage
 public class InventoryActionMessage implements IMessageHandler<InventoryActionMessage.Packet, IMessage>
 {
-	public static InventoryActionMessage instance = new InventoryActionMessage();
-
 	public InventoryActionMessage()
 	{
 		MalisisCore.network.registerMessage(this, Packet.class, Side.SERVER);
