@@ -420,8 +420,10 @@ public class Face
 			z += (current.getX() - next.getX()) * (current.getY() + next.getY());
 		}
 
-		Vector normal = new Vector((float) Math.round(x * 10000) / 10000, (float) Math.round(y * 10000) / 10000,
-				(float) Math.round(z * 10000) / 10000);
+		int factor = 1000;
+		Vector normal = new Vector((float) Math.round(x * factor) / factor, (float) Math.round(y * factor) / factor, (float) Math.round(z
+				* factor)
+				/ factor);
 		normal.normalize();
 		return normal;
 	}
@@ -466,17 +468,20 @@ public class Face
 				dir = ForgeDirection.WEST;
 		}
 
-		if (dir != ForgeDirection.UNKNOWN)
+		//if (dir != ForgeDirection.UNKNOWN)
 		{
 			params.direction.set(dir);
 			params.textureSide.set(dir);
 			params.aoMatrix.set(calculateAoMatrix(dir));
 		}
 
-		double fx = Math.asin(Math.abs(normal.x)) / Math.PI * 2 * 0.6F;
-		double fy = Math.asin(Math.abs(normal.y)) / Math.PI * 2 * (normal.y >= 0 ? 1 : 0.5F);
-		double fz = Math.asin(Math.abs(normal.z)) / Math.PI * 2 * 0.8F;
-		float f = (float) (fx + fy + fz);
+		//		double fx = Math.asin(Math.abs(normal.x)) / Math.PI * 2 * 0.6F;
+		//		double fy = Math.asin(Math.abs(normal.y)) / Math.PI * 2 * (normal.y >= 0 ? 1 : 0.5F);
+		//		double fz = Math.asin(Math.abs(normal.z)) / Math.PI * 2 * 0.8F;
+		//		float f = (float) (fx + fy + fz);
+
+		//fry's patent
+		float f = (float) ((normal.x * normal.x * 0.6 + normal.y * (normal.y * 3 + 1) / 4 + normal.z * normal.z * 0.8));
 		params.colorFactor.set(f);
 	}
 
