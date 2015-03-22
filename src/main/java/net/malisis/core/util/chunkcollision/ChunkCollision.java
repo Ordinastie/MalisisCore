@@ -358,16 +358,21 @@ public class ChunkCollision
 	 */
 	public boolean canPlaceBlock(World world, Block block, int x, int y, int z)
 	{
-		AxisAlignedBB[] aabbs;
+		AxisAlignedBB[] aabbs = new AxisAlignedBB[0];
 		if (block instanceof IChunkCollidable)
 			aabbs = ((IChunkCollidable) block).getBoundingBox(world, x, y, z, BoundingBoxType.CHUNKCOLLISION);
 		else
-			aabbs = new AxisAlignedBB[] { block.getCollisionBoundingBoxFromPool(world, x, y, z).offset(-x, -y, -z) };
+		{
+			AxisAlignedBB aabb = block.getCollisionBoundingBoxFromPool(world, x, y, z);
+			if (aabb != null)
+				aabbs = new AxisAlignedBB[] { aabb.offset(-x, -y, -z) };
+		}
 
 		//build set of coordinates intersecting the AABBs
 		Set<ChunkPosition> positions = new HashSet<>();
 		for (AxisAlignedBB aabb : aabbs)
-			getOverlappingBlocks(positions, aabb.offset(x, y, z));
+			if (aabb != null)
+				getOverlappingBlocks(positions, aabb.offset(x, y, z));
 
 		int minX = chunkX(x);
 		int maxX = chunkX(x);
