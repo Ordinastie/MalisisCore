@@ -787,7 +787,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 		int vertexCount = f.getVertexes().length;
 		if (vertexCount != 4 && renderType == RenderType.ISBRH_WORLD)
 		{
-			MalisisCore.log.error("[BaseRenderer] Attempting to render a face containing {} vertexes in ISBRH. Ignored", vertexCount);
+			MalisisCore.log.error("[MalisisRenderer] Attempting to render a face containing {} vertexes in ISBRH. Ignored", vertexCount);
 			return;
 		}
 
@@ -1294,7 +1294,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 				}
 				catch (ReflectiveOperationException e)
 				{
-					MalisisCore.log.error("[BaseRenderer] Tried to register ISBRH for block class {} that does not have renderId field",
+					MalisisCore.log.error("[MalisisRenderer] Tried to register ISBRH for block class {} that does not have renderId field",
 							clazz.getSimpleName());
 					e.printStackTrace();
 				}
