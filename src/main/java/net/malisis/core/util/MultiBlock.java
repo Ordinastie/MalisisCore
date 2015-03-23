@@ -473,7 +473,7 @@ public class MultiBlock
 		if (provider.xCoord == mb.x && provider.yCoord == mb.y && provider.zCoord == mb.z)
 			return provider;
 
-		TileEntity te = provider.getWorldObj().getTileEntity(mb.x, mb.y, mb.z);
+		TileEntity te = provider.getWorld().getTileEntity(mb.x, mb.y, mb.z);
 		if (te == null || !(te instanceof IProvider))
 			return null;
 

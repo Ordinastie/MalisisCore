@@ -446,7 +446,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	 */
 	public T select(T obj)
 	{
-		return select(getOption(obj));
+		return (T) select(getOption(obj));
 	}
 
 	/**

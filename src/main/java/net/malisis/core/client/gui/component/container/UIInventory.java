@@ -39,7 +39,7 @@ public class UIInventory extends UIContainer<UIInventory>
 	public UIInventory(MalisisGui gui, String title, MalisisInventory inventory, int numCols)
 	{
 		super(gui, title != null ? title : inventory.getInventoryName(), 0, 0);
-		this.hasTitle = title != null || inventory.hasCustomInventoryName();
+		this.hasTitle = title != null || inventory.isCustomInventoryName();
 		this.inventory = inventory;
 		this.numCols = numCols;
 		this.width = Math.min(inventory.getSizeInventory() * 18, numCols * 18);

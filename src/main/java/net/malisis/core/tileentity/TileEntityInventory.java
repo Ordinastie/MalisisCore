@@ -106,7 +106,7 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 	}
 
 	@Override
-	public boolean hasCustomInventoryName()
+	public boolean isCustomInventoryName()
 	{
 		return false;
 	}
@@ -124,19 +124,16 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 	}
 
 	@Override
-	public void openInventory()
+	public void openChest()
 	{}
 
 	@Override
-	public void closeInventory()
+	public void closeChest()
 	{}
 
 	@Override
-	public boolean isItemValidForSlot(int slotNumber, ItemStack itemStack)
-	{
-		MalisisSlot slot = inventory.getSlot(slotNumber);
-		if (slot == null)
-			return false;
-		return slot.isItemValid(itemStack);
-	}
+	public boolean isItemValidForSlot(int slotNumber, ItemStack itemStack) {
+        MalisisSlot slot = inventory.getSlot(slotNumber);
+        return slot != null && slot.isItemValid(itemStack);
+    }
 }

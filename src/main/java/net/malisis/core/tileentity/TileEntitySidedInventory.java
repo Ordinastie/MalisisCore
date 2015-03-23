@@ -132,7 +132,7 @@ public abstract class TileEntitySidedInventory extends TileEntity implements IIn
 	}
 
 	@Override
-	public boolean hasCustomInventoryName()
+	public boolean isCustomInventoryName()
 	{
 		return false;
 	}
@@ -150,24 +150,21 @@ public abstract class TileEntitySidedInventory extends TileEntity implements IIn
 	}
 
 	@Override
-	public void openInventory()
+	public void openChest()
 	{}
 
 	@Override
-	public void closeInventory()
+	public void closeChest()
 	{}
 
 	@Override
-	public boolean isItemValidForSlot(int slotNumber, ItemStack itemStack)
-	{
-		MalisisSlot slot = getInventory(slotNumber).getSlot(convertSlotNumber(slotNumber));
-		if (slot == null)
-			return false;
-		return slot.isItemValid(itemStack);
-	}
+	public boolean isItemValidForSlot(int slotNumber, ItemStack itemStack) {
+        MalisisSlot slot = getInventory(slotNumber).getSlot(convertSlotNumber(slotNumber));
+        return slot != null && slot.isItemValid(itemStack);
+    }
 
 	@Override
-	public int[] getAccessibleSlotsFromSide(int side)
+	public int[] getSlotsForFace(int side)
 	{
 		MalisisInventory inventory = inventories.get(ForgeDirection.getOrientation(side));
 		if (inventory == null)
@@ -181,14 +178,11 @@ public abstract class TileEntitySidedInventory extends TileEntity implements IIn
 	}
 
 	@Override
-	public boolean canInsertItem(int slotNumber, ItemStack itemStack, int side)
-	{
-		MalisisInventory inventory = inventories.get(ForgeDirection.getOrientation(side));
-		if (inventory == null)
-			return false;
+	public boolean canInsertItem(int slotNumber, ItemStack itemStack, int side) {
+        MalisisInventory inventory = inventories.get(ForgeDirection.getOrientation(side));
+        return inventory != null && inventory.isItemValidForSlot(convertSlotNumber(slotNumber), itemStack);
 
-		return inventory.isItemValidForSlot(convertSlotNumber(slotNumber), itemStack);
-	}
+    }
 
 	@Override
 	public boolean canExtractItem(int slotNumber, ItemStack itemStack, int side)

@@ -63,11 +63,12 @@ ext.commit = project.hasProperty("commit") ? commit : 'unknown'
 
 // MinecraftForge version
 minecraft {
-    version = "1.7.10-10.13.2.1232"
+    version = "1.7.10-10.13.2.1342-1.7.10"
     if(file("../../run").exists()) 
 		runDir = "../../run/assets"
 	else
 		runDir = "run/assets"
+    mappings = "stable_12"
 }
 
 // Filter, process, and include resources
@@ -98,6 +99,14 @@ jar.manifest.mainAttributes(
         "Implementation-Version": version,
         "Implementation-Vendor": url,
         "FMLCorePlugin": "net.malisis.core.asm.MalisisCorePlugin")
+
+
+if (JavaVersion.current().isJava8Compatible()) {
+    tasks.withType(Javadoc) {
+        // disable the crazy super-strict doclint tool in Java 8
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+}
 
 // Artifact deployment
 uploadArchives {
