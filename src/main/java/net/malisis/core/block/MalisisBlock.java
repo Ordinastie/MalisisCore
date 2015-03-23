@@ -56,7 +56,7 @@ public class MalisisBlock extends Block
 	}
 
 	@Override
-	public Block setTextureName(String name)
+	public Block setUnlocalizedName(String name)
 	{
 		this.name = name;
 		if (textureName == null)
