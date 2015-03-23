@@ -143,9 +143,10 @@ public class ItemUtils
 		/**
 		 * @return true, if {@link ItemStacksMerger#merge merge} and {@link ItemStacksMerger#into into} can be merged.
 		 */
-		public boolean canMerge() {
-            return merge == null || into == null || areItemStacksStackable(merge, into);
-        }
+		public boolean canMerge()
+		{
+			return merge == null || into == null || areItemStacksStackable(merge, into);
+		}
 	}
 
 	/**
@@ -208,9 +209,11 @@ public class ItemUtils
 	 * @param stack2 second itemStack
 	 * @return true, if the itemStack can be stacked, false otherwise
 	 */
-	public static boolean areItemStacksStackable(ItemStack stack1, ItemStack stack2) {
-        return !(stack1 == null || stack2 == null) && stack1.isStackable() && stack1.getItem() == stack2.getItem() && (!stack2.getHasSubtypes()
-                || stack2.getMetadata() == stack1.getMetadata()) && ItemStack.areItemStackTagsEqual(stack2, stack1);
+	public static boolean areItemStacksStackable(ItemStack stack1, ItemStack stack2)
+	{
+		return !(stack1 == null || stack2 == null) && stack1.isStackable() && stack1.getItem() == stack2.getItem()
+				&& (!stack2.getHasSubtypes() || stack2.getMetadata() == stack1.getMetadata())
+				&& ItemStack.areItemStackTagsEqual(stack2, stack1);
 
-    }
+	}
 }
