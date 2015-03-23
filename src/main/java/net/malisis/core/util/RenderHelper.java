@@ -38,11 +38,9 @@ import org.lwjgl.util.Color;
 
 import cpw.mods.fml.client.FMLClientHandler;
 
-import java.time.chrono.MinguoEra;
-
 /**
  * RenderHelper
- * 
+ *
  * @author PaleoCrafter
  */
 public class RenderHelper
@@ -97,8 +95,8 @@ public class RenderHelper
 
 	public static void drawString(String text, int x, int y, int z, int canvasWidth, int canvasHeight, int color, boolean drawShadow)
 	{
-		drawString(text, x + (canvasWidth - getStringWidth(text)) / 2, y + (canvasHeight - getMC().fontRendererObj.FONT_HEIGHT) / 2, z, color,
-				drawShadow);
+		drawString(text, x + (canvasWidth - getStringWidth(text)) / 2, y + (canvasHeight - getMC().fontRendererObj.FONT_HEIGHT) / 2, z,
+				color, drawShadow);
 	}
 
 	public static void drawString(String text, int x, int y, int z, int color, boolean drawShadow)
@@ -273,8 +271,7 @@ public class RenderHelper
 
 	public static ScaledResolution getScaledResolution()
 	{
-		return new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft()
-                .displayWidth, Minecraft.getMinecraft().displayHeight);
+		return new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
 	}
 
 	public static int getScaledWidth(int width)
