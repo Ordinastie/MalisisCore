@@ -52,7 +52,7 @@ public class MalisisCorePlugin implements IFMLLoadingPlugin
 	@Override
 	public String getModContainerClass()
 	{
-		return "net.malisis.core.MalisisCore";
+		return null;
 	}
 
 	@Override

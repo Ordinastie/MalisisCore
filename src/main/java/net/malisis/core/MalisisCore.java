@@ -47,15 +47,9 @@ import net.minecraftforge.common.MinecraftForge;
 
 import org.apache.logging.log4j.Logger;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
-import cpw.mods.fml.client.FMLFileResourcePack;
-import cpw.mods.fml.client.FMLFolderResourcePack;
-import cpw.mods.fml.common.DummyModContainer;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.LoadController;
-import cpw.mods.fml.common.ModMetadata;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -66,15 +60,15 @@ import cpw.mods.fml.relauncher.SideOnly;
 /**
  * The Class MalisisCore.
  */
-public class MalisisCore extends DummyModContainer implements IMalisisMod
+@Mod(modid = MalisisCore.modid, name = MalisisCore.modname, version = MalisisCore.version)
+public class MalisisCore implements IMalisisMod
 {
 	/** Mod ID. */
 	public static final String modid = "malisiscore";
 	/** Mod name. */
 	public static final String modname = "Malisis Core";
 	/** Current version. */
-	public static final String version = MalisisCore.class.getPackage().getImplementationVersion() != null ? MalisisCore.class.getPackage()
-			.getImplementationVersion() : "UNKNOWN";
+	public static final String version = "${version}";
 	/** Url for the mod. */
 	public static final String url = "";
 	/** Path for the mod. */
@@ -97,19 +91,8 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	 */
 	public MalisisCore()
 	{
-		super(new ModMetadata());
-
-		ModMetadata meta = getMetadata();
-		meta.modId = modid;
-		meta.name = modname;
-		meta.version = version;
-		meta.authorList = Arrays.asList("Ordinastie", "PaleoCrafter");
-		meta.url = "http://github.com/Ordinastie/MalisisCore";
-		meta.logoFile = "malisiscore.png";
-		meta.description = "API rendering and ASM transformations.";
-
 		instance = this;
-		network = new MalisisNetwork(instance);
+		network = new MalisisNetwork(this);
 	}
 
 	//#region IMalisisMod
@@ -170,20 +153,12 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 		return instance.registeredMods.keySet();
 	}
 
-	@Override
-	public boolean registerBus(EventBus bus, LoadController controller)
-	{
-		bus.register(this);
-
-		return true;
-	}
-
 	/**
 	 * Pre-initialization event
 	 *
 	 * @param event the event
 	 */
-	@Subscribe
+	@EventHandler
 	public void preInit(FMLPreInitializationEvent event)
 	{
 		MinecraftForge.EVENT_BUS.register(instance);
@@ -203,7 +178,7 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 	 *
 	 * @param event the event
 	 */
-	@Subscribe
+	@EventHandler
 	public void init(FMLInitializationEvent event)
 	{
 
@@ -287,17 +262,5 @@ public class MalisisCore extends DummyModContainer implements IMalisisMod
 			msg.setChatStyle(cs);
 			Minecraft.getMinecraft().thePlayer.addChatMessage(msg);
 		}
-	}
-
-	@Override
-	public File getSource()
-	{
-		return coremodLocation;
-	}
-
-	@Override
-	public Class<?> getCustomResourcePackClass()
-	{
-		return coremodLocation.isDirectory() ? FMLFolderResourcePack.class : FMLFileResourcePack.class;
 	}
 }

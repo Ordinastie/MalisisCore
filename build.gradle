@@ -48,9 +48,9 @@ ext.isReleaseVersion = !version.endsWith("-SNAPSHOT")
 ext.packaging = 'jar'
 
 // Extended project information
-ext.projectName = 'Malisis\' Core'
-ext.description = 'Malisis\' Core is a framework dedicated to simplify many processes required during a mod development.'
-ext.url = 'http://github.com/ordinastie/malisiscore'
+ext.projectName = 'MalisisCore'
+ext.description = 'MalisisCore is a framework dedicated to simplify many processes required during a mod development.'
+ext.url = 'http://github.com/Ordinastie/MalisisCore'
 
 // Java version target/source compatibility
 sourceCompatibility = '1.7'
@@ -98,7 +98,8 @@ jar.manifest.mainAttributes(
         "Implementation-Title": name,
         "Implementation-Version": version,
         "Implementation-Vendor": url,
-        "FMLCorePlugin": "net.malisis.core.asm.MalisisCorePlugin")
+        "FMLCorePlugin": "net.malisis.core.asm.MalisisCorePlugin",
+        "FMLCorePluginContainsFMLMod": true)
 
 
 if (JavaVersion.current().isJava8Compatible()) {
