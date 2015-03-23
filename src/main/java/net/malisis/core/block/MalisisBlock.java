@@ -89,8 +89,7 @@ public class MalisisBlock extends Block
 	{
 		for (AxisAlignedBB aabb : getBoundingBox(world, x, y, z, BoundingBoxType.COLLISION))
 		{
-			aabb.offset(x, y, z);
-			if (mask.intersectsWith(aabb))
+			if (aabb != null && mask.intersectsWith(aabb.offset(x, y, z)))
 				list.add(aabb);
 		}
 	}
