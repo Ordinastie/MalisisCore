@@ -133,7 +133,7 @@ public class ReplacementTool
 
 			if (ib != null)
 			{
-				f = ReflectionHelper.findField(ItemBlock.class, "field_150939_a");
+				f = ReflectionHelper.findField(ItemBlock.class, "field_150939_a", "blockInstance");
 				modifiers = Field.class.getDeclaredField("modifiers");
 				modifiers.setAccessible(true);
 				modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);

@@ -94,7 +94,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 	@SuppressWarnings("deprecation")
 	private AsmHook updateCoordsHook()
 	{
-		McpMethodMapping func_150807_a = new McpMethodMapping("func_150807_a", "func_150807_a", "net.minecraft.world.chunk.Chunk",
+		McpMethodMapping func_150807_a = new McpMethodMapping("setBlockIDWithMetadata", "func_150807_a", "net.minecraft.world.chunk.Chunk",
 				"(IIILnet/minecraft/block/Block;I)Z");
 		McpMethodMapping setExtBlockMetadata = new McpMethodMapping("setExtBlockMetadata", "func_76654_b",
 				"net.minecraft.world.chunk.storage.ExtendedBlockStorage", "(IIII)V");
@@ -137,7 +137,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 	@SuppressWarnings("deprecation")
 	private AsmHook rayTraceHook()
 	{
-		McpMethodMapping func_147447_a = new McpMethodMapping("func_147447_a", "func_147447_a", "net.minecraft.world.World",
+		McpMethodMapping func_147447_a = new McpMethodMapping("rayTraceBlocks", "func_147447_a", "net.minecraft.world.World",
 				"(Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;ZZZ)Lnet/minecraft/util/MovingObjectPosition;");
 
 		AsmHook ah = new AsmHook(func_147447_a);
