@@ -126,12 +126,15 @@ public class AsmHook
 	public boolean walkSteps(MethodNode methodNode)
 	{
 		int index = 0;
+		int matchesIndex = 0;
+		int insertsIndex = 0;
+		int jumpsIndex = 0;
 		for (HookStep step : steps)
 		{
 			switch (step)
 			{
 				case FIND:
-					InsnList match = matches.remove(0);
+					InsnList match = matches.get(matchesIndex++);
 					AbstractInsnNode node = AsmUtils.findInstruction(methodNode, match, index);
 					if (node == null)
 						return false;
@@ -139,12 +142,12 @@ public class AsmHook
 						index = methodNode.instructions.indexOf(node);
 					break;
 				case INSERT:
-					InsnList insert = inserts.remove(0);
+					InsnList insert = inserts.get(insertsIndex++);
 					index += insert.size();
 					methodNode.instructions.insert(methodNode.instructions.get(index - insert.size()), insert);
 					break;
 				case JUMP:
-					int jump = jumps.remove(0);
+					int jump = jumps.get(jumpsIndex++);
 					if (jump == END)
 						index = methodNode.instructions.size() - 1;
 					else
