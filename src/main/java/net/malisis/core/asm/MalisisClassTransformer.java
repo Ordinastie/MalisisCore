@@ -24,8 +24,7 @@
 
 package net.malisis.core.asm;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 
 import net.malisis.core.MalisisCore;
 import net.minecraft.launchwrapper.IClassTransformer;
@@ -37,9 +36,12 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
 public abstract class MalisisClassTransformer implements IClassTransformer
 {
-	public HashMap<String, ArrayList<AsmHook>> listHooks = new HashMap();
+	public Multimap<String, AsmHook> listHooks = HashMultimap.create();
 	protected String logString;
 	protected Logger log;
 
@@ -51,18 +53,15 @@ public abstract class MalisisClassTransformer implements IClassTransformer
 
 	public void register(AsmHook ah)
 	{
-		ArrayList<AsmHook> hooks = listHooks.get(ah.getTargetClass());
-		if (hooks == null)
-			hooks = new ArrayList<AsmHook>();
-		hooks.add(ah);
-		listHooks.put(ah.getTargetClass(), hooks);
-		LogManager.getLogger(logString).info("Hook registered for {}", ah.getTargetClass());
+		ah.setTransformer(this.getClass().getSimpleName());
+		listHooks.put(ah.getTargetClass(), ah);
+		LogManager.getLogger(logString).info("[{}] Hook registered for {}", ah.getTransformer(), ah.getTargetClass());
 	}
 
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes)
 	{
-		ArrayList<AsmHook> hooks = listHooks.get(transformedName);
+		Collection<AsmHook> hooks = listHooks.get(transformedName);
 		if (hooks == null || hooks.size() == 0)
 			return bytes;
 
@@ -78,8 +77,8 @@ public abstract class MalisisClassTransformer implements IClassTransformer
 			if (methodNode != null)
 			{
 				if (!hook.walkSteps(methodNode))
-					LogManager.getLogger(logString).error("The instruction list was not found in {}:{}{}", hook.getTargetClass(),
-							hook.getMethodName(), hook.getMethodDescriptor());
+					LogManager.getLogger(logString).error("[{}] The instruction list was not found in {}:{}{}", hook.getTransformer(),
+							hook.getTargetClass(), hook.getMethodName(), hook.getMethodDescriptor());
 
 				if (hook.isDebug() == true && !MalisisCore.isObfEnv)
 				{
@@ -88,8 +87,8 @@ public abstract class MalisisClassTransformer implements IClassTransformer
 			}
 			else
 			{
-				LogManager.getLogger(logString).error("Method not found : {}:{}{}", hook.getTargetClass(), hook.getMethodName(),
-						hook.getMethodDescriptor());
+				LogManager.getLogger(logString).error("[{}] Method not found : {}:{}{}", hook.getTransformer(), hook.getTargetClass(),
+						hook.getMethodName(), hook.getMethodDescriptor());
 			}
 		}
 

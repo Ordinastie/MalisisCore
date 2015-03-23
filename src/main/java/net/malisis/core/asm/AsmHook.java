@@ -42,6 +42,7 @@ public class AsmHook
 
 	private static int END = Short.MIN_VALUE;
 
+	private String transformer;
 	private McpMethodMapping mapping;
 	private boolean debug = false;
 
@@ -53,6 +54,16 @@ public class AsmHook
 	public AsmHook(McpMethodMapping mapping)
 	{
 		this.mapping = mapping;
+	}
+
+	public void setTransformer(String transformerName)
+	{
+		this.transformer = transformerName;
+	}
+
+	public String getTransformer()
+	{
+		return transformer;
 	}
 
 	public AsmHook jumpTo(InsnList match)
