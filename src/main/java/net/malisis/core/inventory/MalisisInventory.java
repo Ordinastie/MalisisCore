@@ -214,7 +214,7 @@ public class MalisisInventory implements IInventory
 	 * @return true, if successful
 	 */
 	@Override
-	public boolean hasCustomInventoryName()
+	public boolean isCustomInventoryName()
 	{
 		return name != null;
 	}
@@ -453,7 +453,7 @@ public class MalisisInventory implements IInventory
 	 * Called when this {@link MalisisInventory} is opened.
 	 */
 	@Override
-	public void openInventory()
+	public void openChest()
 	{}
 
 	/**
@@ -647,7 +647,7 @@ public class MalisisInventory implements IInventory
 			for (MalisisInventory inv : inventories)
 			{
 				c.addInventory(inv);
-				inv.openInventory();
+				inv.openChest();
 				inv.bus.post(new InventoryEvent.Open(c, inv));
 			}
 
@@ -678,7 +678,7 @@ public class MalisisInventory implements IInventory
 			for (MalisisInventory inv : inventories)
 			{
 				c.addInventory(inv);
-				inv.openInventory();
+				inv.openChest();
 				inv.bus.post(new InventoryEvent.Open(c, inv));
 			}
 
@@ -710,7 +710,7 @@ public class MalisisInventory implements IInventory
 	 * Unused.
 	 */
 	@Override
-	public void closeInventory()
+	public void closeChest()
 	{}
 
 	/**

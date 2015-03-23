@@ -288,7 +288,7 @@ public abstract class MalisisGui extends GuiScreen
 	 * Called when a mouse button is released.
 	 */
 	@Override
-	protected void mouseMovedOrUp(int x, int y, int button)
+	protected void mouseReleased(int x, int y, int button)
 	{
 		try
 		{
@@ -637,7 +637,7 @@ public abstract class MalisisGui extends GuiScreen
 
 	public static void playSound(String name, float level)
 	{
-		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation(name), level));
+		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.createPositionedSoundRecord(new ResourceLocation(name), level));
 	}
 
 	public static boolean isGuiCloseKey(int keyCode)

@@ -88,7 +88,7 @@ public class ReplacementTool
 		for (Entry<Block, Block> entry : originalBlocks.entrySet())
 		{
 			Block block = entry.getValue();
-			block.registerBlockIcons(event.map);
+			block.registerIcons(event.map);
 		}
 	}
 

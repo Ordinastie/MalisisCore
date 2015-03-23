@@ -255,7 +255,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void set(TileEntity te, float partialTick)
 	{
-		set(te.getWorldObj(), te.getBlockType(), te.xCoord, te.yCoord, te.zCoord, te.getBlockMetadata());
+		set(te.getWorld(), te.getBlockType(), te.xCoord, te.yCoord, te.zCoord, te.getBlockMetadata());
 		this.partialTick = partialTick;
 		this.tileEntity = te;
 	}
@@ -1326,7 +1326,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 
 	public static FontRenderer getFontRenderer()
 	{
-		return Minecraft.getMinecraft().fontRenderer;
+		return Minecraft.getMinecraft().fontRendererObj;
 	}
 
 	/**

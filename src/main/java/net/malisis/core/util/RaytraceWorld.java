@@ -335,7 +335,7 @@ public class RaytraceWorld
 		int metadata = world.getBlockMetadata(x, y, z);
 		if (hasOption(Options.CHECK_COLLISION) && block.getCollisionBoundingBoxFromPool(world, x, y, z) == null)
 			return null;
-		if (!block.canCollideCheck(metadata, hasOption(Options.HIT_LIQUIDS)))
+		if (!block.canStopRayTrace(metadata, hasOption(Options.HIT_LIQUIDS)))
 			return null;
 		return RaytraceBlock.set(src, exit, x, y, z).trace();
 	}
@@ -346,7 +346,7 @@ public class RaytraceWorld
 	public static class Options
 	{
 		/** Ray tracing through liquids returns a hit. */
-		public static int HIT_LIQUIDS = 1 << 0;
+		public static int HIT_LIQUIDS = 1;
 		/** Don't stop ray tracing on hit. */
 		public static int PASS_THROUGH = 1 << 1;
 		/** Don't hit the block source of ray tracing. */

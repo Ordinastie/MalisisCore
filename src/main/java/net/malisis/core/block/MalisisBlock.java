@@ -56,12 +56,12 @@ public class MalisisBlock extends Block
 	}
 
 	@Override
-	public Block setBlockName(String name)
+	public Block setTextureName(String name)
 	{
 		this.name = name;
 		if (textureName == null)
 			textureName = name;
-		return super.setBlockName(name);
+		return super.setTextureName(name);
 	}
 
 	public String getName()
@@ -90,7 +90,7 @@ public class MalisisBlock extends Block
 		for (AxisAlignedBB aabb : getBoundingBox(world, x, y, z, BoundingBoxType.COLLISION))
 		{
 			aabb.offset(x, y, z);
-			if (aabb != null && mask.intersectsWith(aabb))
+			if (mask.intersectsWith(aabb))
 				list.add(aabb);
 		}
 	}

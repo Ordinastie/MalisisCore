@@ -101,18 +101,17 @@ public abstract class RecipeHandler<T extends IRecipe>
 	 * @param replaced the replaced
 	 * @return true, if is matched
 	 */
-	protected boolean isMatched(ItemStack itemStack, Object replaced)
-	{
-		if (itemStack == null)
-			return false;
+	protected boolean isMatched(ItemStack itemStack, Object replaced) {
+        if (itemStack == null) {
+            return false;
+        }
 
-		if (replaced instanceof Item)
-			return itemStack.getItem() == replaced;
-		if (replaced instanceof Block)
-			return itemStack.getItem() instanceof ItemBlock && ((ItemBlock) itemStack.getItem()).field_150939_a == replaced;
+        if (replaced instanceof Item) {
+            return itemStack.getItem() == replaced;
+        }
+        return replaced instanceof Block && itemStack.getItem() instanceof ItemBlock && ((ItemBlock) itemStack.getItem()).blockInstance == replaced;
 
-		return false;
-	}
+    }
 
 	public abstract void replace(T recipe, Object vanilla, Object replacement);
 

@@ -861,7 +861,8 @@ public class MalisisInventoryContainer extends Container
 	/**
 	 * Resets the dragging state.
 	 */
-	private void resetDrag()
+    @Override
+	protected void resetDrag()
 	{
 		if (!isDraggingItemStack())
 			return;
