@@ -53,7 +53,9 @@ import cpw.mods.fml.relauncher.Side;
 public class MalisisNetwork extends SimpleNetworkWrapper
 {
 	/** The global discriminator for each packet. */
-	private static int discriminator = 0;
+	private int discriminator = 0;
+	/** Name of the channel used **/
+	protected String name;
 
 	/**
 	 * Instantiates a new {@link MalisisNetwork}.
@@ -63,6 +65,7 @@ public class MalisisNetwork extends SimpleNetworkWrapper
 	public MalisisNetwork(String channelName)
 	{
 		super(channelName);
+		name = channelName;
 	}
 
 	/**
@@ -87,6 +90,8 @@ public class MalisisNetwork extends SimpleNetworkWrapper
 	public <REQ extends IMessage, REPLY extends IMessage> void registerMessage(Class<? extends IMessageHandler<REQ, REPLY>> messageHandler, Class<REQ> requestMessageType, Side side)
 	{
 		super.registerMessage(messageHandler, requestMessageType, discriminator++, side);
+		MalisisCore.log.info("Registering " + messageHandler.getSimpleName() + " for " + requestMessageType.getSimpleName()
+				+ " with discriminator " + discriminator + " in channel " + name);
 	}
 
 	/**
@@ -101,6 +106,8 @@ public class MalisisNetwork extends SimpleNetworkWrapper
 	public <REQ extends IMessage, REPLY extends IMessage> void registerMessage(IMessageHandler<? super REQ, ? extends REPLY> messageHandler, Class<REQ> requestMessageType, Side side)
 	{
 		super.registerMessage(messageHandler, requestMessageType, discriminator++, side);
+		MalisisCore.log.info("Registering " + messageHandler.getClass().getSimpleName() + " for " + requestMessageType.getSimpleName()
+				+ " with discriminator " + discriminator + " in channel " + name);
 	}
 
 	/**
