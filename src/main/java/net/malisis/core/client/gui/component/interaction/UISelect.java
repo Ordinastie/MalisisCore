@@ -368,12 +368,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		return null;
 	}
 
-	public Option getOption(int y)
-	{
-		//TODO
-		return null;
-	}
-
 	/**
 	 * Sets the selected {@link Option} from its containing key.
 	 *
@@ -446,7 +440,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	 */
 	public T select(T obj)
 	{
-		return (T) select(getOption(obj));
+		return select(getOption(obj));
 	}
 
 	/**
