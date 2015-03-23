@@ -124,7 +124,7 @@ public class ChunkCollision
 	//#region updateCollisionCoordinates
 	/**
 	 * Update chunk collision coordinates.<br>
-	 * Called via ASM from {@link Chunk#func_150807_a(int, int, int, Block, int)} (setBlock())
+	 * Called via ASM from {@link Chunk#setBlockIDWithMetadata(int, int, int, Block, int)}
 	 *
 	 * @param chunk the chunk
 	 * @param x the x
@@ -223,7 +223,7 @@ public class ChunkCollision
 	//#region getRayTraceResult
 	/**
 	 * Sets the ray trace infos.<br>
-	 * Called via ASM at the beginning of {@link World#func_147447_a(Vec3, Vec3, boolean, boolean, boolean)} (rayTrace())
+	 * Called via ASM at the beginning of {@link World#rayTraceBlocks(Vec3, Vec3, boolean, boolean, boolean)}
 	 *
 	 * @param world the world
 	 * @param src the src
@@ -258,7 +258,7 @@ public class ChunkCollision
 
 	/**
 	 * Gets the ray trace result.<br>
-	 * Called via ASM from {@link World#func_147447_a(Vec3, Vec3, boolean, boolean, boolean)} (rayTrace()) before each return.
+	 * Called via ASM from {@link World#rayTraceBlocks(Vec3, Vec3, boolean, boolean, boolean)} before each return.
 	 *
 	 * @param world the world
 	 * @param mop the mop
