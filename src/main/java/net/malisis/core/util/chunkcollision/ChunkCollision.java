@@ -29,7 +29,6 @@ import gnu.trove.set.hash.TLongHashSet;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,6 +37,7 @@ import java.util.WeakHashMap;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.BoundingBoxType;
+import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.Point;
 import net.malisis.core.util.RaytraceBlock;
 import net.minecraft.block.Block;
@@ -82,6 +82,7 @@ public class ChunkCollision
 	// /!\ Logical side!
 	private Side side;
 	private Map<Chunk, TLongHashSet> chunks = new WeakHashMap();
+	private CheckCollisionProcedure checkCollisionProcedure = new CheckCollisionProcedure();
 	private CollisionProcedure collisionProcedure = new CollisionProcedure();
 	private RayTraceProcedure rayTraceProcedure = new RayTraceProcedure();
 	private PlaceBlockProcedure placeBlockProcedure = new PlaceBlockProcedure();
@@ -112,6 +113,9 @@ public class ChunkCollision
 		{
 			for (int cz = minZ; cz <= maxZ; ++cz)
 			{
+				if (!world.getChunkProvider().chunkExists(cx, cz))
+					continue;
+
 				Chunk chunk = world.getChunkFromChunkCoords(cx, cz);
 				procedure.set(world, chunk);
 				TLongHashSet coords = chunks.get(chunk);
@@ -141,6 +145,16 @@ public class ChunkCollision
 			cc.removeCoord(chunk, coord);
 		if (block instanceof IChunkCollidable)
 			cc.addCoord(chunk, coord);
+
+		//		int minX = chunkX(MathHelper.floor_double(mask.minX)) - 1;
+		//		int maxX = chunkX(MathHelper.floor_double(mask.maxX)) + 1;
+		//		int minZ = chunkZ(MathHelper.floor_double(mask.minZ)) - 1;
+		//		int maxZ = chunkZ(MathHelper.floor_double(mask.maxZ)) + 1;
+		//
+		//		collisionProcedure.mask = mask;
+		//		collisionProcedure.list = list;
+		//
+		//		callProcedureForChunks(world, minX, minZ, maxX, maxZ, collisionProcedure);
 	}
 
 	/**
@@ -358,21 +372,9 @@ public class ChunkCollision
 	 */
 	public boolean canPlaceBlock(World world, Block block, int x, int y, int z)
 	{
-		AxisAlignedBB[] aabbs = new AxisAlignedBB[0];
-		if (block instanceof IChunkCollidable)
-			aabbs = ((IChunkCollidable) block).getBoundingBox(world, x, y, z, BoundingBoxType.CHUNKCOLLISION);
-		else
-		{
-			AxisAlignedBB aabb = block.getCollisionBoundingBoxFromPool(world, x, y, z);
-			if (aabb != null)
-				aabbs = new AxisAlignedBB[] { aabb.offset(-x, -y, -z) };
-		}
-
+		AxisAlignedBB[] aabbs = AABBUtils.getCollisionBoundingBoxes(block, world, x, y, z);
 		//build set of coordinates intersecting the AABBs
-		Set<ChunkPosition> positions = new HashSet<>();
-		for (AxisAlignedBB aabb : aabbs)
-			if (aabb != null)
-				getOverlappingBlocks(positions, aabb.offset(x, y, z));
+		Set<ChunkPosition> positions = AABBUtils.getCollidingPositions(AABBUtils.offset(x, y, z, aabbs));
 
 		int minX = chunkX(x);
 		int maxX = chunkX(x);
@@ -392,35 +394,14 @@ public class ChunkCollision
 		}
 
 		//check against each IChunkCollidable for occupied chunks
-		placeBlockProcedure.aabbs = aabbs;
-		callProcedureForChunks(world, minX - 1, minZ - 1, maxX + 1, maxZ + 1, placeBlockProcedure);
+		checkCollisionProcedure.aabbs = aabbs;
+		checkCollisionProcedure.removeCollision = false;
+		callProcedureForChunks(world, minX - 1, minZ - 1, maxX + 1, maxZ + 1, checkCollisionProcedure);
 
-		boolean collide = placeBlockProcedure.collide;
-		placeBlockProcedure.clean();
+		boolean collide = checkCollisionProcedure.collide;
+		checkCollisionProcedure.clean();
 
 		return !collide;
-	}
-
-	/**
-	 * Gets the block positions overlapping a specific {@link AxisAlignedBB}.
-	 *
-	 * @param blocks the blocks
-	 * @param aabb the aabb
-	 * @return the overlapping blocks
-	 */
-	private void getOverlappingBlocks(Set<ChunkPosition> blocks, AxisAlignedBB aabb)
-	{
-		int minX = (int) Math.floor(aabb.minX);
-		int maxX = (int) Math.ceil(aabb.maxX);
-		int minY = (int) Math.floor(aabb.minY);
-		int maxY = (int) Math.ceil(aabb.maxY);
-		int minZ = (int) Math.floor(aabb.minZ);
-		int maxZ = (int) Math.ceil(aabb.maxZ);
-
-		for (int x = minX; x < maxX; x++)
-			for (int y = minY; y < maxY; y++)
-				for (int z = minZ; z < maxZ; z++)
-					blocks.add(new ChunkPosition(x, y, z));
 	}
 
 	//#end canPlaceBlockAt
@@ -622,6 +603,41 @@ public class ChunkCollision
 			world = null;
 			chunk = null;
 			block = null;
+		}
+	}
+
+	private class CheckCollisionProcedure extends ChunkProcedure
+	{
+		private AxisAlignedBB[] aabbs;
+		private boolean collide;
+		private boolean removeCollision;
+
+		@Override
+		public boolean execute(long coord)
+		{
+			if (!check(coord))
+				return true;
+
+			AxisAlignedBB[] boxes = AABBUtils.getCollisionBoundingBoxes(block, world, x, y, z);
+			collide = AABBUtils.isColliding(boxes, aabbs);
+			if (collide)
+			{
+				if (removeCollision)
+					get(world).removeCoord(chunk, coord);
+				else
+					return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		protected void clean()
+		{
+			super.clean();
+			aabbs = null;
+			collide = false;
+			removeCollision = false;
 		}
 	}
 

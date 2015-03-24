@@ -24,8 +24,16 @@
 
 package net.malisis.core.util;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import net.malisis.core.block.BoundingBoxType;
+import net.malisis.core.util.chunkcollision.IChunkCollidable;
+import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.ChunkPosition;
+import net.minecraft.world.World;
 
 /**
  * @author Ordinastie
@@ -103,6 +111,12 @@ public class AABBUtils
 		tag.setDouble("maxZ", aabb.maxZ);
 	}
 
+	/**
+	 * Gets a {@link AxisAlignedBB} that englobes the passed {@code AxisAlignedBB}.
+	 *
+	 * @param aabbs the aabbs
+	 * @return the axis aligned bb
+	 */
 	public static AxisAlignedBB combine(AxisAlignedBB[] aabbs)
 	{
 		AxisAlignedBB ret = AxisAlignedBB.getBoundingBox(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MIN_VALUE,
@@ -120,4 +134,85 @@ public class AABBUtils
 
 		return ret;
 	}
+
+	/**
+	 * Offsets the passed {@link AxisAlignedBB}s by the specified coordinates.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param aabbs the aabbs
+	 */
+	public static AxisAlignedBB[] offset(double x, double y, double z, AxisAlignedBB... aabbs)
+	{
+		for (AxisAlignedBB aabb : aabbs)
+			if (aabb != null)
+				aabb.offset(x, y, z);
+		return aabbs;
+	}
+
+	/**
+	 * Gets the {@link ChunkPosition} overlapping {@link AxisAlignedBB}s.
+	 *
+	 * @param aabbs the aabbs
+	 * @return the overlapping blocks
+	 */
+	public static Set<ChunkPosition> getCollidingPositions(AxisAlignedBB... aabbs)
+	{
+		Set<ChunkPosition> blocks = new HashSet<>();
+		for (AxisAlignedBB aabb : aabbs)
+		{
+			if (aabb == null)
+				continue;
+
+			int minX = (int) Math.floor(aabb.minX);
+			int maxX = (int) Math.ceil(aabb.maxX);
+			int minY = (int) Math.floor(aabb.minY);
+			int maxY = (int) Math.ceil(aabb.maxY);
+			int minZ = (int) Math.floor(aabb.minZ);
+			int maxZ = (int) Math.ceil(aabb.maxZ);
+
+			for (int x = minX; x < maxX; x++)
+				for (int y = minY; y < maxY; y++)
+					for (int z = minZ; z < maxZ; z++)
+						blocks.add(new ChunkPosition(x, y, z));
+		}
+
+		return blocks;
+	}
+
+	/**
+	 * Checks if a group of {@link AxisAlignedBB} is colliding with another one.
+	 *
+	 * @param aabbs1 the aabbs1
+	 * @param aabbs2 the aabbs2
+	 * @return true, if is colliding
+	 */
+	public static boolean isColliding(AxisAlignedBB[] aabbs1, AxisAlignedBB[] aabbs2)
+	{
+		for (AxisAlignedBB aabb1 : aabbs1)
+		{
+			if (aabb1 != null)
+			{
+				for (AxisAlignedBB aabb2 : aabbs2)
+					if (aabb2 != null && aabb1.intersectsWith(aabb2))
+						return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static AxisAlignedBB[] getCollisionBoundingBoxes(Block block, World world, int x, int y, int z)
+	{
+		if (block instanceof IChunkCollidable)
+			return ((IChunkCollidable) block).getBoundingBox(world, x, y, z, BoundingBoxType.CHUNKCOLLISION);
+
+		AxisAlignedBB aabb = block.getCollisionBoundingBoxFromPool(world, x, y, z);
+		if (aabb == null)
+			return new AxisAlignedBB[0];
+		aabb.offset(-x, -y, -z);
+		return new AxisAlignedBB[] { aabb };
+	}
+
 }
