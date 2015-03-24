@@ -1,36 +1,36 @@
 buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            name = 'sonatype-nexus-public'
-            url = 'https://oss.sonatype.org/content/repositories/public/'
-        }
-        maven {
-            name = 'forge-repo'
-            url = 'http://files.minecraftforge.net/maven/'
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
-    }
+	repositories {
+		mavenCentral()
+		maven {
+			name = 'sonatype-nexus-public'
+			url = 'https://oss.sonatype.org/content/repositories/public/'
+		}
+		maven {
+			name = 'forge-repo'
+			url = 'http://files.minecraftforge.net/maven/'
+		}
+	}
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+	}
 }
 
 // Gradle plugins
 plugins {
-    id "maven"
-    id "signing"
+	id "maven"
+	id "signing"
 }
 
 apply plugin: 'forge'
 
 // Project repositories
 repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        name = 'sonatype-nexus-public'
-        url = 'https://oss.sonatype.org/content/repositories/public/'
-    }
+	mavenLocal()
+	mavenCentral()
+	maven {
+		name = 'sonatype-nexus-public'
+		url = 'https://oss.sonatype.org/content/repositories/public/'
+	}
 }
 
 // Project dependencies
@@ -62,51 +62,51 @@ ext.commit = project.hasProperty("commit") ? commit : 'unknown'
 
 // MinecraftForge version
 minecraft {
-    version = "1.7.10-10.13.2.1342-1.7.10"
-    if(file("../../run").exists()) 
+	version = "1.7.10-10.13.2.1342-1.7.10"
+	if(file("../../run").exists()) 
 		runDir = "../../run/assets"
 	else
 		runDir = "run/assets"
-    mappings = "stable_12"
+	mappings = "stable_12"
 }
 
 // Filter, process, and include resources
 processResources {
-    inputs.property "version", version
-    inputs.property "mcversion", project.minecraft.version
+	inputs.property "version", version
+	inputs.property "mcversion", project.minecraft.version
 
-    // Include in final JAR
-    from 'LICENSE.txt'
+	// Include in final JAR
+	from 'LICENSE.txt'
 
-    // Replace variables
-    from('src/main/resources/mcmod.info') {
-        expand 'modid': archivesBaseName,
-                'name': projectName,
-                'description': project.ext.description,
-                'version': version,
-                'buildNumber': buildNumber,
-                'mcversion': minecraft.version,
-                'url': url
-    }
+	// Replace variables
+	from('src/main/resources/mcmod.info') {
+		expand 'modid': archivesBaseName,
+				'name': projectName,
+				'description': project.ext.description,
+				'version': version,
+				'buildNumber': buildNumber,
+				'mcversion': minecraft.version,
+				'url': url
+	}
 }
 
 // JAR manifest configuration
 def commonManifest = {
 		mainAttributes(	"Built-By": System.properties['user.name'],
-				        "Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
-				        "Implementation-Title": name,
-				        "Implementation-Version": version,
-				        "Implementation-Vendor": url,
-				        "FMLCorePlugin": "net.malisis.core.asm.MalisisCorePlugin",
-				        "FMLCorePluginContainsFMLMod": true)
+						"Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
+						"Implementation-Title": name,
+						"Implementation-Version": version,
+						"Implementation-Vendor": url,
+						"FMLCorePlugin": "net.malisis.core.asm.MalisisCorePlugin",
+						"FMLCorePluginContainsFMLMod": true)
 }
 jar.manifest commonManifest
 
 if (JavaVersion.current().isJava8Compatible()) {
-    tasks.withType(Javadoc) {
-        // disable the crazy super-strict doclint tool in Java 8
-        options.addStringOption('Xdoclint:none', '-quiet')
-    }
+	tasks.withType(Javadoc) {
+		// disable the crazy super-strict doclint tool in Java 8
+		options.addStringOption('Xdoclint:none', '-quiet')
+	}
 }
 
 // Javadoc JAR generation
@@ -144,15 +144,15 @@ signing {
 
 // Artifact deployment
 uploadArchives {
-    repositories.mavenDeployer {
-    
-     	// Sign Maven POM
-    	beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-    
-	    def username = System.getenv("sonatypeUsername") ?: sonatypeUsername;
-		def password = System.getenv("sonatypePassword") ?: sonatypePassword;
+	repositories.mavenDeployer {
+	
+	 	// Sign Maven POM
+		beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+	
+		def username = System.getenv("sonatypeUsername") ?: project.hasProperty('sonatypeUsername') ? null  : project.getProperty('sonatypeUsername') ;
+		def password = System.getenv("sonatypePassword") ?: project.hasProperty('sonatypePassword') ? null  : project.getProperty('sonatypePassword') ;
 
-        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
 			authentication(userName: username, password: password)
 		}
 		
@@ -160,39 +160,39 @@ uploadArchives {
 			authentication(userName: username, password: password)
 		}
 
-        // Maven POM generation
-        pom.project {
-            name projectName
-            artifactId archivesBaseName
-            packaging packaging
-            url url
-            description project.ext.description
+		// Maven POM generation
+		pom.project {
+			name projectName
+			artifactId archivesBaseName
+			packaging packaging
+			url url
+			description project.ext.description
 
-            scm {
-                connection 'scm:git:git://github.com/Ordinastie/MalisisCore.git'
-                developerConnection 'scm:git:ssh://git@github.com:Ordinastie/MalisisCore.git'
-                url 'https://github.com/Ordinastie/MalisisCore'
-            }
+			scm {
+				connection 'scm:git:git://github.com/Ordinastie/MalisisCore.git'
+				developerConnection 'scm:git:ssh://git@github.com:Ordinastie/MalisisCore.git'
+				url 'https://github.com/Ordinastie/MalisisCore'
+			}
 
-            licenses {
-                license {
-                    name 'The MIT License'
-                    url 'http://www.tldrlegal.com/license/mit-license'
-                    distribution 'repo'
-                }
-            }
+			licenses {
+				license {
+					name 'The MIT License'
+					url 'http://www.tldrlegal.com/license/mit-license'
+					distribution 'repo'
+				}
+			}
 
-            developers {
-                developer {
-                    id 'Ordinastie'
-                    name 'Ordinastie'
-                }
-            }
+			developers {
+				developer {
+					id 'Ordinastie'
+					name 'Ordinastie'
+				}
+			}
 
-            issueManagement {
-                system 'github'
-                url 'https://github.com/Ordinastie/MalisisCore/issues'
-            }
-        }
-    }
+			issueManagement {
+				system 'github'
+				url 'https://github.com/Ordinastie/MalisisCore/issues'
+			}
+		}
+	}
 }
