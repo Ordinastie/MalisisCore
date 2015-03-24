@@ -393,7 +393,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	 *
 	 * @return the selected option
 	 */
-	public Option getSelectedOption()
+	public Option<T> getSelectedOption()
 	{
 		return selectedOption;
 	}
@@ -516,7 +516,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	 * @param mouseY the mouse y
 	 * @return the option
 	 */
-	protected Option getOptionAt(int mouseX, int mouseY)
+	protected Option<T> getOptionAt(int mouseX, int mouseY)
 	{
 		if (!isInsideBounds(mouseX, mouseY))
 			return null;
