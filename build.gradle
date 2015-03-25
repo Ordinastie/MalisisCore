@@ -149,8 +149,8 @@ uploadArchives {
 	 	// Sign Maven POM
 		beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 	
-		def username = System.getenv("sonatypeUsername") ?: project.hasProperty('sonatypeUsername') ? null  : project.getProperty('sonatypeUsername') ;
-		def password = System.getenv("sonatypePassword") ?: project.hasProperty('sonatypePassword') ? null  : project.getProperty('sonatypePassword') ;
+		def username = project.hasProperty('sonatypeUsername') ? project.getProperty('sonatypeUsername') : System.getenv("sonatypeUsername");
+		def password = project.hasProperty('sonatypePassword') ? project.getProperty('sonatypePassword') : System.getenv("sonatypePassword");
 
 		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
 			authentication(userName: username, password: password)
