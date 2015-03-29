@@ -9,6 +9,7 @@ bin
 build
 dist
 lib
+libs
 out
 run
 target
