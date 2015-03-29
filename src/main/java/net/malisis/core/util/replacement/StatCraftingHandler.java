@@ -22,48 +22,42 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.recipe;
+package net.malisis.core.util.replacement;
 
 import java.lang.reflect.Field;
-import java.util.List;
 
-import net.malisis.core.MalisisCore;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.ShapelessRecipes;
+import net.malisis.core.asm.AsmUtils;
+import net.minecraft.stats.StatCrafting;
 
 /**
  * @author Ordinastie
  *
  */
-public class ShapelessRecipesHandler extends RecipeHandler<ShapelessRecipes>
+public class StatCraftingHandler extends ReplacementHandler<StatCrafting>
 {
-	private Field outputField;
+	private Field itemField;
 
-	public ShapelessRecipesHandler()
+	public StatCraftingHandler()
 	{
-		super(ShapelessRecipes.class);
-		outputField = changeAccess(ShapelessRecipes.class, MalisisCore.isObfEnv ? "field_77580_a" : "recipeOutput");
+		super(StatCrafting.class);
+		itemField = AsmUtils.changeAccess(StatCrafting.class, "field_150960_a");
 	}
 
 	@Override
-	public void replace(ShapelessRecipes recipe, Object vanilla, Object replacement)
+	public boolean replace(StatCrafting stat, Object vanilla, Object replacement)
 	{
 		try
 		{
-			if (isMatched(recipe.getRecipeOutput(), vanilla))
-				outputField.set(recipe, getItemStack(replacement));
-
-			List input = recipe.recipeItems;
-			for (int i = 0; i < input.size(); i++)
+			if (itemField.get(stat) == vanilla)
 			{
-				if (input.get(i) instanceof ItemStack && isMatched((ItemStack) input.get(i), vanilla))
-					input.add(i, getItemStack(replacement));
+				itemField.set(stat, replacement);
+				return true;
 			}
 		}
 		catch (IllegalArgumentException | IllegalAccessException e)
 		{
 			e.printStackTrace();
 		}
+		return false;
 	}
-
 }

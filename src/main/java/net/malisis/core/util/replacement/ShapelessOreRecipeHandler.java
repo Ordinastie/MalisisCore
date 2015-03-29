@@ -22,48 +22,59 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.recipe;
+package net.malisis.core.util.replacement;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
+import net.malisis.core.asm.AsmUtils;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 /**
  * @author Ordinastie
  *
  */
-public class ShapedOreRecipeHandler extends RecipeHandler<ShapedOreRecipe>
+public class ShapelessOreRecipeHandler extends ReplacementHandler<ShapelessOreRecipe>
 {
 	private Field inputField;
 	private Field outputField;
 
-	public ShapedOreRecipeHandler()
+	public ShapelessOreRecipeHandler()
 	{
-		super(ShapedOreRecipe.class);
-		inputField = changeAccess(ShapedOreRecipe.class, "input");
-		outputField = changeAccess(ShapedOreRecipe.class, "output");
+		super(ShapelessOreRecipe.class);
+		inputField = AsmUtils.changeAccess(ShapelessOreRecipe.class, "input");
+		outputField = AsmUtils.changeAccess(ShapelessOreRecipe.class, "output");
 	}
 
 	@Override
-	public void replace(ShapedOreRecipe recipe, Object vanilla, Object replacement)
+	public boolean replace(ShapelessOreRecipe recipe, Object vanilla, Object replacement)
 	{
+		boolean replaced = false;
 		try
 		{
 			if (isMatched(recipe.getRecipeOutput(), vanilla))
-				outputField.set(recipe, getItemStack(replacement));
-
-			Object[] input = (Object[]) inputField.get(recipe);
-
-			for (int i = 0; i < input.length; i++)
 			{
-				if (input[i] instanceof ItemStack && isMatched((ItemStack) input[i], vanilla))
-					input[i] = getItemStack(replacement);
+				outputField.set(recipe, getItemStack(replacement));
+				replaced = true;
+			}
+
+			ArrayList<Object> input = (ArrayList<Object>) inputField.get(recipe);
+			for (int i = 0; i < input.size(); i++)
+			{
+				if (input.get(i) instanceof ItemStack && isMatched((ItemStack) input.get(i), vanilla))
+				{
+					input.add(i, getItemStack(replacement));
+					replaced = true;
+				}
 			}
 		}
 		catch (IllegalArgumentException | IllegalAccessException e)
 		{
 			e.printStackTrace();
 		}
+
+		return replaced;
 	}
+
 }

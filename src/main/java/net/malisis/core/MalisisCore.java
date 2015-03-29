@@ -35,6 +35,7 @@ import net.malisis.core.configuration.Settings;
 import net.malisis.core.network.MalisisNetwork;
 import net.malisis.core.tileentity.MultiBlockTileEntity;
 import net.malisis.core.util.chunkblock.ChunkBlockHandler;
+import net.malisis.core.util.replacement.ReplacementTool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;

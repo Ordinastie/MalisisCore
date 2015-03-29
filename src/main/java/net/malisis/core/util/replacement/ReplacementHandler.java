@@ -22,10 +22,8 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.recipe;
+package net.malisis.core.util.replacement;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 
 import net.minecraft.block.Block;
@@ -33,7 +31,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import cpw.mods.fml.relauncher.ReflectionHelper;
 
 /**
  * The Class RecipeHandler.
@@ -41,41 +38,13 @@ import cpw.mods.fml.relauncher.ReflectionHelper;
  * @author Ordinastie
  * @param <T> the type of {@link IRecipe} handled
  */
-public abstract class RecipeHandler<T extends IRecipe>
+public abstract class ReplacementHandler<T>
 {
-	private static HashMap<Class<? extends IRecipe>, RecipeHandler> handlers = new HashMap();
+	private static HashMap<Class<?>, ReplacementHandler> handlers = new HashMap();
 
-	public RecipeHandler(Class<T> clazz)
+	public ReplacementHandler(Class<T> clazz)
 	{
 		handlers.put(clazz, this);
-	}
-
-	/**
-	 * Changes the access level for the specified field for a class.
-	 *
-	 * @param clazz the clazz
-	 * @param fieldName the field name
-	 * @return the field
-	 */
-	protected Field changeAccess(Class clazz, String fieldName)
-	{
-		try
-		{
-			// modify reference in Blocks class
-			Field f = ReflectionHelper.findField(clazz, fieldName);
-			Field modifiers = Field.class.getDeclaredField("modifiers");
-			modifiers.setAccessible(true);
-			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-
-			return f;
-
-		}
-		catch (ReflectiveOperationException e)
-		{
-			e.printStackTrace();
-		}
-
-		return null;
 	}
 
 	/**
@@ -113,7 +82,7 @@ public abstract class RecipeHandler<T extends IRecipe>
 				&& ((ItemBlock) itemStack.getItem()).blockInstance == replaced;
 	}
 
-	public abstract void replace(T recipe, Object vanilla, Object replacement);
+	public abstract boolean replace(T object, Object vanilla, Object replacement);
 
 	/**
 	 * Gets the handler of a specific {@link IRecipe}.
@@ -121,9 +90,9 @@ public abstract class RecipeHandler<T extends IRecipe>
 	 * @param recipe the recipe
 	 * @return the handler
 	 */
-	public static RecipeHandler getHandler(IRecipe recipe)
+	public static ReplacementHandler getHandler(Object object)
 	{
-		return handlers.get(recipe.getClass());
+		return handlers.get(object.getClass());
 	}
 
 }

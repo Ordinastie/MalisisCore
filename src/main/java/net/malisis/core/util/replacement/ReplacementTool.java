@@ -22,27 +22,24 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core;
+package net.malisis.core.util.replacement;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.ListIterator;
+import java.util.List;
 import java.util.Map.Entry;
 
-import net.malisis.core.recipe.RecipeHandler;
-import net.malisis.core.recipe.ShapedOreRecipeHandler;
-import net.malisis.core.recipe.ShapedRecipesHandler;
-import net.malisis.core.recipe.ShapelessOreRecipeHandler;
-import net.malisis.core.recipe.ShapelessRecipesHandler;
+import net.malisis.core.MalisisCore;
+import net.malisis.core.asm.AsmUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.crafting.CraftingManager;
-import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.stats.StatList;
+import net.minecraft.util.RegistryNamespaced;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
@@ -63,12 +60,17 @@ public class ReplacementTool
 	/** List of original {@link Item} being replaced. The key is the replacement, the value is the Vanilla {@code Item}. */
 	private HashMap<Item, Item> originalItems = new HashMap<>();
 
+	private Class[] types = { Integer.TYPE, String.class, Object.class };
+	private Method method = ReflectionHelper.findMethod(FMLControlledNamespacedRegistry.class, (FMLControlledNamespacedRegistry) null,
+			new String[] { "addObjectRaw" }, types);
+
 	private ReplacementTool()
 	{
 		new ShapedOreRecipeHandler();
 		new ShapedRecipesHandler();
 		new ShapelessRecipesHandler();
 		new ShapelessOreRecipeHandler();
+		new StatCraftingHandler();
 	}
 
 	/**
@@ -103,6 +105,60 @@ public class ReplacementTool
 	}
 
 	/**
+	 * Replaces a vanilla {@link Block} or {@link Item} with a new one.<br>
+	 * Changes the instance inside the registry<br>
+	 * Changes the instance inside recipes<br>
+	 * Changes the instance inside stats<br>
+	 * For blocks, changes the instance inside the corresponding ItemBlock if any.
+	 *
+	 * @param id the id
+	 * @param name the name
+	 * @param srgFieldName the srg field name
+	 * @param replacement the replacement
+	 * @param vanilla the vanilla
+	 */
+	private void replaceVanilla(int id, String name, String srgFieldName, Object replacement, Object vanilla)
+	{
+		boolean block = replacement instanceof Block;
+		RegistryNamespaced registry = block ? Block.blockRegistry : Item.itemRegistry;
+		ItemBlock ib = block ? (ItemBlock) Item.getItemFromBlock((Block) vanilla) : null;
+		Class<?> clazz = block ? Blocks.class : Items.class;
+		HashMap map = block ? originalBlocks : originalItems;
+
+		try
+		{
+			method.invoke(registry, id, "minecraft:" + name, replacement);
+			Field f = AsmUtils.changeAccess(clazz, name, srgFieldName);
+			f.set(null, replacement);
+
+			if (ib != null)
+				AsmUtils.changeAccess(ItemBlock.class, "blockInstance", "field_150939_a").set(ib, replacement);
+
+			map.put(replacement, vanilla);
+			replaceIn(CraftingManager.getInstance().getRecipeList(), vanilla, replacement);
+			replaceIn(StatList.allStats, vanilla, replacement);
+		}
+		catch (ReflectiveOperationException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public void replaceIn(List<?> list, Object vanilla, Object replacement) throws ReflectiveOperationException
+	{
+		for (Object object : list)
+		{
+			ReplacementHandler rh = ReplacementHandler.getHandler(object);
+			if (rh != null)
+			{
+				if (rh.replace(object, vanilla, replacement))
+					MalisisCore.log.info("Replaced {} by {} in {}", vanilla.getClass().getSimpleName(), replacement.getClass()
+							.getSimpleName(), object.getClass().getSimpleName());
+			}
+		}
+	}
+
+	/**
 	 * Replaces vanilla block with another one.<br>
 	 * Changes the registry by removing the vanilla block and adding the replacement.
 	 *
@@ -114,87 +170,21 @@ public class ReplacementTool
 	 */
 	public static void replaceVanillaBlock(int id, String name, String srgFieldName, Block replacement, Block vanilla)
 	{
-		try
-		{
-			ItemBlock ib = (ItemBlock) Item.getItemFromBlock(vanilla);
-
-			// add block to registry
-			Class[] types = { Integer.TYPE, String.class, Object.class };
-			Method method = ReflectionHelper.findMethod(FMLControlledNamespacedRegistry.class, (FMLControlledNamespacedRegistry) null,
-					new String[] { "addObjectRaw" }, types);
-			method.invoke(Block.blockRegistry, id, "minecraft:" + name, replacement);
-
-			// modify reference in Blocks class
-			Field f = ReflectionHelper.findField(Blocks.class, MalisisCore.isObfEnv ? srgFieldName : name);
-			Field modifiers = Field.class.getDeclaredField("modifiers");
-			modifiers.setAccessible(true);
-			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-			f.set(null, replacement);
-
-			if (ib != null)
-			{
-				f = ReflectionHelper.findField(ItemBlock.class, "field_150939_a", "blockInstance");
-				modifiers = Field.class.getDeclaredField("modifiers");
-				modifiers.setAccessible(true);
-				modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-				f.set(ib, replacement);
-			}
-
-			instance().originalBlocks.put(replacement, vanilla);
-
-			instance().replaceInRecipes(vanilla, replacement);
-
-		}
-		catch (ReflectiveOperationException e)
-		{
-			e.printStackTrace();
-		}
+		instance().replaceVanilla(id, name, srgFieldName, replacement, vanilla);
 	}
 
+	/**
+	 * Replace vanilla item.
+	 *
+	 * @param id the id
+	 * @param name the name
+	 * @param srgFieldName the srg field name
+	 * @param replacement the replacement
+	 * @param vanilla the vanilla
+	 */
 	public static void replaceVanillaItem(int id, String name, String srgFieldName, Item replacement, Item vanilla)
 	{
-		try
-		{
-			// add block to registry
-			Class[] types = { Integer.TYPE, String.class, Object.class };
-			Method method = ReflectionHelper.findMethod(FMLControlledNamespacedRegistry.class, (FMLControlledNamespacedRegistry) null,
-					new String[] { "addObjectRaw" }, types);
-			method.invoke(Item.itemRegistry, id, "minecraft:" + name, replacement);
-
-			// modify reference in Item class
-			Field f = ReflectionHelper.findField(Items.class, MalisisCore.isObfEnv ? srgFieldName : name);
-			Field modifiers = Field.class.getDeclaredField("modifiers");
-			modifiers.setAccessible(true);
-			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-			f.set(null, replacement);
-
-			instance().originalItems.put(replacement, vanilla);
-
-			instance().replaceInRecipes(vanilla, replacement);
-
-		}
-		catch (ReflectiveOperationException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	public void replaceInRecipes(Object vanilla, Object replacement) throws ReflectiveOperationException
-	{
-		if (!(vanilla instanceof Item || vanilla instanceof Block))
-			return;
-		if (!(replacement instanceof Item || replacement instanceof Block))
-			return;
-
-		ListIterator<IRecipe> iterator = CraftingManager.getInstance().getRecipeList().listIterator();
-		while (iterator.hasNext())
-		{
-			IRecipe recipe = iterator.next();
-			RecipeHandler rh = RecipeHandler.getHandler(recipe);
-			if (rh != null)
-				rh.replace(recipe, vanilla, replacement);
-
-		}
+		instance().replaceVanilla(id, name, srgFieldName, replacement, vanilla);
 	}
 
 	/**
