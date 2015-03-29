@@ -281,8 +281,8 @@ public class RaytraceWorld
 		if (firstHit == null && dest != null)
 			firstHit = new MovingObjectPosition(currentX, currentY, currentZ, -1, dest.toVec3(), false);
 
-		ChunkCollision.setRayTraceInfos(world, src, dest);
-		firstHit = ChunkCollision.getRayTraceResult(world, mop);
+		ChunkCollision.get().setRayTraceInfos(src, dest);
+		firstHit = ChunkCollision.get().getRayTraceResult(world, mop);
 
 		if (!ret)
 			MalisisCore.message("Trace fail : " + MAX_BLOCKS + " blocks passed (" + currentX + "," + currentY + "," + currentZ + ")");
@@ -337,7 +337,7 @@ public class RaytraceWorld
 			return null;
 		if (!block.canStopRayTrace(metadata, hasOption(Options.HIT_LIQUIDS)))
 			return null;
-		return RaytraceBlock.set(src, exit, x, y, z).trace();
+		return RaytraceBlock.set(world, src, exit, x, y, z).trace();
 	}
 
 	/**

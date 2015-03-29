@@ -61,7 +61,9 @@ public class MalisisBlock extends Block
 		this.name = name;
 		if (textureName == null)
 			textureName = name;
-		return super.setTextureName(name);
+		super.setTextureName(name);
+		super.setUnlocalizedName(name);
+		return this;
 	}
 
 	public String getName()
@@ -97,7 +99,7 @@ public class MalisisBlock extends Block
 	@Override
 	public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 src, Vec3 dest)
 	{
-		return RaytraceBlock.set(src, dest, x, y, z).trace();
+		return RaytraceBlock.set(world, src, dest, x, y, z).trace();
 	}
 
 	@Override

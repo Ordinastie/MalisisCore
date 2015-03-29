@@ -24,6 +24,7 @@
 
 package net.malisis.core.util;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +32,6 @@ import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.util.chunkcollision.IChunkCollidable;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -48,7 +48,8 @@ public class RaytraceBlock
 {
 	/** Unique instance of {@link RaytraceBlock}. */
 	private static RaytraceBlock instance = new RaytraceBlock();
-
+	/** World reference **/
+	private WeakReference<World> world;
 	/** X coordinate of the block being ray traced. */
 	private int x;
 	/** Y coordinate of the block being ray traced. */
@@ -80,8 +81,9 @@ public class RaytraceBlock
 	 * @param y the y
 	 * @param z the z
 	 */
-	private void _set(Ray ray, int x, int y, int z)
+	private void _set(World world, Ray ray, int x, int y, int z)
 	{
+		this.world = new WeakReference<World>(world);
 		this.src = ray.origin;
 		this.ray = ray;
 		this.x = x;
@@ -99,9 +101,9 @@ public class RaytraceBlock
 	 * @param z the z coordinate of the block
 	 * @return the {@link RaytraceBlock} instance
 	 */
-	public static RaytraceBlock set(Ray ray, int x, int y, int z)
+	public static RaytraceBlock set(World world, Ray ray, int x, int y, int z)
 	{
-		instance._set(ray, x, y, z);
+		instance._set(world, ray, x, y, z);
 		return instance;
 	}
 
@@ -115,9 +117,9 @@ public class RaytraceBlock
 	 * @param z the z coordinate of the block
 	 * @return the {@link RaytraceBlock} instance
 	 */
-	public static RaytraceBlock set(Point src, Vector v, int x, int y, int z)
+	public static RaytraceBlock set(World world, Point src, Vector v, int x, int y, int z)
 	{
-		instance._set(new Ray(src, v), x, y, z);
+		instance._set(world, new Ray(src, v), x, y, z);
 		return instance;
 	}
 
@@ -131,10 +133,10 @@ public class RaytraceBlock
 	 * @param z the z coordinate of the block
 	 * @return the {@link RaytraceBlock} instance
 	 */
-	public static RaytraceBlock set(Point src, Point dest, int x, int y, int z)
+	public static RaytraceBlock set(World world, Point src, Point dest, int x, int y, int z)
 	{
 		instance.dest = dest;
-		instance._set(new Ray(src, new Vector(src, dest)), x, y, z);
+		instance._set(world, new Ray(src, new Vector(src, dest)), x, y, z);
 		return instance;
 	}
 
@@ -148,16 +150,16 @@ public class RaytraceBlock
 	 * @param z the z coordinate of the block
 	 * @return the {@link RaytraceBlock} instance
 	 */
-	public static RaytraceBlock set(Vec3 src, Vec3 dest, int x, int y, int z)
+	public static RaytraceBlock set(World world, Vec3 src, Vec3 dest, int x, int y, int z)
 	{
 		instance.dest = new Point(dest);
-		instance._set(new Ray(src, dest), x, y, z);
+		instance._set(world, new Ray(src, dest), x, y, z);
 		return instance;
 	}
 
 	public World world()
 	{
-		return Minecraft.getMinecraft().theWorld;
+		return world.get();
 	}
 
 	/**
