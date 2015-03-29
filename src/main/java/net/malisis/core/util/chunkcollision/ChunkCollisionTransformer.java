@@ -33,7 +33,6 @@ import net.malisis.core.asm.mappings.McpMethodMapping;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -50,7 +49,6 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 	public void registerHooks()
 	{
 		register(getBoundingBoxesHook());
-		register(updateCoordsHook());
 		register(rayTraceHook());
 		register(placeBlockHook());
 	}
@@ -72,12 +70,14 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		//GETFIELD net/minecraft/world/World.collidingBoundingBoxes : Ljava/util/ArrayList;
 		//ALOAD 1 param1 (entity)
 		InsnList insert = new InsnList();
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "get",
+				"()Lnet/malisis/core/util/chunkcollision/ChunkCollision;"));
 		insert.add(new VarInsnNode(ALOAD, 0));
 		insert.add(new VarInsnNode(ALOAD, 2));
 		insert.add(new VarInsnNode(ALOAD, 0));
 		insert.add(collidingBoundingBoxes.getInsnNode(GETFIELD));
 		insert.add(new VarInsnNode(ALOAD, 1));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "getCollisionBoundingBoxes",
+		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "getCollisionBoundingBoxes",
 				"(Lnet/minecraft/world/World;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;)V"));
 
 		//LDC 0.25
@@ -92,49 +92,6 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 	}
 
 	@SuppressWarnings("deprecation")
-	private AsmHook updateCoordsHook()
-	{
-		McpMethodMapping func_150807_a = new McpMethodMapping("setBlockIDWithMetadata", "func_150807_a", "net.minecraft.world.chunk.Chunk",
-				"(IIILnet/minecraft/block/Block;I)Z");
-		McpMethodMapping setExtBlockMetadata = new McpMethodMapping("setExtBlockMetadata", "func_76654_b",
-				"net.minecraft.world.chunk.storage.ExtendedBlockStorage", "(IIII)V");
-
-		AsmHook ah = new AsmHook(func_150807_a);
-
-		//		  ALOAD 10
-		//		    ILOAD 1
-		//		    ILOAD 2
-		//		    BIPUSH 15
-		//		    IAND
-		//		    ILOAD 3
-		//		    ILOAD 5
-		//		    INVOKEVIRTUAL net/minecraft/world/chunk/storage/ExtendedBlockStorage.setExtBlockMetadata (IIII)V
-		InsnList match = new InsnList();
-		match.add(new VarInsnNode(ALOAD, 10));
-		match.add(new VarInsnNode(ILOAD, 1));
-		match.add(new VarInsnNode(ILOAD, 2));
-		match.add(new IntInsnNode(BIPUSH, 15));
-		match.add(new InsnNode(IAND));
-		match.add(new VarInsnNode(ILOAD, 3));
-		match.add(new VarInsnNode(ILOAD, 5));
-		match.add(setExtBlockMetadata.getInsnNode(INVOKEVIRTUAL));
-
-		InsnList insert = new InsnList();
-		insert.add(new VarInsnNode(ALOAD, 0));
-		insert.add(new VarInsnNode(ILOAD, 12));
-		insert.add(new VarInsnNode(ILOAD, 2));
-		insert.add(new VarInsnNode(ILOAD, 13));
-		insert.add(new VarInsnNode(ALOAD, 8));
-		insert.add(new VarInsnNode(ALOAD, 4));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "updateCollisionCoordinates",
-				"(Lnet/minecraft/world/chunk/Chunk;IIILnet/minecraft/block/Block;Lnet/minecraft/block/Block;)V"));
-
-		ah.jumpAfter(match).jumpAfter(match).insert(insert);
-
-		return ah;
-	}
-
-	@SuppressWarnings("deprecation")
 	private AsmHook rayTraceHook()
 	{
 		McpMethodMapping func_147447_a = new McpMethodMapping("rayTraceBlocks", "func_147447_a", "net.minecraft.world.World",
@@ -144,11 +101,12 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 
 		//setRayTraceInfos(Lnet/minecraft/world/World;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)V
 		InsnList setRayTraceInfos = new InsnList();
-		setRayTraceInfos.add(new VarInsnNode(ALOAD, 0));
+		setRayTraceInfos.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "get",
+				"()Lnet/malisis/core/util/chunkcollision/ChunkCollision;"));
 		setRayTraceInfos.add(new VarInsnNode(ALOAD, 1));
 		setRayTraceInfos.add(new VarInsnNode(ALOAD, 2));
-		setRayTraceInfos.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "setRayTraceInfos",
-				"(Lnet/minecraft/world/World;Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)V"));
+		setRayTraceInfos.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "setRayTraceInfos",
+				"(Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)V"));
 
 		//L1195 return movingobjectposition;
 		//ALOAD 14
@@ -160,9 +118,11 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		//Before L1195
 		//getRayTraceResult(World world, MovingObjectPosition mop, Vec3 src, Vec3 dest)
 		InsnList insertMop = new InsnList();
+		insertMop.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "get",
+				"()Lnet/malisis/core/util/chunkcollision/ChunkCollision;"));
 		insertMop.add(new VarInsnNode(ALOAD, 0));
 		insertMop.add(new VarInsnNode(ALOAD, 14));
-		insertMop.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "getRayTraceResult",
+		insertMop.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "getRayTraceResult",
 				"(Lnet/minecraft/world/World;Lnet/minecraft/util/MovingObjectPosition;)Lnet/minecraft/util/MovingObjectPosition;"));
 		insertMop.add(new VarInsnNode(ASTORE, 14));
 
@@ -192,9 +152,11 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		//Before L1367
 		//getRayTraceResult(World world, MovingObjectPosition mop, Vec3 src, Vec3 dest)
 		InsnList insertMop1 = new InsnList();
+		insertMop1.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "get",
+				"()Lnet/malisis/core/util/chunkcollision/ChunkCollision;"));
 		insertMop1.add(new VarInsnNode(ALOAD, 0));
 		insertMop1.add(new VarInsnNode(ALOAD, 41));
-		insertMop1.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "getRayTraceResult",
+		insertMop1.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "getRayTraceResult",
 				"(Lnet/minecraft/world/World;Lnet/minecraft/util/MovingObjectPosition;)Lnet/minecraft/util/MovingObjectPosition;"));
 		insertMop1.add(new VarInsnNode(ASTORE, 41));
 
@@ -220,13 +182,29 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 	@SuppressWarnings("deprecation")
 	private AsmHook placeBlockHook()
 	{
-		McpMethodMapping canPlaceEntityOnSide = new McpMethodMapping("canPlaceEntityOnSide", "func_147472_a", "net.minecraft.world.World",
-				"(Lnet/minecraft/block/Block;IIIZILnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)Z");
+		McpMethodMapping canPlaceEntityOnSide = new McpMethodMapping("onItemUse", "func_77648_a", "net/minecraft/item/ItemBlock",
+				"(Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;IIIIFFF)Z");
+
+		McpMethodMapping getItemStackMetadata = new McpMethodMapping("getMetadata", "func_77960_j", "net/minecraft/item/ItemStack", "()I");
+		McpMethodMapping getItemMetadata = new McpMethodMapping("getMetadata", "func_77647_b", "net/minecraft/item/ItemBlock", "(I)I");
+		McpFieldMapping blockInstance = new McpFieldMapping("blockInstance", "field_150939_a", "net/minecraft/item/ItemBlock",
+				"Lnet/minecraft/block/Block;");
 
 		AsmHook ah = new AsmHook(canPlaceEntityOnSide);
 
-		//if(canPlaceBlockAt(Lnet/minecraft/world/World;Lnet/minecraft/block/Block;IIILnet/minecraft/util/AxisAlignedBB;)Z)
-		//	return false;
+		//		int i1 = this.getMetadata(p_77648_1_.getMetadata());
+		//	    ALOAD 0
+		//	    ALOAD 1
+		//	    INVOKEVIRTUAL net/minecraft/item/ItemStack.getMetadata ()I
+		//	    INVOKEVIRTUAL net/minecraft/item/ItemBlock.getMetadata (I)I
+		InsnList match = new InsnList();
+		match.add(new VarInsnNode(ALOAD, 0));
+		match.add(new VarInsnNode(ALOAD, 1));
+		match.add(getItemStackMetadata.getInsnNode(INVOKEVIRTUAL));
+		match.add(getItemMetadata.getInsnNode(INVOKEVIRTUAL));
+
+		//		if (!ChunkCollision.get().canPlaceBlockAt(itemStack, player, world, block, x, y, z, side))
+		//			return null;
 		//		 IFNE L1
 		//		   L2
 		//		    LINENUMBER 412 L2
@@ -235,19 +213,25 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		//		   L1
 		InsnList insert = new InsnList();
 		LabelNode label = new LabelNode();
-		insert.add(new VarInsnNode(ALOAD, 0));
-		insert.add(new VarInsnNode(ALOAD, 1));
-		insert.add(new VarInsnNode(ILOAD, 2));
-		insert.add(new VarInsnNode(ILOAD, 3));
-		insert.add(new VarInsnNode(ILOAD, 4));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "canPlaceBlockAt",
-				"(Lnet/minecraft/world/World;Lnet/minecraft/block/Block;III)Z"));
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "get",
+				"()Lnet/malisis/core/util/chunkcollision/ChunkCollision;"));
+		insert.add(new VarInsnNode(ALOAD, 1)); //itemStack,
+		insert.add(new VarInsnNode(ALOAD, 2)); //player,
+		insert.add(new VarInsnNode(ALOAD, 3)); //world,
+		insert.add(new VarInsnNode(ALOAD, 0)); //this.
+		insert.add(blockInstance.getInsnNode(GETFIELD)); //blockInstance
+		insert.add(new VarInsnNode(ILOAD, 4)); //x,
+		insert.add(new VarInsnNode(ILOAD, 5)); //y,
+		insert.add(new VarInsnNode(ILOAD, 6)); //z,
+		insert.add(new VarInsnNode(ILOAD, 7)); //side,
+		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "canPlaceBlockAt",
+				"(Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/block/Block;IIII)Z"));
 		insert.add(new JumpInsnNode(IFNE, label));
 		insert.add(new InsnNode(ICONST_0));
 		insert.add(new InsnNode(IRETURN));
 		insert.add(label);
 
-		ah.insert(insert);
+		ah.jumpTo(match).insert(insert).debug();
 
 		return ah;
 	}
