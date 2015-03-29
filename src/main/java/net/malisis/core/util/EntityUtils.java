@@ -111,6 +111,9 @@ public class EntityUtils
 	 */
 	public static ForgeDirection getEntityFacing(Entity entity, boolean sixWays)
 	{
+		if (entity == null)
+			return ForgeDirection.UNKNOWN;
+
 		float pitch = entity.rotationPitch;
 		if (sixWays && pitch < -45)
 			return ForgeDirection.UP;
