@@ -24,15 +24,12 @@
 
 package net.malisis.core.util;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import net.malisis.core.block.BoundingBoxType;
+import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.util.chunkcollision.IChunkCollidable;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 
 /**
@@ -81,6 +78,13 @@ public class AABBUtils
 			tmp = aabb.minX;
 			aabb.minX = aabb.maxX;
 			aabb.maxX = tmp;
+		}
+
+		if (aabb.minY > aabb.maxY)
+		{
+			tmp = aabb.minY;
+			aabb.minY = aabb.maxY;
+			aabb.maxY = tmp;
 		}
 
 		if (aabb.minZ > aabb.maxZ)
@@ -152,36 +156,6 @@ public class AABBUtils
 	}
 
 	/**
-	 * Gets the {@link ChunkPosition} overlapping {@link AxisAlignedBB}s.
-	 *
-	 * @param aabbs the aabbs
-	 * @return the overlapping blocks
-	 */
-	public static Set<ChunkPosition> getCollidingPositions(AxisAlignedBB... aabbs)
-	{
-		Set<ChunkPosition> blocks = new HashSet<>();
-		for (AxisAlignedBB aabb : aabbs)
-		{
-			if (aabb == null)
-				continue;
-
-			int minX = (int) Math.floor(aabb.minX);
-			int maxX = (int) Math.ceil(aabb.maxX);
-			int minY = (int) Math.floor(aabb.minY);
-			int maxY = (int) Math.ceil(aabb.maxY);
-			int minZ = (int) Math.floor(aabb.minZ);
-			int maxZ = (int) Math.ceil(aabb.maxZ);
-
-			for (int x = minX; x < maxX; x++)
-				for (int y = minY; y < maxY; y++)
-					for (int z = minZ; z < maxZ; z++)
-						blocks.add(new ChunkPosition(x, y, z));
-		}
-
-		return blocks;
-	}
-
-	/**
 	 * Checks if a group of {@link AxisAlignedBB} is colliding with another one.
 	 *
 	 * @param aabbs1 the aabbs1
@@ -203,16 +177,76 @@ public class AABBUtils
 		return false;
 	}
 
-	public static AxisAlignedBB[] getCollisionBoundingBoxes(Block block, World world, int x, int y, int z)
+	/**
+	 * Gets the collision bounding boxes.
+	 *
+	 * @param world the world
+	 * @param block the block
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @return the collision bounding boxes
+	 */
+	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, Block block, int x, int y, int z)
 	{
-		if (block instanceof IChunkCollidable)
-			return ((IChunkCollidable) block).getBoundingBox(world, x, y, z, BoundingBoxType.CHUNKCOLLISION);
+		return getCollisionBoundingBoxes(world, new BlockState(x, y, z, block), false);
+	}
 
-		AxisAlignedBB aabb = block.getCollisionBoundingBoxFromPool(world, x, y, z);
-		if (aabb == null)
-			return new AxisAlignedBB[0];
-		aabb.offset(-x, -y, -z);
-		return new AxisAlignedBB[] { aabb };
+	/**
+	 * Gets the collision bounding boxes for the block.
+	 *
+	 * @param world the world
+	 * @param block the block
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param offset if true, the boxes are offset by the coordinate
+	 * @return the collision bounding boxes
+	 */
+	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, Block block, int x, int y, int z, boolean offset)
+	{
+		return getCollisionBoundingBoxes(world, new BlockState(x, y, z, block), offset);
+	}
+
+	/**
+	 * Gets the collision bounding boxes.
+	 *
+	 * @param world the world
+	 * @param state the state
+	 * @return the collision bounding boxes
+	 */
+	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, BlockState state)
+	{
+		return getCollisionBoundingBoxes(world, state, false);
+	}
+
+	/**
+	 * Gets the collision bounding boxes for the state.
+	 *
+	 * @param world the world
+	 * @param state the state
+	 * @return the collision bounding boxes
+	 */
+	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, BlockState state, boolean offset)
+	{
+		AxisAlignedBB[] aabbs = new AxisAlignedBB[0];
+		if (state.getBlock() instanceof IChunkCollidable)
+			aabbs = ((IChunkCollidable) state.getBlock()).getBoundingBox(world, state.getX(), state.getY(), state.getZ(),
+					BoundingBoxType.CHUNKCOLLISION);
+		else if (state.getBlock() instanceof MalisisBlock)
+			aabbs = ((MalisisBlock) state.getBlock()).getBoundingBox(world, state.getX(), state.getY(), state.getZ(),
+					BoundingBoxType.CHUNKCOLLISION);
+		else
+		{
+			AxisAlignedBB aabb = state.getBlock().getCollisionBoundingBoxFromPool(world, state.getX(), state.getY(), state.getZ());
+			if (aabb != null)
+				aabbs = new AxisAlignedBB[] { aabb.offset(-state.getX(), -state.getY(), -state.getZ()) };
+		}
+
+		if (offset)
+			AABBUtils.offset(state.getX(), state.getY(), state.getZ(), aabbs);
+
+		return aabbs;
 	}
 
 }
