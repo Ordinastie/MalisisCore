@@ -282,7 +282,7 @@ public class RaytraceWorld
 			firstHit = new MovingObjectPosition(currentX, currentY, currentZ, -1, dest.toVec3(), false);
 
 		ChunkCollision.get().setRayTraceInfos(src, dest);
-		firstHit = ChunkCollision.get().getRayTraceResult(world, mop);
+		firstHit = ChunkCollision.get().getRayTraceResult(world, firstHit);
 
 		if (!ret)
 			MalisisCore.message("Trace fail : " + MAX_BLOCKS + " blocks passed (" + currentX + "," + currentY + "," + currentZ + ")");
