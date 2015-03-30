@@ -173,7 +173,7 @@ public class ChunkBlockHandler
 	private void removeCoord(Chunk chunk, BlockPos pos)
 	{
 		if (!getCoords(chunk).remove(pos.toLong()))
-			MalisisCore.message("Failed to remove : %s (%s)", pos, pos.toLong());
+			MalisisCore.log.error("Failed to remove : {} ({})", pos, pos.toLong());
 		//else
 		//	MalisisCore.message("Removed " + pos + " from " + chunk.xPosition + ", " + chunk.zPosition);
 	}
