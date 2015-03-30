@@ -25,10 +25,20 @@
 package net.malisis.core.util.chunkblock;
 
 /**
- * @author Ordinastie
+ * The IChunkBlock defines a block that will be store in chunks data directly.
  *
+ * @author Ordinastie
  */
 public interface IChunkBlock
 {
+
+	/**
+	 * Gets the block range.<br>
+	 * Defines the distance for which the block will store itself into chunk data.<br>
+	 *
+	 * @param world the world
+	 * @param pos the pos
+	 * @return the int
+	 */
 	public int blockRange();
 }
