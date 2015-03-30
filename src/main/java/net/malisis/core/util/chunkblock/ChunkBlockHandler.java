@@ -37,7 +37,6 @@ import java.util.WeakHashMap;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.util.BlockPos;
 import net.malisis.core.util.BlockState;
-import net.malisis.core.util.chunkcollision.ChunkCollision;
 import net.malisis.core.util.chunkcollision.IChunkCollidable;
 import net.malisis.core.util.chunklistener.ChunkListener;
 import net.malisis.core.util.chunklistener.IBlockListener;
@@ -69,7 +68,6 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	public ChunkBlockHandler()
 	{
 		handlers.add(new ChunkListener());
-		handlers.add(ChunkCollision.get());
 	}
 
 	private TLongHashSet getCoords(Chunk chunk)
