@@ -46,6 +46,8 @@ import net.minecraftforge.common.util.ForgeDirection;
  */
 public class EntityUtils
 {
+	private static ForgeDirection[] facings = new ForgeDirection[] { ForgeDirection.SOUTH, ForgeDirection.WEST, ForgeDirection.NORTH,
+			ForgeDirection.EAST, ForgeDirection.UP, ForgeDirection.DOWN, ForgeDirection.UNKNOWN };
 
 	/**
 	 * Eject a new item corresponding to the {@link ItemStack}.
@@ -111,18 +113,21 @@ public class EntityUtils
 	 */
 	public static ForgeDirection getEntityFacing(Entity entity, boolean sixWays)
 	{
+		return facings[getEntityFacingInt(entity, sixWays)];
+	}
+
+	public static int getEntityFacingInt(Entity entity, boolean sixWays)
+	{
 		if (entity == null)
-			return ForgeDirection.UNKNOWN;
+			return 6;
 
 		float pitch = entity.rotationPitch;
 		if (sixWays && pitch < -45)
-			return ForgeDirection.UP;
+			return 5;
 		if (sixWays && pitch > 45)
-			return ForgeDirection.DOWN;
+			return 4;
 
-		int facing = MathHelper.floor_double(entity.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
-		ForgeDirection[] dirs = new ForgeDirection[] { ForgeDirection.SOUTH, ForgeDirection.WEST, ForgeDirection.NORTH, ForgeDirection.EAST };
-		return dirs[facing];
+		return MathHelper.floor_double(entity.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
 	}
 
 	public static boolean isEquipped(EntityPlayer player, Item item)
