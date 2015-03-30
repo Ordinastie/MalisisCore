@@ -26,7 +26,6 @@ package net.malisis.core.util.chunkcollision;
 
 import java.util.List;
 
-import net.malisis.core.MalisisCore;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.BlockPos;
@@ -316,10 +315,7 @@ public class ChunkCollision
 				if (removeCollision)
 					world.setBlockToAir(state.getX(), state.getY(), state.getZ());
 				else
-				{
-					MalisisCore.message("Collision : " + state);
 					return false;
-				}
 			}
 
 			return true;
