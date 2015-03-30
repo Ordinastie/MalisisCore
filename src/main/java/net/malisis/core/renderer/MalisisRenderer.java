@@ -720,8 +720,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void renderDestroyProgress()
 	{
-		overrideTexture = damagedIcons[destroyBlockProgress.getPartialBlockDamage()];
-		enableBlending();
+		if (destroyBlockProgress != null)
+			overrideTexture = damagedIcons[destroyBlockProgress.getPartialBlockDamage()];
+		//	enableBlending();
 		render();
 	}
 
