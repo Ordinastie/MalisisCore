@@ -29,6 +29,7 @@ import java.util.List;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.BlockPos;
+import net.malisis.core.util.BlockState;
 import net.malisis.core.util.Point;
 import net.malisis.core.util.RaytraceBlock;
 import net.malisis.core.util.chunkblock.ChunkBlockHandler;
@@ -187,11 +188,16 @@ public class ChunkCollision
 		for (AxisAlignedBB aabb : aabbs)
 			for (BlockPos pos : BlockPos.getAllInBox(aabb))
 			{
-				if (!world.getBlock(pos.getX(), pos.getY(), pos.getZ()).isReplaceable(world, pos.getX(), pos.getY(), pos.getZ()))
+				boolean b = false;
+				b |= !world.getBlock(pos.getX(), pos.getY(), pos.getZ()).isReplaceable(world, pos.getX(), pos.getY(), pos.getZ());
+				b &= AABBUtils.isColliding(aabb, AABBUtils.getCollisionBoundingBoxes(world, new BlockState(world, pos), true));
+
+				if (b)
 					return false;
+
 			}
 
-		CheckCollisionProcedure procedure = new CheckCollisionProcedure(aabbs, false);
+		CheckCollisionProcedure procedure = new CheckCollisionProcedure(aabbs);
 		for (Chunk chunk : ChunkBlockHandler.getAffectedChunks(world, aabbs))
 			ChunkBlockHandler.get().callProcedure(chunk, procedure);
 
@@ -292,12 +298,10 @@ public class ChunkCollision
 	{
 		private AxisAlignedBB[] aabbs;
 		private boolean collide = false;
-		private boolean removeCollision;
 
-		public CheckCollisionProcedure(AxisAlignedBB[] aabbs, boolean removeCollision)
+		public CheckCollisionProcedure(AxisAlignedBB[] aabbs)
 		{
 			this.aabbs = aabbs;
-			this.removeCollision = removeCollision;
 		}
 
 		@Override
@@ -311,13 +315,7 @@ public class ChunkCollision
 
 			collide = AABBUtils.isColliding(aabbs, blockBounds);
 			if (collide)
-			{
-				if (removeCollision)
-					world.setBlockToAir(state.getX(), state.getY(), state.getZ());
-				else
-					return false;
-			}
-
+				return false;
 			return true;
 		}
 
