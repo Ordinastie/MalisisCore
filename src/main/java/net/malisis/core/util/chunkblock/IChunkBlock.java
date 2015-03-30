@@ -36,8 +36,6 @@ public interface IChunkBlock
 	 * Gets the block range.<br>
 	 * Defines the distance for which the block will store itself into chunk data.<br>
 	 *
-	 * @param world the world
-	 * @param pos the pos
 	 * @return the int
 	 */
 	public int blockRange();

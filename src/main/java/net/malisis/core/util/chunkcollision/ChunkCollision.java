@@ -84,7 +84,6 @@ public class ChunkCollision
 	 * Sets the ray trace infos.<br>
 	 * Called via ASM at the beginning of {@link World#rayTraceBlocks(Vec3, Vec3, boolean, boolean, boolean)}
 	 *
-	 * @param world the world
 	 * @param src the src
 	 * @param dest the dest
 	 */

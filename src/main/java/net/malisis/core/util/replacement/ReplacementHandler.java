@@ -87,7 +87,7 @@ public abstract class ReplacementHandler<T>
 	/**
 	 * Gets the handler of a specific {@link IRecipe}.
 	 *
-	 * @param recipe the recipe
+	 * @param object the object
 	 * @return the handler
 	 */
 	public static ReplacementHandler getHandler(Object object)
