@@ -31,6 +31,7 @@ import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * @author Ordinastie
@@ -38,6 +39,50 @@ import net.minecraft.world.World;
  */
 public class AABBUtils
 {
+	public static AxisAlignedBB identity()
+	{
+		return AxisAlignedBB.getBoundingBox(0, 0, 0, 1, 1, 1);
+	}
+
+	public static AxisAlignedBB[] identities()
+	{
+		return new AxisAlignedBB[] { identity() };
+	}
+
+	private static int getAngle(ForgeDirection dir)
+	{
+		switch (dir)
+		{
+			case EAST:
+				return 1;
+			case SOUTH:
+				return 2;
+			case WEST:
+				return 3;
+			case NORTH:
+			default:
+				return 0;
+		}
+	}
+
+	/**
+	 * Rotate the {@link AxisAlignedBB} based on the specified direction.<br>
+	 * Assumes {@link ForgeDirection#NORTH} to be the default non rotated direction.<br>
+	 *
+	 *
+	 * @param aabb the aabb
+	 * @param dir the dir
+	 * @return the axis aligned bb
+	 */
+	public static AxisAlignedBB rotate(AxisAlignedBB aabb, ForgeDirection dir)
+	{
+		return rotate(aabb, getAngle(dir));
+	}
+
+	public static AxisAlignedBB[] rotate(AxisAlignedBB[] aabbs, ForgeDirection dir)
+	{
+		return rotate(aabbs, getAngle(dir));
+	}
 
 	public static AxisAlignedBB[] rotate(AxisAlignedBB[] aabbs, int angle)
 	{
