@@ -22,10 +22,11 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.util.chunkblock;
+package net.malisis.core.util.chunklistener;
 
 import net.malisis.core.util.BlockPos;
 import net.malisis.core.util.BlockState;
+import net.malisis.core.util.chunkblock.IChunkBlock;
 import net.minecraft.world.World;
 
 /**

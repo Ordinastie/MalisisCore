@@ -37,10 +37,12 @@ import java.util.WeakHashMap;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.util.BlockPos;
 import net.malisis.core.util.BlockState;
+import net.malisis.core.util.chunkcollision.ChunkCollision;
 import net.malisis.core.util.chunkcollision.IChunkCollidable;
+import net.malisis.core.util.chunklistener.ChunkListener;
+import net.malisis.core.util.chunklistener.IBlockListener;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
@@ -56,13 +58,19 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
  * @author Ordinastie
  *
  */
-public class ChunkBlockHandler
+public class ChunkBlockHandler implements IChunkBlockHandler
 {
 	private static ChunkBlockHandler instance = new ChunkBlockHandler();
 
-	private static Map<Chunk, TLongHashSet> serverChunks = new WeakHashMap();
-	private static Map<Chunk, TLongHashSet> clientChunks = new WeakHashMap();
-	private static BlockNotifierProcedure blockNotifierProcedure = new BlockNotifierProcedure();
+	private Map<Chunk, TLongHashSet> serverChunks = new WeakHashMap();
+	private Map<Chunk, TLongHashSet> clientChunks = new WeakHashMap();
+	private List<IChunkBlockHandler> handlers = new ArrayList();
+
+	public ChunkBlockHandler()
+	{
+		handlers.add(new ChunkListener());
+		handlers.add(ChunkCollision.get());
+	}
 
 	private TLongHashSet getCoords(Chunk chunk)
 	{
@@ -90,12 +98,16 @@ public class ChunkBlockHandler
 			coords.forEach(procedure);
 	}
 
+	public void addHandler(IChunkBlockHandler handler)
+	{
+		handlers.add(handler);
+	}
+
 	//#region updateCoordinates
 	/**
 	 * Update chunk coordinates.<br>
 	 * Called via ASM from {@link Chunk#setBlockIDWithMetadata(int, int, int, Block, int)} Notifies all {@link IBlockListener} for that
 	 * chunk.<br>
-	 * If no listener cancel the block placement,
 	 *
 	 * @param chunk the chunk
 	 * @param x the x
@@ -103,19 +115,26 @@ public class ChunkBlockHandler
 	 * @param z the z
 	 * @param old the old
 	 * @param block the block
+	 * @return true, if block can be placed, false if canceled
 	 */
 	public boolean updateCoordinates(Chunk chunk, int x, int y, int z, Block old, Block block)
 	{
+		boolean canceled = false;
 		BlockPos pos = new BlockPos(x, y, z);
-		blockNotifierProcedure.newState = new BlockState(pos, block);
+		for (IChunkBlockHandler handler : handlers)
+			canceled |= handler.updateCoordinates(chunk, pos, old, block);
 
-		callProcedure(chunk, blockNotifierProcedure);
-		boolean cancel = blockNotifierProcedure.cancel;
-		blockNotifierProcedure.clean();
+		//*this* handler needs to be canceled, so it's called last
+		if (!canceled)
+			updateCoordinates(chunk, pos, old, block);
 
-		if (cancel)
-			return false;
+		return !canceled;
 
+	}
+
+	@Override
+	public boolean updateCoordinates(Chunk chunk, BlockPos pos, Block old, Block block)
+	{
 		if (old instanceof IChunkBlock)
 			removeCoord(chunk.worldObj, pos, ((IChunkBlock) old).blockRange());
 		if (block instanceof IChunkBlock)
@@ -355,41 +374,4 @@ public class ChunkBlockHandler
 		}
 	}
 
-	private static class BlockNotifierProcedure extends ChunkProcedure
-	{
-		boolean cancel = false;
-		BlockState newState;
-
-		@Override
-		public boolean execute(long coord)
-		{
-			if (!check(coord))
-				return true;
-
-			if (!(state.getBlock() instanceof IBlockListener))
-				return true;
-
-			IBlockListener block = (IBlockListener) state.getBlock();
-			if (!state.getPos().isInRange(newState.getPos(), block.blockRange()))
-				return true;
-
-			if (!state.getPos().equals(newState.getPos()))
-			{
-				if (newState.getBlock() == Blocks.air)
-					cancel |= !block.onBlockRemoved(world, state.getPos(), newState.getPos());
-				else
-					cancel |= !block.onBlockSet(world, state.getPos(), newState);
-			}
-
-			return !cancel;
-		}
-
-		@Override
-		protected void clean()
-		{
-			super.clean();
-			cancel = false;
-			newState = null;
-		}
-	}
 }
