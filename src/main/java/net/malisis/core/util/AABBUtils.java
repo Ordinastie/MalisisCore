@@ -194,10 +194,25 @@ public class AABBUtils
 	 */
 	public static AxisAlignedBB[] offset(double x, double y, double z, AxisAlignedBB... aabbs)
 	{
+		return offset(new BlockPos(x, y, z), aabbs);
+	}
+
+	public static AxisAlignedBB[] offset(BlockPos pos, AxisAlignedBB... aabbs)
+	{
 		for (AxisAlignedBB aabb : aabbs)
 			if (aabb != null)
-				aabb.offset(x, y, z);
+				aabb.offset(pos.getX(), pos.getY(), pos.getZ());
 		return aabbs;
+	}
+
+	public static boolean isColliding(AxisAlignedBB aabb, AxisAlignedBB[] aabbs)
+	{
+		return isColliding(new AxisAlignedBB[] { aabb }, aabbs);
+	}
+
+	public static boolean isColliding(AxisAlignedBB[] aabbs, AxisAlignedBB aabb)
+	{
+		return isColliding(aabbs, new AxisAlignedBB[] { aabb });
 	}
 
 	/**
