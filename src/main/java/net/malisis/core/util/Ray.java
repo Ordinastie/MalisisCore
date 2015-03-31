@@ -129,14 +129,26 @@ public class Ray
 		return (z - origin.z) / direction.z;
 	}
 
+	/**
+	 * Finds the points intersectint the {@link AxisAlignedBB}
+	 *
+	 * @param aabb the aabb
+	 * @return the list
+	 */
 	public List<Point> intersect(AxisAlignedBB aabb)
 	{
-		Point interx = getPointAt(intersectX(aabb.minX));
-		Point interX = getPointAt(intersectX(aabb.maxX));
-		Point intery = getPointAt(intersectY(aabb.minY));
-		Point interY = getPointAt(intersectY(aabb.maxY));
-		Point interz = getPointAt(intersectZ(aabb.minZ));
-		Point interZ = getPointAt(intersectZ(aabb.maxZ));
+		double ix = intersectX(aabb.minX);
+		double iX = intersectX(aabb.maxX);
+		double iy = intersectY(aabb.minY);
+		double iY = intersectY(aabb.maxY);
+		double iz = intersectZ(aabb.minZ);
+		double iZ = intersectZ(aabb.maxZ);
+		Point interx = ix > 0 ? getPointAt(ix) : null;
+		Point interX = iX > 0 ? getPointAt(iX) : null;
+		Point intery = iy > 0 ? getPointAt(iy) : null;
+		Point interY = iY > 0 ? getPointAt(iY) : null;
+		Point interz = iz > 0 ? getPointAt(iz) : null;
+		Point interZ = iZ > 0 ? getPointAt(iZ) : null;
 
 		List<Point> list = new ArrayList<>();
 		if (interx != null && interx.isInside(aabb))
