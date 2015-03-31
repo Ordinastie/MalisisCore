@@ -82,6 +82,16 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
+	 * Gets the base {@link Vertex} for this {@link MergedVertex}.
+	 *
+	 * @return the base
+	 */
+	public Vertex getBase()
+	{
+		return base;
+	}
+
+	/**
 	 * Gets the X coordinate of this {@link MergedVertex}.
 	 *
 	 * @return the X coordinate of this {@link MergedVertex}.
@@ -89,6 +99,17 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	public double getX()
 	{
 		return base.getX();
+	}
+
+	/**
+	 * Sets the X coordinate for this {@link MergedVertex}.
+	 *
+	 * @param x the new x
+	 */
+	public void setX(double x)
+	{
+		for (Vertex v : vertexes)
+			v.setX(x);
 	}
 
 	/**
@@ -102,6 +123,17 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
+	 * Sets the Y coordinate for this {@link MergedVertex}.
+	 *
+	 * @param y the new y
+	 */
+	public void setY(double y)
+	{
+		for (Vertex v : vertexes)
+			v.setY(y);
+	}
+
+	/**
 	 * Gets the Z coordinate of this {@link MergedVertex}
 	 *
 	 * @return the Z coordinate of this {@link MergedVertex}.
@@ -109,6 +141,17 @@ public class MergedVertex implements ITransformable.Translate, ITransformable.Ro
 	public double getZ()
 	{
 		return base.getZ();
+	}
+
+	/**
+	 * Sets the Z coordinate for this {@link MergedVertex}.
+	 *
+	 * @param z the new z
+	 */
+	public void setZ(double z)
+	{
+		for (Vertex v : vertexes)
+			v.setZ(z);
 	}
 
 	/**
