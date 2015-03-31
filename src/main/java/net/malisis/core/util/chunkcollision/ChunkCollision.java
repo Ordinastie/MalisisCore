@@ -205,6 +205,31 @@ public class ChunkCollision
 
 	//#end canPlaceBlockAt
 
+	public void replaceBlocks(World world, BlockState state)
+	{
+		AxisAlignedBB[] aabbs = AABBUtils.getCollisionBoundingBoxes(world, state, true);
+		for (AxisAlignedBB aabb : aabbs)
+		{
+			for (BlockPos pos : BlockPos.getAllInBox(aabb))
+			{
+				if (world.getBlock(pos.getX(), pos.getY(), pos.getZ()).isReplaceable(world, pos.getX(), pos.getY(), pos.getZ()))
+					world.setBlockToAir(pos.getX(), pos.getY(), pos.getZ());
+			}
+		}
+	}
+
+	public void updateBlocks(World world, BlockState state)
+	{
+		AxisAlignedBB[] aabbs = AABBUtils.getCollisionBoundingBoxes(world, state, true);
+		for (AxisAlignedBB aabb : aabbs)
+		{
+			for (BlockPos pos : BlockPos.getAllInBox(aabb))
+			{
+				world.notifyBlockChange(pos.getX(), pos.getY(), pos.getZ(), state.getBlock());
+			}
+		}
+	}
+
 	public static ChunkCollision get()
 	{
 		return instance;
