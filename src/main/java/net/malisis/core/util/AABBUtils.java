@@ -41,12 +41,32 @@ public class AABBUtils
 {
 	public static AxisAlignedBB identity()
 	{
-		return AxisAlignedBB.getBoundingBox(0, 0, 0, 1, 1, 1);
+		return identity(0, 0, 0);
+	}
+
+	public static AxisAlignedBB identity(BlockPos pos)
+	{
+		return identity(pos.getX(), pos.getY(), pos.getZ());
+	}
+
+	public static AxisAlignedBB identity(int x, int y, int z)
+	{
+		return AxisAlignedBB.getBoundingBox(x, y, z, x + 1, y + 1, z + 1);
 	}
 
 	public static AxisAlignedBB[] identities()
 	{
-		return new AxisAlignedBB[] { identity() };
+		return identities(0, 0, 0);
+	}
+
+	public static AxisAlignedBB[] identities(BlockPos pos)
+	{
+		return identities(pos.getX(), pos.getX(), pos.getZ());
+	}
+
+	public static AxisAlignedBB[] identities(int x, int y, int z)
+	{
+		return new AxisAlignedBB[] { identity(x, y, z) };
 	}
 
 	private static int getAngle(ForgeDirection dir)
