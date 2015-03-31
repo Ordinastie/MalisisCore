@@ -238,6 +238,11 @@ public class BlockPos
 		return (x * x + y * y + z * z) <= range * range;
 	}
 
+	public boolean isInside(AxisAlignedBB aabb)
+	{
+		return aabb.intersectsWith(AABBUtils.identity(this));
+	}
+
 	public ChunkPosition toChunkPosition()
 	{
 		return new ChunkPosition(chunkX(), y, chunkZ());
