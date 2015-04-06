@@ -26,10 +26,12 @@ package net.malisis.core.util;
 
 import java.util.Iterator;
 
+import net.minecraft.block.Block;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkPosition;
+import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * @author Ordinastie
@@ -88,6 +90,17 @@ public class BlockPos
 		return z >> 4;
 	}
 
+	public Block getBlock(World world)
+	{
+		return world.getBlock(getX(), getY(), getZ());
+	}
+
+	public int getMetadata(World world)
+	{
+		return world.getBlockMetadata(getX(), getY(), getZ());
+
+	}
+
 	/**
 	 * Add the given coordinates to the coordinates of this BlockPos
 	 *
@@ -125,7 +138,7 @@ public class BlockPos
 	 */
 	public BlockPos up(int n)
 	{
-		return this.offset(EnumFacing.UP, n);
+		return this.offset(ForgeDirection.UP, n);
 	}
 
 	/**
@@ -141,7 +154,7 @@ public class BlockPos
 	 */
 	public BlockPos down(int n)
 	{
-		return this.offset(EnumFacing.DOWN, n);
+		return this.offset(ForgeDirection.DOWN, n);
 	}
 
 	/**
@@ -157,7 +170,7 @@ public class BlockPos
 	 */
 	public BlockPos north(int n)
 	{
-		return this.offset(EnumFacing.NORTH, n);
+		return this.offset(ForgeDirection.NORTH, n);
 	}
 
 	/**
@@ -173,7 +186,7 @@ public class BlockPos
 	 */
 	public BlockPos south(int n)
 	{
-		return this.offset(EnumFacing.SOUTH, n);
+		return this.offset(ForgeDirection.SOUTH, n);
 	}
 
 	/**
@@ -189,7 +202,7 @@ public class BlockPos
 	 */
 	public BlockPos west(int n)
 	{
-		return this.offset(EnumFacing.WEST, n);
+		return this.offset(ForgeDirection.WEST, n);
 	}
 
 	/**
@@ -205,13 +218,13 @@ public class BlockPos
 	 */
 	public BlockPos east(int n)
 	{
-		return this.offset(EnumFacing.EAST, n);
+		return this.offset(ForgeDirection.EAST, n);
 	}
 
 	/**
 	 * Offset this BlockPos 1 block in the given direction
 	 */
-	public BlockPos offset(EnumFacing facing)
+	public BlockPos offset(ForgeDirection facing)
 	{
 		return this.offset(facing, 1);
 	}
@@ -222,10 +235,9 @@ public class BlockPos
 	 * @param facing The direction of the offset
 	 * @param n The number of blocks to offset by
 	 */
-	public BlockPos offset(EnumFacing facing, int n)
+	public BlockPos offset(ForgeDirection facing, int n)
 	{
-		return new BlockPos(this.getX() + facing.getFrontOffsetX() * n, this.getY() + facing.getFrontOffsetY() * n, this.getZ()
-				+ facing.getFrontOffsetZ() * n);
+		return new BlockPos(this.getX() + facing.offsetX * n, this.getY() + facing.offsetY * n, this.getZ() + facing.offsetZ * n);
 	}
 
 	//#end Moves
