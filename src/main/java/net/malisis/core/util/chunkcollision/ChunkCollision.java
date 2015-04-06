@@ -178,10 +178,11 @@ public class ChunkCollision
 			aabbs = ((IChunkCollidable) block).getPlacedBoundingBox(world, x, y, z, side, player, itemStack);
 		else
 			aabbs = AABBUtils.getCollisionBoundingBoxes(world, block, x, y, z);
-		AABBUtils.offset(x, y, z, aabbs);
 
 		if (aabbs == null)
 			return true;
+
+		AABBUtils.offset(x, y, z, aabbs);
 
 		//check against each block position occupied by the AABBs
 		if (block instanceof IChunkCollidable)
