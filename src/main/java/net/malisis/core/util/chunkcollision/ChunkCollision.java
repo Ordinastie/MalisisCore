@@ -184,17 +184,19 @@ public class ChunkCollision
 			return true;
 
 		//check against each block position occupied by the AABBs
-		for (AxisAlignedBB aabb : aabbs)
-			for (BlockPos pos : BlockPos.getAllInBox(aabb))
-			{
-				boolean b = false;
-				b |= !world.getBlock(pos.getX(), pos.getY(), pos.getZ()).isReplaceable(world, pos.getX(), pos.getY(), pos.getZ());
-				b &= AABBUtils.isColliding(aabb, AABBUtils.getCollisionBoundingBoxes(world, new BlockState(world, pos), true));
+		if (block instanceof IChunkCollidable)
+		{
+			for (AxisAlignedBB aabb : aabbs)
+				for (BlockPos pos : BlockPos.getAllInBox(aabb))
+				{
+					boolean b = false;
+					b |= !world.getBlock(pos.getX(), pos.getY(), pos.getZ()).isReplaceable(world, pos.getX(), pos.getY(), pos.getZ());
+					b &= AABBUtils.isColliding(aabb, AABBUtils.getCollisionBoundingBoxes(world, new BlockState(world, pos), true));
 
-				if (b)
-					return false;
-
-			}
+					if (b)
+						return false;
+				}
+		}
 
 		CheckCollisionProcedure procedure = new CheckCollisionProcedure(aabbs);
 		for (Chunk chunk : ChunkBlockHandler.getAffectedChunks(world, aabbs))
