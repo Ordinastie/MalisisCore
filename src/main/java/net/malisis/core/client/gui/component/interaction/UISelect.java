@@ -360,7 +360,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	 * @param obj the key of the Option
 	 * @return the option
 	 */
-	public Option getOption(T obj)
+	public Option<T> getOption(T obj)
 	{
 		for (Option<T> opt : this)
 			if (obj == opt.getKey())
