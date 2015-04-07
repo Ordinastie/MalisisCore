@@ -30,6 +30,7 @@ import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.asm.MalisisClassTransformer;
 import net.malisis.core.asm.mappings.McpFieldMapping;
 import net.malisis.core.asm.mappings.McpMethodMapping;
+import net.minecraft.entity.player.EntityPlayerMP;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -37,6 +38,7 @@ import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 /**
@@ -51,6 +53,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		register(getBoundingBoxesHook());
 		register(rayTraceHook());
 		register(placeBlockHook());
+		register(blockReachDistanceHook());
 	}
 
 	@SuppressWarnings("deprecation")
@@ -234,5 +237,66 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		ah.jumpTo(match).insert(insert);
 
 		return ah;
+	}
+
+	EntityPlayerMP playerEntity;
+
+	private AsmHook blockReachDistanceHook()
+	{
+		McpMethodMapping processPlayerDigging = new McpMethodMapping("processPlayerDigging", "func_147345_a",
+				"net/minecraft/network/NetHandlerPlayServer", "(Lnet/minecraft/network/play/client/C07PacketPlayerDigging;)V");
+
+		McpFieldMapping playerEntity = new McpFieldMapping("playerEntity", "field_147369_b", "net/minecraft/network/NetHandlerPlayServer",
+				"Lnet/minecraft/entity/player/EntityPlayerMP;");
+		McpFieldMapping worldObj = new McpFieldMapping("worldObj", "field_70170_p", "net/minecraft/entity/player/EntityPlayerMP",
+				"Lnet/minecraft/world/World;");
+		McpMethodMapping getBlock = new McpMethodMapping("getBlock", "func_147439_a", "net/minecraft/world/World",
+				"(III)Lnet/minecraft/block/Block;");
+
+		AsmHook ah = new AsmHook(processPlayerDigging);
+
+		//		DMUL
+		//		DADD
+		//		DSTORE 13
+		InsnList match = new InsnList();
+		match.add(new InsnNode(DMUL));
+		match.add(new InsnNode(DADD));
+		match.add(new VarInsnNode(DSTORE, 13));
+
+		//		if (this.playerEntity.worldObj.getBlock(i, j, k) instanceof IChunkCollidable)
+		//			d3 = 0;
+		//	    ALOAD 0
+		//	    GETFIELD net/minecraft/network/NetHandlerPlayServer.playerEntity : Lnet/minecraft/entity/player/EntityPlayerMP;
+		//	    GETFIELD net/minecraft/entity/player/EntityPlayerMP.worldObj : Lnet/minecraft/world/World;
+		//	    ILOAD 2
+		//	    ILOAD 3
+		//	    ILOAD 4
+		//	    INVOKEVIRTUAL net/minecraft/world/World.getBlock (III)Lnet/minecraft/block/Block;
+		//	    INSTANCEOF net/malisis/core/util/chunkcollision/IChunkCollidable
+		//	    IFEQ L8
+		//	   L9
+		//	    LINENUMBER 252 L9
+		//	    DCONST_0
+		//	    DSTORE 5
+		//	   L8
+		InsnList insert = new InsnList();
+		LabelNode label = new LabelNode();
+		insert.add(new VarInsnNode(ALOAD, 0)); //this.
+		insert.add(playerEntity.getInsnNode(GETFIELD)); //playerEntity.
+		insert.add(worldObj.getInsnNode(GETFIELD)); //worldObj.
+		insert.add(new VarInsnNode(ILOAD, 4)); //i,
+		insert.add(new VarInsnNode(ILOAD, 5)); //j,
+		insert.add(new VarInsnNode(ILOAD, 6)); //k,
+		insert.add(getBlock.getInsnNode(INVOKEVIRTUAL));//getBlock()
+		insert.add(new TypeInsnNode(INSTANCEOF, "net/malisis/core/util/chunkcollision/IChunkCollidable")); //instanceof IChunkCollidable
+		insert.add(new JumpInsnNode(IFEQ, label));
+		insert.add(new InsnNode(DCONST_0));
+		insert.add(new VarInsnNode(DSTORE, 13));
+		insert.add(label);
+
+		ah.jumpAfter(match).insert(insert).debug();
+
+		return ah;
+
 	}
 }
