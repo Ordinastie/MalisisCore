@@ -294,7 +294,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		insert.add(new VarInsnNode(DSTORE, 13));
 		insert.add(label);
 
-		ah.jumpAfter(match).insert(insert).debug();
+		ah.jumpAfter(match).insert(insert);
 
 		return ah;
 
