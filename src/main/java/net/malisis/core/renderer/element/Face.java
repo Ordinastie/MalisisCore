@@ -28,12 +28,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.util.Vector;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 
-public class Face
+public class Face implements ITransformable.Translate, ITransformable.Rotate
 {
 	protected String name;
 	protected Vertex[] vertexes;
@@ -306,11 +307,19 @@ public class Face
 		return this;
 	}
 
-	public Face translate(double x, double y, double z)
+	@Override
+	public void rotate(float angle, float x, float y, float z, float offsetX, float offsetY, float offsetZ)
+	{
+		rotateAroundX(angle * x, offsetX, offsetY, offsetZ);
+		rotateAroundY(angle * y, offsetX, offsetY, offsetZ);
+		rotateAroundZ(angle * z, offsetX, offsetY, offsetZ);
+	}
+
+	@Override
+	public void translate(float x, float y, float z)
 	{
 		for (Vertex v : vertexes)
 			v.add(x, y, z);
-		return this;
 	}
 
 	public void scale(float f)
