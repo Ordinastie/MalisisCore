@@ -92,7 +92,7 @@ public class BBRenderElement
 	{
 		if (itemStack != null)
 			return 16;
-		return GuiRenderer.getStringWidth(getFormattedText());
+		return 0;//GuiRenderer.getStringWidth(getFormattedText());
 	}
 
 	public void render(GuiRenderer renderer, int x, int y, int z)
@@ -100,7 +100,7 @@ public class BBRenderElement
 		if (itemStack != null)
 			renderer.drawItemStack(itemStack, x, y);
 		else
-			renderer.drawText(getFormattedText(), x, y, z, color, shadow, true);
+			renderer.drawText(null, getFormattedText(), x, y, z, null);
 	}
 
 	@Override

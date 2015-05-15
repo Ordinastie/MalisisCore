@@ -77,6 +77,12 @@ public class BBTextField extends UITextField implements IBBCodeRenderer<BBTextFi
 		return this;
 	}
 
+	@Override
+	public float getFontScale()
+	{
+		return getRenderer().getFontRendererOptions(this).fontScale;
+	}
+
 	public boolean isWysiwyg()
 	{
 		return isWysiwyg;

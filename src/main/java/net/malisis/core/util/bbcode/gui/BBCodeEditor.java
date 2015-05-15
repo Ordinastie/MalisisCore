@@ -140,8 +140,8 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 	{
 		bbTexfield.setWysiwyg(w);
 
-		btnWysiwyg.setTextColor(w ? 0x66CC77 : defaultColor);
-		btnWysiwyg.setBgColor(w ? 0xBBFFCC : defaultColor);
+		//		btnWysiwyg.setTextColor(w ? 0x66CC77 : defaultColor);
+		//		btnWysiwyg.setBgColor(w ? 0xBBFFCC : defaultColor);
 
 		return this;
 	}
@@ -318,7 +318,7 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 			return;
 		}
 
-		button.setTextColor(active ? activeColor : defaultColor);
+		//button.setTextColor(active ? activeColor : defaultColor);
 		bbTexfield.setFocused(true);
 	}
 
@@ -354,7 +354,7 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 
 		if (button != null)
 		{
-			button.setTextColor(active ? 0x66CC77 : defaultColor);
+			//button.setTextColor(active ? 0x66CC77 : defaultColor);
 			button.setBgColor(active ? 0xBBFFCC : defaultColor);
 		}
 
