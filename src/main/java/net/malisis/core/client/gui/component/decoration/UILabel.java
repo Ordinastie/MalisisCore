@@ -29,12 +29,15 @@ import java.util.List;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
+import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.util.bbcode.BBString;
 import net.malisis.core.util.bbcode.render.BBCodeRenderer;
 import net.malisis.core.util.bbcode.render.IBBCodeRenderer;
@@ -49,35 +52,33 @@ import com.google.common.eventbus.Subscribe;
  *
  * @author Ordinastie
  */
-public class UILabel extends UIComponent<UILabel> implements IScrollable, IBBCodeRenderer<UILabel>
+public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiText<UILabel>, IBBCodeRenderer<UILabel>
 {
+	/** The {@link MalisisFont} to use for this {@link UILabel}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
+	protected MalisisFont font;
+	/** The {@link FontRenderOptions} to use for this {@link UILabel}. If null, uses {@link GuiRenderer#getDefaultFontRendererOptions()}. */
+	protected FontRenderOptions fro;
 	/** Text of this {@link UILabel}. */
 	protected String text;
-	/** BBCode for this {@link UILabel} */
+	/** BBCode for this {@link UILabel}. */
 	protected BBString bbText;
 	/** BBCode renderer **/
 	protected BBCodeRenderer bbRenderer;
-	/** List of strings making the text of this {@link UILabel} */
+	/** List of strings making the text of this {@link UILabel}. */
 	protected List<String> lines = new LinkedList<>();
 	/** Whether this {@link UITextField} handles multiline text. */
 	protected boolean multiLine = false;
 
 	//text space
-	/** Number of line offset out of this {@link UILabel} when drawn. Always 0 if {@link #multiLine} is false */
+	/** Number of line offset out of this {@link UILabel} when drawn. Always 0 if {@link #multiLine} is false. */
 	protected int lineOffset = 0;
 	/** Space used between each line. */
 	protected int lineSpacing = 1;
-	/** Font scale used to draw the text *. */
-	protected float fontScale = 1;
 
 	//interaction
 	/** Scrollbar of the textfield **/
 	protected UISlimScrollbar scrollBar;
 
-	/** Color to use to draw the text of this {@link UILabel}. */
-	protected int color = 0x404040;
-	/** Determines if the text is drawn with drop shadow. */
-	protected boolean drawShadow;
 	/** Width of the text. */
 	protected int textWidth;
 	/** Height of the text. */
@@ -174,38 +175,38 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IBBCod
 	}
 
 	/**
-	 * Sets the color of the text of this {@link UILabel}.
+	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
 	 *
-	 * @param color the color
-	 * @return the UI label
+	 * @return the font
 	 */
-	public UILabel setColor(int color)
+	@Override
+	public MalisisFont getFont()
 	{
-		this.color = color;
-		return this;
+		return font;
 	}
 
 	/**
-	 * Set the drop shadow for the text of this {@link UILabel}.
+	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
 	 *
-	 * @param drawShadow the draw shadow
-	 * @return the UI label
+	 * @return the font renderer options
 	 */
-	public UILabel setDrawShadow(boolean drawShadow)
+	@Override
+	public FontRenderOptions getFontRendererOptions()
 	{
-		this.drawShadow = drawShadow;
-		return this;
+		return fro;
 	}
 
 	/**
-	 * Sets the scale of the font to use for this {@link UILabel}.
+	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
 	 *
-	 * @param scale the scale
-	 * @return the UI label
+	 * @param font the new font
+	 * @param fro the fro
 	 */
-	public UILabel setFontScale(float scale)
+	@Override
+	public UILabel setFont(MalisisFont font, FontRenderOptions fro)
 	{
-		this.fontScale = scale;
+		this.font = font;
+		this.fro = fro;
 		calculateSize();
 		return this;
 	}
@@ -218,7 +219,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IBBCod
 	@Override
 	public float getFontScale()
 	{
-		return fontScale;
+		return getRenderer().getFontRendererOptions(this).fontScale;
 	}
 
 	// #end getters/setters
@@ -233,7 +234,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IBBCod
 	@Override
 	public int getContentHeight()
 	{
-		return lines.size() * (GuiRenderer.FONT_HEIGHT + 1);
+		return lines.size() * getLineHeight();
 	}
 
 	@Override
@@ -321,7 +322,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IBBCod
 	@Override
 	public int getLineHeight()
 	{
-		return GuiRenderer.getStringHeight(fontScale) + lineSpacing;
+		return getRenderer().getStringHeight(this) + lineSpacing;
 	}
 
 	//#end IBBStringRenderer
@@ -348,7 +349,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IBBCod
 		lines.clear();
 
 		if (!StringUtils.isEmpty(text))
-			lines = GuiRenderer.wrapText(text, getWidth(), fontScale);
+			lines = getRenderer().getFont(this).wrapText(text, getWidth(), getFontScale());
 
 		fireEvent(new ContentUpdateEvent<UILabel>(this));
 	}
@@ -360,8 +361,8 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IBBCod
 	{
 		if (multiLine)
 			return;
-		this.textWidth = GuiRenderer.getStringWidth(text, fontScale);
-		this.textHeight = GuiRenderer.getStringHeight(fontScale);
+		this.textWidth = getRenderer().getStringWidth(this, text);
+		this.textHeight = getRenderer().getStringHeight(this);
 		setSize(textWidth, textHeight);
 	}
 
@@ -394,18 +395,20 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IBBCod
 			return;
 		}
 
-		renderer.setFontScale(fontScale);
 		if (multiLine)
 		{
+			FontRenderOptions fro = getRenderer().getFontRendererOptions(this);
+			fro.resetStyles();
+			fro.multiLines = true;
 			for (int i = lineOffset; i < lineOffset + getVisibleLines() && i < lines.size(); i++)
 			{
 				int h = (i - lineOffset) * getLineHeight();
-				renderer.drawText(lines.get(i), 0, h, color, drawShadow);
+				renderer.drawText(font, lines.get(i), 0, h, 0, fro);
 			}
+			fro.multiLines = false;
 		}
 		else
-			renderer.drawText(text, color, drawShadow);
-		renderer.setFontScale(1);
+			renderer.drawText(font, text, fro);
 	}
 
 	@Subscribe
@@ -417,7 +420,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IBBCod
 	@Override
 	public String getPropertyString()
 	{
-		return "text=" + text + " | color=0x" + Integer.toHexString(this.color) + " | " + super.getPropertyString();
+		return "text=" + text + " | " + super.getPropertyString();
 	}
 
 }

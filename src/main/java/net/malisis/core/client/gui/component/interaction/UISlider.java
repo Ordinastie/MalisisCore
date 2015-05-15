@@ -26,26 +26,39 @@ package net.malisis.core.client.gui.component.interaction;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
+import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.util.MouseButton;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Ordinastie
  *
  */
-public class UISlider extends UIComponent<UISlider>
+public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider>
 {
 	public static int SLIDER_WIDTH = 8;
 
 	protected GuiIcon iconBackground;
 	protected GuiIcon sliderIcon;
 
-	private String label;
+	/** The {@link MalisisFont} to use for this {@link UISlider}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
+	protected MalisisFont font;
+	/** The {@link FontRenderOptions} to use for this {@link UISlider}. If null, uses {@link GuiRenderer#getDefaultFontRendererOptions()}. */
+	protected FontRenderOptions fro;
+	/** The {@link FontRenderOptions} to use for this {@link UISlider} when hovered. */
+	protected FontRenderOptions hoveredFro;
+
+	private String text;
 	private float minValue;
 	private float maxValue;
 	private float value;
@@ -53,13 +66,23 @@ public class UISlider extends UIComponent<UISlider>
 
 	private GuiShape sliderShape;
 
-	public UISlider(MalisisGui gui, int width, float min, float max, String label)
+	public UISlider(MalisisGui gui, int width, float min, float max, String text)
 	{
 		super(gui);
+		this.text = text;
+
 		setSize(width, 20);
-		this.minValue = min;
-		this.maxValue = max;
-		this.label = label;
+
+		minValue = min;
+		maxValue = max;
+
+		fro = new FontRenderOptions();
+		fro.color = 0xFFFFFF;
+		fro.shadow = true;
+
+		hoveredFro = new FontRenderOptions();
+		hoveredFro.color = 0xFFFFA0;
+		hoveredFro.shadow = true;
 
 		shape = new XResizableGuiShape();
 		sliderShape = new SimpleGuiShape();
@@ -75,6 +98,45 @@ public class UISlider extends UIComponent<UISlider>
 	{
 		this(gui, width, min, max, null);
 	}
+
+	//#region Getters/Setters
+	/**
+	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
+	 *
+	 * @return the font
+	 */
+	@Override
+	public MalisisFont getFont()
+	{
+		return font;
+	}
+
+	/**
+	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
+	 *
+	 * @return the font renderer options
+	 */
+	@Override
+	public FontRenderOptions getFontRendererOptions()
+	{
+		return fro;
+	}
+
+	/**
+	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
+	 *
+	 * @param font the new font
+	 * @param fro the fro
+	 */
+	@Override
+	public UISlider setFont(MalisisFont font, FontRenderOptions fro)
+	{
+		this.font = font;
+		this.fro = fro;
+		return this;
+	}
+
+	//#end Getters/Setters
 
 	@Override
 	public boolean onClick(int x, int y)
@@ -150,12 +212,13 @@ public class UISlider extends UIComponent<UISlider>
 		renderer.next();
 		//zIndex = 1;
 
-		if (label != null)
+		if (!StringUtils.isEmpty(text))
 		{
-			String str = String.format(label, value);
-			int x = (width - GuiRenderer.getStringWidth(str)) / 2;
+			String str = String.format(text, value);
+			int x = (width - getRenderer().getStringWidth(this, str)) / 2;
 			int y = 6;
-			renderer.drawText(str, x, y, isHovered() ? 0xFFFFA0 : 0xFFFFFF, true);
+
+			renderer.drawText(font, str, x, y, 0, isHovered() ? hoveredFro : fro);
 		}
 	}
 

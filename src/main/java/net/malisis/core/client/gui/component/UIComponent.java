@@ -55,6 +55,7 @@ import org.lwjgl.opengl.GL14;
 
 import com.google.common.eventbus.EventBus;
 
+// TODO: Auto-generated Javadoc
 /**
  * {@link UIComponent} is the base of everything drawn onto a GUI.<br>
  * The drawing is separated between background and foreground.<br>
@@ -68,11 +69,15 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 {
 	/** The Exception handler for all Compoenent events. */
 	private static final ComponentExceptionHandler exceptionHandler = new ComponentExceptionHandler();
+
+	/** The Constant INHERITED. */
 	public final static int INHERITED = 0;
 
 	/** Reference to the {@link MalisisGui} this {@link UIComponent} was added to. */
 	private final MalisisGui gui;
-	/** List of {@link UIComponent components} controling this {@link UIContainer}. */
+	/** Reference to the {@link GuiRenderer} that will draw this {@link UIComponent}. */
+	private final GuiRenderer renderer;
+	/** List of {@link UIComponent components} controlling this {@link UIContainer}. */
 	private final Set<IControlComponent> controlComponents;
 	/** Position of this {@link UIComponent}. */
 	protected int x, y;
@@ -86,7 +91,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	private EventBus bus;
 	/** The parent {@link UIComponent} of this <code>UIComponent</code>. */
 	protected UIComponent parent;
-	/** The name of this {@link UIComponent} Can be used to retrieve this back from a container. */
+	/** The name of this {@link UIComponent}. Can be used to retrieve this back from a container. */
 	protected String name;
 	/** The tooltip for this {@link UIComponent} Automatically displayed when the {@link UIComponent} is hovered. */
 	protected UITooltip tooltip;
@@ -118,6 +123,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	public UIComponent(MalisisGui gui)
 	{
 		this.gui = gui;
+		this.renderer = gui.getRenderer();
 		bus = new EventBus(exceptionHandler);
 		bus.register(this);
 		controlComponents = new LinkedHashSet<>();
@@ -134,6 +140,16 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	public MalisisGui getGui()
 	{
 		return gui;
+	}
+
+	/**
+	 * Gets the {@link GuiRenderer} that will draw this {@link UIComponent}.
+	 *
+	 * @return the renderer
+	 */
+	public GuiRenderer getRenderer()
+	{
+		return renderer;
 	}
 
 	/**
@@ -280,7 +296,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Gets the raw width of this {@link UIComponent}
+	 * Gets the raw width of this {@link UIComponent}.
 	 *
 	 * @return the width
 	 */
@@ -475,7 +491,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	/**
-	 * Checks if this {@link UIComponent} is disabled
+	 * Checks if this {@link UIComponent} is disabled.
 	 *
 	 * @return true if disabled
 	 */
@@ -641,6 +657,15 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 
 	//#region Inputs
 
+	/**
+	 * On mouse move.
+	 *
+	 * @param lastX the last x
+	 * @param lastY the last y
+	 * @param x the x
+	 * @param y the y
+	 * @return true, if successful
+	 */
 	public boolean onMouseMove(int lastX, int lastY, int x, int y)
 	{
 		if (isDisabled())
@@ -649,6 +674,14 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		return parent != null ? parent.onMouseMove(lastX, lastY, x, y) : false;
 	}
 
+	/**
+	 * On button press.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param button the button
+	 * @return true, if successful
+	 */
 	public boolean onButtonPress(int x, int y, MouseButton button)
 	{
 		if (isDisabled())
@@ -657,6 +690,14 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		return parent != null ? parent.onButtonPress(x, y, button) : false;
 	}
 
+	/**
+	 * On button release.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param button the button
+	 * @return true, if successful
+	 */
 	public boolean onButtonRelease(int x, int y, MouseButton button)
 	{
 		if (isDisabled())
@@ -665,6 +706,13 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		return parent != null ? parent.onButtonRelease(x, y, button) : false;
 	}
 
+	/**
+	 * On click.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @return true, if successful
+	 */
 	public boolean onClick(int x, int y)
 	{
 		if (isDisabled())
@@ -673,6 +721,13 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		return parent != null ? parent.onClick(x, y) : false;
 	}
 
+	/**
+	 * On right click.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @return true, if successful
+	 */
 	public boolean onRightClick(int x, int y)
 	{
 		if (isDisabled())
@@ -681,6 +736,14 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		return parent != null ? parent.onRightClick(x, y) : false;
 	}
 
+	/**
+	 * On double click.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param button the button
+	 * @return true, if successful
+	 */
 	public boolean onDoubleClick(int x, int y, MouseButton button)
 	{
 		if (isDisabled())
@@ -689,6 +752,16 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		return parent != null ? parent.onDoubleClick(x, y, button) : false;
 	}
 
+	/**
+	 * On drag.
+	 *
+	 * @param lastX the last x
+	 * @param lastY the last y
+	 * @param x the x
+	 * @param y the y
+	 * @param button the button
+	 * @return true, if successful
+	 */
 	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
 	{
 		if (isDisabled())
@@ -697,6 +770,14 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		return parent != null ? parent.onDrag(lastX, lastY, x, y, button) : false;
 	}
 
+	/**
+	 * On scroll wheel.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param delta the delta
+	 * @return true, if successful
+	 */
 	public boolean onScrollWheel(int x, int y, int delta)
 	{
 		if (isDisabled())
@@ -983,6 +1064,11 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 				+ " | position=" + x + "," + y + " | container=" + parentX() + "," + parentY() + " | screen=" + screenX() + "," + screenY();
 	}
 
+	/**
+	 * To string.
+	 *
+	 * @return the string
+	 */
 	@Override
 	public String toString()
 	{

@@ -31,15 +31,17 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.shape.Cube;
+import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderBlocks;
@@ -55,7 +57,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.MinecraftForgeClient;
@@ -63,7 +64,6 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
@@ -84,7 +84,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	private static Map damagedBlocks;
 	/** The damaged icons. */
 	protected static IIcon[] damagedIcons;
-	/** Whether this {@link MalisisRenderer} initialized. (initialize() already called */
+	/** Reference to Tessellator.isDrawing field **/
+	private static Field isDrawingField;
+	/** Whether this {@link MalisisRenderer} initialized. (initialize() already called) */
 	private boolean initialized = false;
 	/** Id of this {@link MalisisRenderer}. */
 	protected int renderId = -1;
@@ -531,8 +533,31 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void startDrawing(int drawMode)
 	{
+		if (isDrawing())
+			draw();
 		t.startDrawing(drawMode);
 		this.drawMode = drawMode;
+	}
+
+	/**
+	 * Checks if the {@link Tessellator} is currently drawing.
+	 *
+	 * @return true, if is drawing
+	 */
+	public boolean isDrawing()
+	{
+		if (isDrawingField == null)
+			isDrawingField = AsmUtils.changeAccess(Tessellator.class, "isDrawing", "field_78415_z");
+
+		try
+		{
+			return isDrawingField.getBoolean(t);
+		}
+		catch (IllegalArgumentException | IllegalAccessException e)
+		{
+			MalisisCore.log.error("[MalisisRenderer] Failed to get Tessellator.isDrawing value", e);
+			return false;
+		}
 	}
 
 	/**
@@ -550,7 +575,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void next(int drawMode)
 	{
-		draw();
+		if (isDrawing())
+			draw();
 		startDrawing(drawMode);
 	}
 
@@ -559,7 +585,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void draw()
 	{
-		t.draw();
+		if (isDrawing())
+			t.draw();
 	}
 
 	/**
@@ -867,26 +894,12 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 * @param color the color
 	 * @param shadow the shadow
 	 */
-	public void drawString(String text, float x, float y, float z, int color, boolean shadow)
+	public void drawText(MalisisFont font, String text, float x, float y, float z, FontRenderOptions fro)
 	{
-		if (MalisisRenderer.getFontRenderer() == null)
-			return;
+		if (font == null)
+			font = MalisisFont.minecraftFont;
 
-		text = StatCollector.translateToLocal(text);
-		text = text.replaceAll("\r", "");
-		GL11.glPushMatrix();
-		float s = 0.010F;
-		GL11.glTranslatef(x, y, z);
-		GL11.glScalef(s, -s, s);
-
-		// GL11.glDisable(GL11.GL_DEPTH_TEST);
-		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-
-		getFontRenderer().drawString(text, 0, 0, color, shadow);
-
-		GL11.glPopMatrix();
-		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-		// GL11.glEnable(GL11.GL_DEPTH_TEST);
+		font.render(this, text, x, y, z, fro);
 	}
 
 	/**
@@ -1323,33 +1336,5 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	public void registerForRenderWorldLast()
 	{
 		RenderWorldEventHandler.register(this);
-	}
-
-	public static FontRenderer getFontRenderer()
-	{
-		return Minecraft.getMinecraft().fontRendererObj;
-	}
-
-	/**
-	 * Gets rendering width of a string.
-	 *
-	 * @param str the str
-	 * @return the string width
-	 */
-	public static int getStringWidth(String str)
-	{
-		str = StatCollector.translateToLocal(str);
-		str = str.replaceAll("\r", "");
-		return (int) Math.ceil(getFontRenderer().getStringWidth(str) * 0.01F);
-	}
-
-	/**
-	 * Gets the rendering height of strings according to fontscale.
-	 *
-	 * @return the string height
-	 */
-	public static int getStringHeight()
-	{
-		return (int) Math.ceil(getFontRenderer().FONT_HEIGHT * 0.01F);
 	}
 }

@@ -30,19 +30,24 @@ import java.util.List;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.MalisisFont;
 
+import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
 
 /**
  * @author Ordinastie
  *
  */
-public class UIRadioButton extends UIComponent<UIRadioButton>
+public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiText<UIRadioButton>
 {
 	private static HashMap<String, List<UIRadioButton>> radioButtons = new HashMap<>();
 
@@ -52,21 +57,23 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 	protected GuiIcon rbChecked;
 	protected GuiIcon rbHovered;
 
+	/** The {@link MalisisFont} to use for this {@link UIRadioButton}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
+	protected MalisisFont font;
+	/**
+	 * The {@link FontRenderOptions} to use for this {@link UIRadioButton}. If null, uses
+	 * {@link GuiRenderer#getDefaultFontRendererOptions()}.
+	 */
+	protected FontRenderOptions fro;
+
 	private String name;
-	private String label;
+	private String text;
 	private boolean selected;
 
-	public UIRadioButton(MalisisGui gui, String name, String label)
+	public UIRadioButton(MalisisGui gui, String name, String text)
 	{
 		super(gui);
 		this.name = name;
-		if (label != null && !label.equals(""))
-		{
-			this.label = label;
-			width = GuiRenderer.getStringWidth(label);
-		}
-
-		setSize(width + 10, 11);
+		setText(text);
 
 		shape = new SimpleGuiShape();
 
@@ -84,18 +91,102 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 		this(gui, name, null);
 	}
 
+	//#region Getters/Setters
+	/**
+	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
+	 *
+	 * @return the font
+	 */
+	@Override
+	public MalisisFont getFont()
+	{
+		return font;
+	}
+
+	/**
+	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
+	 *
+	 * @return the font renderer options
+	 */
+	@Override
+	public FontRenderOptions getFontRendererOptions()
+	{
+		return fro;
+	}
+
+	/**
+	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
+	 *
+	 * @param font the new font
+	 * @param fro the fro
+	 */
+	@Override
+	public UIRadioButton setFont(MalisisFont font, FontRenderOptions fro)
+	{
+		this.font = font;
+		this.fro = fro;
+		calculateSize();
+		return this;
+	}
+
+	/**
+	 * Sets the text for this {@link UIRadioButton}.
+	 *
+	 * @param text the new text
+	 */
+	public UIRadioButton setText(String text)
+	{
+		this.text = text;
+		calculateSize();
+		return this;
+	}
+
+	/**
+	 * Gets the text for this {@link UICheckBox}.
+	 *
+	 * @return the text
+	 */
+	public String getText()
+	{
+		return text;
+	}
+
+	/**
+	 * Checks if this {@link UIRadioButton} is selected.
+	 *
+	 * @return true, if is selected
+	 */
 	public boolean isSelected()
 	{
 		return selected;
 	}
 
-	public void setSelected()
+	/**
+	 * Sets state of this {@link UIRadioButton} to selected.<br>
+	 * If a radiobutton with the same name is currently selected, unselects it.<br>
+	 * Does not fire {@link SelectEvent}.
+	 *
+	 * @return the UI radio button
+	 */
+	public UIRadioButton setSelected()
 	{
 		UIRadioButton rb = getSelected(name);
 		if (rb != null)
 			rb.selected = false;
 		selected = true;
+		return this;
+	}
 
+	//#end Getters/Setters
+	/**
+	 * Calculates the size for this {@link UIRadioButton}.
+	 */
+	private void calculateSize()
+	{
+		int w = 0;
+		if (!StringUtils.isEmpty(text))
+			w = getRenderer().getStringWidth(this, text);
+		setSize(w + 11, 10);
 	}
 
 	@Override
@@ -133,10 +224,9 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
 
-		if (label != null)
-		{
-			renderer.drawText(label, 12, 0, 0x404040, false);
-		}
+		if (text != null)
+			renderer.drawText(font, text, 12, 0, 0, fro);
+
 	}
 
 	@Override

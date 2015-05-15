@@ -27,23 +27,35 @@ package net.malisis.core.client.gui.component.interaction;
 import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UITabGroup;
 import net.malisis.core.client.gui.component.container.UITabGroup.TabChangeEvent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
+import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
+import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.MalisisFont;
 import net.minecraft.util.IIcon;
 
 /**
  * @author Ordinastie
  *
  */
-public class UITab extends UIComponent<UITab>
+public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 {
-
+	/** The {@link MalisisFont} to use for this {@link UITooltip}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
+	protected MalisisFont font;
+	/** The {@link FontRenderOptions} to use for this {@link UITooltip}. If null, uses {@link GuiRenderer#getDefaultFontRendererOptions()}. */
+	protected FontRenderOptions fro;
+	/** The {@link FontRenderOptions} to use for this {@link UITooltip} when active. */
+	protected FontRenderOptions activeFro;
+	/** The {@link FontRenderOptions} to use for this {@link UITooltip} when hovered. */
+	protected FontRenderOptions hoveredFro;
 	/** Label for this {@link UITab}. */
 	protected String label;
 	/** Image for this {@link UITab}. */
@@ -57,16 +69,6 @@ public class UITab extends UIComponent<UITab>
 	/** Whether this {@link UITab} is currently active. */
 	protected boolean active = false;
 
-	/** Text color for this {@link UITab} when not active. */
-	protected int textColor = 0x404040;
-	/** Text color for this {@link UITab} when active. */
-	protected int activeTextColor = 0xFFFFFF;
-	/** Text color for this {@link UITab} when hovered. */
-	protected int hoverTextColor = 0xFFFFA0;
-	/** Text shadow for this {@link UITab} when not active. */
-	protected boolean textShadow = false;
-	/** Text shadow for this {@link UITab} when active. */
-	protected boolean activeTextShadow = true;
 	/** Background color for this {@link UITab}. */
 	protected int bgColor = 0xFFFFFF;
 
@@ -79,6 +81,12 @@ public class UITab extends UIComponent<UITab>
 	public UITab(MalisisGui gui, String label)
 	{
 		super(gui);
+		activeFro = new FontRenderOptions();
+		activeFro.color = 0xFFFFFF;
+		activeFro.shadow = true;
+		hoveredFro = new FontRenderOptions();
+		hoveredFro.color = 0xFFFFA0;
+
 		setSize(0, 0);
 		setLabel(label);
 
@@ -101,6 +109,90 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	//#region Getters/Setters
+	/**
+	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
+	 *
+	 * @return the font
+	 */
+	@Override
+	public MalisisFont getFont()
+	{
+		return font;
+	}
+
+	/**
+	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
+	 *
+	 * @return the font renderer options
+	 */
+	@Override
+	public FontRenderOptions getFontRendererOptions()
+	{
+		return fro;
+	}
+
+	/**
+	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
+	 *
+	 * @param font the new font
+	 * @param fro the fro
+	 */
+	@Override
+	public UITab setFont(MalisisFont font, FontRenderOptions fro)
+	{
+		this.font = font;
+		this.fro = fro;
+		if (autoWidth)
+			width = calcAutoWidth();
+		if (autoHeight)
+			height = calcAutoHeight();
+		return this;
+	}
+
+	/**
+	 * Gets the active {@link FontRenderOptions}.
+	 *
+	 * @return the activeFro
+	 */
+	public FontRenderOptions getActiveFontRendererOptions()
+	{
+		return activeFro;
+	}
+
+	/**
+	 * Sets the active {@link FontRenderOptions}.
+	 *
+	 * @param fro the fro
+	 * @return the UI tab
+	 */
+	public UITab setActiveFontRendererOptions(FontRenderOptions fro)
+	{
+		this.activeFro = fro;
+		return this;
+	}
+
+	/**
+	 * Gets the hovered {@link FontRenderOptions}.
+	 *
+	 * @return the hoveredFro
+	 */
+	public FontRenderOptions getHoveredFontRendererOptions()
+	{
+		return hoveredFro;
+	}
+
+	/**
+	 * Sets the hovered {@link FontRenderOptions}.
+	 *
+	 * @param fro the fro
+	 * @return the UI tab
+	 */
+	public UITab setHoveredFontRendererOptions(FontRenderOptions fro)
+	{
+		this.hoveredFro = fro;
+		return this;
+	}
+
 	/**
 	 * Sets the label for this {@link UITab}.<br>
 	 * Removes the image if previously set.<br>
@@ -221,116 +313,6 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	/**
-	 * Gets the text color for this {@link UITab} when not {@link #active}.
-	 *
-	 * @return the text color
-	 */
-	public int getTextColor()
-	{
-		return textColor;
-	}
-
-	/**
-	 * Sets the text color for this {@link UITab} when not {@link #active}.
-	 *
-	 * @param textColor the text color
-	 * @return the UI tab
-	 */
-	public UITab setTextColor(int textColor)
-	{
-		this.textColor = textColor;
-		return this;
-	}
-
-	/**
-	 * Gets the text color for this {@link UITab} when {@link #active}.
-	 *
-	 * @return the active text color
-	 */
-	public int getActiveTextColor()
-	{
-		return activeTextColor;
-	}
-
-	/**
-	 * Sets the text shadow for this {@link UITab} when {@link #active}.
-	 *
-	 * @param activeTextColor the active text color
-	 * @return this {@link UITab}
-	 */
-	public UITab setActiveTextColor(int activeTextColor)
-	{
-		this.activeTextColor = activeTextColor;
-		return this;
-	}
-
-	/**
-	 * Gets the text color for this {@link UITab} when not hovered.
-	 *
-	 * @return the text color
-	 */
-	public int getHoverTextColor()
-	{
-		return hoverTextColor;
-	}
-
-	/**
-	 * Sets the text color for this {@link UITab} when hovered.
-	 *
-	 * @param hovertextColor the text color
-	 * @return the UI tab
-	 */
-	public UITab setHoveredTextColor(int hovertextColor)
-	{
-		this.hoverTextColor = hovertextColor;
-		return this;
-	}
-
-	/**
-	 * Checks if text shadow is used for this {@link UITab} when not {@link #active}.
-	 *
-	 * @return true, if text shadow is used
-	 */
-	public boolean isTextShadow()
-	{
-		return textShadow;
-	}
-
-	/**
-	 * Sets the text shadow for this {@link UITab} when not {@link #active}.
-	 *
-	 * @param textShadow the text shadow
-	 * @return this {@link UITab}
-	 */
-	public UITab setTextShadow(boolean textShadow)
-	{
-		this.textShadow = textShadow;
-		return this;
-	}
-
-	/**
-	 * Checks if text shadow is used for this {@link UITab} when not {@link #active}.
-	 *
-	 * @return true, if active text shadow is used
-	 */
-	public boolean isActiveTextShadow()
-	{
-		return activeTextShadow;
-	}
-
-	/**
-	 * Sets the text shadow for this {@link UITab} when {@link #active}.
-	 *
-	 * @param activeTextShadow the active text shadow
-	 * @return the UI tab
-	 */
-	public UITab setActiveTextShadow(boolean activeTextShadow)
-	{
-		this.activeTextShadow = activeTextShadow;
-		return this;
-	}
-
-	/**
 	 * Gets the background color for this {@link UITab}.
 	 *
 	 * @return the color of this {@link UITab}.
@@ -356,19 +338,6 @@ public class UITab extends UIComponent<UITab>
 			if (cont instanceof ITransformable.Color)
 				((Color) cont).setColor(color);
 		}
-		return this;
-	}
-
-	public UITab setOptions(int textColor, int activeTextColor, int hoverTextColor, int bgColor, boolean textShadow, boolean activeTextShadow)
-	{
-		this.textColor = textColor;
-		this.activeTextColor = activeTextColor;
-		this.hoverTextColor = hoverTextColor;
-		this.textShadow = textShadow;
-		this.activeTextShadow = activeTextShadow;
-
-		setBgColor(bgColor);
-
 		return this;
 	}
 
@@ -452,7 +421,7 @@ public class UITab extends UIComponent<UITab>
 	private int calcAutoWidth()
 	{
 		if (label != null)
-			return GuiRenderer.getStringWidth(label) + (isHorizontal() ? 10 : 8);
+			return getRenderer().getStringWidth(this, label) + (isHorizontal() ? 10 : 8);
 		else if (image != null)
 			return image.getWidth() + 10;
 		else
@@ -467,11 +436,24 @@ public class UITab extends UIComponent<UITab>
 	private int calcAutoHeight()
 	{
 		if (label != null)
-			return GuiRenderer.FONT_HEIGHT + (isHorizontal() ? 8 : 10);
+			return getRenderer().getStringHeight(this) + (isHorizontal() ? 8 : 10);
 		else if (image != null)
 			return image.getHeight() + 10;
 		else
 			return 8;
+	}
+
+	@Override
+	public boolean onClick(int x, int y)
+	{
+		if (!(parent instanceof UITabGroup))
+			return super.onClick(x, y);
+
+		if (!fireEvent(new TabChangeEvent((UITabGroup) parent, this)))
+			return super.onClick(x, y);
+
+		((UITabGroup) parent).setActiveTab(this);
+		return true;
 	}
 
 	@Override
@@ -485,8 +467,8 @@ public class UITab extends UIComponent<UITab>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int w = label != null ? GuiRenderer.getStringWidth(label) : image.getWidth();
-		int h = label != null ? GuiRenderer.FONT_HEIGHT : image.getHeight();
+		int w = label != null ? getRenderer().getStringWidth(this, label) : image.getWidth();
+		int h = label != null ? getRenderer().getStringHeight(this) : image.getHeight();
 		int x = (getWidth() - w) / 2;
 		int y = (getHeight() - h) / 2 + 1;
 
@@ -511,9 +493,8 @@ public class UITab extends UIComponent<UITab>
 
 		if (label != null)
 		{
-			int color = isHovered() ? hoverTextColor : (active ? activeTextColor : textColor);
-			boolean shadow = active ? activeTextShadow : textShadow;
-			renderer.drawText(label, x, y, 1, color, shadow, true);
+			FontRenderOptions fro = isHovered() ? hoveredFro : (active ? activeFro : this.fro);
+			renderer.drawText(font, label, x, y, 1, fro);
 		}
 		else if (image != null)
 		{
@@ -524,21 +505,8 @@ public class UITab extends UIComponent<UITab>
 	}
 
 	@Override
-	public boolean onClick(int x, int y)
-	{
-		if (!(parent instanceof UITabGroup))
-			return super.onClick(x, y);
-
-		if (!fireEvent(new TabChangeEvent((UITabGroup) parent, this)))
-			return super.onClick(x, y);
-
-		((UITabGroup) parent).setActiveTab(this);
-		return true;
-	}
-
-	@Override
 	public String getPropertyString()
 	{
-		return "Label : " + label + " | " + super.getPropertyString();
+		return "label : " + label + " | " + super.getPropertyString();
 	}
 }

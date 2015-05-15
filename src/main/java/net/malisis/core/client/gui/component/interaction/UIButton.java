@@ -26,11 +26,16 @@ package net.malisis.core.client.gui.component.interaction;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
+import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
+import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.util.MouseButton;
 
 /**
@@ -38,12 +43,18 @@ import net.malisis.core.util.MouseButton;
  *
  * @author Ordinastie, PaleoCrafter
  */
-public class UIButton extends UIComponent<UIButton>
+public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton>
 {
 	protected GuiIcon iconHovered;
 	protected GuiIcon iconDisabled;
 	protected GuiIcon iconPressed;
 
+	/** The {@link MalisisFont} to use for this {@link UITooltip}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
+	protected MalisisFont font;
+	/** The {@link FontRenderOptions} to use for this {@link UITooltip}. If null, uses {@link GuiRenderer#getDefaultFontRendererOptions()}. */
+	protected FontRenderOptions fro;
+	/** The {@link FontRenderOptions} to use for this {@link UITooltip} when hovered. */
+	protected FontRenderOptions hoveredFro;
 	/** Text used for this {@link UIButton}. Exclusive with {@link #image}. */
 	protected String text;
 	/** Image used for this {@link UIButton}. Exclusive with {@link #text}. */
@@ -55,12 +66,6 @@ public class UIButton extends UIComponent<UIButton>
 
 	/** The background color of this {@link UIButton}. */
 	protected int bgColor = 0xFFFFFF;
-	/** The text color of this {@link UIButton}. */
-	protected int textColor = 0xFFFFFF;
-	/** The hovered text color of this {@link UIButton}. */
-	protected int hoverTextColor = 0xFFFFA0;
-	/** Whether to use shadow for the text of this {@link UIButton}. */
-	protected boolean textShadow = true;
 	/** Offset for the contents */
 	protected int offsetX, offsetY;
 
@@ -72,7 +77,12 @@ public class UIButton extends UIComponent<UIButton>
 	public UIButton(MalisisGui gui)
 	{
 		super(gui);
-		//setSize(60);
+		fro = new FontRenderOptions();
+		fro.color = 0xFFFFFF;
+		fro.shadow = true;
+		hoveredFro = new FontRenderOptions();
+		hoveredFro.color = 0xFFFFA0;
+		hoveredFro.shadow = true;
 
 		shape = new XYResizableGuiShape();
 		icon = gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5);
@@ -106,6 +116,64 @@ public class UIButton extends UIComponent<UIButton>
 	}
 
 	//#region Getters/Setters
+	/**
+	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
+	 *
+	 * @return the font
+	 */
+	@Override
+	public MalisisFont getFont()
+	{
+		return font;
+	}
+
+	/**
+	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
+	 *
+	 * @return the font renderer options
+	 */
+	@Override
+	public FontRenderOptions getFontRendererOptions()
+	{
+		return fro;
+	}
+
+	/**
+	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
+	 *
+	 * @param font the new font
+	 * @param fro the fro
+	 */
+	@Override
+	public UIButton setFont(MalisisFont font, FontRenderOptions fro)
+	{
+		this.font = font;
+		this.fro = fro;
+		setSize(width, height);
+		return this;
+	}
+
+	/**
+	 * Gets the {@link FontRenderOptions} used for this {@link UILabel} when hovered.
+	 *
+	 * @return the hoveredFro
+	 */
+	public FontRenderOptions getHoveredFontRendererOptions()
+	{
+		return hoveredFro;
+	}
+
+	/**
+	 * Sthe {@link FontRenderOptions} used for this {@link UILabel} when hovered.
+	 *
+	 * @param hoveredFro the hoveredFro to set
+	 * @return this {@link UIButton}
+	 */
+	public UIButton setHoveredFontRendererOptions(FontRenderOptions hoveredFro)
+	{
+		this.hoveredFro = hoveredFro;
+		return this;
+	}
 
 	/**
 	 * Gets the text of this {@link UIButton}.
@@ -188,8 +256,8 @@ public class UIButton extends UIComponent<UIButton>
 			}
 			else
 			{
-				int w = GuiRenderer.getStringWidth(text);
-				int h = GuiRenderer.getStringHeight();
+				int w = getRenderer().getStringWidth(this, text);
+				int h = getRenderer().getStringHeight(this);
 				width = Math.max(width, w + 6);
 				height = Math.max(height, h + 6);
 			}
@@ -247,72 +315,6 @@ public class UIButton extends UIComponent<UIButton>
 	}
 
 	/**
-	 * Gets the text color of this {@link UIButton}.
-	 *
-	 * @return the text color
-	 */
-	public int getTextColor()
-	{
-		return textColor;
-	}
-
-	/**
-	 * Sets the text color of this {@link UIButton}.
-	 *
-	 * @param textColor the text color
-	 * @return the UI button
-	 */
-	public UIButton setTextColor(int textColor)
-	{
-		this.textColor = textColor;
-		return this;
-	}
-
-	/**
-	 * Gets the hovered text color of this {@link UIButton}.
-	 *
-	 * @return the hover text color
-	 */
-	public int getHoverTextColor()
-	{
-		return hoverTextColor;
-	}
-
-	/**
-	 * Sets the hover text color of this {@link UIButton}.
-	 *
-	 * @param hoverTextColor the hover text color
-	 * @return the UI button
-	 */
-	public UIButton setHoverTextColor(int hoverTextColor)
-	{
-		this.hoverTextColor = hoverTextColor;
-		return this;
-	}
-
-	/**
-	 * Whether the text of this {@link UIButton} is drawn with shadow.
-	 *
-	 * @return true, if is text shadow
-	 */
-	public boolean isTextShadow()
-	{
-		return textShadow;
-	}
-
-	/**
-	 * Sets the text shadow for this {@link UIButton}.
-	 *
-	 * @param textShadow the text shadow
-	 * @return the UI button
-	 */
-	public UIButton setTextShadow(boolean textShadow)
-	{
-		this.textShadow = textShadow;
-		return this;
-	}
-
-	/**
 	 * Gets the text offset of this {@link UIButton}.
 	 *
 	 * @return the text offset x
@@ -346,24 +348,6 @@ public class UIButton extends UIComponent<UIButton>
 		return this;
 	}
 
-	/**
-	 * Sets the options for this {@link UIButton}.
-	 *
-	 * @param textColor the text color
-	 * @param hoverTextColor the hover text color
-	 * @param bgColor the bg color
-	 * @param textShadow the text shadow
-	 * @return the UI button
-	 */
-	public UIButton setOptions(int textColor, int hoverTextColor, int bgColor, boolean textShadow)
-	{
-		this.textColor = textColor;
-		this.hoverTextColor = hoverTextColor;
-		this.bgColor = bgColor;
-		this.textShadow = textShadow;
-		return this;
-	}
-
 	//#end Getters/Setters
 
 	@Override
@@ -372,6 +356,22 @@ public class UIButton extends UIComponent<UIButton>
 		MalisisGui.playSound("gui.button.press");
 		fireEvent(new ClickEvent(this, x, y));
 		return true;
+	}
+
+	@Override
+	public boolean onButtonPress(int x, int y, MouseButton button)
+	{
+		if (button == MouseButton.LEFT)
+			isPressed = true;
+		return super.onButtonPress(x, y, button);
+	}
+
+	@Override
+	public boolean onButtonRelease(int x, int y, MouseButton button)
+	{
+		if (button == MouseButton.LEFT)
+			isPressed = false;
+		return super.onButtonRelease(x, y, button);
 	}
 
 	@Override
@@ -404,8 +404,8 @@ public class UIButton extends UIComponent<UIButton>
 		}
 		else
 		{
-			w = GuiRenderer.getStringWidth(text);
-			h = GuiRenderer.getStringHeight();
+			w = getRenderer().getStringWidth(this, text);
+			h = getRenderer().getStringHeight(this);
 		}
 
 		int x = (width - w) / 2;
@@ -431,31 +431,15 @@ public class UIButton extends UIComponent<UIButton>
 		}
 		else
 		{
-			renderer.drawText(text, x, y, isHovered() ? hoverTextColor : textColor, textShadow);
+			renderer.drawText(font, text, x, y, 0, isHovered() ? hoveredFro : fro);
 		}
 
 	}
 
 	@Override
-	public boolean onButtonPress(int x, int y, MouseButton button)
-	{
-		if (button == MouseButton.LEFT)
-			isPressed = true;
-		return super.onButtonPress(x, y, button);
-	}
-
-	@Override
-	public boolean onButtonRelease(int x, int y, MouseButton button)
-	{
-		if (button == MouseButton.LEFT)
-			isPressed = false;
-		return super.onButtonRelease(x, y, button);
-	}
-
-	@Override
 	public String getPropertyString()
 	{
-		return (image != null ? "{" + image + "}" : text) + " , " + super.getPropertyString();
+		return (image != null ? "{" + image + "}" : text) + " | " + super.getPropertyString();
 	}
 
 	/**

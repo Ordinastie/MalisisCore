@@ -29,18 +29,26 @@ import java.util.List;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.AlphaTransform;
+import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.MalisisFont;
 
 /**
  * UITooltip
  *
  * @author PaleoCrafter
  */
-public class UITooltip extends UIComponent
+public class UITooltip extends UIComponent implements IGuiText<UITooltip>
 {
+	/** The {@link MalisisFont} to use for this {@link UITooltip}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
+	protected MalisisFont font;
+	/** The {@link FontRenderOptions} to use for this {@link UITooltip}. If null, uses {@link GuiRenderer#getDefaultFontRendererOptions()}. */
+	protected FontRenderOptions fro;
+
 	protected List<String> lines;
 	protected int padding = 4;
 	protected int delay = 0;
@@ -51,6 +59,9 @@ public class UITooltip extends UIComponent
 		super(gui);
 		setSize(16, 16);
 		zIndex = 300;
+		fro = new FontRenderOptions();
+		fro.color = 0xFFFFFF;
+		fro.shadow = true;
 
 		shape = new XYResizableGuiShape();
 		icon = gui.getGuiTexture().getXYResizableIcon(227, 31, 15, 15, 5);
@@ -77,10 +88,48 @@ public class UITooltip extends UIComponent
 		setDelay(delay);
 	}
 
+	//#region Getters/Setters
+	/**
+	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
+	 *
+	 * @return the font
+	 */
+	@Override
+	public MalisisFont getFont()
+	{
+		return font;
+	}
+
+	/**
+	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
+	 *
+	 * @return the font renderer options
+	 */
+	@Override
+	public FontRenderOptions getFontRendererOptions()
+	{
+		return fro;
+	}
+
+	/**
+	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
+	 *
+	 * @param font the new font
+	 * @param fro the fro
+	 */
+	@Override
+	public UITooltip setFont(MalisisFont font, FontRenderOptions fro)
+	{
+		this.font = font;
+		this.fro = fro;
+		calculateSize();
+		return this;
+	}
+
 	public UITooltip setText(String text)
 	{
 		lines = Arrays.asList(text.split("\\n"));
-		calcSize();
+		calculateSize();
 		return this;
 
 	}
@@ -88,7 +137,7 @@ public class UITooltip extends UIComponent
 	public UITooltip setText(List<String> lines)
 	{
 		this.lines = lines;
-		calcSize();
+		calculateSize();
 		return this;
 	}
 
@@ -103,14 +152,6 @@ public class UITooltip extends UIComponent
 		return delay;
 	}
 
-	protected void calcSize()
-	{
-		width = Math.max(16, GuiRenderer.getMaxStringWidth(lines));
-		width += padding * 2;
-		height = lines.size() > 1 ? (GuiRenderer.FONT_HEIGHT + 1) * (lines.size()) : 8;
-		height += padding * 2;
-	}
-
 	protected int getOffsetX()
 	{
 		return 8;
@@ -119,6 +160,18 @@ public class UITooltip extends UIComponent
 	protected int getOffsetY()
 	{
 		return -16;
+	}
+
+	//#end Getters/Setters
+
+	protected void calculateSize()
+	{
+
+		width = Math.max(16,
+				(int) getRenderer().getFont(this).getMaxStringWidth(lines, getRenderer().getFontRendererOptions(this).fontScale));
+		width += padding * 2;
+		height = lines.size() > 1 ? getRenderer().getStringHeight(this) * lines.size() : 8;
+		height += padding * 2;
 	}
 
 	public void animate()
@@ -144,12 +197,12 @@ public class UITooltip extends UIComponent
 		int x = mouseX + getOffsetX() + padding;
 		int y = mouseY + getOffsetY() + padding;
 		int i = 0;
-		for (String s : lines)
+		for (String str : lines)
 		{
 			int sy = y;
 			if (i > 0)
 				sy += 2;
-			renderer.drawText(s, x, sy + (GuiRenderer.FONT_HEIGHT + 1) * i, zIndex + 1, 0xFFFFFF, true, false);
+			renderer.drawText(font, str, x, sy + getRenderer().getStringHeight(this) * i, zIndex + 1, fro, false);
 			i++;
 		}
 	}

@@ -26,12 +26,17 @@ package net.malisis.core.client.gui.component.interaction;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.icon.GuiIcon;
+import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.MalisisFont;
 import net.minecraft.client.renderer.OpenGlHelper;
 
+import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -40,7 +45,7 @@ import org.lwjgl.opengl.GL11;
  *
  * @author PaleoCrafter
  */
-public class UICheckBox extends UIComponent<UICheckBox>
+public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICheckBox>
 {
 	protected GuiIcon bgIcon;
 	protected GuiIcon bgIconDisabled;
@@ -48,21 +53,19 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	protected GuiIcon cbChecked;
 	protected GuiIcon cbHovered;
 
-	private String label;
+	/** The {@link MalisisFont} to use for this {@link UICheckBox}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
+	protected MalisisFont font;
+	/** The {@link FontRenderOptions} to use for this {@link UICheckBox}. If null, uses {@link GuiRenderer#getDefaultFontRendererOptions()}. */
+	protected FontRenderOptions fro;
+	/** Text to draw beside the checkbox. **/
+	private String text;
+	/** Whether this {@link UICheckBox} is checked. */
 	private boolean checked;
 
-	public UICheckBox(MalisisGui gui, String label)
+	public UICheckBox(MalisisGui gui, String text)
 	{
 		super(gui);
-
-		int w = 0;
-		if (label != null && !label.equals(""))
-		{
-			this.label = label;
-			w = GuiRenderer.getStringWidth(label);
-		}
-
-		setSize(w + 11, 10);
+		setText(text);
 
 		shape = new SimpleGuiShape();
 
@@ -78,7 +81,82 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		this(gui, null);
 	}
 
+	//#region Getters/Setters
 	/**
+	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
+	 *
+	 * @return the font
+	 */
+	@Override
+	public MalisisFont getFont()
+	{
+		return font;
+	}
+
+	/**
+	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
+	 *
+	 * @return the font renderer options
+	 */
+	@Override
+	public FontRenderOptions getFontRendererOptions()
+	{
+		return fro;
+	}
+
+	/**
+	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
+	 *
+	 * @param font the new font
+	 * @param fro the fro
+	 */
+	@Override
+	public UICheckBox setFont(MalisisFont font, FontRenderOptions fro)
+	{
+		this.font = font;
+		this.fro = fro;
+		calculateSize();
+		return this;
+	}
+
+	/**
+	 * Sets the text for this {@link UICheckBox}.
+	 *
+	 * @param text the new text
+	 */
+	public UICheckBox setText(String text)
+	{
+		this.text = text;
+		calculateSize();
+		return this;
+	}
+
+	/**
+	 * Gets the text for this {@link UICheckBox}.
+	 *
+	 * @return the text
+	 */
+	public String getText()
+	{
+		return text;
+	}
+
+	//#end Getters/Setters
+
+	/**
+	 * Calculates the size for this {@link UICheckBox}.
+	 */
+	private void calculateSize()
+	{
+		int w = 0;
+		if (!StringUtils.isEmpty(text))
+			w = getRenderer().getStringWidth(this, text);
+		setSize(w + 11, 10);
+	}
+
+	/**
+	 * Checks if this {@link UICheckBox} is checked.
+	 *
 	 * @return whether this {@link UICheckBox} is checked or not.
 	 */
 	public boolean isChecked()
@@ -87,7 +165,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	}
 
 	/**
-	 * Sets the state for this {@link UICheckBox}. Does not fire CheckEvent.
+	 * Sets the state for this {@link UICheckBox}. Does not fire {@link CheckEvent}.
 	 *
 	 * @param checked true if checked
 	 * @return this {@link UIComponent}
@@ -96,6 +174,29 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	{
 		this.checked = checked;
 		return this;
+	}
+
+	@Override
+	public boolean onClick(int x, int y)
+	{
+		if (fireEvent(new CheckEvent(this, !checked)))
+			checked = !checked;
+		return true;
+	}
+
+	@Override
+	public boolean onKeyTyped(char keyChar, int keyCode)
+	{
+		if (!isFocused())
+			return super.onKeyTyped(keyChar, keyCode);
+
+		if (keyCode == Keyboard.KEY_SPACE)
+		{
+			if (fireEvent(new CheckEvent(this, !checked)))
+				checked = !checked;
+		}
+
+		return true;
 	}
 
 	@Override
@@ -134,10 +235,8 @@ public class UICheckBox extends UIComponent<UICheckBox>
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
 
-		if (label != null)
-		{
-			renderer.drawText(label, 14, 2, 0x404040, false);
-		}
+		if (!StringUtils.isEmpty(text))
+			renderer.drawText(font, text, 14, 2, 0, fro);
 	}
 
 	@Override
@@ -159,32 +258,9 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	}
 
 	@Override
-	public boolean onClick(int x, int y)
+	public String getPropertyString()
 	{
-		if (fireEvent(new CheckEvent(this, !checked)))
-			checked = !checked;
-		return true;
-	}
-
-	@Override
-	public boolean onKeyTyped(char keyChar, int keyCode)
-	{
-		if (!isFocused())
-			return super.onKeyTyped(keyChar, keyCode);
-
-		if (keyCode == Keyboard.KEY_SPACE)
-		{
-			if (fireEvent(new CheckEvent(this, !checked)))
-				checked = !checked;
-		}
-
-		return true;
-	}
-
-	@Override
-	public String toString()
-	{
-		return this.getClass().getName() + "[ text=" + label + ", checked=" + this.checked + ", " + this.getPropertyString() + " ]";
+		return "text=" + text + " | checked=" + this.checked + " | " + super.getPropertyString();
 	}
 
 	/**

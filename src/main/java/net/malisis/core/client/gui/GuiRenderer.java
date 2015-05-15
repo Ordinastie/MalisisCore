@@ -24,12 +24,7 @@
 
 package net.malisis.core.client.gui;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
@@ -41,6 +36,8 @@ import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.RenderType;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
+import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.MalisisFont;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderHelper;
@@ -49,9 +46,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 
-import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -65,10 +60,6 @@ public class GuiRenderer extends MalisisRenderer
 {
 	/** RenderItem used to draw itemStacks. */
 	public static RenderItem itemRenderer = new RenderItem();
-	/** Font height. */
-	public static int FONT_HEIGHT = MalisisRenderer.getFontRenderer().FONT_HEIGHT;
-	/** Map of EnumChatFormatting **/
-	public static Map<Character, EnumChatFormatting> charFormats = new HashMap<>();
 	/** Current component being drawn. */
 	public UIComponent currentComponent;
 	/** Width of the Minecraft window. */
@@ -79,25 +70,20 @@ public class GuiRenderer extends MalisisRenderer
 	private int scaleFactor;
 	/** Should the rendering be done according to scaleFactor. */
 	private boolean ignoreScale = false;
-	/** Scale to use when drawing fonts. */
-	private float fontScale = 1F;
 	/** Current X position of the mouse. */
 	public int mouseX;
 	/** Current Y position of the mouse. */
 	public int mouseY;
 	/** Default {@link GuiTexture} to use for current {@link MalisisGui}. */
 	private GuiTexture defaultGuiTexture;
-	/** Currently used {@link GuiTexture} */
+	/** Currently used {@link GuiTexture}. */
 	private GuiTexture currentTexture;
+	/** Currently used {@link MalisisFont}. */
+	private MalisisFont defaultFont = MalisisFont.minecraftFont;
+	/** Currently used {@link FontRenderOptions}. */
+	private FontRenderOptions defaultFro = new FontRenderOptions();
 
 	private static GuiShape rectangle = new SimpleGuiShape();
-
-	static
-	{
-		//could reflect to get EnumChatFormatting.formattingCodeMapping instead
-		for (EnumChatFormatting ecf : EnumChatFormatting.values())
-			charFormats.put(ecf.getFormattingCode(), ecf);
-	}
 
 	/**
 	 * Instantiates a new {@link GuiRenderer}.
@@ -105,6 +91,7 @@ public class GuiRenderer extends MalisisRenderer
 	public GuiRenderer()
 	{
 		defaultGuiTexture = new GuiTexture(new ResourceLocation("malisiscore", "textures/gui/gui.png"), 300, 100);
+		defaultFro.color = 0x404040;
 		updateGuiScale();
 	}
 
@@ -134,9 +121,78 @@ public class GuiRenderer extends MalisisRenderer
 		return defaultGuiTexture;
 	}
 
+	/**
+	 * Sets the default {@link GuiTexture} to use for this {@link GuiRenderer}.
+	 *
+	 * @param texture the new default texture
+	 */
 	public void setDefaultTexture(GuiTexture texture)
 	{
 		this.defaultGuiTexture = texture;
+	}
+
+	/**
+	 * Gets the default {@link MalisisFont}.
+	 *
+	 * @return the default font
+	 */
+	public MalisisFont getDefaultFont()
+	{
+		return defaultFont;
+	}
+
+	/**
+	 * Gets the default {@link FontRenderOptions}.
+	 *
+	 * @return the default font renderer options
+	 */
+	public FontRenderOptions getDefaultFontRendererOptions()
+	{
+		return defaultFro;
+	}
+
+	/**
+	 * Sets the default {@link MalisisFont} to use for this {@link GuiRenderer}.
+	 *
+	 * @param font the new default font
+	 */
+	public void setDefaultFont(MalisisFont font, FontRenderOptions fro)
+	{
+		this.defaultFont = font;
+		this.defaultFro = fro;
+	}
+
+	/**
+	 * Gets the {@link MalisisFont} to be used for the specified {@link IGuiText}.
+	 *
+	 * @param guiText the gui text
+	 * @return the font
+	 */
+	public MalisisFont getFont(IGuiText guiText)
+	{
+		return guiText == null || guiText.getFont() == null ? getDefaultFont() : guiText.getFont();
+	}
+
+	/**
+	 * Gets the {@link FontRenderOptions} to be used for the specified {@link IGuiText}.
+	 *
+	 * @param guiText the gui text
+	 * @return the font
+	 */
+	public FontRenderOptions getFontRendererOptions(IGuiText guiText)
+	{
+		return guiText == null || guiText.getFontRendererOptions() == null ? getDefaultFontRendererOptions() : guiText
+				.getFontRendererOptions();
+	}
+
+	public int getStringHeight(IGuiText guiText)
+	{
+		return (int) Math.ceil(getFont(guiText).getStringHeight(getFontRendererOptions(guiText).fontScale));
+	}
+
+	public int getStringWidth(IGuiText guiText, String text)
+	{
+		return (int) Math.ceil(getFont(guiText).getStringWidth(text, getFontRendererOptions(guiText).fontScale));
 	}
 
 	/**
@@ -158,16 +214,6 @@ public class GuiRenderer extends MalisisRenderer
 	public boolean isIgnoreScale()
 	{
 		return ignoreScale;
-	}
-
-	/**
-	 * Sets a custom font scale factor.
-	 *
-	 * @param scale the new font scale
-	 */
-	public void setFontScale(float scale)
-	{
-		fontScale = scale;
 	}
 
 	/**
@@ -376,71 +422,69 @@ public class GuiRenderer extends MalisisRenderer
 	}
 
 	/**
-	 * Draws a white text on the GUI without shadow.
+	 * Draws text with default {@link MalisisFont} and {@link FontRenderOptions}.
 	 *
 	 * @param text the text
 	 */
 	public void drawText(String text)
 	{
-		drawText(text, 0, 0, 0, 0xFFFFFF, false, true);
+		drawText(null, text, 0, 0, 0, null, true);
 	}
 
 	/**
-	 * Draws a text on the GUI with specified color and shadow.
-	 *
-	 * @param text the text
-	 * @param color the color
-	 * @param shadow the shadow
-	 */
-	public void drawText(String text, int color, boolean shadow)
-	{
-		drawText(text, 0, 0, 0, color, shadow, true);
-	}
-
-	/**
-	 * Draws a white text on the GUI without shadow, at the specified coordinates, relative to its parent container.
-	 *
-	 * @param text the text
-	 * @param x the x
-	 * @param y the y
-	 */
-	public void drawText(String text, int x, int y)
-	{
-		drawText(text, x, y, 0, 0xFFFFFF, false, true);
-	}
-
-	/**
-	 * Draws a text on the GUI at the specified coordinates, relative to its parent container, with color and shadow.
-	 *
-	 * @param text the text
-	 * @param x the x
-	 * @param y the y
-	 * @param color the color
-	 * @param shadow the shadow
-	 */
-	public void drawText(String text, int x, int y, int color, boolean shadow)
-	{
-		drawText(text, x, y, 0, color, shadow, true);
-	}
-
-	/**
-	 * Draws a string at the specified coordinates, with color and shadow.<br>
-	 * The string gets translated.<br>
-	 * Uses FontRenderer.drawString().
+	 * Draws text with default {@link MalisisFont} and {@link FontRenderOptions} at the coordinates relative to {@link #currentComponent}.
 	 *
 	 * @param text the text
 	 * @param x the x
 	 * @param y the y
 	 * @param z the z
-	 * @param color the color
-	 * @param shadow the shadow
-	 * @param relative true if the coordinates are relatives to current component
 	 */
-	public void drawText(String text, int x, int y, int z, int color, boolean shadow, boolean relative)
+	public void drawText(String text, float x, float y, float z)
 	{
-		if (MalisisRenderer.getFontRenderer() == null)
-			return;
+		drawText(null, text, x, y, z, null, true);
+	}
 
+	/**
+	 * Draw text with specified {@link MalisisFont} with {@link FontRenderOptions}.
+	 *
+	 * @param font the font
+	 * @param text the text
+	 * @param fro the fro
+	 */
+	public void drawText(MalisisFont font, String text, FontRenderOptions fro)
+	{
+		drawText(font, text, 0, 0, 0, fro, true);
+	}
+
+	/**
+	 * Draws text with specified {@link MalisisFont} with {@link FontRenderOptions} at the coordinates relative to {@link #currentComponent}
+	 *
+	 * @param font the font
+	 * @param text the text
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param fro the fro
+	 */
+	@Override
+	public void drawText(MalisisFont font, String text, float x, float y, float z, FontRenderOptions fro)
+	{
+		drawText(font, text, x, y, z, fro, true);
+	}
+
+	/**
+	 * Draws text with specified {@link MalisisFont} with {@link FontRenderOptions} at the coordinatesp passed.
+	 *
+	 * @param font the font
+	 * @param text the text
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param fro the fro
+	 * @param relative true if the coordinates are relative to current component
+	 */
+	public void drawText(MalisisFont font, String text, float x, float y, float z, FontRenderOptions fro, boolean relative)
+	{
 		if (relative && currentComponent != null)
 		{
 			x += currentComponent.screenX();
@@ -448,25 +492,12 @@ public class GuiRenderer extends MalisisRenderer
 			z += currentComponent.getZIndex();
 		}
 
-		draw();
+		if (font == null)
+			font = defaultFont;
+		if (fro == null)
+			fro = defaultFro;
 
-		text = processString(text);
-		GL11.glPushMatrix();
-		GL11.glTranslatef(x * (1 - fontScale), y * (1 - fontScale), 0);
-		GL11.glScalef(fontScale, fontScale, 1);
-		GL11.glTranslatef(0, 0, z);
-		// GL11.glDisable(GL11.GL_DEPTH_TEST);
-		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-
-		MalisisRenderer.getFontRenderer().drawString(text, x, y, color, shadow);
-
-		GL11.glPopMatrix();
-		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-		// GL11.glEnable(GL11.GL_DEPTH_TEST);
-		currentTexture = null;
-		bindDefaultTexture();
-
-		startDrawing();
+		super.drawText(font, text, x, y, z, fro);
 	}
 
 	//#end drawText()
@@ -543,7 +574,7 @@ public class GuiRenderer extends MalisisRenderer
 
 		FontRenderer fontRenderer = itemStack.getItem().getFontRenderer(itemStack);
 		if (fontRenderer == null)
-			fontRenderer = MalisisRenderer.getFontRenderer();
+			fontRenderer = Minecraft.getMinecraft().fontRendererObj;
 
 		if (label == null && (itemStack.stackSize > 1 || format != null))
 			label = Integer.toString(itemStack.stackSize);
@@ -618,287 +649,5 @@ public class GuiRenderer extends MalisisRenderer
 
 		GL11.glDisable(GL11.GL_SCISSOR_TEST);
 		GL11.glPopAttrib();
-	}
-
-	public static String processString(String str)
-	{
-		EnumChatFormatting ecf = getFormatting(str, 0);
-		if (ecf != null)
-			str = str.substring(2);
-		str = StatCollector.translateToLocal(str);
-		str = str.replaceAll("\r?\n", "").replaceAll("\t", "    ");
-		return (ecf != null ? ecf : "") + str;
-	}
-
-	/**
-	 * Clips a string to fit in the specified width. The string is translated before clipping.
-	 *
-	 * @param text the text
-	 * @param width the width
-	 * @return the string
-	 */
-	public static String clipString(String text, int width)
-	{
-		return clipString(text, width, 1, false);
-	}
-
-	/**
-	 * Clips a string to fit in the specified width with the fontScale. The string is translated before clipping.
-	 *
-	 * @param text the text
-	 * @param width the width
-	 * @param fontScale the font scale
-	 * @return the string
-	 */
-	public static String clipString(String text, int width, float fontScale)
-	{
-		return clipString(text, width, fontScale, false);
-	}
-
-	public static String clipString(String text, int width, float fontScale, boolean appendPeriods)
-	{
-		text = StatCollector.translateToLocal(text);
-		StringBuilder ret = new StringBuilder();
-		float strWidth = 0;
-		int index = 0;
-
-		if (appendPeriods)
-			width -= 4;
-
-		while (index < text.length())
-		{
-			char c = text.charAt(index);
-			strWidth += getCharWidth(c, fontScale);
-			if (strWidth < width)
-				ret.append(c);
-			else
-			{
-				if (appendPeriods)
-					ret.append("...");
-				return ret.toString();
-			}
-			index++;
-		}
-
-		return ret.toString();
-	}
-
-	/**
-	 * Gets rendering width of a string.
-	 *
-	 * @param str the str
-	 * @return the string width
-	 */
-	public static int getStringWidth(String str)
-	{
-		return getStringWidth(str, 1);
-	}
-
-	/**
-	 * Gets rendering width of a string according to fontScale.
-	 *
-	 * @param str the str
-	 * @param fontScale the font scale
-	 * @return the string width
-	 */
-	public static int getStringWidth(String str, float fontScale)
-	{
-		if (StringUtils.isEmpty(str))
-			return 0;
-
-		str = processString(str);
-		return (int) Math.ceil(MalisisRenderer.getFontRenderer().getStringWidth(str) * fontScale);
-	}
-
-	/**
-	 * Gets the rendering height of strings.
-	 *
-	 * @return the string height
-	 */
-	public static int getStringHeight()
-	{
-		return getStringHeight(1);
-	}
-
-	/**
-	 * Gets the rendering height of strings according to fontscale.
-	 *
-	 * @param fontScale the font scale
-	 * @return the string height
-	 */
-	public static int getStringHeight(float fontScale)
-	{
-		return (int) Math.ceil(FONT_HEIGHT * fontScale);
-	}
-
-	/**
-	 * Gets the max string width.
-	 *
-	 * @param strings the strings
-	 * @return the max string width
-	 */
-	public static int getMaxStringWidth(List<String> strings)
-	{
-		return getMaxStringWidth(strings, 1);
-	}
-
-	/**
-	 * Gets max rendering width of an array of string.
-	 *
-	 * @param strings the strings
-	 * @param fontScale the font scale
-	 * @return the max string width
-	 */
-	public static int getMaxStringWidth(List<String> strings, float fontScale)
-	{
-		int width = 0;
-		for (String str : strings)
-			width = Math.max(width, getStringWidth(str, fontScale));
-		return width;
-	}
-
-	/**
-	 * Gets the rendering width of a char.
-	 *
-	 * @param c the c
-	 * @return the char width
-	 */
-	public static float getCharWidth(char c)
-	{
-		return getCharWidth(c, 1);
-	}
-
-	/**
-	 * Gets the rendering width of a char with the specified fontScale.
-	 *
-	 * @param c the c
-	 * @param fontScale the font scale
-	 * @return the char width
-	 */
-	public static float getCharWidth(char c, float fontScale)
-	{
-		if (c == '\r' || c == '\n')
-			return 0;
-		if (c == '\t')
-			return getCharWidth(' ', fontScale) * 4;
-
-		float s = MalisisRenderer.getFontRenderer().getCharWidth(c) * fontScale;
-		return s >= 0 ? s : 0;
-	}
-
-	/**
-	 * Splits the string in multiple lines to fit in the specified maxWidth.
-	 *
-	 * @param text the text
-	 * @param maxWidth the max width
-	 * @return list of lines that won't exceed maxWidth limit
-	 */
-	public static List<String> wrapText(String text, int maxWidth)
-	{
-		return wrapText(text, maxWidth, 1);
-	}
-
-	/**
-	 * Splits the string in multiple lines to fit in the specified maxWidth using the specified fontScale.
-	 *
-	 * @param text the text
-	 * @param maxWidth the max width
-	 * @param fontScale the font scale
-	 * @return list of lines that won't exceed maxWidth limit
-	 */
-	public static List<String> wrapText(String text, int maxWidth, float fontScale)
-	{
-		List<String> lines = new ArrayList<>();
-		String[] texts = text.split("\r?(?<=\n)");
-		if (texts.length > 1)
-		{
-			for (String str : texts)
-				lines.addAll(wrapText(str, maxWidth, fontScale));
-			return lines;
-		}
-
-		List<EnumChatFormatting> modifiers = new LinkedList<>();
-		EnumChatFormatting ecf;
-		StringBuilder line = new StringBuilder();
-		StringBuilder word = new StringBuilder();
-
-		float lineWidth = 0;
-		float wordWidth = 0;
-		int index = 0;
-
-		text = StatCollector.translateToLocal(text);
-
-		while (index < text.length())
-		{
-			while ((ecf = getFormatting(text, index)) != null)
-			{
-				if (ecf == EnumChatFormatting.RESET || ecf.isColor())
-					modifiers.clear();
-				if (ecf != EnumChatFormatting.RESET)
-					modifiers.add(ecf);
-				index += 2;
-				word.append(ecf.toString());
-				if (index >= text.length())
-					break;
-			}
-
-			char c = text.charAt(index);
-
-			float w = getCharWidth(c, fontScale);
-			lineWidth += w;
-			wordWidth += w;
-			word.append(c);
-			//we just ended a new word, add it to the current line
-			if (c == ' ' || c == '-' || c == '.')
-			{
-				line.append(word);
-				word.setLength(0);
-				wordWidth = 0;
-			}
-			if (lineWidth >= maxWidth)
-			{
-				//the first word on the line is too large, split anyway
-				if (line.length() == 0)
-				{
-					line.append(word);
-					word.setLength(0);
-					wordWidth = 0;
-				}
-				//make a new line
-				lines.add(line.toString());
-				line.setLength(0);
-
-				//add modifiers to the new line
-				for (int i = 0; i < modifiers.size(); i++)
-					line.insert(i * 2, modifiers.get(i));
-
-				lineWidth = wordWidth;
-			}
-			index++;
-		}
-
-		line.append(word);
-		lines.add(line.toString());
-
-		return lines;
-	}
-
-	/**
-	 * Gets the {@link EnumChatFormatting} at the specified position in the text.<br>
-	 * Returns null if
-	 *
-	 * @param text the text
-	 * @param index the index
-	 * @return the formatting
-	 */
-	private static EnumChatFormatting getFormatting(String text, int index)
-	{
-		if (text == null || index >= text.length() - 3)
-			return null;
-
-		char c = text.charAt(index);
-		if (c != '\u00a7')
-			return null;
-		return charFormats.get(text.charAt(index + 1));
 	}
 }

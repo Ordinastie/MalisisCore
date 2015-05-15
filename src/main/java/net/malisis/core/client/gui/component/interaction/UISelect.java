@@ -31,7 +31,9 @@ import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IClipable;
+import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UISelect.Option;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
@@ -39,7 +41,8 @@ import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.icon.GuiIcon;
-import net.minecraft.util.EnumChatFormatting;
+import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.MalisisFont;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
@@ -56,8 +59,19 @@ import com.google.common.collect.Iterables;
  *
  * @author Ordinastie
  */
-public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Option<T>>, IClipable
+public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Option<T>>, IClipable, IGuiText<UISelect<T>>
 {
+	/** The {@link MalisisFont} to use for this {@link UISelect}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
+	protected MalisisFont font;
+	/** The {@link FontRenderOptions} to use for this {@link UISelect}. If null, uses {@link GuiRenderer#getDefaultFontRendererOptions()}. */
+	protected FontRenderOptions fro;
+	/** The {@link FontRenderOptions} to use for this {@link UISelect} when option is hovered. */
+	protected FontRenderOptions hoveredFro;
+	/** The {@link FontRenderOptions} to use for this {@link UISelect} when option is selected. */
+	protected FontRenderOptions selectedFro;
+	/** The {@link FontRenderOptions} to use for this {@link UISelect} when option is disabled. */
+	protected FontRenderOptions disabledFro;
+
 	/** The {@link Option options} of this {@link UISelect}. */
 	protected FluentIterable<Option<T>> options;
 	/** Currently selected option index. */
@@ -93,20 +107,10 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		}
 	};
 
-	/** Text color. */
-	protected int textColor = 0xFFFFFF;
 	/** Background color */
 	protected int bgColor = 0xFFFFFF;
-	/** Hovered text color */
-	protected int hoverTextColor = 0xDED89F;
 	/** Hovered background color */
 	protected int hoverBgColor = 0x5E789F;
-	/** Selected text color */
-	protected int selectTextColor = 0x9EA8DF;
-	/* Disabled text color */
-	protected int disabledTextColor = 0x444444;
-	/** Text shadow */
-	protected boolean textShadow = true;
 
 	/** Shape used to draw the arrow. */
 	protected GuiShape arrowShape;
@@ -135,6 +139,18 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		super(gui);
 		setSize(width, 12);
 		setOptions(values);
+		fro = new FontRenderOptions();
+		fro.color = 0xFFFFFF;
+		fro.shadow = true;
+		hoveredFro = new FontRenderOptions();
+		hoveredFro.color = 0xDED89F;
+		hoveredFro.shadow = true;
+		selectedFro = new FontRenderOptions();
+		selectedFro.color = 0x9EA8DF;
+		selectedFro.shadow = true;
+		disabledFro = new FontRenderOptions();
+		disabledFro.color = 0x444444;
+		disabledFro.shadow = false;
 
 		shape = new XResizableGuiShape(3);
 		arrowShape = new SimpleGuiShape();
@@ -161,14 +177,106 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	}
 
 	//#region Getters/Setters
-	public int getTextColor()
+	/**
+	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
+	 *
+	 * @return the font
+	 */
+	@Override
+	public MalisisFont getFont()
 	{
-		return textColor;
+		return font;
 	}
 
-	public UISelect<T> setTextColor(int textColor)
+	/**
+	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
+	 *
+	 * @return the font renderer options
+	 */
+	@Override
+	public FontRenderOptions getFontRendererOptions()
 	{
-		this.textColor = textColor;
+		return fro;
+	}
+
+	/**
+	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
+	 *
+	 * @param font the new font
+	 * @param fro the fro
+	 */
+	@Override
+	public UISelect<T> setFont(MalisisFont font, FontRenderOptions fro)
+	{
+		this.font = font;
+		this.fro = fro;
+		calcOptionsSize();
+		return this;
+	}
+
+	/**
+	 * Gets the hovered {@link FontRenderOptions}.
+	 *
+	 * @return the hoveredFro
+	 */
+	public FontRenderOptions getHoveredFontRendererOptions()
+	{
+		return hoveredFro;
+	}
+
+	/**
+	 * Sets the selected {@link FontRenderOptions}.
+	 *
+	 * @param fro the fro
+	 * @return this {@link UISelect}
+	 */
+	public UISelect<T> setSelectedFontRendererOptions(FontRenderOptions fro)
+	{
+		selectedFro = fro;
+		return this;
+	}
+
+	/**
+	 * Gets the selected {@link FontRenderOptions}.
+	 *
+	 * @return the hoveredFro
+	 */
+	public FontRenderOptions getSelectedFontRendererOptions()
+	{
+		return selectedFro;
+	}
+
+	/**
+	 * Sets the disabled {@link FontRenderOptions}.
+	 *
+	 * @param fro the fro
+	 * @return this {@link UISelect}
+	 */
+	public UISelect<T> setDisabledFontRendererOptions(FontRenderOptions fro)
+	{
+		disabledFro = fro;
+		return this;
+	}
+
+	/**
+	 * Gets the disabled {@link FontRenderOptions}.
+	 *
+	 * @return the hoveredFro
+	 */
+	public FontRenderOptions getDisabledFontRendererOptions()
+	{
+		return disabledFro;
+	}
+
+	/**
+	 * Sets the hovered {@link FontRenderOptions}.
+	 *
+	 * @param fro the fro
+	 * @return this {@link UISelect}
+	 */
+	public UISelect<T> setHoveredFontRendererOptions(FontRenderOptions fro)
+	{
+		hoveredFro = fro;
 		return this;
 	}
 
@@ -183,17 +291,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		return this;
 	}
 
-	public int getHoverTextColor()
-	{
-		return hoverTextColor;
-	}
-
-	public UISelect<T> setHoverTextColor(int hoverTextColor)
-	{
-		this.hoverTextColor = hoverTextColor;
-		return this;
-	}
-
 	public int getHoverBgColor()
 	{
 		return hoverBgColor;
@@ -205,49 +302,10 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		return this;
 	}
 
-	public int getSelectTextColor()
+	public UISelect<T> setColors(int bgColor, int hoverBgColor)
 	{
-		return selectTextColor;
-	}
-
-	public UISelect<T> setSelectTextColor(int selectTextColor)
-	{
-		this.selectTextColor = selectTextColor;
-		return this;
-	}
-
-	public int getDisabledTextColor()
-	{
-		return disabledTextColor;
-	}
-
-	public UISelect<T> setDisabledTextColor(int disabledTextColor)
-	{
-		this.disabledTextColor = disabledTextColor;
-		return this;
-	}
-
-	public boolean isTextShadow()
-	{
-		return textShadow;
-	}
-
-	public UISelect<T> setTextShadow(boolean textShadow)
-	{
-		this.textShadow = textShadow;
-		return this;
-	}
-
-	public UISelect<T> setColors(int textColor, int bgColor, int hoverTextColor, int hoverBgColor, int selectTextColor, int disabledTextColor, boolean textShadow)
-	{
-		this.textColor = textColor;
 		this.bgColor = bgColor;
-		this.hoverTextColor = hoverTextColor;
 		this.hoverBgColor = hoverBgColor;
-		this.selectTextColor = selectTextColor;
-		this.disabledTextColor = disabledTextColor;
-		this.textShadow = textShadow;
-
 		return this;
 	}
 
@@ -317,7 +375,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	{
 		optionsWidth = getWidth() - 4;
 		for (Option<?> option : this)
-			optionsWidth = Math.max(optionsWidth, GuiRenderer.getStringWidth(option.getLabel(labelPattern)));
+			optionsWidth = Math.max(optionsWidth, (int) MalisisFont.minecraftFont.getStringWidth(option.getLabel(labelPattern)));
 
 		optionsWidth += 4;
 		if (maxExpandedWidth > 0)
@@ -528,9 +586,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		int cy = 0;
 		for (Option<T> option : this)
 		{
-			if (cy + option.getHeight() > y)
+			if (cy + option.getHeight(this) > y)
 				return option;
-			cy += option.getHeight();
+			cy += option.getHeight(this);
 		}
 		return null;
 	}
@@ -626,7 +684,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		for (Option option : this)
 		{
 			option.draw(this, renderer, 0, y, 0, partialTick, option.equals(hover), false);
-			y += option.getHeight();
+			y += option.getHeight(this);
 		}
 
 		renderer.endClipping(area);
@@ -802,9 +860,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			this.disabled = disabled;
 		}
 
-		public int getHeight()
+		public int getHeight(UISelect select)
 		{
-			return GuiRenderer.getStringHeight() + 1;
+			return select.getRenderer().getStringHeight(select) + 1;
 		}
 
 		public void draw(UISelect select, GuiRenderer renderer, int x, int y, int z, float partialTick, boolean hovered, boolean isTop)
@@ -815,25 +873,21 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 			if (hovered && !disabled)
 			{
-				renderer.drawRectangle(x + 1, y - 1, z + 2, select.optionsWidth - 2, getHeight(), select.getHoverBgColor(), 255);
+				renderer.drawRectangle(x + 1, y - 1, z + 2, select.optionsWidth - 2, getHeight(select), select.getHoverBgColor(), 255);
 			}
 
 			if (isTop)
-				text = GuiRenderer.clipString(text, select.getWidth() - 15);
+				text = MalisisFont.minecraftFont.clipString(text, select.getWidth() - 15);
 
-			int color = equals(select.getSelectedOption()) && !isTop ? select.getSelectTextColor() : select.getTextColor();
-			boolean shadow = select.isTextShadow();
-
+			FontRenderOptions fro = null;
 			if (hovered)
-				color = select.getHoverTextColor();
+				fro = select.getHoveredFontRendererOptions();
+			if (equals(select.getSelectedOption()) && !isTop)
+				fro = select.getSelectedFontRendererOptions();
 			if (disabled)
-			{
-				text = EnumChatFormatting.ITALIC + text;
-				color = select.getDisabledTextColor();
-				shadow = false;
-			}
+				fro = select.getDisabledFontRendererOptions();
 
-			renderer.drawText(text, x + 2, y, z + 2, color, shadow, true);
+			renderer.drawText(select.font, text, x + 2, y, z + 2, fro);
 		}
 
 		@Override

@@ -38,6 +38,8 @@ import net.malisis.core.inventory.MalisisSlot;
 import net.malisis.core.inventory.message.InventoryActionMessage;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.AnimationRenderer;
+import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -104,6 +106,16 @@ public abstract class MalisisGui extends GuiScreen
 	public abstract void construct();
 
 	/**
+	 * Gets the {@link GuiRenderer} for this {@link MalisisGui}.
+	 *
+	 * @return the renderer
+	 */
+	public GuiRenderer getRenderer()
+	{
+		return renderer;
+	}
+
+	/**
 	 * Sets the {@link MalisisInventoryContainer} for this {@link MalisisGui}.
 	 *
 	 * @param container the inventory container
@@ -124,11 +136,33 @@ public abstract class MalisisGui extends GuiScreen
 	}
 
 	/**
+	 * Gets the default {@link GuiTexture} used by the {@link GuiRenderer}.
+	 *
 	 * @return the defaultGuiTexture
 	 */
 	public GuiTexture getGuiTexture()
 	{
 		return renderer.getDefaultTexture();
+	}
+
+	/**
+	 * Gets the defaut {@link MalisisFont} used by the {@link GuiRenderer}.
+	 *
+	 * @return the font
+	 */
+	public MalisisFont getFont()
+	{
+		return renderer.getDefaultFont();
+	}
+
+	/**
+	 * Gets the default {@link FontRenderOptions} used by the {@link GuiRenderer}.
+	 *
+	 * @return the font render options
+	 */
+	public FontRenderOptions getFontRenderOptions()
+	{
+		return renderer.getDefaultFontRendererOptions();
 	}
 
 	/**
@@ -637,7 +671,8 @@ public abstract class MalisisGui extends GuiScreen
 
 	public static void playSound(String name, float level)
 	{
-		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.createPositionedSoundRecord(new ResourceLocation(name), level));
+		Minecraft.getMinecraft().getSoundHandler()
+				.playSound(PositionedSoundRecord.createPositionedSoundRecord(new ResourceLocation(name), level));
 	}
 
 	public static boolean isGuiCloseKey(int keyCode)
