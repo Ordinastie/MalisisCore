@@ -80,22 +80,22 @@ public class MalisisFont
 	/** Size of the texture (width and height) **/
 	protected int size;
 
-	public MalisisFont(File fontFile) throws FileNotFoundException
+	public MalisisFont(File fontFile)
 	{
 		this(load(fontFile, FontGeneratorOptions.DEFAULT), null);
 	}
 
-	public MalisisFont(File fontFile, FontGeneratorOptions options) throws FileNotFoundException
+	public MalisisFont(File fontFile, FontGeneratorOptions options)
 	{
 		this(load(fontFile, options), options);
 	}
 
-	public MalisisFont(ResourceLocation fontFile) throws IOException
+	public MalisisFont(ResourceLocation fontFile)
 	{
 		this(load(fontFile, FontGeneratorOptions.DEFAULT), null);
 	}
 
-	public MalisisFont(ResourceLocation fontFile, FontGeneratorOptions options) throws IOException
+	public MalisisFont(ResourceLocation fontFile, FontGeneratorOptions options)
 	{
 		this(load(fontFile, options), options);
 	}
@@ -689,14 +689,30 @@ public class MalisisFont
 	//#end Load font
 
 	//#region Font load
-	public static Font load(ResourceLocation rl, FontGeneratorOptions options) throws IOException
+	public static Font load(ResourceLocation rl, FontGeneratorOptions options)
 	{
-		return load(Minecraft.getMinecraft().getResourceManager().getResource(rl).getInputStream(), options);
+		try
+		{
+			return load(Minecraft.getMinecraft().getResourceManager().getResource(rl).getInputStream(), options);
+		}
+		catch (IOException e)
+		{
+			MalisisCore.log.error("[MalisiFont] Couldn't load font from ResourceLocation.", e);
+			return null;
+		}
 	}
 
-	public static Font load(File file, FontGeneratorOptions options) throws FileNotFoundException
+	public static Font load(File file, FontGeneratorOptions options)
 	{
-		return load(new FileInputStream(file), options);
+		try
+		{
+			return load(new FileInputStream(file), options);
+		}
+		catch (FileNotFoundException e)
+		{
+			MalisisCore.log.error("[MalisiFont] Couldn't load font from File.", e);
+			return null;
+		}
 	}
 
 	public static Font load(InputStream is, FontGeneratorOptions options)
@@ -708,10 +724,9 @@ public class MalisisFont
 		}
 		catch (IOException | FontFormatException e)
 		{
-			e.printStackTrace();
+			MalisisCore.log.error("[MalisiFont] Couldn't load font from InputStream.", e);
+			return null;
 		}
-
-		return null;
 	}
 
 	//#end Font load
