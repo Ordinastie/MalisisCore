@@ -223,6 +223,9 @@ public class UISlot extends UIComponent<UISlot>
 		if (container.getPickedItemStack() != null)
 			return super.onButtonPress(x, y, button);
 
+		if (button.getCode() == Minecraft.getMinecraft().gameSettings.keyBindPickBlock.getKeyCode() + 100)
+			action = ActionType.PICKBLOCK;
+
 		if (button == MouseButton.LEFT)
 			action = GuiScreen.isShiftKeyDown() ? ActionType.SHIFT_LEFT_CLICK : ActionType.LEFT_CLICK;
 
@@ -291,7 +294,7 @@ public class UISlot extends UIComponent<UISlot>
 	@Override
 	public boolean onKeyTyped(char keyChar, int keyCode)
 	{
-		if (!isHovered() || keyCode == Keyboard.KEY_ESCAPE || keyChar == Keyboard.KEY_TAB)
+		if (!isHovered() || MalisisGui.isGuiCloseKey(keyCode))
 			return super.onKeyTyped(keyChar, keyCode);
 
 		ActionType action = null;
