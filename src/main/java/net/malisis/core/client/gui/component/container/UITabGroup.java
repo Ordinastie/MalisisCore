@@ -30,6 +30,7 @@ import java.util.Map;
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.interaction.UITab;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
@@ -233,6 +234,13 @@ public class UITabGroup extends UIContainer<UITabGroup>
 			h += offset * 2;
 
 		setSize(w + 2, h + 2);
+	}
+
+	public void setActiveTab(String tabName)
+	{
+		UIComponent comp = getComponent(tabName);
+		if (comp instanceof UITab)
+			setActiveTab((UITab) comp);
 	}
 
 	/**
