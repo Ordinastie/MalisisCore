@@ -37,6 +37,8 @@ import net.minecraft.util.ResourceLocation;
 
 import org.apache.commons.lang3.StringUtils;
 
+import cpw.mods.fml.client.FMLClientHandler;
+
 /**
  * @author Ordinastie
  *
@@ -62,7 +64,11 @@ public class MinecraftFont extends MalisisFont
 
 	private void setField()
 	{
-		charWidthField = AsmUtils.changeAccess(FontRenderer.class, "charWidth", "field_78286_d");
+		String srg = "field_78286_d";
+		if (FMLClientHandler.instance().hasOptifine())
+			srg = "d";
+
+		charWidthField = AsmUtils.changeAccess(FontRenderer.class, "charWidth", srg);
 	}
 
 	protected float getWidth(char c)
@@ -70,7 +76,12 @@ public class MinecraftFont extends MalisisFont
 		try
 		{
 			if (c >= 0 && c < 256)
-				return ((int[]) charWidthField.get(fontRenderer))[c];
+			{
+				if (FMLClientHandler.instance().hasOptifine())
+					return ((float[]) charWidthField.get(fontRenderer))[c];
+				else
+					return ((int[]) charWidthField.get(fontRenderer))[c];
+			}
 		}
 		catch (IllegalArgumentException | IllegalAccessException e)
 		{
