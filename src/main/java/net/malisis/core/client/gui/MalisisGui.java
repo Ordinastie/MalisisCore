@@ -27,8 +27,11 @@ package net.malisis.core.client.gui;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.client.gui.component.IKeyListener;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.client.gui.component.container.UIContainer;
@@ -84,10 +87,14 @@ public abstract class MalisisGui extends GuiScreen
 	private AnimationRenderer ar;
 	/** Currently hovered child component. */
 	protected UIComponent hoveredComponent;
-	/** Currently focused child component */
+	/** Currently focused child component. */
 	protected UIComponent focusedComponent;
-	/** Whether this GUI has been constructed */
+	/** Whether this GUI has been constructed. */
 	protected boolean constructed = false;
+	/** List of {@link IKeyListener} registered. */
+	protected Set<IKeyListener> keyListeners = new HashSet<>();
+	/** Debug **/
+	private boolean debug = false;
 
 	protected MalisisGui()
 	{
@@ -192,6 +199,26 @@ public abstract class MalisisGui extends GuiScreen
 	public void clearScreen()
 	{
 		screen.removeAll();
+	}
+
+	/**
+	 * Registers a {@link IKeyListener} that will always receive keys types, even when not focused or hovered.
+	 *
+	 * @param listener the listener
+	 */
+	public void registerKeyListener(IKeyListener listener)
+	{
+		keyListeners.add(listener);
+	}
+
+	/**
+	 * Unregisters a previously registered IKeyListener.
+	 *
+	 * @param listener the listener
+	 */
+	public void unregisterKeyListener(IKeyListener listener)
+	{
+		keyListeners.remove(listener);
 	}
 
 	/**
@@ -370,19 +397,31 @@ public abstract class MalisisGui extends GuiScreen
 	{
 		try
 		{
-			if (focusedComponent != null && focusedComponent.onKeyTyped(keyChar, keyCode))
+			boolean ret = false;
+			for (IKeyListener listener : keyListeners)
+				ret |= listener.onKeyTyped(keyChar, keyCode);
+
+			if (ret)
 				return;
 
-			if (hoveredComponent != null && hoveredComponent.onKeyTyped(keyChar, keyCode))
+			if (focusedComponent != null && !keyListeners.contains(focusedComponent) && focusedComponent.onKeyTyped(keyChar, keyCode))
+				return;
+
+			if (hoveredComponent != null && !keyListeners.contains(hoveredComponent) && hoveredComponent.onKeyTyped(keyChar, keyCode))
 				return;
 
 			if (isGuiCloseKey(keyCode))
 				close();
 
-			if (!MalisisCore.isObfEnv && isCtrlKeyDown() && keyCode == Keyboard.KEY_R && currentGui() != null)
+			if (!MalisisCore.isObfEnv && isCtrlKeyDown() && currentGui() != null)
 			{
-				screen.removeAll();
-				construct();
+				if (keyCode == Keyboard.KEY_R)
+				{
+					clearScreen();
+					construct();
+				}
+				if (keyCode == Keyboard.KEY_D)
+					debug = !debug;
 			}
 		}
 		catch (Exception e)
@@ -436,8 +475,16 @@ public abstract class MalisisGui extends GuiScreen
 
 		renderer.drawScreen(screen, mouseX, mouseY, partialTicks);
 
-		//		if (hoveredComponent != null)
-		//			renderer.drawString(hoveredComponent.toString(), 5, 5, 0, 0xFFFFFF, true);
+		if (debug)
+		{
+			FontRenderOptions fro = new FontRenderOptions();
+			fro.color = 0xFFFFFF;
+			fro.shadow = true;
+			//fro.fontScale = 1 / renderer.getScaleFactor() * 2;
+			renderer.drawText(null, "Mouse : " + mouseX + "," + mouseY, 5, 5, 0, fro, false);
+			renderer.drawText(null, "Focus : " + focusedComponent, 5, 15, 0, fro, false);
+			renderer.drawText(null, "Hover : " + hoveredComponent, 5, 25, 0, fro, false);
+		}
 
 		if (inventoryContainer != null)
 		{
@@ -624,10 +671,14 @@ public abstract class MalisisGui extends GuiScreen
 			return false;
 		}
 
-		if (gui.hoveredComponent != null)
-			gui.hoveredComponent.setHovered(false);
+		if (hovered)
+		{
+			if (gui.hoveredComponent != null)
+				gui.hoveredComponent.setHovered(false);
 
-		gui.hoveredComponent = component;
+			gui.hoveredComponent = component;
+		}
+
 		return true;
 	}
 
@@ -657,10 +708,13 @@ public abstract class MalisisGui extends GuiScreen
 			return false;
 		}
 
-		if (gui.focusedComponent != null)
-			gui.focusedComponent.setFocused(false);
+		if (focused)
+		{
+			if (gui.focusedComponent != null)
+				gui.focusedComponent.setFocused(false);
 
-		gui.focusedComponent = component;
+			gui.focusedComponent = component;
+		}
 		return true;
 	}
 

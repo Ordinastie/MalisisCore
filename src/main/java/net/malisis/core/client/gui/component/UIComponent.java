@@ -65,7 +65,7 @@ import com.google.common.eventbus.EventBus;
  * @param <T> the type of <code>UIComponent</code>
  */
 public abstract class UIComponent<T extends UIComponent> implements ITransformable.Position<T>, ITransformable.Size<T>,
-		ITransformable.Alpha
+		ITransformable.Alpha, IKeyListener
 {
 	/** The Exception handler for all Compoenent events. */
 	private static final ComponentExceptionHandler exceptionHandler = new ComponentExceptionHandler();
@@ -538,9 +538,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	 *
 	 * @param name the name to be used
 	 */
-	public void setName(String name)
+	public T setName(String name)
 	{
 		this.name = name;
+		return (T) this;
 	}
 
 	/**
@@ -790,13 +791,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		return parent != null && !(this instanceof IControlComponent) ? parent.onScrollWheel(x, y, delta) : false;
 	}
 
-	/**
-	 * Called when a key is typed while this {@link UIComponent} is focused or hovered.<br>
-	 *
-	 * @param keyChar the key char
-	 * @param keyCode the key code
-	 * @return true, if successful
-	 */
+	@Override
 	public boolean onKeyTyped(char keyChar, int keyCode)
 	{
 		if (isDisabled())
