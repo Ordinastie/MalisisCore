@@ -879,11 +879,12 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			if (isTop)
 				text = MalisisFont.minecraftFont.clipString(text, select.getWidth() - 15);
 
-			FontRenderOptions fro = null;
-			if (hovered)
-				fro = select.getHoveredFontRendererOptions();
+			FontRenderOptions fro = select.getFontRendererOptions();
 			if (equals(select.getSelectedOption()) && !isTop)
 				fro = select.getSelectedFontRendererOptions();
+			if (hovered)
+				fro = select.getHoveredFontRendererOptions();
+
 			if (disabled)
 				fro = select.getDisabledFontRendererOptions();
 
