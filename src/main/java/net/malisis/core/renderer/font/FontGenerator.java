@@ -45,6 +45,13 @@ import org.apache.commons.io.FileUtils;
  */
 public class FontGenerator
 {
+	static
+	{
+		File f = new File("fonts/");
+		if (!f.exists())
+			f.mkdir();
+	}
+
 	private Font font;
 	private CharData[] charData;
 	private FontGeneratorOptions options;
