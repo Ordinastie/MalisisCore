@@ -42,6 +42,8 @@ import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
 import net.minecraft.client.gui.GuiScreen;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.eventbus.Subscribe;
 
 /**
@@ -284,7 +286,53 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	}
 
 	/**
-	 * Gets the component at the specified coordinates.<br>
+	 * Gets the {@link UIComponent} matching the specified name.
+	 *
+	 * @param name the name
+	 * @return the component
+	 */
+	public UIComponent getComponent(String name)
+	{
+		return getComponent(name, false);
+	}
+
+	/**
+	 * Gets the {@link UIComponent} matching the specified name. If recursive is true, looks for the {@code UIComponent} inside it child
+	 * {@link UIContainer} too.
+	 *
+	 * @param name the name
+	 * @param recursive if true, look inside child {@code UIContainer}
+	 * @return the component
+	 */
+	public UIComponent getComponent(String name, boolean recursive)
+	{
+		if (StringUtils.isEmpty(name))
+			return null;
+
+		for (UIComponent c : components)
+		{
+			if (name.equals(c.getName()))
+				return c;
+		}
+
+		if (!recursive)
+			return null;
+
+		for (UIComponent c : components)
+		{
+			if (c instanceof UIContainer)
+			{
+				UIComponent found = getComponent(name, true);
+				if (found != null)
+					return found;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Gets the {@link UIComponent} at the specified coordinates.<br>
 	 * Selects the component with the highest z-index from the components overlapping the coordinates.
 	 *
 	 * @param x the x
