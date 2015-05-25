@@ -887,12 +887,12 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	/**
 	 * Draws a string at the specified coordinates, with color and shadow. The string gets translated. Uses FontRenderer.drawString().
 	 *
+	 * @param font the font
 	 * @param text the text
 	 * @param x the x
 	 * @param y the y
 	 * @param z the z
-	 * @param color the color
-	 * @param shadow the shadow
+	 * @param fro the fro
 	 */
 	public void drawText(MalisisFont font, String text, float x, float y, float z, FontRenderOptions fro)
 	{

@@ -304,11 +304,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	/**
 	 * Sets the options.
 	 *
-	 * @param textColor the text color
 	 * @param bgColor the bg color
 	 * @param cursorColor the cursor color
 	 * @param selectColor the select color
-	 * @param textShadow the text shadow
 	 * @return the UI text field
 	 */
 	public UITextField setOptions(int bgColor, int cursorColor, int selectColor)
