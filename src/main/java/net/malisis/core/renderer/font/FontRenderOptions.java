@@ -99,7 +99,8 @@ public class FontRenderOptions
 	 */
 	public String processStyles(String text)
 	{
-		saveDefault();
+		if (!defaultSaved)
+			saveDefault();
 		EnumChatFormatting ecf;
 		while ((ecf = getFormatting(text, 0)) != null)
 		{
@@ -112,7 +113,8 @@ public class FontRenderOptions
 
 	public int processStyles(String text, int index)
 	{
-		saveDefault();
+		if (!defaultSaved)
+			saveDefault();
 		EnumChatFormatting ecf;
 		int offset = 0;
 		while ((ecf = getFormatting(text, index + offset)) != null)
@@ -126,9 +128,6 @@ public class FontRenderOptions
 
 	public void saveDefault()
 	{
-		if (defaultSaved)
-			return;
-
 		defaultSaved = true;
 		defaultFro.color = color;
 		defaultFro.strikethrough = strikethrough;
