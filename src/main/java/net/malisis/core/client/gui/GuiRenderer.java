@@ -231,6 +231,16 @@ public class GuiRenderer extends MalisisRenderer
 	}
 
 	/**
+	 * Gets the scale factor used by the GUI.
+	 *
+	 * @return the scale factor
+	 */
+	public float getScaleFactor()
+	{
+		return scaleFactor;
+	}
+
+	/**
 	 * Sets the mouse position and the partial tick.
 	 *
 	 * @param mouseX the mouse x
