@@ -50,8 +50,6 @@ import org.objectweb.asm.util.Printer;
 import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
-import cpw.mods.fml.relauncher.ReflectionHelper;
-
 public class AsmUtils
 {
 	/**
@@ -245,13 +243,13 @@ public class AsmUtils
 		try
 		{
 			// modify reference in Blocks class
-			Field f = ReflectionHelper.findField(clazz, MalisisCore.isObfEnv ? srgName : fieldName);
+			Field f = clazz.getDeclaredField(MalisisCore.isObfEnv ? srgName : fieldName);
+			f.setAccessible(true);
 			Field modifiers = Field.class.getDeclaredField("modifiers");
 			modifiers.setAccessible(true);
 			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
 
 			return f;
-
 		}
 		catch (ReflectiveOperationException e)
 		{
