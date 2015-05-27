@@ -33,7 +33,6 @@ import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UITabGroup;
 import net.malisis.core.client.gui.component.container.UITabGroup.TabChangeEvent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
-import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
@@ -48,14 +47,14 @@ import net.minecraft.util.IIcon;
  */
 public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 {
-	/** The {@link MalisisFont} to use for this {@link UITooltip}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
-	protected MalisisFont font;
-	/** The {@link FontRenderOptions} to use for this {@link UITooltip}. If null, uses {@link GuiRenderer#getDefaultFontRendererOptions()}. */
-	protected FontRenderOptions fro;
+	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
+	protected MalisisFont font = MalisisFont.minecraftFont;
+	/** The {@link FontRenderOptions} to use for this {@link UITooltip}. */
+	protected FontRenderOptions fro = new FontRenderOptions();
 	/** The {@link FontRenderOptions} to use for this {@link UITooltip} when active. */
-	protected FontRenderOptions activeFro;
+	protected FontRenderOptions activeFro = new FontRenderOptions();
 	/** The {@link FontRenderOptions} to use for this {@link UITooltip} when hovered. */
-	protected FontRenderOptions hoveredFro;
+	protected FontRenderOptions hoveredFro = new FontRenderOptions();
 	/** Label for this {@link UITab}. */
 	protected String label;
 	/** Image for this {@link UITab}. */
@@ -81,10 +80,8 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	public UITab(MalisisGui gui, String label)
 	{
 		super(gui);
-		activeFro = new FontRenderOptions();
 		activeFro.color = 0xFFFFFF;
 		activeFro.shadow = true;
-		hoveredFro = new FontRenderOptions();
 		hoveredFro.color = 0xFFFFA0;
 
 		setSize(0, 0);
@@ -109,38 +106,32 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	}
 
 	//#region Getters/Setters
-	/**
-	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
-	 *
-	 * @return the font
-	 */
 	@Override
 	public MalisisFont getFont()
 	{
 		return font;
 	}
 
-	/**
-	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
-	 *
-	 * @return the font renderer options
-	 */
 	@Override
-	public FontRenderOptions getFontRendererOptions()
+	public UITab setFont(MalisisFont font)
+	{
+		this.font = font;
+		if (autoWidth)
+			width = calcAutoWidth();
+		if (autoHeight)
+			height = calcAutoHeight();
+		return this;
+	}
+
+	@Override
+	public FontRenderOptions getFontRenderOptions()
 	{
 		return fro;
 	}
 
-	/**
-	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
-	 *
-	 * @param font the new font
-	 * @param fro the fro
-	 */
 	@Override
-	public UITab setFont(MalisisFont font, FontRenderOptions fro)
+	public UITab setFontRenderOptions(FontRenderOptions fro)
 	{
-		this.font = font;
 		this.fro = fro;
 		if (autoWidth)
 			width = calcAutoWidth();
@@ -421,7 +412,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	private int calcAutoWidth()
 	{
 		if (label != null)
-			return getRenderer().getStringWidth(this, label) + (isHorizontal() ? 10 : 8);
+			return (int) (font.getStringWidth(label, fro.fontScale) + (isHorizontal() ? 10 : 8));
 		else if (image != null)
 			return image.getWidth() + 10;
 		else
@@ -436,7 +427,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	private int calcAutoHeight()
 	{
 		if (label != null)
-			return getRenderer().getStringHeight(this) + (isHorizontal() ? 8 : 10);
+			return (int) (font.getStringHeight(fro.fontScale) + (isHorizontal() ? 8 : 10));
 		else if (image != null)
 			return image.getHeight() + 10;
 		else
@@ -467,8 +458,8 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int w = label != null ? getRenderer().getStringWidth(this, label) : image.getWidth();
-		int h = label != null ? getRenderer().getStringHeight(this) : image.getHeight();
+		int w = label != null ? (int) font.getStringWidth(label, fro.fontScale) : image.getWidth();
+		int h = label != null ? (int) font.getStringHeight(fro.fontScale) : image.getHeight();
 		int x = (getWidth() - w) / 2;
 		int y = (getHeight() - h) / 2 + 1;
 

@@ -898,6 +898,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	{
 		if (font == null)
 			font = MalisisFont.minecraftFont;
+		if (fro == null)
+			fro = new FontRenderOptions();
 
 		font.render(this, text, x, y, z, fro);
 	}

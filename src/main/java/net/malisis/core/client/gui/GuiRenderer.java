@@ -24,7 +24,6 @@
 
 package net.malisis.core.client.gui;
 
-import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
@@ -78,10 +77,6 @@ public class GuiRenderer extends MalisisRenderer
 	private GuiTexture defaultGuiTexture;
 	/** Currently used {@link GuiTexture}. */
 	private GuiTexture currentTexture;
-	/** Currently used {@link MalisisFont}. */
-	private MalisisFont defaultFont = MalisisFont.minecraftFont;
-	/** Currently used {@link FontRenderOptions}. */
-	private FontRenderOptions defaultFro = new FontRenderOptions();
 
 	private static GuiShape rectangle = new SimpleGuiShape();
 
@@ -91,7 +86,6 @@ public class GuiRenderer extends MalisisRenderer
 	public GuiRenderer()
 	{
 		defaultGuiTexture = new GuiTexture(new ResourceLocation("malisiscore", "textures/gui/gui.png"), 300, 100);
-		defaultFro.color = 0x404040;
 		updateGuiScale();
 	}
 
@@ -129,70 +123,6 @@ public class GuiRenderer extends MalisisRenderer
 	public void setDefaultTexture(GuiTexture texture)
 	{
 		this.defaultGuiTexture = texture;
-	}
-
-	/**
-	 * Gets the default {@link MalisisFont}.
-	 *
-	 * @return the default font
-	 */
-	public MalisisFont getDefaultFont()
-	{
-		return defaultFont;
-	}
-
-	/**
-	 * Gets the default {@link FontRenderOptions}.
-	 *
-	 * @return the default font renderer options
-	 */
-	public FontRenderOptions getDefaultFontRendererOptions()
-	{
-		return defaultFro;
-	}
-
-	/**
-	 * Sets the default {@link MalisisFont} to use for this {@link GuiRenderer}.
-	 *
-	 * @param font the new default font
-	 */
-	public void setDefaultFont(MalisisFont font, FontRenderOptions fro)
-	{
-		this.defaultFont = font;
-		this.defaultFro = fro;
-	}
-
-	/**
-	 * Gets the {@link MalisisFont} to be used for the specified {@link IGuiText}.
-	 *
-	 * @param guiText the gui text
-	 * @return the font
-	 */
-	public MalisisFont getFont(IGuiText guiText)
-	{
-		return guiText == null || guiText.getFont() == null ? getDefaultFont() : guiText.getFont();
-	}
-
-	/**
-	 * Gets the {@link FontRenderOptions} to be used for the specified {@link IGuiText}.
-	 *
-	 * @param guiText the gui text
-	 * @return the font
-	 */
-	public FontRenderOptions getFontRendererOptions(IGuiText guiText)
-	{
-		return guiText == null || guiText.getFontRendererOptions() == null ? getDefaultFontRendererOptions() : guiText
-				.getFontRendererOptions();
-	}
-
-	public int getStringHeight(IGuiText guiText)
-	{
-		return (int) Math.ceil(getFont(guiText).getStringHeight(getFontRendererOptions(guiText).fontScale));
-	}
-
-	public int getStringWidth(IGuiText guiText, String text)
-	{
-		return (int) Math.ceil(getFont(guiText).getStringWidth(text, getFontRendererOptions(guiText).fontScale));
 	}
 
 	/**
@@ -501,11 +431,6 @@ public class GuiRenderer extends MalisisRenderer
 			y += currentComponent.screenY();
 			z += currentComponent.getZIndex();
 		}
-
-		if (font == null)
-			font = defaultFont;
-		if (fro == null)
-			fro = defaultFro;
 
 		super.drawText(font, text, x, y, z, fro);
 	}

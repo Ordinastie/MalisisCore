@@ -259,6 +259,8 @@ public class MalisisFont
 			i += fro.processStyles(text, i);
 			if (i >= text.length())
 				break;
+			if (text.charAt(i) < 0 || text.charAt(i) >= charData.length)
+				break;
 
 			CharData cd = charData[text.charAt(i)];
 			t.setColorOpaque_I(shadow ? fro.getShadowColor() : fro.color);
@@ -297,6 +299,9 @@ public class MalisisFont
 		{
 			i += fro.processStyles(text, i);
 			if (i >= text.length())
+				break;
+
+			if (text.charAt(i) < 0 || text.charAt(i) >= charData.length)
 				break;
 
 			CharData cd = charData[text.charAt(i)];
@@ -499,6 +504,9 @@ public class MalisisFont
 			return 0;
 		if (c == '\t')
 			return getCharWidth(' ', fontScale) * 4;
+
+		if (c < 0 || c >= charData.length)
+			return 0;
 
 		CharData cd = charData[c];
 		if (cd == null)

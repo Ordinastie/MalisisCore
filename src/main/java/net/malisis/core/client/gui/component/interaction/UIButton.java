@@ -49,12 +49,12 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	protected GuiIcon iconDisabled;
 	protected GuiIcon iconPressed;
 
-	/** The {@link MalisisFont} to use for this {@link UITooltip}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
-	protected MalisisFont font;
-	/** The {@link FontRenderOptions} to use for this {@link UITooltip}. If null, uses {@link GuiRenderer#getDefaultFontRendererOptions()}. */
-	protected FontRenderOptions fro;
+	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
+	protected MalisisFont font = MalisisFont.minecraftFont;
+	/** The {@link FontRenderOptions} to use for this {@link UITooltip}. */
+	protected FontRenderOptions fro = new FontRenderOptions();
 	/** The {@link FontRenderOptions} to use for this {@link UITooltip} when hovered. */
-	protected FontRenderOptions hoveredFro;
+	protected FontRenderOptions hoveredFro = new FontRenderOptions();
 	/** Text used for this {@link UIButton}. Exclusive with {@link #image}. */
 	protected String text;
 	/** Image used for this {@link UIButton}. Exclusive with {@link #text}. */
@@ -77,10 +77,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	public UIButton(MalisisGui gui)
 	{
 		super(gui);
-		fro = new FontRenderOptions();
 		fro.color = 0xFFFFFF;
 		fro.shadow = true;
-		hoveredFro = new FontRenderOptions();
 		hoveredFro.color = 0xFFFFA0;
 		hoveredFro.shadow = true;
 
@@ -116,38 +114,29 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	}
 
 	//#region Getters/Setters
-	/**
-	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
-	 *
-	 * @return the font
-	 */
 	@Override
 	public MalisisFont getFont()
 	{
 		return font;
 	}
 
-	/**
-	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
-	 *
-	 * @return the font renderer options
-	 */
 	@Override
-	public FontRenderOptions getFontRendererOptions()
+	public UIButton setFont(MalisisFont font)
+	{
+		this.font = font;
+		setSize(width, height);
+		return this;
+	}
+
+	@Override
+	public FontRenderOptions getFontRenderOptions()
 	{
 		return fro;
 	}
 
-	/**
-	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
-	 *
-	 * @param font the new font
-	 * @param fro the fro
-	 */
 	@Override
-	public UIButton setFont(MalisisFont font, FontRenderOptions fro)
+	public UIButton setFontRenderOptions(FontRenderOptions fro)
 	{
-		this.font = font;
 		this.fro = fro;
 		setSize(width, height);
 		return this;
@@ -164,7 +153,7 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	}
 
 	/**
-	 * Sthe {@link FontRenderOptions} used for this {@link UILabel} when hovered.
+	 * Sets the {@link FontRenderOptions} used for this {@link UILabel} when hovered.
 	 *
 	 * @param hoveredFro the hoveredFro to set
 	 * @return this {@link UIButton}
@@ -256,8 +245,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 			}
 			else
 			{
-				int w = getRenderer().getStringWidth(this, text);
-				int h = getRenderer().getStringHeight(this);
+				int w = (int) font.getStringWidth(text, fro.fontScale);
+				int h = (int) font.getStringHeight(fro.fontScale);
 				width = Math.max(width, w + 6);
 				height = Math.max(height, h + 6);
 			}
@@ -404,8 +393,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 		}
 		else
 		{
-			w = getRenderer().getStringWidth(this, text);
-			h = getRenderer().getStringHeight(this);
+			w = (int) font.getStringWidth(text, fro.fontScale);
+			h = (int) font.getStringHeight(fro.fontScale);
 		}
 
 		int x = (width - w) / 2;

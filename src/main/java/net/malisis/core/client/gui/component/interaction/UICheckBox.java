@@ -28,7 +28,6 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.icon.GuiIcon;
@@ -53,10 +52,10 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	protected GuiIcon cbChecked;
 	protected GuiIcon cbHovered;
 
-	/** The {@link MalisisFont} to use for this {@link UICheckBox}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
-	protected MalisisFont font;
-	/** The {@link FontRenderOptions} to use for this {@link UICheckBox}. If null, uses {@link GuiRenderer#getDefaultFontRendererOptions()}. */
-	protected FontRenderOptions fro;
+	/** The {@link MalisisFont} to use for this {@link UICheckBox}. */
+	protected MalisisFont font = MalisisFont.minecraftFont;
+	/** The {@link FontRenderOptions} to use for this {@link UICheckBox}. */
+	protected FontRenderOptions fro = new FontRenderOptions();
 	/** Text to draw beside the checkbox. **/
 	private String text;
 	/** Whether this {@link UICheckBox} is checked. */
@@ -66,6 +65,7 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	{
 		super(gui);
 		setText(text);
+		fro.color = 0x444444;
 
 		shape = new SimpleGuiShape();
 
@@ -82,38 +82,29 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	}
 
 	//#region Getters/Setters
-	/**
-	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
-	 *
-	 * @return the font
-	 */
 	@Override
 	public MalisisFont getFont()
 	{
 		return font;
 	}
 
-	/**
-	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
-	 *
-	 * @return the font renderer options
-	 */
 	@Override
-	public FontRenderOptions getFontRendererOptions()
+	public UICheckBox setFont(MalisisFont font)
+	{
+		this.font = font;
+		calculateSize();
+		return this;
+	}
+
+	@Override
+	public FontRenderOptions getFontRenderOptions()
 	{
 		return fro;
 	}
 
-	/**
-	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
-	 *
-	 * @param font the new font
-	 * @param fro the fro
-	 */
 	@Override
-	public UICheckBox setFont(MalisisFont font, FontRenderOptions fro)
+	public UICheckBox setFontRenderOptions(FontRenderOptions fro)
 	{
-		this.font = font;
 		this.fro = fro;
 		calculateSize();
 		return this;
@@ -148,9 +139,7 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	 */
 	private void calculateSize()
 	{
-		int w = 0;
-		if (!StringUtils.isEmpty(text))
-			w = getRenderer().getStringWidth(this, text);
+		int w = StringUtils.isEmpty(text) ? 0 : (int) font.getStringWidth(text, fro.fontScale);
 		setSize(w + 11, 10);
 	}
 

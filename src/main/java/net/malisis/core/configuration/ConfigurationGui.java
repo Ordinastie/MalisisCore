@@ -88,8 +88,8 @@ public class ConfigurationGui extends MalisisGui
 		window.setSize(windowWidth, windowHeight);
 
 		comment = new UILabel(this, true);
-		comment.getFontRendererOptions().color = 0xFFFFFF;
-		comment.getFontRendererOptions().shadow = true;
+		comment.getFontRenderOptions().color = 0xFFFFFF;
+		comment.getFontRenderOptions().shadow = true;
 		UIPanel panelComment = new UIPanel(this, 140, windowHeight - 35).setPosition(0, 0, Anchor.RIGHT);
 		panelComment.setBackgroundColor(0xCCCCCC);
 		panelComment.add(comment);

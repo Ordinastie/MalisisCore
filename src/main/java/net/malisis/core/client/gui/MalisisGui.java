@@ -42,7 +42,6 @@ import net.malisis.core.inventory.message.InventoryActionMessage;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.AnimationRenderer;
 import net.malisis.core.renderer.font.FontRenderOptions;
-import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -150,26 +149,6 @@ public abstract class MalisisGui extends GuiScreen
 	public GuiTexture getGuiTexture()
 	{
 		return renderer.getDefaultTexture();
-	}
-
-	/**
-	 * Gets the defaut {@link MalisisFont} used by the {@link GuiRenderer}.
-	 *
-	 * @return the font
-	 */
-	public MalisisFont getFont()
-	{
-		return renderer.getDefaultFont();
-	}
-
-	/**
-	 * Gets the default {@link FontRenderOptions} used by the {@link GuiRenderer}.
-	 *
-	 * @return the font render options
-	 */
-	public FontRenderOptions getFontRenderOptions()
-	{
-		return renderer.getDefaultFontRendererOptions();
 	}
 
 	/**

@@ -28,7 +28,6 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
@@ -51,12 +50,12 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 	protected GuiIcon iconBackground;
 	protected GuiIcon sliderIcon;
 
-	/** The {@link MalisisFont} to use for this {@link UISlider}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
-	protected MalisisFont font;
-	/** The {@link FontRenderOptions} to use for this {@link UISlider}. If null, uses {@link GuiRenderer#getDefaultFontRendererOptions()}. */
-	protected FontRenderOptions fro;
+	/** The {@link MalisisFont} to use for this {@link UISlider}. */
+	protected MalisisFont font = MalisisFont.minecraftFont;
+	/** The {@link FontRenderOptions} to use for this {@link UISlider}. */
+	protected FontRenderOptions fro = new FontRenderOptions();
 	/** The {@link FontRenderOptions} to use for this {@link UISlider} when hovered. */
-	protected FontRenderOptions hoveredFro;
+	protected FontRenderOptions hoveredFro = new FontRenderOptions();
 
 	private String text;
 	private float minValue;
@@ -76,11 +75,8 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 		minValue = min;
 		maxValue = max;
 
-		fro = new FontRenderOptions();
 		fro.color = 0xFFFFFF;
 		fro.shadow = true;
-
-		hoveredFro = new FontRenderOptions();
 		hoveredFro.color = 0xFFFFA0;
 		hoveredFro.shadow = true;
 
@@ -100,38 +96,28 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 	}
 
 	//#region Getters/Setters
-	/**
-	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
-	 *
-	 * @return the font
-	 */
 	@Override
 	public MalisisFont getFont()
 	{
 		return font;
 	}
 
-	/**
-	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
-	 *
-	 * @return the font renderer options
-	 */
 	@Override
-	public FontRenderOptions getFontRendererOptions()
+	public UISlider setFont(MalisisFont font)
+	{
+		this.font = font;
+		return this;
+	}
+
+	@Override
+	public FontRenderOptions getFontRenderOptions()
 	{
 		return fro;
 	}
 
-	/**
-	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
-	 *
-	 * @param font the new font
-	 * @param fro the fro
-	 */
 	@Override
-	public UISlider setFont(MalisisFont font, FontRenderOptions fro)
+	public UISlider setFontRenderOptions(FontRenderOptions fro)
 	{
-		this.font = font;
 		this.fro = fro;
 		return this;
 	}
@@ -215,7 +201,7 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 		if (!StringUtils.isEmpty(text))
 		{
 			String str = String.format(text, value);
-			int x = (width - getRenderer().getStringWidth(this, str)) / 2;
+			int x = (int) ((width - font.getStringWidth(str, fro.fontScale)) / 2);
 			int y = 6;
 
 			renderer.drawText(font, str, x, y, 0, isHovered() ? hoveredFro : fro);

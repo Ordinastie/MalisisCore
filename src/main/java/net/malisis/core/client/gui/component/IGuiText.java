@@ -49,17 +49,25 @@ public interface IGuiText<T>
 	public MalisisFont getFont();
 
 	/**
+	 * Sets the {@link MalisisFont}.
+	 *
+	 * @param font the new font
+	 * @return the t
+	 */
+	public T setFont(MalisisFont font);
+
+	/**
 	 * Gets the {@link FontRenderOptions}.
 	 *
 	 * @return the font renderer options
 	 */
-	public FontRenderOptions getFontRendererOptions();
+	public FontRenderOptions getFontRenderOptions();
 
 	/**
-	 * Sets the {@link MalisisFont} and {@link FontRenderOptions}.
+	 * Sets the {@link FontRenderOptions}.
 	 *
 	 * @param font the new font
-	 * @param fro the fro
+	 * @return the t
 	 */
-	public T setFont(MalisisFont font, FontRenderOptions fro);
+	public T setFontRenderOptions(FontRenderOptions fro);
 }

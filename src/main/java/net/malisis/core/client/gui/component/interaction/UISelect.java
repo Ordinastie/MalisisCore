@@ -33,7 +33,6 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UISelect.Option;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
@@ -61,16 +60,16 @@ import com.google.common.collect.Iterables;
  */
 public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Option<T>>, IClipable, IGuiText<UISelect<T>>
 {
-	/** The {@link MalisisFont} to use for this {@link UISelect}. If null, uses {@link GuiRenderer#getDefaultFont()}. */
-	protected MalisisFont font;
-	/** The {@link FontRenderOptions} to use for this {@link UISelect}. If null, uses {@link GuiRenderer#getDefaultFontRendererOptions()}. */
-	protected FontRenderOptions fro;
+	/** The {@link MalisisFont} to use for this {@link UISelect}. */
+	protected MalisisFont font = MalisisFont.minecraftFont;
+	/** The {@link FontRenderOptions} to use for this {@link UISelect}. */
+	protected FontRenderOptions fro = new FontRenderOptions();
 	/** The {@link FontRenderOptions} to use for this {@link UISelect} when option is hovered. */
-	protected FontRenderOptions hoveredFro;
+	protected FontRenderOptions hoveredFro = new FontRenderOptions();
 	/** The {@link FontRenderOptions} to use for this {@link UISelect} when option is selected. */
-	protected FontRenderOptions selectedFro;
+	protected FontRenderOptions selectedFro = new FontRenderOptions();
 	/** The {@link FontRenderOptions} to use for this {@link UISelect} when option is disabled. */
-	protected FontRenderOptions disabledFro;
+	protected FontRenderOptions disabledFro = new FontRenderOptions();
 
 	/** The {@link Option options} of this {@link UISelect}. */
 	protected FluentIterable<Option<T>> options;
@@ -139,18 +138,13 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		super(gui);
 		setSize(width, 12);
 		setOptions(values);
-		fro = new FontRenderOptions();
 		fro.color = 0xFFFFFF;
 		fro.shadow = true;
-		hoveredFro = new FontRenderOptions();
 		hoveredFro.color = 0xDED89F;
 		hoveredFro.shadow = true;
-		selectedFro = new FontRenderOptions();
 		selectedFro.color = 0x9EA8DF;
 		selectedFro.shadow = true;
-		disabledFro = new FontRenderOptions();
 		disabledFro.color = 0x444444;
-		disabledFro.shadow = false;
 
 		shape = new XResizableGuiShape(3);
 		arrowShape = new SimpleGuiShape();
@@ -177,38 +171,29 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	}
 
 	//#region Getters/Setters
-	/**
-	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
-	 *
-	 * @return the font
-	 */
 	@Override
 	public MalisisFont getFont()
 	{
 		return font;
 	}
 
-	/**
-	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
-	 *
-	 * @return the font renderer options
-	 */
 	@Override
-	public FontRenderOptions getFontRendererOptions()
+	public UISelect<T> setFont(MalisisFont font)
+	{
+		this.font = font;
+		calcOptionsSize();
+		return this;
+	}
+
+	@Override
+	public FontRenderOptions getFontRenderOptions()
 	{
 		return fro;
 	}
 
-	/**
-	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
-	 *
-	 * @param font the new font
-	 * @param fro the fro
-	 */
 	@Override
-	public UISelect<T> setFont(MalisisFont font, FontRenderOptions fro)
+	public UISelect<T> setFontRenderOptions(FontRenderOptions fro)
 	{
-		this.font = font;
 		this.fro = fro;
 		calcOptionsSize();
 		return this;
@@ -862,7 +847,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 		public int getHeight(UISelect select)
 		{
-			return select.getRenderer().getStringHeight(select) + 1;
+			return (int) (select.font.getStringHeight(select.fro.fontScale) + 1);
 		}
 
 		public void draw(UISelect select, GuiRenderer renderer, int x, int y, int z, float partialTick, boolean hovered, boolean isTop)
@@ -879,7 +864,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			if (isTop)
 				text = MalisisFont.minecraftFont.clipString(text, select.getWidth() - 15);
 
-			FontRenderOptions fro = select.getFontRendererOptions();
+			FontRenderOptions fro = select.getFontRenderOptions();
 			if (equals(select.getSelectedOption()) && !isTop)
 				fro = select.getSelectedFontRendererOptions();
 			if (hovered)
