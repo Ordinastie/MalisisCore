@@ -160,6 +160,7 @@ public class MinecraftFont extends MalisisFont
 		offsetY -= factor + h;
 		w += 1.01F * factor;
 
+		t.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
 		t.addVertex(offsetX, offsetY, 0);
 		t.addVertex(offsetX, offsetY + h, 0);
 		t.addVertex(offsetX + w, offsetY + h, 0);
@@ -230,7 +231,7 @@ public class MinecraftFont extends MalisisFont
 		@Override
 		public float getCharWidth()
 		{
-			if (c == ' ' || c < 0 || c >= 256)
+			if (c == ' ' || c < 0 || c >= 256 || pos == -1)
 				return 4.0F;
 			else if (FMLClientHandler.instance().hasOptifine())
 				return optifineCharWidth[c];
