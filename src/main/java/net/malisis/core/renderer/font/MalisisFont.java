@@ -79,6 +79,8 @@ public class MalisisFont
 	protected ResourceLocation textureRl;
 	/** Size of the texture (width and height) **/
 	protected int size;
+	/** Whether the currently drawn text is the shadow part **/
+	protected boolean drawingShadow = false;
 
 	public MalisisFont(File fontFile)
 	{
@@ -130,6 +132,13 @@ public class MalisisFont
 		loadTexture(true);
 	}
 
+	public CharData getCharData(char c)
+	{
+		if (c < 0 || c > charData.length)
+			c = '?';
+		return charData[c];
+	}
+
 	public Shape getShape(String text, float fontSize)
 	{
 		text = processString(text, null);
@@ -138,7 +147,7 @@ public class MalisisFont
 		float factor = options.fontSize / fontSize;
 		for (int i = 0; i < text.length(); i++)
 		{
-			CharData cd = charData[text.charAt(i)];
+			CharData cd = getCharData(text.charAt(i));
 			if (cd.getChar() != ' ')
 			{
 				Face f = new SouthFace();
@@ -156,7 +165,7 @@ public class MalisisFont
 	}
 
 	//#region Prepare/Clean
-	private void prepare(MalisisRenderer renderer, float x, float y, float z, FontRenderOptions fro)
+	protected void prepare(MalisisRenderer renderer, float x, float y, float z, FontRenderOptions fro)
 	{
 		boolean isGui = renderer instanceof GuiRenderer;
 		renderer.next(GL11.GL_QUADS);
@@ -169,7 +178,7 @@ public class MalisisFont
 			GL11.glScalef(1 / 9F, -1 / 9F, 1 / 9F);
 	}
 
-	private void clean(MalisisRenderer renderer, boolean isDrawing)
+	protected void clean(MalisisRenderer renderer, boolean isDrawing)
 	{
 		if (isDrawing)
 			renderer.next();
@@ -180,8 +189,9 @@ public class MalisisFont
 		GL11.glPopMatrix();
 	}
 
-	private void prepareShadow(MalisisRenderer renderer)
+	protected void prepareShadow(MalisisRenderer renderer)
 	{
+		drawingShadow = true;
 		if (renderer instanceof GuiRenderer)
 			return;
 		renderer.next();
@@ -189,8 +199,9 @@ public class MalisisFont
 		GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
 	}
 
-	private void cleanShadow(MalisisRenderer renderer)
+	protected void cleanShadow(MalisisRenderer renderer)
 	{
+		drawingShadow = false;
 		if (renderer instanceof GuiRenderer)
 			return;
 		renderer.next();
@@ -198,13 +209,13 @@ public class MalisisFont
 		GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
 	}
 
-	private void prepareLines(MalisisRenderer renderer, FontRenderOptions fro)
+	protected void prepareLines(MalisisRenderer renderer, FontRenderOptions fro)
 	{
 		renderer.next();
 		renderer.disableTextures();
 	}
 
-	private void cleanLines(MalisisRenderer renderer)
+	protected void cleanLines(MalisisRenderer renderer)
 	{
 		renderer.next();
 		renderer.enableTextures();
@@ -216,8 +227,6 @@ public class MalisisFont
 	{
 		boolean isDrawing = renderer.isDrawing();
 
-		fro.saveDefault();
-
 		prepare(renderer, x, y, z, fro);
 
 		text = processString(text, fro);
@@ -225,10 +234,10 @@ public class MalisisFont
 		if (fro.shadow)
 		{
 			prepareShadow(renderer);
-			drawString(text, fro.fontScale, fro.fontScale, fro, true);
+			drawString(text, fro);
 			cleanShadow(renderer);
 		}
-		drawString(text, 0, 0, fro, false);
+		drawString(text, fro);
 
 		if (hasLines(text, fro))
 		{
@@ -236,41 +245,36 @@ public class MalisisFont
 			if (fro.shadow)
 			{
 				prepareShadow(renderer);
-				drawLines(text, fro.fontScale, fro.fontScale, fro, true);
+				drawLines(text, fro);
 				cleanShadow(renderer);
 			}
-			drawLines(text, 0, 0, fro, false);
+			drawLines(text, fro);
 			cleanLines(renderer);
 		}
 
 		clean(renderer, isDrawing);
 	}
 
-	private void drawString(String text, float offsetX, float offsetY, FontRenderOptions fro, boolean shadow)
+	protected void drawString(String text, FontRenderOptions fro)
 	{
-		Tessellator t = Tessellator.instance;
 		float x = 0;
 		float f = fro.fontScale / options.fontSize * 9;
 
-		fro.resetStyles();
+		fro.resetStyles(false);
 
 		for (int i = 0; i < text.length(); i++)
 		{
 			i += fro.processStyles(text, i);
 			if (i >= text.length())
 				break;
-			if (text.charAt(i) < 0 || text.charAt(i) >= charData.length)
-				break;
 
-			CharData cd = charData[text.charAt(i)];
-			t.setColorOpaque_I(shadow ? fro.getShadowColor() : fro.color);
-			drawChar(cd, offsetX + x, offsetY, fro);
-
+			CharData cd = getCharData(text.charAt(i));
+			drawChar(cd, x, 0, fro);
 			x += cd.getCharWidth() * f;
 		}
 	}
 
-	private void drawChar(CharData cd, float offsetX, float offsetY, FontRenderOptions fro)
+	protected void drawChar(CharData cd, float offsetX, float offsetY, FontRenderOptions fro)
 	{
 		if (cd.getChar() == ' ')
 			return;
@@ -281,17 +285,23 @@ public class MalisisFont
 		float h = cd.getFullHeight(options) * factor;
 		float i = fro.italic ? fro.fontScale : 0;
 
+		if (drawingShadow)
+		{
+			offsetX += fro.fontScale;
+			offsetY += fro.fontScale;
+		}
+
+		t.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
 		t.addVertexWithUV(offsetX + i, offsetY, 0, cd.u(), cd.v());
 		t.addVertexWithUV(offsetX - i, offsetY + h, 0, cd.u(), cd.V());
 		t.addVertexWithUV(offsetX + w - i, offsetY + h, 0, cd.U(), cd.V());
 		t.addVertexWithUV(offsetX + w + i, offsetY, 0, cd.U(), cd.v());
 	}
 
-	private void drawLines(String text, float offsetX, float offsetY, FontRenderOptions fro, boolean shadow)
+	protected void drawLines(String text, FontRenderOptions fro)
 	{
-		Tessellator t = Tessellator.instance;
 		float x = 0;
-		float f = fro.fontScale / options.fontSize * 9;
+		float factor = fro.fontScale / options.fontSize * 9;
 
 		fro.resetStyles();
 
@@ -301,32 +311,34 @@ public class MalisisFont
 			if (i >= text.length())
 				break;
 
-			if (text.charAt(i) < 0 || text.charAt(i) >= charData.length)
-				break;
-
-			CharData cd = charData[text.charAt(i)];
-			t.setColorOpaque_I(shadow ? fro.getShadowColor() : fro.color);
-
+			CharData cd = getCharData(text.charAt(i));
 			if (fro.underline)
-				drawLineChar(cd, offsetX + x, offsetY + getStringHeight(fro.fontScale) + fro.fontScale, f);
+				drawLineChar(cd, x, getStringHeight(fro.fontScale) + fro.fontScale, fro);
 			if (fro.strikethrough)
-				drawLineChar(cd, offsetX + x, offsetY + getStringHeight(fro.fontScale) * 0.5F + fro.fontScale, f);
+				drawLineChar(cd, x, getStringHeight(fro.fontScale) * 0.5F + fro.fontScale, fro);
 
-			x += cd.getCharWidth() * f;
+			x += cd.getCharWidth() * factor;
 		}
 	}
 
-	protected void drawLineChar(CharData cd, float offsetX, float offsetY, float factor)
+	protected void drawLineChar(CharData cd, float offsetX, float offsetY, FontRenderOptions fro)
 	{
 		Tessellator t = Tessellator.instance;
+		float factor = fro.fontScale / options.fontSize * 9;
 		float w = cd.getFullWidth(options) * factor;
 		float h = cd.getFullHeight(options) / 9F * factor;
 
+		if (drawingShadow)
+		{
+			offsetX += fro.fontScale;
+			offsetY += fro.fontScale;
+		}
+
+		t.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
 		t.addVertex(offsetX, offsetY, 0);
 		t.addVertex(offsetX, offsetY + h, 0);
 		t.addVertex(offsetX + w, offsetY + h, 0);
 		t.addVertex(offsetX + w, offsetY, 0);
-
 	}
 
 	//#region String processing
@@ -505,14 +517,7 @@ public class MalisisFont
 		if (c == '\t')
 			return getCharWidth(' ', fontScale) * 4;
 
-		if (c < 0 || c >= charData.length)
-			return 0;
-
-		CharData cd = charData[c];
-		if (cd == null)
-			return 0;
-		else
-			return cd.getCharWidth() / options.fontSize * fontScale * 9;
+		return getCharData(c).getCharWidth() / options.fontSize * fontScale * 9;
 	}
 
 	/**

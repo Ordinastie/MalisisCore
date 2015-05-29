@@ -97,7 +97,6 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		this.setText(text);
 		this.multiLine = multiLine;
 		this.fro.color = 0x444444;
-		this.fro.multiLines = multiLine;
 	}
 
 	/**
@@ -112,7 +111,6 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		this.setText(text);
 		this.multiLine = true;
 		this.fro.color = 0x444444;
-		this.fro.multiLines = multiLine;
 	}
 
 	/**
@@ -409,11 +407,13 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		if (multiLine)
 		{
 			fro.resetStyles();//manually reset style because fro.multiline = true
+			fro.multiLines = true;
 			for (int i = lineOffset; i < lineOffset + getVisibleLines() && i < lines.size(); i++)
 			{
 				int h = (i - lineOffset) * getLineHeight();
 				renderer.drawText(font, lines.get(i), 0, h, 0, fro);
 			}
+			fro.multiLines = false;
 		}
 		else
 			renderer.drawText(font, text, fro);

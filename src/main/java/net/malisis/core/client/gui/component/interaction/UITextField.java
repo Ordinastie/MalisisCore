@@ -1094,6 +1094,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		}
 		else
 		{
+			fro.resetStyles();//manually reset style because fro.multiline = true
 			for (int i = lineOffset; i < lineOffset + getVisibleLines() && i < lines.size(); i++)
 			{
 				int h = (i - lineOffset) * getLineHeight();

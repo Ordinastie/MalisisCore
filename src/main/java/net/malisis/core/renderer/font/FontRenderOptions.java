@@ -173,11 +173,13 @@ public class FontRenderOptions
 
 	public void resetStyles()
 	{
-		resetStyles(false);
+		resetStyles(true);
 	}
 
 	public void resetStyles(boolean force)
 	{
+		if (!defaultSaved)
+			saveDefault();
 		if (!force && multiLines)
 			return;
 
