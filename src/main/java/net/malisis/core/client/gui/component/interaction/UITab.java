@@ -80,6 +80,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	public UITab(MalisisGui gui, String label)
 	{
 		super(gui);
+		fro.color = 0x444444;
 		activeFro.color = 0xFFFFFF;
 		activeFro.shadow = true;
 		hoveredFro.color = 0xFFFFA0;
