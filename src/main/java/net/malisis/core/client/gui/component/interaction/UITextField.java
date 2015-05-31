@@ -51,6 +51,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+
 /**
  * UITextField.
  *
@@ -70,6 +73,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	protected List<String> lines = new LinkedList<>();
 	/** Whether this {@link UITextField} handles multiline text. */
 	protected boolean multiLine = false;
+	/** Validator **/
+	protected Predicate<String> validator = Predicates.alwaysTrue();
 
 	//text space
 	/** Number of character offset out of this {@link UITextField} when drawn. */
@@ -472,6 +477,28 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		return scrollBar;
 	}
 
+	/**
+	 * Gets the predicate used to validate input text.
+	 *
+	 * @return the predicate
+	 */
+	public Predicate<String> getValidator()
+	{
+		return validator;
+	}
+
+	/**
+	 * Sets the predicate used to validate input text.
+	 *
+	 * @param validator the validator
+	 * @return the UI text field
+	 */
+	public UITextField setValidator(Predicate<String> validator)
+	{
+		this.validator = validator;
+		return this;
+	}
+
 	// #end Getters/Setters
 
 	//#region IScrollable
@@ -631,8 +658,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 */
 	protected boolean validateText(String text)
 	{
-		//TODO : handle text validator
-		return true;
+		return validator.apply(text);
 	}
 
 	/**
