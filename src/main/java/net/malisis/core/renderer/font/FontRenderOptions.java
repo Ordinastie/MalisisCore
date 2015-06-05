@@ -90,6 +90,20 @@ public class FontRenderOptions
 
 	}
 
+	public FontRenderOptions(FontRenderOptions fro)
+	{
+		fontScale = fro.fontScale;
+		color = fro.color;
+		bold = fro.bold;
+		italic = fro.italic;
+		strikethrough = fro.strikethrough;
+		underline = fro.underline;
+
+		defaultFro = new FontRenderOptions(false);
+		saveDefault();
+		defaultSaved = false;
+	}
+
 	/**
 	 * Process styles applied to the text with {@link EnumChatFormatting} values.<br>
 	 * Applies the styles to this {@link FontRenderOptions} and returns the stripped text.
