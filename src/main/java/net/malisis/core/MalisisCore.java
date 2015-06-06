@@ -257,10 +257,14 @@ public class MalisisCore implements IMalisisMod
 		}
 		else
 		{
+			if (Minecraft.getMinecraft() == null || Minecraft.getMinecraft().thePlayer == null)
+				return;
+
 			ChatStyle cs = new ChatStyle();
 			cs.setItalic(true);
 			cs.setColor(EnumChatFormatting.GRAY);
 			msg.setChatStyle(cs);
+
 			Minecraft.getMinecraft().thePlayer.addChatMessage(msg);
 		}
 	}
