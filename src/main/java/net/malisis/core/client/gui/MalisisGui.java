@@ -46,14 +46,22 @@ import net.malisis.core.util.MouseButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.common.MinecraftForge;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.InputEvent;
 
 /**
  * GuiScreenProxy
@@ -70,6 +78,10 @@ public abstract class MalisisGui extends GuiScreen
 
 	/** Renderer drawing the components. */
 	protected GuiRenderer renderer;
+	protected int displayWidth;
+	protected int displayHeight;
+	/** The resolution for the GUI **/
+	protected ScaledResolution resolution;
 	/** Top level container which hold the user components. Spans across the whole screen. */
 	private UIContainer screen;
 	/** Determines if the screen should be darkened when the GUI is opened. */
@@ -82,6 +94,9 @@ public abstract class MalisisGui extends GuiScreen
 	protected long lastClickTime = 0;
 	/** Inventory container that handles the inventories and slots actions. */
 	protected MalisisInventoryContainer inventoryContainer;
+	/** Whether this GUI is considered as an overlay **/
+	protected boolean isOverlay = false;
+
 	/** {@link AnimationRenderer} */
 	private AnimationRenderer ar;
 	/** Currently hovered child component. */
@@ -110,6 +125,25 @@ public abstract class MalisisGui extends GuiScreen
 	 * Called when Ctrl+R is pressed to rebuild the GUI.
 	 */
 	public abstract void construct();
+
+	protected boolean doConstruct()
+	{
+		try
+		{
+			if (!constructed)
+			{
+				construct();
+				constructed = true;
+			}
+		}
+		catch (Exception e)
+		{
+			MalisisCore.message("A problem occured while constructing " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+		}
+
+		return constructed;
+	}
 
 	/**
 	 * Gets the {@link GuiRenderer} for this {@link MalisisGui}.
@@ -159,6 +193,38 @@ public abstract class MalisisGui extends GuiScreen
 	public long getElapsedTime()
 	{
 		return ar.getElapsedTime();
+	}
+
+	/**
+	 * Called when game resolution changes.
+	 */
+	@Override
+	public final void setWorldAndResolution(Minecraft minecraft, int width, int height)
+	{
+		super.setWorldAndResolution(minecraft, width, height);
+		setResolution();
+	}
+
+	/**
+	 * Sets the resolution for this {@link MalisisGui}.
+	 */
+	public void setResolution()
+	{
+		if (resolution == null || displayWidth != Display.getWidth() || displayHeight != Display.getHeight())
+		{
+			displayWidth = Display.getWidth();
+			displayHeight = Display.getHeight();
+
+			resolution = new ScaledResolution(mc, displayWidth, displayHeight);
+			renderer.setScaleFactor(resolution.getScaleFactor());
+
+			width = renderer.isIgnoreScale() ? displayWidth : resolution.getScaledWidth();
+			height = renderer.isIgnoreScale() ? displayHeight : resolution.getScaledHeight();
+
+			screen.setSize(width, height);
+
+			System.out.println("Set resolution");
+		}
 	}
 
 	/**
@@ -389,14 +455,15 @@ public abstract class MalisisGui extends GuiScreen
 			if (hoveredComponent != null && !keyListeners.contains(hoveredComponent) && hoveredComponent.onKeyTyped(keyChar, keyCode))
 				return;
 
-			if (isGuiCloseKey(keyCode))
+			if (isGuiCloseKey(keyCode) && !isOverlay)
 				close();
 
-			if (!MalisisCore.isObfEnv && isCtrlKeyDown() && currentGui() != null)
+			if (!MalisisCore.isObfEnv && isCtrlKeyDown() && (currentGui() != null || isOverlay))
 			{
 				if (keyCode == Keyboard.KEY_R)
 				{
 					clearScreen();
+					setResolution();
 					construct();
 				}
 				if (keyCode == Keyboard.KEY_D)
@@ -405,27 +472,10 @@ public abstract class MalisisGui extends GuiScreen
 		}
 		catch (Exception e)
 		{
-			MalisisCore.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			MalisisCore.message("A problem occured while handling key typed for " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		}
 
-	}
-
-	/**
-	 * Called when game resolution changes.
-	 */
-	@Override
-	public void setWorldAndResolution(Minecraft minecraft, int width, int height)
-	{
-		int factor = renderer.updateGuiScale();
-		if (renderer.isIgnoreScale())
-		{
-			width *= factor;
-			height *= factor;
-		}
-
-		super.setWorldAndResolution(minecraft, width, height);
-		screen.setSize(width, height);
 	}
 
 	/**
@@ -529,22 +579,11 @@ public abstract class MalisisGui extends GuiScreen
 	 */
 	public void display(boolean cancelClose)
 	{
-		try
-		{
-			if (!constructed)
-			{
-				construct();
-				constructed = true;
-			}
+		if (!doConstruct())
+			return;
 
-			MalisisGui.cancelClose = cancelClose;
-			Minecraft.getMinecraft().displayGuiScreen(this);
-		}
-		catch (Exception e)
-		{
-			MalisisCore.message("A problem occured : " + e.getClass().getSimpleName() + ": " + e.getMessage());
-			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
-		}
+		MalisisGui.cancelClose = cancelClose;
+		Minecraft.getMinecraft().displayGuiScreen(this);
 	}
 
 	/**
@@ -552,6 +591,8 @@ public abstract class MalisisGui extends GuiScreen
 	 */
 	public void close()
 	{
+		setFocusedComponent(null, true);
+		setHoveredComponent(null, true);
 		Keyboard.enableRepeatEvents(false);
 		if (this.mc.thePlayer != null)
 			this.mc.thePlayer.closeScreen();
@@ -560,11 +601,53 @@ public abstract class MalisisGui extends GuiScreen
 		return;
 	}
 
+	public void displayOverlay()
+	{
+		mc = Minecraft.getMinecraft();
+		isOverlay = true;
+		setWorldAndResolution(mc, 0, 0);
+
+		if (!doConstruct())
+			return;
+
+		MinecraftForge.EVENT_BUS.register(this);
+		FMLCommonHandler.instance().bus().register(this);
+	}
+
+	public void closeOverlay()
+	{
+		if (mc.currentScreen == this)
+			close();
+		MinecraftForge.EVENT_BUS.unregister(this);
+		FMLCommonHandler.instance().bus().unregister(this);
+		onGuiClosed();
+	}
+
 	@Override
 	public void onGuiClosed()
 	{
 		if (inventoryContainer != null)
 			inventoryContainer.onContainerClosed(this.mc.thePlayer);
+	}
+
+	@SubscribeEvent
+	public void renderOverlay(RenderGameOverlayEvent.Post event)
+	{
+		if (event.type != RenderGameOverlayEvent.ElementType.ALL || Minecraft.getMinecraft().currentScreen == this)
+			return;
+
+		setResolution();
+		drawScreen(event.mouseX, event.mouseY, event.partialTicks);
+	}
+
+	@SubscribeEvent
+	public void keyEvent(InputEvent.KeyInputEvent event)
+	{
+		if (!isOverlay)
+			return;
+
+		if (Keyboard.getEventKeyState())
+			keyTyped(Keyboard.getEventCharacter(), Keyboard.getEventKey());
 	}
 
 	/**

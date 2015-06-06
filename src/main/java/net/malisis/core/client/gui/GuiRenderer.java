@@ -61,10 +61,6 @@ public class GuiRenderer extends MalisisRenderer
 	public static RenderItem itemRenderer = new RenderItem();
 	/** Current component being drawn. */
 	public UIComponent currentComponent;
-	/** Width of the Minecraft window. */
-	private int displayWidth;
-	/** Height of the Minecraft window. */
-	private int displayHeight;
 	/** Multiplying factor between GUI size and pixel size. */
 	private int scaleFactor;
 	/** Should the rendering be done according to scaleFactor. */
@@ -86,23 +82,6 @@ public class GuiRenderer extends MalisisRenderer
 	public GuiRenderer()
 	{
 		defaultGuiTexture = new GuiTexture(new ResourceLocation("malisiscore", "textures/gui/gui.png"), 300, 100);
-		updateGuiScale();
-	}
-
-	/**
-	 * Calculates GUI scale factor.
-	 *
-	 * @param guiScale the gui scale
-	 */
-	private void calcScaleFactor(int guiScale)
-	{
-		this.scaleFactor = 1;
-		if (guiScale == 0)
-			guiScale = 1000;
-
-		while (this.scaleFactor < guiScale && this.displayWidth / (this.scaleFactor + 1) >= 320
-				&& this.displayHeight / (this.scaleFactor + 1) >= 240)
-			++this.scaleFactor;
 	}
 
 	/**
@@ -126,6 +105,26 @@ public class GuiRenderer extends MalisisRenderer
 	}
 
 	/**
+	 * Sets the scale factor to use for this {@link GuiRenderer}.
+	 *
+	 * @param factor the new scale factor
+	 */
+	public void setScaleFactor(int factor)
+	{
+		scaleFactor = factor;
+	}
+
+	/**
+	 * Gets the scale factor used for this {@link GuiRenderer}.
+	 *
+	 * @return the scale factor
+	 */
+	public int getScaleFactor()
+	{
+		return scaleFactor;
+	}
+
+	/**
 	 * Sets whether to ignore default Minecraft GUI scale factor.<br>
 	 * If set to true, 1 pixel size will be equal to 1 pixel on screen.
 	 *
@@ -144,30 +143,6 @@ public class GuiRenderer extends MalisisRenderer
 	public boolean isIgnoreScale()
 	{
 		return ignoreScale;
-	}
-
-	/**
-	 * Sets the width, height and scale factor for this {@link GuiRenderer}.
-	 *
-	 * @return the the scale factor calculated
-	 */
-	public int updateGuiScale()
-	{
-		Minecraft mc = Minecraft.getMinecraft();
-		displayWidth = mc.displayWidth;
-		displayHeight = mc.displayHeight;
-		calcScaleFactor(mc.gameSettings.guiScale);
-		return scaleFactor;
-	}
-
-	/**
-	 * Gets the scale factor used by the GUI.
-	 *
-	 * @return the scale factor
-	 */
-	public float getScaleFactor()
-	{
-		return scaleFactor;
 	}
 
 	/**
@@ -566,7 +541,7 @@ public class GuiRenderer extends MalisisRenderer
 
 		int f = ignoreScale ? 1 : scaleFactor;
 		int x = area.x * f;
-		int y = displayHeight - (area.y + area.height()) * f;
+		int y = Minecraft.getMinecraft().displayHeight - (area.y + area.height()) * f;
 		int w = area.width() * f;
 		int h = area.height() * f;;
 		GL11.glScissor(x, y, w, h);
