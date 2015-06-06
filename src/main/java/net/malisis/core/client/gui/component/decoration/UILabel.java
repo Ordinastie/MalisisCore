@@ -166,6 +166,9 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	 */
 	public UILabel setText(String text)
 	{
+		if (text == this.text || (text != null && text.equals(this.text)))
+			return this;
+
 		this.text = text;
 		this.bbText = null;
 		if (multiLine)
