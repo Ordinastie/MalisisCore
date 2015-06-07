@@ -222,8 +222,6 @@ public abstract class MalisisGui extends GuiScreen
 			height = renderer.isIgnoreScale() ? displayHeight : resolution.getScaledHeight();
 
 			screen.setSize(width, height);
-
-			System.out.println("Set resolution");
 		}
 	}
 
