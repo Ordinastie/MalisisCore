@@ -225,6 +225,9 @@ public class MalisisFont
 
 	public void render(MalisisRenderer renderer, String text, float x, float y, float z, FontRenderOptions fro)
 	{
+		if (StringUtils.isEmpty(text))
+			return;
+
 		boolean isDrawing = renderer.isDrawing();
 
 		prepare(renderer, x, y, z, fro);
