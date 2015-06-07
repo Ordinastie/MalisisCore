@@ -55,7 +55,6 @@ import org.lwjgl.opengl.GL14;
 
 import com.google.common.eventbus.EventBus;
 
-// TODO: Auto-generated Javadoc
 /**
  * {@link UIComponent} is the base of everything drawn onto a GUI.<br>
  * The drawing is separated between background and foreground.<br>
