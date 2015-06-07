@@ -155,7 +155,7 @@ public class FontRenderOptions
 	 *
 	 * @param ecf the ecf
 	 */
-	private void apply(EnumChatFormatting ecf)
+	public void apply(EnumChatFormatting ecf)
 	{
 		if (ecf == EnumChatFormatting.RESET)
 			resetStyles(true);
