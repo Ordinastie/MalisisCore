@@ -38,6 +38,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
@@ -66,6 +68,8 @@ import com.google.common.io.Files;
 public class MalisisFont
 {
 	public static MalisisFont minecraftFont = new MinecraftFont();
+
+	private static Pattern pattern = Pattern.compile("\\{(.*?)}");
 
 	/** AWT font used **/
 	protected Font font;
@@ -357,9 +361,24 @@ public class MalisisFont
 		//		if (fro == null)
 		//			fro = new FontRenderOptions();
 		//		str = fro.processStyles(str);
-		str = StatCollector.translateToLocal(str);
+		str = translate(str);
 		str = str.replaceAll("\r?\n", "").replaceAll("\t", "    ");
 		return str;
+	}
+
+	private String translate(String str)
+	{
+		if (str.indexOf('{') == -1 || str.indexOf('{') >= str.indexOf('}'))
+			return StatCollector.translateToLocal(str);
+
+		StringBuffer output = new StringBuffer();
+		Matcher matcher = pattern.matcher(str);
+
+		while (matcher.find())
+			matcher.appendReplacement(output, StatCollector.translateToLocal(matcher.group(1)));
+
+		matcher.appendTail(output);
+		return output.toString();
 	}
 
 	private boolean hasLines(String text, FontRenderOptions fro)
