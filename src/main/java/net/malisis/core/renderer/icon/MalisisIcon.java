@@ -122,6 +122,14 @@ public class MalisisIcon extends TextureAtlasSprite
 		this.height = height;
 	}
 
+	public void setUVs(float u, float v, float U, float V)
+	{
+		minU = u;
+		minV = v;
+		maxU = U;
+		maxV = V;
+	}
+
 	@Override
 	public float getMinU()
 	{
