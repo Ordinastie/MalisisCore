@@ -30,7 +30,6 @@ import java.util.List;
 
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.animation.transformation.Transformation;
-import net.malisis.core.renderer.element.Shape;
 import net.minecraft.client.Minecraft;
 
 /**
@@ -139,12 +138,12 @@ public class AnimationRenderer
 		return anims;
 	}
 
-	public void animate(Shape shape, Transformation animation)
+	public void animate(ITransformable transformable, Transformation animation)
 	{
-		if (shape == null)
+		if (transformable == null)
 			return;
 
-		animation.transform(shape, getElapsedTime());
+		animation.transform(transformable, getElapsedTime());
 	}
 
 }
