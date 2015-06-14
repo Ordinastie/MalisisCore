@@ -78,8 +78,12 @@ public abstract class MalisisGui extends GuiScreen
 
 	/** Renderer drawing the components. */
 	protected GuiRenderer renderer;
+	/** Width of the window. */
 	protected int displayWidth;
+	/** Height of the window. */
 	protected int displayHeight;
+	/** Currently used gui scale. */
+	protected int currentGuiScale;
 	/** The resolution for the GUI **/
 	protected ScaledResolution resolution;
 	/** Top level container which hold the user components. Spans across the whole screen. */
@@ -210,19 +214,24 @@ public abstract class MalisisGui extends GuiScreen
 	 */
 	public void setResolution()
 	{
-		if (resolution == null || displayWidth != Display.getWidth() || displayHeight != Display.getHeight())
-		{
-			displayWidth = Display.getWidth();
-			displayHeight = Display.getHeight();
+		boolean set = resolution == null;
+		set |= displayWidth != Display.getWidth() || displayHeight != Display.getHeight();
+		set |= currentGuiScale != mc.gameSettings.guiScale;
 
-			resolution = new ScaledResolution(mc, displayWidth, displayHeight);
-			renderer.setScaleFactor(resolution.getScaleFactor());
+		if (!set)
+			return;
 
-			width = renderer.isIgnoreScale() ? displayWidth : resolution.getScaledWidth();
-			height = renderer.isIgnoreScale() ? displayHeight : resolution.getScaledHeight();
+		displayWidth = Display.getWidth();
+		displayHeight = Display.getHeight();
+		currentGuiScale = mc.gameSettings.guiScale;
 
-			screen.setSize(width, height);
-		}
+		resolution = new ScaledResolution(mc, displayWidth, displayHeight);
+		renderer.setScaleFactor(resolution.getScaleFactor());
+
+		width = renderer.isIgnoreScale() ? displayWidth : resolution.getScaledWidth();
+		height = renderer.isIgnoreScale() ? displayHeight : resolution.getScaledHeight();
+
+		screen.setSize(width, height);
 	}
 
 	/**
