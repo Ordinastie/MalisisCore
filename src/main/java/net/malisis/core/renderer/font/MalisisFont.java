@@ -463,6 +463,7 @@ public class MalisisFont
 		if (StringUtils.isEmpty(str))
 			return 0;
 
+		str = EnumChatFormatting.getTextWithoutFormattingCodes(str);
 		str = processString(str, null);
 		return (float) font.getStringBounds(str, frc).getWidth() / options.fontSize * fontScale * 9;
 	}

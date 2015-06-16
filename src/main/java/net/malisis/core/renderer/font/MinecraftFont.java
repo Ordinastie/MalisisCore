@@ -33,6 +33,7 @@ import net.malisis.core.renderer.MalisisRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
 import org.apache.commons.lang3.StringUtils;
@@ -173,6 +174,7 @@ public class MinecraftFont extends MalisisFont
 		if (StringUtils.isEmpty(str))
 			return 0;
 
+		str = EnumChatFormatting.getTextWithoutFormattingCodes(str);
 		str = processString(str, null);
 		return fontRenderer.getStringWidth(str) * fontScale;
 	}
