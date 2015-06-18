@@ -639,22 +639,6 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		return !event.isCancelled();
 	}
 
-	//	//TODO: clean
-	//	/**
-	//	 * Fires a {@link MouseEvent}.
-	//	 *
-	//	 * @param event the event
-	//	 * @return true, if the even can propagate, false if cancelled
-	//	 */
-	//	public boolean fireMouseEvent(MouseEvent event)
-	//	{
-	//		if (isDisabled() || !isVisible())
-	//			return false;
-	//
-	//		bus.post(event);
-	//		return !event.isCancelled();
-	//	}
-
 	//#region Inputs
 
 	/**
@@ -981,7 +965,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 
 	/**
 	 * Called when this {@link UIComponent} is added to screen.<br>
-	 * Triggers a {@link SizeChangeEvent} is this component size is relative.
+	 * Triggers a {@link SizeChangeEvent} if this component size is relative.
 	 */
 	public void onAddedToScreen()
 	{
