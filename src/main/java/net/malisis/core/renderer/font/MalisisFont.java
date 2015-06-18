@@ -267,7 +267,7 @@ public class MalisisFont
 		float x = 0;
 		float f = fro.fontScale / options.fontSize * 9;
 
-		fro.resetStyles(false);
+		fro.resetStylesLine();
 		StringWalker walker = StringWalker.get(text, this, fro, true);
 		walker.ignoreFontScale(true);
 		while (walker.walk())
@@ -310,9 +310,8 @@ public class MalisisFont
 		float x = 0;
 		float f = fro.fontScale / options.fontSize * 9;
 
-		fro.resetStyles();
+		fro.resetStylesLine();
 
-		fro.resetStyles(false);
 		StringWalker walker = StringWalker.get(text, this, fro, true);
 		walker.ignoreFontScale(true);
 		while (walker.walk())
@@ -548,7 +547,7 @@ public class MalisisFont
 		{
 			width += walker.getWidth();
 			if (width > fx)
-				return walker.getIndex();
+				return walker.getIndex() - 1;
 		}
 
 		return walker.getIndex();

@@ -143,7 +143,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 
 		fro.color = 0xFFFFFF;
 		fro.shadow = true;
-		fro.multiLines = multiLine;
 
 		shape = new XYResizableGuiShape(1);
 		cursorShape = new SimpleGuiShape();
@@ -1127,7 +1126,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	public void drawText(GuiRenderer renderer)
 	{
 		FontRenderOptions fro = isDisabled() ? disabledFro : this.fro;
-		fro.multiLines = multiLine;
 		if (!multiLine)
 		{
 			int end = text.length();
@@ -1139,11 +1137,13 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		}
 		else
 		{
-			fro.resetStyles();//manually reset style because fro.multiline = true
+			fro.resetStyles();
 			for (int i = lineOffset; i < lineOffset + getVisibleLines() && i < lines.size(); i++)
 			{
+				fro.setLineFro(fro);
 				int h = (i - lineOffset) * getLineHeight();
 				renderer.drawText(font, lines.get(i), 2, h + 2, 0, fro);
+
 			}
 		}
 	}

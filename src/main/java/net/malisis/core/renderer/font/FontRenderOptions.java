@@ -78,10 +78,9 @@ public class FontRenderOptions
 	public boolean strikethrough;
 	/** Disable ECF so char are actually drawn **/
 	public boolean disableECF = false;
-	/** Multilines (styles are only reset by ECF) **/
-	public boolean multiLines = false;
 
 	private FontRenderOptions defaultFro;
+	private FontRenderOptions lineFro;
 	private boolean defaultSaved = false;
 
 	public FontRenderOptions()
@@ -97,14 +96,10 @@ public class FontRenderOptions
 
 	public FontRenderOptions(FontRenderOptions fro)
 	{
-		fontScale = fro.fontScale;
-		color = fro.color;
-		bold = fro.bold;
-		italic = fro.italic;
-		strikethrough = fro.strikethrough;
-		underline = fro.underline;
-
 		defaultFro = new FontRenderOptions(false);
+
+		from(fro);
+
 		saveDefault();
 		defaultSaved = false;
 	}
@@ -169,7 +164,7 @@ public class FontRenderOptions
 	public void apply(EnumChatFormatting ecf)
 	{
 		if (ecf == EnumChatFormatting.RESET)
-			resetStyles(true);
+			resetStyles();
 		else if (ecf.isColor())
 		{
 			color = colors[ecf.ordinal()];
@@ -208,21 +203,41 @@ public class FontRenderOptions
 
 	public void resetStyles()
 	{
-		resetStyles(true);
+		if (!defaultSaved)
+		{
+			saveDefault();
+			return;
+		}
+
+		from(defaultFro);
 	}
 
-	public void resetStyles(boolean force)
+	public void setLineFro(FontRenderOptions fro)
 	{
-		if (!defaultSaved)
-			saveDefault();
-		if (!force && multiLines)
-			return;
+		if (lineFro == null)
+			lineFro = new FontRenderOptions();
+		lineFro.from(fro);
+	}
 
-		color = defaultFro.color;
-		strikethrough = defaultFro.strikethrough;
-		bold = defaultFro.bold;
-		italic = defaultFro.italic;
-		underline = defaultFro.underline;
+	public void resetStylesLine()
+	{
+		if (lineFro == null)
+		{
+			resetStyles();
+			return;
+		}
+
+		from(lineFro);
+	}
+
+	public void from(FontRenderOptions fro)
+	{
+		fontScale = fro.fontScale;
+		color = fro.color;
+		bold = fro.bold;
+		italic = fro.italic;
+		strikethrough = fro.strikethrough;
+		underline = fro.underline;
 	}
 
 	/**
@@ -258,7 +273,7 @@ public class FontRenderOptions
 	 */
 	public static EnumChatFormatting getFormatting(String text, int index)
 	{
-		if (StringUtils.isEmpty(text) || index >= text.length() - 2)
+		if (StringUtils.isEmpty(text) || index > text.length() - 2)
 			return null;
 
 		char c = text.charAt(index);
