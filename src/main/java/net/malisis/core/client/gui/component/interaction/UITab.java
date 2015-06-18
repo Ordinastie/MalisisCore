@@ -413,7 +413,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	private int calcAutoWidth()
 	{
 		if (label != null)
-			return (int) (font.getStringWidth(label, fro.fontScale) + (isHorizontal() ? 10 : 8));
+			return (int) (font.getStringWidth(label, fro) + (isHorizontal() ? 10 : 8));
 		else if (image != null)
 			return image.getWidth() + 10;
 		else
@@ -428,7 +428,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	private int calcAutoHeight()
 	{
 		if (label != null)
-			return (int) (font.getStringHeight(fro.fontScale) + (isHorizontal() ? 8 : 10));
+			return (int) (font.getStringHeight(fro) + (isHorizontal() ? 8 : 10));
 		else if (image != null)
 			return image.getHeight() + 10;
 		else
@@ -459,8 +459,8 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int w = label != null ? (int) font.getStringWidth(label, fro.fontScale) : image.getWidth();
-		int h = label != null ? (int) font.getStringHeight(fro.fontScale) : image.getHeight();
+		int w = label != null ? (int) font.getStringWidth(label, fro) : image.getWidth();
+		int h = label != null ? (int) font.getStringHeight(fro) : image.getHeight();
 		int x = (getWidth() - w) / 2;
 		int y = (getHeight() - h) / 2 + 1;
 

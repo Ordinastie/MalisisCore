@@ -157,9 +157,9 @@ public class UITooltip extends UIComponent implements IGuiText<UITooltip>
 	protected void calculateSize()
 	{
 
-		width = Math.max(16, (int) font.getMaxStringWidth(lines, fro.fontScale));
+		width = Math.max(16, (int) font.getMaxStringWidth(lines, fro));
 		width += padding * 2;
-		height = (int) (lines.size() > 1 ? font.getStringHeight(fro.fontScale) * lines.size() : 8);
+		height = (int) (lines.size() > 1 ? font.getStringHeight(fro) * lines.size() : 8);
 		height += padding * 2;
 	}
 
@@ -191,7 +191,7 @@ public class UITooltip extends UIComponent implements IGuiText<UITooltip>
 			int sy = y;
 			if (i > 0)
 				sy += 2;
-			renderer.drawText(font, str, x, sy + font.getStringHeight(fro.fontScale) * i, zIndex + 1, fro, false);
+			renderer.drawText(font, str, x, sy + font.getStringHeight(fro) * i, zIndex + 1, fro, false);
 			i++;
 		}
 	}

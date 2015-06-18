@@ -201,7 +201,7 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 		if (!StringUtils.isEmpty(text))
 		{
 			String str = String.format(text, value);
-			int x = (int) ((width - font.getStringWidth(str, fro.fontScale)) / 2);
+			int x = (int) ((width - font.getStringWidth(str, fro)) / 2);
 			int y = 6;
 
 			renderer.drawText(font, str, x, y, 0, isHovered() ? hoveredFro : fro);

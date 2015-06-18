@@ -847,7 +847,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 		public int getHeight(UISelect select)
 		{
-			return (int) (select.font.getStringHeight(select.fro.fontScale) + 1);
+			return (int) (select.font.getStringHeight(select.fro) + 1);
 		}
 
 		public void draw(UISelect select, GuiRenderer renderer, int x, int y, int z, float partialTick, boolean hovered, boolean isTop)

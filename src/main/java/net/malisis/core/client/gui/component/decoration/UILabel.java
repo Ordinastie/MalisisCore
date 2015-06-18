@@ -334,7 +334,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	@Override
 	public int getLineHeight()
 	{
-		return (int) (font.getStringHeight(fro.fontScale) + lineSpacing);
+		return (int) (font.getStringHeight(fro) + lineSpacing);
 	}
 
 	//#end IBBStringRenderer
@@ -361,7 +361,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		lines.clear();
 
 		if (!StringUtils.isEmpty(text))
-			lines = font.wrapText(text, getWidth(), fro.fontScale);
+			lines = font.wrapText(text, getWidth(), fro);
 
 		fireEvent(new ContentUpdateEvent<UILabel>(this));
 	}
@@ -373,8 +373,8 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	{
 		if (multiLine)
 			return;
-		this.textWidth = (int) font.getStringWidth(text, fro.fontScale);
-		this.textHeight = (int) font.getStringHeight(fro.fontScale);
+		this.textWidth = (int) font.getStringWidth(text, fro);
+		this.textHeight = (int) font.getStringHeight(fro);
 		setSize(textWidth, textHeight);
 	}
 

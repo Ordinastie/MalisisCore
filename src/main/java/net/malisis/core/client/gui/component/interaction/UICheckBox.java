@@ -139,7 +139,7 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	 */
 	private void calculateSize()
 	{
-		int w = StringUtils.isEmpty(text) ? 0 : (int) font.getStringWidth(text, fro.fontScale);
+		int w = StringUtils.isEmpty(text) ? 0 : (int) font.getStringWidth(text, fro);
 		setSize(w + 11, 10);
 	}
 

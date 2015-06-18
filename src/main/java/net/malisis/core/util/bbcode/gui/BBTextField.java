@@ -105,7 +105,7 @@ public class BBTextField extends UITextField implements IBBCodeRenderer<BBTextFi
 	}
 
 	@Override
-	protected void buildLines()
+	public void buildLines()
 	{
 		super.buildLines();
 		if (isWysiwyg())

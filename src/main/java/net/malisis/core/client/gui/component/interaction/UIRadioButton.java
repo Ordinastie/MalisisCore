@@ -171,7 +171,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 	 */
 	private void calculateSize()
 	{
-		int w = StringUtils.isEmpty(text) ? 0 : (int) font.getStringWidth(text, fro.fontScale);
+		int w = StringUtils.isEmpty(text) ? 0 : (int) font.getStringWidth(text, fro);
 		setSize(w + 11, 10);
 	}
 

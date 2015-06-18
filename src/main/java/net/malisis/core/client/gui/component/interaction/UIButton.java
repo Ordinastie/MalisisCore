@@ -245,8 +245,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 			}
 			else
 			{
-				int w = (int) font.getStringWidth(text, fro.fontScale);
-				int h = (int) font.getStringHeight(fro.fontScale);
+				int w = (int) font.getStringWidth(text, fro);
+				int h = (int) font.getStringHeight(fro);
 				width = Math.max(width, w + 6);
 				height = Math.max(height, h + 6);
 			}
@@ -393,8 +393,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 		}
 		else
 		{
-			w = (int) font.getStringWidth(text, fro.fontScale);
-			h = (int) font.getStringHeight(fro.fontScale);
+			w = (int) font.getStringWidth(text, fro);
+			h = (int) font.getStringHeight(fro);
 		}
 
 		int x = (width - w) / 2;
