@@ -268,16 +268,16 @@ public class MalisisFont
 		float f = fro.fontScale / options.fontSize * 9;
 
 		fro.resetStyles(false);
-
-		for (int i = 0; i < text.length(); i++)
+		StringWalker walker = StringWalker.get(text, this, fro, true);
+		walker.ignoreFontScale(true);
+		while (walker.walk())
 		{
-			i += fro.processStyles(text, i);
-			if (i >= text.length())
-				break;
-
-			CharData cd = getCharData(text.charAt(i));
-			drawChar(cd, x, 0, fro);
-			x += cd.getCharWidth() * f;
+			if (!walker.isFormatting())
+			{
+				CharData cd = getCharData(walker.getChar());
+				drawChar(cd, x, 0, fro);
+				x += walker.getWidth() * f;
+			}
 		}
 	}
 
@@ -308,23 +308,25 @@ public class MalisisFont
 	protected void drawLines(String text, FontRenderOptions fro)
 	{
 		float x = 0;
-		float factor = fro.fontScale / options.fontSize * 9;
+		float f = fro.fontScale / options.fontSize * 9;
 
 		fro.resetStyles();
 
-		for (int i = 0; i < text.length(); i++)
+		fro.resetStyles(false);
+		StringWalker walker = StringWalker.get(text, this, fro, true);
+		walker.ignoreFontScale(true);
+		while (walker.walk())
 		{
-			i += fro.processStyles(text, i);
-			if (i >= text.length())
-				break;
+			if (!walker.isFormatting())
+			{
+				CharData cd = getCharData(walker.getChar());
+				if (fro.underline)
+					drawLineChar(cd, x, getStringHeight(fro) + fro.fontScale, fro);
+				if (fro.strikethrough)
+					drawLineChar(cd, x, getStringHeight(fro) * 0.5F + fro.fontScale, fro);
 
-			CharData cd = getCharData(text.charAt(i));
-			if (fro.underline)
-				drawLineChar(cd, x, getStringHeight(fro.fontScale) + fro.fontScale, fro);
-			if (fro.strikethrough)
-				drawLineChar(cd, x, getStringHeight(fro.fontScale) * 0.5F + fro.fontScale, fro);
-
-			x += cd.getCharWidth() * factor;
+				x += walker.getWidth() * f;
+			}
 		}
 	}
 
@@ -358,9 +360,6 @@ public class MalisisFont
 	 */
 	public String processString(String str, FontRenderOptions fro)
 	{
-		//		if (fro == null)
-		//			fro = new FontRenderOptions();
-		//		str = fro.processStyles(str);
 		str = translate(str);
 		str = str.replaceAll("\r?\n", "").replaceAll("\t", "    ");
 		return str;
@@ -394,9 +393,9 @@ public class MalisisFont
 	 * @param width the width
 	 * @return the string
 	 */
-	public String clipString(String text, int width)
+	public String clipString(String str, int width)
 	{
-		return clipString(text, width, 1, false);
+		return clipString(str, width, null, false);
 	}
 
 	/**
@@ -407,37 +406,19 @@ public class MalisisFont
 	 * @param fontScale the font scale
 	 * @return the string
 	 */
-	public String clipString(String text, int width, float fontScale)
+	public String clipString(String str, int width, FontRenderOptions fro)
 	{
-		return clipString(text, width, fontScale, false);
+		return clipString(str, width, fro, false);
 	}
 
-	public String clipString(String text, int width, float fontScale, boolean appendPeriods)
+	public String clipString(String str, int width, FontRenderOptions fro, boolean appendPeriods)
 	{
-		text = StatCollector.translateToLocal(text);
-		StringBuilder ret = new StringBuilder();
-		float strWidth = 0;
-		int index = 0;
-
+		str = processString(str, fro);
 		if (appendPeriods)
 			width -= 4;
 
-		while (index < text.length())
-		{
-			char c = text.charAt(index);
-			strWidth += getCharWidth(c, fontScale);
-			if (strWidth < width)
-				ret.append(c);
-			else
-			{
-				if (appendPeriods)
-					ret.append("...");
-				return ret.toString();
-			}
-			index++;
-		}
-
-		return ret.toString();
+		int pos = (int) getCharPosition(str, fro, width, 0);
+		return str.substring(0, pos) + (appendPeriods ? "..." : "");
 	}
 
 	/**
@@ -448,7 +429,7 @@ public class MalisisFont
 	 */
 	public float getStringWidth(String str)
 	{
-		return getStringWidth(str, 1);
+		return getStringWidth(str, null);
 	}
 
 	/**
@@ -458,14 +439,16 @@ public class MalisisFont
 	 * @param fontScale the font scale
 	 * @return the string width
 	 */
-	public float getStringWidth(String str, float fontScale)
+	public float getStringWidth(String str, FontRenderOptions fro)
 	{
+		if (fro != null && !fro.disableECF)
+			str = EnumChatFormatting.getTextWithoutFormattingCodes(str);
+
 		if (StringUtils.isEmpty(str))
 			return 0;
 
-		str = EnumChatFormatting.getTextWithoutFormattingCodes(str);
-		str = processString(str, null);
-		return (float) font.getStringBounds(str, frc).getWidth() / options.fontSize * fontScale * 9;
+		str = processString(str, fro);
+		return (float) font.getStringBounds(str, frc).getWidth() / options.fontSize * (fro != null ? fro.fontScale : 1) * 9;
 	}
 
 	/**
@@ -475,7 +458,7 @@ public class MalisisFont
 	 */
 	public float getStringHeight()
 	{
-		return getStringHeight(1);
+		return getStringHeight(null);
 	}
 
 	/**
@@ -484,9 +467,9 @@ public class MalisisFont
 	 * @param fontScale the font scale
 	 * @return the string height
 	 */
-	public float getStringHeight(float fontScale)
+	public float getStringHeight(FontRenderOptions fro)
 	{
-		return fontScale * 9;
+		return (fro != null ? fro.fontScale : 1) * 9;
 	}
 
 	/**
@@ -497,7 +480,7 @@ public class MalisisFont
 	 */
 	public float getMaxStringWidth(List<String> strings)
 	{
-		return getMaxStringWidth(strings, 1);
+		return getMaxStringWidth(strings, null);
 	}
 
 	/**
@@ -507,11 +490,11 @@ public class MalisisFont
 	 * @param fontScale the font scale
 	 * @return the max string width
 	 */
-	public float getMaxStringWidth(List<String> strings, float fontScale)
+	public float getMaxStringWidth(List<String> strings, FontRenderOptions fro)
 	{
 		float width = 0;
 		for (String str : strings)
-			width = Math.max(width, getStringWidth(str, fontScale));
+			width = Math.max(width, getStringWidth(str, fro));
 		return width;
 	}
 
@@ -523,7 +506,7 @@ public class MalisisFont
 	 */
 	public float getCharWidth(char c)
 	{
-		return getCharWidth(c, 1);
+		return getCharWidth(c, null);
 	}
 
 	/**
@@ -533,14 +516,42 @@ public class MalisisFont
 	 * @param fontScale the font scale
 	 * @return the char width
 	 */
-	public float getCharWidth(char c, float fontScale)
+	public float getCharWidth(char c, FontRenderOptions fro)
 	{
 		if (c == '\r' || c == '\n')
 			return 0;
 		if (c == '\t')
-			return getCharWidth(' ', fontScale) * 4;
+			return getCharWidth(' ', fro) * 4;
 
-		return getCharData(c).getCharWidth() / options.fontSize * fontScale * 9;
+		return getCharData(c).getCharWidth() / options.fontSize * (fro != null ? fro.fontScale : 1) * 9;
+	}
+
+	/**
+	 * Determines the character for a given X coordinate.
+	 *
+	 * @param x the x coordinate
+	 * @return position
+	 */
+	public float getCharPosition(String str, FontRenderOptions fro, int position, int charOffset)
+	{
+		if (StringUtils.isEmpty(str))
+			return 0;
+
+		str = processString(str, fro);
+		float fx = position / (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
+		float width = 0;
+
+		StringWalker walker = StringWalker.get(str, this, fro, false);
+		walker.startIndex(charOffset);
+		walker.ignoreFontScale(true);
+		while (walker.walk())
+		{
+			width += walker.getWidth();
+			if (width > fx)
+				return walker.getIndex();
+		}
+
+		return walker.getIndex();
 	}
 
 	/**
@@ -552,7 +563,7 @@ public class MalisisFont
 	 */
 	public List<String> wrapText(String text, int maxWidth)
 	{
-		return wrapText(text, maxWidth, 1);
+		return wrapText(text, maxWidth, null);
 	}
 
 	/**
@@ -563,14 +574,14 @@ public class MalisisFont
 	 * @param fontScale the font scale
 	 * @return list of lines that won't exceed maxWidth limit
 	 */
-	public List<String> wrapText(String text, int maxWidth, float fontScale)
+	public List<String> wrapText(String str, int maxWidth, FontRenderOptions fro)
 	{
 		List<String> lines = new ArrayList<>();
-		String[] texts = text.split("\r?(?<=\n)");
+		String[] texts = str.split("\r?(?<=\n)");
 		if (texts.length > 1)
 		{
-			for (String str : texts)
-				lines.addAll(wrapText(str, maxWidth, fontScale));
+			for (String t : texts)
+				lines.addAll(wrapText(t, maxWidth, fro));
 			return lines;
 		}
 
@@ -580,18 +591,24 @@ public class MalisisFont
 
 		float lineWidth = 0;
 		float wordWidth = 0;
-		int index = 0;
 
-		text = StatCollector.translateToLocal(text);
+		str = processString(str, fro);
 
-		while (index < text.length())
+		StringWalker walker = StringWalker.get(str, this, fro, false);
+		walker.ignoreFontScale(true);
+		while (walker.walk())
 		{
-			char c = text.charAt(index);
+			char c = walker.getChar();
+			lineWidth += walker.getWidth();
+			wordWidth += walker.getWidth();
+			if (walker.isFormatting())
+			{
+				word.append(walker.getFormatting());
+				continue;
+			}
+			else
+				word.append(c);
 
-			float w = getCharWidth(c, fontScale);
-			lineWidth += w;
-			wordWidth += w;
-			word.append(c);
 			//we just ended a new word, add it to the current line
 			if (c == ' ' || c == '-' || c == '.')
 			{
@@ -614,7 +631,6 @@ public class MalisisFont
 
 				lineWidth = wordWidth;
 			}
-			index++;
 		}
 
 		line.append(word);

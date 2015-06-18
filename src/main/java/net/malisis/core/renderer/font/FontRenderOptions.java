@@ -29,6 +29,8 @@ import java.util.Map;
 
 import net.minecraft.util.EnumChatFormatting;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author Ordinastie
  *
@@ -74,6 +76,8 @@ public class FontRenderOptions
 	public boolean underline;
 	/** Striketrhough the text **/
 	public boolean strikethrough;
+	/** Disable ECF so char are actually drawn **/
+	public boolean disableECF = false;
 	/** Multilines (styles are only reset by ECF) **/
 	public boolean multiLines = false;
 
@@ -87,7 +91,8 @@ public class FontRenderOptions
 
 	public FontRenderOptions(boolean b)
 	{
-
+		//constructor without a default.
+		//'this' object should already be the default for another FRO
 	}
 
 	public FontRenderOptions(FontRenderOptions fro)
@@ -104,31 +109,47 @@ public class FontRenderOptions
 		defaultSaved = false;
 	}
 
+	public FontRenderOptions(String ecfs)
+	{
+		defaultFro = new FontRenderOptions(false);
+		processStyles(ecfs);
+		saveDefault();
+		defaultSaved = false;
+	}
+
+	public FontRenderOptions(String ecfs, int color)
+	{
+		this(ecfs);
+		this.color = color;
+		defaultFro.color = color;
+	}
+
 	/**
-	 * Process styles applied to the text with {@link EnumChatFormatting} values.<br>
-	 * Applies the styles to this {@link FontRenderOptions} and returns the stripped text.
+	 * Process styles applied to the beginning of the text with {@link EnumChatFormatting} values.<br>
+	 * Applies the styles to this {@link FontRenderOptions} and returns the number of characters read.
 	 *
 	 * @param text the text
 	 * @return the string with ECF
 	 */
-	public String processStyles(String text)
+	public int processStyles(String text)
 	{
-		if (!defaultSaved)
-			saveDefault();
-		EnumChatFormatting ecf;
-		while ((ecf = getFormatting(text, 0)) != null)
-		{
-			text = text.substring(2);
-			apply(ecf);
-		}
-
-		return text;
+		return processStyles(text, 0);
 	}
 
+	/**
+	 * Process styles applied at the specified position in the text with {@link EnumChatFormatting} values.<br>
+	 * Applies the styles to this {@link FontRenderOptions} and returns the number of characters read.
+	 *
+	 * @param text the text
+	 * @param index the index
+	 * @return the int
+	 */
 	public int processStyles(String text, int index)
 	{
 		if (!defaultSaved)
 			saveDefault();
+		if (disableECF)
+			return 0;
 		EnumChatFormatting ecf;
 		int offset = 0;
 		while ((ecf = getFormatting(text, index + offset)) != null)
@@ -138,16 +159,6 @@ public class FontRenderOptions
 		}
 
 		return offset;
-	}
-
-	public void saveDefault()
-	{
-		defaultSaved = true;
-		defaultFro.color = color;
-		defaultFro.strikethrough = strikethrough;
-		defaultFro.bold = bold;
-		defaultFro.italic = italic;
-		defaultFro.underline = underline;
 	}
 
 	/**
@@ -183,6 +194,16 @@ public class FontRenderOptions
 					break;
 			}
 		}
+	}
+
+	public void saveDefault()
+	{
+		defaultSaved = true;
+		defaultFro.color = color;
+		defaultFro.strikethrough = strikethrough;
+		defaultFro.bold = bold;
+		defaultFro.italic = italic;
+		defaultFro.underline = underline;
 	}
 
 	public void resetStyles()
@@ -227,11 +248,6 @@ public class FontRenderOptions
 		return (r & 255) << 16 | (g & 255) << 8 | b & 255;
 	}
 
-	public String addStyles(String text)
-	{
-		return null;
-	}
-
 	/**
 	 * Gets the {@link EnumChatFormatting} at the specified position in the text.<br>
 	 * Returns null if none is found.
@@ -242,13 +258,25 @@ public class FontRenderOptions
 	 */
 	public static EnumChatFormatting getFormatting(String text, int index)
 	{
-		if (text == null || index >= text.length() - 2)
+		if (StringUtils.isEmpty(text) || index >= text.length() - 2)
 			return null;
 
 		char c = text.charAt(index);
 		if (c != '\u00a7')
 			return null;
 		return charFormats.get(text.charAt(index + 1));
+	}
+
+	/**
+	 * Checks if there is a {@link EnumChatFormatting} at the specified position in the text.
+	 *
+	 * @param text the text
+	 * @param index the index
+	 * @return true, if ECF
+	 */
+	public static boolean isFormatting(String text, int index)
+	{
+		return getFormatting(text, index) != null;
 	}
 
 }
