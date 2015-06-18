@@ -91,17 +91,17 @@ public class StringWalker
 		if (index >= str.length())
 			return false;
 
-		ecf = fro.disableECF ? null : FontRenderOptions.getFormatting(str, index);
+		ecf = fro == null || fro.disableECF ? null : FontRenderOptions.getFormatting(str, index);
 		c = str.charAt(index);
 		width = font.getCharWidth(c);
 		if (isFormatting())
 		{
 			width = 0;
 			index++;
-			if (applyStyles)
+			if (applyStyles && fro != null)
 				fro.apply(ecf);
 		}
-		if (!ignoreScale)
+		if (!ignoreScale && fro != null)
 			width *= fro.fontScale;
 
 		index++;
