@@ -199,6 +199,7 @@ public class FontRenderOptions
 		defaultFro.bold = bold;
 		defaultFro.italic = italic;
 		defaultFro.underline = underline;
+		defaultFro.fontScale = fontScale;
 	}
 
 	public void resetStyles()

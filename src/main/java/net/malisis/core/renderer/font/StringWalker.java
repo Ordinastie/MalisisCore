@@ -38,7 +38,6 @@ public class StringWalker
 	private FontRenderOptions fro;
 	private String str;
 	private boolean applyStyles;
-	private boolean ignoreScale;
 
 	private int index;
 	private char c;
@@ -74,11 +73,6 @@ public class StringWalker
 		return width;
 	}
 
-	public void ignoreFontScale(boolean ignore)
-	{
-		ignoreScale = ignore;
-	}
-
 	public void startIndex(int index)
 	{
 		this.index = index;
@@ -101,8 +95,6 @@ public class StringWalker
 			if (applyStyles && fro != null)
 				fro.apply(ecf);
 		}
-		if (!ignoreScale && fro != null)
-			width *= fro.fontScale;
 
 		index++;
 		return true;

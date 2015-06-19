@@ -269,7 +269,6 @@ public class MalisisFont
 
 		fro.resetStylesLine();
 		StringWalker walker = StringWalker.get(text, this, fro, true);
-		walker.ignoreFontScale(true);
 		while (walker.walk())
 		{
 			if (!walker.isFormatting())
@@ -313,7 +312,6 @@ public class MalisisFont
 		fro.resetStylesLine();
 
 		StringWalker walker = StringWalker.get(text, this, fro, true);
-		walker.ignoreFontScale(true);
 		while (walker.walk())
 		{
 			if (!walker.isFormatting())
@@ -542,7 +540,6 @@ public class MalisisFont
 
 		StringWalker walker = StringWalker.get(str, this, fro, false);
 		walker.startIndex(charOffset);
-		walker.ignoreFontScale(true);
 		while (walker.walk())
 		{
 			width += walker.getWidth();
@@ -588,13 +585,14 @@ public class MalisisFont
 		StringBuilder word = new StringBuilder();
 		//FontRenderOptions fro = new FontRenderOptions();
 
+		maxWidth -= 4;
+		maxWidth /= (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
 		float lineWidth = 0;
 		float wordWidth = 0;
 
 		str = processString(str, fro);
 
 		StringWalker walker = StringWalker.get(str, this, fro, false);
-		walker.ignoreFontScale(true);
 		while (walker.walk())
 		{
 			char c = walker.getChar();

@@ -179,7 +179,7 @@ public class MinecraftFont extends MalisisFont
 		while (walker.walk())
 			width += walker.getWidth();
 
-		return width;
+		return width * (fro != null ? fro.fontScale : 1);
 	}
 
 	@Override
