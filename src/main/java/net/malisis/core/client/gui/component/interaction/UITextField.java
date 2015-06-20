@@ -138,6 +138,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		this.multiLine = multiLine;
 		cursorPosition = new CursorPosition();
 		selectionPosition = new CursorPosition();
+
 		if (text != null)
 			this.setText(text);
 
@@ -1275,6 +1276,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				textPosition = 0;
 				line = 0;
 				character = 0;
+				onCursorUpdated();
 				return;
 			}
 
@@ -1523,6 +1525,13 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		{
 			return (line - lineOffset) * getLineHeight();
 		}
+
+		@Override
+		public String toString()
+		{
+			return "Pos : " + textPosition + " (l" + line + " / c" + character + ") at " + getXOffset() + "," + getYOffset();
+		}
+
 	}
 
 	//#end CursorPosition
