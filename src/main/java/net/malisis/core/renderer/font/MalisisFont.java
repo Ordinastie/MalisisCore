@@ -282,7 +282,7 @@ public class MalisisFont
 
 	protected void drawChar(CharData cd, float offsetX, float offsetY, FontRenderOptions fro)
 	{
-		if (cd.getChar() == ' ')
+		if (Character.isWhitespace(cd.getChar()))
 			return;
 
 		Tessellator t = Tessellator.instance;
@@ -358,7 +358,7 @@ public class MalisisFont
 	public String processString(String str, FontRenderOptions fro)
 	{
 		str = translate(str);
-		str = str.replaceAll("\r?\n", "").replaceAll("\t", "    ");
+		//str = str.replaceAll("\r?\n", "").replaceAll("\t", "    ");
 		return str;
 	}
 
