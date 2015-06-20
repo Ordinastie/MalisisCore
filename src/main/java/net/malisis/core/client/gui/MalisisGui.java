@@ -27,8 +27,12 @@ package net.malisis.core.client.gui;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.component.IKeyListener;
@@ -54,6 +58,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 
+import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -113,6 +118,7 @@ public abstract class MalisisGui extends GuiScreen
 	protected Set<IKeyListener> keyListeners = new HashSet<>();
 	/** Debug **/
 	private boolean debug = false;
+	private HashMap<String, Callable<String>> debugMap = new HashMap<>();
 
 	protected MalisisGui()
 	{
@@ -232,6 +238,44 @@ public abstract class MalisisGui extends GuiScreen
 		height = renderer.isIgnoreScale() ? displayHeight : resolution.getScaledHeight();
 
 		screen.setSize(width, height);
+	}
+
+	public void addDebug(String name, final Object... objects)
+	{
+		Callable<String> call;
+		if (objects.length == 1 && objects[0] instanceof Callable)
+		{
+			call = (Callable<String>) objects[0];
+		}
+		else if (objects.length > 1 && objects[0] instanceof String)
+		{
+			call = new Callable<String>()
+			{
+				@Override
+				public String call()
+				{
+					return String.format((String) objects[0], Arrays.copyOfRange(objects, 1, objects.length));
+				}
+			};
+		}
+		else
+		{
+			call = new Callable<String>()
+			{
+				@Override
+				public String call()
+				{
+					return StringUtils.join(objects);
+				}
+			};
+		}
+
+		debugMap.put(name, call);
+	}
+
+	public void removeDebug(String name)
+	{
+		debugMap.remove(name);
 	}
 
 	/**
@@ -513,13 +557,27 @@ public abstract class MalisisGui extends GuiScreen
 
 		if (debug)
 		{
+			int dy = 0, oy = 5;
 			FontRenderOptions fro = new FontRenderOptions();
 			fro.color = 0xFFFFFF;
 			fro.shadow = true;
 			//fro.fontScale = 1 / renderer.getScaleFactor() * 2;
-			renderer.drawText(null, "Mouse : " + mouseX + "," + mouseY, 5, 5, 0, fro, false);
-			renderer.drawText(null, "Focus : " + focusedComponent, 5, 15, 0, fro, false);
-			renderer.drawText(null, "Hover : " + hoveredComponent, 5, 25, 0, fro, false);
+			renderer.drawText(null, "Mouse : " + mouseX + "," + mouseY, 5, dy++ * 10 + oy, 0, fro, false);
+			renderer.drawText(null, "Focus : " + focusedComponent, 5, dy++ * 10 + oy, 0, fro, false);
+			renderer.drawText(null, "Hover : " + hoveredComponent, 5, dy++ * 10 + oy, 0, fro, false);
+
+			for (Entry<String, Callable<String>> entry : debugMap.entrySet())
+			{
+				Callable<String> call = entry.getValue();
+				try
+				{
+					renderer.drawText(null, entry.getKey() + " : " + call.call(), 5, dy++ * 10 + oy, 0, fro, false);
+				}
+				catch (Exception e)
+				{
+					renderer.drawText(null, entry.getKey() + " : " + e.getMessage(), 5, dy++ * 10 + oy, 0, fro, false);
+				}
+			}
 		}
 
 		if (inventoryContainer != null)
