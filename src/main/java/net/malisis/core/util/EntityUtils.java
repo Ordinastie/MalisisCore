@@ -46,8 +46,8 @@ import net.minecraftforge.common.util.ForgeDirection;
  */
 public class EntityUtils
 {
-	private static ForgeDirection[] facings = new ForgeDirection[] { ForgeDirection.SOUTH, ForgeDirection.WEST, ForgeDirection.NORTH,
-			ForgeDirection.EAST, ForgeDirection.UP, ForgeDirection.DOWN, ForgeDirection.UNKNOWN };
+	private static ForgeDirection[] facings = new ForgeDirection[] { ForgeDirection.NORTH, ForgeDirection.EAST, ForgeDirection.SOUTH,
+			ForgeDirection.WEST, ForgeDirection.UP, ForgeDirection.DOWN, ForgeDirection.UNKNOWN };
 
 	/**
 	 * Eject a new item corresponding to the {@link ItemStack}.
@@ -127,7 +127,7 @@ public class EntityUtils
 		if (sixWays && pitch > 45)
 			return 4;
 
-		return MathHelper.floor_double(entity.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
+		return (MathHelper.floor_double(entity.rotationYaw * 4.0F / 360.0F + 0.5D) + 2) & 3;
 	}
 
 	public static boolean isEquipped(EntityPlayer player, Item item)
