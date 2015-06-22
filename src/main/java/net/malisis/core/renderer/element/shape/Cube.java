@@ -44,5 +44,6 @@ public class Cube extends Shape
 	public Cube()
 	{
 		super(new NorthFace(), new SouthFace(), new EastFace(), new WestFace(), new TopFace(), new BottomFace());
+		storeState();
 	}
 }
