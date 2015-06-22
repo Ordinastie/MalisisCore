@@ -78,16 +78,17 @@ public class PatternMultiBlock extends MultiBlock
 		states.clear();
 		BlockPos pos;
 		BlockState state;
-		int x = 0;
-		int y = 0;
-		for (List<String> layer : pattern)
+
+		for (int y = 0; y < pattern.size(); y++)
 		{
-			for (String row : layer)
+			List<String> layer = pattern.get(y);
+			for (int z = 0; z < layer.size(); z++)
 			{
-				for (int z = 0; z < row.length(); z++)
+				String row = layer.get(z);
+				for (int x = 0; x < row.length(); x++)
 				{
 					pos = new BlockPos(x, y, z).add(offset);
-					state = blocks.get(row.charAt(z));
+					state = blocks.get(row.charAt(x));
 					if (state != null)
 						states.put(pos, new BlockState(pos, state));
 				}
