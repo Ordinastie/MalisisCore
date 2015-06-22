@@ -28,9 +28,11 @@ import java.lang.ref.WeakReference;
 
 import net.malisis.core.util.BlockPos.BlockIterator;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -131,9 +133,30 @@ public class BlockState
 		return pos.getZ();
 	}
 
+	public boolean isAir()
+	{
+		return getBlock().getMaterial() == Material.air;
+	}
+
 	public BlockState offset(BlockPos pos)
 	{
 		return new BlockState(this.pos.add(pos), this);
+	}
+
+	public BlockState rotate(int rotation)
+	{
+		return new BlockState(this.pos.rotate(rotation), this);
+	}
+
+	public void rotateInWorld(World world, int rotation)
+	{
+		ForgeDirection[] dirs = new ForgeDirection[] { ForgeDirection.NORTH, ForgeDirection.EAST, ForgeDirection.SOUTH, ForgeDirection.WEST };
+		block.rotateBlock(world, getX(), getY(), getZ(), dirs[rotation / 90]);
+	}
+
+	public void placeBlock(World world)
+	{
+		world.setBlock(getX(), getY(), getZ(), block, metadata, 3);
 	}
 
 	public void placeBlock(World world, int flag)
@@ -146,6 +169,11 @@ public class BlockState
 		world.setBlock(getX(), getY(), getZ(), Blocks.air, 0, flag);
 	}
 
+	public boolean matchesWorld(IBlockAccess world)
+	{
+		return new BlockState(world, pos).equals(this);
+	}
+
 	public static Iterable<BlockState> getAllInBox(IBlockAccess world, BlockPos from, BlockPos to, Block block, boolean skipAir)
 	{
 		FluentIterable<BlockState> it = FluentIterable.from(new BlockIterator(from, to).asIterable()).transform(toBlockState.set(world));
@@ -153,6 +181,16 @@ public class BlockState
 			it.filter(blockFilter.set(block, skipAir));
 
 		return it;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (!(obj instanceof BlockState))
+			return false;
+
+		BlockState bs = (BlockState) obj;
+		return pos.equals(bs.pos) && block == bs.block && metadata == bs.metadata;
 	}
 
 	@Override

@@ -115,6 +115,8 @@ public class BlockPos
 
 	public BlockPos add(BlockPos pos)
 	{
+		if (pos == null)
+			return new BlockPos(getX(), getY(), getZ());
 		return add(pos.getX(), pos.getY(), pos.getZ());
 	}
 
@@ -238,6 +240,21 @@ public class BlockPos
 	public BlockPos offset(ForgeDirection facing, int n)
 	{
 		return new BlockPos(this.getX() + facing.offsetX * n, this.getY() + facing.offsetY * n, this.getZ() + facing.offsetZ * n);
+	}
+
+	public BlockPos rotate(int rotation)
+	{
+		int[] cos = { 1, 0, -1, 0 };
+		int[] sin = { 0, 1, 0, -1 };
+
+		int a = rotation % 4;
+		if (a < 0)
+			a += 4;
+
+		int newX = (x * cos[a]) - (z * sin[a]);
+		int newZ = (x * sin[a]) + (z * cos[a]);
+
+		return new BlockPos(newX, y, newZ);
 	}
 
 	//#end Moves
