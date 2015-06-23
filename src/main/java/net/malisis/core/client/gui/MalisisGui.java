@@ -142,6 +142,7 @@ public abstract class MalisisGui extends GuiScreen
 		{
 			if (!constructed)
 			{
+				debugMap.clear();
 				construct();
 				constructed = true;
 			}
