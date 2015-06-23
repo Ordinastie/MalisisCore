@@ -94,6 +94,11 @@ public class ClipArea
 		return Y - y;
 	}
 
+	public boolean isInside(int x, int y)
+	{
+		return x >= this.x && x < this.X && y >= this.y && y < this.Y;
+	}
+
 	@Override
 	public String toString()
 	{
