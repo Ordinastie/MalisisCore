@@ -1241,6 +1241,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		protected int character;
 		/** The line. */
 		protected int line;
+		/** Last x offset **/
+		protected int lastOffset;
 
 		/**
 		 * Sets this {@link CursorPosition} at the same position than <b>position</b>.
@@ -1306,7 +1308,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				line++;
 			}
 			character = pos;
-
+			lastOffset = getXOffset();
 			onCursorUpdated();
 		}
 
@@ -1363,16 +1365,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		{
 			if (textPosition == 0)
 				return;
-			if (character == 0 && line > 0)
-			{
-				line--;
-				character = currentLineText().length();
-				if (currentLineText().endsWith("\n"))
-				{
-					character--;
-					textPosition--;
-				}
-			}
+
+			if (FontRenderOptions.isFormatting(text.toString(), textPosition - 2))
+				jumpBy(-2);
 			else
 				jumpBy(-1);
 
@@ -1387,18 +1382,11 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		{
 			if (textPosition == text.length())
 				return;
-			if (currentLineText().endsWith("\n"))
-				jumpBy(1);
+
+			if (FontRenderOptions.isFormatting(text.toString(), textPosition))
+				jumpBy(2);
 			else
-			{
-				if (character++ >= currentLineText().length() && line < lines.size() - 1)
-				{
-					line++;
-					character = 0;
-				}
-				else
-					textPosition++;
-			}
+				jumpBy(1);
 
 			onCursorUpdated();
 		}
@@ -1431,9 +1419,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				line = Math.max(0, line - 1);
 			else
 				line = Math.min(line + 1, lines.size() - 1);
-			character = Math.min(character, currentLineText().length());
+			//character = Math.min(character, currentLineText().length());
+			character = Math.round(font.getCharPosition(currentLineText(), fro, lastOffset, charOffset));
 			updateTextPosition();
-
 		}
 
 		/**
@@ -1460,6 +1448,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			line = lineFromY(y);
 			character = characterFromX(x);
 			updateTextPosition();
+			lastOffset = getXOffset();
 		}
 
 		/**
