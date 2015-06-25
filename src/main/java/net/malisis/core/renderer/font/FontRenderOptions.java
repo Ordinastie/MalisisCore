@@ -163,6 +163,8 @@ public class FontRenderOptions
 	 */
 	public void apply(EnumChatFormatting ecf)
 	{
+		if (!defaultSaved)
+			saveDefault();
 		if (ecf == EnumChatFormatting.RESET)
 			resetStyles();
 		else if (ecf.isColor())
@@ -274,7 +276,7 @@ public class FontRenderOptions
 	 */
 	public static EnumChatFormatting getFormatting(String text, int index)
 	{
-		if (StringUtils.isEmpty(text) || index > text.length() - 2)
+		if (StringUtils.isEmpty(text) || index < 0 || index > text.length() - 2)
 			return null;
 
 		char c = text.charAt(index);
@@ -293,6 +295,21 @@ public class FontRenderOptions
 	public static boolean isFormatting(String text, int index)
 	{
 		return getFormatting(text, index) != null;
+	}
+
+	public static Link getLink(String text, int index)
+	{
+		if (StringUtils.isEmpty(text) || index < 0 || index > text.length() - 2)
+			return null;
+
+		if (text.charAt(index) != '[')
+			return null;
+		int i = text.indexOf(']');
+		if (i < 2)
+			return null;
+
+		Link link = new Link(index, text.substring(index + 1, i));
+		return link.isValid() ? link : null;
 	}
 
 }

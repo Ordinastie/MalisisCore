@@ -268,15 +268,13 @@ public class MalisisFont
 		float f = fro.fontScale / options.fontSize * 9;
 
 		fro.resetStylesLine();
-		StringWalker walker = StringWalker.get(text, this, fro, true);
+		StringWalker walker = new StringWalker(text, this, fro);
+		walker.applyStyles(true);
 		while (walker.walk())
 		{
-			if (!walker.isFormatting())
-			{
-				CharData cd = getCharData(walker.getChar());
-				drawChar(cd, x, 0, fro);
-				x += walker.getWidth() * f;
-			}
+			CharData cd = getCharData(walker.getChar());
+			drawChar(cd, x, 0, fro);
+			x += walker.getWidth() * f;
 		}
 	}
 
@@ -311,7 +309,8 @@ public class MalisisFont
 
 		fro.resetStylesLine();
 
-		StringWalker walker = StringWalker.get(text, this, fro, true);
+		StringWalker walker = new StringWalker(text, this, fro);
+		walker.applyStyles(true);
 		while (walker.walk())
 		{
 			if (!walker.isFormatting())
@@ -436,8 +435,11 @@ public class MalisisFont
 	 * @param fontScale the font scale
 	 * @return the string width
 	 */
-	public float getStringWidth(String str, FontRenderOptions fro)
+	public float getStringWidth(String str, FontRenderOptions fro, int start, int end)
 	{
+		if (start > end)
+			return 0;
+
 		if (fro != null && !fro.disableECF)
 			str = EnumChatFormatting.getTextWithoutFormattingCodes(str);
 
@@ -446,6 +448,13 @@ public class MalisisFont
 
 		str = processString(str, fro);
 		return (float) font.getStringBounds(str, frc).getWidth() / options.fontSize * (fro != null ? fro.fontScale : 1) * 9;
+	}
+
+	public float getStringWidth(String str, FontRenderOptions fro)
+	{
+		if (StringUtils.isEmpty(str))
+			return 0;
+		return getStringWidth(str, fro, 0, str.length());
 	}
 
 	/**
@@ -536,18 +545,11 @@ public class MalisisFont
 
 		str = processString(str, fro);
 		float fx = position / (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
-		float width = 0;
 
-		StringWalker walker = StringWalker.get(str, this, fro, false);
+		StringWalker walker = new StringWalker(str, this, fro);
 		walker.startIndex(charOffset);
-		while (walker.walk())
-		{
-			width += walker.getWidth();
-			if (width > fx)
-				return walker.getIndex() - 1;
-		}
-
-		return walker.getIndex();
+		walker.skipChars(true);
+		return walker.walkTo(fx);
 	}
 
 	/**
@@ -592,19 +594,21 @@ public class MalisisFont
 
 		str = processString(str, fro);
 
-		StringWalker walker = StringWalker.get(str, this, fro, false);
+		StringWalker walker = new StringWalker(str, this, fro);
+		walker.skipChars(false);
+		walker.applyStyles(false);
 		while (walker.walk())
 		{
 			char c = walker.getChar();
 			lineWidth += walker.getWidth();
 			wordWidth += walker.getWidth();
-			if (walker.isFormatting())
-			{
-				word.append(walker.getFormatting());
-				continue;
-			}
-			else
-				word.append(c);
+			//			if (walker.isFormatting())
+			//			{
+			//				word.append(walker.getFormatting());
+			//				continue;
+			//			}
+			//			else
+			word.append(c);
 
 			//we just ended a new word, add it to the current line
 			if (c == ' ' || c == '-' || c == '.')

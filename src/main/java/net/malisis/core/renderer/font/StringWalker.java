@@ -32,22 +32,56 @@ import net.minecraft.util.EnumChatFormatting;
  */
 public class StringWalker
 {
-	private static StringWalker instance = new StringWalker();
-
 	private MalisisFont font;
 	private FontRenderOptions fro;
 	private String str;
+	private boolean litteral;
+	private boolean skipChars = true;
 	private boolean applyStyles;
+	private boolean isText;
+
+	private int prevColor;
+	private boolean prevUnderline;
 
 	private int index;
+	private int endIndex;
 	private char c;
 	private EnumChatFormatting ecf;
+	private Link link;
 	private float width;
 
-	public StringWalker()
-	{}
+	public StringWalker(String str, MalisisFont font, FontRenderOptions fro)
+	{
+		this.str = str;
+		this.font = font;
+		this.fro = fro;
+		this.index = 0;
+		this.endIndex = str.length();
+		litteral = fro != null && fro.disableECF;
+	}
 
 	//#region Getters/Setters
+
+	public void setLitteral(boolean litteral)
+	{
+		this.litteral = litteral;
+	}
+
+	public void skipChars(boolean skip)
+	{
+		this.skipChars = skip;
+	}
+
+	public void applyStyles(boolean apply)
+	{
+		this.applyStyles = apply;
+	}
+
+	public boolean isApplyStyles()
+	{
+		return applyStyles;
+	}
+
 	public int getIndex()
 	{
 		return index;
@@ -68,6 +102,16 @@ public class StringWalker
 		return ecf != null;
 	}
 
+	public Link getLink()
+	{
+		return link;
+	}
+
+	public boolean isLink()
+	{
+		return link != null;
+	}
+
 	public float getWidth()
 	{
 		return width;
@@ -78,40 +122,107 @@ public class StringWalker
 		this.index = index;
 	}
 
+	public void endIndex(int index)
+	{
+		this.endIndex = index;
+	}
+
+	private void setLinkStyle(FontRenderOptions fro)
+	{
+		if (fro == null || litteral || !applyStyles)
+			return;
+
+		prevColor = fro.color;
+		prevUnderline = fro.underline;
+		//		fro.saveDefault();
+		fro.color = 0x6666FF;
+		fro.underline = true;
+	}
+
+	private void resetLinkStyle(FontRenderOptions fro)
+	{
+		if (fro == null || litteral || !applyStyles)
+			return;
+
+		fro.color = prevColor;
+		fro.underline = prevUnderline;
+	}
+
 	//#end Getters/Setters
+
+	private void checkEcf()
+	{
+		ecf = FontRenderOptions.getFormatting(str, index);
+		if (ecf == null)
+			ecf = FontRenderOptions.getFormatting(str, index - 1);
+
+		if (ecf == null)
+			return;
+
+		if (applyStyles && fro != null && !isLink())
+			fro.apply(ecf);
+
+		if (skipChars && !litteral)
+			index += 2;
+	}
+
+	public void checkLink()
+	{
+		if (link != null)
+		{
+			isText = link.isText(getIndex());
+
+			if (str.charAt(index) == ']')
+			{
+				resetLinkStyle(fro);
+				if (skipChars && !litteral)
+					index++;
+			}
+		}
+		else
+		{
+			link = FontRenderOptions.getLink(str, index);
+			if (isLink())
+			{
+				if (skipChars && !litteral)
+					index += link.indexAdvance();
+				setLinkStyle(fro);
+			}
+		}
+
+	}
+
+	public int walkTo(float x)
+	{
+		float width = 0;
+		while (walk())
+		{
+			width += getWidth();
+			if (width > x)
+				return getIndex() - 1;
+		}
+
+		return getIndex();
+	}
 
 	public boolean walk()
 	{
-		if (index >= str.length())
+		if (index >= endIndex)
 			return false;
 
-		ecf = fro == null || fro.disableECF ? null : FontRenderOptions.getFormatting(str, index);
+		checkEcf();
+		checkLink();
+
+		if (index >= endIndex)
+			return false;
+
 		c = str.charAt(index);
 		width = font.getCharWidth(c);
-		if (isFormatting())
-		{
+
+		if (!litteral && !skipChars && (ecf != null || (link != null && !isText)))
 			width = 0;
-			index++;
-			if (applyStyles && fro != null)
-				fro.apply(ecf);
-		}
 
 		index++;
 		return true;
-	}
-
-	private void set(String str, MalisisFont font, FontRenderOptions fro, boolean applyStyles)
-	{
-		this.str = str;
-		this.font = font;
-		this.fro = fro;
-		this.applyStyles = applyStyles;
-		this.index = 0;
-	}
-
-	public static StringWalker get(String str, MalisisFont font, FontRenderOptions fro, boolean applyStyles)
-	{
-		instance.set(str, font, fro, applyStyles);
-		return instance;
 	}
 }

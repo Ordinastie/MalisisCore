@@ -168,14 +168,16 @@ public class MinecraftFont extends MalisisFont
 	}
 
 	@Override
-	public float getStringWidth(String str, FontRenderOptions fro)
+	public float getStringWidth(String str, FontRenderOptions fro, int start, int end)
 	{
 		if (StringUtils.isEmpty(str))
 			return 0;
 
 		str = processString(str, null);
 		int width = 0;
-		StringWalker walker = StringWalker.get(str, this, fro, false);
+		StringWalker walker = new StringWalker(str, this, fro);
+		walker.startIndex(start);
+		walker.endIndex(end);
 		while (walker.walk())
 			width += walker.getWidth();
 

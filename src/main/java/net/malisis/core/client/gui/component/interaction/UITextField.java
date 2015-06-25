@@ -43,6 +43,7 @@ import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
 import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.Link;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -416,6 +417,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 */
 	public void setLineOffset(int line)
 	{
+		if (line < 0)
+			line = 0;
 		this.lineOffset = line;
 	}
 
@@ -934,6 +937,13 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (button != MouseButton.LEFT)
 			return super.onDoubleClick(x, y, button);
 
+		Link link = cursorPosition.getLink();
+		if (link != null)
+		{
+			link.click();
+			return true;
+		}
+
 		selectWord();
 		return true;
 	}
@@ -1415,6 +1425,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		 */
 		public void jumpLine(boolean backwards)
 		{
+			if ((backwards && line == 0) || (!backwards && line == lines.size() - 1))
+				return;
+
 			if (backwards)
 				line = Math.max(0, line - 1);
 			else
@@ -1502,7 +1515,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				return 0;
 			if (charOffset >= character || charOffset >= currentLineText().length())
 				return 0;
-			return (int) font.getStringWidth(currentLineText().substring(charOffset, character), fro);
+
+			return (int) font.getStringWidth(currentLineText(), fro, charOffset, character);
 		}
 
 		/**
@@ -1513,6 +1527,11 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		public int getYOffset()
 		{
 			return (line - lineOffset) * getLineHeight();
+		}
+
+		public Link getLink()
+		{
+			return Link.getLink(currentLineText(), character);
 		}
 
 		@Override
