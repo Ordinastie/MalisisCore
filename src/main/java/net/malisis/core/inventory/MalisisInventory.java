@@ -569,6 +569,16 @@ public class MalisisInventory implements IInventory
 	{
 		for (ItemStack itemStack : getItemStackList())
 			EntityUtils.spawnEjectedItem(world, x, y, z, itemStack);
+		closeContainers();
+	}
+
+	/**
+	 * Close all currently opened containers
+	 */
+	public void closeContainers()
+	{
+		for (MalisisInventoryContainer container : containers)
+			container.close();
 	}
 
 	/**

@@ -24,6 +24,9 @@
 
 package net.malisis.core.inventory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.malisis.core.util.ItemUtils;
 import net.malisis.core.util.ItemUtils.ItemStackSplitter;
 import net.malisis.core.util.ItemUtils.ItemStacksMerger;
@@ -43,11 +46,11 @@ public class MalisisSlot
 	/** ItemStack held by this {@link MalisisSlot}. */
 	private ItemStack itemStack;
 	/** ItemStack cached to detect changes. */
-	private ItemStack cachedItemStack;
+	private Map<EntityPlayer, ItemStack> cachedItemStacks = new HashMap<>();
 	/** ItemStack currently dragged into the slot. */
 	private ItemStack draggedItemStack;
 	/** ItemStack cached to detect changes. */
-	private ItemStack cachedDraggedItemStack;
+	private Map<EntityPlayer, ItemStack> cachedDraggedItemStacks = new HashMap<>();
 	/** Slot position within its {@link MalisisInventory}. */
 	public int slotNumber;
 	/** {@link InventoryState} of this slot. */
@@ -294,8 +297,8 @@ public class MalisisSlot
 		ItemStackSplitter iss = new ItemUtils.ItemStackSplitter(getItemStack());
 		iss.split(amount);
 		setItemStack(iss.source);
-		if (hasChanged())
-			onSlotChanged();
+		//if (hasChanged())
+		onSlotChanged();
 		return iss.split;
 	}
 
@@ -359,8 +362,8 @@ public class MalisisSlot
 		ism.merge(amount, getSlotStackLimit());
 		setItemStack(ism.into);
 
-		if (hasChanged())
-			onSlotChanged();
+		//if (hasChanged())
+		onSlotChanged();
 
 		return ism.merge;
 	}
@@ -379,23 +382,38 @@ public class MalisisSlot
 	}
 
 	/**
-	 * Checks whether this slot has changed.
+	 * Checks whether this slot has changed for the {@link EntityPlayer}.
 	 *
+	 * @param player the player
 	 * @return true, if changed, false otherwise
 	 */
-	public boolean hasChanged()
+	public boolean hasChanged(EntityPlayer player)
 	{
-		return !ItemStack.areItemStacksEqual(itemStack, cachedItemStack)
-				|| !ItemStack.areItemStacksEqual(draggedItemStack, cachedDraggedItemStack);
+		ItemStack cached = cachedItemStacks.get(player);
+		ItemStack cachedDragged = cachedDraggedItemStacks.get(player);
+		return !ItemStack.areItemStacksEqual(itemStack, cached) || !ItemStack.areItemStacksEqual(draggedItemStack, cachedDragged);
 	}
 
 	/**
-	 * Update the cached {@link ItemStack itemStacks} of this {@link MalisisSlot}.
+	 * Update the cached {@link ItemStack itemStacks} of this {@link MalisisSlot} for the {@link EntityPlayer}.
+	 *
+	 * @param player the player
 	 */
-	public void updateCache()
+	public void updateCache(EntityPlayer player)
 	{
-		cachedItemStack = itemStack != null ? itemStack.copy() : null;
-		cachedDraggedItemStack = draggedItemStack != null ? draggedItemStack.copy() : null;
+		cachedItemStacks.put(player, itemStack != null ? itemStack.copy() : null);
+		cachedDraggedItemStacks.put(player, draggedItemStack != null ? draggedItemStack.copy() : null);
+	}
+
+	/**
+	 * Clear cache for the {@link EntityPlayer}.
+	 *
+	 * @param player the player
+	 */
+	public void clearCache(EntityPlayer player)
+	{
+		cachedItemStacks.remove(player);
+		cachedDraggedItemStacks.remove(player);
 	}
 
 	@Override
