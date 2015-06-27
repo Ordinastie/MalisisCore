@@ -454,7 +454,7 @@ public class MalisisFont
 	{
 		if (StringUtils.isEmpty(str))
 			return 0;
-		return getStringWidth(str, fro, 0, str.length());
+		return getStringWidth(str, fro, 0, 0);
 	}
 
 	/**
