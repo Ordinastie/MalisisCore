@@ -72,13 +72,7 @@ public class CloseInventoryMessage implements IMessageHandler<CloseInventoryMess
 	}
 
 	/**
-	 * Open a the GUI for the {@link MalisisInventoryContainer}.
-	 *
-	 * @param type the type
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
-	 * @param windowId the window id
+	 * Closes a the GUI for the {@link MalisisInventoryContainer}.
 	 */
 	@SideOnly(Side.CLIENT)
 	private void closeGui()
@@ -90,9 +84,7 @@ public class CloseInventoryMessage implements IMessageHandler<CloseInventoryMess
 	/**
 	 * Sends a packet to client to notify it to open a {@link MalisisInventory}.
 	 *
-	 * @param container the container
 	 * @param player the player
-	 * @param windowId the window id
 	 */
 	public static void send(EntityPlayerMP player)
 	{

@@ -24,17 +24,12 @@
 
 package net.malisis.core.client.gui.component;
 
-import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 
 /**
- * Defines a {@link UIComponent} that uses text to be rendered on the {@link MalisisGui}.<br>
- * The {@code UIComponent} should allow null {@link MalisisFont} and {@link FontRenderOptions} values so that they default to
- * {@link GuiRenderer} default values when rendered.<br>
- * As a consequence of this, {@link GuiRenderer#getFont(IGuiText)} and {@link GuiRenderer#getFontRendererOptions(IGuiText)} should be used
- * when needed instead of direct access.
+ * Defines a {@link UIComponent} that uses text to be rendered on the {@link MalisisGui}.
  *
  * @author Ordinastie
  *
@@ -66,7 +61,7 @@ public interface IGuiText<T>
 	/**
 	 * Sets the {@link FontRenderOptions}.
 	 *
-	 * @param font the new font
+	 * @param fro the fro
 	 * @return the t
 	 */
 	public T setFontRenderOptions(FontRenderOptions fro);

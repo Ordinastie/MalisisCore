@@ -212,8 +212,8 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	/**
 	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
 	 *
-	 * @param font the new font
 	 * @param fro the fro
+	 * @return this {@link UILabel}
 	 */
 	@Override
 	public UILabel setFontRenderOptions(FontRenderOptions fro)

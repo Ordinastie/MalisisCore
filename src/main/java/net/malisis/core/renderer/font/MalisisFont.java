@@ -385,7 +385,7 @@ public class MalisisFont
 	/**
 	 * Clips a string to fit in the specified width. The string is translated before clipping.
 	 *
-	 * @param text the text
+	 * @param str the str
 	 * @param width the width
 	 * @return the string
 	 */
@@ -395,11 +395,11 @@ public class MalisisFont
 	}
 
 	/**
-	 * Clips a string to fit in the specified width with the fontScale. The string is translated before clipping.
+	 * Clips a string to fit in the specified width. The string is translated before clipping.
 	 *
-	 * @param text the text
+	 * @param str the str
 	 * @param width the width
-	 * @param fontScale the font scale
+	 * @param fro the fro
 	 * @return the string
 	 */
 	public String clipString(String str, int width, FontRenderOptions fro)
@@ -407,6 +407,15 @@ public class MalisisFont
 		return clipString(str, width, fro, false);
 	}
 
+	/**
+	 * Clips a string to fit in the specified width. The string is translated before clipping.
+	 *
+	 * @param str the str
+	 * @param width the width
+	 * @param fro the fro
+	 * @param appendPeriods the append periods
+	 * @return the string
+	 */
 	public String clipString(String str, int width, FontRenderOptions fro, boolean appendPeriods)
 	{
 		str = processString(str, fro);
@@ -432,7 +441,9 @@ public class MalisisFont
 	 * Gets rendering width of a string according to fontScale.
 	 *
 	 * @param str the str
-	 * @param fontScale the font scale
+	 * @param fro the fro
+	 * @param start the start
+	 * @param end the end
 	 * @return the string width
 	 */
 	public float getStringWidth(String str, FontRenderOptions fro, int start, int end)
@@ -470,7 +481,7 @@ public class MalisisFont
 	/**
 	 * Gets the rendering height of strings according to fontscale.
 	 *
-	 * @param fontScale the font scale
+	 * @param fro the fro
 	 * @return the string height
 	 */
 	public float getStringHeight(FontRenderOptions fro)
@@ -493,7 +504,7 @@ public class MalisisFont
 	 * Gets max rendering width of an array of string.
 	 *
 	 * @param strings the strings
-	 * @param fontScale the font scale
+	 * @param fro the fro
 	 * @return the max string width
 	 */
 	public float getMaxStringWidth(List<String> strings, FontRenderOptions fro)
@@ -519,7 +530,7 @@ public class MalisisFont
 	 * Gets the rendering width of a char with the specified fontScale.
 	 *
 	 * @param c the c
-	 * @param fontScale the font scale
+	 * @param fro the fro
 	 * @return the char width
 	 */
 	public float getCharWidth(char c, FontRenderOptions fro)
@@ -535,7 +546,10 @@ public class MalisisFont
 	/**
 	 * Determines the character for a given X coordinate.
 	 *
-	 * @param x the x coordinate
+	 * @param str the str
+	 * @param fro the fro
+	 * @param position the position
+	 * @param charOffset the char offset
 	 * @return position
 	 */
 	public float getCharPosition(String str, FontRenderOptions fro, int position, int charOffset)
@@ -567,9 +581,9 @@ public class MalisisFont
 	/**
 	 * Splits the string in multiple lines to fit in the specified maxWidth using the specified fontScale.
 	 *
-	 * @param text the text
+	 * @param str the str
 	 * @param maxWidth the max width
-	 * @param fontScale the font scale
+	 * @param fro the fro
 	 * @return list of lines that won't exceed maxWidth limit
 	 */
 	public List<String> wrapText(String str, int maxWidth, FontRenderOptions fro)
