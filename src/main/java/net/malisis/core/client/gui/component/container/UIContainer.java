@@ -349,9 +349,6 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		if (isDisabled() || !isVisible())
 			return null;
 
-		if (clipContent && !getClipArea().isInside(x, y))
-			return null;
-
 		Set<UIComponent> list = new LinkedHashSet<>();
 		for (UIComponent c : components)
 		{
@@ -369,6 +366,12 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 			if (component == null || component.getZIndex() <= c.getZIndex())
 				component = c;
 		}
+
+		if (component instanceof IClipable && ((IClipable) component).shouldClipContent())
+			return component;
+
+		if (clipContent && !getClipArea().isInside(x, y))
+			return null;
 
 		return component;
 	}
