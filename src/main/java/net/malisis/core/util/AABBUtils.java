@@ -39,6 +39,14 @@ import net.minecraftforge.common.util.ForgeDirection;
  */
 public class AABBUtils
 {
+	public static enum Axis
+	{
+		X, Y, Z
+	};
+
+	private static int[] cos = { 1, 0, -1, 0 };
+	private static int[] sin = { 0, 1, 0, -1 };
+
 	public static AxisAlignedBB identity()
 	{
 		return identity(0, 0, 0);
@@ -113,24 +121,50 @@ public class AABBUtils
 
 	public static AxisAlignedBB rotate(AxisAlignedBB aabb, int angle)
 	{
-		int[] cos = { 1, 0, -1, 0 };
-		int[] sin = { 0, 1, 0, -1 };
+		return rotate(aabb, angle, Axis.Y);
+	}
+
+	public static AxisAlignedBB rotate(AxisAlignedBB aabb, int angle, Axis axis)
+	{
+		if (aabb == null)
+			return null;
 
 		int a = angle % 4;
 		if (a < 0)
 			a += 4;
+		int s = sin[a];
+		int c = cos[a];
 
-		AxisAlignedBB copy = AxisAlignedBB.getBoundingBox(1, aabb.minY, 1, 1, aabb.maxY, 1);
-		aabb.offset(-0.5F, 0, -0.5F);
+		AxisAlignedBB copy = AxisAlignedBB.getBoundingBox(0, 0, 0, 0, 0, 0);
+		aabb.offset(-0.5F, -0.5F, -0.5F);
+		copy.setBB(aabb);
 
-		copy.minX = (aabb.minX * cos[a]) - (aabb.minZ * sin[a]);
-		copy.minZ = (aabb.minX * sin[a]) + (aabb.minZ * cos[a]);
+		if (axis == Axis.X)
+		{
+			copy.minY = (aabb.minY * c) - (aabb.minZ * s);
+			copy.maxY = (aabb.maxY * c) - (aabb.maxZ * s);
+			copy.minZ = (aabb.minY * s) + (aabb.minZ * c);
+			copy.maxZ = (aabb.maxY * s) + (aabb.maxZ * c);
 
-		copy.maxX = (aabb.maxX * cos[a]) - (aabb.maxZ * sin[a]);
-		copy.maxZ = (aabb.maxX * sin[a]) + (aabb.maxZ * cos[a]);
+		}
+		if (axis == Axis.Y)
+		{
+			copy.minX = (aabb.minX * c) - (aabb.minZ * s);
+			copy.maxX = (aabb.maxX * c) - (aabb.maxZ * s);
+			copy.minZ = (aabb.minX * s) + (aabb.minZ * c);
+			copy.maxZ = (aabb.maxX * s) + (aabb.maxZ * c);
+		}
+
+		if (axis == Axis.Z)
+		{
+			copy.minX = (aabb.minX * c) - (aabb.minY * s);
+			copy.maxX = (aabb.maxX * c) - (aabb.maxY * s);
+			copy.minY = (aabb.minX * s) + (aabb.minY * c);
+			copy.maxY = (aabb.maxX * s) + (aabb.maxY * c);
+		}
 
 		aabb.setBB(fix(copy));
-		aabb.offset(0.5F, 0, 0.5F);
+		aabb.offset(0.5F, 0.5F, 0.5F);
 
 		return aabb;
 	}
