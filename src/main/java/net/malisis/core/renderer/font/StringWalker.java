@@ -165,7 +165,10 @@ public class StringWalker
 			fro.apply(ecf);
 
 		if (skipChars && !litteral)
+		{
 			index += 2;
+			checkEcf();
+		}
 	}
 
 	public void checkLink()
