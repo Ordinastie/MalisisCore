@@ -22,20 +22,31 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.util.chunkcollision;
+package net.malisis.core.block;
 
-import net.malisis.core.block.IBoundingBox;
-import net.malisis.core.util.chunkblock.IChunkBlock;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.malisis.core.util.RaytraceBlock;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.IBlockAccess;
 
 /**
+ * {@link IBoundingBox} defines an implementers that have bounding box.<br>
+ * Currently used in {@link RaytraceBlock#trace()}.
+ *
  * @author Ordinastie
  *
  */
-public interface IChunkCollidable extends IChunkBlock, IBoundingBox
+public interface IBoundingBox
 {
-	public AxisAlignedBB[] getPlacedBoundingBox(IBlockAccess world, int x, int y, int z, int side, EntityPlayer entity, ItemStack itemStack);
+
+	/**
+	 * Gets the {@link AxisAlignedBB} for this {@link IBoundingBox}.
+	 *
+	 * @param world the world
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param type the type
+	 * @return the bounding box
+	 */
+	public AxisAlignedBB[] getBoundingBox(IBlockAccess world, int x, int y, int z, BoundingBoxType type);
 }

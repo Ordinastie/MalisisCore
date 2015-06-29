@@ -29,8 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.malisis.core.block.BoundingBoxType;
-import net.malisis.core.block.MalisisBlock;
-import net.malisis.core.util.chunkcollision.IChunkCollidable;
+import net.malisis.core.block.IBoundingBox;
 import net.minecraft.block.Block;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
@@ -192,10 +191,11 @@ public class RaytraceBlock
 	{
 		points.clear();
 
-		if (!(block instanceof MalisisBlock || block instanceof IChunkCollidable))
+		if (!(block instanceof IBoundingBox))
 			return block.collisionRayTrace(world(), x, y, z, ray.origin.toVec3(), dest.toVec3());
 
-		MalisisBlock block = (MalisisBlock) this.block;
+		//
+		IBoundingBox block = (IBoundingBox) this.block;
 		AxisAlignedBB[] aabbs = block.getBoundingBox(world(), x, y, z, BoundingBoxType.RAYTRACE);
 
 		double maxDist = Point.distanceSquared(src, dest);

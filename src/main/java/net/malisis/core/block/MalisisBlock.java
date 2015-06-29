@@ -45,7 +45,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
  * @author Ordinastie
  *
  */
-public class MalisisBlock extends Block
+public class MalisisBlock extends Block implements IBoundingBox
 {
 	protected String name;
 	protected AxisAlignedBB boundingBox;
@@ -81,6 +81,7 @@ public class MalisisBlock extends Block
 		GameRegistry.registerBlock(this, item, getName());
 	}
 
+	@Override
 	public AxisAlignedBB[] getBoundingBox(IBlockAccess world, int x, int y, int z, BoundingBoxType type)
 	{
 		return new AxisAlignedBB[] { AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ) };

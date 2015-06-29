@@ -31,7 +31,6 @@ package net.malisis.core.util.chunkblock;
  */
 public interface IChunkBlock
 {
-
 	/**
 	 * Gets the block range.<br>
 	 * Defines the distance for which the block will store itself into chunk data.<br>
