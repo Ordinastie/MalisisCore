@@ -107,7 +107,7 @@ public class MalisisBlock extends Block implements IBoundingBox
 	public AxisAlignedBB getSelectedBoundingBoxFromPool(World world, int x, int y, int z)
 	{
 		AxisAlignedBB[] aabbs = getBoundingBox(world, x, y, z, BoundingBoxType.SELECTION);
-		if (ArrayUtils.isEmpty(aabbs))
+		if (ArrayUtils.isEmpty(aabbs) || aabbs[0] == null)
 			return AxisAlignedBB.getBoundingBox(0, 0, 0, 0, 0, 0);
 		return aabbs[0].offset(x, y, z);
 	}
