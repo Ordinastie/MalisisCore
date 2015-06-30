@@ -45,11 +45,23 @@ public class UISlimScrollbar extends UIScrollBar
 	protected int backgroundColor = 0x999999;
 	/** Scroll color **/
 	protected int scrollColor = 0xFFFFFF;
+	/** Whether the scrollbar should fade in/out */
+	protected boolean fade = true;
 
 	public <T extends UIComponent & IScrollable> UISlimScrollbar(MalisisGui gui, T parent, Type type)
 	{
 		super(gui, parent, type);
 		setScrollSize(2, 15);
+	}
+
+	public void setFade(boolean fade)
+	{
+		this.fade = fade;
+	}
+
+	public boolean isFade()
+	{
+		return fade;
 	}
 
 	@Override
@@ -59,9 +71,9 @@ public class UISlimScrollbar extends UIScrollBar
 		int hp = getScrollable().getHorizontalPadding();
 
 		if (type == Type.HORIZONTAL)
-			setPosition(hp, -vp, Anchor.BOTTOM);
+			setPosition(hp + offsetX, -vp + offsetY, Anchor.BOTTOM);
 		else
-			setPosition(-hp, vp, Anchor.RIGHT);
+			setPosition(-hp + offsetX, vp + offsetY, Anchor.RIGHT);
 	}
 
 	@Override
@@ -148,6 +160,9 @@ public class UISlimScrollbar extends UIScrollBar
 	@Subscribe
 	public void onMouseOver(HoveredStateChange event)
 	{
+		if (!fade)
+			return;
+
 		if (isFocused() && !event.getState())
 			return;
 
@@ -157,6 +172,5 @@ public class UISlimScrollbar extends UIScrollBar
 		Animation anim = new Animation(this, new AlphaTransform(from, to).forTicks(5));
 
 		event.getComponent().getGui().animate(anim);
-
 	}
 }

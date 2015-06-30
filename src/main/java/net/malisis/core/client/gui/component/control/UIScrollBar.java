@@ -56,10 +56,16 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		HORIZONTAL, VERTICAL
 	}
 
-	protected int scrollThickness = 10;
-	protected int scrollHeight = 15;
-
 	private static Map<UIComponent, Map<Type, UIScrollBar>> scrollbars = new WeakHashMap();
+
+	/** The scroll thickness (Width for vertical, height for horizontal). */
+	protected int scrollThickness = 10;
+	/** The scroll height (Height for vertical, width for horizontal). */
+	protected int scrollHeight = 15;
+	/** The X offset for the scrollbar rendering. */
+	protected int offsetX = 0;
+	/** The Y offset for the scrollbar rendering. */
+	protected int offsetY = 0;
 
 	protected GuiIcon disabledIcon;
 	protected GuiIcon verticalIcon;
@@ -67,6 +73,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	protected GuiIcon horizontalIcon;
 	protected GuiIcon horizontalDisabledIcon;
 
+	/** The type of scrollbar. */
 	protected Type type;
 
 	public boolean autoHide = false;
@@ -78,14 +85,12 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		super(gui);
 		this.type = type;
 
-		setZIndex(parent.getZIndex() + 1);
-
 		parent.addControlComponent(this);
 		parent.register(this);
 
 		addScrollbar(parent, this);
 		setPosition();
-		updateScrollbars();
+		updateScrollbar();
 
 		createShape(gui);
 	}
@@ -103,17 +108,26 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		createShape(getGui());
 	}
 
+	/**
+	 * Sets the scrollbar position.<br>
+	 * The position is relative its parent component.
+	 */
 	protected void setPosition()
 	{
 		int vp = getScrollable().getVerticalPadding();
 		int hp = getScrollable().getHorizontalPadding();
 
 		if (type == Type.HORIZONTAL)
-			setPosition(-hp, vp, Anchor.BOTTOM);
+			setPosition(-hp + offsetX, vp + offsetY, Anchor.BOTTOM);
 		else
-			setPosition(hp, -vp, Anchor.RIGHT);
+			setPosition(hp + offsetX, -vp + offsetY, Anchor.RIGHT);
 	}
 
+	/**
+	 * Creates the shapes for this {@link UIScrollBar}.
+	 *
+	 * @param gui the gui
+	 */
 	protected void createShape(MalisisGui gui)
 	{
 		int w = scrollThickness - 2;
@@ -140,26 +154,54 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		horizontalDisabledIcon = gui.getGuiTexture().getIcon(230, 23, 15, 8);
 	}
 
+	/**
+	 * Gets the parent as a {@link IScrollable}.
+	 *
+	 * @return the scrollable
+	 */
 	protected IScrollable getScrollable()
 	{
 		return (IScrollable) getParent();
 	}
 
+	/**
+	 * Checks if the other type of scrollbar is present and visible.
+	 *
+	 * @return true, if visible
+	 */
 	public boolean hasVisibleOtherScrollbar()
 	{
 		UIScrollBar scrollbar = getScrollbar(getParent(), isHorizontal() ? Type.VERTICAL : Type.HORIZONTAL);
 		return scrollbar != null && scrollbar.isVisible();
 	}
 
+	/**
+	 * Checks if this {@link UIScrollBar} is {@link Type#HORIZONTAL}.
+	 *
+	 * @return true, if is horizontal
+	 */
 	public boolean isHorizontal()
 	{
 		return type == Type.HORIZONTAL;
 	}
 
+	/**
+	 * Sets whether this {@link UIScrollBar} should automatically hide when scrolling is not possible (content size is inferior to component
+	 * size).
+	 *
+	 * @param autoHide the auto hide
+	 * @return this {@link UIScrollBar}
+	 */
 	public UIScrollBar setAutoHide(boolean autoHide)
 	{
 		this.autoHide = autoHide;
 		return this;
+	}
+
+	@Override
+	public int getZIndex()
+	{
+		return getParent() != null ? getParent().getZIndex() + 5 : 0;
 	}
 
 	@Override
@@ -174,21 +216,46 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		return isHorizontal() ? scrollThickness : getParent().getHeight() - (hasVisibleOtherScrollbar() ? scrollThickness : 0);
 	}
 
+	/**
+	 * Gets the length of this {@link UIScrollBar} (width if {@link Type#HORIZONTAL}, height if {@link Type#VERTICAL}.
+	 *
+	 * @return the length
+	 */
 	public int getLength()
 	{
 		return isHorizontal() ? getWidth() : getHeight();
 	}
 
-	public UIScrollBar setLength(int length)
-	{
-		return null;
-	}
-
+	/**
+	 * Gets the offset of the parent component of this {@link UIScrollBar}.
+	 *
+	 * @return the offset
+	 */
 	public float getOffset()
 	{
 		return isHorizontal() ? getScrollable().getOffsetX() : getScrollable().getOffsetY();
 	}
 
+	/**
+	 * Sets the position offset for this {@link UIScrollBar}.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @return the UI scroll bar
+	 */
+	public UIScrollBar setOffset(int x, int y)
+	{
+		this.offsetX = x;
+		this.offsetY = y;
+		setPosition();
+		return this;
+	}
+
+	/**
+	 * Scroll this {@link UIScrollBar} to the specified offset.
+	 *
+	 * @param offset the offset
+	 */
 	public void scrollTo(float offset)
 	{
 		if (isDisabled())
@@ -205,12 +272,20 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 			getScrollable().setOffsetY(offset, delta);
 	}
 
+	/**
+	 * Scroll this {@link UIScrollBar} by the specified amount.
+	 *
+	 * @param amount the amount
+	 */
 	public void scrollBy(float amount)
 	{
 		scrollTo(getOffset() + amount);
 	}
 
-	public void updateScrollbars()
+	/**
+	 * Update this {@link UIScrollBar}, hiding and disabling it if necessary, based on content size.
+	 */
+	public void updateScrollbar()
 	{
 		UIComponent component = getParent();
 		IScrollable scrollable = getScrollable();
@@ -269,7 +344,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		if (getParent() != event.getComponent())
 			return;
 
-		updateScrollbars();
+		updateScrollbar();
 	}
 
 	@Override
@@ -335,9 +410,16 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	@Override
 	public String getPropertyString()
 	{
-		return type + " | " + super.getPropertyString();
+		return type + " | O=" + getOffset() + "(" + getScrollable().getContentHeight() + ") | " + super.getPropertyString();
 	}
 
+	/**
+	 * Gets the {@link UIScrollBar} for the {@link UIComponent}, if any.
+	 *
+	 * @param component the component
+	 * @param type the type
+	 * @return the scrollbar
+	 */
 	public static UIScrollBar getScrollbar(UIComponent component, Type type)
 	{
 		Map<Type, UIScrollBar> bars = scrollbars.get(component);
@@ -347,7 +429,13 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		return bars.get(type);
 	}
 
-	public static void addScrollbar(UIComponent component, UIScrollBar scrollbar)
+	/**
+	 * Adds the {@link UIScrollBar} to the {@link UIComponent}.
+	 *
+	 * @param component the component
+	 * @param scrollbar the scrollbar
+	 */
+	private static void addScrollbar(UIComponent component, UIScrollBar scrollbar)
 	{
 		Map<Type, UIScrollBar> bars = scrollbars.get(component);
 		if (bars == null)
