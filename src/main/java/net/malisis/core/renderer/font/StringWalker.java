@@ -216,7 +216,7 @@ public class StringWalker
 			return false;
 
 		checkEcf();
-		checkLink();
+		//checkLink();
 
 		if (index >= endIndex)
 			return false;
