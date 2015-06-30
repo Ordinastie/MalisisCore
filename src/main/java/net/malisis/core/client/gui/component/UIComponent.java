@@ -1038,8 +1038,8 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	 */
 	public String getPropertyString()
 	{
-		return "parent=" + (parent != null ? parent.getClass().getSimpleName() : "null") + ", size=" + width + "," + height
-				+ " | position=" + x + "," + y + " | container=" + parentX() + "," + parentY() + " | screen=" + screenX() + "," + screenY();
+		return "P=" + (parent != null ? parent.getClass().getSimpleName() : "null") + " | " + width + "x" + height + "@" + x + "," + y
+				+ " | C=" + parentX() + "," + parentY() + " | S=" + screenX() + "," + screenY();
 	}
 
 	/**
