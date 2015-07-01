@@ -24,7 +24,6 @@
 
 package net.malisis.core.util;
 
-import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.MalisisGui;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
@@ -74,8 +73,8 @@ public class TileEntityUtils
 		}
 		catch (ClassCastException e)
 		{
-			MalisisCore.log.error("Tried to get {} at {},{},{}, but found {} instead.", clazz.getSimpleName(), x, y, z, te.getClass()
-					.getSimpleName());
+			//MalisisCore.log.error("Tried to get {} at {},{},{}, but found {} instead.", clazz.getSimpleName(), x, y, z, te.getClass()
+			//		.getSimpleName());
 			return null;
 		}
 	}
