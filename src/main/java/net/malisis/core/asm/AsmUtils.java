@@ -29,6 +29,7 @@ import static org.objectweb.asm.tree.AbstractInsnNode.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.ListIterator;
@@ -225,9 +226,9 @@ public class AsmUtils
 	 * @param fieldName the field name
 	 * @return the field
 	 */
-	public static Field changeAccess(Class clazz, String fieldName)
+	public static Field changeFieldAccess(Class clazz, String fieldName)
 	{
-		return changeAccess(clazz, fieldName, fieldName);
+		return changeFieldAccess(clazz, fieldName, fieldName);
 	}
 
 	/**
@@ -238,7 +239,7 @@ public class AsmUtils
 	 * @param srgName the srg name
 	 * @return the field
 	 */
-	public static Field changeAccess(Class clazz, String fieldName, String srgName)
+	public static Field changeFieldAccess(Class clazz, String fieldName, String srgName)
 	{
 		try
 		{
@@ -250,6 +251,53 @@ public class AsmUtils
 			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
 
 			return f;
+		}
+		catch (ReflectiveOperationException e)
+		{
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	public static Method changeMethodAccess(Class clazz, String methodName, String params)
+	{
+		return changeMethodAccess(clazz, methodName, methodName, params);
+	}
+
+	public static Method changeMethodAccess(Class clazz, String methodName, String srgName, String params)
+	{
+		return changeMethodAccess(clazz, methodName, srgName, new MethodDescriptor(params).getParams());
+	}
+
+	/**
+	 * Changes the access level for the specified method for a class.
+	 *
+	 * @param clazz the clazz
+	 * @param methodName the field name
+	 * @return the field
+	 */
+	public static Method changeMethodAccess(Class clazz, String methodName, Class<?>... params)
+	{
+		return changeMethodAccess(clazz, methodName, methodName, params);
+	}
+
+	/**
+	 * Changes the access level for the specified method for a class.
+	 *
+	 * @param clazz the clazz
+	 * @param methodName the field name
+	 * @param srgName the srg name
+	 * @return the field
+	 */
+	public static Method changeMethodAccess(Class clazz, String methodName, String srgName, Class<?>... params)
+	{
+		try
+		{
+			// modify reference in Blocks class
+			Method m = clazz.getDeclaredMethod(MalisisCore.isObfEnv ? srgName : methodName, params);
+			m.setAccessible(true);
+			return m;
 		}
 		catch (ReflectiveOperationException e)
 		{

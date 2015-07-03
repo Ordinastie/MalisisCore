@@ -547,7 +547,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	public boolean isDrawing()
 	{
 		if (isDrawingField == null)
-			isDrawingField = AsmUtils.changeAccess(Tessellator.class, "isDrawing", "field_78415_z");
+			isDrawingField = AsmUtils.changeFieldAccess(Tessellator.class, "isDrawing", "field_78415_z");
 
 		try
 		{

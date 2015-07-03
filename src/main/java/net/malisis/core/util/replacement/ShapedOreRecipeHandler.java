@@ -42,8 +42,8 @@ public class ShapedOreRecipeHandler extends ReplacementHandler<ShapedOreRecipe>
 	public ShapedOreRecipeHandler()
 	{
 		super(ShapedOreRecipe.class);
-		inputField = AsmUtils.changeAccess(ShapedOreRecipe.class, "input");
-		outputField = AsmUtils.changeAccess(ShapedOreRecipe.class, "output");
+		inputField = AsmUtils.changeFieldAccess(ShapedOreRecipe.class, "input");
+		outputField = AsmUtils.changeFieldAccess(ShapedOreRecipe.class, "output");
 	}
 
 	@Override

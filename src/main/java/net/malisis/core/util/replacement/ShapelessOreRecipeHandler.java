@@ -43,8 +43,8 @@ public class ShapelessOreRecipeHandler extends ReplacementHandler<ShapelessOreRe
 	public ShapelessOreRecipeHandler()
 	{
 		super(ShapelessOreRecipe.class);
-		inputField = AsmUtils.changeAccess(ShapelessOreRecipe.class, "input");
-		outputField = AsmUtils.changeAccess(ShapelessOreRecipe.class, "output");
+		inputField = AsmUtils.changeFieldAccess(ShapelessOreRecipe.class, "input");
+		outputField = AsmUtils.changeFieldAccess(ShapelessOreRecipe.class, "output");
 	}
 
 	@Override

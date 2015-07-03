@@ -128,11 +128,11 @@ public class ReplacementTool
 		try
 		{
 			method.invoke(registry, id, "minecraft:" + name, replacement);
-			Field f = AsmUtils.changeAccess(clazz, name, srgFieldName);
+			Field f = AsmUtils.changeFieldAccess(clazz, name, srgFieldName);
 			f.set(null, replacement);
 
 			if (ib != null)
-				AsmUtils.changeAccess(ItemBlock.class, "blockInstance", "field_150939_a").set(ib, replacement);
+				AsmUtils.changeFieldAccess(ItemBlock.class, "blockInstance", "field_150939_a").set(ib, replacement);
 
 			map.put(replacement, vanilla);
 			replaceIn(CraftingManager.getInstance().getRecipeList(), vanilla, replacement);

@@ -74,9 +74,9 @@ public class MinecraftFont extends MalisisFont
 		if (FMLClientHandler.instance().hasOptifine())
 			srg = "d";
 
-		Field charWidthField = AsmUtils.changeAccess(FontRenderer.class, "charWidth", srg);
-		Field glyphWidthField = AsmUtils.changeAccess(FontRenderer.class, "glyphWidth", "field_78287_e");
-		Field unicodePagesField = AsmUtils.changeAccess(FontRenderer.class, "unicodePageLocations", "field_111274_c");
+		Field charWidthField = AsmUtils.changeFieldAccess(FontRenderer.class, "charWidth", srg);
+		Field glyphWidthField = AsmUtils.changeFieldAccess(FontRenderer.class, "glyphWidth", "field_78287_e");
+		Field unicodePagesField = AsmUtils.changeFieldAccess(FontRenderer.class, "unicodePageLocations", "field_111274_c");
 
 		try
 		{

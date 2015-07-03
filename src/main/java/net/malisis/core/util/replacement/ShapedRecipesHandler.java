@@ -41,7 +41,7 @@ public class ShapedRecipesHandler extends ReplacementHandler<ShapedRecipes>
 	public ShapedRecipesHandler()
 	{
 		super(ShapedRecipes.class);
-		outputField = AsmUtils.changeAccess(ShapedRecipes.class, "recipeOutput", "field_77575_e");
+		outputField = AsmUtils.changeFieldAccess(ShapedRecipes.class, "recipeOutput", "field_77575_e");
 	}
 
 	@Override

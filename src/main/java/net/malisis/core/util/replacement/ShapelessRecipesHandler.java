@@ -42,7 +42,7 @@ public class ShapelessRecipesHandler extends ReplacementHandler<ShapelessRecipes
 	public ShapelessRecipesHandler()
 	{
 		super(ShapelessRecipes.class);
-		outputField = AsmUtils.changeAccess(ShapelessRecipes.class, "recipeOutput", "field_77580_a");
+		outputField = AsmUtils.changeFieldAccess(ShapelessRecipes.class, "recipeOutput", "field_77580_a");
 	}
 
 	@Override
