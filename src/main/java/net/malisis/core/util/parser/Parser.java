@@ -173,7 +173,7 @@ public abstract class Parser<T>
 
 	public void error(Token expected)
 	{
-		throw new ParserException("Expecting '>' at " + index + " but found " + token);
+		throw new ParserException("Expecting '" + expected + "' at " + index + " but found " + token);
 	}
 
 	public static class ParserException extends RuntimeException

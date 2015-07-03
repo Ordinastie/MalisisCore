@@ -34,37 +34,42 @@ import org.apache.commons.lang3.ArrayUtils;
 public abstract class Token<T>
 {
 	//EMPTY TOKENS
-	public static EmptyToken None = (EmptyToken) new EmptyToken().name("None");
-	public static EmptyToken Unknown = (EmptyToken) new EmptyToken().name("Unknown");
-	public static EmptyToken Error = (EmptyToken) new EmptyToken().name("Error");
-	public static EmptyToken EndOfInput = (EmptyToken) new EmptyToken().name("EndOfInput");
+	public static final EmptyToken None = (EmptyToken) new EmptyToken().name("None");
+	public static final EmptyToken Unknown = (EmptyToken) new EmptyToken().name("Unknown");
+	public static final EmptyToken Error = (EmptyToken) new EmptyToken().name("Error");
+	public static final EmptyToken EndOfInput = (EmptyToken) new EmptyToken().name("EndOfInput");
 
 	//CHAR TOKEN
-	public static CharToken Plus = (CharToken) new CharToken('+').name("Plus");
-	public static CharToken Minus = (CharToken) new CharToken('-').name("Minus");
-	public static CharToken Mult = (CharToken) new CharToken('*').name("Mult");
-	public static CharToken Div = (CharToken) new CharToken('/').name("Div");
-	public static CharToken Sharp = (CharToken) new CharToken('#').name("Sharp");
+	public static final CharToken Plus = (CharToken) new CharToken('+').name("Plus");
+	public static final CharToken Minus = (CharToken) new CharToken('-').name("Minus");
+	public static final CharToken Mult = (CharToken) new CharToken('*').name("Mult");
+	public static final CharToken Div = (CharToken) new CharToken('/').name("Div");
+	public static final CharToken Sharp = (CharToken) new CharToken('#').name("Sharp");
 
-	public static CharToken OpenPar = (CharToken) new CharToken('(').name("OpenPar");
-	public static CharToken ClosePar = (CharToken) new CharToken(')').name("ClosePar");
-	public static CharToken OpenCar = (CharToken) new CharToken('[').name("OpenCar");
-	public static CharToken CloseCar = (CharToken) new CharToken(']').name("CloseCar");
+	public static final CharToken OpenPar = (CharToken) new CharToken('(').name("OpenPar");
+	public static final CharToken ClosePar = (CharToken) new CharToken(')').name("ClosePar");
+	public static final CharToken OpenCar = (CharToken) new CharToken('[').name("OpenCar");
+	public static final CharToken CloseCar = (CharToken) new CharToken(']').name("CloseCar");
 
-	public static CharToken Not = (CharToken) new CharToken('!').name("Not");
-	public static CharToken Equal = (CharToken) new CharToken('=').name("Equal");
-	public static CharToken Superior = (CharToken) new CharToken('>').name("Superior");
-	public static CharToken Inferior = (CharToken) new CharToken('<').name("Inferior");
+	public static final CharToken Not = (CharToken) new CharToken('!').name("Not");
+	public static final CharToken Equal = (CharToken) new CharToken('=').name("Equal");
+	public static final CharToken Superior = (CharToken) new CharToken('>').name("Superior");
+	public static final CharToken Inferior = (CharToken) new CharToken('<').name("Inferior");
 
-	public static CharToken AndOperator = (CharToken) new CharToken('&').name("AndOperator");
-	public static CharToken OrOperator = (CharToken) new CharToken('|').name("OrOperator");
+	public static final CharToken AndOperator = (CharToken) new CharToken('&').name("AndOperator");
+	public static final CharToken OrOperator = (CharToken) new CharToken('|').name("OrOperator");
 
-	public static CharToken StartWith = (CharToken) new CharToken('$').name("StartWith");
-	public static CharToken EndWith = (CharToken) new CharToken('^').name("EndWith");
+	public static final CharToken StartWith = (CharToken) new CharToken('$').name("StartWith");
+	public static final CharToken EndWith = (CharToken) new CharToken('^').name("EndWith");
 
-	public static CharToken Quote = (CharToken) new CharToken('"').name("Quote");
-	public static CharToken Apostrophe = (CharToken) new CharToken('\'').name("Apostrophe");
-	public static CharToken UnderScore = (CharToken) new CharToken('_').name("UnderScore");
+	public static final CharToken Quote = (CharToken) new CharToken('"').name("Quote");
+	public static final CharToken Apostrophe = (CharToken) new CharToken('\'').name("Apostrophe");
+	public static final CharToken UnderScore = (CharToken) new CharToken('_').name("UnderScore");
+
+	public static CharToken Dot = (CharToken) new CharToken('.').name("Dot");
+	public static CharToken Comma = (CharToken) new CharToken(',').name("Comma");
+	public static CharToken Colon = (CharToken) new CharToken(':').name("Colon");
+	public static CharToken SemiColon = (CharToken) new CharToken(';').name("SemiColon");
 
 	//SPECIAL TOKENS
 	public static ExpressionToken Identifier = (ExpressionToken) new ExpressionToken("^[^\\d\\W]\\w*").name("Identifier");
