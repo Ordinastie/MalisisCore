@@ -24,9 +24,15 @@
 
 package net.malisis.core.util;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import net.malisis.core.MalisisCore;
+import net.malisis.core.asm.AsmUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,8 +40,11 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerManager;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.util.ForgeDirection;
 
 /**
@@ -48,6 +57,23 @@ public class EntityUtils
 {
 	private static ForgeDirection[] facings = new ForgeDirection[] { ForgeDirection.NORTH, ForgeDirection.EAST, ForgeDirection.SOUTH,
 			ForgeDirection.WEST, ForgeDirection.UP, ForgeDirection.DOWN, ForgeDirection.UNKNOWN };
+
+	private static Method getPlayerInstance;
+	private static Field playersWatchingChunk;
+	static
+	{
+		try
+		{
+			getPlayerInstance = AsmUtils.changeMethodAccess(PlayerManager.class, "getPlayerInstance", "func_72690_a", "IIZ");
+			Class<?> clazz = Class.forName("net.minecraft.server.management.PlayerManager$PlayerInstance");
+			playersWatchingChunk = AsmUtils.changeFieldAccess(clazz, "playersWatchingChunk", "field_73263_b");
+		}
+		catch (ClassNotFoundException e)
+		{
+			MalisisCore.log.error("Failed to get PlayerInstance class.", e);
+		}
+
+	}
 
 	/**
 	 * Eject a new item corresponding to the {@link ItemStack}.
@@ -138,5 +164,27 @@ public class EntityUtils
 	public static boolean isEquipped(EntityPlayer player, ItemStack itemStack)
 	{
 		return isEquipped(player, itemStack != null ? itemStack.getItem() : null);
+	}
+
+	public static List<EntityPlayerMP> getPlayersWatchingChunk(Chunk chunk)
+	{
+		return getPlayersWatchingChunk((WorldServer) chunk.worldObj, chunk.xPosition, chunk.zPosition);
+	}
+
+	public static List<EntityPlayerMP> getPlayersWatchingChunk(WorldServer world, int x, int z)
+	{
+		if (playersWatchingChunk == null)
+			return new ArrayList<>();
+
+		try
+		{
+			Object playerInstance = getPlayerInstance.invoke(world.getPlayerManager(), x, z, false);
+			return (List<EntityPlayerMP>) playersWatchingChunk.get(playerInstance);
+		}
+		catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+		{
+			MalisisCore.log.info("Failed to get players watching chunk :", e);
+			return new ArrayList<>();
+		}
 	}
 }
