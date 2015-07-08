@@ -29,6 +29,9 @@ import java.util.List;
 import net.malisis.core.IMalisisMod;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.message.OpenInventoryMessage;
+import net.malisis.core.util.EntityUtils;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.world.chunk.Chunk;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Ordering;
@@ -76,6 +79,19 @@ public class MalisisNetwork extends SimpleNetworkWrapper
 	public MalisisNetwork(IMalisisMod mod)
 	{
 		this(mod.getModId());
+	}
+
+	/**
+	 * Send the {@link IMessage} to all the players currently watching that specific chunk.<br>
+	 * The {@link IMessageHandler} for the message type should be on the CLIENT side.
+	 *
+	 * @param message the message
+	 * @param chunk the chunk
+	 */
+	public void sendToPlayersWatchingChunk(IMessage message, Chunk chunk)
+	{
+		for (EntityPlayerMP player : EntityUtils.getPlayersWatchingChunk(chunk))
+			sendTo(message, player);
 	}
 
 	/**
