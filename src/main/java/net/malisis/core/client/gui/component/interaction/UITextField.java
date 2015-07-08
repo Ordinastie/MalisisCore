@@ -1019,7 +1019,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 					addText("\t");
 				break;
 			default:
-				if ((ChatAllowedCharacters.isAllowedCharacter(keyChar) || keyChar == '§') && isEditable())
+				if ((ChatAllowedCharacters.isAllowedCharacter(keyChar) || keyChar == '\u00a7') && isEditable())
 				{
 					this.addText(Character.toString(keyChar));
 					break;
