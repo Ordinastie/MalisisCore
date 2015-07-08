@@ -48,6 +48,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
+import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.face.SouthFace;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
@@ -296,6 +297,7 @@ public class MalisisFont
 		}
 
 		t.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
+		t.setBrightness(Vertex.BRIGHTNESS_MAX);
 		t.addVertexWithUV(offsetX + i, offsetY, 0, cd.u(), cd.v());
 		t.addVertexWithUV(offsetX - i, offsetY + h, 0, cd.u(), cd.V());
 		t.addVertexWithUV(offsetX + w - i, offsetY + h, 0, cd.U(), cd.V());
