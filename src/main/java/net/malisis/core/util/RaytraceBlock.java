@@ -201,14 +201,14 @@ public class RaytraceBlock
 		double maxDist = Point.distanceSquared(src, dest);
 		for (AxisAlignedBB aabb : aabbs)
 		{
-			if (aabb != null)
+			if (aabb == null)
+				continue;
+
+			aabb.offset(x, y, z);
+			for (Point p : ray.intersect(aabb))
 			{
-				aabb.offset(x, y, z);
-				for (Point p : ray.intersect(aabb))
-				{
-					if (Point.distanceSquared(src, p) < maxDist)
-						points.add(p);
-				}
+				if (Point.distanceSquared(src, p) < maxDist)
+					points.add(p);
 			}
 		}
 
@@ -248,6 +248,9 @@ public class RaytraceBlock
 	{
 		for (AxisAlignedBB aabb : aabbs)
 		{
+			if (aabb == null)
+				continue;
+
 			if (point.x == aabb.minX)
 				return ForgeDirection.WEST;
 			if (point.x == aabb.maxX)
