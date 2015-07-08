@@ -127,13 +127,13 @@ public class Syncer
 			try
 			{
 				Class clazz = Class.forName(data.getClassName());
-				Syncable anno = (Syncable) clazz.getDeclaredAnnotation(Syncable.class);
+				Syncable anno = (Syncable) clazz.getAnnotation(Syncable.class);
 				ISyncHandler<?, ? extends ISyncableData> handler = handlers.get(anno.value());
 				classToHandler.put(clazz, handler);
 
 				for (Field f : clazz.getFields())
 				{
-					Sync syncAnno = f.getDeclaredAnnotation(Sync.class);
+					Sync syncAnno = f.getAnnotation(Sync.class);
 					if (syncAnno != null)
 						handler.addFieldData(new FieldData(0, syncAnno.value(), f));
 				}
