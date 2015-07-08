@@ -38,6 +38,7 @@ import net.malisis.core.util.chunkblock.ChunkBlockHandler;
 import net.malisis.core.util.finiteliquid.FiniteLiquid;
 import net.malisis.core.util.finiteliquid.FiniteLiquidRenderer;
 import net.malisis.core.util.replacement.ReplacementTool;
+import net.malisis.core.util.syncer.Syncer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
@@ -174,6 +175,7 @@ public class MalisisCore implements IMalisisMod
 		GameRegistry.registerTileEntity(MultiBlockTileEntity.class, "MalisisCoreMultiBlockTileEntity");
 
 		MalisisNetwork.createMessages(event.getAsmData());
+		Syncer.get().discover(event.getAsmData());
 	}
 
 	/**
