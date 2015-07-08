@@ -53,6 +53,7 @@ import net.minecraftforge.common.util.ForgeDirection;
  * @author Ordinastie
  *
  */
+
 public class EntityUtils
 {
 	private static ForgeDirection[] facings = new ForgeDirection[] { ForgeDirection.NORTH, ForgeDirection.EAST, ForgeDirection.SOUTH,
@@ -179,6 +180,8 @@ public class EntityUtils
 		try
 		{
 			Object playerInstance = getPlayerInstance.invoke(world.getPlayerManager(), x, z, false);
+			if (playerInstance == null)
+				return new ArrayList<>();
 			return (List<EntityPlayerMP>) playersWatchingChunk.get(playerInstance);
 		}
 		catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
