@@ -599,7 +599,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			return null;
 
 		int cy = 0;
-		for (int i = optionOffset; i < optionOffset + maxDisplayedOptions || i < options.size(); i++)
+		for (int i = optionOffset; i < optionOffset + maxDisplayedOptions && i < options.size(); i++)
 		{
 			Option<T> option = options.get(i);
 			if (cy + option.getHeight(this) > y)
