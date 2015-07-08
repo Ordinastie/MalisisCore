@@ -575,8 +575,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void next(int drawMode)
 	{
-		if (isDrawing())
-			draw();
+		draw();
 		startDrawing(drawMode);
 	}
 
