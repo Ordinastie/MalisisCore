@@ -43,7 +43,7 @@ defaultTasks 'build', 'install'
 // Basic project information
 group = 'net.malisis'
 archivesBaseName = 'malisiscore'
-version = '1.7.10-0.12.5-SNAPSHOT'
+version = '1.7.10-0.12.6-SNAPSHOT'
 ext.packaging = 'jar'
 
 // Extended project information
