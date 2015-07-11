@@ -35,8 +35,8 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.util.BlockPos;
-import net.malisis.core.util.BlockState;
+import net.malisis.core.util.MBlockPos;
+import net.malisis.core.util.MBlockState;
 import net.malisis.core.util.chunkcollision.IChunkCollidable;
 import net.malisis.core.util.chunklistener.ChunkListener;
 import net.malisis.core.util.chunklistener.IBlockListener;
@@ -44,11 +44,12 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * This class is the enty point for all the chunk collision related calculation.<br>
@@ -72,7 +73,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 
 	private TLongHashSet getCoords(Chunk chunk)
 	{
-		Map<Chunk, TLongHashSet> chunks = chunk.worldObj.isRemote ? clientChunks : serverChunks;
+		Map<Chunk, TLongHashSet> chunks = chunk.getWorld().isRemote ? clientChunks : serverChunks;
 		TLongHashSet coords = chunks.get(chunk);
 		if (coords == null)
 		{
@@ -115,34 +116,28 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 * @param block the block
 	 * @return true, if block can be placed, false if canceled
 	 */
-	public boolean updateCoordinates(Chunk chunk, int x, int y, int z, Block old, Block block)
+	@Override
+	public boolean updateCoordinates(Chunk chunk, BlockPos pos, Block old, Block block)
 	{
 		boolean canceled = false;
-		BlockPos pos = new BlockPos(x, y, z);
 		for (IChunkBlockHandler handler : handlers)
 			canceled |= handler.updateCoordinates(chunk, pos, old, block);
 
 		//*this* handler needs to be canceled, so it's called last
 		if (!canceled)
-			updateCoordinates(chunk, pos, old, block);
+		{
+			if (old instanceof IChunkBlock)
+				removeCoord(chunk.getWorld(), pos, ((IChunkBlock) old).blockRange());
+			if (block instanceof IChunkBlock)
+				addCoord(chunk.getWorld(), pos, ((IChunkBlock) block).blockRange());
+		}
 
 		return !canceled;
 
 	}
 
-	@Override
-	public boolean updateCoordinates(Chunk chunk, BlockPos pos, Block old, Block block)
-	{
-		if (old instanceof IChunkBlock)
-			removeCoord(chunk.worldObj, pos, ((IChunkBlock) old).blockRange());
-		if (block instanceof IChunkBlock)
-			addCoord(chunk.worldObj, pos, ((IChunkBlock) block).blockRange());
-
-		return true;
-	}
-
 	/**
-	 * Adds coordinate for the {@link Chunk}s around {@link BlockPos}.
+	 * Adds coordinate for the {@link Chunk}s around {@link MBlockPos}.
 	 *
 	 * @param world the world
 	 * @param pos the pos
@@ -168,7 +163,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	}
 
 	/**
-	 * Removes coordinate from the {@link Chunk}s around the {@link BlockPos}.
+	 * Removes coordinate from the {@link Chunk}s around the {@link MBlockPos}.
 	 *
 	 * @param world the world
 	 * @param pos the pos
@@ -211,7 +206,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 			return;
 
 		long[] coords = readLongArray(nbt);
-		Map<Chunk, TLongHashSet> chunks = event.getChunk().worldObj.isRemote ? clientChunks : serverChunks;
+		Map<Chunk, TLongHashSet> chunks = event.getChunk().getWorld().isRemote ? clientChunks : serverChunks;
 		chunks.put(event.getChunk(), new TLongHashSet(coords));
 	}
 
@@ -287,7 +282,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	public void setCoords(int chunkX, int chunkZ, long[] coords)
 	{
 		Chunk chunk = Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(chunkX, chunkZ);
-		Map<Chunk, TLongHashSet> chunks = chunk.worldObj.isRemote ? clientChunks : serverChunks;
+		Map<Chunk, TLongHashSet> chunks = chunk.getWorld().isRemote ? clientChunks : serverChunks;
 		chunks.put(chunk, new TLongHashSet(coords));
 	}
 
@@ -304,7 +299,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 */
 	public List<Chunk> getAffectedChunks(World world, int x, int z, int distance)
 	{
-		AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(x - distance, 0, z - distance, x + distance + 1, 1, z + distance + 1);
+		AxisAlignedBB aabb = new AxisAlignedBB(x - distance, 0, z - distance, x + distance + 1, 1, z + distance + 1);
 		return getAffectedChunks(world, aabb);
 	}
 
@@ -334,11 +329,11 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	{
 		protected World world;
 		protected Chunk chunk;
-		protected BlockState state;
+		protected MBlockState state;
 
 		protected void set(Chunk chunk)
 		{
-			this.world = chunk.worldObj;
+			this.world = chunk.getWorld();
 			this.chunk = chunk;
 		}
 
@@ -351,7 +346,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 		 */
 		protected boolean check(long coord)
 		{
-			state = new BlockState(world, coord);
+			state = new MBlockState(world, coord);
 
 			if (!(state.getBlock() instanceof IChunkBlock))
 			{

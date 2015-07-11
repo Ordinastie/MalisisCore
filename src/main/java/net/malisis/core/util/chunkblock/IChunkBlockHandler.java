@@ -24,8 +24,8 @@
 
 package net.malisis.core.util.chunkblock;
 
-import net.malisis.core.util.BlockPos;
 import net.minecraft.block.Block;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 
 /**
