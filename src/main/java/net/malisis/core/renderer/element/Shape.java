@@ -437,15 +437,28 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	/**
 	 * Sets the bounds for this {@link Shape}. Calculations are based on {@link Vertex#baseName()}.
 	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
-	 * @param X the x
-	 * @param Y the y
-	 * @param Z the z
+	 * @param aabb the aabb
 	 * @return this {@link Shape}
 	 */
-	public Shape setBounds(float x, float y, float z, float X, float Y, float Z)
+	public Shape setBounds(AxisAlignedBB aabb)
+	{
+		if (aabb == null)
+			return this;
+		return setBounds(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ);
+	}
+
+	/**
+	 * Sets the bounds for this {@link Shape}. Calculations are based on {@link Vertex#baseName()}.
+	 *
+	 * @param minX the x
+	 * @param minY the y
+	 * @param minZ the z
+	 * @param maxX the x
+	 * @param maxY the y
+	 * @param maxZ the z
+	 * @return this {@link Shape}
+	 */
+	public Shape setBounds(double minX, double minY, double minZ, double maxX, double maxY, double maxZ)
 	{
 		for (Face f : faces)
 		{
@@ -453,17 +466,17 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 			{
 				String name = v.name();
 				if (name.contains("West"))
-					v.setX(x);
+					v.setX(minX);
 				if (name.contains("East"))
-					v.setX(X);
+					v.setX(maxX);
 				if (name.contains("Bottom"))
-					v.setY(y);
+					v.setY(minY);
 				if (name.contains("Top"))
-					v.setY(Y);
+					v.setY(maxY);
 				if (name.contains("North"))
-					v.setZ(z);
+					v.setZ(minZ);
 				if (name.contains("South"))
-					v.setZ(Z);
+					v.setZ(maxZ);
 			}
 		}
 		return this;
