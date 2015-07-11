@@ -28,8 +28,8 @@ import java.util.List;
 
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.util.AABBUtils;
-import net.malisis.core.util.BlockPos;
-import net.malisis.core.util.BlockState;
+import net.malisis.core.util.BlockPosUtils;
+import net.malisis.core.util.MBlockState;
 import net.malisis.core.util.Point;
 import net.malisis.core.util.RaytraceBlock;
 import net.malisis.core.util.chunkblock.ChunkBlockHandler;
@@ -39,6 +39,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
@@ -119,8 +120,7 @@ public class ChunkCollision
 		if (src == null || dest == null)
 			return mop;
 
-		AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(src.x, src.y, src.z, dest.x, dest.y, dest.z);
-		AABBUtils.fix(aabb);
+		AxisAlignedBB aabb = new AxisAlignedBB(src.x, src.y, src.z, dest.x, dest.y, dest.z);
 
 		RayTraceProcedure procedure = new RayTraceProcedure(src, dest, mop);
 		for (Chunk chunk : ChunkBlockHandler.getAffectedChunks(world, aabb))
@@ -171,32 +171,36 @@ public class ChunkCollision
 	 * @param z the z
 	 * @return true, if can be placed
 	 */
-	public boolean canPlaceBlockAt(ItemStack itemStack, EntityPlayer player, World world, Block block, int x, int y, int z, int side)
+	public boolean canPlaceBlockAt(ItemStack itemStack, EntityPlayer player, World world, Block block, BlockPos pos, int side)
 	{
 		AxisAlignedBB[] aabbs;
 		if (block instanceof IChunkCollidable)
-			aabbs = ((IChunkCollidable) block).getPlacedBoundingBox(world, x, y, z, side, player, itemStack);
+			aabbs = ((IChunkCollidable) block).getPlacedBoundingBox(world, pos, side, player, itemStack);
 		else
-			aabbs = AABBUtils.getCollisionBoundingBoxes(world, block, x, y, z);
+			aabbs = AABBUtils.getCollisionBoundingBoxes(world, block, pos);
 
 		if (aabbs == null)
 			return true;
 
-		AABBUtils.offset(x, y, z, aabbs);
+		AABBUtils.offset(pos, aabbs);
 
 		//check against each block position occupied by the AABBs
 		if (block instanceof IChunkCollidable)
 		{
 			for (AxisAlignedBB aabb : aabbs)
-				for (BlockPos pos : BlockPos.getAllInBox(aabb))
+			{
+				if (aabb == null)
+					continue;
+				for (BlockPos p : BlockPosUtils.getAllInBox(aabb))
 				{
 					boolean b = false;
-					b |= !world.getBlock(pos.getX(), pos.getY(), pos.getZ()).isReplaceable(world, pos.getX(), pos.getY(), pos.getZ());
-					b &= AABBUtils.isColliding(aabb, AABBUtils.getCollisionBoundingBoxes(world, new BlockState(world, pos), true));
+					b |= !world.getBlockState(p).getBlock().isReplaceable(world, p);
+					b &= AABBUtils.isColliding(aabb, AABBUtils.getCollisionBoundingBoxes(world, new MBlockState(world, p), true));
 
 					if (b)
 						return false;
 				}
+			}
 		}
 
 		CheckCollisionProcedure procedure = new CheckCollisionProcedure(aabbs);
@@ -208,28 +212,32 @@ public class ChunkCollision
 
 	//#end canPlaceBlockAt
 
-	public void replaceBlocks(World world, BlockState state)
+	public void replaceBlocks(World world, MBlockState state)
 	{
 		AxisAlignedBB[] aabbs = AABBUtils.getCollisionBoundingBoxes(world, state, true);
 		for (AxisAlignedBB aabb : aabbs)
 		{
-			for (BlockPos pos : BlockPos.getAllInBox(aabb))
+			if (aabb == null)
+				continue;
+
+			for (BlockPos pos : BlockPosUtils.getAllInBox(aabb))
 			{
-				if (world.getBlock(pos.getX(), pos.getY(), pos.getZ()).isReplaceable(world, pos.getX(), pos.getY(), pos.getZ()))
-					world.setBlockToAir(pos.getX(), pos.getY(), pos.getZ());
+				if (world.getBlockState(pos).getBlock().isReplaceable(world, pos))
+					world.setBlockToAir(pos);
 			}
 		}
 	}
 
-	public void updateBlocks(World world, BlockState state)
+	public void updateBlocks(World world, MBlockState state)
 	{
 		AxisAlignedBB[] aabbs = AABBUtils.getCollisionBoundingBoxes(world, state, true);
 		for (AxisAlignedBB aabb : aabbs)
 		{
-			for (BlockPos pos : BlockPos.getAllInBox(aabb))
-			{
-				world.notifyBlockChange(pos.getX(), pos.getY(), pos.getZ(), state.getBlock());
-			}
+			if (aabb == null)
+				continue;
+
+			for (BlockPos pos : BlockPosUtils.getAllInBox(aabb))
+				world.notifyBlockOfStateChange(pos, state.getBlock());
 		}
 	}
 
@@ -260,8 +268,8 @@ public class ChunkCollision
 
 			if (state.getBlock() instanceof IChunkCollidable)
 			{
-				AxisAlignedBB[] aabbs = ((IChunkCollidable) state.getBlock()).getBoundingBox(world, state.getX(), state.getY(),
-						state.getZ(), BoundingBoxType.CHUNKCOLLISION);
+				AxisAlignedBB[] aabbs = ((IChunkCollidable) state.getBlock()).getBoundingBox(world, state.getPos(),
+						BoundingBoxType.CHUNKCOLLISION);
 				for (AxisAlignedBB aabb : aabbs)
 				{
 					if (mask != null && aabb != null && mask.intersectsWith(aabb.offset(state.getX(), state.getY(), state.getZ())))
@@ -302,7 +310,7 @@ public class ChunkCollision
 			if (!check(coord))
 				return true;
 
-			RaytraceBlock rt = RaytraceBlock.set(world, src, dest, state.getX(), state.getY(), state.getZ());
+			RaytraceBlock rt = RaytraceBlock.set(world, src, dest, state.getPos());
 			mop = get().getClosest(src, rt.trace(), mop);
 
 			return true;
