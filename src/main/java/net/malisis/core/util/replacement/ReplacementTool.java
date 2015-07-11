@@ -28,7 +28,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
@@ -41,11 +40,11 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.RegistryNamespaced;
 import net.minecraftforge.client.event.TextureStitchEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
-import cpw.mods.fml.relauncher.ReflectionHelper;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
@@ -84,14 +83,12 @@ public class ReplacementTool
 	@SubscribeEvent
 	public void onTextureStitchEvent(TextureStitchEvent.Pre event)
 	{
-		if (event.map.getTextureType() == 1)
-			return;
-
-		for (Entry<Block, Block> entry : originalBlocks.entrySet())
-		{
-			Block block = entry.getValue();
-			block.registerIcons(event.map);
-		}
+		//TODO
+		//		for (Entry<Block, Block> entry : originalBlocks.entrySet())
+		//		{
+		//			Block block = entry.getValue();
+		//			block.registerIcons(event.map);
+		//		}
 	}
 
 	/**

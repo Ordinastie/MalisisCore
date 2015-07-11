@@ -79,7 +79,7 @@ public abstract class ReplacementHandler<T>
 			return itemStack.getItem() == replaced;
 
 		return replaced instanceof Block && itemStack.getItem() instanceof ItemBlock
-				&& ((ItemBlock) itemStack.getItem()).blockInstance == replaced;
+				&& ((ItemBlock) itemStack.getItem()).getBlock() == replaced;
 	}
 
 	public abstract boolean replace(T object, Object vanilla, Object replacement);
