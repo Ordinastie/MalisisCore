@@ -26,12 +26,14 @@ package net.malisis.core.util.syncer.handlers;
 
 import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
+import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.syncer.ISyncableData;
 import net.malisis.core.util.syncer.handlers.TileEntitySyncHandler.TESyncData;
 import net.malisis.core.util.syncer.message.SyncerMessage.Packet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.tileentity.TileEntity;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * @author Ordinastie
@@ -48,7 +50,7 @@ public class TileEntitySyncHandler extends DefaultSyncHandler<TileEntity, TESync
 	@Override
 	public TileEntity getReceiver(MessageContext ctx, TESyncData data)
 	{
-		return Minecraft.getMinecraft().theWorld.getTileEntity(data.x, data.y, data.z);
+		return Minecraft.getMinecraft().theWorld.getTileEntity(data.pos);
 	}
 
 	@Override
@@ -61,36 +63,30 @@ public class TileEntitySyncHandler extends DefaultSyncHandler<TileEntity, TESync
 	public void send(TileEntity caller, Packet packet)
 	{
 		MalisisCore.network.sendToPlayersWatchingChunk(packet,
-				caller.getWorld().getChunkFromChunkCoords(caller.xCoord >> 4, caller.zCoord >> 4));
+				caller.getWorld().getChunkFromChunkCoords(caller.getPos().getX() >> 4, caller.getPos().getZ() >> 4));
 	}
 
 	public static class TESyncData implements ISyncableData
 	{
-		private int x, y, z;
+		private BlockPos pos;
 
 		public TESyncData(TileEntity te)
 		{
 			if (te == null)
 				return;
-			x = te.xCoord;
-			y = te.yCoord;
-			z = te.zCoord;
+			pos = te.getPos();
 		}
 
 		@Override
 		public void fromBytes(ByteBuf buf)
 		{
-			x = buf.readInt();
-			y = buf.readInt();
-			z = buf.readInt();
+			pos = BlockPosUtils.fromBytes(buf);
 		}
 
 		@Override
 		public void toBytes(ByteBuf buf)
 		{
-			buf.writeInt(x);
-			buf.writeInt(y);
-			buf.writeInt(z);
+			BlockPosUtils.toBytes(buf, pos);
 		}
 	}
 

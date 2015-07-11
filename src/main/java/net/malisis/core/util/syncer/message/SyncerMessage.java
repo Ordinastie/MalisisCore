@@ -37,11 +37,11 @@ import net.malisis.core.util.syncer.FieldData;
 import net.malisis.core.util.syncer.ISyncHandler;
 import net.malisis.core.util.syncer.ISyncableData;
 import net.malisis.core.util.syncer.Syncer;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.relauncher.Side;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * Message to update the slots in the opened {@link MalisisInventoryContainer} on the client.

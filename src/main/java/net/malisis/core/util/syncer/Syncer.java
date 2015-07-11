@@ -35,8 +35,8 @@ import net.malisis.core.util.DoubleKeyMap;
 import net.malisis.core.util.syncer.handlers.TileEntitySyncHandler;
 import net.malisis.core.util.syncer.message.SyncerMessage;
 import net.malisis.core.util.syncer.message.SyncerMessage.Packet;
-import cpw.mods.fml.common.discovery.ASMDataTable;
-import cpw.mods.fml.common.discovery.ASMDataTable.ASMData;
+import net.minecraftforge.fml.common.discovery.ASMDataTable;
+import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
 
 /**
  * This class handles the synchronization between server and client objects. Objects to be synchronized need to have the {@link Syncable}

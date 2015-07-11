@@ -25,7 +25,7 @@
 package net.malisis.core.util.syncer;
 
 import net.malisis.core.util.syncer.message.SyncerMessage.Packet;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * {@link ISyncHandler} are used to define handlers for the {@link Syncer}.<br>
