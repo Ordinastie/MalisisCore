@@ -29,6 +29,7 @@ import java.util.List;
 import net.malisis.core.util.RaytraceBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.util.AxisAlignedBB;
@@ -59,9 +60,6 @@ public class MalisisBlock extends Block implements IBoundingBox
 	public Block setUnlocalizedName(String name)
 	{
 		this.name = name;
-		if (textureName == null)
-			textureName = name;
-		super.setTextureName(name);
 		super.setUnlocalizedName(name);
 		return this;
 	}
@@ -79,6 +77,15 @@ public class MalisisBlock extends Block implements IBoundingBox
 	public void register(Class<? extends ItemBlock> item)
 	{
 		GameRegistry.registerBlock(this, item, getName());
+	}
+
+	@Override
+	public void registerIcons(IIconRegister reg)
+	{
+		if (textureName == null)
+			return;
+
+		super.registerIcons(reg);
 	}
 
 	@Override
