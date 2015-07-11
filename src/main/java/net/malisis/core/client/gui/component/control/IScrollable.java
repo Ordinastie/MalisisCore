@@ -75,7 +75,7 @@ public interface IScrollable
 	 * Sets the offset from 0 to 1 of the scrollable content. Only used for {@link UIScrollBar.Type#VERTICAL} scrollbars.<br>
 	 * Delta is the size taken for the {@link UIScrollBar.Type#HORIZONTAL} scrollbar if available.
 	 *
-	 * @param offsetX the offset x
+	 * @param offsetY the offset y
 	 * @param delta the delta
 	 */
 	public void setOffsetY(float offsetY, int delta);

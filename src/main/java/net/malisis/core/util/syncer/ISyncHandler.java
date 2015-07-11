@@ -24,7 +24,6 @@
 
 package net.malisis.core.util.syncer;
 
-import net.malisis.core.util.syncer.message.SyncerMessage;
 import net.malisis.core.util.syncer.message.SyncerMessage.Packet;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
@@ -72,7 +71,7 @@ public interface ISyncHandler<T, S extends ISyncableData>
 	public void addFieldData(FieldData fieldData);
 
 	/**
-	 * Gets the {@link FieldData} for the specified index (called from the {@link SyncerMessage.Packet#fromBytes(io.netty.buffer.ByteBuf)}).
+	 * Gets the {@link FieldData} for the specified index (called from the the SyncerMessage.Packet).
 	 *
 	 * @param index the index
 	 * @return the field data
