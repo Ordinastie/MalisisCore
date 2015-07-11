@@ -24,11 +24,10 @@
 
 package net.malisis.core.util;
 
-import java.util.HashMap;
-
-import static org.lwjgl.opengl.GL11.GL_TRUE;
-import static org.lwjgl.opengl.GL11.glGetInteger;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
+
+import java.util.HashMap;
 
 /**
  * ShaderSystem

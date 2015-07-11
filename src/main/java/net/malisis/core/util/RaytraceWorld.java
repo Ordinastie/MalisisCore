@@ -29,9 +29,11 @@ import java.util.HashMap;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.util.chunkcollision.ChunkCollision;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 
 /**
@@ -55,9 +57,9 @@ public class RaytraceWorld
 	/** Vector describing the direction of steps to take when reaching limits of a block. */
 	private Vector step;
 	/** The block coordinates of the source. */
-	private ChunkPosition blockSrc;
+	private BlockPos blockSrc;
 	/** The block coordinates of the destination. */
-	private ChunkPosition blockDest;
+	private BlockPos blockDest;
 	/** Current X coordinate of the block being ray traced. */
 	private int currentX;
 	/** Current Y coordinate of the block being ray traced. */
@@ -71,7 +73,7 @@ public class RaytraceWorld
 	 */
 	public MovingObjectPosition firstHit;
 	/** List of blocks passed by the ray trace. Only set if options <code>LOG_BLOCK_PASSED</code> is set */
-	public HashMap<ChunkPosition, MovingObjectPosition> blockPassed;
+	public HashMap<BlockPos, MovingObjectPosition> blockPassed;
 	/** Options for the ray tracing. */
 	public int options = 0;
 
@@ -88,7 +90,7 @@ public class RaytraceWorld
 		this.ray = ray;
 		this.options = options;
 
-		blockSrc = new ChunkPosition(src.toVec3());
+		blockSrc = new BlockPos(src.toVec3());
 
 		int stepX = 1, stepY = 1, stepZ = 1;
 		if (ray.direction.x < 0)
@@ -101,7 +103,7 @@ public class RaytraceWorld
 		step = new Vector(stepX, stepY, stepZ);
 
 		if (hasOption(Options.LOG_BLOCK_PASSED))
-			blockPassed = new HashMap<ChunkPosition, MovingObjectPosition>();
+			blockPassed = new HashMap<>();
 	}
 
 	/**
@@ -148,7 +150,7 @@ public class RaytraceWorld
 	{
 		this(new Ray(src, new Vector(src, dest)), options);
 		this.dest = dest;
-		blockDest = new ChunkPosition(dest.toVec3());
+		blockDest = new BlockPos(dest.toVec3());
 	}
 
 	/**
@@ -161,7 +163,7 @@ public class RaytraceWorld
 	{
 		this(new Ray(src, new Vector(src, dest)), 0);
 		this.dest = dest;
-		blockDest = new ChunkPosition(dest.toVec3());
+		blockDest = new BlockPos(dest.toVec3());
 	}
 
 	/**
@@ -212,7 +214,7 @@ public class RaytraceWorld
 	public void setLength(double length)
 	{
 		dest = ray.getPointAt(length);
-		blockDest = new ChunkPosition(dest.toVec3());
+		blockDest = new BlockPos(dest.toVec3());
 	}
 
 	/**
@@ -240,9 +242,9 @@ public class RaytraceWorld
 		boolean ret = false;
 
 		firstHit = null;
-		currentX = blockSrc.chunkPosX;
-		currentY = blockSrc.chunkPosY;
-		currentZ = blockSrc.chunkPosZ;
+		currentX = blockSrc.getX();
+		currentY = blockSrc.getY();
+		currentZ = blockSrc.getZ();
 
 		while (!ret && count++ <= MAX_BLOCKS)
 		{
@@ -254,13 +256,13 @@ public class RaytraceWorld
 
 			// do not trace first block
 			if (count != 1 || !hasOption(Options.IGNORE_FIRST_BLOCK))
-				mop = rayTraceBlock(currentX, currentY, currentZ, ray.getPointAt(min));
+				mop = rayTraceBlock(new BlockPos(currentX, currentY, currentZ), ray.getPointAt(min));
 			if (firstHit == null)
 				firstHit = mop;
 			if (hasOption(Options.LOG_BLOCK_PASSED))
-				blockPassed.put(new ChunkPosition(currentX, currentY, currentZ), mop);
+				blockPassed.put(new BlockPos(currentX, currentY, currentZ), mop);
 
-			if (dest != null && currentX == blockDest.chunkPosX && currentY == blockDest.chunkPosY && currentZ == blockDest.chunkPosZ)
+			if (dest != null && currentX == blockDest.getX() && currentY == blockDest.getY() && currentZ == blockDest.getZ())
 				ret = true;
 
 			if (!ret)
@@ -279,7 +281,7 @@ public class RaytraceWorld
 		}
 
 		if (firstHit == null && dest != null)
-			firstHit = new MovingObjectPosition(currentX, currentY, currentZ, -1, dest.toVec3(), false);
+			firstHit = new MovingObjectPosition(MovingObjectType.MISS, dest.toVec3(), null, new BlockPos(currentX, currentY, currentZ));
 
 		ChunkCollision.get().setRayTraceInfos(src, dest);
 		firstHit = ChunkCollision.get().getRayTraceResult(world, firstHit);
@@ -329,15 +331,15 @@ public class RaytraceWorld
 	 * @param exit the exit
 	 * @return the {@link MovingObjectPosition} return by block raytrace
 	 */
-	public MovingObjectPosition rayTraceBlock(int x, int y, int z, Point exit)
+	public MovingObjectPosition rayTraceBlock(BlockPos pos, Point exit)
 	{
-		Block block = world.getBlock(x, y, z);
-		int metadata = world.getBlockMetadata(x, y, z);
-		if (hasOption(Options.CHECK_COLLISION) && block.getCollisionBoundingBoxFromPool(world, x, y, z) == null)
+		IBlockState state = world.getBlockState(pos);
+		Block block = state.getBlock();
+		if (hasOption(Options.CHECK_COLLISION) && block.getCollisionBoundingBox(world, pos, state) == null)
 			return null;
-		if (!block.canStopRayTrace(metadata, hasOption(Options.HIT_LIQUIDS)))
+		if (!block.canCollideCheck(state, hasOption(Options.HIT_LIQUIDS)))
 			return null;
-		return RaytraceBlock.set(world, src, exit, x, y, z).trace();
+		return RaytraceBlock.set(world, src, exit, pos).trace();
 	}
 
 	/**

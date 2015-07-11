@@ -41,11 +41,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * Utility class for Entities.
@@ -56,8 +56,8 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 public class EntityUtils
 {
-	private static ForgeDirection[] facings = new ForgeDirection[] { ForgeDirection.NORTH, ForgeDirection.EAST, ForgeDirection.SOUTH,
-			ForgeDirection.WEST, ForgeDirection.UP, ForgeDirection.DOWN, ForgeDirection.UNKNOWN };
+	private static EnumFacing[] facings = new EnumFacing[] { EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST,
+			EnumFacing.UP, EnumFacing.DOWN };
 
 	private static Method getPlayerInstance;
 	private static Field playersWatchingChunk;
@@ -119,26 +119,26 @@ public class EntityUtils
 	}
 
 	/**
-	 * Gets the {@link ForgeDirection} the {@link Entity} is currently facing.
+	 * Gets the {@link EnumFacing} the {@link Entity} is currently facing.
 	 *
 	 * @param entity the entity
 	 * @return the direction
 	 */
-	public static ForgeDirection getEntityFacing(Entity entity)
+	public static EnumFacing getEntityFacing(Entity entity)
 	{
 		return getEntityFacing(entity, false);
 	}
 
 	/**
-	 * Gets the {@link ForgeDirection} the {@link Entity} is currently facing.<br>
-	 * If <b>sixWays</b> is <code>true</code>, the direction can be {@link ForgeDirection#UP UP} or {@link ForgeDirection#DOWN DOWN} if the
-	 * entity is looking up or down.
+	 * Gets the {@link EnumFacing} the {@link Entity} is currently facing.<br>
+	 * If <b>sixWays</b> is <code>true</code>, the direction can be {@link EnumFacing#UP UP} or {@link EnumFacing#DOWN DOWN} if the entity
+	 * is looking up or down.
 	 *
 	 * @param entity the entity
 	 * @param sixWays whether to consider UP and DOWN for directions
 	 * @return the direction
 	 */
-	public static ForgeDirection getEntityFacing(Entity entity, boolean sixWays)
+	public static EnumFacing getEntityFacing(Entity entity, boolean sixWays)
 	{
 		return facings[getEntityFacingInt(entity, sixWays)];
 	}
@@ -169,7 +169,7 @@ public class EntityUtils
 
 	public static List<EntityPlayerMP> getPlayersWatchingChunk(Chunk chunk)
 	{
-		return getPlayersWatchingChunk((WorldServer) chunk.worldObj, chunk.xPosition, chunk.zPosition);
+		return getPlayersWatchingChunk((WorldServer) chunk.getWorld(), chunk.xPosition, chunk.zPosition);
 	}
 
 	public static List<EntityPlayerMP> getPlayersWatchingChunk(WorldServer world, int x, int z)

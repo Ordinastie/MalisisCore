@@ -30,8 +30,9 @@ import net.malisis.core.util.chunkcollision.IChunkCollidable;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * @author Ordinastie
@@ -47,37 +48,42 @@ public class AABBUtils
 	private static int[] cos = { 1, 0, -1, 0 };
 	private static int[] sin = { 0, 1, 0, -1 };
 
+	public static AxisAlignedBB empty()
+	{
+		return empty(new BlockPos(0, 0, 0));
+	}
+
+	public static AxisAlignedBB empty(BlockPos pos)
+	{
+		return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(), pos.getX(), pos.getY(), pos.getZ());
+	}
+
 	public static AxisAlignedBB identity()
 	{
-		return identity(0, 0, 0);
+		return identity(new BlockPos(0, 0, 0));
 	}
 
 	public static AxisAlignedBB identity(BlockPos pos)
 	{
-		return identity(pos.getX(), pos.getY(), pos.getZ());
-	}
-
-	public static AxisAlignedBB identity(int x, int y, int z)
-	{
-		return AxisAlignedBB.getBoundingBox(x, y, z, x + 1, y + 1, z + 1);
+		return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
 	}
 
 	public static AxisAlignedBB[] identities()
 	{
-		return identities(0, 0, 0);
+		return identities(new BlockPos(0, 0, 0));
 	}
 
 	public static AxisAlignedBB[] identities(BlockPos pos)
 	{
-		return identities(pos.getX(), pos.getX(), pos.getZ());
+		return new AxisAlignedBB[] { identity(pos) };
 	}
 
-	public static AxisAlignedBB[] identities(int x, int y, int z)
+	public static AxisAlignedBB copy(AxisAlignedBB aabb)
 	{
-		return new AxisAlignedBB[] { identity(x, y, z) };
+		return new AxisAlignedBB(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ);
 	}
 
-	private static int getAngle(ForgeDirection dir)
+	private static int getAngle(EnumFacing dir)
 	{
 		switch (dir)
 		{
@@ -102,12 +108,12 @@ public class AABBUtils
 	 * @param dir the dir
 	 * @return the axis aligned bb
 	 */
-	public static AxisAlignedBB rotate(AxisAlignedBB aabb, ForgeDirection dir)
+	public static AxisAlignedBB rotate(AxisAlignedBB aabb, EnumFacing dir)
 	{
 		return rotate(aabb, getAngle(dir));
 	}
 
-	public static AxisAlignedBB[] rotate(AxisAlignedBB[] aabbs, ForgeDirection dir)
+	public static AxisAlignedBB[] rotate(AxisAlignedBB[] aabbs, EnumFacing dir)
 	{
 		return rotate(aabbs, getAngle(dir));
 	}
@@ -135,70 +141,48 @@ public class AABBUtils
 		int s = sin[a];
 		int c = cos[a];
 
-		AxisAlignedBB copy = AxisAlignedBB.getBoundingBox(0, 0, 0, 0, 0, 0);
 		aabb.offset(-0.5F, -0.5F, -0.5F);
-		copy.setBB(aabb);
+
+		double minX = aabb.minX;
+		double minY = aabb.minY;
+		double minZ = aabb.minZ;
+		double maxX = aabb.maxX;
+		double maxY = aabb.maxY;
+		double maxZ = aabb.maxZ;
 
 		if (axis == Axis.X)
 		{
-			copy.minY = (aabb.minY * c) - (aabb.minZ * s);
-			copy.maxY = (aabb.maxY * c) - (aabb.maxZ * s);
-			copy.minZ = (aabb.minY * s) + (aabb.minZ * c);
-			copy.maxZ = (aabb.maxY * s) + (aabb.maxZ * c);
+			minY = (aabb.minY * c) - (aabb.minZ * s);
+			maxY = (aabb.maxY * c) - (aabb.maxZ * s);
+			minZ = (aabb.minY * s) + (aabb.minZ * c);
+			maxZ = (aabb.maxY * s) + (aabb.maxZ * c);
 
 		}
 		if (axis == Axis.Y)
 		{
-			copy.minX = (aabb.minX * c) - (aabb.minZ * s);
-			copy.maxX = (aabb.maxX * c) - (aabb.maxZ * s);
-			copy.minZ = (aabb.minX * s) + (aabb.minZ * c);
-			copy.maxZ = (aabb.maxX * s) + (aabb.maxZ * c);
+			minX = (aabb.minX * c) - (aabb.minZ * s);
+			maxX = (aabb.maxX * c) - (aabb.maxZ * s);
+			minZ = (aabb.minX * s) + (aabb.minZ * c);
+			maxZ = (aabb.maxX * s) + (aabb.maxZ * c);
 		}
 
 		if (axis == Axis.Z)
 		{
-			copy.minX = (aabb.minX * c) - (aabb.minY * s);
-			copy.maxX = (aabb.maxX * c) - (aabb.maxY * s);
-			copy.minY = (aabb.minX * s) + (aabb.minY * c);
-			copy.maxY = (aabb.maxX * s) + (aabb.maxY * c);
+			minX = (aabb.minX * c) - (aabb.minY * s);
+			maxX = (aabb.maxX * c) - (aabb.maxY * s);
+			minY = (aabb.minX * s) + (aabb.minY * c);
+			maxY = (aabb.maxX * s) + (aabb.maxY * c);
 		}
 
-		aabb.setBB(fix(copy));
+		aabb = new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
 		aabb.offset(0.5F, 0.5F, 0.5F);
 
 		return aabb;
 	}
 
-	public static AxisAlignedBB fix(AxisAlignedBB aabb)
+	public static AxisAlignedBB readFromNBT(NBTTagCompound tag)
 	{
-		double tmp;
-		if (aabb.minX > aabb.maxX)
-		{
-			tmp = aabb.minX;
-			aabb.minX = aabb.maxX;
-			aabb.maxX = tmp;
-		}
-
-		if (aabb.minY > aabb.maxY)
-		{
-			tmp = aabb.minY;
-			aabb.minY = aabb.maxY;
-			aabb.maxY = tmp;
-		}
-
-		if (aabb.minZ > aabb.maxZ)
-		{
-			tmp = aabb.minZ;
-			aabb.minZ = aabb.maxZ;
-			aabb.maxZ = tmp;
-		}
-
-		return aabb;
-	}
-
-	public static AxisAlignedBB readFromNBT(NBTTagCompound tag, AxisAlignedBB aabb)
-	{
-		return aabb.setBounds(tag.getDouble("minX"), tag.getDouble("minY"), tag.getDouble("minZ"), tag.getDouble("maxX"),
+		return new AxisAlignedBB(tag.getDouble("minX"), tag.getDouble("minY"), tag.getDouble("minZ"), tag.getDouble("maxX"),
 				tag.getDouble("maxY"), tag.getDouble("maxZ"));
 	}
 
@@ -222,17 +206,16 @@ public class AABBUtils
 	 */
 	public static AxisAlignedBB combine(AxisAlignedBB[] aabbs)
 	{
-		AxisAlignedBB ret = AxisAlignedBB.getBoundingBox(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MIN_VALUE,
-				Double.MAX_VALUE, Double.MAX_VALUE);
+		if (aabbs == null || aabbs.length == 0)
+			return null;
 
+		AxisAlignedBB ret = null;
 		for (AxisAlignedBB aabb : aabbs)
 		{
-			ret.minX = Math.min(aabb.minX, ret.minX);
-			ret.maxX = Math.max(aabb.maxX, ret.maxX);
-			ret.minY = Math.min(aabb.minY, ret.minY);
-			ret.maxY = Math.max(aabb.maxY, ret.maxY);
-			ret.minZ = Math.min(aabb.minZ, ret.minZ);
-			ret.maxZ = Math.max(aabb.maxZ, ret.maxZ);
+			if (ret == null)
+				ret = aabb;
+			else if (aabb != null)
+				ret.union(aabb);
 		}
 
 		return ret;
@@ -304,9 +287,9 @@ public class AABBUtils
 	 * @param z the z
 	 * @return the collision bounding boxes
 	 */
-	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, Block block, int x, int y, int z)
+	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, Block block, BlockPos pos)
 	{
-		return getCollisionBoundingBoxes(world, new BlockState(x, y, z, block), false);
+		return getCollisionBoundingBoxes(world, new MBlockState(pos, block), false);
 	}
 
 	/**
@@ -320,9 +303,9 @@ public class AABBUtils
 	 * @param offset if true, the boxes are offset by the coordinate
 	 * @return the collision bounding boxes
 	 */
-	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, Block block, int x, int y, int z, boolean offset)
+	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, Block block, BlockPos pos, boolean offset)
 	{
-		return getCollisionBoundingBoxes(world, new BlockState(x, y, z, block), offset);
+		return getCollisionBoundingBoxes(world, new MBlockState(pos, block), offset);
 	}
 
 	/**
@@ -332,7 +315,7 @@ public class AABBUtils
 	 * @param state the state
 	 * @return the collision bounding boxes
 	 */
-	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, BlockState state)
+	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, MBlockState state)
 	{
 		return getCollisionBoundingBoxes(world, state, false);
 	}
@@ -344,18 +327,17 @@ public class AABBUtils
 	 * @param state the state
 	 * @return the collision bounding boxes
 	 */
-	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, BlockState state, boolean offset)
+	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, MBlockState state, boolean offset)
 	{
 		AxisAlignedBB[] aabbs = new AxisAlignedBB[0];
+
 		if (state.getBlock() instanceof IChunkCollidable)
-			aabbs = ((IChunkCollidable) state.getBlock()).getBoundingBox(world, state.getX(), state.getY(), state.getZ(),
-					BoundingBoxType.CHUNKCOLLISION);
+			aabbs = ((IChunkCollidable) state.getBlock()).getBoundingBox(world, state.getPos(), BoundingBoxType.CHUNKCOLLISION);
 		else if (state.getBlock() instanceof MalisisBlock)
-			aabbs = ((MalisisBlock) state.getBlock()).getBoundingBox(world, state.getX(), state.getY(), state.getZ(),
-					BoundingBoxType.CHUNKCOLLISION);
+			aabbs = ((MalisisBlock) state.getBlock()).getBoundingBox(world, state.getPos(), BoundingBoxType.CHUNKCOLLISION);
 		else
 		{
-			AxisAlignedBB aabb = state.getBlock().getCollisionBoundingBoxFromPool(world, state.getX(), state.getY(), state.getZ());
+			AxisAlignedBB aabb = state.getBlock().getCollisionBoundingBox(world, state.getPos(), state.getBlockState());
 			if (aabb != null)
 				aabbs = new AxisAlignedBB[] { aabb.offset(-state.getX(), -state.getY(), -state.getZ()) };
 		}
@@ -365,5 +347,4 @@ public class AABBUtils
 
 		return aabbs;
 	}
-
 }

@@ -32,10 +32,11 @@ import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBoundingBox;
 import net.minecraft.block.Block;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * RayTrace class that offers more control to handle raytracing.
@@ -49,12 +50,8 @@ public class RaytraceBlock
 	private static RaytraceBlock instance = new RaytraceBlock();
 	/** World reference **/
 	private WeakReference<World> world;
-	/** X coordinate of the block being ray traced. */
-	private int x;
-	/** Y coordinate of the block being ray traced. */
-	private int y;
-	/** Z coordinate of the block being ray traced. */
-	private int z;
+	/** Postion of the block being ray traced **/
+	private BlockPos pos;
 	/** Block being ray traced. */
 	private Block block;
 	/** Source of the ray trace. */
@@ -80,15 +77,13 @@ public class RaytraceBlock
 	 * @param y the y
 	 * @param z the z
 	 */
-	private void _set(World world, Ray ray, int x, int y, int z)
+	private void _set(World world, Ray ray, BlockPos pos)
 	{
 		this.world = new WeakReference<World>(world);
 		this.src = ray.origin;
 		this.ray = ray;
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.block = world().getBlock(x, y, z);
+		this.pos = pos;
+		this.block = world().getBlockState(pos).getBlock();
 	}
 
 	/**
@@ -100,9 +95,9 @@ public class RaytraceBlock
 	 * @param z the z coordinate of the block
 	 * @return the {@link RaytraceBlock} instance
 	 */
-	public static RaytraceBlock set(World world, Ray ray, int x, int y, int z)
+	public static RaytraceBlock set(World world, Ray ray, BlockPos pos)
 	{
-		instance._set(world, ray, x, y, z);
+		instance._set(world, ray, pos);
 		return instance;
 	}
 
@@ -116,9 +111,9 @@ public class RaytraceBlock
 	 * @param z the z coordinate of the block
 	 * @return the {@link RaytraceBlock} instance
 	 */
-	public static RaytraceBlock set(World world, Point src, Vector v, int x, int y, int z)
+	public static RaytraceBlock set(World world, Point src, Vector v, BlockPos pos)
 	{
-		instance._set(world, new Ray(src, v), x, y, z);
+		instance._set(world, new Ray(src, v), pos);
 		return instance;
 	}
 
@@ -132,10 +127,10 @@ public class RaytraceBlock
 	 * @param z the z coordinate of the block
 	 * @return the {@link RaytraceBlock} instance
 	 */
-	public static RaytraceBlock set(World world, Point src, Point dest, int x, int y, int z)
+	public static RaytraceBlock set(World world, Point src, Point dest, BlockPos pos)
 	{
 		instance.dest = dest;
-		instance._set(world, new Ray(src, new Vector(src, dest)), x, y, z);
+		instance._set(world, new Ray(src, new Vector(src, dest)), pos);
 		return instance;
 	}
 
@@ -149,10 +144,10 @@ public class RaytraceBlock
 	 * @param z the z coordinate of the block
 	 * @return the {@link RaytraceBlock} instance
 	 */
-	public static RaytraceBlock set(World world, Vec3 src, Vec3 dest, int x, int y, int z)
+	public static RaytraceBlock set(World world, Vec3 src, Vec3 dest, BlockPos pos)
 	{
 		instance.dest = new Point(dest);
-		instance._set(world, new Ray(src, dest), x, y, z);
+		instance._set(world, new Ray(src, dest), pos);
 		return instance;
 	}
 
@@ -192,11 +187,11 @@ public class RaytraceBlock
 		points.clear();
 
 		if (!(block instanceof IBoundingBox))
-			return block.collisionRayTrace(world(), x, y, z, ray.origin.toVec3(), dest.toVec3());
+			return block.collisionRayTrace(world(), pos, ray.origin.toVec3(), dest.toVec3());
 
 		//
 		IBoundingBox block = (IBoundingBox) this.block;
-		AxisAlignedBB[] aabbs = block.getBoundingBox(world(), x, y, z, BoundingBoxType.RAYTRACE);
+		AxisAlignedBB[] aabbs = block.getBoundingBox(world(), pos, BoundingBoxType.RAYTRACE);
 
 		double maxDist = Point.distanceSquared(src, dest);
 		for (AxisAlignedBB aabb : aabbs)
@@ -204,7 +199,7 @@ public class RaytraceBlock
 			if (aabb == null)
 				continue;
 
-			aabb.offset(x, y, z);
+			AABBUtils.offset(pos, aabb);
 			for (Point p : ray.intersect(aabb))
 			{
 				if (Point.distanceSquared(src, p) < maxDist)
@@ -216,9 +211,9 @@ public class RaytraceBlock
 			return null;
 
 		Point closest = getClosest(points);
-		ForgeDirection side = getSide(aabbs, closest);
+		EnumFacing side = getSide(aabbs, closest);
 
-		return new MovingObjectPosition(x, y, z, side.ordinal(), closest.toVec3());
+		return new MovingObjectPosition(closest.toVec3(), side, pos);
 	}
 
 	/**
@@ -244,7 +239,7 @@ public class RaytraceBlock
 		return ret;
 	}
 
-	private ForgeDirection getSide(AxisAlignedBB[] aabbs, Point point)
+	private EnumFacing getSide(AxisAlignedBB[] aabbs, Point point)
 	{
 		for (AxisAlignedBB aabb : aabbs)
 		{
@@ -252,18 +247,18 @@ public class RaytraceBlock
 				continue;
 
 			if (point.x == aabb.minX)
-				return ForgeDirection.WEST;
+				return EnumFacing.WEST;
 			if (point.x == aabb.maxX)
-				return ForgeDirection.EAST;
+				return EnumFacing.EAST;
 			if (point.y == aabb.minY)
-				return ForgeDirection.DOWN;
+				return EnumFacing.DOWN;
 			if (point.y == aabb.maxY)
-				return ForgeDirection.UP;
+				return EnumFacing.UP;
 			if (point.z == aabb.minZ)
-				return ForgeDirection.NORTH;
+				return EnumFacing.NORTH;
 			if (point.z == aabb.maxZ)
-				return ForgeDirection.SOUTH;
+				return EnumFacing.SOUTH;
 		}
-		return ForgeDirection.UNKNOWN;
+		return null;
 	}
 }

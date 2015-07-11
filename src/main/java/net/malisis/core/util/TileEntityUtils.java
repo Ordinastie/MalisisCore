@@ -27,9 +27,10 @@ package net.malisis.core.util;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.MalisisGui;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Utility class for {@link TileEntity}.
@@ -59,12 +60,12 @@ public class TileEntityUtils
 	 * @param z the z
 	 * @return the tile entity at the coordinates, or null if no tile entity, or not of type T
 	 */
-	public static <T> T getTileEntity(Class<T> clazz, IBlockAccess world, int x, int y, int z)
+	public static <T> T getTileEntity(Class<T> clazz, IBlockAccess world, BlockPos pos)
 	{
 		if (world == null)
 			return null;
 
-		TileEntity te = world.getTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(pos);
 		if (te == null)
 			return null;
 
@@ -74,8 +75,8 @@ public class TileEntityUtils
 		}
 		catch (ClassCastException e)
 		{
-			MalisisCore.log.error("Tried to get {} at {},{},{}, but found {} instead.", clazz.getSimpleName(), x, y, z, te.getClass()
-					.getSimpleName());
+			MalisisCore.log.error("Tried to get {} at {},{},{}, but found {} instead.", clazz.getSimpleName(), pos.getX(), pos.getY(),
+					pos.getZ(), te.getClass().getSimpleName());
 			return null;
 		}
 	}
