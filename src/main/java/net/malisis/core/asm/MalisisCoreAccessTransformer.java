@@ -26,7 +26,7 @@ package net.malisis.core.asm;
 
 import java.io.IOException;
 
-import cpw.mods.fml.common.asm.transformers.AccessTransformer;
+import net.minecraftforge.fml.common.asm.transformers.AccessTransformer;
 
 /**
  * @author Ordinastie

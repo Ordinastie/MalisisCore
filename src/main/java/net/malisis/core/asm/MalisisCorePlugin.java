@@ -31,13 +31,12 @@ import java.util.Map;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.util.chunkblock.ChunkBlockTransformer;
 import net.malisis.core.util.chunkcollision.ChunkCollisionTransformer;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
 import org.apache.logging.log4j.LogManager;
 
 import com.google.common.base.Throwables;
-
-import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
-import cpw.mods.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
 @TransformerExclusions({ "net.malisis.core.asm." })
 @IFMLLoadingPlugin.SortingIndex(1001)
