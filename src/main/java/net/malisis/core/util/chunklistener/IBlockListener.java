@@ -24,9 +24,9 @@
 
 package net.malisis.core.util.chunklistener;
 
-import net.malisis.core.util.BlockPos;
-import net.malisis.core.util.BlockState;
+import net.malisis.core.util.MBlockState;
 import net.malisis.core.util.chunkblock.IChunkBlock;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 /**
@@ -35,7 +35,7 @@ import net.minecraft.world.World;
  */
 public interface IBlockListener extends IChunkBlock
 {
-	public boolean onBlockSet(World world, BlockPos pos, BlockState blockSet);
+	public boolean onBlockSet(World world, BlockPos pos, MBlockState blockSet);
 
 	public boolean onBlockRemoved(World world, BlockPos pos, BlockPos blockRemoved);
 }
