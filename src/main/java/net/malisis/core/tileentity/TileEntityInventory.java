@@ -33,7 +33,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 public abstract class TileEntityInventory extends TileEntity implements IInventoryProvider, IInventory
 {
@@ -51,7 +51,7 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 	}
 
 	@Override
-	public MalisisInventory[] getInventories(ForgeDirection side, Object... data)
+	public MalisisInventory[] getInventories(EnumFacing side, Object... data)
 	{
 		return getInventories(data);
 	}
@@ -100,13 +100,13 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 	}
 
 	@Override
-	public String getInventoryName()
+	public String getCommandSenderName()
 	{
 		return null;
 	}
 
 	@Override
-	public boolean isCustomInventoryName()
+	public boolean hasCustomName()
 	{
 		return false;
 	}
@@ -124,16 +124,9 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 	}
 
 	@Override
-	public void openChest()
-	{}
-
-	@Override
-	public void closeChest()
-	{}
-
-	@Override
-	public boolean isItemValidForSlot(int slotNumber, ItemStack itemStack) {
-        MalisisSlot slot = inventory.getSlot(slotNumber);
-        return slot != null && slot.isItemValid(itemStack);
-    }
+	public boolean isItemValidForSlot(int slotNumber, ItemStack itemStack)
+	{
+		MalisisSlot slot = inventory.getSlot(slotNumber);
+		return slot != null && slot.isItemValid(itemStack);
+	}
 }

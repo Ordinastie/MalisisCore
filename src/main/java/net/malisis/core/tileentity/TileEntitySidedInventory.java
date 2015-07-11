@@ -27,6 +27,7 @@ package net.malisis.core.tileentity;
 import java.util.HashMap;
 
 import net.malisis.core.inventory.IInventoryProvider;
+import net.malisis.core.inventory.InventoryState;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisSlot;
 import net.malisis.core.util.ItemUtils;
@@ -35,22 +36,22 @@ import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 public abstract class TileEntitySidedInventory extends TileEntity implements IInventoryProvider, ISidedInventory
 {
-	protected HashMap<ForgeDirection, MalisisInventory> inventories = new HashMap<>();
-	protected HashMap<Integer, ForgeDirection> ranges = new HashMap<>();
+	protected HashMap<EnumFacing, MalisisInventory> inventories = new HashMap<>();
+	protected HashMap<Integer, EnumFacing> ranges = new HashMap<>();
 	protected int totalSize = 0;
 
 	public TileEntitySidedInventory()
 	{}
 
-	protected void addSidedInventory(MalisisInventory inventory, ForgeDirection... sides)
+	protected void addSidedInventory(MalisisInventory inventory, EnumFacing... sides)
 	{
 		int size = inventory.getSizeInventory();
 		totalSize += size;
-		for (ForgeDirection side : sides)
+		for (EnumFacing side : sides)
 		{
 			if (inventories.get(side) == null)
 			{
@@ -67,7 +68,7 @@ public abstract class TileEntitySidedInventory extends TileEntity implements IIn
 
 	public MalisisInventory getInventory(int slotNumber)
 	{
-		return inventories.get(ForgeDirection.getOrientation(slotNumber & 7));
+		return inventories.get(EnumFacing.getFront(slotNumber & 7));
 	}
 
 	@Override
@@ -77,7 +78,7 @@ public abstract class TileEntitySidedInventory extends TileEntity implements IIn
 	}
 
 	@Override
-	public MalisisInventory[] getInventories(ForgeDirection side, Object... data)
+	public MalisisInventory[] getInventories(EnumFacing side, Object... data)
 	{
 		return new MalisisInventory[] { inventories.get(side) };
 	}
@@ -126,13 +127,13 @@ public abstract class TileEntitySidedInventory extends TileEntity implements IIn
 	}
 
 	@Override
-	public String getInventoryName()
+	public String getCommandSenderName()
 	{
 		return null;
 	}
 
 	@Override
-	public boolean isCustomInventoryName()
+	public boolean hasCustomName()
 	{
 		return false;
 	}
@@ -150,43 +151,39 @@ public abstract class TileEntitySidedInventory extends TileEntity implements IIn
 	}
 
 	@Override
-	public void openChest()
-	{}
-
-	@Override
-	public void closeChest()
-	{}
-
-	@Override
-	public boolean isItemValidForSlot(int slotNumber, ItemStack itemStack) {
-        MalisisSlot slot = getInventory(slotNumber).getSlot(convertSlotNumber(slotNumber));
-        return slot != null && slot.isItemValid(itemStack);
-    }
-
-	@Override
-	public int[] getSlotsForFace(int side)
+	public boolean isItemValidForSlot(int slotNumber, ItemStack itemStack)
 	{
-		MalisisInventory inventory = inventories.get(ForgeDirection.getOrientation(side));
+		MalisisSlot slot = getInventory(slotNumber).getSlot(convertSlotNumber(slotNumber));
+		return slot != null && slot.isItemValid(itemStack);
+	}
+
+	@Override
+	public int[] getSlotsForFace(EnumFacing side)
+	{
+		MalisisInventory inventory = inventories.get(side);
 		if (inventory == null)
 			return new int[0];
 
 		int[] a = new int[inventory.getSizeInventory()];
 		for (int i = 0; i < inventory.getSizeInventory(); i++)
-			a[i] = (i << 3) | side;
+			a[i] = (i << 3) | side.getIndex();
 
 		return a;
 	}
 
 	@Override
-	public boolean canInsertItem(int slotNumber, ItemStack itemStack, int side) {
-        MalisisInventory inventory = inventories.get(ForgeDirection.getOrientation(side));
-        return inventory != null && inventory.isItemValidForSlot(convertSlotNumber(slotNumber), itemStack);
+	public boolean canInsertItem(int slotNumber, ItemStack itemStack, EnumFacing side)
+	{
+		MalisisInventory inventory = inventories.get(side);
+		return inventory != null && inventory.state.is(InventoryState.AUTO_INSERT)
+				&& inventory.isItemValidForSlot(convertSlotNumber(slotNumber), itemStack);
 
-    }
+	}
 
 	@Override
-	public boolean canExtractItem(int slotNumber, ItemStack itemStack, int side)
+	public boolean canExtractItem(int slotNumber, ItemStack itemStack, EnumFacing side)
 	{
-		return true;
+		MalisisInventory inventory = inventories.get(side);
+		return inventory != null && inventory.state.is(InventoryState.AUTO_EXTRACT);
 	}
 }
