@@ -32,16 +32,15 @@ import net.malisis.core.inventory.message.OpenInventoryMessage;
 import net.malisis.core.util.EntityUtils;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.fml.common.discovery.ASMDataTable;
+import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Ordering;
-
-import cpw.mods.fml.common.discovery.ASMDataTable;
-import cpw.mods.fml.common.discovery.ASMDataTable.ASMData;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import cpw.mods.fml.relauncher.Side;
 
 /**
  * {@link MalisisNetwork} is a wrapper around {@link SimpleNetworkWrapper} in order to ease the handling of discriminators.<br>
