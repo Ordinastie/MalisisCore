@@ -30,12 +30,13 @@ import java.util.Set;
 
 import net.malisis.core.configuration.Settings;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 
-// TODO: Auto-generated Javadoc
 /**
  * Commands handler for {@link MalisisCore} mod.
  *
@@ -86,13 +87,13 @@ public class MalisisCommand extends CommandBase
 	 * @param params the params
 	 */
 	@Override
-	public void processCommand(ICommandSender sender, String[] params)
+	public void processCommand(ICommandSender sender, String[] params) throws CommandException
 	{
 		if (params.length == 0)
-			throw new WrongUsageException("malisiscore.commands.usage", new Object[0]);
+			throw new WrongUsageException("malisiscore.commands.usage");
 
 		if (!parameters.contains(params[0]))
-			throw new WrongUsageException("malisiscore.commands.usage", new Object[0]);
+			throw new WrongUsageException("malisiscore.commands.usage");
 
 		switch (params[0])
 		{
@@ -131,12 +132,12 @@ public class MalisisCommand extends CommandBase
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender icommandsender, String[] params)
+	public List addTabCompletionOptions(ICommandSender icommandsender, String[] params, BlockPos pos)
 	{
 		if (params.length == 1)
-			return getListOfStringsFromIterableMatchingLastWord(params, parameters);
+			return getListOfStringsMatchingLastWord(params, parameters);
 		else if (params.length == 2)
-			return getListOfStringsFromIterableMatchingLastWord(params, MalisisCore.listModId());
+			return getListOfStringsMatchingLastWord(params, MalisisCore.listModId());
 		else
 			return null;
 	}
