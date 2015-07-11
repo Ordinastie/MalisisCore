@@ -25,7 +25,7 @@
 package net.malisis.core.event;
 
 import net.minecraftforge.common.MinecraftForge;
-import cpw.mods.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 public abstract class MCEvent extends Event
 {
