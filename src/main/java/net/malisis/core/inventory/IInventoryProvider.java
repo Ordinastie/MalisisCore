@@ -25,9 +25,9 @@
 package net.malisis.core.inventory;
 
 import net.malisis.core.client.gui.MalisisGui;
-import net.minecraftforge.common.util.ForgeDirection;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public interface IInventoryProvider
 {
@@ -46,7 +46,7 @@ public interface IInventoryProvider
 	 * @param data null for TileEntity, ItemStack for Item
 	 * @return the inventories
 	 */
-	public MalisisInventory[] getInventories(ForgeDirection side, Object... data);
+	public MalisisInventory[] getInventories(EnumFacing side, Object... data);
 
 	/**
 	 * Gets the {@link MalisisGui} associated with the {@link MalisisInventory}.

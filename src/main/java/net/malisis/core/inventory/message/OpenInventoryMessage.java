@@ -32,16 +32,17 @@ import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.network.MalisisMessage;
 import net.malisis.core.util.TileEntityUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Message to tell the client to open a GUI.
@@ -73,7 +74,7 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 	public IMessage onMessage(Packet message, MessageContext ctx)
 	{
 		if (ctx.side == Side.CLIENT)
-			openGui(message.type, message.x, message.y, message.z, message.windowId);
+			openGui(message.type, message.pos, message.windowId);
 		return null;
 	}
 
@@ -87,13 +88,13 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 	 * @param windowId the window id
 	 */
 	@SideOnly(Side.CLIENT)
-	private void openGui(ContainerType type, int x, int y, int z, int windowId)
+	private void openGui(ContainerType type, BlockPos pos, int windowId)
 	{
-		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+		EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
 		IInventoryProvider inventoryProvider = null;
 		Object data = null;
 		if (type == ContainerType.TYPE_TILEENTITY)
-			inventoryProvider = TileEntityUtils.getTileEntity(IInventoryProvider.class, Minecraft.getMinecraft().theWorld, x, y, z);
+			inventoryProvider = TileEntityUtils.getTileEntity(IInventoryProvider.class, Minecraft.getMinecraft().theWorld, pos);
 		else if (type == ContainerType.TYPE_ITEM)
 		{
 			ItemStack itemStack = player.getCurrentEquippedItem();
@@ -125,7 +126,7 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 	public static class Packet implements IMessage
 	{
 		private ContainerType type;
-		private int x, y, z;
+		private BlockPos pos;
 		private int windowId;
 
 		public Packet()
@@ -137,9 +138,7 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 			if (container instanceof TileEntity)
 			{
 				this.type = ContainerType.TYPE_TILEENTITY;
-				this.x = ((TileEntity) container).xCoord;
-				this.y = ((TileEntity) container).yCoord;
-				this.z = ((TileEntity) container).zCoord;
+				this.pos = ((TileEntity) container).getPos();
 			}
 			if (container instanceof Item)
 				this.type = ContainerType.TYPE_ITEM;
@@ -151,9 +150,7 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 			this.type = ContainerType.values()[buf.readByte()];
 			if (type == ContainerType.TYPE_TILEENTITY)
 			{
-				this.x = buf.readInt();
-				this.y = buf.readInt();
-				this.z = buf.readInt();
+				this.pos = new BlockPos(buf.readInt(), buf.readInt(), buf.readInt());
 			}
 			this.windowId = buf.readInt();
 		}
@@ -164,9 +161,9 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 			buf.writeByte(type.ordinal());
 			if (type == ContainerType.TYPE_TILEENTITY)
 			{
-				buf.writeInt(x);
-				buf.writeInt(y);
-				buf.writeInt(z);
+				buf.writeInt(pos.getX());
+				buf.writeInt(pos.getY());
+				buf.writeInt(pos.getZ());
 			}
 			buf.writeInt(windowId);
 		}

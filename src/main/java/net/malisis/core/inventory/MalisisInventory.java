@@ -35,7 +35,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.inventory.message.OpenInventoryMessage;
 import net.malisis.core.inventory.player.PlayerInventory;
 import net.malisis.core.util.EntityUtils;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
@@ -43,14 +43,18 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.eventbus.EventBus;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  *
@@ -167,13 +171,13 @@ public class MalisisInventory implements IInventory
 		if (itemStackProvider == null)
 			return;
 
-		NBTTagCompound tag = itemStackProvider.stackTagCompound;
+		NBTTagCompound tag = itemStackProvider.getTagCompound();
 		if (tag == null)
 		{
 			tag = new NBTTagCompound();
-			itemStackProvider.stackTagCompound = tag;
+			itemStackProvider.setTagCompound(tag);
 		}
-		itemStackProvider.stackTagCompound.setInteger("inventoryId", id);
+		itemStackProvider.getTagCompound().setInteger("inventoryId", id);
 	}
 
 	/**
@@ -203,7 +207,7 @@ public class MalisisInventory implements IInventory
 	 * @return the inventory name
 	 */
 	@Override
-	public String getInventoryName()
+	public String getCommandSenderName()
 	{
 		return name;
 	}
@@ -214,9 +218,21 @@ public class MalisisInventory implements IInventory
 	 * @return true, if successful
 	 */
 	@Override
-	public boolean isCustomInventoryName()
+	public boolean hasCustomName()
 	{
-		return name != null;
+		return !StringUtils.isEmpty(name);
+	}
+
+	/**
+	 * Gets the display name of this Inventory.
+	 *
+	 * @return the display name
+	 */
+	@Override
+	public IChatComponent getDisplayName()
+	{
+		return this.hasCustomName() ? new ChatComponentText(this.getCommandSenderName()) : new ChatComponentTranslation(
+				this.getCommandSenderName());
 	}
 
 	/**
@@ -396,8 +412,8 @@ public class MalisisInventory implements IInventory
 	public void removeOpenedContainer(MalisisInventoryContainer container)
 	{
 		containers.remove(container);
-		if (containers.size() == 0 && itemStackProvider != null && itemStackProvider.stackTagCompound != null)
-			itemStackProvider.stackTagCompound.removeTag("inventoryId");
+		if (containers.size() == 0 && itemStackProvider != null && itemStackProvider.getTagCompound() != null)
+			itemStackProvider.getTagCompound().removeTag("inventoryId");
 	}
 
 	/**
@@ -448,13 +464,6 @@ public class MalisisInventory implements IInventory
 
 		bus.post(new InventoryEvent.SlotChanged(this, slot));
 	}
-
-	/**
-	 * Called when this {@link MalisisInventory} is opened.
-	 */
-	@Override
-	public void openChest()
-	{}
 
 	/**
 	 * Gets the first {@link MalisisSlot} containing an {@link ItemStack}.
@@ -657,7 +666,6 @@ public class MalisisInventory implements IInventory
 			for (MalisisInventory inv : inventories)
 			{
 				c.addInventory(inv);
-				inv.openChest();
 				inv.bus.post(new InventoryEvent.Open(c, inv));
 			}
 
@@ -677,7 +685,7 @@ public class MalisisInventory implements IInventory
 	 * @return the malisis inventory container
 	 */
 	@SideOnly(Side.CLIENT)
-	public static MalisisInventoryContainer open(EntityClientPlayerMP player, IInventoryProvider inventoryProvider, int windowId, Object... data)
+	public static MalisisInventoryContainer open(EntityPlayerSP player, IInventoryProvider inventoryProvider, int windowId, Object... data)
 	{
 		if (inventoryProvider == null)
 			return null;
@@ -688,7 +696,6 @@ public class MalisisInventory implements IInventory
 			for (MalisisInventory inv : inventories)
 			{
 				c.addInventory(inv);
-				inv.openChest();
 				inv.bus.post(new InventoryEvent.Open(c, inv));
 			}
 
@@ -715,13 +722,6 @@ public class MalisisInventory implements IInventory
 	{
 		return true;
 	}
-
-	/**
-	 * Unused.
-	 */
-	@Override
-	public void closeChest()
-	{}
 
 	/**
 	 * Unused.
@@ -780,6 +780,34 @@ public class MalisisInventory implements IInventory
 	{
 		setItemStack(slotNumber, itemStack);
 	}
+
+	@Override
+	public void openInventory(EntityPlayer player)
+	{}
+
+	@Override
+	public void closeInventory(EntityPlayer player)
+	{}
+
+	@Override
+	public int getField(int id)
+	{
+		return 0;
+	}
+
+	@Override
+	public void setField(int id, int value)
+	{}
+
+	@Override
+	public int getFieldCount()
+	{
+		return 0;
+	}
+
+	@Override
+	public void clear()
+	{}
 
 	// #end Unused
 }
