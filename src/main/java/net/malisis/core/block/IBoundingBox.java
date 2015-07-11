@@ -26,6 +26,7 @@ package net.malisis.core.block;
 
 import net.malisis.core.util.RaytraceBlock;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
 /**
@@ -42,11 +43,9 @@ public interface IBoundingBox
 	 * Gets the {@link AxisAlignedBB} for this {@link IBoundingBox}.
 	 *
 	 * @param world the world
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
+	 * @param pos the pos
 	 * @param type the type
 	 * @return the bounding box
 	 */
-	public AxisAlignedBB[] getBoundingBox(IBlockAccess world, int x, int y, int z, BoundingBoxType type);
+	public AxisAlignedBB[] getBoundingBox(IBlockAccess world, BlockPos pos, BoundingBoxType type);
 }

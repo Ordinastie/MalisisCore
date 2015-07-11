@@ -26,21 +26,22 @@ package net.malisis.core.block;
 
 import java.util.List;
 
+import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.RaytraceBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import org.apache.commons.lang3.ArrayUtils;
-
-import cpw.mods.fml.common.registry.GameRegistry;
 
 /**
  * @author Ordinastie
@@ -79,43 +80,43 @@ public class MalisisBlock extends Block implements IBoundingBox
 		GameRegistry.registerBlock(this, item, getName());
 	}
 
-	@Override
-	public void registerIcons(IIconRegister reg)
-	{
-		if (textureName == null)
-			return;
+	//	@Override
+	//	public void registerIcons(IIconRegister reg)
+	//	{
+	//		if (textureName == null)
+	//			return;
+	//
+	//		super.registerIcons(reg);
+	//	}
 
-		super.registerIcons(reg);
+	@Override
+	public AxisAlignedBB[] getBoundingBox(IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	{
+		return new AxisAlignedBB[] { new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ) };
 	}
 
 	@Override
-	public AxisAlignedBB[] getBoundingBox(IBlockAccess world, int x, int y, int z, BoundingBoxType type)
+	public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity)
 	{
-		return new AxisAlignedBB[] { AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ) };
-	}
-
-	@Override
-	public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB mask, List list, Entity entity)
-	{
-		for (AxisAlignedBB aabb : getBoundingBox(world, x, y, z, BoundingBoxType.COLLISION))
+		for (AxisAlignedBB aabb : getBoundingBox(world, pos, BoundingBoxType.COLLISION))
 		{
-			if (aabb != null && mask.intersectsWith(aabb.offset(x, y, z)))
+			if (aabb != null && mask.intersectsWith(aabb.offset(pos.getX(), pos.getY(), pos.getZ())))
 				list.add(aabb);
 		}
 	}
 
 	@Override
-	public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 src, Vec3 dest)
+	public MovingObjectPosition collisionRayTrace(World world, BlockPos pos, Vec3 src, Vec3 dest)
 	{
-		return RaytraceBlock.set(world, src, dest, x, y, z).trace();
+		return RaytraceBlock.set(world, src, dest, pos).trace();
 	}
 
 	@Override
-	public AxisAlignedBB getSelectedBoundingBoxFromPool(World world, int x, int y, int z)
+	public AxisAlignedBB getSelectedBoundingBox(World world, BlockPos pos)
 	{
-		AxisAlignedBB[] aabbs = getBoundingBox(world, x, y, z, BoundingBoxType.SELECTION);
+		AxisAlignedBB[] aabbs = getBoundingBox(world, pos, BoundingBoxType.SELECTION);
 		if (ArrayUtils.isEmpty(aabbs) || aabbs[0] == null)
-			return AxisAlignedBB.getBoundingBox(0, 0, 0, 0, 0, 0);
-		return aabbs[0].offset(x, y, z);
+			return AABBUtils.empty(pos);
+		return AABBUtils.offset(pos, aabbs)[0];
 	}
 }
