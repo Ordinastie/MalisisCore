@@ -37,13 +37,14 @@ import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
@@ -58,7 +59,7 @@ import org.lwjgl.opengl.GL12;
 public class GuiRenderer extends MalisisRenderer
 {
 	/** RenderItem used to draw itemStacks. */
-	public static RenderItem itemRenderer = new RenderItem();
+	public static RenderItem itemRenderer = Minecraft.getMinecraft().getRenderItem();
 	/** Current component being drawn. */
 	public UIComponent currentComponent;
 	/** Multiplying factor between GUI size and pixel size. */
@@ -235,7 +236,7 @@ public class GuiRenderer extends MalisisRenderer
 			return;
 
 		Face[] faces = shape.getFaces();
-		IIcon icon = parameters.icon.get();
+		MalisisIcon icon = parameters.icon.get();
 		boolean isGuiIcon = icon instanceof GuiIcon;
 
 		for (int i = 0; i < faces.length; i++)
@@ -269,21 +270,21 @@ public class GuiRenderer extends MalisisRenderer
 	 * @param s the s
 	 * @param params the params
 	 */
-	public void drawShape(GuiShape s, RenderParameters params)
+	public void drawShape(GuiShape shape, RenderParameters params)
 	{
-		if (s == null)
+		if (shape == null)
 			return;
 
-		shape = s;
-		rp = params != null ? params : new RenderParameters();
+		if (params == null)
+			params = new RenderParameters();
 
 		// move the shape at the right coord on screen
 		shape.translate(currentComponent.screenX(), currentComponent.screenY(), currentComponent.getZIndex());
 		shape.applyMatrix();
 
-		applyTexture(shape, rp);
+		applyTexture(shape, params);
 
-		for (Face face : s.getFaces())
+		for (Face face : shape.getFaces())
 			drawFace(face, face.getParameters());
 	}
 
@@ -330,9 +331,9 @@ public class GuiRenderer extends MalisisRenderer
 	{
 		if (tooltip != null)
 		{
-			t.startDrawingQuads();
+			wr.startDrawingQuads();
 			tooltip.draw(this, mouseX, mouseY, partialTick);
-			t.draw();
+			Tessellator.getInstance().draw();
 		}
 	}
 
@@ -493,12 +494,12 @@ public class GuiRenderer extends MalisisRenderer
 		if (format != null)
 			label = format + label;
 
-		t.draw();
+		Tessellator.getInstance().draw();
 		RenderHelper.enableGUIStandardItemLighting();
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 
-		itemRenderer.renderItemAndEffectIntoGUI(fontRenderer, Minecraft.getMinecraft().getTextureManager(), itemStack, x, y);
-		itemRenderer.renderItemOverlayIntoGUI(fontRenderer, Minecraft.getMinecraft().getTextureManager(), itemStack, x, y, label);
+		itemRenderer.renderItemAndEffectIntoGUI(itemStack, x, y);
+		itemRenderer.renderItemOverlayIntoGUI(fontRenderer, itemStack, x, y, label);
 
 		RenderHelper.disableStandardItemLighting();
 		GL11.glColor4f(1, 1, 1, 1);
@@ -506,7 +507,7 @@ public class GuiRenderer extends MalisisRenderer
 
 		currentTexture = null;
 		bindDefaultTexture();
-		t.startDrawingQuads();
+		wr.startDrawingQuads();
 	}
 
 	/**
@@ -520,9 +521,9 @@ public class GuiRenderer extends MalisisRenderer
 			return;
 
 		itemRenderer.zLevel = 100;
-		t.startDrawingQuads();
+		wr.startDrawingQuads();
 		drawItemStack(itemStack, mouseX - 8, mouseY - 8, null, itemStack.stackSize == 0 ? EnumChatFormatting.YELLOW : null, false);
-		t.draw();
+		Tessellator.getInstance().draw();
 		itemRenderer.zLevel = 0;
 	}
 

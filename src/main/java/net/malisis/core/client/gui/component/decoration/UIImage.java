@@ -30,10 +30,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.renderer.icon.MalisisIcon;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.ResourceLocation;
 
 /**
  * UIImage.
@@ -42,15 +39,10 @@ import net.minecraft.util.ResourceLocation;
  */
 public class UIImage extends UIComponent<UIImage>
 {
-	/** {@link ResourceLocation} for Block textures. */
-	public static final ResourceLocation BLOCKS_TEXTURE = TextureMap.locationBlocksTexture;
-	/** {@link ResourceLocation} for Item textures. */
-	public static final ResourceLocation ITEMS_TEXTURE = TextureMap.locationItemsTexture;
-
 	/** {@link GuiTexture} to use for the icon. */
 	private GuiTexture texture;
-	/** {@link IIcon} to use for the texture. */
-	private IIcon icon = null;
+	/** {@link MalisisIcon} to use for the texture. */
+	private MalisisIcon icon = null;
 	/** {@link ItemStack} to render. */
 	private ItemStack itemStack;
 
@@ -61,7 +53,7 @@ public class UIImage extends UIComponent<UIImage>
 	 * @param texture the texture
 	 * @param icon the icon
 	 */
-	public UIImage(MalisisGui gui, GuiTexture texture, IIcon icon)
+	public UIImage(MalisisGui gui, GuiTexture texture, MalisisIcon icon)
 	{
 		super(gui);
 		setIcon(texture, icon);
@@ -91,7 +83,7 @@ public class UIImage extends UIComponent<UIImage>
 	 * @param icon the icon
 	 * @return this UIImage
 	 */
-	public UIImage setIcon(IIcon icon)
+	public UIImage setIcon(MalisisIcon icon)
 	{
 		this.itemStack = null;
 		this.icon = icon != null ? icon : new MalisisIcon();
@@ -105,7 +97,7 @@ public class UIImage extends UIComponent<UIImage>
 	 * @param icon the icon
 	 * @return this UIImage
 	 */
-	public UIImage setIcon(GuiTexture texture, IIcon icon)
+	public UIImage setIcon(GuiTexture texture, MalisisIcon icon)
 	{
 		this.itemStack = null;
 		this.icon = icon != null ? icon : new MalisisIcon();
@@ -129,11 +121,11 @@ public class UIImage extends UIComponent<UIImage>
 	}
 
 	/**
-	 * Gets the {@link IIcon} for this {@link UIImage}.
+	 * Gets the {@link MalisisIcon} for this {@link UIImage}.
 	 *
 	 * @return the icon
 	 */
-	public IIcon getIcon()
+	public MalisisIcon getIcon()
 	{
 		return icon;
 	}

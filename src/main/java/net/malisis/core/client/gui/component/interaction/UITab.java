@@ -39,7 +39,7 @@ import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateC
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.minecraft.util.IIcon;
+import net.malisis.core.renderer.icon.MalisisIcon;
 
 /**
  * @author Ordinastie
@@ -380,11 +380,11 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	}
 
 	/**
-	 * Gets the {@link IIcon} to use for this {@link UITab}.
+	 * Gets the {@link MalisisIcon} to use for this {@link UITab}.
 	 *
 	 * @return the icons to render.
 	 */
-	private IIcon getIcon()
+	private MalisisIcon getIcon()
 	{
 		if (parent == null)
 			return null;

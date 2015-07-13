@@ -57,16 +57,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.InputEvent;
 
 /**
  * GuiScreenProxy
@@ -76,7 +75,6 @@ import cpw.mods.fml.common.gameevent.InputEvent;
 public abstract class MalisisGui extends GuiScreen
 {
 	public static GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.locationBlocksTexture);
-	public static GuiTexture ITEM_TEXTURE = new GuiTexture(TextureMap.locationItemsTexture);
 
 	/** Whether or not to cancel the next gui close event. */
 	public static boolean cancelClose = false;
@@ -703,7 +701,7 @@ public abstract class MalisisGui extends GuiScreen
 			return;
 
 		setResolution();
-		drawScreen(event.mouseX, event.mouseY, event.partialTicks);
+		drawScreen(0, 0, event.partialTicks);
 	}
 
 	@SubscribeEvent
@@ -853,8 +851,7 @@ public abstract class MalisisGui extends GuiScreen
 
 	public static void playSound(String name, float level)
 	{
-		Minecraft.getMinecraft().getSoundHandler()
-				.playSound(PositionedSoundRecord.createPositionedSoundRecord(new ResourceLocation(name), level));
+		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation(name), level));
 	}
 
 	public static boolean isGuiCloseKey(int keyCode)
