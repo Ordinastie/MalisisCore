@@ -33,7 +33,7 @@ import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.vector.Matrix4f;
@@ -244,12 +244,12 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	}
 
 	/**
-	 * Gets a list of {@link Vertex} with a base name containing the {@link ForgeDirection} name.
+	 * Gets a list of {@link Vertex} with a base name containing the {@link EnumFacing} name.
 	 *
 	 * @param direction the direction
 	 * @return the vertexes
 	 */
-	public List<Vertex> getVertexes(ForgeDirection direction)
+	public List<Vertex> getVertexes(EnumFacing direction)
 	{
 		return getVertexes(Face.nameFromDirection(direction));
 	}
@@ -303,12 +303,12 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	}
 
 	/**
-	 * Gets a list of {@link MergedVertex} with a base name containing the {@link ForgeDirection} name.
+	 * Gets a list of {@link MergedVertex} with a base name containing the {@link EnumFacing} name.
 	 *
 	 * @param direction the direction
 	 * @return the merged vertexes
 	 */
-	public List<MergedVertex> getMergedVertexes(ForgeDirection direction)
+	public List<MergedVertex> getMergedVertexes(EnumFacing direction)
 	{
 		return getMergedVertexes(Face.nameFromDirection(direction));
 	}
@@ -680,7 +680,7 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	 * @param factor the factor
 	 * @return the shape
 	 */
-	public Shape shrink(ForgeDirection dir, float factor)
+	public Shape shrink(EnumFacing dir, float factor)
 	{
 		Face face = getFace(Face.nameFromDirection(dir));
 		if (face == null)

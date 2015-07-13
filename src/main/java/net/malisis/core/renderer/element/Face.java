@@ -31,8 +31,7 @@ import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.util.Vector;
-import net.minecraft.util.IIcon;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 public class Face implements ITransformable.Translate, ITransformable.Rotate
 {
@@ -164,7 +163,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		return this;
 	}
 
-	public Face setTexture(IIcon icon)
+	public Face setTexture(MalisisIcon icon)
 	{
 		return setTexture(icon, params.flipU.get(), params.flipV.get(), false);
 	}
@@ -205,7 +204,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		return this;
 	}
 
-	public Face setTexture(IIcon icon, boolean flippedU, boolean flippedV, boolean interpolate)
+	public Face setTexture(MalisisIcon icon, boolean flippedU, boolean flippedV, boolean interpolate)
 	{
 		if (icon == null)
 			return this;
@@ -228,7 +227,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 			int k = i;
 			if (icon instanceof MalisisIcon)
 			{
-				k = (i + ((MalisisIcon) icon).getRotation()) % vertexes.length;
+				k = (i + icon.getRotation()) % vertexes.length;
 			}
 			uvs[k] = new float[] { interpolate(u, U, factorU, flippedU), interpolate(v, V, factorV, flippedV) };
 		}
@@ -372,7 +371,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 	 * @param offset the offset
 	 * @return the aoMatrix
 	 */
-	public int[][][] calculateAoMatrix(ForgeDirection offset)
+	public int[][][] calculateAoMatrix(EnumFacing offset)
 	{
 		int[][][] aoMatrix = new int[vertexes.length][3][3];
 
@@ -453,31 +452,31 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 	public void deductParameters(Vector[] normals)
 	{
 		Vector normal = calculateNormal(normals);
-		ForgeDirection dir = ForgeDirection.UNKNOWN;
+		EnumFacing dir = null;
 
 		if (normal.x == 0 && normal.y == 0)
 		{
 			if (normal.z == 1)
-				dir = ForgeDirection.SOUTH;
+				dir = EnumFacing.SOUTH;
 			else if (normal.z == -1)
-				dir = ForgeDirection.NORTH;
+				dir = EnumFacing.NORTH;
 		}
 		else if (normal.x == 0 && normal.z == 0)
 		{
 			if (normal.y == 1)
-				dir = ForgeDirection.UP;
+				dir = EnumFacing.UP;
 			else if (normal.y == -1)
-				dir = ForgeDirection.DOWN;
+				dir = EnumFacing.DOWN;
 		}
 		else if (normal.y == 0 && normal.z == 0)
 		{
 			if (normal.x == 1)
-				dir = ForgeDirection.EAST;
+				dir = EnumFacing.EAST;
 			else if (normal.x == -1)
-				dir = ForgeDirection.WEST;
+				dir = EnumFacing.WEST;
 		}
 
-		//if (dir != ForgeDirection.UNKNOWN)
+		//if (dir != EnumFacing.UNKNOWN)
 		{
 			params.direction.set(dir);
 			params.textureSide.set(dir);
@@ -504,16 +503,16 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 	}
 
 	/**
-	 * Gets a {@link Face} name from a {@link ForgeDirection}.
+	 * Gets a {@link Face} name from a {@link EnumFacing}.
 	 *
 	 * @param dir the dir
 	 * @return the name
 	 */
-	public static String nameFromDirection(ForgeDirection dir)
+	public static String nameFromDirection(EnumFacing dir)
 	{
-		if (dir == ForgeDirection.UP)
+		if (dir == EnumFacing.UP)
 			return "top";
-		else if (dir == ForgeDirection.DOWN)
+		else if (dir == EnumFacing.DOWN)
 			return "bottom";
 		else
 			return dir.toString();

@@ -26,7 +26,7 @@ package net.malisis.core.renderer.element;
 
 import net.malisis.core.util.Point;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector4f;
@@ -422,29 +422,29 @@ public class Vertex
 	 * @param offset the offset
 	 * @return the matrix
 	 */
-	public int[][] getAoMatrix(ForgeDirection offset)
+	public int[][] getAoMatrix(EnumFacing offset)
 	{
 		int[][] a = new int[3][3];
 
-		if (offset == ForgeDirection.WEST || offset == ForgeDirection.EAST)
+		if (offset == EnumFacing.WEST || offset == EnumFacing.EAST)
 		{
-			a[0][0] = a[1][0] = a[2][0] = offset.offsetX;
+			a[0][0] = a[1][0] = a[2][0] = offset.getFrontOffsetX();
 			a[1][1] += Math.round(y * 2 - 1); // -1 if 0, 1 if 1;
 			a[2][1] += Math.round(y * 2 - 1); // -1 if 0, 1 if 1;
 			a[0][2] += Math.round(z * 2 - 1); // -1 if 0, 1 if 1;
 			a[1][2] += Math.round(z * 2 - 1); // -1 if 0, 1 if 1;
 		}
-		else if (offset == ForgeDirection.UP || offset == ForgeDirection.DOWN)
+		else if (offset == EnumFacing.UP || offset == EnumFacing.DOWN)
 		{
-			a[0][1] = a[1][1] = a[2][1] = offset.offsetY;
+			a[0][1] = a[1][1] = a[2][1] = offset.getFrontOffsetY();
 			a[1][0] += Math.round(x * 2 - 1); // -1 if 0, 1 if 1;
 			a[2][0] += Math.round(x * 2 - 1); // -1 if 0, 1 if 1;
 			a[0][2] += Math.round(z * 2 - 1); // -1 if 0, 1 if 1;
 			a[1][2] += Math.round(z * 2 - 1); // -1 if 0, 1 if 1;
 		}
-		else if (offset == ForgeDirection.NORTH || offset == ForgeDirection.SOUTH)
+		else if (offset == EnumFacing.NORTH || offset == EnumFacing.SOUTH)
 		{
-			a[0][2] = a[1][2] = a[2][2] = offset.offsetZ;
+			a[0][2] = a[1][2] = a[2][2] = offset.getFrontOffsetZ();
 			a[1][0] += Math.round(x * 2 - 1); // -1 if 0, 1 if 1;
 			a[2][0] += Math.round(x * 2 - 1); // -1 if 0, 1 if 1;
 			a[0][1] += Math.round(y * 2 - 1); // -1 if 0, 1 if 1;
