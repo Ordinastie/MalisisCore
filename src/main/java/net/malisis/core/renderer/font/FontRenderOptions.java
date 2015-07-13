@@ -45,7 +45,7 @@ public class FontRenderOptions
 	{
 		//could reflect to get EnumChatFormatting.formattingCodeMapping instead
 		for (EnumChatFormatting ecf : EnumChatFormatting.values())
-			charFormats.put(ecf.getFormattingCode(), ecf);
+			charFormats.put(ecf.toString().charAt(1), ecf);
 
 		//build colors for ECF
 		for (int i = 0; i < 16; ++i)

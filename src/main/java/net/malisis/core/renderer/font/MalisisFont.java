@@ -52,6 +52,7 @@ import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.face.SouthFace;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
@@ -284,7 +285,7 @@ public class MalisisFont
 		if (Character.isWhitespace(cd.getChar()))
 			return;
 
-		Tessellator t = Tessellator.instance;
+		WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
 		float factor = fro.fontScale / options.fontSize * 9;
 		float w = cd.getFullWidth(options) * factor;
 		float h = cd.getFullHeight(options) * factor;
@@ -296,12 +297,12 @@ public class MalisisFont
 			offsetY += fro.fontScale;
 		}
 
-		t.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
-		t.setBrightness(Vertex.BRIGHTNESS_MAX);
-		t.addVertexWithUV(offsetX + i, offsetY, 0, cd.u(), cd.v());
-		t.addVertexWithUV(offsetX - i, offsetY + h, 0, cd.u(), cd.V());
-		t.addVertexWithUV(offsetX + w - i, offsetY + h, 0, cd.U(), cd.V());
-		t.addVertexWithUV(offsetX + w + i, offsetY, 0, cd.U(), cd.v());
+		wr.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
+		wr.setBrightness(Vertex.BRIGHTNESS_MAX);
+		wr.addVertexWithUV(offsetX + i, offsetY, 0, cd.u(), cd.v());
+		wr.addVertexWithUV(offsetX - i, offsetY + h, 0, cd.u(), cd.V());
+		wr.addVertexWithUV(offsetX + w - i, offsetY + h, 0, cd.U(), cd.V());
+		wr.addVertexWithUV(offsetX + w + i, offsetY, 0, cd.U(), cd.v());
 	}
 
 	protected void drawLines(String text, FontRenderOptions fro)
@@ -330,7 +331,7 @@ public class MalisisFont
 
 	protected void drawLineChar(CharData cd, float offsetX, float offsetY, FontRenderOptions fro)
 	{
-		Tessellator t = Tessellator.instance;
+		WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
 		float factor = fro.fontScale / options.fontSize * 9;
 		float w = cd.getFullWidth(options) * factor;
 		float h = cd.getFullHeight(options) / 9F * factor;
@@ -341,11 +342,11 @@ public class MalisisFont
 			offsetY += fro.fontScale;
 		}
 
-		t.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
-		t.addVertex(offsetX, offsetY, 0);
-		t.addVertex(offsetX, offsetY + h, 0);
-		t.addVertex(offsetX + w, offsetY + h, 0);
-		t.addVertex(offsetX + w, offsetY, 0);
+		wr.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
+		wr.addVertex(offsetX, offsetY, 0);
+		wr.addVertex(offsetX, offsetY + h, 0);
+		wr.addVertex(offsetX + w, offsetY + h, 0);
+		wr.addVertex(offsetX + w, offsetY, 0);
 	}
 
 	//#region String processing

@@ -33,11 +33,11 @@ import net.malisis.core.renderer.MalisisRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import org.apache.commons.lang3.StringUtils;
-
-import cpw.mods.fml.client.FMLClientHandler;
 
 /**
  * @author Ordinastie
@@ -152,7 +152,7 @@ public class MinecraftFont extends MalisisFont
 	@Override
 	protected void drawLineChar(CharData cd, float offsetX, float offsetY, FontRenderOptions fro)
 	{
-		Tessellator t = Tessellator.instance;
+		WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
 		float factor = fro.fontScale / options.fontSize * 9;
 		float w = cd.getFullWidth(options) * factor;
 		float h = cd.getFullHeight(options) / 9F * factor;
@@ -160,11 +160,11 @@ public class MinecraftFont extends MalisisFont
 		offsetY -= factor + h;
 		w += 1.01F * factor;
 
-		t.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
-		t.addVertex(offsetX, offsetY, 0);
-		t.addVertex(offsetX, offsetY + h, 0);
-		t.addVertex(offsetX + w, offsetY + h, 0);
-		t.addVertex(offsetX + w, offsetY, 0);
+		wr.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
+		wr.addVertex(offsetX, offsetY, 0);
+		wr.addVertex(offsetX, offsetY + h, 0);
+		wr.addVertex(offsetX + w, offsetY + h, 0);
+		wr.addVertex(offsetX + w, offsetY, 0);
 	}
 
 	@Override
