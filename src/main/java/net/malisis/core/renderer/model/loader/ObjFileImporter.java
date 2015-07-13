@@ -45,8 +45,8 @@ import net.malisis.core.renderer.model.MalisisModel;
 import net.malisis.core.util.Vector;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.ForgeDirection;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -333,7 +333,7 @@ public class ObjFileImporter implements IModelLoader
 		Face f = new Face(faceVertex);
 		f.deductParameters(faceNormals.toArray(new Vector[0]));
 		RenderParameters params = f.getParameters();
-		if (params.direction.get() == ForgeDirection.NORTH || params.direction.get() == ForgeDirection.EAST)
+		if (params.direction.get() == EnumFacing.NORTH || params.direction.get() == EnumFacing.EAST)
 			params.flipU.set(true);
 		params.renderAllFaces.set(true);
 		params.interpolateUV.set(false);
