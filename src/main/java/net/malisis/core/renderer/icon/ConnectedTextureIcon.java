@@ -24,12 +24,12 @@
 
 package net.malisis.core.renderer.icon;
 
-import static net.minecraftforge.common.util.ForgeDirection.*;
+import static net.minecraft.util.EnumFacing.*;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * Implementation that handles automatically connected textures. Two texture files are required, that will be stiched to the texture sheet.
@@ -49,12 +49,12 @@ public class ConnectedTextureIcon extends MalisisIcon
 	private static int FULL = LEFT | TOP | RIGHT | BOTTOM;
 
 	//@formatter:off
-	public static ForgeDirection[][] sides = { 	{ WEST, NORTH, EAST, SOUTH },
-												{ WEST, NORTH, EAST, SOUTH },
-												{ EAST, UP, WEST, DOWN },
-												{ WEST, UP, EAST, DOWN },
-												{ NORTH, UP, SOUTH, DOWN },
-												{ SOUTH, UP, NORTH, DOWN }};
+	public static EnumFacing[][] sides = { 	{ WEST, NORTH, EAST, SOUTH },
+											{ WEST, NORTH, EAST, SOUTH },
+											{ EAST, UP, WEST, DOWN },
+											{ WEST, UP, EAST, DOWN },
+											{ NORTH, UP, SOUTH, DOWN },
+											{ SOUTH, UP, NORTH, DOWN }};
 	//@formatter:on
 
 	private MalisisIcon[] icons = new MalisisIcon[16];
@@ -119,7 +119,7 @@ public class ConnectedTextureIcon extends MalisisIcon
 	 *
 	 * @return the full icon
 	 */
-	public IIcon getFullIcon()
+	public MalisisIcon getFullIcon()
 	{
 		return icons[FULL];
 	}
@@ -134,9 +134,9 @@ public class ConnectedTextureIcon extends MalisisIcon
 	 * @param side the side
 	 * @return the icon
 	 */
-	public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side)
+	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, int side)
 	{
-		int connections = getConnections(world, x, y, z, side);
+		int connections = getConnections(world, pos, side);
 		return icons[connections];
 	}
 
@@ -150,16 +150,13 @@ public class ConnectedTextureIcon extends MalisisIcon
 	 * @param side the side
 	 * @return the connections
 	 */
-	private int getConnections(IBlockAccess world, int x, int y, int z, int side)
+	private int getConnections(IBlockAccess world, BlockPos pos, int side)
 	{
-		Block block = world.getBlock(x, y, z);
-		ForgeDirection dir = getOrientation(side);
-
+		Block block = world.getBlockState(pos).getBlock();
 		int connection = 0;
 		for (int i = 0; i < 4; i++)
 		{
-			if (world.getBlock(x + sides[dir.ordinal()][i].offsetX, y + sides[dir.ordinal()][i].offsetY, z
-					+ sides[dir.ordinal()][i].offsetZ) == block)
+			if (world.getBlockState(pos.offset(sides[side][i])).getBlock() == block)
 				connection |= (1 << i);
 		}
 		return ~connection & 15;

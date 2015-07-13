@@ -29,7 +29,6 @@ import java.util.Set;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.util.IIcon;
 
 /**
  * Extension of {@link TextureAtlasSprite} to allow common operations like clipping and offset.<br>
@@ -93,7 +92,7 @@ public class MalisisIcon extends TextureAtlasSprite
 		maxV = V;
 	}
 
-	public MalisisIcon(IIcon icon)
+	public MalisisIcon(TextureAtlasSprite icon)
 	{
 		this(icon.getIconName(), icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV());
 	}
@@ -251,8 +250,8 @@ public class MalisisIcon extends TextureAtlasSprite
 	 */
 	public MalisisIcon clip(int offsetX, int offsetY, int width, int height)
 	{
-		this.width = width + (useAnisotropicFiltering ? 16 : 0);
-		this.height = height + (useAnisotropicFiltering ? 16 : 0);
+		this.width = width;
+		this.height = height;
 		offset(offsetX, offsetY);
 
 		return this;
@@ -270,23 +269,11 @@ public class MalisisIcon extends TextureAtlasSprite
 	 */
 	public MalisisIcon clip(float offsetXFactor, float offsetYFactor, float widthFactor, float heightFactor)
 	{
-		if (useAnisotropicFiltering)
-		{
-			width -= 16;
-			height -= 16;
-		}
-
 		int offsetX = Math.round(width * offsetXFactor);
 		int offsetY = Math.round(height * offsetYFactor);
 
 		width = Math.round(width * widthFactor);
 		height = Math.round(height * heightFactor);
-
-		if (useAnisotropicFiltering)
-		{
-			width += 16;
-			height += 16;
-		}
 
 		offset(offsetX, offsetY);
 
@@ -320,7 +307,6 @@ public class MalisisIcon extends TextureAtlasSprite
 	public void copyFrom(MalisisIcon base)
 	{
 		super.copyFrom(base);
-		this.useAnisotropicFiltering = base.useAnisotropicFiltering;
 		this.sheetWidth = base.sheetWidth;
 		this.sheetHeight = base.sheetHeight;
 		this.flippedU = base.flippedU;

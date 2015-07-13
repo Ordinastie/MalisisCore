@@ -24,14 +24,14 @@
 
 package net.malisis.core.renderer.icon;
 
-import static net.minecraftforge.common.util.ForgeDirection.*;
+import static net.minecraft.util.EnumFacing.*;
 
 import java.util.HashMap;
 
 import net.minecraft.block.Block;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * @author Ordinastie
@@ -39,17 +39,17 @@ import net.minecraftforge.common.util.ForgeDirection;
  */
 public class MegaTextureIcon extends MalisisIcon
 {
-	private static HashMap<ForgeDirection, ForgeDirection[]> searchDirs = new HashMap<>();
+	private static HashMap<EnumFacing, EnumFacing[]> searchDirs = new HashMap<>();
 	static
 	{
-		searchDirs.put(NORTH, new ForgeDirection[] { DOWN, EAST });
-		searchDirs.put(SOUTH, new ForgeDirection[] { DOWN, WEST });
-		searchDirs.put(EAST, new ForgeDirection[] { DOWN, SOUTH });
-		searchDirs.put(WEST, new ForgeDirection[] { DOWN, NORTH });
+		searchDirs.put(NORTH, new EnumFacing[] { DOWN, EAST });
+		searchDirs.put(SOUTH, new EnumFacing[] { DOWN, WEST });
+		searchDirs.put(EAST, new EnumFacing[] { DOWN, SOUTH });
+		searchDirs.put(WEST, new EnumFacing[] { DOWN, NORTH });
 	}
 
-	int baseX, baseY, baseZ;
-	int numBlocks = -1;
+	private BlockPos base;
+	private int numBlocks = -1;
 
 	public MegaTextureIcon(String name)
 	{
@@ -73,54 +73,45 @@ public class MegaTextureIcon extends MalisisIcon
 		this.numBlocks = numBlocks;
 	}
 
-	public IIcon getIcon(IBlockAccess world, Block block, int x, int y, int z, int side)
+	public MalisisIcon getIcon(IBlockAccess world, Block block, BlockPos pos, int side)
 	{
-		ForgeDirection dir = ForgeDirection.getOrientation(side);
-		getBaseBlock(world, block, x, y, z, dir);
-		return getIcon(x, y, z, dir);
+		EnumFacing dir = EnumFacing.getFront(side);
+		getBaseBlock(world, block, pos, dir);
+		return getIcon(pos, dir);
 	}
 
-	private void getBaseBlock(IBlockAccess world, Block block, int x, int y, int z, ForgeDirection side)
+	private void getBaseBlock(IBlockAccess world, Block block, BlockPos pos, EnumFacing side)
 	{
-		baseX = x;
-		baseY = y;
-		baseZ = z;
-		ForgeDirection[] dirs = searchDirs.get(side);
+		base = new BlockPos(pos);
+		EnumFacing[] dirs = searchDirs.get(side);
 		if (dirs == null)
 			return;
 
-		for (ForgeDirection dir : dirs)
+		for (EnumFacing dir : dirs)
 		{
-			while (world.getBlock(baseX, baseY, baseZ) == block)
-			{
-				baseX += dir.offsetX;
-				baseY += dir.offsetY;
-				baseZ += dir.offsetZ;
-			}
+			while (world.getBlockState(base) == block)
+				base = base.offset(dir);
+
 			//not the block anymore, go one back
 			dir = dir.getOpposite();
-			baseX += dir.offsetX;
-			baseY += dir.offsetY;
-			baseZ += dir.offsetZ;
+			base = base.offset(dir);
 		}
 	}
 
-	private IIcon getIcon(int x, int y, int z, ForgeDirection dir)
+	private MalisisIcon getIcon(BlockPos pos, EnumFacing dir)
 	{
 		if (numBlocks == -1)
 		{
 			int w = width;
-			if (useAnisotropicFiltering)
-				w -= 16;
 			numBlocks = w / 16;
 		}
 
 		int u = 0;
-		int v = ((y - baseY) % numBlocks) + 1;
+		int v = ((pos.getY() - base.getY()) % numBlocks) + 1;
 		if (dir == NORTH || dir == SOUTH)
-			u = Math.abs(x - baseX) % numBlocks;
+			u = Math.abs(pos.getX() - base.getX()) % numBlocks;
 		else
-			u = Math.abs(z - baseZ) % numBlocks;
+			u = Math.abs(pos.getZ() - base.getZ()) % numBlocks;
 
 		float factor = 1.0F / numBlocks;
 		MalisisIcon icon = new MalisisIcon();
