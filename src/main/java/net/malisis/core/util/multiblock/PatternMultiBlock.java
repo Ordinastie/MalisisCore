@@ -30,9 +30,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.malisis.core.util.BlockPos;
-import net.malisis.core.util.BlockState;
+import net.malisis.core.util.MBlockState;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
 
 /**
  * @author Ordinastie
@@ -41,7 +42,7 @@ import net.minecraft.block.Block;
 public class PatternMultiBlock extends MultiBlock
 {
 	private List<List<String>> pattern = new ArrayList<>();
-	private Map<Character, BlockState> blocks = new HashMap<>();
+	private Map<Character, MBlockState> blocks = new HashMap<>();
 
 	public PatternMultiBlock()
 	{
@@ -57,15 +58,15 @@ public class PatternMultiBlock extends MultiBlock
 
 	public PatternMultiBlock withRef(char c, Block block)
 	{
-		return withRef(c, block, 0);
+		return withRef(c, block.getDefaultState());
 	}
 
-	public PatternMultiBlock withRef(char c, Block block, int metadata)
+	public PatternMultiBlock withRef(char c, IBlockState state)
 	{
-		return withRef(c, new BlockState(block, metadata));
+		return withRef(c, new MBlockState(state));
 	}
 
-	public PatternMultiBlock withRef(char c, BlockState state)
+	public PatternMultiBlock withRef(char c, MBlockState state)
 	{
 		blocks.put(c, state);
 		buildStates();
@@ -77,7 +78,7 @@ public class PatternMultiBlock extends MultiBlock
 	{
 		states.clear();
 		BlockPos pos;
-		BlockState state;
+		MBlockState state;
 
 		for (int y = 0; y < pattern.size(); y++)
 		{
@@ -90,9 +91,10 @@ public class PatternMultiBlock extends MultiBlock
 					pos = new BlockPos(x, y, z).add(offset);
 					state = blocks.get(row.charAt(x));
 					if (state != null)
-						states.put(pos, new BlockState(pos, state));
+						states.put(pos, new MBlockState(pos, state));
 				}
 			}
 		}
 	}
+
 }

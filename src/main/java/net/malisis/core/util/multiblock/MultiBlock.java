@@ -29,23 +29,25 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.malisis.core.renderer.element.Vertex;
-import net.malisis.core.util.BlockPos;
-import net.malisis.core.util.BlockState;
-import net.minecraft.block.Block;
+import net.malisis.core.util.BlockPosUtils;
+import net.malisis.core.util.MBlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraftforge.common.util.ForgeDirection;
 
 /**
  * @author Ordinastie
  *
  */
-public abstract class MultiBlock implements Iterable<BlockState>, IBlockAccess
+public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 {
-	protected Map<BlockPos, BlockState> states = new HashMap<>();
+	protected Map<BlockPos, MBlockState> states = new HashMap<>();
 
 	protected BlockPos offset;
 	protected int rotation;
@@ -66,18 +68,18 @@ public abstract class MultiBlock implements Iterable<BlockState>, IBlockAccess
 		return getBlockState(pos) != null;
 	}
 
-	public BlockState getBlockState(BlockPos pos)
+	public MBlockState getState(BlockPos pos)
 	{
-		pos = pos.rotate(4 - rotation);
+		pos = BlockPosUtils.rotate(pos, 4 - rotation);
 		return states.get(pos);
 	}
 
 	public boolean canPlaceBlockAt(World world, BlockPos pos)
 	{
-		for (BlockState state : this)
+		for (MBlockState state : this)
 		{
 			BlockPos p = state.getPos().add(pos);
-			if (!state.getBlock().canPlaceBlockAt(world, p.getX(), p.getY(), p.getZ()))
+			if (!state.getBlock().canPlaceBlockAt(world, p))
 				return false;
 		}
 		return true;
@@ -85,7 +87,7 @@ public abstract class MultiBlock implements Iterable<BlockState>, IBlockAccess
 
 	public void placeBlocks(World world, BlockPos pos)
 	{
-		for (BlockState state : this)
+		for (MBlockState state : this)
 		{
 			state = state.rotate(rotation).offset(pos);
 			if (!state.getPos().equals(pos))
@@ -98,7 +100,7 @@ public abstract class MultiBlock implements Iterable<BlockState>, IBlockAccess
 
 	public void breakBlocks(World world, BlockPos pos)
 	{
-		for (BlockState state : this)
+		for (MBlockState state : this)
 		{
 			state = state.rotate(rotation).offset(pos);
 			if (!state.getPos().equals(pos))
@@ -111,9 +113,9 @@ public abstract class MultiBlock implements Iterable<BlockState>, IBlockAccess
 		return isComplete(world, pos, null);
 	}
 
-	public boolean isComplete(World world, BlockPos pos, BlockState newState)
+	public boolean isComplete(World world, BlockPos pos, MBlockState newState)
 	{
-		for (BlockState state : this)
+		for (MBlockState state : this)
 		{
 			state = state.offset(pos);
 			if (!state.matchesWorld(world) && (newState == null || !state.equals(newState)))
@@ -124,7 +126,7 @@ public abstract class MultiBlock implements Iterable<BlockState>, IBlockAccess
 	}
 
 	@Override
-	public Iterator<BlockState> iterator()
+	public Iterator<MBlockState> iterator()
 	{
 		return states.values().iterator();
 	}
@@ -132,57 +134,36 @@ public abstract class MultiBlock implements Iterable<BlockState>, IBlockAccess
 	protected abstract void buildStates();
 
 	@Override
-	public Block getBlock(int x, int y, int z)
+	public IBlockState getBlockState(BlockPos pos)
 	{
-		BlockState state = getBlockState(new BlockPos(x, y, z));
+		MBlockState state = getState(pos);
 		if (state == null)
-			return Blocks.air;
-		return state.getBlock();
+			return Blocks.air.getDefaultState();
+		return state.getBlockState();
 	}
 
 	@Override
-	public TileEntity getTileEntity(int x, int y, int z)
+	public TileEntity getTileEntity(BlockPos pos)
 	{
 		return null;
 	}
 
 	@Override
-	public int getLightBrightnessForSkyBlocks(int p_72802_1_, int p_72802_2_, int p_72802_3_, int p_72802_4_)
+	public int getCombinedLight(BlockPos pos, int lightValue)
 	{
 		return Vertex.BRIGHTNESS_MAX;
 	}
 
 	@Override
-	public int getBlockMetadata(int x, int y, int z)
+	public boolean isAirBlock(BlockPos pos)
 	{
-		BlockState state = getBlockState(new BlockPos(x, y, z));
-		if (state == null)
-			return 0;
-		return state.getMetadata();
+		return getState(pos).getBlock() == Blocks.air;
 	}
 
 	@Override
-	public int isBlockProvidingPowerTo(int x, int y, int z, int directionIn)
-	{
-		return 0;
-	}
-
-	@Override
-	public boolean isAirBlock(int x, int y, int z)
-	{
-		return getBlock(x, y, z).isAir(this, x, y, z);
-	}
-
-	@Override
-	public BiomeGenBase getBiomeGenForCoords(int x, int z)
+	public BiomeGenBase getBiomeGenForCoords(BlockPos pos)
 	{
 		return null;
-	}
-
-	@Override
-	public int getHeight()
-	{
-		return 0;
 	}
 
 	@Override
@@ -192,8 +173,20 @@ public abstract class MultiBlock implements Iterable<BlockState>, IBlockAccess
 	}
 
 	@Override
-	public boolean isSideSolid(int x, int y, int z, ForgeDirection side, boolean _default)
+	public boolean isSideSolid(BlockPos pos, EnumFacing side, boolean _default)
 	{
-		return getBlock(x, y, z).isSideSolid(this, x, y, z, side);
+		return getBlockState(pos).getBlock().isSideSolid(this, pos, side);
+	}
+
+	@Override
+	public int getStrongPower(BlockPos pos, EnumFacing direction)
+	{
+		return 0;
+	}
+
+	@Override
+	public WorldType getWorldType()
+	{
+		return null;
 	}
 }
