@@ -25,17 +25,12 @@
 package net.malisis.core.util.bbcode;
 
 import static net.malisis.core.util.parser.token.Token.*;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import net.malisis.core.util.bbcode.node.BBColorNode;
 import net.malisis.core.util.bbcode.node.BBItemNode;
 import net.malisis.core.util.bbcode.node.BBNode;
 import net.malisis.core.util.bbcode.node.BBStyleNode;
 import net.malisis.core.util.bbcode.node.BBTextNode;
 import net.malisis.core.util.parser.Parser;
-import net.minecraft.util.EnumChatFormatting;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.Mutable;
@@ -52,13 +47,6 @@ public class BBCodeParser extends Parser<BBNode>
 	private BBNode node = null;
 	private BBTextNode textNode = new BBTextNode("");
 	private int charIndex;
-
-	/** Map of EnumChatFormatting **/
-	public static Map<Character, EnumChatFormatting> charFormats = new HashMap<>();
-	{
-		for (EnumChatFormatting ecf : EnumChatFormatting.values())
-			charFormats.put(ecf.getFormattingCode(), ecf);
-	}
 
 	public BBCodeParser(BBString bbText)
 	{
