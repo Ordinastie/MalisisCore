@@ -33,13 +33,11 @@ public enum RenderType
 	/** Defines a not set render type (currently not in rendering loop). */
 	UNSET,
 	/** Defines rendering for world. */
-	ISBRH_WORLD,
-	/** Defines rendering for inventory with ISBRH. */
-	ISBRH_INVENTORY,
+	BLOCK,
 	/** Defines rendering for inventory with IItemRenderer. */
-	ITEM_INVENTORY,
+	ITEM,
 	/** Defines rendering for TESR. */
-	TESR_WORLD,
+	TILE_ENTITY,
 	/** Defines rendering for IRWL. */
 	WORLD_LAST,
 	/** Defines rendering inside a GUI */

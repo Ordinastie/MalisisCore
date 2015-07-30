@@ -22,29 +22,61 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.element.face;
+package net.malisis.core.renderer.icon.provider;
 
-import static net.minecraft.util.EnumFacing.*;
 import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.vertex.TopNorthEast;
-import net.malisis.core.renderer.element.vertex.TopNorthWest;
-import net.malisis.core.renderer.element.vertex.TopSouthEast;
-import net.malisis.core.renderer.element.vertex.TopSouthWest;
+import net.malisis.core.renderer.icon.MalisisIcon;
+import net.minecraft.client.renderer.texture.TextureMap;
 
 /**
  * @author Ordinastie
  *
  */
-public class TopFace extends Face
+public class DefaultIconProvider implements IIconProvider
 {
-	public TopFace()
-	{
-		super(new TopNorthWest(), new TopSouthWest(), new TopSouthEast(), new TopNorthEast());
+	protected String name;
+	protected MalisisIcon icon;
 
-		params.direction.set(UP);
-		params.textureSide.set(UP);
-		params.colorFactor.set(1.0F);
-		params.aoMatrix.set(calculateAoMatrix(UP));
-		setStandardUV();
+	public DefaultIconProvider(String name)
+	{
+		setIcon(name);
 	}
+
+	public DefaultIconProvider(MalisisIcon icon)
+	{
+		setIcon(icon);
+	}
+
+	public void setIcon(String name)
+	{
+		this.name = name;
+		icon = MalisisIcon.get(name);
+	}
+
+	public void setIcon(MalisisIcon icon)
+	{
+		this.icon = icon;
+	}
+
+	@Override
+	public void registerIcons(TextureMap map)
+	{
+		if (name == null)
+			return;
+
+		icon = new MalisisIcon(name).register(map);
+	}
+
+	@Override
+	public MalisisIcon getIcon(Face face)
+	{
+		return icon;
+	}
+
+	@Override
+	public MalisisIcon getParticleIcon()
+	{
+		return icon;
+	}
+
 }

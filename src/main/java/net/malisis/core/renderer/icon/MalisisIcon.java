@@ -24,9 +24,13 @@
 
 package net.malisis.core.renderer.icon;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.malisis.core.asm.AsmUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 
@@ -39,32 +43,27 @@ import net.minecraft.client.renderer.texture.TextureMap;
  */
 public class MalisisIcon extends TextureAtlasSprite
 {
-	/**
-	 * Width of the global texture sheet.
-	 */
+	/** The private field for registered sprites. */
+	private static Field mapRegisteredSprites = AsmUtils.changeFieldAccess(TextureMap.class, "mapRegisteredSprites", "field_110574_e");
+
+	/** Width of the global texture sheet. */
 	protected int sheetWidth;
-	/**
-	 * Height of the global texture sheet.
-	 */
+	/** Height of the global texture sheet. */
 	protected int sheetHeight;
 
-	/**
-	 * Is the icon flipped on the horizontal axis.
-	 */
+	/** Is the icon flipped on the horizontal axis. */
 	protected boolean flippedU = false;
-	/**
-	 * Is the icon flipped on the vertical axis.
-	 */
+	/** Is the icon flipped on the vertical axis. */
 	protected boolean flippedV = false;
-	/**
-	 * Rotation value (clockwise)
-	 */
+	/** Rotation value (clockwise). */
 	protected int rotation = 0;
-	/**
-	 * Lists of MalisisIcon depending on this one.
-	 */
+
+	/** Lists of MalisisIcon depending on this one. */
 	protected Set<MalisisIcon> dependants = new HashSet<>();
 
+	/**
+	 * Instantiates a new {@link MalisisIcon}.
+	 */
 	public MalisisIcon()
 	{
 		super("");
@@ -72,17 +71,36 @@ public class MalisisIcon extends TextureAtlasSprite
 		maxV = 1;
 	}
 
+	/**
+	 * Instantiates a new {@link MalisisIcon}.
+	 *
+	 * @param name the name
+	 */
 	public MalisisIcon(String name)
 	{
 		super(name);
 	}
 
+	/**
+	 * Instantiates a new {@link MalisisIcon}.
+	 *
+	 * @param baseIcon the base icon
+	 */
 	public MalisisIcon(MalisisIcon baseIcon)
 	{
 		super(baseIcon.getIconName());
 		baseIcon.addDependant(this);
 	}
 
+	/**
+	 * Instantiates a new {@link MalisisIcon}.
+	 *
+	 * @param name the name
+	 * @param u the u
+	 * @param v the v
+	 * @param U the u
+	 * @param V the v
+	 */
 	public MalisisIcon(String name, float u, float v, float U, float V)
 	{
 		this(name);
@@ -94,7 +112,8 @@ public class MalisisIcon extends TextureAtlasSprite
 
 	public MalisisIcon(TextureAtlasSprite icon)
 	{
-		this(icon.getIconName(), icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV());
+		this(icon.getIconName());
+		copyFrom(icon);
 	}
 
 	/**
@@ -121,6 +140,14 @@ public class MalisisIcon extends TextureAtlasSprite
 		this.height = height;
 	}
 
+	/**
+	 * Sets the u vs.
+	 *
+	 * @param u the u
+	 * @param v the v
+	 * @param U the u
+	 * @param V the v
+	 */
 	public void setUVs(float u, float v, float U, float V)
 	{
 		minU = u;
@@ -129,24 +156,44 @@ public class MalisisIcon extends TextureAtlasSprite
 		maxV = V;
 	}
 
+	/**
+	 * Gets the min u.
+	 *
+	 * @return the min u
+	 */
 	@Override
 	public float getMinU()
 	{
 		return this.flippedU ? maxU : minU;
 	}
 
+	/**
+	 * Gets the max u.
+	 *
+	 * @return the max u
+	 */
 	@Override
 	public float getMaxU()
 	{
 		return this.flippedU ? minU : maxU;
 	}
 
+	/**
+	 * Gets the min v.
+	 *
+	 * @return the min v
+	 */
 	@Override
 	public float getMinV()
 	{
 		return this.flippedV ? maxV : minV;
 	}
 
+	/**
+	 * Gets the max v.
+	 *
+	 * @return the max v
+	 */
 	@Override
 	public float getMaxV()
 	{
@@ -168,6 +215,8 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
+	 * Checks if is flipped u.
+	 *
 	 * @return true if this {@link MalisisIcon} is flipped horizontally.
 	 */
 	public boolean isFlippedU()
@@ -176,6 +225,8 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
+	 * Checks if is flipped v.
+	 *
 	 * @return true if this {@link MalisisIcon} is flipped vertically.
 	 */
 	public boolean isFlippedV()
@@ -184,6 +235,8 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
+	 * Checks if is rotated.
+	 *
 	 * @return true fi this {@link MalisisIcon} is rotated.
 	 */
 	public boolean isRotated()
@@ -202,6 +255,8 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
+	 * Gets the rotation.
+	 *
 	 * @return the rotation for this {@link MalisisIcon}.
 	 */
 	public int getRotation()
@@ -295,8 +350,13 @@ public class MalisisIcon extends TextureAtlasSprite
 		this.sheetWidth = width;
 		this.sheetHeight = height;
 		super.initSprite(width, height, x, y, rotated);
-		for (MalisisIcon dep : dependants)
-			dep.initIcon(this, width, height, x, y, rotated);
+		for (TextureAtlasSprite dep : dependants)
+		{
+			if (dep instanceof MalisisIcon)
+				((MalisisIcon) dep).initIcon(this, width, height, x, y, rotated);
+			else
+				copyFrom(this);
+		}
 	}
 
 	/**
@@ -326,19 +386,68 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Attempts to register this {@link MalisisIcon} to the {@link TextureMap}. If an {@link IIcon} is already registered with this name,
-	 * that registered icon will be returned instead.
+	 * Attempts to register this {@link MalisisIcon} to the {@link TextureMap}. If a {@link MalisisIcon} is already registered with this
+	 * name, that registered icon will be returned instead.
 	 *
-	 * @param register the TextureMap
+	 * @param textureMap the TextureMap
 	 * @return this {@link MalisisIcon} if not already registered, otherwise, the MalisisIcon already inside the registry.
 	 */
-	public MalisisIcon register(TextureMap register)
+	public MalisisIcon register(TextureMap textureMap)
 	{
-		TextureAtlasSprite icon = register.getTextureExtry(getIconName());
-		if (icon != null)
+		TextureAtlasSprite icon = textureMap.getTextureExtry(getIconName());
+		if (icon instanceof MalisisIcon)
 			return (MalisisIcon) icon;
 
-		register.setTextureEntry(getIconName(), this);
+		//make sure to replace only vanilla TextureAtlasSprite
+		if (icon != null && icon.getClass() == TextureAtlasSprite.class)
+			return replaceRegisteredIcon(textureMap);
+
+		textureMap.setTextureEntry(getIconName(), this);
 		return this;
 	}
+
+	/**
+	 * Forcefully replaces the {@link TextureAtlasSprite} registered, by a {@link MalisisIcon} version of it.
+	 *
+	 * @param textureMap the texture map
+	 * @return this {@link MalisisIcon}
+	 */
+	private MalisisIcon replaceRegisteredIcon(TextureMap textureMap)
+	{
+		try
+		{
+			HashMap<String, TextureAtlasSprite> map = (HashMap<String, TextureAtlasSprite>) mapRegisteredSprites.get(textureMap);
+			map.put(getIconName(), this);
+		}
+		catch (IllegalArgumentException | IllegalAccessException e)
+		{
+			e.printStackTrace();
+		}
+
+		return this;
+	}
+
+	public static TextureMap textureMap()
+	{
+		return Minecraft.getMinecraft().getTextureMapBlocks();
+	}
+
+	public static MalisisIcon get(String name)
+	{
+		TextureAtlasSprite icon = textureMap() != null ? textureMap().getAtlasSprite(name) : null;
+
+		if (icon instanceof MalisisIcon)
+			return (MalisisIcon) icon;
+
+		if (icon != null && icon.getClass() == TextureAtlasSprite.class)
+			return new MalisisIcon(icon);
+
+		return null;
+	}
+
+	public static TextureAtlasSprite missing()
+	{
+		return get("missingno");
+	}
+
 }

@@ -26,7 +26,10 @@ package net.malisis.core.renderer.element.face;
 
 import static net.minecraft.util.EnumFacing.*;
 import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.Vertex;
+import net.malisis.core.renderer.element.vertex.BottomSouthEast;
+import net.malisis.core.renderer.element.vertex.BottomSouthWest;
+import net.malisis.core.renderer.element.vertex.TopSouthEast;
+import net.malisis.core.renderer.element.vertex.TopSouthWest;
 
 /**
  * @author Ordinastie
@@ -36,7 +39,7 @@ public class SouthFace extends Face
 {
 	public SouthFace()
 	{
-		super(new Vertex.TopSouthWest(), new Vertex.BottomSouthWest(), new Vertex.BottomSouthEast(), new Vertex.TopSouthEast());
+		super(new TopSouthWest(), new BottomSouthWest(), new BottomSouthEast(), new TopSouthEast());
 
 		params.direction.set(SOUTH);
 		params.textureSide.set(SOUTH);

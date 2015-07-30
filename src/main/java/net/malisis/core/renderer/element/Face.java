@@ -31,9 +31,13 @@ import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.util.Vector;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 
-public class Face implements ITransformable.Translate, ITransformable.Rotate
+import com.google.common.primitives.Ints;
+
+public class Face extends BakedQuad implements ITransformable.Translate, ITransformable.Rotate
 {
 	protected String name;
 	protected Vertex[] vertexes;
@@ -41,6 +45,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 
 	public Face(Vertex[] vertexes, RenderParameters params)
 	{
+		super(null, 0, null);
 		this.vertexes = vertexes;
 		this.params = params != null ? params : new RenderParameters();
 		this.setName(null);
@@ -63,6 +68,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 
 	public Face(Face face, RenderParameters params)
 	{
+		super(null, 0, null);
 		Vertex[] faceVertexes = face.getVertexes();
 		this.vertexes = new Vertex[faceVertexes.length];
 		for (int i = 0; i < faceVertexes.length; i++)
@@ -492,6 +498,43 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		float f = (float) ((normal.x * normal.x * 0.6 + normal.y * (normal.y * 3 + 1) / 4 + normal.z * normal.z * 0.8));
 		params.colorFactor.set(f);
 	}
+
+	//#region BakedQuad
+	@Override
+	public int[] getVertexData()
+	{
+		return getVertexData(null);
+	}
+
+	public int[] getVertexData(BlockPos pos)
+	{
+		int[] data = new int[0];
+		for (Vertex v : vertexes)
+			data = Ints.concat(data, v.toVertexData(pos));
+		return data;
+	}
+
+	@Override
+	public boolean hasTintIndex()
+	{
+		return getTintIndex() != 0xFFFFFF;
+	}
+
+	@Override
+	public int getTintIndex()
+	{
+		if (params == null || params.colorMultiplier.get() == null)
+			return 0xFFFFFF;
+		return params.colorMultiplier.get();
+	}
+
+	@Override
+	public EnumFacing getFace()
+	{
+		return params != null ? params.direction.get() : null;
+	}
+
+	//#end BakedQuad
 
 	@Override
 	public String toString()

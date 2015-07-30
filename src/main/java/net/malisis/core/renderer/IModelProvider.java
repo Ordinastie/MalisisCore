@@ -22,29 +22,20 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.element.face;
+package net.malisis.core.renderer;
 
-import static net.minecraft.util.EnumFacing.*;
-import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.vertex.TopNorthEast;
-import net.malisis.core.renderer.element.vertex.TopNorthWest;
-import net.malisis.core.renderer.element.vertex.TopSouthEast;
-import net.malisis.core.renderer.element.vertex.TopSouthWest;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.model.IFlexibleBakedModel;
 
 /**
  * @author Ordinastie
  *
  */
-public class TopFace extends Face
+public interface IModelProvider
 {
-	public TopFace()
-	{
-		super(new TopNorthWest(), new TopSouthWest(), new TopSouthEast(), new TopNorthEast());
+	public void createModels();
 
-		params.direction.set(UP);
-		params.textureSide.set(UP);
-		params.colorFactor.set(1.0F);
-		params.aoMatrix.set(calculateAoMatrix(UP));
-		setStandardUV();
-	}
+	public IFlexibleBakedModel getModel(IBlockAccess world, BlockPos pos, IBlockState state);
 }

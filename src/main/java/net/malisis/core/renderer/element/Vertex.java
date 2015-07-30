@@ -24,8 +24,10 @@
 
 package net.malisis.core.renderer.element;
 
+import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.Point;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 
 import org.lwjgl.util.vector.Matrix4f;
@@ -33,24 +35,14 @@ import org.lwjgl.util.vector.Vector4f;
 
 public class Vertex
 {
-	public static final int BRIGHTNESS_MAX = 15728880;
-
-	//@formatter:off
-	public static class TopNorthWest extends Vertex { public TopNorthWest() { super(0, 1, 0); }}
-	public static class TopNorthEast extends Vertex { public TopNorthEast() { super(1, 1, 0); }}
-	public static class TopSouthWest extends Vertex { public TopSouthWest() { super(0, 1, 1); }}
-	public static class TopSouthEast extends Vertex { public TopSouthEast() { super(1, 1, 1); }}
-	public static class BottomNorthWest extends Vertex { public BottomNorthWest() { super(0, 0, 0); }}
-	public static class BottomNorthEast extends Vertex { public BottomNorthEast() { super(1, 0, 0); }}
-	public static class BottomSouthWest extends Vertex { public BottomSouthWest() { super(0, 0, 1); }}
-	public static class BottomSouthEast extends Vertex { public BottomSouthEast() { super(1, 0, 1); }}
-	//@formatter:on
+	public static final int BRIGHTNESS_MAX = (240 << 16) | 240; //sky << 1| block
 
 	private String baseName;
 	private double x = 0;
 	private double y = 0;
 	private double z = 0;
-	private int brightness = 0;
+	private int blockBrightness = 0;
+	private int skyBrightness = 0;
 	private int color = 0xFFFFFF;
 	private int alpha = 255;
 	private double u = 0.0F;
@@ -60,12 +52,14 @@ public class Vertex
 
 	public Vertex(double x, double y, double z, int rgba, int brightness, double u, double v, boolean isInitialState)
 	{
+		set(x, y, z);
+		setRGBA(rgba);
+		setBrightness(brightness);
+		setUV(u, v);
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		this.color = (rgba >>> 8) & 0xFFFFFF;
-		this.alpha = rgba & 0xFF;
-		this.brightness = brightness;
+
 		this.u = u;
 		this.v = v;
 		this.baseName();
@@ -86,7 +80,7 @@ public class Vertex
 
 	public Vertex(Vertex vertex)
 	{
-		this(vertex.x, vertex.y, vertex.z, vertex.color << 8 | vertex.alpha, vertex.brightness, vertex.u, vertex.v, false);
+		this(vertex.x, vertex.y, vertex.z, vertex.color << 8 | vertex.alpha, vertex.getBrightness(), vertex.u, vertex.v, false);
 		baseName = vertex.baseName;
 	}
 
@@ -100,6 +94,7 @@ public class Vertex
 		this(vertex.x, vertex.y, vertex.z, rgba, brightness, u, v, false);
 	}
 
+	//#region Getters/Setters
 	public double getX()
 	{
 		return x;
@@ -154,6 +149,95 @@ public class Vertex
 		this.y = y;
 		this.z = z;
 	}
+
+	public int getColor()
+	{
+		return this.color;
+	}
+
+	public Vertex setColor(int color)
+	{
+		this.color = color & 0xFFFFFF;
+		return this;
+	}
+
+	public int getAlpha()
+	{
+		return this.alpha;
+	}
+
+	public Vertex setAlpha(int alpha)
+	{
+		this.alpha = alpha & 255;
+		return this;
+	}
+
+	public int getRGBA()
+	{
+		int r = (color >> 16) & 255;
+		int g = (color >> 8) & 255;
+		int b = color & 255;
+		return alpha << 24 | b << 16 | g << 8 | r;
+	}
+
+	public Vertex setRGBA(int rgba)
+	{
+		this.color = (rgba >>> 8) & 0xFFFFFF;
+		this.alpha = rgba & 255;
+		return this;
+	}
+
+	public int getBlockBrightness()
+	{
+		return blockBrightness;
+	}
+
+	public Vertex setBlockBrightness(int brightness)
+	{
+		this.blockBrightness = brightness & 240;
+		return this;
+	}
+
+	public int getSkyBrightness()
+	{
+		return skyBrightness;
+	}
+
+	public Vertex setSkyBrightness(int brightness)
+	{
+		this.skyBrightness = brightness & 240;
+		return this;
+	}
+
+	public int getBrightness()
+	{
+		return (skyBrightness << 16) | blockBrightness;
+	}
+
+	public Vertex setBrightness(int brightness)
+	{
+		this.blockBrightness = brightness & 240;
+		this.skyBrightness = (brightness >> 16) & 240;
+		return this;
+	}
+
+	public double getU()
+	{
+		return this.u;
+	}
+
+	public double getV()
+	{
+		return this.v;
+	}
+
+	public void setUV(double u, double v)
+	{
+		this.u = u;
+		this.v = v;
+	}
+
+	//#end Getters/Setters
 
 	public void limit(double min, double max)
 	{
@@ -274,55 +358,6 @@ public class Vertex
 		return this;
 	}
 
-	public Vertex setColor(int color)
-	{
-		this.color = color;
-		return this;
-	}
-
-	public int getColor()
-	{
-		return this.color;
-	}
-
-	public Vertex setAlpha(int alpha)
-	{
-		this.alpha = alpha;
-		return this;
-	}
-
-	public int getAlpha()
-	{
-		return this.alpha;
-	}
-
-	public Vertex setBrightness(int brightness)
-	{
-		this.brightness = brightness;
-		return this;
-	}
-
-	public int getBrightness()
-	{
-		return this.brightness;
-	}
-
-	public void setUV(float u, float v)
-	{
-		this.u = u;
-		this.v = v;
-	}
-
-	public double getU()
-	{
-		return this.u;
-	}
-
-	public double getV()
-	{
-		return this.v;
-	}
-
 	public void limitU(float min, float max)
 	{
 		u = Math.max(Math.min(u, max), min);
@@ -363,7 +398,7 @@ public class Vertex
 	@Override
 	public String toString()
 	{
-		return name() + " 0x" + Integer.toHexString(color) + " (a:" + alpha + ", b:" + brightness + ")";
+		return name() + " 0x" + Integer.toHexString(color) + " (a:" + alpha + ", bb:" + blockBrightness + ", sb:" + skyBrightness + ")";
 	}
 
 	public Point toPoint()
@@ -394,14 +429,35 @@ public class Vertex
 		z = vec.z;
 	}
 
+	public int[] toVertexData(BlockPos pos)
+	{
+		if (pos == null)
+			pos = new BlockPos(0, 0, 0);
+		else
+			pos = BlockPosUtils.chunkPosition(pos);
+
+		//@formatter:off
+		return new int[] {
+				Float.floatToRawIntBits((float) x + pos.getX()),
+				Float.floatToRawIntBits((float) y + pos.getY()),
+				Float.floatToRawIntBits((float) z + pos.getZ()),
+				getRGBA(),
+				Float.floatToRawIntBits((float) u),
+				Float.floatToRawIntBits((float) v),
+				getBrightness()
+		};
+		//@formatter:on
+	}
+
 	private void setState(Vertex vertex)
 	{
 		x = vertex.x;
 		y = vertex.y;
 		z = vertex.z;
-		brightness = vertex.alpha;
 		color = vertex.color;
 		alpha = vertex.alpha;
+		blockBrightness = vertex.blockBrightness;
+		skyBrightness = vertex.skyBrightness;
 		u = vertex.u;
 		v = vertex.v;
 	}

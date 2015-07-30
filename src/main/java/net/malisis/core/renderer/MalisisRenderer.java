@@ -25,12 +25,10 @@
 package net.malisis.core.renderer;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.MalisisRegistry;
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
@@ -38,98 +36,93 @@ import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.shape.Cube;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.icon.IIconMetaProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.provider.IIconProvider;
+import net.malisis.core.renderer.model.MalisisModel;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.DestroyBlockProgress;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.block.statemap.IStateMapper;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.client.IItemRenderer;
-import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
-import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.relauncher.ReflectionHelper;
+import com.google.common.collect.ImmutableMap;
 
 /**
- * Base class for rendering. Handle the rendering for {@link ISimpleBlockRenderingHandler}, {@link TileEntitySpecialRenderer}, and
- * {@link IItemRenderer}. Provides easy registration of the renderer, and automatically sets up the context for the rendering.
+ * Base class for rendering. Handle the rendering. Provides easy registration of the renderer, and automatically sets up the context for the
+ * rendering.
  *
  * @author Ordinastie
  *
  */
-public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpleBlockRenderingHandler, IItemRenderer, IRenderWorldLast
+public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlockRenderer, IRenderWorldLast
 {
-	//Reference to Minecraft.renderGlobal.damagedBlocks (lazy loaded)
-	/** The damaged blocks. */
-	private static Map damagedBlocks;
-	/** The damaged icons. */
-	protected static IIcon[] damagedIcons;
 	/** Reference to Tessellator.isDrawing field **/
 	private static Field isDrawingField;
 	/** Whether this {@link MalisisRenderer} initialized. (initialize() already called) */
 	private boolean initialized = false;
-	/** Id of this {@link MalisisRenderer}. */
-	protected int renderId = -1;
 	/** Tessellator reference. */
-	protected Tessellator t = Tessellator.instance;
-	/** Current world reference (ISBRH/TESR/IRWL). */
+	protected WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+	/** Current world reference (BLOCK/TESR/IRWL). */
 	protected IBlockAccess world;
-	/** RenderBlocks reference (ISBRH). */
-	protected RenderBlocks renderBlocks;
-	/** Whether render coordinates already shifted (ISBRH). */
-	protected boolean isShifted = false;
-	/** Block to render (ISBRH/TESR). */
+	/** Position of the block (BLOCK/TESR). */
+	protected BlockPos pos;
+	/** Block to render (BLOCK/TESR). */
 	protected Block block;
-	/** Metadata of the block to render (ISBRH/TESR). */
-	protected int blockMetadata;
-	/** Position of the block (ISBRH/TESR). */
-	protected int x, y, z;
+	/** Metadata of the block to render (BLOCK/TESR). */
+	protected IBlockState blockState;
 	/** TileEntity currently drawing (for TESR). */
 	protected TileEntity tileEntity;
 	/** Partial tick time (TESR/IRWL). */
 	protected float partialTick = 0;
 	/** ItemStack to render (ITEM). */
 	protected ItemStack itemStack;
-	/** ItemRenderType of item rendering (ITEM). */
-	protected ItemRenderType itemRenderType;
 	/** RenderGlobal reference (IRWL) */
 	protected RenderGlobal renderGlobal;
+	/** Old vertex format to restore when done drawing (BLOCK) */
+	protected VertexFormat oldVertexFormat;
 	/** Type of rendering. */
 	protected RenderType renderType;
 	/** Mode of rendering (GL constant). */
 	protected int drawMode;
-	/** Current shape being rendered. */
-	protected Shape shape = new Cube();
-	/** Current face being rendered. */
-	protected Face face;
-	/** Current parameters for the shape being rendered. */
-	protected RenderParameters rp = new RenderParameters();
-	/** Current parameters for the face being rendered. */
-	protected RenderParameters params;
+	//	/** Current model being rendered. */
+	//	protected MalisisModel model = new MalisisModel(new Cube());
+	//	/** Current face being rendered. */
+	//	protected Face face;
+	//	/** Current parameters for the shape being rendered. */
+	//	protected RenderParameters rp = new RenderParameters();
+	//	/** Current parameters for the face being rendered. */
+	//	protected RenderParameters params;
 	/** Base brightness of the block. */
 	protected int baseBrightness;
 	/** An override texture set by the renderer. */
-	protected IIcon overrideTexture;
+	protected MalisisIcon overrideTexture;
 
 	/** Whether the damage for the blocks should be handled by this {@link MalisisRenderer} (for TESR). */
 	protected boolean getBlockDamage = false;
@@ -144,8 +137,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public MalisisRenderer()
 	{
-		this.renderId = RenderingRegistry.getNextAvailableRenderId();
-		this.t = Tessellator.instance;
+		//this.renderId = RenderingRegistry.getNextAvailableRenderId();
 	}
 
 	/**
@@ -164,14 +156,13 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void reset()
 	{
+		this.wr = null;
 		this.renderType = RenderType.UNSET;
 		this.drawMode = 0;
 		this.world = null;
+		this.pos = null;
 		this.block = null;
-		this.blockMetadata = 0;
-		this.x = 0;
-		this.y = 0;
-		this.z = 0;
+		this.blockState = null;
 		this.overrideTexture = null;
 		this.destroyBlockProgress = null;
 	}
@@ -186,14 +177,12 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 * @param z the z
 	 * @param metadata the metadata
 	 */
-	public void set(IBlockAccess world, Block block, int x, int y, int z, int metadata)
+	public void set(IBlockAccess world, Block block, BlockPos pos, IBlockState blockState)
 	{
 		this.world = world;
+		this.pos = pos;
 		this.block = block;
-		this.blockMetadata = metadata;
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		this.blockState = blockState;
 	}
 
 	/**
@@ -213,7 +202,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void set(Block block)
 	{
-		set(world, block, x, y, z, blockMetadata);
+		this.block = block;
 	}
 
 	/**
@@ -221,20 +210,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 *
 	 * @param blockMetadata the block metadata
 	 */
-	public void set(int blockMetadata)
+	public void set(IBlockState blockState)
 	{
-		set(world, block, x, y, z, blockMetadata);
-	}
-
-	/**
-	 * Sets informations for this {@link MalisisRenderer}.
-	 *
-	 * @param block the block
-	 * @param blockMetadata the block metadata
-	 */
-	public void set(Block block, int blockMetadata)
-	{
-		set(world, block, x, y, z, blockMetadata);
+		this.blockState = blockState;
 	}
 
 	/**
@@ -244,9 +222,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 * @param y the y
 	 * @param z the z
 	 */
-	public void set(int x, int y, int z)
+	public void set(BlockPos pos)
 	{
-		set(world, block, x, y, z, blockMetadata);
+		this.pos = pos;
 	}
 
 	/**
@@ -257,7 +235,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void set(TileEntity te, float partialTick)
 	{
-		set(te.getWorld(), te.getBlockType(), te.xCoord, te.yCoord, te.zCoord, te.getBlockMetadata());
+		set(te.getWorld(), te.getBlockType(), te.getPos(), te.getWorld().getBlockState(te.getPos()));
 		this.partialTick = partialTick;
 		this.tileEntity = te;
 	}
@@ -268,122 +246,29 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 * @param type the type
 	 * @param itemStack the item stack
 	 */
-	public void set(ItemRenderType type, ItemStack itemStack)
+	public void set(ItemStack itemStack)
 	{
 		if (itemStack.getItem() instanceof ItemBlock)
 			set(Block.getBlockFromItem(itemStack.getItem()));
 		this.itemStack = itemStack;
-		this.itemRenderType = type;
 	}
 
 	// #end
 
-	// #region ISBRH
-	/**
-	 * Renders inventory block.
-	 *
-	 * @param block the block
-	 * @param metadata the metadata
-	 * @param modelId renderId
-	 * @param renderer RenderBlocks
-	 */
+	//#region IBlockRenderer
 	@Override
-	public void renderInventoryBlock(Block block, int metadata, int modelId, RenderBlocks renderer)
+	public boolean renderBlock(BlockModelRenderer bmr, WorldRenderer wr, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
-		set(block, metadata);
-		renderBlocks = renderer;
-		prepare(RenderType.ISBRH_INVENTORY);
+		this.wr = wr;
+		set(world, state.getBlock(), pos, state);
+		prepare(RenderType.BLOCK);
 		render();
 		clean();
-	}
 
-	/**
-	 * Renders world block.
-	 *
-	 * @param world the world
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
-	 * @param block the block
-	 * @param modelId renderId
-	 * @param renderer RenderBlocks
-	 * @return true, if something was drawn, false otherwise
-	 */
-	@Override
-	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer)
-	{
-		set(world, block, x, y, z, world.getBlockMetadata(x, y, z));
-		tileEntity = world.getTileEntity(x, y, z);
-		renderBlocks = renderer;
-		vertexDrawn = false;
-
-		prepare(RenderType.ISBRH_WORLD);
-		if (renderer.hasOverrideBlockTexture())
-			overrideTexture = renderer.overrideBlockTexture;
-		render();
-		clean();
 		return vertexDrawn;
 	}
 
-	/**
-	 * Checks whether this {@link MalisisRenderer} should handle the rendering in inventory
-	 *
-	 * @param modelId renderId
-	 * @return true, if this {@link MalisisRenderer} should be used for rendering the block in inventory
-	 */
-	@Override
-	public boolean shouldRender3DInInventory(int modelId)
-	{
-		return true;
-	}
-
-	// #end ISBRH
-
-	// #region IItemRenderer
-	/**
-	 * Checks whether to use this {@link MalisisRenderer} for the specified {@link net.minecraftforge.client.IItemRenderer.ItemRenderType}.
-	 *
-	 * @param item the item
-	 * @param type ItemRenderType
-	 * @return true, if this {@link MalisisRenderer} should be used for rendering the block in inventory
-	 */
-	@Override
-	public boolean handleRenderType(ItemStack item, ItemRenderType type)
-	{
-		return true;
-	}
-
-	/**
-	 * Checks whether a render helper should be used for this {@link MalisisRenderer}.
-	 *
-	 * @param type the type
-	 * @param item the item
-	 * @param helper the helper
-	 * @return true, if successful
-	 */
-	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper)
-	{
-		return true;
-	}
-
-	/**
-	 * Renders the item.
-	 *
-	 * @param type the type
-	 * @param item the item
-	 * @param data the data
-	 */
-	@Override
-	public void renderItem(ItemRenderType type, ItemStack item, Object... data)
-	{
-		set(type, item);
-		prepare(RenderType.ITEM_INVENTORY);
-		render();
-		clean();
-	}
-
-	// #end IItemRenderer
+	//#end IModelProvider
 
 	// #region TESR
 	/**
@@ -396,29 +281,31 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 * @param partialTick the partial tick
 	 */
 	@Override
-	public void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTick)
+	public void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage)
 	{
+		this.wr = Tessellator.getInstance().getWorldRenderer();
 		set(te, partialTick);
-		prepare(RenderType.TESR_WORLD, x, y, z);
+		prepare(RenderType.TILE_ENTITY, x, y, z);
 		render();
-		if (getBlockDamage)
-		{
-			destroyBlockProgress = getBlockDestroyProgress();
-			if (destroyBlockProgress != null)
-			{
-				next();
-
-				GL11.glEnable(GL11.GL_BLEND);
-				OpenGlHelper.glBlendFunc(GL11.GL_DST_COLOR, GL11.GL_SRC_COLOR, GL11.GL_ONE, GL11.GL_ZERO);
-				GL11.glAlphaFunc(GL11.GL_GREATER, 0);
-				GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
-
-				t.disableColor();
-				renderDestroyProgress();
-				next();
-				GL11.glDisable(GL11.GL_BLEND);
-			}
-		}
+		//TODO
+		//		if (getBlockDamage)
+		//		{
+		//			destroyBlockProgress = getBlockDestroyProgress();
+		//			if (destroyBlockProgress != null)
+		//			{
+		//				next();
+		//
+		//				GL11.glEnable(GL11.GL_BLEND);
+		//				OpenGlHelper.glBlendFunc(GL11.GL_DST_COLOR, GL11.GL_SRC_COLOR, GL11.GL_ONE, GL11.GL_ZERO);
+		//				GL11.glAlphaFunc(GL11.GL_GREATER, 0);
+		//				GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
+		//
+		//				t.disableColor();
+		//				renderDestroyProgress();
+		//				next();
+		//				GL11.glDisable(GL11.GL_BLEND);
+		//			}
+		//		}
 		clean();
 	}
 
@@ -446,7 +333,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 		double x = 0, y = 0, z = 0;
 		if (shouldSetViewportPosition())
 		{
-			EntityClientPlayerMP p = Minecraft.getMinecraft().thePlayer;
+			EntityPlayerSP p = Minecraft.getMinecraft().thePlayer;
 			x = -(p.lastTickPosX + (p.posX - p.lastTickPosX) * partialTick);
 			y = -(p.lastTickPosY + (p.posY - p.lastTickPosY) * partialTick);
 			z = -(p.lastTickPosZ + (p.posZ - p.lastTickPosZ) * partialTick);
@@ -474,33 +361,36 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 		_initialize();
 
 		this.renderType = renderType;
-		if (renderType == RenderType.ISBRH_WORLD)
+
+		if (renderType == RenderType.BLOCK)
 		{
-			tessellatorShift();
+			oldVertexFormat = wr.getVertexFormat();
+			wr.setVertexFormat(DefaultVertexFormats.BLOCK);
 		}
-		else if (renderType == RenderType.ISBRH_INVENTORY)
+		else if (renderType == RenderType.ITEM)
 		{
 			GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
 			startDrawing();
 		}
-		else if (renderType == RenderType.ITEM_INVENTORY)
+		else if (renderType == RenderType.ITEM)
 		{
 			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
 			startDrawing();
 		}
-		else if (renderType == RenderType.TESR_WORLD)
+		else if (renderType == RenderType.TILE_ENTITY)
 		{
-			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
-			RenderHelper.disableStandardItemLighting();
-			GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-			GL11.glShadeModel(GL11.GL_SMOOTH);
+			GlStateManager.pushAttrib();
+			GlStateManager.pushMatrix();
+			GlStateManager.disableLighting();
+			//GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+			//GlStateManager.shadeModel(GL11.GL_SMOOTH);
 
-			GL11.glPushMatrix();
-			GL11.glTranslated(data[0], data[1], data[2]);
+			GlStateManager.translate(data[0], data[1], data[2]);
 
 			bindTexture(TextureMap.locationBlocksTexture);
 
 			startDrawing();
+			wr.setVertexFormat(DefaultVertexFormats.BLOCK);
 		}
 		else if (renderType == RenderType.WORLD_LAST)
 		{
@@ -516,6 +406,42 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 
 			startDrawing();
 		}
+	}
+
+	/**
+	 * Cleans the current renderer state.
+	 */
+	public void clean()
+	{
+		if (renderType == RenderType.BLOCK)
+		{
+			wr.setVertexFormat(oldVertexFormat);
+		}
+		else if (renderType == RenderType.ITEM)
+		{
+			draw();
+			GL11.glTranslatef(0.5F, 0.5F, 0.5F);
+		}
+		else if (renderType == RenderType.ITEM)
+		{
+			draw();
+			GL11.glPopAttrib();
+		}
+		else if (renderType == RenderType.TILE_ENTITY)
+		{
+			draw();
+			GlStateManager.enableLighting();
+			GlStateManager.popMatrix();
+			GlStateManager.popAttrib();
+			wr.setVertexFormat(oldVertexFormat);
+		}
+		else if (renderType == RenderType.WORLD_LAST)
+		{
+			draw();
+			GL11.glPopMatrix();
+			GL11.glPopAttrib();
+		}
+		reset();
 	}
 
 	/**
@@ -535,7 +461,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	{
 		if (isDrawing())
 			draw();
-		t.startDrawing(drawMode);
+
+		wr.startDrawing(drawMode);
 		this.drawMode = drawMode;
 	}
 
@@ -547,11 +474,11 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	public boolean isDrawing()
 	{
 		if (isDrawingField == null)
-			isDrawingField = AsmUtils.changeFieldAccess(Tessellator.class, "isDrawing", "field_78415_z");
+			isDrawingField = AsmUtils.changeFieldAccess(WorldRenderer.class, "isDrawing", "field_179010_r");
 
 		try
 		{
-			return isDrawingField.getBoolean(t);
+			return isDrawingField.getBoolean(wr);
 		}
 		catch (IllegalArgumentException | IllegalAccessException e)
 		{
@@ -585,73 +512,15 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	public void draw()
 	{
 		if (isDrawing())
-			t.draw();
+			Tessellator.getInstance().draw();
 	}
 
 	/**
-	 * Cleans the current renderer state.
-	 */
-	public void clean()
-	{
-		if (renderType == RenderType.ISBRH_WORLD)
-		{
-			tessellatorUnshift();
-		}
-		else if (renderType == RenderType.ISBRH_INVENTORY)
-		{
-			draw();
-			GL11.glTranslatef(0.5F, 0.5F, 0.5F);
-		}
-		else if (renderType == RenderType.ITEM_INVENTORY)
-		{
-			draw();
-			GL11.glPopAttrib();
-		}
-		else if (renderType == RenderType.TESR_WORLD)
-		{
-			draw();
-			GL11.glPopMatrix();
-			GL11.glPopAttrib();
-		}
-		else if (renderType == RenderType.WORLD_LAST)
-		{
-			draw();
-			GL11.glPopMatrix();
-			GL11.glPopAttrib();
-		}
-		reset();
-	}
-
-	/**
-	 * Shifts the {@link Tessellator} for ISBRH rendering.
-	 */
-	public void tessellatorShift()
-	{
-		if (isShifted)
-			return;
-
-		isShifted = true;
-		t.addTranslation(x, y, z);
-	}
-
-	/**
-	 * Unshifts the {@link Tessellator} for ISBRH rendering.
-	 */
-	public void tessellatorUnshift()
-	{
-		if (!isShifted)
-			return;
-
-		isShifted = false;
-		t.addTranslation(-x, -y, -z);
-	}
-
-	/**
-	 * Enables the blending for the rendering. Ineffective for ISBRH.
+	 * Enables the blending for the rendering. Ineffective for BLOCK.
 	 */
 	public void enableBlending()
 	{
-		if (renderType == RenderType.ISBRH_WORLD)
+		if (renderType == RenderType.BLOCK)
 			return;
 
 		GL11.glEnable(GL11.GL_BLEND);
@@ -706,30 +575,13 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	{}
 
 	/**
-	 * Renders the block using the default Minecraft rendering system.
-	 */
-	public void renderStandard()
-	{
-		renderStandard(renderBlocks);
-	}
-
-	/**
-	 * Renders the blocks using the default Minecraft rendering system with the specified <b>renderer</b>.
+	 * Renders the blocks using the default Minecraft rendering system.
 	 *
 	 * @param renderer the renderer
 	 */
-	public void renderStandard(RenderBlocks renderer)
+	public void renderStandard()
 	{
-		if (renderer == null)
-			return;
-
-		boolean b = isShifted;
-		if (b)
-			tessellatorUnshift();
-		renderer.setRenderBoundsFromBlock(block);
-		renderer.renderStandardBlock(block, x, y, z);
-		if (b)
-			tessellatorShift();
+		Minecraft.getMinecraft().getBlockRendererDispatcher().renderBlock(blockState, pos, world, wr);
 	}
 
 	/**
@@ -738,18 +590,13 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void render()
 	{
-		drawShape(shape, rp);
+		drawShape(new Cube());
 	}
 
-	/**
-	 * Renders the destroy progress manually for TESR. Called if {@link MalisisRenderer#destroyBlockProgress} is not <code>null</code>.
-	 */
-	public void renderDestroyProgress()
+	public void drawModel(MalisisModel model, RenderParameters params)
 	{
-		if (destroyBlockProgress != null)
-			overrideTexture = damagedIcons[destroyBlockProgress.getPartialBlockDamage()];
-		//	enableBlending();
-		render();
+		for (Shape s : model)
+			drawShape(s, params);
 	}
 
 	/**
@@ -773,21 +620,17 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 		if (s == null)
 			return;
 
-		shape = s;
-		rp = params != null ? params : new RenderParameters();
+		if (params == null)
+			params = new RenderParameters();
 
 		//apply transformations
 		s.applyMatrix();
 
-		// vertex position
-		if (rp.vertexPositionRelativeToRenderBounds.get())
-			calcVertexesPosition(getRenderBounds());
-
-		if (rp.applyTexture.get())
-			applyTexture(s, rp);
+		if (params.applyTexture.get())
+			applyTexture(s, params);
 
 		for (Face f : s.getFaces())
-			drawFace(f, f.getParameters());
+			drawFace(f, params);
 	}
 
 	/**
@@ -797,56 +640,46 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void drawFace(Face face)
 	{
-		drawFace(face, face.getParameters());
+		drawFace(face, null);
 	}
 
 	/**
 	 * Draws a {@link Face} with specified {@link RenderParameters}.
 	 *
-	 * @param f the f
-	 * @param faceParams the face params
+	 * @param face the f
+	 * @param params the face params
 	 */
-	protected void drawFace(Face f, RenderParameters faceParams)
+	protected void drawFace(Face face, RenderParameters params)
 	{
-		if (f == null)
+		if (face == null)
 			return;
 
-		int vertexCount = f.getVertexes().length;
-		if (vertexCount != 4 && renderType == RenderType.ISBRH_WORLD)
+		int vertexCount = face.getVertexes().length;
+		if (vertexCount != 4 && renderType == RenderType.BLOCK)
 		{
-			MalisisCore.log.error("[MalisisRenderer] Attempting to render a face containing {} vertexes in ISBRH. Ignored", vertexCount);
+			MalisisCore.log.error("[MalisisRenderer] Attempting to render a face containing {} vertexes in BLOCK for {}. Ignored",
+					vertexCount, block);
 			return;
 		}
 
-		face = f;
-		params = RenderParameters.merge(rp, faceParams);
+		params = RenderParameters.merge(params, face.getParameters());
 
-		if (!shouldRenderFace(face))
+		if (!shouldRenderFace(face, params))
 			return;
 
 		//use normals if available
-		if ((renderType == RenderType.ITEM_INVENTORY || renderType == RenderType.ISBRH_INVENTORY || params.useNormals.get())
-				&& params.direction.get() != null)
-			t.setNormal(params.direction.get().offsetX, params.direction.get().offsetY, params.direction.get().offsetZ);
+		if ((renderType == RenderType.ITEM || renderType == RenderType.ITEM || params.useNormals.get()) && params.direction.get() != null)
+			wr.setNormal(params.direction.get().getFrontOffsetX(), params.direction.get().getFrontOffsetY(), params.direction.get()
+					.getFrontOffsetZ());
 
-		baseBrightness = getBaseBrightness();
+		baseBrightness = getBaseBrightness(params);
 
-		drawVertexes(face.getVertexes());
+		for (int i = 0; i < face.getVertexes().length; i++)
+			drawVertex(face.getVertexes()[i], i, params);
 
 		//we need to separate each face
 		if (drawMode == GL11.GL_POLYGON || drawMode == GL11.GL_LINE || drawMode == GL11.GL_LINE_STRIP || drawMode == GL11.GL_LINE_LOOP)
 			next();
-	}
-
-	/**
-	 * * Draws an array of {@link Vertex vertexes} (usually {@link Face#getVertexes()}).
-	 *
-	 * @param vertexes the vertexes
-	 */
-	protected void drawVertexes(Vertex[] vertexes)
-	{
-		for (int i = 0; i < vertexes.length; i++)
-			drawVertex(vertexes[i], i);
 	}
 
 	/**
@@ -855,30 +688,28 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 * @param vertex the vertex
 	 * @param number the offset inside the face. (Used for AO)
 	 */
-	protected void drawVertex(Vertex vertex, int number)
+	protected void drawVertex(Vertex vertex, int number, RenderParameters params)
 	{
 		if (vertex == null)
 			vertex = new Vertex(0, 0, 0);
 
 		// brightness
-		int brightness = calcVertexBrightness(vertex, (int[][]) params.aoMatrix.get(number));
+		int brightness = calcVertexBrightness(vertex, number, params);
 		vertex.setBrightness(brightness);
 
 		// color
-		int color = calcVertexColor(vertex, (int[][]) params.aoMatrix.get(number));
+		int color = calcVertexColor(vertex, number, params);
 		vertex.setColor(color);
 
 		// alpha
 		if (!params.usePerVertexAlpha.get())
 			vertex.setAlpha(params.alpha.get());
 
-		t.setColorRGBA_I(vertex.getColor(), vertex.getAlpha());
-		t.setBrightness(vertex.getBrightness());
-
-		if (params.useTexture.get())
-			t.addVertexWithUV(vertex.getX(), vertex.getY(), vertex.getZ(), vertex.getU(), vertex.getV());
-		else
-			t.addVertex(vertex.getX(), vertex.getY(), vertex.getZ());
+		//TODO: refactor when done
+		if (renderType == RenderType.BLOCK)
+			wr.addVertexData(vertex.toVertexData(pos));
+		else if (renderType == RenderType.TILE_ENTITY)
+			wr.addVertexData(vertex.toVertexData(null));
 
 		vertexDrawn = true;
 	}
@@ -904,30 +735,22 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	}
 
 	/**
-	 * Gets the IIcon corresponding to the specified {@link RenderParameters}.
+	 * Gets the MalisisIcon corresponding to the specified {@link RenderParameters}.
 	 *
 	 * @param params the params
 	 * @return the icon
 	 */
-	protected IIcon getIcon(RenderParameters params)
+	protected MalisisIcon getIcon(Face face, RenderParameters params)
 	{
-		IIcon icon = params.icon.get();
-		if (params.useCustomTexture.get())
-			icon = new MalisisIcon(); //use a generic icon where UVs go from 0 to 1
-		else if (overrideTexture != null)
-			icon = overrideTexture;
-		else if (block != null && icon == null)
-		{
-			int side = 0;
-			if (params.textureSide.get() != null)
-				side = params.textureSide.get().ordinal();
-			if (world != null && params.useWorldSensitiveIcon.get())
-				icon = block.getIcon(world, x, y, z, side);
-			else
-				icon = block.getIcon(side, blockMetadata);
-		}
+		IIconProvider iconProvider = params.iconProvider.get();
+		if (iconProvider == null && block instanceof IIconMetaProvider)
+			iconProvider = ((IIconMetaProvider) block).getIconProvider();
 
-		return icon;
+		if (iconProvider == null)
+			return new MalisisIcon();
+
+		MalisisIcon icon = iconProvider.getIcon(face);
+		return icon != null ? icon : new MalisisIcon();
 	}
 
 	/**
@@ -936,20 +759,18 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 * @param face the face
 	 * @return true, if successful
 	 */
-	protected boolean shouldRenderFace(Face face)
+	protected boolean shouldRenderFace(Face face, RenderParameters params)
 	{
-		if (renderType != RenderType.ISBRH_WORLD || world == null || block == null)
+		if (renderType != RenderType.BLOCK || world == null || block == null)
 			return true;
-		if (rp != null && rp.renderAllFaces.get())
+		if (params != null && params.renderAllFaces.get())
 			return true;
-		if (renderBlocks != null && renderBlocks.renderAllFaces == true)
-			return true;
+
 		RenderParameters p = face.getParameters();
 		if (p.direction.get() == null || p.renderAllFaces.get())
 			return true;
 
-		boolean b = block.shouldSideBeRendered(world, x + p.direction.get().offsetX, y + p.direction.get().offsetY, z
-				+ p.direction.get().offsetZ, p.direction.get().ordinal());
+		boolean b = block.shouldSideBeRendered(world, pos.offset(p.direction.get()), p.direction.get());
 		return b;
 	}
 
@@ -978,16 +799,12 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 		//shape.applyMatrix();
 		for (Face f : shape.getFaces())
 		{
-			face = f;
 			RenderParameters params = RenderParameters.merge(f.getParameters(), parameters);
-			IIcon icon = getIcon(params);
-			if (icon != null)
-			{
-				boolean flipU = params.flipU.get();
-				if (params.direction.get() == ForgeDirection.NORTH || params.direction.get() == ForgeDirection.EAST)
-					flipU = !flipU;
-				f.setTexture(icon, flipU, params.flipV.get(), params.interpolateUV.get());
-			}
+			MalisisIcon icon = getIcon(f, params);
+			boolean flipU = params.flipU.get();
+			if (params.direction.get() == EnumFacing.NORTH || params.direction.get() == EnumFacing.EAST)
+				flipU = !flipU;
+			f.setTexture(icon, flipU, params.flipV.get(), params.interpolateUV.get());
 		}
 	}
 
@@ -1000,32 +817,35 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 * @param aoMatrix the ao matrix
 	 * @return the int
 	 */
-	protected int calcVertexColor(Vertex vertex, int[][] aoMatrix)
+	protected int calcVertexColor(Vertex vertex, int number, RenderParameters params)
 	{
 		int color = 0xFFFFFF;
+		if (params == null)
+			return color;
 
 		if (params.usePerVertexColor.get()) //vertex should use their own colors
 			color = vertex.getColor();
+
 		if (params.colorMultiplier.get() != null) //global color multiplier is set
 			color = params.colorMultiplier.get();
-		else if (block != null) //use block color mulitplier
-			color = world != null ? block.colorMultiplier(world, x, y, z) : block.getRenderColor(blockMetadata);
+		else if (block != null) //use block color multiplier
+			color = world != null ? block.colorMultiplier(world, pos, 0) : block.getRenderColor(blockState);
 
 		if (drawMode == GL11.GL_LINE) //no AO for lines
 			return color;
-		if (renderType != RenderType.ISBRH_WORLD && renderType != RenderType.TESR_WORLD) //no AO for item/inventories
+		if (renderType != RenderType.BLOCK && renderType != RenderType.TILE_ENTITY) //no AO for item/inventories
 			return color;
 
+		int[][] aoMatrix = (int[][]) params.aoMatrix.get(number);
 		float factor = 1;
 		//calculate AO
 		if (params.calculateAOColor.get() && aoMatrix != null && Minecraft.isAmbientOcclusionEnabled()
-				&& block.getLightValue(world, x, y, z) == 0)
+				&& block.getLightValue(world, pos) == 0)
 		{
-			factor = getBlockAmbientOcclusion(world, x + params.direction.get().offsetX, y + params.direction.get().offsetY, z
-					+ params.direction.get().offsetZ);
+			factor = getBlockAmbientOcclusion(world, pos.offset(params.direction.get()));
 
 			for (int i = 0; i < aoMatrix.length; i++)
-				factor += getBlockAmbientOcclusion(world, x + aoMatrix[i][0], y + aoMatrix[i][1], z + aoMatrix[i][2]);
+				factor += getBlockAmbientOcclusion(world, pos.add(aoMatrix[i][0], aoMatrix[i][1], aoMatrix[i][2]));
 
 			factor /= (aoMatrix.length + 1);
 		}
@@ -1049,41 +869,40 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 *
 	 * @return the base brightness
 	 */
-	protected int getBaseBrightness()
+	protected int getBaseBrightness(RenderParameters params)
 	{
 		//not in world
-		if ((renderType != RenderType.ISBRH_WORLD && renderType != RenderType.TESR_WORLD) || world == null
-				|| !params.useBlockBrightness.get())
+		if ((renderType != RenderType.BLOCK && renderType != RenderType.TILE_ENTITY) || world == null || !params.useBlockBrightness.get())
 			return params.brightness.get();
 
 		//no direction, we can only use current block brightness
 		if (params.direction.get() == null)
-			return block.getMixedBrightnessForBlock(world, x, y, z);
+			return block.getMixedBrightnessForBlock(world, pos);
 
-		AxisAlignedBB bounds = getRenderBounds();
-		ForgeDirection dir = params.direction.get();
-		int ox = x + dir.offsetX;
-		int oy = y + dir.offsetY;
-		int oz = z + dir.offsetZ;
+		AxisAlignedBB bounds = getRenderBounds(params);
+		EnumFacing dir = params.direction.get();
+		BlockPos p = pos;
+		if (dir != null)
+			p = p.offset(dir);
 
 		//use the brightness of the block next to it
 		if (bounds != null)
 		{
-			if (dir == ForgeDirection.WEST && bounds.minX > 0)
-				ox += 1;
-			else if (dir == ForgeDirection.EAST && bounds.maxX < 1)
-				ox -= 1;
-			else if (dir == ForgeDirection.NORTH && bounds.minZ > 0)
-				oz += 1;
-			else if (dir == ForgeDirection.SOUTH && bounds.maxZ < 1)
-				oz -= 1;
-			else if (dir == ForgeDirection.DOWN && bounds.minY > 0)
-				oy += 1;
-			else if (dir == ForgeDirection.UP && bounds.maxY < 1)
-				oy -= 1;
+			if (dir == EnumFacing.WEST && bounds.minX > 0)
+				p = p.east();
+			else if (dir == EnumFacing.EAST && bounds.maxX < 1)
+				p = p.west();
+			else if (dir == EnumFacing.NORTH && bounds.minZ > 0)
+				p = p.south();
+			else if (dir == EnumFacing.SOUTH && bounds.maxZ < 1)
+				p = p.north();
+			else if (dir == EnumFacing.DOWN && bounds.minY > 0)
+				p = p.up();
+			else if (dir == EnumFacing.UP && bounds.maxY < 1)
+				p = p.down();
 		}
 
-		return getMixedBrightnessForBlock(world, ox, oy, oz);
+		return getMixedBrightnessForBlock(world, p);
 	}
 
 	/**
@@ -1094,23 +913,26 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 * @param aoMatrix the ao matrix
 	 * @return the int
 	 */
-	protected int calcVertexBrightness(Vertex vertex, int[][] aoMatrix)
+	protected int calcVertexBrightness(Vertex vertex, int number, RenderParameters params)
 	{
+		if (params == null)
+			return baseBrightness;
 		if (params.usePerVertexBrightness.get())
 			return vertex.getBrightness();
 		if (drawMode == GL11.GL_LINE) //no AO for lines
 			return baseBrightness;
-		if (renderType != RenderType.ISBRH_WORLD && renderType != RenderType.TESR_WORLD) //not in world
+		if (renderType != RenderType.BLOCK && renderType != RenderType.TILE_ENTITY) //not in world
 			return baseBrightness;
+		int[][] aoMatrix = (int[][]) params.aoMatrix.get(number);
 		if (!params.calculateBrightness.get() || aoMatrix == null) //no data
 			return baseBrightness;
-		if (!Minecraft.isAmbientOcclusionEnabled() || block.getLightValue(world, x, y, z) != 0) // emit light
+		if (!Minecraft.isAmbientOcclusionEnabled() || block.getLightValue(world, pos) != 0) // emit light
 			return baseBrightness;
 
 		int[] b = new int[Math.max(3, aoMatrix.length)];
 
 		for (int i = 0; i < b.length; i++)
-			b[i] += getMixedBrightnessForBlock(world, x + aoMatrix[i][0], y + aoMatrix[i][1], z + aoMatrix[i][2]);
+			b[i] += getMixedBrightnessForBlock(world, pos.add(aoMatrix[i][0], aoMatrix[i][1], aoMatrix[i][2]));
 
 		int brightness = getAoBrightness(b[0], b[1], b[2], baseBrightness);
 
@@ -1149,9 +971,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 * @param z the z
 	 * @return the block ambient occlusion
 	 */
-	protected float getBlockAmbientOcclusion(IBlockAccess world, int x, int y, int z)
+	protected float getBlockAmbientOcclusion(IBlockAccess world, BlockPos pos)
 	{
-		Block block = world.getBlock(x, y, z);
+		Block block = world.getBlockState(pos).getBlock();
 		if (block == null)
 			return 1.0F;
 
@@ -1167,10 +989,10 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 * @param z the z
 	 * @return the mixed brightness for block
 	 */
-	protected int getMixedBrightnessForBlock(IBlockAccess world, int x, int y, int z)
+	protected int getMixedBrightnessForBlock(IBlockAccess world, BlockPos pos)
 	{
 		// return world.getLightBrightnessForSkyBlocks(x, y, z, 0);
-		return world.getBlock(x, y, z).getMixedBrightnessForBlock(world, x, y, z);
+		return world.getBlockState(pos).getBlock().getMixedBrightnessForBlock(world, pos);
 	}
 
 	/**
@@ -1179,146 +1001,40 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 *
 	 * @return the render bounds
 	 */
-	protected AxisAlignedBB getRenderBounds()
+	protected AxisAlignedBB getRenderBounds(RenderParameters params)
 	{
-		if (block == null || !rp.useBlockBounds.get())
-			return rp.renderBounds.get();
+		if (block == null || !params.useBlockBounds.get())
+			return params.renderBounds.get();
 
 		if (world != null)
-			block.setBlockBoundsBasedOnState(world, x, y, z);
+			block.setBlockBoundsBasedOnState(world, pos);
 
-		return AxisAlignedBB.getBoundingBox(block.getBlockBoundsMinX(), block.getBlockBoundsMinY(), block.getBlockBoundsMinZ(),
+		return new AxisAlignedBB(block.getBlockBoundsMinX(), block.getBlockBoundsMinY(), block.getBlockBoundsMinZ(),
 				block.getBlockBoundsMaxX(), block.getBlockBoundsMaxY(), block.getBlockBoundsMaxZ());
 	}
 
-	/**
-	 * Modifies the {@link Vertex vertexes} coordinates relative to the bounds specified.<br>
-	 * Eg : if x = 0.5, minX = 1, maxX = 3, x becomes 2
-	 *
-	 * @param bounds the bounds
-	 */
-	protected void calcVertexesPosition(AxisAlignedBB bounds)
+	public void registerFor(Block block)
 	{
-		if (bounds == null)
-			return;
-
-		for (Face f : shape.getFaces())
+		MalisisRegistry.registerBlockRenderer(block, this);
+		ModelLoader.setCustomStateMapper(block, new IStateMapper()
 		{
-			face = f;
-			for (Vertex v : f.getVertexes())
-				v.interpolateCoord(bounds);
-		}
-	}
-
-	/**
-	 * Gets and hold reference to damagedBlocks from Minecraft.renderGlobal via reflection.
-	 *
-	 * @return the damaged blocks
-	 */
-	protected Map getDamagedBlocks()
-	{
-		if (damagedBlocks != null)
-			return damagedBlocks;
-
-		try
-		{
-			Field modifiers = Field.class.getDeclaredField("modifiers");
-			modifiers.setAccessible(true);
-
-			Field f = ReflectionHelper.findField(RenderGlobal.class, MalisisCore.isObfEnv ? "field_94141_F" : "destroyBlockIcons");
-			modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-			damagedIcons = (IIcon[]) f.get(Minecraft.getMinecraft().renderGlobal);
-
-			f = ReflectionHelper.findField(RenderGlobal.class, MalisisCore.isObfEnv ? "field_72738_E" : "damagedBlocks");
-
-			modifiers.setInt(f, f.getModifiers());
-			damagedBlocks = (HashMap) f.get(Minecraft.getMinecraft().renderGlobal);
-
-			return damagedBlocks;
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	/**
-	 * Gets the destroy block progress for this rendering. Only used for TESR.
-	 *
-	 * @return the block destroy progress
-	 */
-	protected DestroyBlockProgress getBlockDestroyProgress()
-	{
-		if (renderType != RenderType.TESR_WORLD)
-			return null;
-		Map damagedBlocks = getDamagedBlocks();
-		if (damagedBlocks == null || damagedBlocks.isEmpty())
-			return null;
-
-		Iterator iterator = damagedBlocks.values().iterator();
-		while (iterator.hasNext())
-		{
-			DestroyBlockProgress dbp = (DestroyBlockProgress) iterator.next();
-			if (isCurrentBlockDestroyProgress(dbp))
-				return dbp;
-		}
-		return null;
-
-	}
-
-	/**
-	 * Checks whether the DestroyBlockProgress specified should apply for this TESR.
-	 *
-	 * @param dbp the dbp
-	 * @return true, if is current block destroy progress
-	 */
-	protected boolean isCurrentBlockDestroyProgress(DestroyBlockProgress dbp)
-	{
-		return dbp.getPartialBlockX() == x && dbp.getPartialBlockY() == y && dbp.getPartialBlockZ() == z;
-	}
-
-	/**
-	 * Gets the render id of this {@link MalisisRenderer}.
-	 *
-	 * @return the render id
-	 */
-	@Override
-	public int getRenderId()
-	{
-		return renderId;
-	}
-
-	/**
-	 * Registers this {@link MalisisRenderer} to be used for rendering for specified classes.<br>
-	 * Classes have to extend Block or TileEntity.<br>
-	 * <font color="990000">A static <b>renderId</b> field is required inside the class extending Block !</font>
-	 *
-	 * @param listClass the list class
-	 */
-	public void registerFor(Class... listClass)
-	{
-		for (Class clazz : listClass)
-		{
-			if (Block.class.isAssignableFrom(clazz))
+			@Override
+			public Map putStateModelLocations(Block block)
 			{
-				try
-				{
-					clazz.getField("renderId").set(null, renderId);
-					RenderingRegistry.registerBlockHandler(this);
-				}
-				catch (ReflectiveOperationException e)
-				{
-					MalisisCore.log.error("[MalisisRenderer] Tried to register ISBRH for block class {} that does not have renderId field",
-							clazz.getSimpleName());
-					e.printStackTrace();
-				}
+				return ImmutableMap.of();
 			}
-			else if (TileEntity.class.isAssignableFrom(clazz))
-			{
-				ClientRegistry.bindTileEntitySpecialRenderer(clazz, this);
-			}
-		}
+		});
+	}
+
+	/**
+	 * Registers this {@link MalisisRenderer} to be used for rendering for a specified class.<br>
+	 * Class has to extend TileEntity.<br>
+	 *
+	 * @param clazz the clazz
+	 */
+	public void registerFor(Class<? extends TileEntity> clazz)
+	{
+		ClientRegistry.bindTileEntitySpecialRenderer(clazz, this);
 	}
 
 	/**
@@ -1328,7 +1044,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	public void registerFor(Item item)
 	{
-		MinecraftForgeClient.registerItemRenderer(item, this);
+		//MinecraftForgeClient.registerItemRenderer(item, this);
 	}
 
 	/**

@@ -32,8 +32,14 @@ import java.util.Map;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.model.IFlexibleBakedModel;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.vector.Matrix4f;
@@ -45,7 +51,7 @@ import org.lwjgl.util.vector.Vector3f;
  * @author Ordinastie
  *
  */
-public class Shape implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale
+public class Shape implements IFlexibleBakedModel, ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale
 {
 	/** {@link Face Faces} making up this {@link Shape} */
 	protected Face[] faces;
@@ -714,6 +720,65 @@ public class Shape implements ITransformable.Translate, ITransformable.Rotate, I
 	{
 		for (Face f : faces)
 			f.deductParameters();
+	}
+
+	//#region IFlexibleModel
+	@Override
+	public boolean isAmbientOcclusion()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean isGui3d()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean isBuiltInRenderer()
+	{
+		return false;
+	}
+
+	@Override
+	public TextureAtlasSprite getTexture()
+	{
+		return null;
+	}
+
+	@Override
+	@SuppressWarnings("deprecation")
+	public ItemCameraTransforms getItemCameraTransforms()
+	{
+		return null;
+	}
+
+	@Override
+	public List<BakedQuad> getFaceQuads(EnumFacing side)
+	{
+		List<BakedQuad> quads = new ArrayList<>();
+		for (Face f : getFaces())
+			if (f.getFace() == side)
+				quads.add(f);
+
+		return quads;
+	}
+
+	@Override
+	public List<BakedQuad> getGeneralQuads()
+	{
+		List<BakedQuad> quads = new ArrayList<>();
+		for (Face f : getFaces())
+			if (f.getFace() == null)
+				quads.add(f);
+		return quads;
+	}
+
+	@Override
+	public VertexFormat getFormat()
+	{
+		return DefaultVertexFormats.BLOCK;
 	}
 
 	/**

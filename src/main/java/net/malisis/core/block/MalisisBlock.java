@@ -26,6 +26,10 @@ package net.malisis.core.block;
 
 import java.util.List;
 
+import net.malisis.core.MalisisRegistry;
+import net.malisis.core.renderer.icon.IIconMetaProvider;
+import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
+import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.RaytraceBlock;
 import net.minecraft.block.Block;
@@ -42,15 +46,17 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Ordinastie
  *
  */
-public class MalisisBlock extends Block implements IBoundingBox
+public class MalisisBlock extends Block implements IBoundingBox, IIconMetaProvider
 {
 	protected String name;
 	protected AxisAlignedBB boundingBox;
+	protected IIconProvider iconProvider;
 
 	protected MalisisBlock(Material material)
 	{
@@ -70,24 +76,35 @@ public class MalisisBlock extends Block implements IBoundingBox
 		return name;
 	}
 
+	public void setTextureName(String textureName)
+	{
+		if (StringUtils.isEmpty(textureName))
+			return;
+
+		setIconProvider(new DefaultIconProvider(textureName));
+	}
+
+	public void setIconProvider(IIconProvider iconProvider)
+	{
+		this.iconProvider = iconProvider;
+	}
+
+	@Override
+	public IIconProvider getIconProvider()
+	{
+		return iconProvider;
+	}
+
 	public void register()
 	{
-		GameRegistry.registerBlock(this, getName());
+		register(ItemBlock.class);
 	}
 
 	public void register(Class<? extends ItemBlock> item)
 	{
 		GameRegistry.registerBlock(this, item, getName());
+		MalisisRegistry.registerIconProvider(iconProvider);
 	}
-
-	//	@Override
-	//	public void registerIcons(IIconRegister reg)
-	//	{
-	//		if (textureName == null)
-	//			return;
-	//
-	//		super.registerIcons(reg);
-	//	}
 
 	@Override
 	public AxisAlignedBB[] getBoundingBox(IBlockAccess world, BlockPos pos, BoundingBoxType type)
@@ -98,9 +115,9 @@ public class MalisisBlock extends Block implements IBoundingBox
 	@Override
 	public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity)
 	{
-		for (AxisAlignedBB aabb : getBoundingBox(world, pos, BoundingBoxType.COLLISION))
+		for (AxisAlignedBB aabb : AABBUtils.offset(pos, getBoundingBox(world, pos, BoundingBoxType.COLLISION)))
 		{
-			if (aabb != null && mask.intersectsWith(aabb.offset(pos.getX(), pos.getY(), pos.getZ())))
+			if (aabb != null && mask.intersectsWith(aabb))
 				list.add(aabb);
 		}
 	}

@@ -29,8 +29,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.util.chunkblock.ChunkBlockTransformer;
-import net.malisis.core.util.chunkcollision.ChunkCollisionTransformer;
+import net.malisis.core.renderer.transformer.MalisisRendererTransformer;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
@@ -46,8 +45,8 @@ public class MalisisCorePlugin implements IFMLLoadingPlugin
 	@Override
 	public String[] getASMTransformerClass()
 	{
-		return new String[] { MalisisCoreTransformer.class.getName(), ChunkBlockTransformer.class.getName(),
-				ChunkCollisionTransformer.class.getName() };
+		return new String[] { /*MalisisCoreTransformer.class.getName(), ChunkBlockTransformer.class.getName(),
+								ChunkCollisionTransformer.class.getName(),*/MalisisRendererTransformer.class.getName() };
 	}
 
 	@Override

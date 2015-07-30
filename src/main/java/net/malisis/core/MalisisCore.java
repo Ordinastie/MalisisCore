@@ -34,8 +34,6 @@ import net.malisis.core.configuration.ConfigurationGui;
 import net.malisis.core.configuration.Settings;
 import net.malisis.core.network.MalisisNetwork;
 import net.malisis.core.util.chunkblock.ChunkBlockHandler;
-import net.malisis.core.util.finiteliquid.FiniteLiquid;
-import net.malisis.core.util.finiteliquid.FiniteLiquidRenderer;
 import net.malisis.core.util.replacement.ReplacementTool;
 import net.malisis.core.util.syncer.Syncer;
 import net.minecraft.client.Minecraft;
@@ -64,6 +62,7 @@ import org.apache.logging.log4j.Logger;
 @Mod(modid = MalisisCore.modid, name = MalisisCore.modname, version = MalisisCore.version)
 public class MalisisCore implements IMalisisMod
 {
+	public static final int malisisRenderType = 4;
 	/** Mod ID. */
 	public static final String modid = "malisiscore";
 	/** Mod name. */
@@ -183,8 +182,8 @@ public class MalisisCore implements IMalisisMod
 	{
 		ClientCommandHandler.instance.registerCommand(new MalisisCommand());
 
-		if (FMLCommonHandler.instance().getSide() == Side.CLIENT)
-			new FiniteLiquidRenderer().registerFor(FiniteLiquid.class);
+		//		if (FMLCommonHandler.instance().getSide() == Side.CLIENT)
+		//			new FiniteLiquidRenderer().registerFor(FiniteLiquid.class);
 	}
 
 	/**

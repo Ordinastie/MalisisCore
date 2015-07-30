@@ -26,7 +26,10 @@ package net.malisis.core.renderer.element.face;
 
 import static net.minecraft.util.EnumFacing.*;
 import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.Vertex;
+import net.malisis.core.renderer.element.vertex.BottomNorthWest;
+import net.malisis.core.renderer.element.vertex.BottomSouthWest;
+import net.malisis.core.renderer.element.vertex.TopNorthWest;
+import net.malisis.core.renderer.element.vertex.TopSouthWest;
 
 /**
  * @author Ordinastie
@@ -37,7 +40,7 @@ public class WestFace extends Face
 
 	public WestFace()
 	{
-		super(new Vertex.TopNorthWest(), new Vertex.BottomNorthWest(), new Vertex.BottomSouthWest(), new Vertex.TopSouthWest());
+		super(new TopNorthWest(), new BottomNorthWest(), new BottomSouthWest(), new TopSouthWest());
 
 		params.direction.set(WEST);
 		params.textureSide.set(WEST);

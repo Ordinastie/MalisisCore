@@ -22,29 +22,18 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.element.face;
+package net.malisis.core.renderer.element.vertex;
 
-import static net.minecraft.util.EnumFacing.*;
-import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.vertex.TopNorthEast;
-import net.malisis.core.renderer.element.vertex.TopNorthWest;
-import net.malisis.core.renderer.element.vertex.TopSouthEast;
-import net.malisis.core.renderer.element.vertex.TopSouthWest;
+import net.malisis.core.renderer.element.Vertex;
 
 /**
  * @author Ordinastie
  *
  */
-public class TopFace extends Face
+public class TopNorthEast extends Vertex
 {
-	public TopFace()
+	public TopNorthEast()
 	{
-		super(new TopNorthWest(), new TopSouthWest(), new TopSouthEast(), new TopNorthEast());
-
-		params.direction.set(UP);
-		params.textureSide.set(UP);
-		params.colorFactor.set(1.0F);
-		params.aoMatrix.set(calculateAoMatrix(UP));
-		setStandardUV();
+		super(1, 1, 0);
 	}
 }

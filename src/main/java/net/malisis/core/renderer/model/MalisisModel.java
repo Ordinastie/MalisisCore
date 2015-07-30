@@ -24,8 +24,10 @@
 
 package net.malisis.core.renderer.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import net.malisis.core.MalisisCore;
@@ -34,9 +36,15 @@ import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.model.loader.ObjFileImporter;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.model.IFlexibleBakedModel;
 
-// TODO: Auto-generated Javadoc
 /**
  * This class is a holder for multiple shapes.<br>
  * If a {@link ResourceLocation} is provided, the model will be populated using the specified {@link IModelLoader}. If no loaded is giver,
@@ -44,7 +52,9 @@ import net.minecraft.util.ResourceLocation;
  *
  * @author Ordinastie
  */
-public class MalisisModel implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale, Iterable<Shape>
+@SuppressWarnings("deprecation")
+public class MalisisModel implements IFlexibleBakedModel, ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale,
+		Iterable<Shape>
 {
 	/** Shapes building this {@link MalisisModel}. */
 	protected Map<String, Shape> shapes = new HashMap<>();
@@ -54,8 +64,16 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	 * Allows {@link Shape shapes} to be added manually to the model.
 	 */
 	public MalisisModel()
-	{
+	{}
 
+	/**
+	 * Instantiates a new {@link MalisisModel} with the specified {@link Shape shapes}.
+	 *
+	 * @param shapes the shapes
+	 */
+	public MalisisModel(Shape... shapes)
+	{
+		addShapes(shapes);
 	}
 
 	/**
@@ -180,7 +198,8 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
-	 * Renders a specific {@link Shape} of this {@link MalisisModel} using the specified {@link MalisisRenderer} and {@link RenderParameters}.
+	 * Renders a specific {@link Shape} of this {@link MalisisModel} using the specified {@link MalisisRenderer} and
+	 * {@link RenderParameters}.
 	 *
 	 * @param renderer the renderer
 	 * @param name the name of the shape
@@ -236,6 +255,62 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	public Iterator<Shape> iterator()
 	{
 		return shapes.values().iterator();
+	}
+
+	//#region IFlexibleModel
+	@Override
+	public boolean isAmbientOcclusion()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isGui3d()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isBuiltInRenderer()
+	{
+		return false;
+	}
+
+	@Override
+	public TextureAtlasSprite getTexture()
+	{
+		return null;
+	}
+
+	@Override
+	public ItemCameraTransforms getItemCameraTransforms()
+	{
+		return null;
+	}
+
+	@Override
+	public List<BakedQuad> getFaceQuads(EnumFacing side)
+	{
+		List<BakedQuad> quads = new ArrayList<>();
+		for (Shape s : this)
+			quads.addAll(s.getFaceQuads(side));
+		return quads;
+	}
+
+	@Override
+	public List<BakedQuad> getGeneralQuads()
+	{
+		List<BakedQuad> quads = new ArrayList<>();
+		for (Shape s : this)
+			quads.addAll(s.getGeneralQuads());
+
+		return quads;
+	}
+
+	@Override
+	public VertexFormat getFormat()
+	{
+		return DefaultVertexFormats.BLOCK;
 	}
 
 }

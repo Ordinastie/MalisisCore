@@ -28,9 +28,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.malisis.core.renderer.animation.transformation.ITransformable;
+import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 
 /**
  * @author Ordinastie
@@ -38,7 +38,7 @@ import net.minecraftforge.common.util.ForgeDirection;
  */
 public class RenderParameters implements ITransformable.Color, ITransformable.Alpha, ITransformable.Brightness
 {
-	private List<Parameter> listParams = new LinkedList<>();
+	private List<Parameter<?>> listParams = new LinkedList<>();
 	/**
 	 * Defines whether to render all faces even if shoudSideBeRendered is false
 	 */
@@ -52,10 +52,6 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	 */
 	public Parameter<AxisAlignedBB> renderBounds = new Parameter<>(null);
 	/**
-	 * Defines whether the vertex coordinates are relatives to the bounding box. This means 0 = min_, 1 = max_
-	 */
-	public Parameter<Boolean> vertexPositionRelativeToRenderBounds = new Parameter<>(true);
-	/**
 	 * Define whether a custom texture for drawing. It disable default icon behavior. A ResourceLocation need to be bound.
 	 */
 	public Parameter<Boolean> useCustomTexture = new Parameter<>(false);
@@ -64,9 +60,9 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	 */
 	public Parameter<Boolean> applyTexture = new Parameter<>(true);
 	/**
-	 * Defines an icon to use for the block/face (will override textureSide) (Block Level)
+	 * Defines an {@link IIconProvider} to be used to get the icon for the faces. (Block Level)
 	 */
-	public Parameter<IIcon> icon = new Parameter<>(null);
+	public Parameter<IIconProvider> iconProvider = new Parameter<>(null);
 	/**
 	 * Defines whether to use block.getIcon(world, x, y, z, side) instead of block.getIcon(side, metadata) to get the IIcon
 	 */
@@ -131,11 +127,11 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	/**
 	 * Defines the general direction of a face. Used for normals, and offset for AO and brightness calculation (Face Level)
 	 */
-	public Parameter<ForgeDirection> direction = new Parameter<>(null);
+	public Parameter<EnumFacing> direction = new Parameter<>(null);
 	/**
 	 * Defines which direction will be used to get the block icon. If ForgeDirection.UNKNOWN, no texture will be used (Face Level)
 	 */
-	public Parameter<ForgeDirection> textureSide = new Parameter<>(null);
+	public Parameter<EnumFacing> textureSide = new Parameter<>(null);
 	/**
 	 * Defines which block to take into account for AO calculation (Face Level)
 	 */
@@ -154,10 +150,9 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 		listParams.add(renderAllFaces);
 		listParams.add(useBlockBounds);
 		listParams.add(renderBounds);
-		listParams.add(vertexPositionRelativeToRenderBounds);
 		listParams.add(useCustomTexture);
 		listParams.add(applyTexture);
-		listParams.add(icon);
+		listParams.add(iconProvider);
 		listParams.add(useWorldSensitiveIcon);
 		listParams.add(useTexture);
 		listParams.add(interpolateUV);
@@ -207,12 +202,11 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 			getParameter(i).merge(params.getParameter(i));
 	}
 
-	public static RenderParameters merge(RenderParameters rp1, RenderParameters rp2)
+	public static RenderParameters merge(RenderParameters... params)
 	{
 		RenderParameters rp = new RenderParameters();
-		rp.merge(rp1);
-		rp.merge(rp2);
-
+		for (RenderParameters p : params)
+			rp.merge(p);
 		return rp;
 	}
 
