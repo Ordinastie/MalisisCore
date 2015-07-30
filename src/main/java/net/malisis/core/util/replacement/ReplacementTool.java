@@ -42,7 +42,6 @@ import net.minecraft.util.RegistryNamespaced;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -59,9 +58,8 @@ public class ReplacementTool
 	/** List of original {@link Item} being replaced. The key is the replacement, the value is the Vanilla {@code Item}. */
 	private HashMap<Item, Item> originalItems = new HashMap<>();
 
-	private Class[] types = { Integer.TYPE, String.class, Object.class };
-	private Method method = ReflectionHelper.findMethod(FMLControlledNamespacedRegistry.class, (FMLControlledNamespacedRegistry) null,
-			new String[] { "addObjectRaw" }, types);
+	private Class[] types = { Integer.TYPE, Object.class, Object.class };
+	private Method method = AsmUtils.changeMethodAccess(FMLControlledNamespacedRegistry.class, "addObjectRaw", types);
 
 	private ReplacementTool()
 	{
