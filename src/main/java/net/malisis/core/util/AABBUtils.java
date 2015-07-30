@@ -239,9 +239,9 @@ public class AABBUtils
 		if (aabbs == null)
 			return null;
 
-		for (AxisAlignedBB aabb : aabbs)
-			if (aabb != null)
-				aabb.offset(pos.getX(), pos.getY(), pos.getZ());
+		for (int i = 0; i < aabbs.length; i++)
+			if (aabbs[i] != null)
+				aabbs[i] = aabbs[i].offset(pos.getX(), pos.getY(), pos.getZ());
 		return aabbs;
 	}
 

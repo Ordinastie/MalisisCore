@@ -194,12 +194,11 @@ public class RaytraceBlock
 		AxisAlignedBB[] aabbs = block.getBoundingBox(world(), pos, BoundingBoxType.RAYTRACE);
 
 		double maxDist = Point.distanceSquared(src, dest);
-		for (AxisAlignedBB aabb : aabbs)
+		for (AxisAlignedBB aabb : AABBUtils.offset(pos, aabbs))
 		{
 			if (aabb == null)
 				continue;
 
-			AABBUtils.offset(pos, aabb);
 			for (Point p : ray.intersect(aabb))
 			{
 				if (Point.distanceSquared(src, p) < maxDist)
