@@ -266,7 +266,6 @@ public class MalisisFont
 	protected void drawString(String text, FontRenderOptions fro)
 	{
 		float x = 0;
-		float f = fro.fontScale / options.fontSize * 9;
 
 		fro.resetStylesLine();
 		StringWalker walker = new StringWalker(text, this, fro);
@@ -275,7 +274,7 @@ public class MalisisFont
 		{
 			CharData cd = getCharData(walker.getChar());
 			drawChar(cd, x, 0, fro);
-			x += walker.getWidth() * f;
+			x += walker.getWidth();
 		}
 	}
 
@@ -307,8 +306,6 @@ public class MalisisFont
 	protected void drawLines(String text, FontRenderOptions fro)
 	{
 		float x = 0;
-		float f = fro.fontScale / options.fontSize * 9;
-
 		fro.resetStylesLine();
 
 		StringWalker walker = new StringWalker(text, this, fro);
@@ -323,7 +320,7 @@ public class MalisisFont
 				if (fro.strikethrough)
 					drawLineChar(cd, x, getStringHeight(fro) * 0.5F + fro.fontScale, fro);
 
-				x += walker.getWidth() * f;
+				x += walker.getWidth();
 			}
 		}
 	}
