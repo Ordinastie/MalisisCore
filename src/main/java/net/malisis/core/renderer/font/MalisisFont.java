@@ -422,7 +422,7 @@ public class MalisisFont
 			width -= 4;
 
 		int pos = (int) getCharPosition(str, fro, width, 0);
-		return str.substring(0, pos) + (appendPeriods ? "..." : "");
+		return str.substring(0, pos) + (pos < str.length() && appendPeriods ? "..." : "");
 	}
 
 	/**
@@ -557,12 +557,12 @@ public class MalisisFont
 			return 0;
 
 		str = processString(str, fro);
-		float fx = position / (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
+		//float fx = position / (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
 
 		StringWalker walker = new StringWalker(str, this, fro);
 		walker.startIndex(charOffset);
 		walker.skipChars(true);
-		return walker.walkTo(fx);
+		return walker.walkTo(position);
 	}
 
 	/**
