@@ -1051,6 +1051,14 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	protected int getBaseBrightness()
 	{
+		if (block != null)
+		{
+			if (world != null && block.getLightValue(world, x, y, z) != 0)
+				return block.getLightValue(world, x, y, z) << 4;
+			else if (block.getLightValue() != 0)
+				return block.getLightValue() << 4;
+		}
+
 		//not in world
 		if ((renderType != RenderType.ISBRH_WORLD && renderType != RenderType.TESR_WORLD) || world == null
 				|| !params.useBlockBrightness.get())
