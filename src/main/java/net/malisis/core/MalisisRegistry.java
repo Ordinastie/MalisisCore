@@ -30,14 +30,16 @@ import java.util.Map;
 import java.util.Set;
 
 import net.malisis.core.renderer.IBlockRenderer;
+import net.malisis.core.renderer.IItemRenderer;
+import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.icon.IIconMetaProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.BlockModelRenderer;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -62,7 +64,7 @@ public class MalisisRegistry
 	//#region IBlockRenderer
 	private Map<Block, IBlockRenderer> blockRenderers = new HashMap<>();
 
-	public static void registerBlockRenderer(Block block, IBlockRenderer provider)
+	public static void registerBlockRenderer(Block block, IBlockRenderer renderer)
 	{
 		if (block.getRenderType() != MalisisCore.malisisRenderType)
 		{
@@ -71,15 +73,16 @@ public class MalisisRegistry
 			return;
 		}
 
-		instance.blockRenderers.put(block, provider);
+		instance.blockRenderers.put(block, renderer);
+		instance.itemRenderers.put(Item.getItemFromBlock(block), renderer);
 	}
 
-	public static boolean renderBlock(BlockModelRenderer bmr, WorldRenderer wr, IBlockAccess world, BlockPos pos, IBlockState state)
+	public static boolean renderBlock(IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		IBlockRenderer renderer = instance.blockRenderers.get(state.getBlock());
 		if (renderer == null)
 			return false;
-		return renderer.renderBlock(bmr, wr, world, pos, state);
+		return renderer.renderBlock(world, pos, state);
 	}
 
 	public static TextureAtlasSprite getParticleIcon(IBlockState state)
@@ -93,6 +96,27 @@ public class MalisisRegistry
 	}
 
 	//#end IBlockRenderer
+
+	//#region IItemRenderer
+	private Map<Item, IItemRenderer> itemRenderers = new HashMap<>();
+
+	public static void registerItemRenderer(Item item, IItemRenderer renderer)
+	{
+		instance.itemRenderers.put(item, renderer);
+	}
+
+	public static boolean renderItem(ItemStack itemStack)
+	{
+		Item item = itemStack.getItem();
+		IItemRenderer ir = instance.itemRenderers.get(item);
+		if (ir == null)
+			return false;
+
+		ir.renderItem(itemStack, MalisisRenderer.getPartialTick());
+		return true;
+	}
+
+	//#end IItemRenderer
 
 	//#region IIconProvider
 	@SideOnly(Side.CLIENT)

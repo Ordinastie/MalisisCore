@@ -28,7 +28,6 @@ import static org.objectweb.asm.Opcodes.*;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmHook;
 import net.malisis.core.asm.MalisisClassTransformer;
-import net.malisis.core.asm.mappings.McpFieldMapping;
 import net.malisis.core.asm.mappings.McpMethodMapping;
 
 import org.objectweb.asm.tree.InsnList;
@@ -49,6 +48,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 	public void registerHooks()
 	{
 		register(blockHook());
+		register(itemHook());
 		register(particleHook());
 	}
 
@@ -77,40 +77,58 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		match.add(new VarInsnNode(ISTORE, 5));
 
 		//if (i == MalisisCore.malisisRenderType)
-		//	return MalisisRegistry.render(this.blockModelRenderer, wr, world, pos, state);
+		//	return MalisisRegistry.render(world, pos, state);
 		//		ILOAD 6
 		//		ICONST_4 | SIPUSH 4
 		//		IF_ICMPNE L18
-		//		ALOAD 0
-		//		GETFIELD net/minecraft/client/renderer/BlockRendererDispatcher.blockModelRenderer : Lnet/minecraft/client/renderer/BlockModelRenderer;
-		//		ALOAD 6
 		//	    ALOAD 7
 		//	    ALOAD 8
 		//	    ALOAD 9
-		//	    INVOKESTATIC net/malisis/core/renderer/BlockRendererRegistry.render (Lnet/minecraft/client/renderer/BlockModelRenderer;Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z
+		//	    INVOKESTATIC net/malisis/core/renderer/BlockRendererRegistry.render (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z
 		LabelNode falseLabel = new LabelNode();
-		McpFieldMapping blockModelRenderer = new McpFieldMapping("blockModelRenderer", "field_175027_c",
-				"net/minecraft/client/renderer/BlockRendererDispatcher", "Lnet/minecraft/client/renderer/BlockModelRenderer;");
 		InsnList insert = new InsnList();
 		insert.add(new VarInsnNode(ILOAD, 5));
 		insert.add(new IntInsnNode(SIPUSH, MalisisCore.malisisRenderType));
 		insert.add(new JumpInsnNode(IF_ICMPNE, falseLabel));
-		insert.add(new VarInsnNode(ALOAD, 0));
-		insert.add(blockModelRenderer.getInsnNode(GETFIELD));
-		insert.add(new VarInsnNode(ALOAD, 4));
 		insert.add(new VarInsnNode(ALOAD, 3));
 		insert.add(new VarInsnNode(ALOAD, 2));
 		insert.add(new VarInsnNode(ALOAD, 1));
-		insert.add(new MethodInsnNode(
-				INVOKESTATIC,
-				"net/malisis/core/MalisisRegistry",
-				"renderBlock",
-				"(Lnet/minecraft/client/renderer/BlockModelRenderer;Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z",
-				false));
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/MalisisRegistry", "renderBlock",
+				"(Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z", false));
 		insert.add(new InsnNode(IRETURN));
 		insert.add(falseLabel);
 
 		ah.jumpAfter(match).insert(insert);
+		return ah;
+	}
+
+	private AsmHook itemHook()
+	{
+		McpMethodMapping renderByItem = new McpMethodMapping("renderByItem", "func_179022_a",
+				"net/minecraft/client/renderer/tileentity/TileEntityItemStackRenderer", "(Lnet/minecraft/item/ItemStack;)V");
+		AsmHook ah = new AsmHook(renderByItem);
+
+		//		if (MalisisRegistry.renderItem(itemStack))
+		//			return;
+
+		//		ALOAD 3
+		//	    INVOKESTATIC net/malisis/core/MalisisRegistry.renderItem (Lnet/minecraft/item/ItemStack;)Z
+		//	    IFEQ L6
+		//	   L7
+		//	    LINENUMBER 119 L7
+		//	    ACONST_NULL
+		//	    RETURN
+		//	   L6
+
+		LabelNode falseLabel = new LabelNode();
+		InsnList insert = new InsnList();
+		insert.add(new VarInsnNode(ALOAD, 1));
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/MalisisRegistry", "renderItem", "(Lnet/minecraft/item/ItemStack;)Z",
+				false));
+		insert.add(new InsnNode(RETURN));
+		insert.add(falseLabel);
+
+		ah.insert(insert);
 		return ah;
 	}
 
