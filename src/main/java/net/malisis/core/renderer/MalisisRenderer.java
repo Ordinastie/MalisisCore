@@ -871,6 +871,14 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 */
 	protected int getBaseBrightness(RenderParameters params)
 	{
+		if (block != null)
+		{
+			if (world != null && block.getLightValue(world, pos) != 0)
+				return block.getLightValue(world, pos) << 4;
+			else if (block.getLightValue() != 0)
+				return block.getLightValue() << 4;
+		}
+
 		//not in world
 		if ((renderType != RenderType.BLOCK && renderType != RenderType.TILE_ENTITY) || world == null || !params.useBlockBrightness.get())
 			return params.brightness.get();

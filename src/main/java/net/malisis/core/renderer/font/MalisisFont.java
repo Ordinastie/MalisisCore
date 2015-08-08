@@ -267,7 +267,6 @@ public class MalisisFont
 	protected void drawString(String text, FontRenderOptions fro)
 	{
 		float x = 0;
-		float f = fro.fontScale / options.fontSize * 9;
 
 		fro.resetStylesLine();
 		StringWalker walker = new StringWalker(text, this, fro);
@@ -276,7 +275,7 @@ public class MalisisFont
 		{
 			CharData cd = getCharData(walker.getChar());
 			drawChar(cd, x, 0, fro);
-			x += walker.getWidth() * f;
+			x += walker.getWidth();
 		}
 	}
 
@@ -308,8 +307,6 @@ public class MalisisFont
 	protected void drawLines(String text, FontRenderOptions fro)
 	{
 		float x = 0;
-		float f = fro.fontScale / options.fontSize * 9;
-
 		fro.resetStylesLine();
 
 		StringWalker walker = new StringWalker(text, this, fro);
@@ -324,7 +321,7 @@ public class MalisisFont
 				if (fro.strikethrough)
 					drawLineChar(cd, x, getStringHeight(fro) * 0.5F + fro.fontScale, fro);
 
-				x += walker.getWidth() * f;
+				x += walker.getWidth();
 			}
 		}
 	}
@@ -426,7 +423,7 @@ public class MalisisFont
 			width -= 4;
 
 		int pos = (int) getCharPosition(str, fro, width, 0);
-		return str.substring(0, pos) + (appendPeriods ? "..." : "");
+		return str.substring(0, pos) + (pos < str.length() && appendPeriods ? "..." : "");
 	}
 
 	/**
@@ -561,12 +558,12 @@ public class MalisisFont
 			return 0;
 
 		str = processString(str, fro);
-		float fx = position / (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
+		//float fx = position / (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
 
 		StringWalker walker = new StringWalker(str, this, fro);
 		walker.startIndex(charOffset);
 		walker.skipChars(true);
-		return walker.walkTo(fx);
+		return walker.walkTo(position);
 	}
 
 	/**

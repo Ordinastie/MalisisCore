@@ -222,7 +222,7 @@ public class StringWalker
 			return false;
 
 		c = str.charAt(index);
-		width = font.getCharWidth(c);
+		width = font.getCharWidth(c, fro);
 
 		if (!litteral && !skipChars && (ecf != null || (link != null && !isText)))
 			width = 0;
