@@ -292,7 +292,7 @@ public class GuiRenderer extends MalisisRenderer
 		drawRectangle(x, y, z, width, height, color, alpha, true);
 	}
 
-	public void drawRectangle(int x, int y, int z, int width, int height, int color, int alpha, boolean relative)
+	public void drawRectangle(float x, float y, float z, float width, float height, int color, int alpha, boolean relative)
 	{
 		if (relative && currentComponent != null)
 		{

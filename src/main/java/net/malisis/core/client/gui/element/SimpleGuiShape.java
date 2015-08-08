@@ -44,7 +44,7 @@ public class SimpleGuiShape extends GuiShape
 	}
 
 	@Override
-	public void setSize(int width, int height)
+	public void setSize(float width, float height)
 	{
 		faces[0].factor(width, height, 0);
 	}

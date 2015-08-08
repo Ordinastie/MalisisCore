@@ -45,7 +45,7 @@ public class XResizableGuiShape extends GuiShape
 	}
 
 	@Override
-	public void setSize(int w, int h)
+	public void setSize(float w, float h)
 	{
 		w = Math.max(w - 2 * sideWidth, 0);
 

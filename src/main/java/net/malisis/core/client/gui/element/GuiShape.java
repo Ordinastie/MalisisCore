@@ -46,7 +46,7 @@ public abstract class GuiShape extends Shape
 			faces[i] = new GuiFace();
 	}
 
-	public void setPosition(int x, int y)
+	public void setPosition(float x, float y)
 	{
 		translate(x, y, 0);
 	}
@@ -81,7 +81,7 @@ public abstract class GuiShape extends Shape
 		scale(scale, scale);
 	}
 
-	public abstract void setSize(int width, int height);
+	public abstract void setSize(float width, float height);
 
 	public abstract void scale(float x, float y);
 

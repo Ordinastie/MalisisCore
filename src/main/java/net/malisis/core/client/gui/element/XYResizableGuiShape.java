@@ -51,7 +51,7 @@ public class XYResizableGuiShape extends GuiShape
 	}
 
 	@Override
-	public void setSize(int w, int h)
+	public void setSize(float w, float h)
 	{
 		w = Math.max(w - 2 * cornerWidth, 0);
 		h = Math.max(h - 2 * cornerHeight, 0);

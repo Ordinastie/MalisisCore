@@ -1137,6 +1137,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	public void drawText(GuiRenderer renderer)
 	{
 		FontRenderOptions fro = isDisabled() ? disabledFro : this.fro;
+		if (fro == null)
+			fro = new FontRenderOptions();
 		if (!multiLine)
 		{
 			int end = text.length();
