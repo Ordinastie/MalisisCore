@@ -38,7 +38,7 @@ import net.minecraftforge.common.util.ForgeDirection;
  */
 public class RenderParameters implements ITransformable.Color, ITransformable.Alpha, ITransformable.Brightness
 {
-	private List<Parameter> listParams = new LinkedList<>();
+	protected List<Parameter> listParams = new LinkedList<>();
 	/**
 	 * Defines whether to render all faces even if shoudSideBeRendered is false
 	 */
@@ -205,15 +205,6 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 
 		for (int i = 0; i < listParams.size(); i++)
 			getParameter(i).merge(params.getParameter(i));
-	}
-
-	public static RenderParameters merge(RenderParameters rp1, RenderParameters rp2)
-	{
-		RenderParameters rp = new RenderParameters();
-		rp.merge(rp1);
-		rp.merge(rp2);
-
-		return rp;
 	}
 
 	@Override

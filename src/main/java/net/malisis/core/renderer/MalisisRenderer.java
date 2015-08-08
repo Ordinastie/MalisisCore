@@ -819,7 +819,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 		}
 
 		face = f;
-		params = RenderParameters.merge(rp, faceParams);
+		params = new RenderParameters();
+		params.merge(rp);
+		params.merge(faceParams);
 
 		if (!shouldRenderFace(face))
 			return;
@@ -979,7 +981,10 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 		for (Face f : shape.getFaces())
 		{
 			face = f;
-			RenderParameters params = RenderParameters.merge(f.getParameters(), parameters);
+			RenderParameters params = new RenderParameters();
+			params.merge(f.getParameters());
+			params.merge(parameters);
+
 			IIcon icon = getIcon(params);
 			if (icon != null)
 			{
