@@ -54,6 +54,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -93,6 +94,7 @@ public class MalisisCore implements IMalisisMod
 	{
 		instance = this;
 		network = new MalisisNetwork(this);
+		log = LogManager.getLogger(modid);
 	}
 
 	//#region IMalisisMod
@@ -165,8 +167,6 @@ public class MalisisCore implements IMalisisMod
 		MinecraftForge.EVENT_BUS.register(ReplacementTool.instance());
 		MinecraftForge.EVENT_BUS.register(ChunkBlockHandler.get());
 		//MinecraftForge.EVENT_BUS.register(ChunkCollision.client);
-
-		log = event.getModLog();
 
 		MalisisNetwork.createMessages(event.getAsmData());
 		Syncer.get().discover(event.getAsmData());
