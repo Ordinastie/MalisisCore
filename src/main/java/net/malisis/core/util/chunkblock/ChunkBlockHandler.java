@@ -303,6 +303,13 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 		return getAffectedChunks(world, aabb);
 	}
 
+	/**
+	 * Gets the chunks colliding with the specified {@link AxisAlignedBB}.
+	 *
+	 * @param world the world
+	 * @param aabbs the aabbs
+	 * @return the affected chunks
+	 */
 	public static List<Chunk> getAffectedChunks(World world, AxisAlignedBB... aabbs)
 	{
 		List<Chunk> chunks = new ArrayList<>();
@@ -312,7 +319,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 			{
 				for (int cz = (int) Math.floor(aabb.minZ) >> 4; cz <= (int) Math.ceil(aabb.maxZ) >> 4; cz++)
 				{
-					if (world.getChunkProvider().chunkExists(cx, cz))
+					if (world.getChunkProvider() != null && world.getChunkProvider().chunkExists(cx, cz))
 						chunks.add(world.getChunkFromChunkCoords(cx, cz));
 				}
 			}
