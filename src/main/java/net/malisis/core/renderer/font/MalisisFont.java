@@ -601,7 +601,7 @@ public class MalisisFont
 		//FontRenderOptions fro = new FontRenderOptions();
 
 		maxWidth -= 4;
-		maxWidth /= (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
+		//maxWidth /= (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
 		float lineWidth = 0;
 		float wordWidth = 0;
 
@@ -615,12 +615,6 @@ public class MalisisFont
 			char c = walker.getChar();
 			lineWidth += walker.getWidth();
 			wordWidth += walker.getWidth();
-			//			if (walker.isFormatting())
-			//			{
-			//				word.append(walker.getFormatting());
-			//				continue;
-			//			}
-			//			else
 			word.append(c);
 
 			//we just ended a new word, add it to the current line
