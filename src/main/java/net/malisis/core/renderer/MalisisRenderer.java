@@ -662,7 +662,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			return;
 		}
 
-		params = RenderParameters.merge(params, face.getParameters());
+		params = new RenderParameters();
+		params.merge(params);
+		params.merge(face.getParameters());
 
 		if (!shouldRenderFace(face, params))
 			return;
@@ -799,7 +801,10 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		//shape.applyMatrix();
 		for (Face f : shape.getFaces())
 		{
-			RenderParameters params = RenderParameters.merge(f.getParameters(), parameters);
+			RenderParameters params = new RenderParameters();
+			params.merge(f.getParameters());
+			params.merge(parameters);
+
 			MalisisIcon icon = getIcon(f, params);
 			boolean flipU = params.flipU.get();
 			if (params.direction.get() == EnumFacing.NORTH || params.direction.get() == EnumFacing.EAST)

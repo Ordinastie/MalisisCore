@@ -38,7 +38,7 @@ import net.minecraft.util.EnumFacing;
  */
 public class RenderParameters implements ITransformable.Color, ITransformable.Alpha, ITransformable.Brightness
 {
-	private List<Parameter<?>> listParams = new LinkedList<>();
+	protected List<Parameter> listParams = new LinkedList<>();
 	/**
 	 * Defines whether to render all faces even if shoudSideBeRendered is false
 	 */
@@ -200,14 +200,6 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 
 		for (int i = 0; i < listParams.size(); i++)
 			getParameter(i).merge(params.getParameter(i));
-	}
-
-	public static RenderParameters merge(RenderParameters... params)
-	{
-		RenderParameters rp = new RenderParameters();
-		for (RenderParameters p : params)
-			rp.merge(p);
-		return rp;
 	}
 
 	@Override
