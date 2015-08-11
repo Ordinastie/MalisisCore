@@ -32,28 +32,24 @@ import java.util.Map;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.client.model.IFlexibleBakedModel;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+// TODO: Auto-generated Javadoc
 /**
  * Base class for anything drawn with a {@link MalisisRenderer}. Supports basic transformations like scaling, translation and rotations.
  *
  * @author Ordinastie
  *
  */
-public class Shape implements IFlexibleBakedModel, ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale
+public class Shape implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale
 {
-	/** {@link Face Faces} making up this {@link Shape} */
+
+	/** {@link Face Faces} making up this {@link Shape}. */
 	protected Face[] faces;
 
 	/** The matrix containing all the transformations applied to this {@link Shape}. */
@@ -321,6 +317,9 @@ public class Shape implements IFlexibleBakedModel, ITransformable.Translate, ITr
 
 	//#end VERTEXES
 
+	/**
+	 * Reset matrix.
+	 */
 	private void resetMatrix()
 	{
 		transformMatrix.setIdentity();
@@ -694,7 +693,7 @@ public class Shape implements IFlexibleBakedModel, ITransformable.Translate, ITr
 		enableMergedVertexes();
 
 		HashMap<String, Vertex> vertexNames = new HashMap<String, Vertex>();
-		double x = 0, y = 0, z = 0;
+		float x = 0, y = 0, z = 0;
 		for (Vertex v : face.getVertexes())
 		{
 			vertexNames.put(v.name(), v);
@@ -702,7 +701,7 @@ public class Shape implements IFlexibleBakedModel, ITransformable.Translate, ITr
 			y += v.getY() / 4;
 			z += v.getZ() / 4;
 		}
-		face.scale(factor, x, y, z);
+		face.scale(factor, factor, factor, x, y, z);
 
 		for (Vertex v : face.getVertexes())
 		{
@@ -716,69 +715,13 @@ public class Shape implements IFlexibleBakedModel, ITransformable.Translate, ITr
 		return this;
 	}
 
+	/**
+	 * Deducts the parameters for each {@link Face} automatically.
+	 */
 	public void deductParameters()
 	{
 		for (Face f : faces)
 			f.deductParameters();
-	}
-
-	//#region IFlexibleModel
-	@Override
-	public boolean isAmbientOcclusion()
-	{
-		return true;
-	}
-
-	@Override
-	public boolean isGui3d()
-	{
-		return true;
-	}
-
-	@Override
-	public boolean isBuiltInRenderer()
-	{
-		return false;
-	}
-
-	@Override
-	public TextureAtlasSprite getTexture()
-	{
-		return null;
-	}
-
-	@Override
-	@SuppressWarnings("deprecation")
-	public ItemCameraTransforms getItemCameraTransforms()
-	{
-		return null;
-	}
-
-	@Override
-	public List<BakedQuad> getFaceQuads(EnumFacing side)
-	{
-		List<BakedQuad> quads = new ArrayList<>();
-		for (Face f : getFaces())
-			if (f.getFace() == side)
-				quads.add(f);
-
-		return quads;
-	}
-
-	@Override
-	public List<BakedQuad> getGeneralQuads()
-	{
-		List<BakedQuad> quads = new ArrayList<>();
-		for (Face f : getFaces())
-			if (f.getFace() == null)
-				quads.add(f);
-		return quads;
-	}
-
-	@Override
-	public VertexFormat getFormat()
-	{
-		return DefaultVertexFormats.BLOCK;
 	}
 
 	/**

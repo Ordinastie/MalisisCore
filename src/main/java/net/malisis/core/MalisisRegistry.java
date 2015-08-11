@@ -37,6 +37,7 @@ import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -77,12 +78,12 @@ public class MalisisRegistry
 		instance.itemRenderers.put(Item.getItemFromBlock(block), renderer);
 	}
 
-	public static boolean renderBlock(IBlockAccess world, BlockPos pos, IBlockState state)
+	public static boolean renderBlock(WorldRenderer wr, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		IBlockRenderer renderer = instance.blockRenderers.get(state.getBlock());
 		if (renderer == null)
 			return false;
-		return renderer.renderBlock(world, pos, state);
+		return renderer.renderBlock(wr, world, pos, state);
 	}
 
 	public static TextureAtlasSprite getParticleIcon(IBlockState state)
@@ -107,6 +108,9 @@ public class MalisisRegistry
 
 	public static boolean renderItem(ItemStack itemStack)
 	{
+		if (itemStack == null)
+			return false;
+
 		Item item = itemStack.getItem();
 		IItemRenderer ir = instance.itemRenderers.get(item);
 		if (ir == null)

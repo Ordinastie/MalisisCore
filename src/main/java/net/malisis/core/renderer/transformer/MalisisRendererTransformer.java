@@ -77,24 +77,30 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		match.add(new VarInsnNode(ISTORE, 5));
 
 		//if (i == MalisisCore.malisisRenderType)
-		//	return MalisisRegistry.render(world, pos, state);
+		//	return MalisisRegistry.render(wr, world, pos, state);
 		//		ILOAD 6
 		//		ICONST_4 | SIPUSH 4
 		//		IF_ICMPNE L18
+		//		ALOAD 6
 		//	    ALOAD 7
 		//	    ALOAD 8
 		//	    ALOAD 9
-		//	    INVOKESTATIC net/malisis/core/renderer/BlockRendererRegistry.render (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z
+		//	    INVOKESTATIC net/malisis/core/renderer/BlockRendererRegistry.render (Lnet/minecraft/client/renderer/BlockModelRenderer;Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z
 		LabelNode falseLabel = new LabelNode();
 		InsnList insert = new InsnList();
 		insert.add(new VarInsnNode(ILOAD, 5));
 		insert.add(new IntInsnNode(SIPUSH, MalisisCore.malisisRenderType));
 		insert.add(new JumpInsnNode(IF_ICMPNE, falseLabel));
+		insert.add(new VarInsnNode(ALOAD, 4));
 		insert.add(new VarInsnNode(ALOAD, 3));
 		insert.add(new VarInsnNode(ALOAD, 2));
 		insert.add(new VarInsnNode(ALOAD, 1));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/MalisisRegistry", "renderBlock",
-				"(Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z", false));
+		insert.add(new MethodInsnNode(
+				INVOKESTATIC,
+				"net/malisis/core/MalisisRegistry",
+				"renderBlock",
+				"(Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z",
+				false));
 		insert.add(new InsnNode(IRETURN));
 		insert.add(falseLabel);
 
@@ -104,9 +110,10 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 
 	private AsmHook itemHook()
 	{
-		McpMethodMapping renderByItem = new McpMethodMapping("renderByItem", "func_179022_a",
-				"net/minecraft/client/renderer/tileentity/TileEntityItemStackRenderer", "(Lnet/minecraft/item/ItemStack;)V");
-		AsmHook ah = new AsmHook(renderByItem);
+		McpMethodMapping renderModel = new McpMethodMapping("renderModel", "func_175045_a",
+				"net/minecraft/client/renderer/entity/RenderItem",
+				"(Lnet/minecraft/client/resources/model/IBakedModel;ILnet/minecraft/item/ItemStack;)V");
+		AsmHook ah = new AsmHook(renderModel);
 
 		//		if (MalisisRegistry.renderItem(itemStack))
 		//			return;
@@ -122,9 +129,10 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 
 		LabelNode falseLabel = new LabelNode();
 		InsnList insert = new InsnList();
-		insert.add(new VarInsnNode(ALOAD, 1));
+		insert.add(new VarInsnNode(ALOAD, 3));
 		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/MalisisRegistry", "renderItem", "(Lnet/minecraft/item/ItemStack;)Z",
 				false));
+		insert.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert.add(new InsnNode(RETURN));
 		insert.add(falseLabel);
 

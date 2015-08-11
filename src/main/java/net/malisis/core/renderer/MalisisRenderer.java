@@ -25,7 +25,6 @@
 package net.malisis.core.renderer;
 
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Map;
 
 import net.malisis.core.MalisisCore;
@@ -37,6 +36,8 @@ import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.shape.Cube;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.handler.BakeEventHandler;
+import net.malisis.core.renderer.handler.RenderWorldEventHandler;
 import net.malisis.core.renderer.icon.IIconMetaProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
@@ -49,18 +50,14 @@ import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.statemap.IStateMapper;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -71,14 +68,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import org.lwjgl.opengl.GL11;
 
@@ -91,7 +84,6 @@ import com.google.common.collect.ImmutableMap;
  * @author Ordinastie
  *
  */
-@SuppressWarnings("deprecation")
 public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlockRenderer, IRenderWorldLast
 {
 	/** Reference to Tessellator.isDrawing field **/
@@ -116,24 +108,25 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	protected ItemStack itemStack;
 	/** RenderGlobal reference (IRWL) */
 	protected RenderGlobal renderGlobal;
-	/** Old vertex format to restore when done drawing (BLOCK) */
-	protected VertexFormat oldVertexFormat;
 	/** Type of rendering. */
 	protected RenderType renderType;
 	/** Mode of rendering (GL constant). */
 	protected int drawMode;
-	//	/** Current model being rendered. */
-	//	protected MalisisModel model = new MalisisModel(new Cube());
-	//	/** Current face being rendered. */
-	//	protected Face face;
-	//	/** Current parameters for the shape being rendered. */
-	//	protected RenderParameters rp = new RenderParameters();
-	//	/** Current parameters for the face being rendered. */
-	//	protected RenderParameters params;
 	/** Base brightness of the block. */
 	protected int baseBrightness;
 	/** An override texture set by the renderer. */
 	protected MalisisIcon overrideTexture;
+
+	public static VertexFormat itemFormat = new VertexFormat();
+	static
+	{
+		itemFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
+		itemFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.UBYTE, VertexFormatElement.EnumUsage.COLOR, 4));
+		itemFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 2));
+		itemFormat.setElement(new VertexFormatElement(1, VertexFormatElement.EnumType.SHORT, VertexFormatElement.EnumUsage.UV, 2));
+		itemFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.NORMAL, 3));
+		itemFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.PADDING, 1));
+	}
 
 	/** Whether the damage for the blocks should be handled by this {@link MalisisRenderer} (for TESR). */
 	protected boolean getBlockDamage = false;
@@ -258,9 +251,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 
 	//#region IBlockRenderer
 	@Override
-	public boolean renderBlock(IBlockAccess world, BlockPos pos, IBlockState state)
+	public boolean renderBlock(WorldRenderer wr, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
-		this.wr = Tessellator.getInstance().getWorldRenderer();
+		this.wr = wr;
 		set(world, state.getBlock(), pos, state);
 		prepare(RenderType.BLOCK);
 		render();
@@ -379,14 +372,18 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 
 		if (renderType == RenderType.BLOCK)
 		{
-			oldVertexFormat = wr.getVertexFormat();
 			wr.setVertexFormat(DefaultVertexFormats.BLOCK);
 		}
 		else if (renderType == RenderType.ITEM)
 		{
-			GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
-			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
+			//GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
+			//GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
+			//			GlStateManager.pushAttrib();
+			//			GlStateManager.pushMatrix();
+			//			GlStateManager.translate(-0.5F, -0.5F, -0.5F);
+
 			startDrawing();
+			wr.setVertexFormat(itemFormat);
 		}
 		else if (renderType == RenderType.TILE_ENTITY)
 		{
@@ -405,13 +402,13 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		}
 		else if (renderType == RenderType.WORLD_LAST)
 		{
-			GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
-			RenderHelper.disableStandardItemLighting();
-			GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-			GL11.glShadeModel(GL11.GL_SMOOTH);
+			GlStateManager.pushAttrib();
+			GlStateManager.pushMatrix();
+			GlStateManager.disableLighting();
+			//GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+			//GL11.glShadeModel(GL11.GL_SMOOTH);
 
-			GL11.glPushMatrix();
-			GL11.glTranslated(data[0], data[1], data[2]);
+			GlStateManager.translate(data[0], data[1], data[2]);
 
 			bindTexture(TextureMap.locationBlocksTexture);
 
@@ -424,15 +421,12 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 */
 	public void clean()
 	{
-		if (renderType == RenderType.BLOCK)
-		{
-			wr.setVertexFormat(oldVertexFormat);
-		}
-		else if (renderType == RenderType.ITEM)
+		if (renderType == RenderType.ITEM)
 		{
 			draw();
-			GL11.glTranslatef(0.5F, 0.5F, 0.5F);
-			GL11.glPopAttrib();
+			//			GlStateManager.enableLighting();
+			//			GlStateManager.popMatrix();
+			//			GlStateManager.popAttrib();
 		}
 		else if (renderType == RenderType.TILE_ENTITY)
 		{
@@ -440,13 +434,12 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			GlStateManager.enableLighting();
 			GlStateManager.popMatrix();
 			GlStateManager.popAttrib();
-			wr.setVertexFormat(oldVertexFormat);
 		}
 		else if (renderType == RenderType.WORLD_LAST)
 		{
 			draw();
-			GL11.glPopMatrix();
-			GL11.glPopAttrib();
+			GlStateManager.popMatrix();
+			GlStateManager.popAttrib();
 		}
 		reset();
 	}
@@ -611,7 +604,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 *
 	 * @param shape the shape
 	 */
-	protected void drawShape(Shape shape)
+	public void drawShape(Shape shape)
 	{
 		drawShape(shape, null);
 	}
@@ -622,13 +615,10 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 * @param s the s
 	 * @param params the params
 	 */
-	protected void drawShape(Shape s, RenderParameters params)
+	public void drawShape(Shape s, RenderParameters params)
 	{
 		if (s == null)
 			return;
-
-		if (params == null)
-			params = new RenderParameters();
 
 		//apply transformations
 		s.applyMatrix();
@@ -669,8 +659,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			return;
 		}
 
-		params = new RenderParameters();
-		params.merge(params);
+		if (params == null)
+			params = new RenderParameters();
 		params.merge(face.getParameters());
 
 		if (!shouldRenderFace(face, params))
@@ -714,11 +704,10 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		if (!params.usePerVertexAlpha.get())
 			vertex.setAlpha(params.alpha.get());
 
-		//TODO: refactor when done
-		if (renderType == RenderType.BLOCK)
-			wr.addVertexData(vertex.toVertexData(pos));
-		else if (renderType == RenderType.TILE_ENTITY)
-			wr.addVertexData(vertex.toVertexData(null));
+		if (renderType == RenderType.ITEM)
+			vertex.setNormal(params.direction.get());
+
+		wr.addVertexData(vertex.toVertexData(renderType == RenderType.BLOCK ? pos : null, wr.getVertexFormat()));
 
 		vertexDrawn = true;
 	}
@@ -892,8 +881,11 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		}
 
 		//not in world
-		if ((renderType != RenderType.BLOCK && renderType != RenderType.TILE_ENTITY) || world == null || !params.useBlockBrightness.get())
+		if (((renderType == RenderType.BLOCK || renderType == RenderType.TILE_ENTITY) && world == null) || !params.useBlockBrightness.get())
 			return params.brightness.get();
+
+		if (renderType == RenderType.ITEM)
+			return Minecraft.getMinecraft().thePlayer.getBrightnessForRender(getPartialTick());
 
 		//no direction, we can only use current block brightness
 		if (params.direction.get() == null)
@@ -1071,7 +1063,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			}
 		});
 
-		//MinecraftForge.EVENT_BUS.register(new ItemBakeHandler(block));
+		MinecraftForge.EVENT_BUS.register(new BakeEventHandler(block));
 	}
 
 	/**
@@ -1082,7 +1074,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	public void registerFor(Item item)
 	{
 		//MalisisRegistry.registerItemRenderer(item, this);
-		MinecraftForge.EVENT_BUS.register(new ItemBakeHandler(item));
+		MinecraftForge.EVENT_BUS.register(new BakeEventHandler(item));
 	}
 
 	/**
@@ -1102,53 +1094,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	public void registerForRenderWorldLast()
 	{
 		RenderWorldEventHandler.register(this);
-	}
-
-	//@formatter:off
-	private static BuiltIn builtin = new BuiltIn();
-	private static class BuiltIn implements IFlexibleBakedModel
-	{
-		@Override
-		public boolean isAmbientOcclusion() { return false; }
-		@Override
-		public boolean isGui3d() { return false; }
-		@Override
-		public boolean isBuiltInRenderer() { return true; }
-		@Override
-		public TextureAtlasSprite getTexture() { return null; }
-		@Override
-		public ItemCameraTransforms getItemCameraTransforms() { return ItemCameraTransforms.DEFAULT; }
-		@Override
-		public List<BakedQuad> getFaceQuads(EnumFacing side) { return null; }
-		@Override
-		public List<BakedQuad> getGeneralQuads() { return null; }
-		@Override
-		public VertexFormat getFormat() { return null; }
-	}
-	//@formatter:on
-
-	private static class ItemBakeHandler
-	{
-		private final ModelResourceLocation rl;
-
-		public ItemBakeHandler(Item item)
-		{
-			rl = new ModelResourceLocation(item.getUnlocalizedName(), "inventory");
-		}
-
-		public ItemBakeHandler(Block block)
-		{
-			String modid = Loader.instance().activeModContainer().getModId();
-			String name = block.getUnlocalizedName().substring(5);
-			rl = new ModelResourceLocation(modid + ":" + name, "inventory");
-			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, rl);
-		}
-
-		@SubscribeEvent
-		public void onModelBakeEvent(ModelBakeEvent event)
-		{
-			event.modelRegistry.putObject(rl, builtin);
-		}
 	}
 
 }

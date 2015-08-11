@@ -157,7 +157,7 @@ public class MalisisFont
 			if (cd.getChar() != ' ')
 			{
 				Face f = new SouthFace();
-				f.factor(cd.getFullWidth(options) / factor, cd.getFullHeight(options) / factor, 0);
+				f.scale(cd.getFullWidth(options) / factor, cd.getFullHeight(options) / factor, 0);
 				f.translate((offset - options.mx) / factor, -options.my / factor, 0);
 				f.setTexture(cd.getIcon());
 

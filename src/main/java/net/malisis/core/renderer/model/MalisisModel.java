@@ -34,6 +34,7 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
+import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.model.loader.ObjFileImporter;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -291,18 +292,26 @@ public class MalisisModel implements IFlexibleBakedModel, ITransformable.Transla
 	@Override
 	public List<BakedQuad> getFaceQuads(EnumFacing side)
 	{
-		List<BakedQuad> quads = new ArrayList<>();
-		for (Shape s : this)
-			quads.addAll(s.getFaceQuads(side));
-		return quads;
+		return getQuads(side);
 	}
 
 	@Override
 	public List<BakedQuad> getGeneralQuads()
 	{
+		return getQuads(null);
+	}
+
+	public List<BakedQuad> getQuads(EnumFacing side)
+	{
 		List<BakedQuad> quads = new ArrayList<>();
 		for (Shape s : this)
-			quads.addAll(s.getGeneralQuads());
+		{
+			for (Face f : s.getFaces())
+			{
+				if (f.getParameters().direction.get() == side)
+					quads.add(f.toBakedQuad());
+			}
+		}
 
 		return quads;
 	}

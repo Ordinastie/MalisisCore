@@ -24,33 +24,41 @@
 
 package net.malisis.core.renderer.element;
 
+import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.Point;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector4f;
 
 public class Vertex
 {
-	public static final int BRIGHTNESS_MAX = (240 << 16) | 240; //sky << 1| block
+	public static final int BRIGHTNESS_MAX = (240 << 16) | 240; //sky << 16 | block
 
+	/** Base name of this {@link Vertex}, set when first instanciated and kept after transformation for easy access. */
 	private String baseName;
+	/** X coordinate of this {@link Vertex} **/
 	private double x = 0;
+	/** Y coordinate of this {@link Vertex} **/
 	private double y = 0;
+	/** Z coordinate of this {@link Vertex} **/
 	private double z = 0;
-	private int blockBrightness = 0;
-	private int skyBrightness = 0;
+	/** Brightness of this {@link Vertex} **/
+	private int brightness = 0;
+	/** Color of this {@link Vertex} **/
 	private int color = 0xFFFFFF;
 	private int alpha = 255;
+	private int normal = 0;
 	private double u = 0.0F;
 	private double v = 0.0F;
 
 	private Vertex initialState;
 
-	public Vertex(double x, double y, double z, int rgba, int brightness, double u, double v, boolean isInitialState)
+	public Vertex(double x, double y, double z, int rgba, int brightness, double u, double v, int normal, boolean isInitialState)
 	{
 		set(x, y, z);
 		setRGBA(rgba);
@@ -62,25 +70,26 @@ public class Vertex
 
 		this.u = u;
 		this.v = v;
+		this.normal = normal;
 		this.baseName();
 
 		if (!isInitialState)
-			initialState = new Vertex(x, y, z, rgba, brightness, u, v, true);
+			initialState = new Vertex(x, y, z, rgba, brightness, u, v, normal, true);
 	}
 
 	public Vertex(double x, double y, double z, int rgba, int brightness)
 	{
-		this(x, y, z, rgba, brightness, 0, 0, false);
+		this(x, y, z, rgba, brightness, 0, 0, 0, false);
 	}
 
 	public Vertex(double x, double y, double z)
 	{
-		this(x, y, z, 0xFFFFFFFF, BRIGHTNESS_MAX, 0, 0, false);
+		this(x, y, z, 0xFFFFFFFF, BRIGHTNESS_MAX, 0, 0, 0, false);
 	}
 
 	public Vertex(Vertex vertex)
 	{
-		this(vertex.x, vertex.y, vertex.z, vertex.color << 8 | vertex.alpha, vertex.getBrightness(), vertex.u, vertex.v, false);
+		this(vertex.x, vertex.y, vertex.z, vertex.color << 8 | vertex.alpha, vertex.getBrightness(), vertex.u, vertex.v, 0, false);
 		baseName = vertex.baseName;
 	}
 
@@ -91,7 +100,7 @@ public class Vertex
 
 	public Vertex(Vertex vertex, int rgba, int brightness, float u, float v)
 	{
-		this(vertex.x, vertex.y, vertex.z, rgba, brightness, u, v, false);
+		this(vertex.x, vertex.y, vertex.z, rgba, brightness, u, v, 0, false);
 	}
 
 	//#region Getters/Setters
@@ -189,36 +198,39 @@ public class Vertex
 
 	public int getBlockBrightness()
 	{
-		return blockBrightness;
-	}
-
-	public Vertex setBlockBrightness(int brightness)
-	{
-		this.blockBrightness = brightness & 240;
-		return this;
+		return brightness & 240;
 	}
 
 	public int getSkyBrightness()
 	{
-		return skyBrightness;
-	}
-
-	public Vertex setSkyBrightness(int brightness)
-	{
-		this.skyBrightness = brightness & 240;
-		return this;
+		return (brightness >> 16) & 240;
 	}
 
 	public int getBrightness()
 	{
-		return (skyBrightness << 16) | blockBrightness;
+		return brightness;
 	}
 
 	public Vertex setBrightness(int brightness)
 	{
-		this.blockBrightness = brightness & 240;
-		this.skyBrightness = (brightness >> 16) & 240;
+		this.brightness = brightness;
 		return this;
+	}
+
+	public Vertex setNormal(float x, float y, float z)
+	{
+		byte b0 = (byte) (x * 127.0F);
+		byte b1 = (byte) (y * 127.0F);
+		byte b2 = (byte) (z * 127.0F);
+		normal = b0 & 255 | (b1 & 255) << 8 | (b2 & 255) << 16;
+		return this;
+	}
+
+	public Vertex setNormal(EnumFacing facing)
+	{
+		if (facing == null)
+			return this;
+		return setNormal(facing.getFrontOffsetX(), facing.getFrontOffsetY(), facing.getFrontOffsetZ());
 	}
 
 	public double getU()
@@ -239,28 +251,15 @@ public class Vertex
 
 	//#end Getters/Setters
 
-	public void limit(double min, double max)
-	{
-		x = clamp(x, min, max);
-		y = clamp(y, min, max);
-		z = clamp(z, min, max);
-	}
-
-	public void interpolateCoord(AxisAlignedBB bounds)
-	{
-		if (bounds == null)
-			return;
-
-		double fx = bounds.maxX - bounds.minX;
-		double fy = bounds.maxY - bounds.minY;
-		double fz = bounds.maxZ - bounds.minZ;
-
-		x = x * fx + bounds.minX;
-		y = y * fy + bounds.minY;
-		z = z * fz + bounds.minZ;
-	}
-
-	public Vertex add(double x, double y, double z)
+	/**
+	 * Translates this {@link Vertex} by the specified amount.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @return the vertex
+	 */
+	public Vertex translate(double x, double y, double z)
 	{
 		this.x += x;
 		this.y += y;
@@ -268,42 +267,57 @@ public class Vertex
 		return this;
 	}
 
-	public Vertex factorX(float f)
+	public Vertex scaleX(float f)
 	{
-		x *= f;
+		return scaleX(f, 0);
+	}
+
+	public Vertex scaleX(float f, float offset)
+	{
+		x = (x - offset) * f + offset;
 		return this;
 	}
 
-	public Vertex factorY(float f)
+	public Vertex scaleY(float f)
 	{
-		y *= f;
+		return scaleY(f, 0);
+	}
+
+	public Vertex scaleY(float f, float offset)
+	{
+		y = (y - offset) * f + offset;
 		return this;
 	}
 
-	public Vertex factorZ(float f)
+	public Vertex scaleZ(float f)
 	{
-		z *= f;
-		return this;
+		return scaleZ(f, 0);
 	}
 
-	public Vertex factor(float f)
+	public Vertex scaleZ(float f, float offset)
 	{
-		factorX(f);
-		factorY(f);
-		factorZ(f);
+		z = (z - offset) * f + offset;
 		return this;
 	}
 
 	public Vertex scale(float f)
 	{
-		return scale(f, 0.5, 0.5, 0.5);
+		return scale(f, 0);
 	}
 
-	public Vertex scale(float f, double centerX, double centerY, double centerZ)
+	public Vertex scale(float f, float offset)
 	{
-		x = (x - centerX) * f + centerX;
-		y = (y - centerY) * f + centerY;
-		z = (z - centerZ) * f + centerZ;
+		scaleX(f, offset);
+		scaleY(f, offset);
+		scaleZ(f, offset);
+		return this;
+	}
+
+	public Vertex scale(float fx, float fy, float fz, float offsetX, float offsetY, float offsetZ)
+	{
+		scaleX(fx, offsetX);
+		scaleY(fy, offsetY);
+		scaleZ(fz, offsetZ);
 		return this;
 	}
 
@@ -398,7 +412,8 @@ public class Vertex
 	@Override
 	public String toString()
 	{
-		return name() + " 0x" + Integer.toHexString(color) + " (a:" + alpha + ", bb:" + blockBrightness + ", sb:" + skyBrightness + ")";
+		return name() + " 0x" + Integer.toHexString(color) + " (a:" + alpha + ", bb:" + getBlockBrightness() + ", sb:" + getSkyBrightness()
+				+ ")";
 	}
 
 	public Point toPoint()
@@ -429,7 +444,7 @@ public class Vertex
 		z = vec.z;
 	}
 
-	public int[] toVertexData(BlockPos pos)
+	public int[] toVertexData(BlockPos pos, VertexFormat vertexFormat)
 	{
 		if (pos == null)
 			pos = new BlockPos(0, 0, 0);
@@ -437,7 +452,7 @@ public class Vertex
 			pos = BlockPosUtils.chunkPosition(pos);
 
 		//@formatter:off
-		return new int[] {
+		int[] data = new int[] {
 				Float.floatToRawIntBits((float) x + pos.getX()),
 				Float.floatToRawIntBits((float) y + pos.getY()),
 				Float.floatToRawIntBits((float) z + pos.getZ()),
@@ -447,6 +462,10 @@ public class Vertex
 				getBrightness()
 		};
 		//@formatter:on
+
+		if (MalisisRenderer.itemFormat.equals(vertexFormat))
+			data = ArrayUtils.add(data, normal);
+		return data;
 	}
 
 	private void setState(Vertex vertex)
@@ -456,8 +475,7 @@ public class Vertex
 		z = vertex.z;
 		color = vertex.color;
 		alpha = vertex.alpha;
-		blockBrightness = vertex.blockBrightness;
-		skyBrightness = vertex.skyBrightness;
+		brightness = vertex.brightness;
 		u = vertex.u;
 		v = vertex.v;
 	}

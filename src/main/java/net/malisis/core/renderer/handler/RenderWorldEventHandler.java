@@ -22,11 +22,12 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer;
+package net.malisis.core.renderer.handler;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import net.malisis.core.renderer.IRenderWorldLast;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;

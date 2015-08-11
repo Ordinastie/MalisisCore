@@ -32,12 +32,11 @@ import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.util.Vector;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 
 import com.google.common.primitives.Ints;
 
-public class Face extends BakedQuad implements ITransformable.Translate, ITransformable.Rotate
+public class Face implements ITransformable.Translate, ITransformable.Rotate
 {
 	protected String name;
 	protected Vertex[] vertexes;
@@ -45,7 +44,6 @@ public class Face extends BakedQuad implements ITransformable.Translate, ITransf
 
 	public Face(Vertex[] vertexes, RenderParameters params)
 	{
-		super(null, 0, null);
 		this.vertexes = vertexes;
 		this.params = params != null ? params : new RenderParameters();
 		this.setName(null);
@@ -68,7 +66,6 @@ public class Face extends BakedQuad implements ITransformable.Translate, ITransf
 
 	public Face(Face face, RenderParameters params)
 	{
-		super(null, 0, null);
 		Vertex[] faceVertexes = face.getVertexes();
 		this.vertexes = new Vertex[faceVertexes.length];
 		for (int i = 0; i < faceVertexes.length; i++)
@@ -169,6 +166,7 @@ public class Face extends BakedQuad implements ITransformable.Translate, ITransf
 		return this;
 	}
 
+	//#region Textures manipaluation
 	public Face setTexture(MalisisIcon icon)
 	{
 		return setTexture(icon, params.flipU.get(), params.flipV.get(), false);
@@ -298,18 +296,35 @@ public class Face extends BakedQuad implements ITransformable.Translate, ITransf
 		return min + (max - min) * (float) factor;
 	}
 
-	public Face factor(float fx, float fy, float fz)
+	//#end Textures manipaluation
+
+	//#region Transformations
+	@Override
+	public void translate(float x, float y, float z)
 	{
 		for (Vertex v : vertexes)
-		{
-			if (v != null)
-			{
-				v.factorX(fx);
-				v.factorY(fy);
-				v.factorZ(fz);
-			}
-		}
-		return this;
+			v.translate(x, y, z);
+	}
+
+	public void scale(float f)
+	{
+		scale(f, f, f, 0, 0, 0);
+	}
+
+	public void scale(float f, float offset)
+	{
+		scale(f, f, f, offset, offset, offset);
+	}
+
+	public void scale(float fx, float fy, float fz)
+	{
+		scale(fx, fy, fz, 0, 0, 0);
+	}
+
+	public void scale(float fx, float fy, float fz, float offsetX, float offsetY, float offsetZ)
+	{
+		for (Vertex v : vertexes)
+			v.scale(fx, fy, fz, offsetX, offsetY, offsetZ);
 	}
 
 	@Override
@@ -318,24 +333,6 @@ public class Face extends BakedQuad implements ITransformable.Translate, ITransf
 		rotateAroundX(angle * x, offsetX, offsetY, offsetZ);
 		rotateAroundY(angle * y, offsetX, offsetY, offsetZ);
 		rotateAroundZ(angle * z, offsetX, offsetY, offsetZ);
-	}
-
-	@Override
-	public void translate(float x, float y, float z)
-	{
-		for (Vertex v : vertexes)
-			v.add(x, y, z);
-	}
-
-	public void scale(float f)
-	{
-		scale(f, 0.5, 0.5, 0.5);
-	}
-
-	public void scale(float f, double x, double y, double z)
-	{
-		for (Vertex v : vertexes)
-			v.scale(f, x, y, z);
 	}
 
 	public void rotateAroundX(double angle)
@@ -370,6 +367,8 @@ public class Face extends BakedQuad implements ITransformable.Translate, ITransf
 		for (Vertex v : vertexes)
 			v.rotateAroundZ(angle, centerX, centerY, centerZ);
 	}
+
+	//#end Transformations
 
 	/**
 	 * Automatically calculate AoMatrix for this {@link Face}. Only works for regular N/S/E/W/T/B faces
@@ -482,59 +481,28 @@ public class Face extends BakedQuad implements ITransformable.Translate, ITransf
 				dir = EnumFacing.WEST;
 		}
 
-		//if (dir != EnumFacing.UNKNOWN)
-		{
-			params.direction.set(dir);
-			params.textureSide.set(dir);
-			params.aoMatrix.set(calculateAoMatrix(dir));
-		}
-
-		//		double fx = Math.asin(Math.abs(normal.x)) / Math.PI * 2 * 0.6F;
-		//		double fy = Math.asin(Math.abs(normal.y)) / Math.PI * 2 * (normal.y >= 0 ? 1 : 0.5F);
-		//		double fz = Math.asin(Math.abs(normal.z)) / Math.PI * 2 * 0.8F;
-		//		float f = (float) (fx + fy + fz);
+		params.direction.set(dir);
+		params.textureSide.set(dir);
+		params.aoMatrix.set(calculateAoMatrix(dir));
 
 		//fry's patent
 		float f = (float) ((normal.x * normal.x * 0.6 + normal.y * (normal.y * 3 + 1) / 4 + normal.z * normal.z * 0.8));
 		params.colorFactor.set(f);
 	}
 
-	//#region BakedQuad
-	@Override
-	public int[] getVertexData()
-	{
-		return getVertexData(null);
-	}
-
-	public int[] getVertexData(BlockPos pos)
+	/**
+	 * Gets a {@link BakedQuad} from this {@link Face}
+	 *
+	 * @return the baked quad
+	 */
+	public BakedQuad toBakedQuad()
 	{
 		int[] data = new int[0];
-		for (Vertex v : vertexes)
-			data = Ints.concat(data, v.toVertexData(pos));
-		return data;
-	}
+		for (Vertex v : getVertexes())
+			data = Ints.concat(data, v.toVertexData(null, null));
 
-	@Override
-	public boolean hasTintIndex()
-	{
-		return getTintIndex() != 0xFFFFFF;
+		return new BakedQuad(data, params.colorMultiplier.get(), params.direction.get());
 	}
-
-	@Override
-	public int getTintIndex()
-	{
-		if (params == null || params.colorMultiplier.get() == null)
-			return 0xFFFFFF;
-		return params.colorMultiplier.get();
-	}
-
-	@Override
-	public EnumFacing getFace()
-	{
-		return params != null ? params.direction.get() : null;
-	}
-
-	//#end BakedQuad
 
 	@Override
 	public String toString()
@@ -560,4 +528,5 @@ public class Face extends BakedQuad implements ITransformable.Translate, ITransf
 		else
 			return dir.toString();
 	}
+
 }
