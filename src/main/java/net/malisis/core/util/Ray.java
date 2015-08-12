@@ -143,12 +143,12 @@ public class Ray
 		double iY = intersectY(aabb.maxY);
 		double iz = intersectZ(aabb.minZ);
 		double iZ = intersectZ(aabb.maxZ);
-		Point interx = ix > 0 ? getPointAt(ix) : null;
-		Point interX = iX > 0 ? getPointAt(iX) : null;
-		Point intery = iy > 0 ? getPointAt(iy) : null;
-		Point interY = iY > 0 ? getPointAt(iY) : null;
-		Point interz = iz > 0 ? getPointAt(iz) : null;
-		Point interZ = iZ > 0 ? getPointAt(iZ) : null;
+		Point interx = ix >= 0 ? getPointAt(ix) : null;
+		Point interX = iX >= 0 ? getPointAt(iX) : null;
+		Point intery = iy >= 0 ? getPointAt(iy) : null;
+		Point interY = iY >= 0 ? getPointAt(iY) : null;
+		Point interz = iz >= 0 ? getPointAt(iz) : null;
+		Point interZ = iZ >= 0 ? getPointAt(iZ) : null;
 
 		List<Point> list = new ArrayList<>();
 		if (interx != null && interx.isInside(aabb))
