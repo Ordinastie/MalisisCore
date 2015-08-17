@@ -33,8 +33,8 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.interaction.UITab;
 import net.malisis.core.client.gui.event.ComponentEvent;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
+import net.malisis.core.renderer.icon.GuiIcon;
 
 /**
  * @author Ordinastie

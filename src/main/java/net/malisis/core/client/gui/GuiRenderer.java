@@ -29,7 +29,6 @@ import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.RenderType;
@@ -37,7 +36,9 @@ import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.icon.GuiIcon;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderHelper;
@@ -227,20 +228,33 @@ public class GuiRenderer extends MalisisRenderer
 	 * Applies the texture the {@link Shape}.
 	 *
 	 * @param shape the shape
-	 * @param parameters the parameters
+	 * @param params the parameters
 	 */
 	@Override
-	public void applyTexture(Shape shape, RenderParameters parameters)
+	public void applyTexture(Shape shape, RenderParameters params)
 	{
-		if (parameters.icon.get() == null)
+		IGuiIconProvider iconProvider;
+		if (params.iconProvider.get() instanceof IGuiIconProvider)
+			iconProvider = (IGuiIconProvider) params.iconProvider.get();
+		else
+			iconProvider = currentComponent.getGuiIconProvider();
+
+		if (iconProvider == null)
 			return;
 
 		Face[] faces = shape.getFaces();
-		MalisisIcon icon = parameters.icon.get();
-		boolean isGuiIcon = icon instanceof GuiIcon;
-
 		for (int i = 0; i < faces.length; i++)
+		{
+			MalisisIcon icon = iconProvider.getIcon(currentComponent);
+			boolean isGuiIcon = icon instanceof GuiIcon;
 			faces[i].setTexture(isGuiIcon ? ((GuiIcon) icon).getIcon(i) : icon, false, false, false);
+		}
+	}
+
+	@Override
+	public void applyTexture(Face face, RenderParameters params)
+	{
+		//texture is already applied from the shape
 	}
 
 	/**
@@ -275,17 +289,12 @@ public class GuiRenderer extends MalisisRenderer
 		if (shape == null)
 			return;
 
-		if (params == null)
-			params = new RenderParameters();
-
 		// move the shape at the right coord on screen
 		shape.translate(currentComponent.screenX(), currentComponent.screenY(), currentComponent.getZIndex());
 		shape.applyMatrix();
 
-		applyTexture(shape, params);
-
 		for (Face face : shape.getFaces())
-			drawFace(face, face.getParameters());
+			drawFace(face, params);
 	}
 
 	public void drawRectangle(int x, int y, int z, int width, int height, int color, int alpha)

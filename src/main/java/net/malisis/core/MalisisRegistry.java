@@ -32,8 +32,8 @@ import java.util.Set;
 import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
 import net.malisis.core.renderer.MalisisRenderer;
-import net.malisis.core.renderer.icon.IIconMetaProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -89,11 +89,11 @@ public class MalisisRegistry
 	public static TextureAtlasSprite getParticleIcon(IBlockState state)
 	{
 		Block block = state.getBlock();
-		IIconProvider iconProvider = null;
-		if (block instanceof IIconMetaProvider)
-			iconProvider = ((IIconMetaProvider) block).getIconProvider();
+		MalisisIcon icon = null;
+		if (block instanceof IBlockIconProvider)
+			icon = ((IBlockIconProvider) block).getParticleIcon(state);
 
-		return iconProvider != null && iconProvider.getParticleIcon() != null ? iconProvider.getParticleIcon() : MalisisIcon.missing();
+		return icon != null ? icon : MalisisIcon.missing();
 	}
 
 	//#end IBlockRenderer

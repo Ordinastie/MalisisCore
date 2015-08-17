@@ -36,7 +36,7 @@ import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
-import net.malisis.core.client.gui.icon.GuiIcon;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
 
@@ -67,18 +67,14 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	/** The Y offset for the scrollbar rendering. */
 	protected int offsetY = 0;
 
-	protected GuiIcon disabledIcon;
-	protected GuiIcon verticalIcon;
-	protected GuiIcon verticalDisabledIcon;
-	protected GuiIcon horizontalIcon;
-	protected GuiIcon horizontalDisabledIcon;
-
 	/** The type of scrollbar. */
 	protected Type type;
 
 	public boolean autoHide = false;
 
 	protected GuiShape scrollShape;
+	private GuiIconProvider verticalIconProvider;
+	private GuiIconProvider horizontalIconProvider;
 
 	public <T extends UIComponent & IScrollable> UIScrollBar(MalisisGui gui, T parent, Type type)
 	{
@@ -145,13 +141,14 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		scrollShape.setSize(w, h);
 		scrollShape.storeState();
 
-		icon = gui.getGuiTexture().getXYResizableIcon(215, 0, 15, 15, 1);
-		disabledIcon = gui.getGuiTexture().getXYResizableIcon(215, 15, 15, 15, 1);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(215, 0, 15, 15, 1), null, gui.getGuiTexture()
+				.getXYResizableIcon(215, 15, 15, 15, 1));
 
-		verticalIcon = gui.getGuiTexture().getIcon(230, 0, 8, 15);
-		verticalDisabledIcon = gui.getGuiTexture().getIcon(238, 0, 8, 15);
-		horizontalIcon = gui.getGuiTexture().getIcon(230, 15, 15, 8);
-		horizontalDisabledIcon = gui.getGuiTexture().getIcon(230, 23, 15, 8);
+		verticalIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(230, 0, 8, 15), null, gui.getGuiTexture().getIcon(238, 0, 8,
+				15));
+
+		horizontalIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(230, 15, 15, 8), null, gui.getGuiTexture().getIcon(230,
+				23, 15, 8));
 	}
 
 	/**
@@ -310,31 +307,28 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.icon.set(isDisabled() ? disabledIcon : icon);
 		renderer.drawShape(shape, rp);
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		GuiIcon icon;
 		int ox = 0, oy = 0;
 		int l = getLength() - scrollHeight - 2;
 		if (isHorizontal())
 		{
-			icon = isDisabled() ? horizontalDisabledIcon : horizontalIcon;
+			rp.iconProvider.set(horizontalIconProvider);
 			ox = (int) (getOffset() * l);
 		}
 		else
 		{
-			icon = isDisabled() ? verticalDisabledIcon : verticalIcon;
+			rp.iconProvider.set(verticalIconProvider);
 			oy = (int) (getOffset() * l);
 		}
 
 		scrollShape.resetState();
 		scrollShape.setPosition(ox + 1, oy + 1);
 
-		rp.icon.set(icon);
 		renderer.drawShape(scrollShape, rp);
 	}
 

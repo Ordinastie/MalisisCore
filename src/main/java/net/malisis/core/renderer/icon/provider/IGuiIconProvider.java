@@ -22,56 +22,24 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.component.control;
+package net.malisis.core.renderer.icon.provider;
 
-import net.malisis.core.client.gui.Anchor;
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.renderer.icon.MalisisIcon;
+import net.minecraft.client.renderer.texture.TextureMap;
 
 /**
  * @author Ordinastie
  *
  */
-public class UICloseHandle extends UIComponent<UICloseHandle> implements IControlComponent
+public interface IGuiIconProvider extends IIconProvider
 {
-	public <T extends UIComponent & ICloseable> UICloseHandle(MalisisGui gui, T parent)
+	public default MalisisIcon getIcon(UIComponent<?> component)
 	{
-		super(gui);
-
-		int x = -1;
-		int y = 1;
-		if (parent instanceof UIContainer)
-		{
-			x += ((UIContainer) parent).getHorizontalPadding();
-			y -= ((UIContainer) parent).getVerticalPadding();
-		}
-		setPosition(x, y, Anchor.RIGHT);
-		setSize(5, 5);
-		setZIndex(10);
-		register(this);
-
-		parent.addControlComponent(this);
-
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(268, 30, 15, 15));
+		return getIcon();
 	}
 
 	@Override
-	public boolean onClick(int x, int y)
-	{
-		((ICloseable) getParent()).onClose();
-		return true;
-	}
-
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	public default void registerIcons(TextureMap map)
 	{}
-
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		renderer.drawShape(shape, rp);
-	}
 }

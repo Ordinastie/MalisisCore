@@ -28,6 +28,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
  * @author Ordinastie
@@ -45,7 +46,7 @@ public class UISeparator extends UIComponent<UISeparator>
 		this.vertical = vertical;
 
 		shape = new XYResizableGuiShape(1);
-		icon = gui.getGuiTexture().getXYResizableIcon(200, 15, 15, 15, 3);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 15, 15, 15, 3));
 
 		setSize(0, 0);
 	}
@@ -89,7 +90,6 @@ public class UISeparator extends UIComponent<UISeparator>
 		rp.useTexture.set(true);
 		rp.alpha.set(255);
 		rp.colorMultiplier.set(getColor());
-		rp.icon.set(icon);
 		renderer.drawShape(shape, rp);
 	}
 

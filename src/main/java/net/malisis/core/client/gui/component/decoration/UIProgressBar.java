@@ -28,7 +28,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.icon.GuiIcon;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
  * @author Ordinastie
@@ -36,11 +36,10 @@ import net.malisis.core.client.gui.icon.GuiIcon;
  */
 public class UIProgressBar extends UIComponent<UIProgressBar>
 {
-	protected GuiIcon barIcon;
-	protected GuiIcon barFilledIcon;
-
 	protected float progress = 0;
 	protected boolean reversed = false;
+
+	protected GuiIconProvider filledIconProvider;
 
 	public UIProgressBar(MalisisGui gui)
 	{
@@ -48,8 +47,8 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 		setSize(22, 16);
 
 		shape = new SimpleGuiShape();
-		barIcon = gui.getGuiTexture().getIcon(246, 0, 22, 16);
-		barFilledIcon = gui.getGuiTexture().getIcon(246, 16, 22, 16);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(246, 0, 22, 16));
+		filledIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(246, 16, 22, 16));
 	}
 
 	public float getProgress()
@@ -78,8 +77,9 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	{
 		shape.resetState();
 		shape.setSize(width, height);
-		barIcon.flip(reversed, false);
-		rp.icon.set(barIcon);
+		//TODO:
+		//		barIcon.flip(reversed, false);
+		//		rp.icon.set(barIcon);
 		renderer.drawShape(shape, rp);
 	}
 
@@ -87,12 +87,12 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		int width = (int) (this.width * progress);
-		barFilledIcon.clip(0, 0, width, 16);
-		barFilledIcon.flip(reversed, false);
+		//		barFilledIcon.clip(0, 0, width, 16);
+		//		barFilledIcon.flip(reversed, false);
 		shape.resetState();
 		shape.setSize(width, 16);
 		shape.translate(reversed ? this.width - width : 0, 0);
-		rp.icon.set(barFilledIcon);
+		//		rp.icon.set(barFilledIcon);
 		renderer.drawShape(shape, rp);
 	}
 }

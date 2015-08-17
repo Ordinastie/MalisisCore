@@ -32,9 +32,9 @@ import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 
 import org.apache.commons.lang3.StringUtils;
@@ -47,8 +47,7 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 {
 	public static int SLIDER_WIDTH = 8;
 
-	protected GuiIcon iconBackground;
-	protected GuiIcon sliderIcon;
+	protected GuiIconProvider sliderIcon;
 
 	/** The {@link MalisisFont} to use for this {@link UISlider}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
@@ -85,8 +84,8 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 		sliderShape.setSize(8, 20);
 		sliderShape.storeState();
 
-		iconBackground = gui.getGuiTexture().getXResizableIcon(0, 0, 200, 20, 5);
-		sliderIcon = gui.getGuiTexture().getIcon(227, 46, 8, 20);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXResizableIcon(0, 0, 200, 20, 5));
+		sliderIcon = new GuiIconProvider(gui.getGuiTexture().getIcon(227, 46, 8, 20));
 
 	}
 
@@ -179,7 +178,6 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.icon.set(iconBackground);
 		renderer.drawShape(shape, rp);
 	}
 
@@ -192,7 +190,7 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 		sliderShape.resetState();
 		sliderShape.setPosition(ox, 0);
 
-		rp.icon.set(sliderIcon);
+		rp.iconProvider.set(sliderIcon);
 		renderer.drawShape(sliderShape, rp);
 
 		renderer.next();

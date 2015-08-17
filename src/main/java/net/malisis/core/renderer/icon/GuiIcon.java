@@ -22,11 +22,9 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.icon;
+package net.malisis.core.renderer.icon;
 
 import java.util.Arrays;
-
-import net.malisis.core.renderer.icon.MalisisIcon;
 
 /**
  * @author Ordinastie

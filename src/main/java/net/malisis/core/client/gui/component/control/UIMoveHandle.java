@@ -29,6 +29,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 
 /**
@@ -63,7 +64,7 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 
 		parent.addControlComponent(this);
 
-		icon = gui.getGuiTexture().getIcon(268, 15, 15, 15);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(268, 15, 15, 15));
 	}
 
 	public UIMoveHandle(MalisisGui gui, UIComponent parent)
@@ -103,7 +104,6 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.icon.set(icon);
 		renderer.drawShape(shape, rp);
 	}
 

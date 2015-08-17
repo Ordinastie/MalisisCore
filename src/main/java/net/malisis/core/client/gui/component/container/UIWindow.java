@@ -30,6 +30,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.control.ICloseable;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
  * @author Ordinastie, PaleoCrafter
@@ -46,7 +47,7 @@ public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 		this.anchor = anchor;
 
 		shape = new XYResizableGuiShape();
-		icon = gui.getGuiTexture().getXYResizableIcon(200, 0, 15, 15, 5);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 0, 15, 15, 5));
 	}
 
 	public UIWindow(MalisisGui gui, String title, int width, int height)
@@ -93,7 +94,6 @@ public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		rp.colorMultiplier.set(getBackgroundColor());
-		rp.icon.set(icon);
 		renderer.drawShape(shape, rp);
 	}
 

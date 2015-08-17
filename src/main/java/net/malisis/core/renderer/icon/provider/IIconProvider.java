@@ -24,7 +24,6 @@
 
 package net.malisis.core.renderer.icon.provider;
 
-import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.client.renderer.texture.TextureMap;
 
@@ -34,9 +33,7 @@ import net.minecraft.client.renderer.texture.TextureMap;
  */
 public interface IIconProvider
 {
-	public MalisisIcon getIcon(Face face);
-
-	public MalisisIcon getParticleIcon();
+	public MalisisIcon getIcon();
 
 	public void registerIcons(TextureMap map);
 }

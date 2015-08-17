@@ -40,6 +40,7 @@ import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
  * @author Ordinastie
@@ -89,6 +90,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 		setLabel(label);
 
 		shape = new XYResizableGuiShape();
+		iconProvider = new GuiIconProvider(null);
 	}
 
 	/**
@@ -452,7 +454,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		rp.colorMultiplier.set(bgColor);
-		rp.icon.set(getIcon());
+		((GuiIconProvider) iconProvider).setIcon(getIcon());
 		renderer.drawShape(shape, rp);
 	}
 

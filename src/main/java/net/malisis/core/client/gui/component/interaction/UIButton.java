@@ -33,9 +33,10 @@ import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.icon.GuiIcon;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 
 /**
@@ -45,10 +46,6 @@ import net.malisis.core.util.MouseButton;
  */
 public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton>
 {
-	protected GuiIcon iconHovered;
-	protected GuiIcon iconDisabled;
-	protected GuiIcon iconPressed;
-
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontRenderOptions} to use for this {@link UITooltip}. */
@@ -69,6 +66,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	/** Offset for the contents */
 	protected int offsetX, offsetY;
 
+	protected GuiIconProvider iconPressedProvider;
+
 	/**
 	 * Instantiates a new {@link UIButton}.
 	 *
@@ -83,10 +82,10 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 		hoveredFro.shadow = true;
 
 		shape = new XYResizableGuiShape();
-		icon = gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5);
-		iconHovered = gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5);
-		iconDisabled = gui.getGuiTexture().getXYResizableIcon(0, 0, 200, 20, 5);
-		iconPressed = (GuiIcon) gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5).flip(true, true);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5), gui.getGuiTexture()
+				.getXYResizableIcon(0, 40, 200, 20, 5), gui.getGuiTexture().getXYResizableIcon(0, 0, 200, 20, 5));
+
+		iconPressedProvider = new GuiIconProvider((GuiIcon) gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5).flip(true, true));
 	}
 
 	/**
@@ -366,17 +365,9 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		final GuiIcon icon;
-		if (isDisabled())
-			icon = iconDisabled;
-		else if (isPressed && isHovered())
-			icon = iconPressed;
-		else if (isHovered())
-			icon = iconHovered;
-		else
-			icon = this.icon;
+		if (isPressed && isHovered())
+			rp.iconProvider.set(iconPressedProvider);
 
-		rp.icon.set(icon);
 		rp.colorMultiplier.set(bgColor);
 		renderer.drawShape(shape, rp);
 	}

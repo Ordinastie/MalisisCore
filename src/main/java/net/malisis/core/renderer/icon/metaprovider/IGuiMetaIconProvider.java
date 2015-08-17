@@ -22,37 +22,15 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.element;
+package net.malisis.core.renderer.icon.metaprovider;
 
-import net.malisis.core.renderer.element.Face;
+import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
 
 /**
  * @author Ordinastie
  *
  */
-public class SimpleGuiShape extends GuiShape
+public interface IGuiMetaIconProvider
 {
-	public SimpleGuiShape(Face face)
-	{
-		super(face);
-		storeState();
-	}
-
-	public SimpleGuiShape()
-	{
-		this(new GuiFace());
-	}
-
-	@Override
-	public void setSize(int width, int height)
-	{
-		faces[0].scale(width, height, 0);
-	}
-
-	@Override
-	public void scale(float x, float y)
-	{
-		super.scale(x, y, 0);
-		applyMatrix();
-	}
+	public IGuiIconProvider getGuiIconProvider();
 }

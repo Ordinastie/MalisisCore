@@ -30,9 +30,9 @@ import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.minecraft.client.renderer.OpenGlHelper;
 
 import org.apache.commons.lang3.StringUtils;
@@ -46,12 +46,6 @@ import org.lwjgl.opengl.GL11;
  */
 public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICheckBox>
 {
-	protected GuiIcon bgIcon;
-	protected GuiIcon bgIconDisabled;
-	protected GuiIcon cbDisabled;
-	protected GuiIcon cbChecked;
-	protected GuiIcon cbHovered;
-
 	/** The {@link MalisisFont} to use for this {@link UICheckBox}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontRenderOptions} to use for this {@link UICheckBox}. */
@@ -61,6 +55,8 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	/** Whether this {@link UICheckBox} is checked. */
 	private boolean checked;
 
+	private GuiIconProvider cbIconProvider;
+
 	public UICheckBox(MalisisGui gui, String text)
 	{
 		super(gui);
@@ -69,11 +65,9 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 
 		shape = new SimpleGuiShape();
 
-		bgIcon = gui.getGuiTexture().getIcon(242, 32, 10, 10);
-		bgIconDisabled = gui.getGuiTexture().getIcon(252, 32, 10, 10);
-		cbDisabled = gui.getGuiTexture().getIcon(242, 42, 12, 10);
-		cbChecked = gui.getGuiTexture().getIcon(242, 52, 12, 10);
-		cbHovered = gui.getGuiTexture().getIcon(254, 42, 12, 10);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(242, 32, 10, 10), null, gui.getGuiTexture().getIcon(252, 32, 10, 10));
+		cbIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(242, 52, 12, 10), gui.getGuiTexture().getIcon(254, 42, 12, 10),
+				gui.getGuiTexture().getIcon(242, 42, 12, 10));
 	}
 
 	public UICheckBox(MalisisGui gui)
@@ -194,7 +188,6 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 		shape.resetState();
 		shape.setSize(10, 10);
 		shape.setPosition(1, 0);
-		rp.icon.set(isDisabled() ? bgIconDisabled : bgIcon);
 		renderer.drawShape(shape, rp);
 
 		renderer.next();
@@ -238,7 +231,7 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 			rp.reset();
 			shape.resetState();
 			shape.setSize(12, 10);
-			rp.icon.set(isDisabled() ? cbDisabled : (isHovered() ? cbHovered : cbChecked));
+			rp.iconProvider.set(cbIconProvider);
 			renderer.drawShape(shape, rp);
 			renderer.next();
 			if (isHovered() && !isDisabled())

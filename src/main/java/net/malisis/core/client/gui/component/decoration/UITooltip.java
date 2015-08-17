@@ -36,6 +36,7 @@ import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.AlphaTransform;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
  * UITooltip
@@ -63,7 +64,7 @@ public class UITooltip extends UIComponent implements IGuiText<UITooltip>
 		fro.shadow = true;
 
 		shape = new XYResizableGuiShape();
-		icon = gui.getGuiTexture().getXYResizableIcon(227, 31, 15, 15, 5);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(227, 31, 15, 15, 5));
 
 		animation = new Animation(this, new AlphaTransform(0, 255).forTicks(2));
 	}
@@ -176,7 +177,6 @@ public class UITooltip extends UIComponent implements IGuiText<UITooltip>
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		shape.setPosition(mouseX + getOffsetX(), mouseY + getOffsetY());
-		rp.icon.set(icon);
 		renderer.drawShape(shape, rp);
 	}
 

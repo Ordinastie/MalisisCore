@@ -22,56 +22,63 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.component.control;
+package net.malisis.core.renderer.icon.provider;
 
-import net.malisis.core.client.gui.Anchor;
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.renderer.icon.GuiIcon;
+import net.malisis.core.renderer.icon.MalisisIcon;
 
 /**
  * @author Ordinastie
  *
  */
-public class UICloseHandle extends UIComponent<UICloseHandle> implements IControlComponent
+public class GuiIconProvider implements IGuiIconProvider
 {
-	public <T extends UIComponent & ICloseable> UICloseHandle(MalisisGui gui, T parent)
+	protected MalisisIcon icon;
+	protected MalisisIcon hoveredIcon;
+	protected MalisisIcon disabledIcon;
+
+	public GuiIconProvider(GuiIcon icon)
 	{
-		super(gui);
+		setIcon(icon);
+	}
 
-		int x = -1;
-		int y = 1;
-		if (parent instanceof UIContainer)
-		{
-			x += ((UIContainer) parent).getHorizontalPadding();
-			y -= ((UIContainer) parent).getVerticalPadding();
-		}
-		setPosition(x, y, Anchor.RIGHT);
-		setSize(5, 5);
-		setZIndex(10);
-		register(this);
+	public GuiIconProvider(MalisisIcon icon, MalisisIcon hoveredIcon, MalisisIcon disabledIcon)
+	{
+		setIcon(icon);
+		setHoveredIcon(hoveredIcon);
+		setDisabledIcon(disabledIcon);
+	}
 
-		parent.addControlComponent(this);
+	public void setIcon(MalisisIcon icon)
+	{
+		this.icon = icon;
+	}
 
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(268, 30, 15, 15));
+	public void setHoveredIcon(MalisisIcon icon)
+	{
+		this.hoveredIcon = icon;
+	}
+
+	public void setDisabledIcon(MalisisIcon icon)
+	{
+		this.disabledIcon = icon;
 	}
 
 	@Override
-	public boolean onClick(int x, int y)
+	public MalisisIcon getIcon()
 	{
-		((ICloseable) getParent()).onClose();
-		return true;
+		return icon;
 	}
 
 	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{}
-
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	public MalisisIcon getIcon(UIComponent<?> component)
 	{
-		renderer.drawShape(shape, rp);
+		if (component.isDisabled())
+			return disabledIcon != null ? disabledIcon : icon;
+		if (component.isHovered())
+			return hoveredIcon != null ? hoveredIcon : icon;
+		return icon;
 	}
+
 }

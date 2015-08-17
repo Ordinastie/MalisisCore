@@ -49,9 +49,9 @@ public class XResizableGuiShape extends GuiShape
 	{
 		w = Math.max(w - 2 * sideWidth, 0);
 
-		faces[0].factor(sideWidth, h, 0);
-		faces[1].factor(w, h, 0);
-		faces[2].factor(sideWidth, h, 0);
+		faces[0].scale(sideWidth, h, 0);
+		faces[1].scale(w, h, 0);
+		faces[2].scale(sideWidth, h, 0);
 
 		faces[1].translate(sideWidth, 0, 0);
 		faces[2].translate(sideWidth + w, 0, 0);

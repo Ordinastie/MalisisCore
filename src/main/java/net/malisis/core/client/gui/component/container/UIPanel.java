@@ -29,6 +29,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 public class UIPanel extends UIContainer<UIPanel> implements ITransformable.Color
 {
@@ -41,7 +42,7 @@ public class UIPanel extends UIContainer<UIPanel> implements ITransformable.Colo
 		setPadding(3, 3);
 
 		shape = new XYResizableGuiShape(5);
-		icon = gui.getGuiTexture().getXYResizableIcon(200, 15, 15, 15, 5);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 15, 15, 15, 5));
 	}
 
 	public UIPanel(MalisisGui gui, int width, int height)
@@ -108,7 +109,6 @@ public class UIPanel extends UIContainer<UIPanel> implements ITransformable.Colo
 		rp.useTexture.set(true);
 		rp.alpha.set(255);
 		rp.colorMultiplier.set(getBackgroundColor() != 0x404040 ? getBackgroundColor() : -1);
-		rp.icon.set(icon);
 		renderer.drawShape(shape, rp);
 		renderer.next();
 	}

@@ -26,7 +26,10 @@ package net.malisis.core.client.gui.element;
 
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.element.Vertex;
+import net.malisis.core.renderer.element.vertex.BottomSouthEast;
+import net.malisis.core.renderer.element.vertex.BottomSouthWest;
+import net.malisis.core.renderer.element.vertex.TopSouthEast;
+import net.malisis.core.renderer.element.vertex.TopSouthWest;
 
 /**
  * @author Ordinastie
@@ -89,15 +92,15 @@ public abstract class GuiShape extends Shape
 	{
 		public GuiFace()
 		{
-			super(new Vertex.BottomSouthWest().setBaseName("TopLeft"), new Vertex.TopSouthWest().setBaseName("BottomLeft"),
-					new Vertex.TopSouthEast().setBaseName("BottomRight"), new Vertex.BottomSouthEast().setBaseName("TopRight"));
+			super(new BottomSouthWest().setBaseName("TopLeft"), new TopSouthWest().setBaseName("BottomLeft"), new TopSouthEast()
+					.setBaseName("BottomRight"), new BottomSouthEast().setBaseName("TopRight"));
 			setStandardUV();
 		}
 
 		public GuiFace(int width, int height)
 		{
 			this();
-			factor(width, height, 0);
+			scale(width, height, 0);
 		}
 	}
 }

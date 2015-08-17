@@ -36,7 +36,7 @@ import net.minecraft.util.EnumFacing;
  * @author Ordinastie
  *
  */
-public class RenderParameters implements ITransformable.Color, ITransformable.Alpha, ITransformable.Brightness
+public class RenderParameters implements ITransformable.Color, ITransformable.Alpha, ITransformable.Brightness, Cloneable
 {
 	protected List<Parameter> listParams = new LinkedList<>();
 	/**
@@ -218,5 +218,29 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	public void setBrightness(int brightness)
 	{
 		this.brightness.set(brightness);
+	}
+
+	public static RenderParameters merge(RenderParameters rp1, RenderParameters rp2)
+	{
+		if (rp1 == null)
+			return rp2 == null ? new RenderParameters() : rp2.clone();
+
+		RenderParameters rp = rp1.clone();
+		rp.merge(rp2);
+		return rp;
+	}
+
+	@Override
+	public RenderParameters clone()
+	{
+		try
+		{
+			return (RenderParameters) super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

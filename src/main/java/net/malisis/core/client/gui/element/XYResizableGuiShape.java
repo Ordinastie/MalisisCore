@@ -56,15 +56,15 @@ public class XYResizableGuiShape extends GuiShape
 		w = Math.max(w - 2 * cornerWidth, 0);
 		h = Math.max(h - 2 * cornerHeight, 0);
 
-		faces[0].factor(cornerWidth, cornerHeight, 0);
-		faces[1].factor(w, cornerHeight, 0);
-		faces[2].factor(cornerWidth, cornerHeight, 0);
-		faces[3].factor(cornerWidth, h, 0);
-		faces[4].factor(w, h, 0);
-		faces[5].factor(cornerWidth, h, 0);
-		faces[6].factor(cornerWidth, cornerHeight, 0);
-		faces[7].factor(w, cornerHeight, 0);
-		faces[8].factor(cornerWidth, cornerHeight, 0);
+		faces[0].scale(cornerWidth, cornerHeight, 0);
+		faces[1].scale(w, cornerHeight, 0);
+		faces[2].scale(cornerWidth, cornerHeight, 0);
+		faces[3].scale(cornerWidth, h, 0);
+		faces[4].scale(w, h, 0);
+		faces[5].scale(cornerWidth, h, 0);
+		faces[6].scale(cornerWidth, cornerHeight, 0);
+		faces[7].scale(w, cornerHeight, 0);
+		faces[8].scale(cornerWidth, cornerHeight, 0);
 
 		faces[1].translate(cornerWidth, 0, 0);
 		faces[2].translate(cornerWidth + w, 0, 0);

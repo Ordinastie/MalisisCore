@@ -24,7 +24,6 @@
 
 package net.malisis.core.renderer.icon.provider;
 
-import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.client.renderer.texture.TextureMap;
 
@@ -32,7 +31,7 @@ import net.minecraft.client.renderer.texture.TextureMap;
  * @author Ordinastie
  *
  */
-public class DefaultIconProvider implements IIconProvider
+public class DefaultIconProvider implements IBlockIconProvider, IItemIconProvider
 {
 	protected String name;
 	protected MalisisIcon icon;
@@ -68,15 +67,8 @@ public class DefaultIconProvider implements IIconProvider
 	}
 
 	@Override
-	public MalisisIcon getIcon(Face face)
+	public MalisisIcon getIcon()
 	{
 		return icon;
 	}
-
-	@Override
-	public MalisisIcon getParticleIcon()
-	{
-		return icon;
-	}
-
 }

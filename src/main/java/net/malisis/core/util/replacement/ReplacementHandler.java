@@ -33,7 +33,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 
 /**
- * The Class RecipeHandler.
+ * The Class ReplacementHandler.
  *
  * @author Ordinastie
  * @param <T> the type of {@link IRecipe} handled

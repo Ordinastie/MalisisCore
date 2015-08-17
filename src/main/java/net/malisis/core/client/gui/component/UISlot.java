@@ -31,12 +31,12 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.inventory.InventoryEvent;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
 import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -51,12 +51,10 @@ import com.google.common.eventbus.Subscribe;
 
 public class UISlot extends UIComponent<UISlot>
 {
-	/** Icon to use for the background of this {@link UISlot} */
-	protected GuiIcon icon;
-	/** Icon for Mojang fix */
-	protected GuiIcon iconLeft;
-	/** Icon for Mojang fix */
-	protected GuiIcon iconTop;
+	/** IconProvider for Mojang fix */
+	protected GuiIconProvider iconLeftProvider;
+	/** IconProvider for Mojang fix */
+	protected GuiIconProvider iconTopProvider;
 
 	/** Whether the mouse button has been released at least once. */
 	public static boolean buttonRelased = true;
@@ -81,9 +79,9 @@ public class UISlot extends UIComponent<UISlot>
 
 		shape = new SimpleGuiShape();
 
-		icon = gui.getGuiTexture().getIcon(209, 30, 18, 18);
-		iconLeft = gui.getGuiTexture().getIcon(209, 30, 1, 18);
-		iconTop = gui.getGuiTexture().getIcon(209, 30, 18, 1);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 30, 18, 18));
+		iconLeftProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 30, 1, 18));
+		iconTopProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 30, 18, 1));
 
 	}
 
@@ -133,7 +131,6 @@ public class UISlot extends UIComponent<UISlot>
 	{
 		shape.resetState();
 		shape.setSize(18, 18);
-		rp.icon.set(icon);
 		renderer.drawShape(shape, rp);
 		renderer.next();
 	}
@@ -192,12 +189,12 @@ public class UISlot extends UIComponent<UISlot>
 		shape.resetState();
 		shape.setSize(1, 18);
 		shape.translate(0, 0, 50);
-		rp.icon.set(iconLeft);
+		rp.iconProvider.set(iconLeftProvider);
 		renderer.drawShape(shape, rp);
 		shape.resetState();
 		shape.setSize(18, 1);
 		shape.translate(0, 0, 50);
-		rp.icon.set(iconTop);
+		rp.iconProvider.set(iconTopProvider);
 		renderer.drawShape(shape, rp);
 
 	}

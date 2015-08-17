@@ -38,9 +38,12 @@ import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.handler.BakeEventHandler;
 import net.malisis.core.renderer.handler.RenderWorldEventHandler;
-import net.malisis.core.renderer.icon.IIconMetaProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
+import net.malisis.core.renderer.icon.metaprovider.IItemMetaIconProvider;
+import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
+import net.malisis.core.renderer.icon.provider.IItemIconProvider;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -620,11 +623,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		if (s == null)
 			return;
 
-		//apply transformations
 		s.applyMatrix();
-
-		if (params.applyTexture.get())
-			applyTexture(s, params);
 
 		for (Face f : s.getFaces())
 			drawFace(f, params);
@@ -659,15 +658,16 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			return;
 		}
 
-		if (params == null)
-			params = new RenderParameters();
-		params.merge(face.getParameters());
+		params = RenderParameters.merge(params, face.getParameters());
 
 		if (!shouldRenderFace(face, params))
 			return;
 
+		if (params.applyTexture.get())
+			applyTexture(face, params);
+
 		//use normals if available
-		if ((renderType == RenderType.ITEM || renderType == RenderType.ITEM || params.useNormals.get()) && params.direction.get() != null)
+		if ((renderType == RenderType.ITEM || params.useNormals.get()) && params.direction.get() != null)
 			wr.setNormal(params.direction.get().getFrontOffsetX(), params.direction.get().getFrontOffsetY(), params.direction.get()
 					.getFrontOffsetZ());
 
@@ -733,25 +733,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	}
 
 	/**
-	 * Gets the MalisisIcon corresponding to the specified {@link RenderParameters}.
-	 *
-	 * @param params the params
-	 * @return the icon
-	 */
-	protected MalisisIcon getIcon(Face face, RenderParameters params)
-	{
-		IIconProvider iconProvider = params.iconProvider.get();
-		if (iconProvider == null && block instanceof IIconMetaProvider)
-			iconProvider = ((IIconMetaProvider) block).getIconProvider();
-
-		if (iconProvider == null)
-			return new MalisisIcon();
-
-		MalisisIcon icon = iconProvider.getIcon(face);
-		return icon != null ? icon : new MalisisIcon();
-	}
-
-	/**
 	 * Checks if a {@link Face} should be rendered. {@link RenderParameters#direction} needs to be defined for the <b>face</b>.
 	 *
 	 * @param face the face
@@ -790,23 +771,68 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 * <code>false</code> to prevent reapplying texture when rendering.
 	 *
 	 * @param shape the shape
-	 * @param parameters the parameters
+	 * @param params the parameters
 	 */
-	public void applyTexture(Shape shape, RenderParameters parameters)
+	public void applyTexture(Shape shape, RenderParameters params)
 	{
 		//shape.applyMatrix();
 		for (Face f : shape.getFaces())
 		{
-			RenderParameters params = new RenderParameters();
-			params.merge(f.getParameters());
-			params.merge(parameters);
-
-			MalisisIcon icon = getIcon(f, params);
-			boolean flipU = params.flipU.get();
-			if (params.direction.get() == EnumFacing.NORTH || params.direction.get() == EnumFacing.EAST)
-				flipU = !flipU;
-			f.setTexture(icon, flipU, params.flipV.get(), params.interpolateUV.get());
+			RenderParameters rp = RenderParameters.merge(params, f.getParameters());
+			applyTexture(f, rp);
 		}
+	}
+
+	/**
+	 * Applies the texture to the {@link Face} with specified {@link RenderParameters}.<br>
+	 *
+	 * @param shape the shape
+	 * @param params the parameters
+	 */
+	public void applyTexture(Face face, RenderParameters params)
+	{
+		MalisisIcon icon = getIcon(face, params);
+		boolean flipU = params.flipU.get();
+		if (params.direction.get() == EnumFacing.NORTH || params.direction.get() == EnumFacing.EAST)
+			flipU = !flipU;
+		face.setTexture(icon, flipU, params.flipV.get(), params.interpolateUV.get());
+	}
+
+	/**
+	 * Gets the {@link MalisisIcon} corresponding to the specified {@link RenderParameters}.
+	 *
+	 * @param params the params
+	 * @return the icon
+	 */
+	protected MalisisIcon getIcon(Face face, RenderParameters params)
+	{
+		if (renderType == RenderType.ITEM)
+		{
+			IIconProvider itemIconProvider = params.iconProvider.get();
+			if (itemIconProvider instanceof IItemIconProvider)
+				return ((IItemIconProvider) itemIconProvider).getIcon(itemStack);
+
+			if (itemStack.getItem() instanceof IItemMetaIconProvider)
+				itemIconProvider = ((IItemMetaIconProvider) itemStack.getItem()).getItemIconProvider();
+
+			if (itemIconProvider instanceof IItemIconProvider)
+				return ((IItemIconProvider) itemIconProvider).getIcon(itemStack);
+		}
+
+		if (block != null)
+		{
+			IIconProvider blockIconProvider = params.iconProvider.get();
+			if (blockIconProvider instanceof IBlockIconProvider)
+				return ((IBlockIconProvider) blockIconProvider).getIcon(pos, blockState, params.textureSide.get());
+
+			if (block instanceof IBlockMetaIconProvider)
+				blockIconProvider = ((IBlockMetaIconProvider) block).getBlockIconProvider();
+
+			if (blockIconProvider instanceof IBlockIconProvider)
+				return ((IBlockIconProvider) blockIconProvider).getIcon(pos, blockState, params.textureSide.get());
+		}
+
+		return new MalisisIcon();
 	}
 
 	/**

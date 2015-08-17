@@ -42,9 +42,9 @@ import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
@@ -123,14 +123,10 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	protected GuiShape optionsShape;
 	/** Shape used to draw the hovered {@link Option} background **/
 	protected GuiShape optionBackground;
-	/** Icon used to draw this {@link UISelect}. */
-	protected GuiIcon iconsSelect;
-	/** Icon used to draw this {@link UISelect} when disabled. */
-	protected GuiIcon iconsSelectDisabled;
 	/** Icon used to draw the option container. */
-	protected GuiIcon iconsExpanded;
+	protected GuiIconProvider iconsExpanded;
 	/** Icon used to draw the arrow. */
-	protected GuiIcon arrowIcon;
+	protected GuiIconProvider arrowIcon;
 
 	/**
 	 * Instantiates a new {@link UISelect}.
@@ -164,10 +160,11 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		optionsShape = new XYResizableGuiShape(1);
 		optionBackground = new SimpleGuiShape();
 
-		iconsSelect = gui.getGuiTexture().getXResizableIcon(200, 30, 9, 12, 3);
-		iconsSelectDisabled = gui.getGuiTexture().getXResizableIcon(200, 42, 9, 12, 3);
-		iconsExpanded = gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1);
-		arrowIcon = gui.getGuiTexture().getIcon(209, 48, 7, 4);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXResizableIcon(200, 30, 9, 12, 3), null, gui.getGuiTexture()
+				.getXResizableIcon(200, 42, 9, 12, 3));
+
+		iconsExpanded = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1));
+		arrowIcon = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 48, 7, 4));
 	}
 
 	/**
@@ -721,7 +718,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	{
 		shape.resetState();
 		shape.setSize(super.getWidth(), super.getHeight());
-		rp.icon.set(isDisabled() ? iconsSelectDisabled : iconsSelect);
 		rp.colorMultiplier.set(bgColor);
 		renderer.drawShape(shape, rp);
 	}
@@ -742,7 +738,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			rp.colorMultiplier.set(0xBEC8FF);
 		else
 			rp.colorMultiplier.reset();
-		rp.icon.set(arrowIcon);
+		rp.iconProvider.set(arrowIcon);
 		renderer.drawShape(arrowShape, rp);
 
 		//draw selected value
@@ -762,7 +758,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		optionsShape.resetState();
 		optionsShape.setSize(optionsWidth, optionsHeight);
 		optionsShape.translate(0, 12, 1);
-		rp.icon.set(iconsExpanded);
+		rp.iconProvider.set(iconsExpanded);
 		rp.colorMultiplier.set(bgColor);
 
 		renderer.drawShape(optionsShape, rp);

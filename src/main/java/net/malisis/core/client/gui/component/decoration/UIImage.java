@@ -30,6 +30,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.minecraft.item.ItemStack;
 
 /**
@@ -56,10 +57,14 @@ public class UIImage extends UIComponent<UIImage>
 	public UIImage(MalisisGui gui, GuiTexture texture, MalisisIcon icon)
 	{
 		super(gui);
+
+		iconProvider = new GuiIconProvider(null);
+
 		setIcon(texture, icon);
 		setSize(16, 16);
 
 		shape = new SimpleGuiShape();
+		iconProvider = new GuiIconProvider(null);
 	}
 
 	/**
@@ -71,6 +76,9 @@ public class UIImage extends UIComponent<UIImage>
 	public UIImage(MalisisGui gui, ItemStack itemStack)
 	{
 		super(gui);
+
+		iconProvider = new GuiIconProvider(null);
+
 		setItemStack(itemStack);
 		setSize(16, 16);
 
@@ -127,7 +135,7 @@ public class UIImage extends UIComponent<UIImage>
 	 */
 	public MalisisIcon getIcon()
 	{
-		return icon;
+		return iconProvider.getIcon();
 	}
 
 	/**
@@ -178,7 +186,7 @@ public class UIImage extends UIComponent<UIImage>
 	{
 		if (icon != null)
 		{
-			rp.icon.set(icon);
+			((GuiIconProvider) iconProvider).setIcon(icon);
 			renderer.bindTexture(texture);
 			renderer.drawShape(shape, rp);
 		}

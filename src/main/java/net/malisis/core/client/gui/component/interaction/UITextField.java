@@ -41,10 +41,11 @@ import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.Link;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.icon.GuiIcon;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
@@ -150,8 +151,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		cursorShape = new SimpleGuiShape();
 		selectShape = new SimpleGuiShape();
 
-		iconTextfield = gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1);
-		iconTextfieldDisabled = gui.getGuiTexture().getXYResizableIcon(200, 42, 9, 12, 1);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1), null, gui.getGuiTexture()
+				.getXYResizableIcon(200, 42, 9, 12, 1));
 
 		if (multiLine)
 			scrollBar = new UISlimScrollbar(gui, this, Type.VERTICAL);
@@ -1105,7 +1106,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	{
 		rp.useTexture.reset();
 		rp.colorMultiplier.reset();
-		rp.icon.set(isDisabled() ? iconTextfieldDisabled : iconTextfield);
 		rp.colorMultiplier.set(bgColor);
 		renderer.drawShape(shape, rp);
 	}

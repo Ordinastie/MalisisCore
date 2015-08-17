@@ -22,15 +22,15 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.icon;
+package net.malisis.core.renderer.icon.metaprovider;
 
-import net.malisis.core.renderer.icon.provider.IIconProvider;
+import net.malisis.core.renderer.icon.provider.IItemIconProvider;
 
 /**
  * @author Ordinastie
  *
  */
-public interface IIconMetaProvider
+public interface IItemMetaIconProvider
 {
-	public IIconProvider getIconProvider();
+	public IItemIconProvider getItemIconProvider();
 }

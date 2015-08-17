@@ -38,6 +38,7 @@ import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.ComponentExceptionHandler;
+import net.malisis.core.client.gui.event.GuiEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.PositionChangeEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
@@ -45,9 +46,11 @@ import net.malisis.core.client.gui.event.component.StateChangeEvent.DisabledStat
 import net.malisis.core.client.gui.event.component.StateChangeEvent.FocusStateChange;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
+import net.malisis.core.renderer.icon.GuiIcon;
+import net.malisis.core.renderer.icon.metaprovider.IGuiMetaIconProvider;
+import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
 import net.malisis.core.util.MouseButton;
 
 import org.lwjgl.opengl.GL11;
@@ -64,7 +67,7 @@ import com.google.common.eventbus.EventBus;
  * @param <T> the type of <code>UIComponent</code>
  */
 public abstract class UIComponent<T extends UIComponent> implements ITransformable.Position<T>, ITransformable.Size<T>,
-		ITransformable.Alpha, IKeyListener
+		ITransformable.Alpha, IKeyListener, IGuiMetaIconProvider
 {
 	/** The Exception handler for all Compoenent events. */
 	private static final ComponentExceptionHandler exceptionHandler = new ComponentExceptionHandler();
@@ -96,10 +99,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	protected UITooltip tooltip;
 	/** Determines whether this {@link UIComponent} is visible. */
 	protected boolean visible = true;
-	/**
-	 * Determines whether this {@link UIComponent} is enabled. If set to false, will cancel any
-	 * {@link net.malisis.core.client.gui.event.GuiEvent events} received.
-	 */
+	/** Determines whether this {@link UIComponent} is enabled. If set to false, will cancel any {@link GuiEvent events} received. */
 	protected boolean disabled = false;
 	/** Hover state of this {@link UIComponent}. */
 	protected boolean hovered = false;
@@ -110,7 +110,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	/** {@link RenderParameters} used to draw this {@link UIComponent}. */
 	protected RenderParameters rp;
 	/** {@link GuiIcon} used to draw this {@link UIComponent}. */
-	protected GuiIcon icon;
+	protected IGuiIconProvider iconProvider;
 	/** Alpha transparency of this {@link UIComponent}. */
 	protected int alpha = 255;
 
@@ -602,6 +602,12 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	// #end getters/setters
+
+	@Override
+	public IGuiIconProvider getGuiIconProvider()
+	{
+		return iconProvider;
+	}
 
 	/**
 	 * Registers an <code>object</code> to handle events received by this {@link UIComponent}.

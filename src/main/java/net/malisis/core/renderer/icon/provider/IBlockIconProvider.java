@@ -26,73 +26,23 @@ package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Ordinastie
  *
  */
-public class SidesIconProvider extends DefaultIconProvider
+public interface IBlockIconProvider extends IIconProvider
 {
-	private String[] names = new String[6];
-	private MalisisIcon[] icons = new MalisisIcon[6];
-
-	public SidesIconProvider(String defaultName, String[] iconNames)
+	public default MalisisIcon getIcon(BlockPos pos, IBlockState state, EnumFacing facing)
 	{
-		super(defaultName);
-		setIcons(iconNames);
+		return getIcon();
 	}
 
-	@Override
-	public void registerIcons(TextureMap map)
+	public default MalisisIcon getParticleIcon(IBlockState state)
 	{
-		super.registerIcons(map);
-		if (ArrayUtils.isEmpty(names))
-			return;
-
-		for (int i = 0; i < names.length; i++)
-		{
-			if (!StringUtils.isEmpty(names[i]))
-			{
-				icons[i] = new MalisisIcon(names[i]);
-				icons[i].register(map);
-			}
-		}
-	}
-
-	public void setIcons(String[] names)
-	{
-		this.names = names;
-	}
-
-	public void setIcons(MalisisIcon[] icons)
-	{
-		this.icons = icons;
-	}
-
-	public MalisisIcon getIcon(EnumFacing dir)
-	{
-		if (dir == null || dir.getIndex() > icons.length)
-			return null;
-
-		return icons[dir.getIndex()];
-	}
-
-	@Override
-	public MalisisIcon getIcon(BlockPos pos, IBlockState state, EnumFacing facing)
-	{
-		//TODO: handle actual block direction from state
-		//store in the class the IProperty used for direction get it here
-		if (facing == null)
-			return icon;
-		MalisisIcon dirIcon = getIcon(facing);
-		return dirIcon != null ? dirIcon : icon;
-
+		return getIcon();
 	}
 
 }

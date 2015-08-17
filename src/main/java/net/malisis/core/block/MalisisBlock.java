@@ -27,9 +27,9 @@ package net.malisis.core.block;
 import java.util.List;
 
 import net.malisis.core.MalisisRegistry;
-import net.malisis.core.renderer.icon.IIconMetaProvider;
+import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
-import net.malisis.core.renderer.icon.provider.IIconProvider;
+import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.RaytraceBlock;
 import net.minecraft.block.Block;
@@ -52,11 +52,11 @@ import org.apache.commons.lang3.StringUtils;
  * @author Ordinastie
  *
  */
-public class MalisisBlock extends Block implements IBoundingBox, IIconMetaProvider
+public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconProvider
 {
 	protected String name;
 	protected AxisAlignedBB boundingBox;
-	protected IIconProvider iconProvider;
+	protected IBlockIconProvider iconProvider;
 
 	protected MalisisBlock(Material material)
 	{
@@ -81,16 +81,16 @@ public class MalisisBlock extends Block implements IBoundingBox, IIconMetaProvid
 		if (StringUtils.isEmpty(textureName))
 			return;
 
-		setIconProvider(new DefaultIconProvider(textureName));
+		setBlockIconProvider(new DefaultIconProvider(textureName));
 	}
 
-	public void setIconProvider(IIconProvider iconProvider)
+	public void setBlockIconProvider(IBlockIconProvider iconProvider)
 	{
 		this.iconProvider = iconProvider;
 	}
 
 	@Override
-	public IIconProvider getIconProvider()
+	public IBlockIconProvider getBlockIconProvider()
 	{
 		return iconProvider;
 	}

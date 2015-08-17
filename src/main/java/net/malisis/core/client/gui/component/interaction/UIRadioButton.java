@@ -34,10 +34,10 @@ import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.client.gui.icon.GuiIcon;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
@@ -50,12 +50,6 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 {
 	private static HashMap<String, List<UIRadioButton>> radioButtons = new HashMap<>();
 
-	protected GuiIcon bgIcon;
-	protected GuiIcon bgIconDisabled;
-	protected GuiIcon rbDisabled;
-	protected GuiIcon rbChecked;
-	protected GuiIcon rbHovered;
-
 	/** The {@link MalisisFont} to use for this {@link UIRadioButton}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontRenderOptions} to use for this {@link UIRadioButton}. */
@@ -64,6 +58,8 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 	private String name;
 	private String text;
 	private boolean selected;
+
+	private GuiIconProvider rbIconProvider;
 
 	public UIRadioButton(MalisisGui gui, String name, String text)
 	{
@@ -74,11 +70,9 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 
 		shape = new SimpleGuiShape();
 
-		bgIcon = gui.getGuiTexture().getIcon(200, 54, 8, 8);
-		bgIconDisabled = gui.getGuiTexture().getIcon(200, 62, 8, 8);
-		rbDisabled = gui.getGuiTexture().getIcon(208, 54, 6, 6);
-		rbChecked = gui.getGuiTexture().getIcon(214, 54, 6, 6);
-		rbHovered = gui.getGuiTexture().getIcon(220, 54, 6, 6);
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(200, 54, 8, 8), null, gui.getGuiTexture().getIcon(200, 62, 8, 8));
+		rbIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(214, 54, 6, 6), gui.getGuiTexture().getIcon(220, 54, 6, 6), gui
+				.getGuiTexture().getIcon(208, 54, 6, 6));
 
 		addRadioButton(this);
 	}
@@ -181,7 +175,6 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 		shape.resetState();
 		shape.setSize(8, 8);
 		shape.translate(1, 0, 0);
-		rp.icon.set(isDisabled() ? bgIconDisabled : bgIcon);
 		renderer.drawShape(shape, rp);
 
 		renderer.next();
@@ -225,7 +218,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 			shape.resetState();
 			shape.setSize(6, 6);
 			shape.setPosition(2, 1);
-			rp.icon.set(isDisabled() ? rbDisabled : (isHovered() ? rbHovered : rbChecked));
+			rp.iconProvider.set(rbIconProvider);
 			renderer.drawShape(shape, rp);
 		}
 	}
