@@ -51,7 +51,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
@@ -91,6 +90,16 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 {
 	/** Reference to Tessellator.isDrawing field **/
 	private static Field isDrawingField;
+
+	//@formatter:off
+	public static MalisisRenderer defaultRenderer = new MalisisRenderer()
+	{
+		private Shape shape;
+		@Override protected void initialize() { shape = new Cube(); }
+		@Override public void render() { drawShape(shape); }
+	};
+	//@formatter:on
+
 	/** Whether this {@link MalisisRenderer} initialized. (initialize() already called) */
 	private boolean initialized = false;
 	/** Tessellator reference. */
@@ -379,12 +388,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		}
 		else if (renderType == RenderType.ITEM)
 		{
-			//GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
-			//GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
-			//			GlStateManager.pushAttrib();
-			//			GlStateManager.pushMatrix();
-			//			GlStateManager.translate(-0.5F, -0.5F, -0.5F);
-
 			startDrawing();
 			wr.setVertexFormat(itemFormat);
 		}
@@ -393,8 +396,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			GlStateManager.pushAttrib();
 			GlStateManager.pushMatrix();
 			GlStateManager.disableLighting();
-			//GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-			//GlStateManager.shadeModel(GL11.GL_SMOOTH);
 
 			GlStateManager.translate(data[0], data[1], data[2]);
 
@@ -408,8 +409,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			GlStateManager.pushAttrib();
 			GlStateManager.pushMatrix();
 			GlStateManager.disableLighting();
-			//GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-			//GL11.glShadeModel(GL11.GL_SMOOTH);
 
 			GlStateManager.translate(data[0], data[1], data[2]);
 
@@ -519,27 +518,30 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	}
 
 	/**
-	 * Enables the blending for the rendering. Ineffective for BLOCK.
+	 * Enables the blending for the rendering. Ineffective for BLOCK renderType.
 	 */
 	public void enableBlending()
 	{
 		if (renderType == RenderType.BLOCK)
 			return;
 
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-		GL11.glShadeModel(GL11.GL_SMOOTH);
-		OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
-		GL11.glAlphaFunc(GL11.GL_GREATER, 0.0F);
-
+		GlStateManager.enableBlend();
+		GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
+		GlStateManager.alphaFunc(GL11.GL_GREATER, 0.0F);
+		GlStateManager.shadeModel(GL11.GL_SMOOTH);
+		GlStateManager.enableColorMaterial();
 	}
 
 	/**
-	 * Disables textures.
+	 * Disables blending for the rendering. Ineffective for BLOCK renderType.
 	 */
-	public void disableTextures()
+	public void disableBlending()
 	{
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		if (renderType == RenderType.BLOCK)
+			return;
+
+		GlStateManager.disableBlend();
+		GlStateManager.disableColorMaterial();
 	}
 
 	/**
@@ -548,6 +550,14 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	public void enableTextures()
 	{
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+
+	/**
+	 * Disables textures.
+	 */
+	public void disableTextures()
+	{
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}
 
 	@Override
@@ -906,15 +916,15 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 				return block.getLightValue() << 4;
 		}
 
-		//not in world
-		if (((renderType == RenderType.BLOCK || renderType == RenderType.TILE_ENTITY) && world == null) || !params.useBlockBrightness.get())
-			return params.brightness.get();
-
 		if (renderType == RenderType.ITEM)
 			return Minecraft.getMinecraft().thePlayer.getBrightnessForRender(getPartialTick());
 
+		//not in world
+		if ((renderType != RenderType.BLOCK && renderType != RenderType.TILE_ENTITY) || world == null || !params.useBlockBrightness.get())
+			return params.brightness.get();
+
 		//no direction, we can only use current block brightness
-		if (params.direction.get() == null)
+		if (params.direction.get() == null && block != null)
 			return block.getMixedBrightnessForBlock(world, pos);
 
 		AxisAlignedBB bounds = getRenderBounds(params);

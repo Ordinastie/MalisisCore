@@ -26,7 +26,9 @@ package net.malisis.core.block;
 
 import java.util.List;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.MalisisRegistry;
+import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
@@ -43,7 +45,9 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -103,7 +107,12 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 	public void register(Class<? extends ItemBlock> item)
 	{
 		GameRegistry.registerBlock(this, item, getName());
-		MalisisRegistry.registerIconProvider(iconProvider);
+		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+		{
+			MalisisRegistry.registerIconProvider(iconProvider);
+			if (useDefaultRenderer())
+				MalisisRenderer.defaultRenderer.registerFor(this);
+		}
 	}
 
 	@Override
@@ -135,5 +144,16 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 		if (ArrayUtils.isEmpty(aabbs) || aabbs[0] == null)
 			return AABBUtils.empty(pos);
 		return AABBUtils.offset(pos, aabbs)[0];
+	}
+
+	public boolean useDefaultRenderer()
+	{
+		return true;
+	}
+
+	@Override
+	public int getRenderType()
+	{
+		return MalisisCore.malisisRenderType;
 	}
 }
