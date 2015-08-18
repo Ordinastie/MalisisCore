@@ -28,14 +28,12 @@ import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.inventory.MalisisInventory;
-import net.malisis.core.inventory.MalisisInventoryContainer;
+import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Message to tell the client to open a GUI.
@@ -44,38 +42,21 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  */
 @MalisisMessage
-public class CloseInventoryMessage implements IMessageHandler<CloseInventoryMessage.Packet, IMessage>
+public class CloseInventoryMessage implements IMalisisMessageHandler<CloseInventoryMessage.Packet, IMessage>
 {
-	public enum ContainerType
-	{
-		TYPE_TILEENTITY, TYPE_ITEM;
-	}
-
 	public CloseInventoryMessage()
 	{
 		MalisisCore.network.registerMessage(this, Packet.class, Side.CLIENT);
 	}
 
 	/**
-	 * Handles the received {@link Packet} on the client. Close the GUI.
+	 * Handles the received {@link Packet} on the client. Closes the GUI.
 	 *
 	 * @param message the message
 	 * @param ctx the ctx
-	 * @return the i message
 	 */
 	@Override
-	public IMessage onMessage(Packet message, MessageContext ctx)
-	{
-		if (ctx.side == Side.CLIENT)
-			closeGui();
-		return null;
-	}
-
-	/**
-	 * Closes a the GUI for the {@link MalisisInventoryContainer}.
-	 */
-	@SideOnly(Side.CLIENT)
-	private void closeGui()
+	public void process(Packet message, MessageContext ctx)
 	{
 		if (MalisisGui.currentGui() != null)
 			MalisisGui.currentGui().close();

@@ -34,6 +34,7 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisSlot;
+import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -42,10 +43,8 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Message to update the slots in the opened {@link MalisisInventoryContainer} on the client.
@@ -54,7 +53,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  */
 @MalisisMessage
-public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInventorySlotsMessage.Packet, IMessage>
+public class UpdateInventorySlotsMessage implements IMalisisMessageHandler<UpdateInventorySlotsMessage.Packet, IMessage>
 {
 	public static int PICKEDITEM = -1;
 
@@ -64,48 +63,32 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 	}
 
 	/**
-	 * Handles the received {@link Packet} on the client. Updates the slots.
+	 * Handles the received {@link Packet} on the client.<br>
+	 * Updates the slots in the client {@link MalisisInventory}
 	 *
 	 * @param message the message
 	 * @param ctx the ctx
-	 * @return the i message
 	 */
 	@Override
-	public IMessage onMessage(Packet message, MessageContext ctx)
-	{
-		if (ctx.side == Side.CLIENT)
-			updateSlots(message.inventoryId, message.slots, message.windowId);
-
-		return null;
-	}
-
-	/**
-	 * Handles the reception of packets that update the inventory of the client.
-	 *
-	 * @param inventoryId the inventory id
-	 * @param slots the slots
-	 * @param windowId the window id
-	 */
-	@SideOnly(Side.CLIENT)
-	private void updateSlots(int inventoryId, HashMap<Integer, ItemStack> slots, int windowId)
+	public void process(Packet message, MessageContext ctx)
 	{
 		EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
 		Container c = player.openContainer;
-		if (windowId != c.windowId || !(c instanceof MalisisInventoryContainer))
+		if (message.windowId != c.windowId || !(c instanceof MalisisInventoryContainer))
 			return;
 
 		MalisisInventoryContainer container = (MalisisInventoryContainer) c;
-		if (inventoryId == PICKEDITEM)
+		if (message.inventoryId == PICKEDITEM)
 		{
-			container.setPickedItemStack(slots.get(-1));
+			container.setPickedItemStack(message.slots.get(-1));
 			return;
 		}
 
-		MalisisInventory inventory = container.getInventory(inventoryId);
+		MalisisInventory inventory = container.getInventory(message.inventoryId);
 		if (inventory == null)
 			return;
 
-		for (Entry<Integer, ItemStack> entry : slots.entrySet())
+		for (Entry<Integer, ItemStack> entry : message.slots.entrySet())
 		{
 			Integer slotNumber = entry.getKey();
 			ItemStack itemStack = entry.getValue();
@@ -115,7 +98,7 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 	}
 
 	/**
-	 * Sends a packet to player to update the picked itemStack.
+	 * Sends a {@link Packet} to player to update the picked {@link ItemStack}.
 	 *
 	 * @param itemStack the item stack
 	 * @param player the player
@@ -129,7 +112,7 @@ public class UpdateInventorySlotsMessage implements IMessageHandler<UpdateInvent
 	}
 
 	/**
-	 * Sends a packet to player to update the inventory slots.
+	 * Sends a {@link Packet} to player to update the inventory slots.
 	 *
 	 * @param inventoryId the inventory id
 	 * @param slots the slots

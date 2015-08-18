@@ -28,7 +28,7 @@ import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.IInventoryProvider;
 import net.malisis.core.inventory.MalisisInventory;
-import net.malisis.core.inventory.MalisisInventoryContainer;
+import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
 import net.malisis.core.util.TileEntityUtils;
 import net.minecraft.client.Minecraft;
@@ -39,10 +39,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Message to tell the client to open a GUI.
@@ -51,7 +49,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  */
 @MalisisMessage
-public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessage.Packet, IMessage>
+public class OpenInventoryMessage implements IMalisisMessageHandler<OpenInventoryMessage.Packet, IMessage>
 {
 	public enum ContainerType
 	{
@@ -64,38 +62,21 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 	}
 
 	/**
-	 * Handles the received {@link Packet} on the client. Opens the GUI.
+	 * Handles the received {@link Packet} on the client.<br>
+	 * Opens the GUI for the {@link MalisisInventory}
 	 *
 	 * @param message the message
 	 * @param ctx the ctx
-	 * @return the i message
 	 */
 	@Override
-	public IMessage onMessage(Packet message, MessageContext ctx)
-	{
-		if (ctx.side == Side.CLIENT)
-			openGui(message.type, message.pos, message.windowId);
-		return null;
-	}
-
-	/**
-	 * Open a the GUI for the {@link MalisisInventoryContainer}.
-	 *
-	 * @param type the type
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
-	 * @param windowId the window id
-	 */
-	@SideOnly(Side.CLIENT)
-	private void openGui(ContainerType type, BlockPos pos, int windowId)
+	public void process(Packet message, MessageContext ctx)
 	{
 		EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
 		IInventoryProvider inventoryProvider = null;
 		Object data = null;
-		if (type == ContainerType.TYPE_TILEENTITY)
-			inventoryProvider = TileEntityUtils.getTileEntity(IInventoryProvider.class, Minecraft.getMinecraft().theWorld, pos);
-		else if (type == ContainerType.TYPE_ITEM)
+		if (message.type == ContainerType.TYPE_TILEENTITY)
+			inventoryProvider = TileEntityUtils.getTileEntity(IInventoryProvider.class, Minecraft.getMinecraft().theWorld, message.pos);
+		else if (message.type == ContainerType.TYPE_ITEM)
 		{
 			ItemStack itemStack = player.getCurrentEquippedItem();
 			if (itemStack != null && itemStack.getItem() instanceof IInventoryProvider)
@@ -106,7 +87,7 @@ public class OpenInventoryMessage implements IMessageHandler<OpenInventoryMessag
 		}
 
 		if (inventoryProvider != null)
-			MalisisInventory.open(player, inventoryProvider, windowId, data);
+			MalisisInventory.open(player, inventoryProvider, message.windowId, data);
 
 	}
 

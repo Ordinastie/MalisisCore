@@ -28,11 +28,11 @@ import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
+import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.Container;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -44,7 +44,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  */
 @MalisisMessage
-public class InventoryActionMessage implements IMessageHandler<InventoryActionMessage.Packet, IMessage>
+public class InventoryActionMessage implements IMalisisMessageHandler<InventoryActionMessage.Packet, IMessage>
 {
 	public InventoryActionMessage()
 	{
@@ -52,28 +52,22 @@ public class InventoryActionMessage implements IMessageHandler<InventoryActionMe
 	}
 
 	/**
-	 * Handles the {@link Packet} received from the client. Pass the action to the {@link MalisisInventoryContainer}, and send the changes
-	 * back to the client.
+	 * Handles the {@link Packet} received from the client.<br>
+	 * Passes the action to the {@link MalisisInventoryContainer}, and send the changes back to the client.
 	 *
 	 * @param message the message
 	 * @param ctx the ctx
-	 * @return the i message
 	 */
 	@Override
-	public IMessage onMessage(Packet message, MessageContext ctx)
+	public void process(Packet message, MessageContext ctx)
 	{
-		if (ctx.side != Side.SERVER)
-			return null;
-
 		Container c = ctx.getServerHandler().playerEntity.openContainer;
 		if (message.windowId != c.windowId || !(c instanceof MalisisInventoryContainer))
-			return null;
+			return;
 
 		MalisisInventoryContainer container = (MalisisInventoryContainer) c;
 		container.handleAction(message.action, message.inventoryId, message.slotNumber, message.code);
 		container.detectAndSendChanges();
-
-		return null;
 	}
 
 	/**
