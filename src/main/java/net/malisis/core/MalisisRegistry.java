@@ -33,6 +33,7 @@ import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
@@ -90,8 +91,12 @@ public class MalisisRegistry
 	{
 		Block block = state.getBlock();
 		MalisisIcon icon = null;
-		if (block instanceof IBlockIconProvider)
-			icon = ((IBlockIconProvider) block).getParticleIcon(state);
+		if (block instanceof IBlockMetaIconProvider)
+		{
+			IBlockIconProvider provider = ((IBlockMetaIconProvider) block).getBlockIconProvider();
+			if (provider != null)
+				icon = provider.getParticleIcon(state);
+		}
 
 		return icon != null ? icon : MalisisIcon.missing();
 	}
