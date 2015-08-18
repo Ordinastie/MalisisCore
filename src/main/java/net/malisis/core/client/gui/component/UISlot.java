@@ -35,17 +35,15 @@ import net.malisis.core.inventory.InventoryEvent;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
-import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -162,41 +160,21 @@ public class UISlot extends UIComponent<UISlot>
 		// draw the white shade over the slot
 		if (hovered || draggedItemStack != null)
 		{
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glDisable(GL11.GL_ALPHA_TEST);
-			OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-			GL11.glShadeModel(GL11.GL_SMOOTH);
+			renderer.disableTextures();
+			GlStateManager.disableLighting();
+			GlStateManager.disableDepth();
+			GlStateManager.colorMask(true, true, true, false);
 
-			RenderParameters rp = new RenderParameters();
-			rp.colorMultiplier.set(0xFFFFFF);
-			rp.alpha.set(80);
-			rp.useTexture.set(false);
-
-			shape.resetState();
-			shape.setSize(16, 16);
-			shape.translate(1, 1, 100);
-			renderer.drawShape(shape, rp);
+			renderer.next();
+			renderer.drawRectangle(1, 1, 100, 16, 16, 0xFFFFFF, 80);
 			renderer.next();
 
-			GL11.glShadeModel(GL11.GL_FLAT);
-			GL11.glDisable(GL11.GL_BLEND);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
+			GlStateManager.colorMask(true, true, true, true);
+			GlStateManager.enableLighting();
+			GlStateManager.enableDepth();
+			renderer.enableTextures();
 		}
-		GL11.glEnable(GL11.GL_ALPHA_TEST);
-
-		// Dirty fix because Mojang can't count and masks overflow the slots
-		shape.resetState();
-		shape.setSize(1, 18);
-		shape.translate(0, 0, 50);
-		rp.iconProvider.set(iconLeftProvider);
-		renderer.drawShape(shape, rp);
-		shape.resetState();
-		shape.setSize(18, 1);
-		shape.translate(0, 0, 50);
-		rp.iconProvider.set(iconTopProvider);
-		renderer.drawShape(shape, rp);
-
+		//GL11.glEnable(GL11.GL_ALPHA_TEST);
 	}
 
 	@Override

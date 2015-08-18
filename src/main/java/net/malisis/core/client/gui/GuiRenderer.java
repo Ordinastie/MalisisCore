@@ -41,6 +41,7 @@ import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
@@ -49,7 +50,6 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 /**
  * Renderer to use for {@link MalisisGui}.
@@ -84,6 +84,7 @@ public class GuiRenderer extends MalisisRenderer
 	public GuiRenderer()
 	{
 		defaultGuiTexture = new GuiTexture(new ResourceLocation("malisiscore", "textures/gui/gui.png"), 300, 100);
+
 	}
 
 	/**
@@ -166,14 +167,15 @@ public class GuiRenderer extends MalisisRenderer
 	{
 		_initialize();
 		this.renderType = renderType;
+		this.wr = Tessellator.getInstance().getWorldRenderer();
 
 		currentTexture = null;
 		bindDefaultTexture();
 
 		if (ignoreScale)
 		{
-			GL11.glPushMatrix();
-			GL11.glScalef(1F / scaleFactor, 1F / scaleFactor, 1);
+			GlStateManager.pushMatrix();
+			GlStateManager.scale(1F / scaleFactor, 1F / scaleFactor, 1);
 		}
 
 		enableBlending();
@@ -187,7 +189,7 @@ public class GuiRenderer extends MalisisRenderer
 		draw();
 
 		if (ignoreScale)
-			GL11.glPopMatrix();
+			GlStateManager.popMatrix();
 
 		reset();
 	}
@@ -200,6 +202,13 @@ public class GuiRenderer extends MalisisRenderer
 	{
 		super.next();
 		bindDefaultTexture();
+	}
+
+	@Override
+	public void startDrawing(int drawMode)
+	{
+		super.startDrawing(drawMode);
+		this.wr.setVertexFormat(itemFormat);
 	}
 
 	/**
@@ -293,6 +302,8 @@ public class GuiRenderer extends MalisisRenderer
 		shape.translate(currentComponent.screenX(), currentComponent.screenY(), currentComponent.getZIndex());
 		shape.applyMatrix();
 
+		applyTexture(shape, params);
+
 		for (Face face : shape.getFaces())
 			drawFace(face, params);
 	}
@@ -317,9 +328,9 @@ public class GuiRenderer extends MalisisRenderer
 		rectangle.getFaces()[0].getParameters().colorMultiplier.set(color);
 		rectangle.getFaces()[0].getParameters().alpha.set(alpha);
 
-		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-		GL11.glPushMatrix();
-		GL11.glTranslated(0, 0, z);
+		GlStateManager.pushAttrib();
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(0, 0, z);
 		disableTextures();
 		enableBlending();
 
@@ -327,8 +338,8 @@ public class GuiRenderer extends MalisisRenderer
 		next();
 		enableTextures();
 
-		GL11.glPopMatrix();
-		GL11.glPopAttrib();
+		GlStateManager.popMatrix();
+		GlStateManager.popAttrib();
 	}
 
 	/**
@@ -340,9 +351,11 @@ public class GuiRenderer extends MalisisRenderer
 	{
 		if (tooltip != null)
 		{
-			wr.startDrawingQuads();
+			prepare(RenderType.GUI);
+			startDrawing();
 			tooltip.draw(this, mouseX, mouseY, partialTick);
-			Tessellator.getInstance().draw();
+			draw();
+			clean();
 		}
 	}
 
@@ -504,15 +517,15 @@ public class GuiRenderer extends MalisisRenderer
 			label = format + label;
 
 		Tessellator.getInstance().draw();
-		RenderHelper.enableGUIStandardItemLighting();
-		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-
-		itemRenderer.renderItemAndEffectIntoGUI(itemStack, x, y);
-		itemRenderer.renderItemOverlayIntoGUI(fontRenderer, itemStack, x, y, label);
 
 		RenderHelper.disableStandardItemLighting();
-		GL11.glColor4f(1, 1, 1, 1);
-		//	GL11.glDisable(GL11.GL_ALPHA_TEST);
+		RenderHelper.enableGUIStandardItemLighting();
+
+		itemRenderer.renderItemIntoGUI(itemStack, x, y);
+		itemRenderer.renderItemOverlayIntoGUI(fontRenderer, itemStack, x, y, label);
+
+		RenderHelper.enableStandardItemLighting();
+		GlStateManager.enableBlend(); //Forge commented blend reenabling
 
 		currentTexture = null;
 		bindDefaultTexture();
@@ -530,10 +543,12 @@ public class GuiRenderer extends MalisisRenderer
 			return;
 
 		itemRenderer.zLevel = 100;
-		wr.startDrawingQuads();
+		prepare(RenderType.GUI);
+		startDrawing();
 		drawItemStack(itemStack, mouseX - 8, mouseY - 8, null, itemStack.stackSize == 0 ? EnumChatFormatting.YELLOW : null, false);
-		Tessellator.getInstance().draw();
+		draw();
 		itemRenderer.zLevel = 0;
+		clean();
 	}
 
 	/**

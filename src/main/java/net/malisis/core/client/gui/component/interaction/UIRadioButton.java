@@ -92,7 +92,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 	@Override
 	public UIRadioButton setFont(MalisisFont font)
 	{
-		this.font = font;
+		this.font = font != null ? font : MalisisFont.minecraftFont;
 		calculateSize();
 		return this;
 	}

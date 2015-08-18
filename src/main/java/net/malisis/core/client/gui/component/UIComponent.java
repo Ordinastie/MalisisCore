@@ -52,6 +52,7 @@ import net.malisis.core.renderer.icon.GuiIcon;
 import net.malisis.core.renderer.icon.metaprovider.IGuiMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
 import net.malisis.core.util.MouseButton;
+import net.minecraft.client.renderer.GlStateManager;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
@@ -1006,7 +1007,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 		if (getAlpha() < 255)
 		{
-			GL11.glBlendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE_MINUS_CONSTANT_ALPHA);
+			GlStateManager.blendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE_MINUS_CONSTANT_ALPHA);
 			GL14.glBlendColor(1, 1, 1, (float) getAlpha() / 255);
 		}
 
