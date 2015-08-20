@@ -833,13 +833,13 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		{
 			IIconProvider blockIconProvider = params.iconProvider.get();
 			if (blockIconProvider instanceof IBlockIconProvider)
-				return ((IBlockIconProvider) blockIconProvider).getIcon(pos, blockState, params.textureSide.get());
+				return ((IBlockIconProvider) blockIconProvider).getIcon(world, pos, blockState, params.textureSide.get());
 
 			if (block instanceof IBlockMetaIconProvider)
 				blockIconProvider = ((IBlockMetaIconProvider) block).getBlockIconProvider();
 
 			if (blockIconProvider instanceof IBlockIconProvider)
-				return ((IBlockIconProvider) blockIconProvider).getIcon(pos, blockState, params.textureSide.get());
+				return ((IBlockIconProvider) blockIconProvider).getIcon(world, pos, blockState, params.textureSide.get());
 		}
 
 		return new MalisisIcon();

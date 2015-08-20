@@ -29,6 +29,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.IBlockAccess;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -84,7 +85,7 @@ public class SidesIconProvider extends DefaultIconProvider
 	}
 
 	@Override
-	public MalisisIcon getIcon(BlockPos pos, IBlockState state, EnumFacing facing)
+	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
 	{
 		//TODO: handle actual block direction from state
 		//store in the class the IProperty used for direction get it here

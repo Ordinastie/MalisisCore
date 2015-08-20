@@ -28,6 +28,7 @@ import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.IBlockAccess;
 
 /**
  * @author Ordinastie
@@ -35,7 +36,7 @@ import net.minecraft.util.EnumFacing;
  */
 public interface IBlockIconProvider extends IIconProvider
 {
-	public default MalisisIcon getIcon(BlockPos pos, IBlockState state, EnumFacing facing)
+	public default MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
 	{
 		return getIcon();
 	}
