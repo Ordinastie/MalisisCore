@@ -22,24 +22,22 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.icon;
+package net.malisis.core.renderer.icon.provider;
 
 import static net.minecraft.util.EnumFacing.*;
+import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 
 /**
- * Implementation that handles automatically connected textures. Two texture files are required, that will be stiched to the texture sheet.
- * The {@link ConnectedTextureIcon} will then clip different parts for different connection cases.<br>
- * The textures need to have a specific pattern (http://puu.sh/bIWaX.png).
- *
  * @author Ordinastie
  *
  */
-public class ConnectedTextureIcon extends MalisisIcon
+public class ConnectedIconsProvider implements IBlockIconProvider
 {
 	private static int NONE = 0;
 	private static int LEFT = 1;
@@ -57,61 +55,53 @@ public class ConnectedTextureIcon extends MalisisIcon
 											{ SOUTH, UP, NORTH, DOWN }};
 	//@formatter:on
 
+	private MalisisIcon part1;
+	private MalisisIcon part2;
 	private MalisisIcon[] icons = new MalisisIcon[16];
+	private boolean initialized = false;
 
-	public ConnectedTextureIcon(String name, MalisisIcon part1, MalisisIcon part2)
+	public ConnectedIconsProvider(String name)
 	{
-		super(name);
-		part1.addDependant(this);
-		part2.addDependant(this);
-	}
-
-	public ConnectedTextureIcon(TextureMap register, String name)
-	{
-		super(name);
-		MalisisIcon part1 = new MalisisIcon(name);
-		MalisisIcon part2 = new MalisisIcon(name + "2");
-
-		part1.addDependant(this);
-		part2.addDependant(this);
-
-		register.setTextureEntry(name, part1);
-		register.setTextureEntry(name + "2", part2);
+		part1 = new MalisisIcon(name);
+		part2 = new MalisisIcon(name + "2");
 	}
 
 	@Override
-	protected void initIcon(MalisisIcon icon, int width, int height, int x, int y, boolean rotated)
+	public void registerIcons(TextureMap map)
+	{
+		part1.register(map);
+		part2.register(map);
+	}
+
+	protected void initializeIcons()
 	{
 		float f = 1F / 3F;
 
-		if (icon.getIconName().equals(getIconName()))
-		{
-			icons[LEFT | TOP] = icon.copy().clip(0, 0, f, f);
-			icons[TOP] = icon.copy().clip(f, 0, f, f);
-			icons[RIGHT | TOP] = icon.copy().clip(2 * f, 0, f, f);
+		icons[LEFT | TOP] = part1.copy().clip(0, 0, f, f);
+		icons[TOP] = part1.copy().clip(f, 0, f, f);
+		icons[RIGHT | TOP] = part1.copy().clip(2 * f, 0, f, f);
 
-			icons[LEFT] = icon.copy().clip(0, f, f, f);
-			icons[NONE] = icon.copy().clip(f, f, f, f);
-			icons[RIGHT] = icon.copy().clip(2 * f, f, f, f);
+		icons[LEFT] = part1.copy().clip(0, f, f, f);
+		icons[NONE] = part1.copy().clip(f, f, f, f);
+		icons[RIGHT] = part1.copy().clip(2 * f, f, f, f);
 
-			icons[LEFT | BOTTOM] = icon.copy().clip(0, 2 * f, f, f);
-			icons[BOTTOM] = icon.copy().clip(f, 2 * f, f, f);
-			icons[RIGHT | BOTTOM] = icon.copy().clip(2 * f, 2 * f, f, f);
-		}
-		else
-		{
-			icons[LEFT | TOP | BOTTOM] = icon.copy().clip(0, 0, f, f);
-			icons[TOP | BOTTOM] = icon.copy().clip(f, 0, f, f);
-			icons[LEFT | RIGHT | TOP] = icon.copy().clip(2 * f, 0, f, f);
+		icons[LEFT | BOTTOM] = part1.copy().clip(0, 2 * f, f, f);
+		icons[BOTTOM] = part1.copy().clip(f, 2 * f, f, f);
+		icons[RIGHT | BOTTOM] = part1.copy().clip(2 * f, 2 * f, f, f);
 
-			icons[LEFT | RIGHT] = icon.copy().clip(0, f, f, f);
-			icons[FULL] = icon.copy().clip(f, f, f, f);
-			//icons[LEFT | RIGHT] = icon.copy().clip(2 * f, f, f, f);
+		icons[LEFT | TOP | BOTTOM] = part2.copy().clip(0, 0, f, f);
+		icons[TOP | BOTTOM] = part2.copy().clip(f, 0, f, f);
+		icons[LEFT | RIGHT | TOP] = part2.copy().clip(2 * f, 0, f, f);
 
-			icons[LEFT | RIGHT | BOTTOM] = icon.copy().clip(0, 2 * f, f, f);
-			//icons[TOP | BOTTOM] = icon.copy().clip(f, 2 * f, f, f);
-			icons[RIGHT | TOP | BOTTOM] = icon.copy().clip(2 * f, 2 * f, f, f);
-		}
+		icons[LEFT | RIGHT] = part2.copy().clip(0, f, f, f);
+		icons[FULL] = part2.copy().clip(f, f, f, f);
+		//icons[LEFT | RIGHT] = icon.copy().clip(2 * f, f, f, f);
+
+		icons[LEFT | RIGHT | BOTTOM] = part2.copy().clip(0, 2 * f, f, f);
+		//icons[TOP | BOTTOM] = icon.copy().clip(f, 2 * f, f, f);
+		icons[RIGHT | TOP | BOTTOM] = part2.copy().clip(2 * f, 2 * f, f, f);
+
+		initialized = true;
 	}
 
 	/**
@@ -119,8 +109,12 @@ public class ConnectedTextureIcon extends MalisisIcon
 	 *
 	 * @return the full icon
 	 */
-	public MalisisIcon getFullIcon()
+	@Override
+	public MalisisIcon getIcon()
 	{
+		if (!initialized)
+			initializeIcons();
+
 		return icons[FULL];
 	}
 
@@ -134,9 +128,12 @@ public class ConnectedTextureIcon extends MalisisIcon
 	 * @param side the side
 	 * @return the icon
 	 */
-	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, int side)
+	@Override
+	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
 	{
-		int connections = getConnections(world, pos, side);
+		if (!initialized)
+			initializeIcons();
+		int connections = getConnections(world, pos, facing);
 		return icons[connections];
 	}
 
@@ -150,19 +147,15 @@ public class ConnectedTextureIcon extends MalisisIcon
 	 * @param side the side
 	 * @return the connections
 	 */
-	private int getConnections(IBlockAccess world, BlockPos pos, int side)
+	private int getConnections(IBlockAccess world, BlockPos pos, EnumFacing facing)
 	{
 		Block block = world.getBlockState(pos).getBlock();
 		int connection = 0;
 		for (int i = 0; i < 4; i++)
 		{
-			if (world.getBlockState(pos.offset(sides[side][i])).getBlock() == block)
+			if (world.getBlockState(pos.offset(sides[facing.getIndex()][i])).getBlock() == block)
 				connection |= (1 << i);
 		}
 		return ~connection & 15;
 	}
-
-	@Override
-	public void initSprite(int width, int height, int x, int y, boolean rotated)
-	{}
 }
