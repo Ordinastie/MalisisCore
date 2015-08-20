@@ -28,11 +28,20 @@ import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.item.ItemStack;
 
 /**
+ * This interface allows implementers to provide {@link MalisisIcon icons} when rendering an {@link ItemStack}.
+ *
  * @author Ordinastie
  *
  */
 public interface IItemIconProvider extends IIconProvider
 {
+
+	/**
+	 * Gets the {@link MalisisIcon} to use for the {@link ItemStack}.
+	 *
+	 * @param itemStack the item stack
+	 * @return the icon
+	 */
 	public default MalisisIcon getIcon(ItemStack itemStack)
 	{
 		return getIcon();

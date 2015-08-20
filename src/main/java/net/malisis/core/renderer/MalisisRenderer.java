@@ -42,6 +42,7 @@ import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
 import net.malisis.core.renderer.icon.metaprovider.IItemMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
+import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.malisis.core.renderer.icon.provider.IItemIconProvider;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.minecraft.block.Block;
@@ -812,8 +813,11 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	}
 
 	/**
-	 * Gets the {@link MalisisIcon} corresponding to the specified {@link RenderParameters}.
+	 * Gets the {@link MalisisIcon} corresponding to the specified {@link RenderParameters}.<br>
+	 * If {@link #block} or {@link #item} is an {@link IIconProvider} and give the right provider for the current context, gets the icon
+	 * from that provider.
 	 *
+	 * @param face the face
 	 * @param params the params
 	 * @return the icon
 	 */
@@ -834,6 +838,13 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		return null;
 	}
 
+	/**
+	 * Gets the {@link IBlockIconProvider} for the current context.<br>
+	 * If none is supplied with the {@link RenderParameters params}, get one from the {@link #block} if available.
+	 *
+	 * @param params the params
+	 * @return the block icon provider
+	 */
 	private IBlockIconProvider getBlockIconProvider(RenderParameters params)
 	{
 		if (params.iconProvider.get() instanceof IBlockIconProvider)
@@ -845,6 +856,14 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		return null;
 	}
 
+	/**
+	 * Gets the {@link IBlockIconProvider} for the current context.<br>
+	 * If none is supplied with the {@link RenderParameters params}, get one from the {@link #item} if available.<br>
+	 * If none from the {@link #item} available, falls back to {@link #getBlockIconProvider(RenderParameters)}.
+	 *
+	 * @param params the params
+	 * @return the item icon provider
+	 */
 	private IItemIconProvider getItemIconProvider(RenderParameters params)
 	{
 		if (params.iconProvider.get() instanceof IItemIconProvider)
@@ -860,7 +879,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	}
 
 	/**
-	 * Calculates the ambient occlusion for a {@link Vertex} and also apply the side dependent shade.<br>
+	 * Calculates the ambient occlusion for a {@link Vertex} and also applies the side dependent shade.<br>
 	 * <b>aoMatrix</b> is the list of block coordinates necessary to compute AO. If it's empty, only the global face shade is applied.<br>
 	 * Also, <i>params.colorMultiplier</i> is applied as well.
 	 *

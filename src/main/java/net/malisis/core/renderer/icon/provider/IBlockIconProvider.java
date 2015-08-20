@@ -31,16 +31,33 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 
 /**
- * @author Ordinastie
+ * This interface allows implementers to provide {@link MalisisIcon icons} when rendering Blocks.
  *
+ * @author Ordinastie
  */
 public interface IBlockIconProvider extends IItemIconProvider
 {
+
+	/**
+	 * Gets the {@link MalisisIcon} to use.
+	 *
+	 * @param world the world
+	 * @param pos the pos
+	 * @param state the state
+	 * @param facing the facing
+	 * @return the icon
+	 */
 	public default MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
 	{
 		return getIcon();
 	}
 
+	/**
+	 * Gets the particle {@link MalisisIcon} to use for the {@link IBlockState}.
+	 *
+	 * @param state the state
+	 * @return the particle icon
+	 */
 	public default MalisisIcon getParticleIcon(IBlockState state)
 	{
 		return getIcon();
