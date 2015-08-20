@@ -42,7 +42,6 @@ import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
 import net.malisis.core.renderer.icon.metaprovider.IItemMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
-import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.malisis.core.renderer.icon.provider.IItemIconProvider;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.minecraft.block.Block;
@@ -118,6 +117,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	protected float partialTick = 0;
 	/** ItemStack to render (ITEM). */
 	protected ItemStack itemStack;
+	/** Item to render (ITEM) */
+	protected Item item;
 	/** RenderGlobal reference (IRWL) */
 	protected RenderGlobal renderGlobal;
 	/** Type of rendering. */
@@ -254,9 +255,11 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 */
 	public void set(ItemStack itemStack)
 	{
-		if (itemStack.getItem() instanceof ItemBlock)
-			set(Block.getBlockFromItem(itemStack.getItem()));
 		this.itemStack = itemStack;
+		this.item = itemStack.getItem();
+		if (item instanceof ItemBlock)
+			set(Block.getBlockFromItem(itemStack.getItem()));
+
 	}
 
 	// #end
@@ -818,33 +821,42 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	{
 		if (renderType == RenderType.ITEM)
 		{
-			IIconProvider itemIconProvider = params.iconProvider.get();
-			if (itemIconProvider instanceof IItemIconProvider)
-				return ((IItemIconProvider) itemIconProvider).getIcon(itemStack);
-
-			if (itemStack.getItem() instanceof IItemMetaIconProvider)
-				itemIconProvider = ((IItemMetaIconProvider) itemStack.getItem()).getItemIconProvider();
-
-			if (itemIconProvider instanceof IItemIconProvider)
-				return ((IItemIconProvider) itemIconProvider).getIcon(itemStack);
+			IItemIconProvider provider = getItemIconProvider(params);
+			return provider != null ? provider.getIcon(itemStack) : null;
 		}
 
-		if (block != null)
+		if (renderType == RenderType.BLOCK)
 		{
-			IIconProvider iconProvider = params.iconProvider.get();
-			IBlockIconProvider blockIconProvider = null;
-			if (iconProvider instanceof IBlockIconProvider)
-				blockIconProvider = (IBlockIconProvider) iconProvider;
-			else if (block instanceof IBlockMetaIconProvider)
-				blockIconProvider = ((IBlockMetaIconProvider) block).getBlockIconProvider();
-
-			if (blockIconProvider != null)
-				return world != null ? blockIconProvider.getIcon(world, pos, blockState, params.textureSide.get()) : blockIconProvider
-						.getIcon();
-
+			IBlockIconProvider provider = getBlockIconProvider(params);
+			return provider != null ? provider.getIcon(world, pos, blockState, params != null ? params.direction.get() : null) : null;
 		}
 
-		return new MalisisIcon();
+		return null;
+	}
+
+	private IBlockIconProvider getBlockIconProvider(RenderParameters params)
+	{
+		if (params.iconProvider.get() instanceof IBlockIconProvider)
+			return (IBlockIconProvider) params.iconProvider.get();
+
+		if (block instanceof IBlockMetaIconProvider)
+			return ((IBlockMetaIconProvider) block).getBlockIconProvider();
+
+		return null;
+	}
+
+	private IItemIconProvider getItemIconProvider(RenderParameters params)
+	{
+		if (params.iconProvider.get() instanceof IItemIconProvider)
+			return (IItemIconProvider) params.iconProvider.get();
+
+		if (item == null)
+			return null;
+
+		if (item instanceof IItemIconProvider)
+			return ((IItemMetaIconProvider) item).getItemIconProvider();
+
+		return getBlockIconProvider(params);
 	}
 
 	/**
@@ -910,6 +922,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 */
 	protected int getBaseBrightness(RenderParameters params)
 	{
+		if (!params.useEnvironmentBrightness.get())
+			return params.brightness.get();
+
 		if (block != null)
 		{
 			if (world != null && block.getLightValue(world, pos) != 0)
@@ -922,7 +937,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			return Minecraft.getMinecraft().thePlayer.getBrightnessForRender(getPartialTick());
 
 		//not in world
-		if ((renderType != RenderType.BLOCK && renderType != RenderType.TILE_ENTITY) || world == null || !params.useBlockBrightness.get())
+		if (world == null)
 			return params.brightness.get();
 
 		//no direction, we can only use current block brightness

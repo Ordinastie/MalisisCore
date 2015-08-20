@@ -98,7 +98,7 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	/**
 	 * Defines whether to use the block mixBlockBrightness (if false, RenderParameters.brightness will be used) (Block Level)
 	 */
-	public Parameter<Boolean> useBlockBrightness = new Parameter<>(true);
+	public Parameter<Boolean> useEnvironmentBrightness = new Parameter<>(true);
 	/**
 	 * Defines whether to use the defined normals
 	 */
@@ -161,7 +161,7 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 		listParams.add(usePerVertexColor);
 		listParams.add(usePerVertexAlpha);
 		listParams.add(usePerVertexBrightness);
-		listParams.add(useBlockBrightness);
+		listParams.add(useEnvironmentBrightness);
 		listParams.add(useNormals);
 		listParams.add(colorMultiplier);
 		listParams.add(colorFactor);
