@@ -34,7 +34,7 @@ import net.minecraft.world.IBlockAccess;
  * @author Ordinastie
  *
  */
-public interface IBlockIconProvider extends IIconProvider
+public interface IBlockIconProvider extends IItemIconProvider
 {
 	public default MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
 	{
