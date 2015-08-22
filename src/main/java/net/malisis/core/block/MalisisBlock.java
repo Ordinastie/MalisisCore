@@ -107,7 +107,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 	public void register(Class<? extends ItemBlock> item)
 	{
 		GameRegistry.registerBlock(this, item, getName());
-		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+		if (FMLCommonHandler.instance().getSide() == Side.CLIENT)
 		{
 			MalisisRegistry.registerIconProvider(iconProvider);
 			if (useDefaultRenderer())
