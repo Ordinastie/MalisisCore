@@ -25,6 +25,7 @@
 package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.BlockPos;
@@ -42,6 +43,7 @@ public class SidesIconProvider extends DefaultIconProvider
 {
 	private String[] names = new String[6];
 	private MalisisIcon[] icons = new MalisisIcon[6];
+	private PropertyDirection property;
 
 	public SidesIconProvider(String defaultName, String[] iconNames)
 	{
@@ -66,6 +68,11 @@ public class SidesIconProvider extends DefaultIconProvider
 		}
 	}
 
+	public void setPropertyDirection(PropertyDirection property)
+	{
+		this.property = property;
+	}
+
 	public void setIcons(String[] names)
 	{
 		this.names = names;
@@ -87,13 +94,43 @@ public class SidesIconProvider extends DefaultIconProvider
 	@Override
 	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
 	{
-		//TODO: handle actual block direction from state
-		//store in the class the IProperty used for direction get it here
 		if (facing == null)
 			return icon;
-		MalisisIcon dirIcon = getIcon(facing);
-		return dirIcon != null ? dirIcon : icon;
 
+		EnumFacing direction = (EnumFacing) state.getValue(property);
+		int count = getRotationCount(direction);
+		if (facing != EnumFacing.UP && facing != EnumFacing.DOWN)
+		{
+			facing = rotateFacing(facing, count);
+			count = 0;
+		}
+
+		MalisisIcon dirIcon = getIcon(facing);
+		dirIcon.setRotation(count);
+		return dirIcon != null ? dirIcon : icon;
 	}
 
+	private int getRotationCount(EnumFacing facing)
+	{
+		switch (facing)
+		{
+			case SOUTH:
+				return 0;
+			case EAST:
+				return 1;
+			case NORTH:
+				return 2;
+			case WEST:
+				return 3;
+			default:
+				return 0;
+		}
+	}
+
+	private EnumFacing rotateFacing(EnumFacing facing, int count)
+	{
+		while (count-- > 0)
+			facing = facing.rotateAround(EnumFacing.Axis.Y);
+		return facing;
+	}
 }
