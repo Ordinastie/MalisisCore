@@ -67,6 +67,13 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 		super(material);
 	}
 
+	public Block setName(String name)
+	{
+		this.name = name;
+		super.setUnlocalizedName(name);
+		return this;
+	}
+
 	@Override
 	public Block setUnlocalizedName(String name)
 	{
