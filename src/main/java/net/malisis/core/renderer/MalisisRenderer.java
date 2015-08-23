@@ -1056,6 +1056,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	 */
 	protected int getBaseBrightness()
 	{
+		if (!params.useEnvironmentBrightness.get())
+			return params.brightness.get();
+
 		if (block != null)
 		{
 			if (world != null && block.getLightValue(world, x, y, z) != 0)
@@ -1064,9 +1067,11 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 				return block.getLightValue() << 4;
 		}
 
+		if (renderType == RenderType.ISBRH_INVENTORY || renderType == RenderType.ITEM_INVENTORY)
+			return Minecraft.getMinecraft().thePlayer.getBrightnessForRender(getPartialTick());
+
 		//not in world
-		if ((renderType != RenderType.ISBRH_WORLD && renderType != RenderType.TESR_WORLD) || world == null
-				|| !params.useBlockBrightness.get())
+		if (world == null)
 			return params.brightness.get();
 
 		//no direction, we can only use current block brightness

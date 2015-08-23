@@ -338,7 +338,7 @@ public class ObjFileImporter implements IModelLoader
 		params.renderAllFaces.set(true);
 		params.interpolateUV.set(false);
 		params.calculateAOColor.set(false);
-		params.useBlockBrightness.set(false);
+		params.useEnvironmentBrightness.set(false);
 
 		faces.add(f);
 	}
