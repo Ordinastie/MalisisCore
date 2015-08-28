@@ -442,7 +442,7 @@ public class MalisisIcon extends TextureAtlasSprite
 		if (icon != null && icon.getClass() == TextureAtlasSprite.class)
 			return new MalisisIcon(icon);
 
-		return null;
+		return new MalisisIcon(name);
 	}
 
 	public static TextureAtlasSprite missing()
