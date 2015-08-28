@@ -37,6 +37,7 @@ import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.model.loader.ObjFileImporter;
+import net.malisis.core.renderer.model.loader.TextureModelLoader;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -100,6 +101,8 @@ public class MalisisModel implements IFlexibleBakedModel, ITransformable.Transla
 		IModelLoader loader = null;
 		if (resource.getResourcePath().endsWith(".obj"))
 			loader = new ObjFileImporter(resource);
+		if (resource.getResourcePath().endsWith(".png"))
+			loader = new TextureModelLoader(resource);
 
 		if (loader != null)
 			load(loader);
@@ -150,6 +153,9 @@ public class MalisisModel implements IFlexibleBakedModel, ITransformable.Transla
 	 */
 	public void addShape(String name, Shape shape)
 	{
+		if (shape == null)
+			return;
+
 		shapes.put(name.toLowerCase(), shape);
 	}
 

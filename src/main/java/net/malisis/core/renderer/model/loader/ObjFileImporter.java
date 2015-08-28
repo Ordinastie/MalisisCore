@@ -48,7 +48,6 @@ import net.minecraft.client.resources.IResource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 
-// TODO: Auto-generated Javadoc
 /**
  * Model loader for OBJ files (Wavefront).
  *
