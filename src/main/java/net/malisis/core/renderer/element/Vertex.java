@@ -24,14 +24,9 @@
 
 package net.malisis.core.renderer.element;
 
-import net.malisis.core.renderer.MalisisRenderer;
-import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.Point;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector4f;
 
@@ -215,6 +210,11 @@ public class Vertex
 	{
 		this.brightness = brightness;
 		return this;
+	}
+
+	public int getNormal()
+	{
+		return normal;
 	}
 
 	public Vertex setNormal(float x, float y, float z)
@@ -444,28 +444,20 @@ public class Vertex
 		z = vec.z;
 	}
 
-	public int[] toVertexData(BlockPos pos, VertexFormat vertexFormat)
+	public int[] toVertexData()
 	{
-		if (pos == null)
-			pos = new BlockPos(0, 0, 0);
-		else
-			pos = BlockPosUtils.chunkPosition(pos);
-
 		//@formatter:off
-		int[] data = new int[] {
-				Float.floatToRawIntBits((float) x + pos.getX()),
-				Float.floatToRawIntBits((float) y + pos.getY()),
-				Float.floatToRawIntBits((float) z + pos.getZ()),
+		return new int[] {
+				Float.floatToRawIntBits((float) x),
+				Float.floatToRawIntBits((float) y),
+				Float.floatToRawIntBits((float) z),
 				getRGBA(),
 				Float.floatToRawIntBits((float) u),
 				Float.floatToRawIntBits((float) v),
-				getBrightness()
+				getBrightness(),
+				normal,
 		};
 		//@formatter:on
-
-		if (MalisisRenderer.itemFormat.equals(vertexFormat))
-			data = ArrayUtils.add(data, normal);
-		return data;
 	}
 
 	private void setState(Vertex vertex)
@@ -476,6 +468,7 @@ public class Vertex
 		color = vertex.color;
 		alpha = vertex.alpha;
 		brightness = vertex.brightness;
+		normal = vertex.normal;
 		u = vertex.u;
 		v = vertex.v;
 	}

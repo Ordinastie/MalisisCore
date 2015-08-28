@@ -33,7 +33,6 @@ import net.minecraft.client.renderer.texture.TextureMap;
  */
 public class DefaultIconProvider implements IBlockIconProvider, IItemIconProvider
 {
-	protected String name;
 	protected MalisisIcon icon;
 
 	public DefaultIconProvider(String name)
@@ -48,7 +47,6 @@ public class DefaultIconProvider implements IBlockIconProvider, IItemIconProvide
 
 	public void setIcon(String name)
 	{
-		this.name = name;
 		icon = MalisisIcon.get(name);
 	}
 
@@ -60,10 +58,7 @@ public class DefaultIconProvider implements IBlockIconProvider, IItemIconProvide
 	@Override
 	public void registerIcons(TextureMap map)
 	{
-		if (name == null)
-			return;
-
-		icon = new MalisisIcon(name).register(map);
+		icon = icon.register(map);
 	}
 
 	@Override

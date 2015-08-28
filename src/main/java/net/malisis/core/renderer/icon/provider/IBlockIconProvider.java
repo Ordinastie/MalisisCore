@@ -26,6 +26,7 @@ package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
@@ -35,7 +36,7 @@ import net.minecraft.world.IBlockAccess;
  *
  * @author Ordinastie
  */
-public interface IBlockIconProvider extends IItemIconProvider
+public interface IBlockIconProvider extends IIconProvider
 {
 
 	/**
@@ -48,6 +49,19 @@ public interface IBlockIconProvider extends IItemIconProvider
 	 * @return the icon
 	 */
 	public default MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
+	{
+		return getIcon();
+	}
+
+	/**
+	 * Gets the {@link MalisisIcon} to use for the item. (Only used if the item associated with the block isn't already a
+	 * {@link IItemIconProvider}).
+	 *
+	 * @param itemStack the item stack
+	 * @param facing the facing
+	 * @return the icon
+	 */
+	public default MalisisIcon getIcon(ItemStack itemStack, EnumFacing facing)
 	{
 		return getIcon();
 	}

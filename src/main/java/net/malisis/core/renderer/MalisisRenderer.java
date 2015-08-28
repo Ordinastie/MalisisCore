@@ -45,6 +45,7 @@ import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.malisis.core.renderer.icon.provider.IItemIconProvider;
 import net.malisis.core.renderer.model.MalisisModel;
+import net.malisis.core.util.BlockPosUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -96,7 +97,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	{
 		private Shape shape;
 		@Override protected void initialize() { shape = new Cube(); }
-		@Override public void render() { drawShape(shape); }
+		@Override public void render() { shape.resetState(); drawShape(shape); }
 	};
 	//@formatter:on
 
@@ -112,7 +113,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	protected Block block;
 	/** Metadata of the block to render (BLOCK/TESR). */
 	protected IBlockState blockState;
-	/** TileEntity currently drawing (for TESR). */
+	/** TileEntity currently drawing (TESR). */
 	protected TileEntity tileEntity;
 	/** Partial tick time (TESR/IRWL). */
 	protected float partialTick = 0;
@@ -131,15 +132,15 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	/** An override texture set by the renderer. */
 	protected MalisisIcon overrideTexture;
 
-	public static VertexFormat itemFormat = new VertexFormat();
+	public static VertexFormat vertexFormat = new VertexFormat();
 	static
 	{
-		itemFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
-		itemFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.UBYTE, VertexFormatElement.EnumUsage.COLOR, 4));
-		itemFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 2));
-		itemFormat.setElement(new VertexFormatElement(1, VertexFormatElement.EnumType.SHORT, VertexFormatElement.EnumUsage.UV, 2));
-		itemFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.NORMAL, 3));
-		itemFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.PADDING, 1));
+		vertexFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
+		vertexFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.UBYTE, VertexFormatElement.EnumUsage.COLOR, 4));
+		vertexFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 2));
+		vertexFormat.setElement(new VertexFormatElement(1, VertexFormatElement.EnumType.SHORT, VertexFormatElement.EnumUsage.UV, 2));
+		vertexFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.NORMAL, 3));
+		vertexFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.PADDING, 1));
 	}
 
 	/** Whether the damage for the blocks should be handled by this {@link MalisisRenderer} (for TESR). */
@@ -171,6 +172,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		this.pos = null;
 		this.block = null;
 		this.blockState = null;
+		this.item = null;
+		this.itemStack = null;
 		this.overrideTexture = null;
 		this.destroyBlockProgress = null;
 	}
@@ -393,7 +396,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		else if (renderType == RenderType.ITEM)
 		{
 			startDrawing();
-			wr.setVertexFormat(itemFormat);
 		}
 		else if (renderType == RenderType.TILE_ENTITY)
 		{
@@ -406,7 +408,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			bindTexture(TextureMap.locationBlocksTexture);
 
 			startDrawing();
-			wr.setVertexFormat(DefaultVertexFormats.BLOCK);
 		}
 		else if (renderType == RenderType.WORLD_LAST)
 		{
@@ -469,6 +470,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			draw();
 
 		wr.startDrawing(drawMode);
+		wr.setVertexFormat(vertexFormat);
 		this.drawMode = drawMode;
 	}
 
@@ -721,9 +723,46 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		if (renderType == RenderType.ITEM)
 			vertex.setNormal(params.direction.get());
 
-		wr.addVertexData(vertex.toVertexData(renderType == RenderType.BLOCK ? pos : null, wr.getVertexFormat()));
+		wr.addVertexData(getVertexData(vertex));
 
 		vertexDrawn = true;
+	}
+
+	/**
+	 * Gets the vertex data.
+	 *
+	 * @param vertex the vertex
+	 * @return the vertex data
+	 */
+	private int[] getVertexData(Vertex vertex)
+	{
+		float x = (float) vertex.getX();
+		float y = (float) vertex.getY();
+		float z = (float) vertex.getZ();
+
+		int size = vertexFormat.getNextOffset();
+		if (renderType == RenderType.BLOCK)
+		{
+			size = DefaultVertexFormats.BLOCK.getNextOffset();
+			//when drawing a block, the position to draw is relative to current chunk
+			BlockPos chunkPos = BlockPosUtils.chunkPosition(pos);
+			x += chunkPos.getX();
+			y += chunkPos.getY();
+			z += chunkPos.getZ();
+		}
+
+		int[] data = new int[size / 4];
+		data[0] = Float.floatToRawIntBits(x);
+		data[1] = Float.floatToRawIntBits(y);
+		data[2] = Float.floatToRawIntBits(z);
+		data[3] = vertex.getRGBA();
+		data[4] = Float.floatToRawIntBits((float) vertex.getU());
+		data[5] = Float.floatToRawIntBits((float) vertex.getV());
+		data[6] = vertex.getBrightness();
+		if (renderType != RenderType.BLOCK)
+			data[7] = vertex.getNormal();
+
+		return data;
 	}
 
 	/**
@@ -823,59 +862,40 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 */
 	protected MalisisIcon getIcon(Face face, RenderParameters params)
 	{
-		if (renderType == RenderType.ITEM)
+		IIconProvider ip = getIconProvider(params);
+		if (ip instanceof IItemIconProvider && itemStack != null)
+			return ((IItemIconProvider) ip).getIcon(itemStack);
+
+		if (ip instanceof IBlockIconProvider && block != null)
 		{
-			IItemIconProvider provider = getItemIconProvider(params);
-			return provider != null ? provider.getIcon(itemStack) : null;
+			IBlockIconProvider iblockp = (IBlockIconProvider) ip;
+			if (renderType == RenderType.BLOCK)
+				return iblockp.getIcon(world, pos, blockState, params.direction.get());
+			else if (renderType == RenderType.ITEM)
+				return iblockp.getIcon(itemStack, params.direction.get());
 		}
 
-		if (renderType == RenderType.BLOCK)
-		{
-			IBlockIconProvider provider = getBlockIconProvider(params);
-			return provider != null ? provider.getIcon(world, pos, blockState, params != null ? params.direction.get() : null) : null;
-		}
-
-		return null;
+		IIconProvider iconProvider = params.iconProvider.get();
+		return iconProvider != null ? iconProvider.getIcon() : null;
 	}
 
 	/**
-	 * Gets the {@link IBlockIconProvider} for the current context.<br>
-	 * If none is supplied with the {@link RenderParameters params}, get one from the {@link #block} if available.
+	 * Gets the {@link IIconProvider} either from parameters, the block or the item.
 	 *
-	 * @param params the params
-	 * @return the block icon provider
+	 * @return the icon provider
 	 */
-	private IBlockIconProvider getBlockIconProvider(RenderParameters params)
+	private IIconProvider getIconProvider(RenderParameters params)
 	{
-		if (params.iconProvider.get() instanceof IBlockIconProvider)
-			return (IBlockIconProvider) params.iconProvider.get();
+		if (params.iconProvider.get() != null)
+			return params.iconProvider.get();
 
-		if (block instanceof IBlockMetaIconProvider)
+		if (item instanceof IItemMetaIconProvider && ((IItemMetaIconProvider) item).getItemIconProvider() != null)
+			return ((IItemMetaIconProvider) item).getItemIconProvider();
+
+		if (block instanceof IBlockMetaIconProvider && ((IBlockMetaIconProvider) block).getBlockIconProvider() != null)
 			return ((IBlockMetaIconProvider) block).getBlockIconProvider();
 
 		return null;
-	}
-
-	/**
-	 * Gets the {@link IBlockIconProvider} for the current context.<br>
-	 * If none is supplied with the {@link RenderParameters params}, get one from the {@link #item} if available.<br>
-	 * If none from the {@link #item} available, falls back to {@link #getBlockIconProvider(RenderParameters)}.
-	 *
-	 * @param params the params
-	 * @return the item icon provider
-	 */
-	private IItemIconProvider getItemIconProvider(RenderParameters params)
-	{
-		if (params.iconProvider.get() instanceof IItemIconProvider)
-			return (IItemIconProvider) params.iconProvider.get();
-
-		if (item == null)
-			return null;
-
-		if (item instanceof IItemIconProvider)
-			return ((IItemMetaIconProvider) item).getItemIconProvider();
-
-		return getBlockIconProvider(params);
 	}
 
 	/**
@@ -1145,7 +1165,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 */
 	public void registerFor(Item item)
 	{
-		//MalisisRegistry.registerItemRenderer(item, this);
+		MalisisRegistry.registerItemRenderer(item, this);
 		MinecraftForge.EVENT_BUS.register(new BakeEventHandler(item));
 	}
 

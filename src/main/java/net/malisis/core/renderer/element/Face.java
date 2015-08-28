@@ -499,7 +499,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 	{
 		int[] data = new int[0];
 		for (Vertex v : getVertexes())
-			data = Ints.concat(data, v.toVertexData(null, null));
+			data = Ints.concat(data, v.toVertexData());
 
 		return new BakedQuad(data, params.colorMultiplier.get(), params.direction.get());
 	}

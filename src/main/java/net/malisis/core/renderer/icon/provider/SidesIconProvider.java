@@ -28,43 +28,68 @@ import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Ordinastie
  *
  */
-public class SidesIconProvider extends DefaultIconProvider
+public class SidesIconProvider implements IBlockIconProvider
 {
-	private String[] names = new String[6];
-	private MalisisIcon[] icons = new MalisisIcon[6];
+	private MalisisIcon defaultIcon;
+	private MalisisIcon[] sideIcons = new MalisisIcon[6];
 	private PropertyDirection property;
 
-	public SidesIconProvider(String defaultName, String[] iconNames)
+	public SidesIconProvider(String defaultName, String[] sideNames)
 	{
-		super(defaultName);
-		setIcons(iconNames);
+		setDefaultIcon(defaultName);
+		setSideIcons(sideNames);
+	}
+
+	public SidesIconProvider(MalisisIcon defaultIcon, MalisisIcon[] sideIcons)
+	{
+
+	}
+
+	public void setDefaultIcon(String name)
+	{
+		defaultIcon = MalisisIcon.get(name);
+	}
+
+	public void setDefaultIcon(MalisisIcon icon)
+	{
+		this.defaultIcon = icon;
+	}
+
+	public void setSideIcons(String[] names)
+	{
+		for (int i = 0; i < names.length; i++)
+		{
+			if (i < 6 && !StringUtils.isEmpty(names[i]))
+				sideIcons[i] = new MalisisIcon(names[i]);
+		}
+	}
+
+	public void setSideIcons(MalisisIcon[] icons)
+	{
+		this.sideIcons = icons;
 	}
 
 	@Override
 	public void registerIcons(TextureMap map)
 	{
-		super.registerIcons(map);
-		if (ArrayUtils.isEmpty(names))
-			return;
+		if (defaultIcon != null)
+			defaultIcon.register(map);
 
-		for (int i = 0; i < names.length; i++)
+		for (MalisisIcon icon : sideIcons)
 		{
-			if (!StringUtils.isEmpty(names[i]))
-			{
-				icons[i] = new MalisisIcon(names[i]);
-				icons[i].register(map);
-			}
+			if (icon != null)
+				icon.register(map);
 		}
 	}
 
@@ -73,29 +98,19 @@ public class SidesIconProvider extends DefaultIconProvider
 		this.property = property;
 	}
 
-	public void setIcons(String[] names)
-	{
-		this.names = names;
-	}
-
-	public void setIcons(MalisisIcon[] icons)
-	{
-		this.icons = icons;
-	}
-
 	public MalisisIcon getIcon(EnumFacing dir)
 	{
-		if (dir == null || dir.getIndex() > icons.length)
+		if (dir == null || dir.getIndex() > sideIcons.length)
 			return null;
 
-		return icons[dir.getIndex()];
+		return sideIcons[dir.getIndex()];
 	}
 
 	@Override
 	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
 	{
 		if (facing == null)
-			return icon;
+			return defaultIcon;
 
 		EnumFacing direction = (EnumFacing) state.getValue(property);
 		int count = getRotationCount(direction);
@@ -107,7 +122,19 @@ public class SidesIconProvider extends DefaultIconProvider
 
 		MalisisIcon dirIcon = getIcon(facing);
 		dirIcon.setRotation(count);
-		return dirIcon != null ? dirIcon : icon;
+		return dirIcon != null ? dirIcon : defaultIcon;
+	}
+
+	@Override
+	public MalisisIcon getIcon(ItemStack itemStack, EnumFacing facing)
+	{
+		return getIcon(facing);
+	}
+
+	@Override
+	public MalisisIcon getIcon()
+	{
+		return defaultIcon;
 	}
 
 	private int getRotationCount(EnumFacing facing)
