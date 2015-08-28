@@ -31,7 +31,7 @@ import java.lang.reflect.Array;
  * @author Ordinastie
  * @param <T> type of value held by the {@link Parameter}
  */
-public class Parameter<T>
+public class Parameter<T> implements Cloneable
 {
 	/** Default value. */
 	private T defaultValue;
@@ -132,5 +132,19 @@ public class Parameter<T>
 	public String toString()
 	{
 		return value.toString() + " [" + defaultValue.toString() + "]";
+	}
+
+	@Override
+	protected Parameter clone()
+	{
+		try
+		{
+			return (Parameter) super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

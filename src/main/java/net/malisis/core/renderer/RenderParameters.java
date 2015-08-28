@@ -38,7 +38,7 @@ import net.minecraft.util.EnumFacing;
  */
 public class RenderParameters implements ITransformable.Color, ITransformable.Alpha, ITransformable.Brightness, Cloneable
 {
-	protected List<Parameter> listParams = new LinkedList<>();
+	protected List<Parameter> listParams;
 	/**
 	 * Defines whether to render all faces even if shoudSideBeRendered is false
 	 */
@@ -147,6 +147,12 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 
 	public RenderParameters()
 	{
+		buildList();
+	}
+
+	protected void buildList()
+	{
+		listParams = new LinkedList<>();
 		listParams.add(renderAllFaces);
 		listParams.add(useBlockBounds);
 		listParams.add(renderBounds);
@@ -235,7 +241,34 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	{
 		try
 		{
-			return (RenderParameters) super.clone();
+			RenderParameters rp = (RenderParameters) super.clone();
+			rp.renderAllFaces = renderAllFaces.clone();
+			rp.useBlockBounds = useBlockBounds.clone();
+			rp.renderBounds = renderBounds.clone();
+			rp.useCustomTexture = useCustomTexture.clone();
+			rp.applyTexture = applyTexture.clone();
+			rp.iconProvider = iconProvider.clone();
+			rp.useWorldSensitiveIcon = useWorldSensitiveIcon.clone();
+			rp.useTexture = useTexture.clone();
+			rp.interpolateUV = interpolateUV.clone();
+			rp.calculateAOColor = calculateAOColor.clone();
+			rp.calculateBrightness = calculateBrightness.clone();
+			rp.usePerVertexColor = usePerVertexColor.clone();
+			rp.usePerVertexAlpha = usePerVertexAlpha.clone();
+			rp.usePerVertexBrightness = usePerVertexBrightness.clone();
+			rp.useEnvironmentBrightness = useEnvironmentBrightness.clone();
+			rp.useNormals = useNormals.clone();
+			rp.colorMultiplier = colorMultiplier.clone();
+			rp.colorFactor = colorFactor.clone();
+			rp.brightness = brightness.clone();
+			rp.alpha = alpha.clone();
+			rp.direction = direction.clone();
+			rp.textureSide = textureSide.clone();
+			rp.aoMatrix = aoMatrix.clone();
+			rp.flipU = flipU.clone();
+			rp.flipV = flipV.clone();
+			rp.buildList();
+			return rp;
 		}
 		catch (CloneNotSupportedException e)
 		{
