@@ -208,7 +208,7 @@ public class GuiRenderer extends MalisisRenderer
 	public void startDrawing(int drawMode)
 	{
 		super.startDrawing(drawMode);
-		this.wr.setVertexFormat(itemFormat);
+		this.wr.setVertexFormat(vertexFormat);
 	}
 
 	/**
