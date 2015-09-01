@@ -26,7 +26,6 @@ package net.malisis.core.util.syncer.handlers;
 
 import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
-import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.syncer.ISyncableData;
 import net.malisis.core.util.syncer.handlers.TileEntitySyncHandler.TESyncData;
 import net.malisis.core.util.syncer.message.SyncerMessage.Packet;
@@ -80,13 +79,13 @@ public class TileEntitySyncHandler extends DefaultSyncHandler<TileEntity, TESync
 		@Override
 		public void fromBytes(ByteBuf buf)
 		{
-			pos = BlockPosUtils.fromBytes(buf);
+			pos = BlockPos.fromLong(buf.readLong());
 		}
 
 		@Override
 		public void toBytes(ByteBuf buf)
 		{
-			BlockPosUtils.toBytes(buf, pos);
+			buf.writeLong(pos.toLong());
 		}
 	}
 
