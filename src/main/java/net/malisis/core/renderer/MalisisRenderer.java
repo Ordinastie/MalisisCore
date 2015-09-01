@@ -25,7 +25,8 @@
 package net.malisis.core.renderer;
 
 import java.lang.reflect.Field;
-import java.util.Map;
+
+import javax.vecmath.Matrix4f;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.MalisisRegistry;
@@ -36,7 +37,6 @@ import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.shape.Cube;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.handler.BakeEventHandler;
 import net.malisis.core.renderer.handler.RenderWorldEventHandler;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
@@ -55,7 +55,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.block.statemap.IStateMapper;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -72,13 +72,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 import org.lwjgl.opengl.GL11;
-
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Base class for rendering. Handles the rendering. Provides easy registration of the renderer, and automatically sets up the context for
@@ -87,19 +83,23 @@ import com.google.common.collect.ImmutableMap;
  * @author Ordinastie
  *
  */
+@SuppressWarnings("deprecation")
 public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlockRenderer, IRenderWorldLast
 {
 	/** Reference to Tessellator.isDrawing field **/
 	private static Field isDrawingField;
 
-	//@formatter:off
-	public static MalisisRenderer defaultRenderer = new MalisisRenderer()
+	public static VertexFormat vertexFormat = new VertexFormat()
 	{
-		private Shape shape;
-		@Override protected void initialize() { shape = new Cube(); }
-		@Override public void render() { shape.resetState(); drawShape(shape); }
+		{
+			setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
+			setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.UBYTE, VertexFormatElement.EnumUsage.COLOR, 4));
+			setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 2));
+			setElement(new VertexFormatElement(1, VertexFormatElement.EnumType.SHORT, VertexFormatElement.EnumUsage.UV, 2));
+			setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.NORMAL, 3));
+			setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.PADDING, 1));
+		}
 	};
-	//@formatter:on
 
 	/** Whether this {@link MalisisRenderer} initialized. (initialize() already called) */
 	private boolean initialized = false;
@@ -121,6 +121,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	protected ItemStack itemStack;
 	/** Item to render (ITEM) */
 	protected Item item;
+	/** Type of render for item (ITEM) **/
+	protected TransformType tranformType;
 	/** RenderGlobal reference (IRWL) */
 	protected RenderGlobal renderGlobal;
 	/** Type of rendering. */
@@ -131,17 +133,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	protected int baseBrightness;
 	/** An override texture set by the renderer. */
 	protected MalisisIcon overrideTexture;
-
-	public static VertexFormat vertexFormat = new VertexFormat();
-	static
-	{
-		vertexFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
-		vertexFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.UBYTE, VertexFormatElement.EnumUsage.COLOR, 4));
-		vertexFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 2));
-		vertexFormat.setElement(new VertexFormatElement(1, VertexFormatElement.EnumType.SHORT, VertexFormatElement.EnumUsage.UV, 2));
-		vertexFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.NORMAL, 3));
-		vertexFormat.setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.PADDING, 1));
-	}
 
 	/** Whether the damage for the blocks should be handled by this {@link MalisisRenderer} (for TESR). */
 	protected boolean getBlockDamage = false;
@@ -293,6 +284,19 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		render();
 		clean();
 		return true;
+	}
+
+	@Override
+	public boolean isGui3d()
+	{
+		return block != null;
+	}
+
+	@Override
+	public Matrix4f getTransform(TransformType tranformType)
+	{
+		this.tranformType = tranformType;
+		return null;
 	}
 
 	//#end IItemRenderer
@@ -1145,17 +1149,12 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 */
 	public void registerFor(Block block)
 	{
-		MalisisRegistry.registerBlockRenderer(block, this);
-		ModelLoader.setCustomStateMapper(block, new IStateMapper()
-		{
-			@Override
-			public Map putStateModelLocations(Block block)
-			{
-				return ImmutableMap.of();
-			}
-		});
+		registerFor(block, getDefaultRenderInfos());
+	}
 
-		MinecraftForge.EVENT_BUS.register(new BakeEventHandler(block));
+	public void registerFor(Block block, IItemRenderInfo renderInfos)
+	{
+		MalisisRegistry.registerBlockRenderer(block, this, renderInfos);
 	}
 
 	/**
@@ -1165,8 +1164,12 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 */
 	public void registerFor(Item item)
 	{
-		MalisisRegistry.registerItemRenderer(item, this);
-		MinecraftForge.EVENT_BUS.register(new BakeEventHandler(item));
+		registerFor(item, getDefaultRenderInfos());
+	}
+
+	public void registerFor(Item item, IItemRenderInfo renderInfos)
+	{
+		MalisisRegistry.registerItemRenderer(item, this, renderInfos);
 	}
 
 	/**
@@ -1186,6 +1189,24 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	public void registerForRenderWorldLast()
 	{
 		RenderWorldEventHandler.register(this);
+	}
+
+	private IItemRenderInfo getDefaultRenderInfos()
+	{
+		return new IItemRenderInfo()
+		{
+			@Override
+			public boolean isGui3d()
+			{
+				return MalisisRenderer.this.isGui3d();
+			}
+
+			@Override
+			public Matrix4f getTransform(TransformType tranformType)
+			{
+				return MalisisRenderer.this.getTransform(tranformType);
+			}
+		};
 	}
 
 }

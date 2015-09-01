@@ -28,7 +28,7 @@ import java.util.List;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.MalisisRegistry;
-import net.malisis.core.renderer.MalisisRenderer;
+import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
@@ -118,7 +118,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 		{
 			MalisisRegistry.registerIconProvider(iconProvider);
 			if (useDefaultRenderer())
-				MalisisRenderer.defaultRenderer.registerFor(this);
+				DefaultRenderer.block.registerFor(this);
 		}
 	}
 

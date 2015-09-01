@@ -25,7 +25,7 @@
 package net.malisis.core.item;
 
 import net.malisis.core.MalisisRegistry;
-import net.malisis.core.renderer.MalisisRenderer;
+import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.icon.metaprovider.IItemMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
 import net.malisis.core.renderer.icon.provider.IItemIconProvider;
@@ -97,7 +97,7 @@ public class MalisisItem extends Item implements IItemMetaIconProvider
 		{
 			MalisisRegistry.registerIconProvider(iconProvider);
 			if (useDefaultRenderer())
-				MalisisRenderer.defaultRenderer.registerFor(this);
+				DefaultRenderer.item.registerFor(this);
 		}
 	}
 

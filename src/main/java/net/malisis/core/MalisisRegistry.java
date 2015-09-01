@@ -27,10 +27,12 @@ package net.malisis.core;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
+import net.malisis.core.renderer.IItemRenderer.IItemRenderInfo;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
@@ -39,16 +41,23 @@ import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.block.statemap.IStateMapper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * @author Ordinastie
@@ -65,8 +74,16 @@ public class MalisisRegistry
 
 	//#region IBlockRenderer
 	private Map<Block, IBlockRenderer> blockRenderers = new HashMap<>();
+	private IStateMapper emptyMapper = new IStateMapper()
+	{
+		@Override
+		public Map putStateModelLocations(Block block)
+		{
+			return ImmutableMap.of();
+		}
+	};
 
-	public static void registerBlockRenderer(Block block, IBlockRenderer renderer)
+	public static void registerBlockRenderer(Block block, IBlockRenderer renderer, IItemRenderInfo renderInfos)
 	{
 		if (block.getRenderType() != MalisisCore.malisisRenderType)
 		{
@@ -77,6 +94,10 @@ public class MalisisRegistry
 
 		instance.blockRenderers.put(block, renderer);
 		instance.itemRenderers.put(Item.getItemFromBlock(block), renderer);
+
+		ModelLoader.setCustomStateMapper(block, instance.emptyMapper);
+		MalisisRegistry.registerItemRenderInfos(block, renderInfos);
+
 	}
 
 	public static boolean renderBlock(WorldRenderer wr, IBlockAccess world, BlockPos pos, IBlockState state)
@@ -106,9 +127,10 @@ public class MalisisRegistry
 	//#region IItemRenderer
 	private Map<Item, IItemRenderer> itemRenderers = new HashMap<>();
 
-	public static void registerItemRenderer(Item item, IItemRenderer renderer)
+	public static void registerItemRenderer(Item item, IItemRenderer renderer, IItemRenderInfo renderInfos)
 	{
 		instance.itemRenderers.put(item, renderer);
+		MalisisRegistry.registerItemRenderInfos(item, renderInfos);
 	}
 
 	public static boolean renderItem(ItemStack itemStack)
@@ -147,4 +169,33 @@ public class MalisisRegistry
 	}
 
 	//#end IIconProvider
+
+	//#region BakeEventHandler
+	private HashMap<ModelResourceLocation, IItemRenderInfo> renderInfos = new HashMap<>();
+
+	private static void registerItemRenderInfos(Item item, IItemRenderInfo renderInfos)
+	{
+		String modid = Loader.instance().activeModContainer().getModId();
+		String name = item.getUnlocalizedName().substring(5);
+		ModelResourceLocation rl = new ModelResourceLocation(modid + ":" + name, "inventory");
+		ModelLoader.setCustomModelResourceLocation(item, 0, rl);
+		instance.renderInfos.put(rl, renderInfos);
+	}
+
+	private static void registerItemRenderInfos(Block block, IItemRenderInfo renderInfos)
+	{
+		String modid = Loader.instance().activeModContainer().getModId();
+		String name = block.getUnlocalizedName().substring(5);
+		ModelResourceLocation rl = new ModelResourceLocation(modid + ":" + name, "inventory");
+		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, rl);
+		instance.renderInfos.put(rl, renderInfos);
+	}
+
+	@SubscribeEvent
+	public void onModelBakeEvent(ModelBakeEvent event)
+	{
+		for (Entry<ModelResourceLocation, IItemRenderInfo> entry : renderInfos.entrySet())
+			event.modelRegistry.putObject(entry.getKey(), entry.getValue());
+	}
+	//#end BakeEventHandler
 }

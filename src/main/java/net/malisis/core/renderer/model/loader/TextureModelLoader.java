@@ -82,7 +82,9 @@ public class TextureModelLoader implements IModelLoader
 		List<Face> faces = readTexture();
 
 		shape = new Shape(faces);
-		shape.scale(2F / width);
+		shape.translate(-1 / 2F, -1 / 2F, 0);
+		shape.scale(1F / width);
+
 	}
 
 	private List<Face> readTexture()
@@ -134,6 +136,10 @@ public class TextureModelLoader implements IModelLoader
 				face.translate(x, height - y - 1, 0);
 				//face.translate((faces.size() - 2) / 4, 0, 0);
 				applyTexture(face, x, y);
+				RenderParameters params = face.getParameters();
+				params.renderAllFaces.set(true);
+				params.interpolateUV.set(false);
+				//params.useEnvironmentBrightness.set(false);
 				faces.add(face);
 			}
 		}
@@ -158,10 +164,12 @@ public class TextureModelLoader implements IModelLoader
 
 	private void applyTexture(Face face, int x, int y)
 	{
-		float u = sprite.getInterpolatedU(((float) x / width) * 16F + 0.001F);
-		float v = sprite.getInterpolatedV(((float) y / height) * 16F + 0.001F);
-		float U = sprite.getInterpolatedU(((float) x / width) * 16 + 0.001F);
-		float V = sprite.getInterpolatedV(((float) y / height) * 16 + 0.001F);
+		//x = 0;
+		y++;
+		float u = sprite.getInterpolatedU(((float) x / width) * 16F + 0.01F);
+		float v = sprite.getInterpolatedV(((float) y / height) * 16F - 0.01F);
+		float U = sprite.getInterpolatedU(((float) x / width) * 16 + 0.01F);
+		float V = sprite.getInterpolatedV(((float) y / height) * 16 - 0.01F);
 		face.setTexture(new MalisisIcon("", u, v, U, V));
 	}
 

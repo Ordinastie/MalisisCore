@@ -24,13 +24,52 @@
 
 package net.malisis.core.renderer;
 
+import java.util.List;
+
+import javax.vecmath.Matrix4f;
+
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.model.IPerspectiveAwareModel;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @author Ordinastie
  *
  */
+@SuppressWarnings("deprecation")
 public interface IItemRenderer
 {
 	public boolean renderItem(ItemStack itemStack, float partialTick);
+
+	public boolean isGui3d();
+
+	public Matrix4f getTransform(TransformType tranformType);
+
+	public static interface IItemRenderInfo extends IPerspectiveAwareModel
+	{
+		public Matrix4f getTransform(TransformType tranformType);
+
+		@Override
+		public default Pair<IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType)
+		{
+			return Pair.of(this, getTransform(cameraTransformType));
+		}
+
+		//@formatter:off
+		@Override public default boolean isAmbientOcclusion() 					{ return false; }
+		@Override public default boolean isBuiltInRenderer() 					{ return false; }
+		@Override public default TextureAtlasSprite getTexture() 				{ return null; }
+		@Override public default ItemCameraTransforms getItemCameraTransforms() { return null; }
+		@Override public default List<BakedQuad> getFaceQuads(EnumFacing side) 	{ return null; }
+		@Override public default List<BakedQuad> getGeneralQuads() 				{ return null; }
+		//@formatter:on
+
+	}
 }
