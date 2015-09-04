@@ -24,8 +24,10 @@
 
 package net.malisis.core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -33,6 +35,7 @@ import java.util.Set;
 import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
 import net.malisis.core.renderer.IItemRenderer.IItemRenderInfo;
+import net.malisis.core.renderer.IRenderWorldLast;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
@@ -40,6 +43,7 @@ import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.block.statemap.IStateMapper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -49,6 +53,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
@@ -197,5 +202,30 @@ public class MalisisRegistry
 		for (Entry<ModelResourceLocation, IItemRenderInfo> entry : renderInfos.entrySet())
 			event.modelRegistry.putObject(entry.getKey(), entry.getValue());
 	}
+
 	//#end BakeEventHandler
+
+	//#region RenderWorldLast
+	private List<IRenderWorldLast> renderWorldLastRenderers = new ArrayList<>();
+
+	public static void registerRenderWorldLast(IRenderWorldLast renderer)
+	{
+		instance.renderWorldLastRenderers.add(renderer);
+	}
+
+	public static void unregisterRenderWorldLast(IRenderWorldLast renderer)
+	{
+		instance.renderWorldLastRenderers.remove(renderer);
+	}
+
+	@SubscribeEvent
+	public void onRenderLast(RenderWorldLastEvent event)
+	{
+		for (IRenderWorldLast renderer : renderWorldLastRenderers)
+		{
+			if (renderer.shouldRender(event, Minecraft.getMinecraft().theWorld))
+				renderer.renderWorldLastEvent(event, Minecraft.getMinecraft().theWorld);
+		}
+	}
+	//#end RenderWorldLast
 }

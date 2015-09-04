@@ -37,7 +37,6 @@ import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.shape.Cube;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.handler.RenderWorldEventHandler;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
 import net.malisis.core.renderer.icon.metaprovider.IItemMetaIconProvider;
@@ -289,7 +288,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	@Override
 	public boolean isGui3d()
 	{
-		return block != null;
+		return true;
 	}
 
 	@Override
@@ -359,6 +358,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	public void renderWorldLastEvent(RenderWorldLastEvent event, IBlockAccess world)
 	{
 		set(world);
+		wr = Tessellator.getInstance().getWorldRenderer();
 		partialTick = event.partialTicks;
 		renderGlobal = event.context;
 		double x = 0, y = 0, z = 0;
@@ -417,7 +417,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		{
 			GlStateManager.pushAttrib();
 			GlStateManager.pushMatrix();
-			GlStateManager.disableLighting();
 
 			GlStateManager.translate(data[0], data[1], data[2]);
 
@@ -490,6 +489,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 
 		try
 		{
+			if (wr == null)
+				throw new NullPointerException("[MalisisRenderer] WorldRenderer not set for " + renderType);
 			return isDrawingField.getBoolean(wr);
 		}
 		catch (IllegalArgumentException | IllegalAccessException e)
@@ -980,7 +981,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			return Minecraft.getMinecraft().thePlayer.getBrightnessForRender(getPartialTick());
 
 		//not in world
-		if (world == null)
+		if (world == null || block == null)
 			return params.brightness.get();
 
 		//no direction, we can only use current block brightness
@@ -1188,7 +1189,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 */
 	public void registerForRenderWorldLast()
 	{
-		RenderWorldEventHandler.register(this);
+		MalisisRegistry.registerRenderWorldLast(this);
 	}
 
 	private IItemRenderInfo getDefaultRenderInfos()
