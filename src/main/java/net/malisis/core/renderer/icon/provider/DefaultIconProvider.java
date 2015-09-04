@@ -25,7 +25,10 @@
 package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.item.Item;
 
 /**
  * @author Ordinastie
@@ -34,10 +37,28 @@ import net.minecraft.client.renderer.texture.TextureMap;
 public class DefaultIconProvider implements IBlockIconProvider, IItemIconProvider
 {
 	protected MalisisIcon icon;
+	protected Item item;
+	protected IBlockState blockState;
+	protected int metadata;
 
 	public DefaultIconProvider(String name)
 	{
 		setIcon(name);
+	}
+
+	public DefaultIconProvider(Block block)
+	{
+		this.blockState = block.getDefaultState();
+	}
+
+	public DefaultIconProvider(IBlockState blockState)
+	{
+		this.blockState = blockState;
+	}
+
+	public DefaultIconProvider(Item item, int metadata)
+	{
+		this.item = item;
 	}
 
 	public DefaultIconProvider(MalisisIcon icon)
@@ -50,6 +71,29 @@ public class DefaultIconProvider implements IBlockIconProvider, IItemIconProvide
 		icon = MalisisIcon.get(name);
 	}
 
+	public void setIcon(Item item)
+	{
+		setIcon(item, 0);
+	}
+
+	public void setIcon(Item item, int metadata)
+	{
+		this.item = item;
+		this.metadata = metadata;
+		icon = MalisisIcon.get(item, metadata);
+	}
+
+	public void setIcon(Block block)
+	{
+		setIcon(block.getDefaultState());
+	}
+
+	public void setIcon(IBlockState blockState)
+	{
+		this.blockState = blockState;
+		icon = MalisisIcon.get(blockState);
+	}
+
 	public void setIcon(MalisisIcon icon)
 	{
 		this.icon = icon;
@@ -58,12 +102,15 @@ public class DefaultIconProvider implements IBlockIconProvider, IItemIconProvide
 	@Override
 	public void registerIcons(TextureMap map)
 	{
-		icon = icon.register(map);
+		if (item == null && blockState == null)
+			icon.register(map);
 	}
 
 	@Override
 	public MalisisIcon getIcon()
 	{
+		if (icon == null && (item != null || blockState != null))
+			icon = item != null ? MalisisIcon.get(item, metadata) : MalisisIcon.get(blockState);
 		return icon;
 	}
 }
