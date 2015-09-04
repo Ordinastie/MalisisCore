@@ -369,13 +369,21 @@ public class MalisisIcon extends TextureAtlasSprite
 	 *
 	 * @param base the icon to copy from
 	 */
-	public void copyFrom(MalisisIcon base)
+	@Override
+	public void copyFrom(TextureAtlasSprite base)
 	{
 		super.copyFrom(base);
-		this.sheetWidth = base.sheetWidth;
-		this.sheetHeight = base.sheetHeight;
-		this.flippedU = base.flippedU;
-		this.flippedV = base.flippedV;
+		for (int i = 0; i < base.getFrameCount(); i++)
+			this.framesTextureData.add(base.getFrameTextureData(i));
+
+		if (base instanceof MalisisIcon)
+		{
+			MalisisIcon mbase = (MalisisIcon) base;
+			this.sheetWidth = mbase.sheetWidth;
+			this.sheetHeight = mbase.sheetHeight;
+			this.flippedU = mbase.flippedU;
+			this.flippedV = mbase.flippedV;
+		}
 	}
 
 	/**
@@ -475,6 +483,8 @@ public class MalisisIcon extends TextureAtlasSprite
 	 */
 	public static MalisisIcon get(Item item, int metadata)
 	{
+		if (Minecraft.getMinecraft().getRenderItem() == null)
+			return missing();
 		TextureAtlasSprite icon = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getParticleIcon(item, metadata);
 		return get(icon);
 	}
