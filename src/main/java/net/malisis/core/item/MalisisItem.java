@@ -24,6 +24,7 @@
 
 package net.malisis.core.item;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.MalisisRegistry;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.icon.metaprovider.IItemMetaIconProvider;
@@ -34,6 +35,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -71,9 +73,11 @@ public class MalisisItem extends Item implements IItemMetaIconProvider
 		if (StringUtils.isEmpty(textureName))
 			return;
 
-		setItemIconProvider(new DefaultIconProvider(textureName));
+		if (MalisisCore.isClient())
+			setItemIconProvider(new DefaultIconProvider(textureName));
 	}
 
+	@SideOnly(Side.CLIENT)
 	public void setItemIconProvider(IItemIconProvider iconProvider)
 	{
 		this.iconProvider = iconProvider;

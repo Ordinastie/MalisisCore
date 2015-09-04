@@ -155,6 +155,11 @@ public class MalisisCore implements IMalisisMod
 		return instance.registeredMods.keySet();
 	}
 
+	public static boolean isClient()
+	{
+		return FMLCommonHandler.instance().getSide().isClient();
+	}
+
 	/**
 	 * Pre-initialization event
 	 *

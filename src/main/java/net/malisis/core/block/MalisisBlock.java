@@ -45,9 +45,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -92,7 +90,8 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 		if (StringUtils.isEmpty(textureName))
 			return;
 
-		setBlockIconProvider(new DefaultIconProvider(textureName));
+		if (MalisisCore.isClient())
+			setBlockIconProvider(new DefaultIconProvider(textureName));
 	}
 
 	public void setBlockIconProvider(IBlockIconProvider iconProvider)
@@ -114,7 +113,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 	public void register(Class<? extends ItemBlock> item)
 	{
 		GameRegistry.registerBlock(this, item, getName());
-		if (FMLCommonHandler.instance().getSide() == Side.CLIENT)
+		if (MalisisCore.isClient())
 		{
 			MalisisRegistry.registerIconProvider(iconProvider);
 			if (useDefaultRenderer())
