@@ -24,7 +24,9 @@
 
 package net.malisis.core.renderer.icon.provider;
 
+import net.malisis.core.block.IBlockDirectional;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -36,6 +38,10 @@ import net.minecraft.world.IBlockAccess;
 import org.apache.commons.lang3.StringUtils;
 
 /**
+ * This {@link IIconProvider} allows a {@link Block} to have different icons for its sides.<br>
+ * By default, it will also use the {@link IBlockDirectional#DIRECTION} property to determine the facing of the block and rotate the icons
+ * accordingly.
+ *
  * @author Ordinastie
  *
  */
@@ -43,7 +49,7 @@ public class SidesIconProvider implements IBlockIconProvider
 {
 	private MalisisIcon defaultIcon;
 	private MalisisIcon[] sideIcons = new MalisisIcon[6];
-	private PropertyDirection property;
+	private PropertyDirection property = IBlockDirectional.DIRECTION;
 
 	public SidesIconProvider(String defaultName, String[] sideNames)
 	{
@@ -53,19 +59,37 @@ public class SidesIconProvider implements IBlockIconProvider
 
 	public SidesIconProvider(MalisisIcon defaultIcon, MalisisIcon[] sideIcons)
 	{
-
+		setDefaultIcon(defaultIcon);
+		setSideIcons(sideIcons);
 	}
 
+	/**
+	 * Sets the default {@link MalisisIcon} to use if no icon is set for a face.
+	 *
+	 * @param name the new default icon
+	 */
 	public void setDefaultIcon(String name)
 	{
 		defaultIcon = MalisisIcon.get(name);
 	}
 
+	/**
+	 * Sets the default {@link MalisisIcon} to use if no icon is set for a side of the block.
+	 *
+	 * @param icon the new default icon
+	 */
 	public void setDefaultIcon(MalisisIcon icon)
 	{
 		this.defaultIcon = icon;
 	}
 
+	/**
+	 * Sets the {@link MalisisIcon} to use for each side of the block.<br>
+	 * The index of the array is the {@link EnumFacing#getIndex()} value.<br>
+	 * If no icon is set for a side, {@link #defaultIcon} will be used instead.
+	 *
+	 * @param names the new side icons
+	 */
 	public void setSideIcons(String[] names)
 	{
 		for (int i = 0; i < names.length; i++)
@@ -75,60 +99,99 @@ public class SidesIconProvider implements IBlockIconProvider
 		}
 	}
 
+	/**
+	 * Sets the {@link MalisisIcon} to use for each side of the block.<br>
+	 * The index of the array is the {@link EnumFacing#getIndex()} value.<br>
+	 * If no icon is set for a side, {@link #defaultIcon} will be used instead.
+	 *
+	 * @param icons the new side icons
+	 */
 	public void setSideIcons(MalisisIcon[] icons)
 	{
 		this.sideIcons = icons;
+	}
+
+	/**
+	 * Sets the property direction to used to determine the facing of the block.<br>
+	 * By default, uses {@link IBlockDirectional#DIRECTION}.
+	 *
+	 * @param property the new property direction
+	 */
+	public void setPropertyDirection(PropertyDirection property)
+	{
+		this.property = property;
 	}
 
 	@Override
 	public void registerIcons(TextureMap map)
 	{
 		if (defaultIcon != null)
-			defaultIcon.register(map);
+			defaultIcon = defaultIcon.register(map);
 
-		for (MalisisIcon icon : sideIcons)
+		for (int i = 0; i < sideIcons.length; i++)
 		{
-			if (icon != null)
-				icon.register(map);
+			if (sideIcons[i] != null)
+				sideIcons[i] = sideIcons[i].register(map);
 		}
 	}
 
-	public void setPropertyDirection(PropertyDirection property)
+	/**
+	 * Gets the {@link MalisisIcon} associated with a side.
+	 *
+	 * @param side the dir
+	 * @return the icon
+	 */
+	public MalisisIcon getIcon(EnumFacing side)
 	{
-		this.property = property;
-	}
-
-	public MalisisIcon getIcon(EnumFacing dir)
-	{
-		if (dir == null || dir.getIndex() > sideIcons.length)
+		if (side == null || side.getIndex() > sideIcons.length)
 			return null;
 
-		return sideIcons[dir.getIndex()];
+		return sideIcons[side.getIndex()];
 	}
 
+	/**
+	 * Gets the {@link MalisisIcon} for the side for the block in world.<br>
+	 * Takes in account the facing of the block.<br>
+	 * If no icon was set for the side, {@link #defaultIcon} is used.
+	 *
+	 * @param world the world
+	 * @param pos the pos
+	 * @param state the state
+	 * @param side the side
+	 * @return the icon
+	 */
 	@Override
-	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
+	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
 	{
-		if (facing == null)
+		if (side == null)
 			return defaultIcon;
 
 		EnumFacing direction = (EnumFacing) state.getValue(property);
 		int count = getRotationCount(direction);
-		if (facing != EnumFacing.UP && facing != EnumFacing.DOWN)
+		if (side != EnumFacing.UP && side != EnumFacing.DOWN)
 		{
-			facing = rotateFacing(facing, count);
+			side = rotateFacing(side, count);
 			count = 0;
 		}
 
-		MalisisIcon dirIcon = getIcon(facing);
+		MalisisIcon dirIcon = getIcon(side);
 		dirIcon.setRotation(count);
 		return dirIcon != null ? dirIcon : defaultIcon;
 	}
 
+	/**
+	 * Gets the {@link MalisisIcon} for the side for the block in inventory.<br>
+	 * If no icon was set for the side, {@link #defaultIcon} is used.
+	 *
+	 * @param itemStack the item stack
+	 * @param side the facing
+	 * @return the icon
+	 */
 	@Override
-	public MalisisIcon getIcon(ItemStack itemStack, EnumFacing facing)
+	public MalisisIcon getIcon(ItemStack itemStack, EnumFacing side)
 	{
-		return getIcon(facing);
+		MalisisIcon dirIcon = getIcon(side);
+		return dirIcon != null ? dirIcon : defaultIcon;
 	}
 
 	@Override
@@ -137,6 +200,12 @@ public class SidesIconProvider implements IBlockIconProvider
 		return defaultIcon;
 	}
 
+	/**
+	 * Gets the rotation count for the facing.
+	 *
+	 * @param facing the facing
+	 * @return the rotation count
+	 */
 	private int getRotationCount(EnumFacing facing)
 	{
 		switch (facing)
@@ -154,6 +223,13 @@ public class SidesIconProvider implements IBlockIconProvider
 		}
 	}
 
+	/**
+	 * Rotates facing {@code count} times.
+	 *
+	 * @param facing the facing
+	 * @param count the count
+	 * @return the enum facing
+	 */
 	private EnumFacing rotateFacing(EnumFacing facing, int count)
 	{
 		while (count-- > 0)
