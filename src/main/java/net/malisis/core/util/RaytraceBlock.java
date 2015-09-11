@@ -210,6 +210,9 @@ public class RaytraceBlock
 			return null;
 
 		Point closest = getClosest(points);
+		if (closest == null)
+			return null;
+
 		EnumFacing side = getSide(aabbs, closest);
 
 		return new MovingObjectPosition(closest.toVec3(), side, pos);
