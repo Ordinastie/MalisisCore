@@ -36,11 +36,14 @@ import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.RaytraceBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
@@ -122,6 +125,24 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 	}
 
 	@Override
+	protected BlockState createBlockState()
+	{
+		if (this instanceof IBlockDirectional)
+			return ((IBlockDirectional) this).createBlockState(this);
+
+		return super.createBlockState();
+	}
+
+	@Override
+	public IBlockState onBlockPlaced(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+	{
+		if (this instanceof IBlockDirectional)
+			return ((IBlockDirectional) this).onBlockPlaced(this, world, pos, facing, hitX, hitY, hitZ, meta, placer);
+
+		return super.onBlockPlaced(world, pos, facing, hitX, hitY, hitZ, meta, placer);
+	}
+
+	@Override
 	public AxisAlignedBB[] getBoundingBox(IBlockAccess world, BlockPos pos, BoundingBoxType type)
 	{
 		return new AxisAlignedBB[] { new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ) };
@@ -155,6 +176,24 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 	public boolean useDefaultRenderer()
 	{
 		return true;
+	}
+
+	@Override
+	public IBlockState getStateFromMeta(int meta)
+	{
+		if (this instanceof IBlockDirectional)
+			return ((IBlockDirectional) this).getStateFromMeta(this, meta);
+
+		return super.getStateFromMeta(meta);
+	}
+
+	@Override
+	public int getMetaFromState(IBlockState state)
+	{
+		if (this instanceof IBlockDirectional)
+			return ((IBlockDirectional) this).getMetaFromState(this, state);
+
+		return super.getMetaFromState(state);
 	}
 
 	@Override
