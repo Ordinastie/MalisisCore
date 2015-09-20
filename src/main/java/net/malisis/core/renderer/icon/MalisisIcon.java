@@ -30,12 +30,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.malisis.core.asm.AsmUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.item.Item;
 
 /**
  * Extension of {@link TextureAtlasSprite} to allow common operations like clipping and offset.<br>
@@ -49,7 +45,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	/** The private field for registered sprites. */
 	private static Field mapRegisteredSprites = AsmUtils.changeFieldAccess(TextureMap.class, "mapRegisteredSprites", "field_110574_e");
 	/** Missing texture {@link MalisisIcon} **/
-	private static MalisisIcon missing;
+	public static MalisisIcon missing = new MalisisIcon("missingno");
 
 	/** Width of the global texture sheet. */
 	protected int sheetWidth;
@@ -84,6 +80,8 @@ public class MalisisIcon extends TextureAtlasSprite
 	public MalisisIcon(String name)
 	{
 		super(name);
+		maxU = 1;
+		maxV = 1;
 	}
 
 	/**
@@ -94,6 +92,8 @@ public class MalisisIcon extends TextureAtlasSprite
 	public MalisisIcon(MalisisIcon baseIcon)
 	{
 		super(baseIcon.getIconName());
+		maxU = 1;
+		maxV = 1;
 		baseIcon.addDependant(this);
 	}
 
@@ -439,105 +439,4 @@ public class MalisisIcon extends TextureAtlasSprite
 
 		return this;
 	}
-
-	/**
-	 * Gets a {@link MalisisIcon} for texture of the model of the {@link Block}.
-	 *
-	 * @param block the block
-	 * @return the {@link MalisisIcon}
-	 */
-	public static MalisisIcon get(Block block)
-	{
-		return get(block.getDefaultState());
-	}
-
-	/**
-	 * Gets a {@link MalisisIcon} for the texture of the model used for the {@link IBlockState}.
-	 *
-	 * @param blockState the block state
-	 * @return the {@link MalisisIcon}
-	 */
-	public static MalisisIcon get(IBlockState blockState)
-	{
-		TextureAtlasSprite icon = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getTexture(blockState);
-		return get(icon);
-	}
-
-	/**
-	 * Gets a {@link MalisisIcon} for the texture of the model use for the {@link Item}.
-	 *
-	 * @param item the item
-	 * @return the malisis icon
-	 */
-	public static MalisisIcon get(Item item)
-	{
-		return get(item, 0);
-	}
-
-	/**
-	 * Gets a {@link MalisisIcon} for the texture of the model use for the {@link Item}.
-	 *
-	 * @param item the item
-	 * @param metadata the metadata
-	 * @return the malisis icon
-	 */
-	public static MalisisIcon get(Item item, int metadata)
-	{
-		if (Minecraft.getMinecraft().getRenderItem() == null)
-			return missing();
-		TextureAtlasSprite icon = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getParticleIcon(item, metadata);
-		return get(icon);
-	}
-
-	/**
-	 * Gets the {@link TextureMap} on which textures are stitched.
-	 *
-	 * @return the texture map
-	 */
-	public static TextureMap textureMap()
-	{
-		return Minecraft.getMinecraft().getTextureMapBlocks();
-	}
-
-	/**
-	 * Gets a {@link MalisisIcon} for the texture stitched under the specified name.
-	 *
-	 * @param name the name
-	 * @return the {@link MalisisIcon}
-	 */
-	public static MalisisIcon get(String name)
-	{
-		TextureAtlasSprite icon = textureMap() != null ? textureMap().getAtlasSprite(name) : null;
-		return icon != null ? get(icon) : new MalisisIcon(name);
-	}
-
-	/**
-	 * Gets a {@link MalisisIcon} version of the supplied {@link TextureAtlasSprite}.
-	 *
-	 * @param icon the icon
-	 * @return the {@link MalisisIcon}
-	 */
-	private static MalisisIcon get(TextureAtlasSprite icon)
-	{
-		if (icon instanceof MalisisIcon)
-			return (MalisisIcon) icon;
-
-		if (icon != null && icon.getClass() == TextureAtlasSprite.class)
-			return new MalisisIcon(icon);
-
-		return missing();
-	}
-
-	/**
-	 * Gets the {@link MalisisIcon} version of the missing texture.
-	 *
-	 * @return the malisis icon
-	 */
-	public static MalisisIcon missing()
-	{
-		if (missing == null)
-			missing = new MalisisIcon(textureMap().getAtlasSprite("missingno"));
-		return missing;
-	}
-
 }

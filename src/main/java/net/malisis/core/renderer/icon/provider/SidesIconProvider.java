@@ -26,6 +26,7 @@ package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.block.IBlockDirectional;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.util.EnumFacingUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
@@ -35,6 +36,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -63,6 +65,11 @@ public class SidesIconProvider implements IBlockIconProvider
 		setSideIcons(sideIcons);
 	}
 
+	public SidesIconProvider(MalisisIcon defaultIcon)
+	{
+		setDefaultIcon(defaultIcon);
+	}
+
 	/**
 	 * Sets the default {@link MalisisIcon} to use if no icon is set for a face.
 	 *
@@ -70,7 +77,7 @@ public class SidesIconProvider implements IBlockIconProvider
 	 */
 	public void setDefaultIcon(String name)
 	{
-		defaultIcon = MalisisIcon.get(name);
+		defaultIcon = new MalisisIcon(name);
 	}
 
 	/**
@@ -109,6 +116,11 @@ public class SidesIconProvider implements IBlockIconProvider
 	public void setSideIcons(MalisisIcon[] icons)
 	{
 		this.sideIcons = icons;
+	}
+
+	public void setSideIcon(EnumFacing side, MalisisIcon icon)
+	{
+		sideIcons[side.getIndex()] = icon;
 	}
 
 	/**
@@ -167,16 +179,17 @@ public class SidesIconProvider implements IBlockIconProvider
 			return defaultIcon;
 
 		EnumFacing direction = (EnumFacing) state.getValue(property);
-		int count = getRotationCount(direction);
+		int count = EnumFacingUtils.getRotationCount(direction);
 		if (side != EnumFacing.UP && side != EnumFacing.DOWN)
 		{
-			side = rotateFacing(side, count);
+			side = EnumFacingUtils.rotateFacing(side, count);
 			count = 0;
 		}
 
-		MalisisIcon dirIcon = getIcon(side);
-		dirIcon.setRotation(count);
-		return dirIcon != null ? dirIcon : defaultIcon;
+		MalisisIcon dirIcon = ObjectUtils.firstNonNull(getIcon(side), defaultIcon);
+		if (dirIcon != null)
+			dirIcon.setRotation(count);
+		return dirIcon;
 	}
 
 	/**
@@ -198,42 +211,5 @@ public class SidesIconProvider implements IBlockIconProvider
 	public MalisisIcon getIcon()
 	{
 		return defaultIcon;
-	}
-
-	/**
-	 * Gets the rotation count for the facing.
-	 *
-	 * @param facing the facing
-	 * @return the rotation count
-	 */
-	private int getRotationCount(EnumFacing facing)
-	{
-		switch (facing)
-		{
-			case SOUTH:
-				return 0;
-			case EAST:
-				return 1;
-			case NORTH:
-				return 2;
-			case WEST:
-				return 3;
-			default:
-				return 0;
-		}
-	}
-
-	/**
-	 * Rotates facing {@code count} times.
-	 *
-	 * @param facing the facing
-	 * @param count the count
-	 * @return the enum facing
-	 */
-	private EnumFacing rotateFacing(EnumFacing facing, int count)
-	{
-		while (count-- > 0)
-			facing = facing.rotateAround(EnumFacing.Axis.Y);
-		return facing;
 	}
 }
