@@ -140,10 +140,28 @@ public class EntityUtils
 	 */
 	public static EnumFacing getEntityFacing(Entity entity, boolean sixWays)
 	{
-		return facings[getEntityFacingInt(entity, sixWays)];
+		return facings[getEntityRotation(entity, sixWays)];
 	}
 
-	public static int getEntityFacingInt(Entity entity, boolean sixWays)
+	/**
+	 * Gets the entity rotation based on where it's currently facing.
+	 *
+	 * @param entity the entity
+	 * @return the entity rotation
+	 */
+	public static int getEntityRotation(Entity entity)
+	{
+		return getEntityRotation(entity, false);
+	}
+
+	/**
+	 * Gets the entity rotation based on where it's currently facing.
+	 *
+	 * @param entity the entity
+	 * @param sixWays the six ways
+	 * @return the entity rotation
+	 */
+	public static int getEntityRotation(Entity entity, boolean sixWays)
 	{
 		if (entity == null)
 			return 6;
@@ -157,21 +175,49 @@ public class EntityUtils
 		return (MathHelper.floor_double(entity.rotationYaw * 4.0F / 360.0F + 0.5D) + 2) & 3;
 	}
 
+	/**
+	 * Checks if is the {@link Item} is equipped for the player.
+	 *
+	 * @param player the player
+	 * @param item the item
+	 * @return true, if is equipped
+	 */
 	public static boolean isEquipped(EntityPlayer player, Item item)
 	{
 		return player != null && player.getCurrentEquippedItem() != null && player.getCurrentEquippedItem().getItem() == item;
 	}
 
+	/**
+	 * Checks if is the {@link Item} contained in the {@link ItemStack} is equipped for the player.
+	 *
+	 * @param player the player
+	 * @param itemStack the item stack
+	 * @return true, if is equipped
+	 */
 	public static boolean isEquipped(EntityPlayer player, ItemStack itemStack)
 	{
 		return isEquipped(player, itemStack != null ? itemStack.getItem() : null);
 	}
 
+	/**
+	 * Gets the list of players currently watching the {@link Chunk}.
+	 *
+	 * @param chunk the chunk
+	 * @return the players watching chunk
+	 */
 	public static List<EntityPlayerMP> getPlayersWatchingChunk(Chunk chunk)
 	{
 		return getPlayersWatchingChunk((WorldServer) chunk.getWorld(), chunk.xPosition, chunk.zPosition);
 	}
 
+	/**
+	 * Gets the list of players currently watching the chunk at the coordinate.
+	 *
+	 * @param world the world
+	 * @param x the x
+	 * @param z the z
+	 * @return the players watching chunk
+	 */
 	public static List<EntityPlayerMP> getPlayersWatchingChunk(WorldServer world, int x, int z)
 	{
 		if (playersWatchingChunk == null)
