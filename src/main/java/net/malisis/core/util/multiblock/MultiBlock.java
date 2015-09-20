@@ -28,9 +28,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.malisis.core.MalisisCore;
+import net.malisis.core.block.IBlockDirectional;
 import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.util.BlockPosUtils;
+import net.malisis.core.util.EnumFacingUtils;
 import net.malisis.core.util.MBlockState;
+import net.malisis.core.util.blockdata.BlockDataHandler;
+import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
@@ -47,10 +52,12 @@ import net.minecraft.world.biome.BiomeGenBase;
  */
 public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 {
-	protected Map<BlockPos, MBlockState> states = new HashMap<>();
+	public static String ORIGIN_BLOCK_DATA = MalisisCore.modid + ":multiBlockOrigin";
 
+	protected Map<BlockPos, MBlockState> states = new HashMap<>();
 	protected BlockPos offset;
-	protected int rotation;
+	protected PropertyDirection property = IBlockDirectional.DIRECTION;
+	private int rotation;
 
 	public void setOffset(BlockPos offset)
 	{
@@ -58,9 +65,15 @@ public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 		buildStates();
 	}
 
-	public void setRotation(int rotation)
+	public void setPropertyDirection(PropertyDirection property)
 	{
-		this.rotation = rotation;
+		this.property = property;
+	}
+
+	private void setRotation(World world, BlockPos pos)
+	{
+		EnumFacing direction = (EnumFacing) world.getBlockState(pos).getValue(property);
+		rotation = EnumFacingUtils.getRotationCount(direction);
 	}
 
 	public boolean isFromMultiblock(BlockPos pos)
@@ -74,8 +87,19 @@ public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 		return states.get(pos);
 	}
 
+	public BlockPos getOrigin(World world, BlockPos pos)
+	{
+		return BlockDataHandler.getData(ORIGIN_BLOCK_DATA, world, pos);
+	}
+
+	public boolean isOrigin(World world, BlockPos pos)
+	{
+		return pos.equals(getOrigin(world, pos));
+	}
+
 	public boolean canPlaceBlockAt(World world, BlockPos pos)
 	{
+		setRotation(world, pos);
 		for (MBlockState state : this)
 		{
 			BlockPos p = state.getPos().add(pos);
@@ -87,6 +111,7 @@ public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 
 	public void placeBlocks(World world, BlockPos pos)
 	{
+		setRotation(world, pos);
 		for (MBlockState state : this)
 		{
 			state = state.rotate(rotation).offset(pos);
@@ -94,18 +119,31 @@ public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 			{
 				state.placeBlock(world, 2);
 				state.rotateInWorld(world, rotation);
+				BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, state.getPos(), pos);
 			}
 		}
+
+		BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, pos, pos);
 	}
 
 	public void breakBlocks(World world, BlockPos pos)
 	{
+		pos = getOrigin(world, pos);
+		if (pos == null)
+			return;
+		setRotation(world, pos);
 		for (MBlockState state : this)
 		{
 			state = state.rotate(rotation).offset(pos);
 			if (!state.getPos().equals(pos))
+			{
 				state.breakBlock(world, 2);
+				BlockDataHandler.removeData(ORIGIN_BLOCK_DATA, world, state.getPos());
+			}
 		}
+
+		world.setBlockToAir(pos);
+		BlockDataHandler.removeData(ORIGIN_BLOCK_DATA, world, pos);
 	}
 
 	public boolean isComplete(World world, BlockPos pos)
@@ -115,6 +153,7 @@ public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 
 	public boolean isComplete(World world, BlockPos pos, MBlockState newState)
 	{
+		setRotation(world, pos);
 		for (MBlockState state : this)
 		{
 			state = state.offset(pos);
@@ -188,5 +227,10 @@ public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 	public WorldType getWorldType()
 	{
 		return null;
+	}
+
+	public static void regsiterBlockData()
+	{
+		BlockDataHandler.registerBlockData(ORIGIN_BLOCK_DATA, BlockPosUtils::fromBytes, BlockPosUtils::toBytes);
 	}
 }

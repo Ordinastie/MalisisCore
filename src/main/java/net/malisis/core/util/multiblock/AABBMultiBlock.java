@@ -24,16 +24,37 @@
 
 package net.malisis.core.util.multiblock;
 
-import net.minecraft.tileentity.TileEntity;
+import net.malisis.core.util.BlockPosUtils;
+import net.malisis.core.util.MBlockState;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 
 /**
- * You can extend this class to make your Tile Entity use a MultiBlock system. If your TileEntity already has an ancestor, you need to
- * implement MultiBlock.IProvider and copy the method implementations provided here.
- *
  * @author Ordinastie
  *
  */
-public class MultiBlockTileEntity2 extends TileEntity
+public class AABBMultiBlock extends MultiBlock
 {
+	private AxisAlignedBB aabb;
+	private IBlockState blockState;
 
+	public AABBMultiBlock(AxisAlignedBB aabb, IBlockState blockState)
+	{
+		this.aabb = aabb;
+		this.blockState = blockState;
+		buildStates();
+	}
+
+	@Override
+	protected void buildStates()
+	{
+		states.clear();
+		for (BlockPos pos : BlockPosUtils.getAllInBox(aabb))
+		{
+			if (offset != null)
+				pos = pos.add(offset);
+			states.put(pos, new MBlockState(pos, blockState));
+		}
+	}
 }
