@@ -124,7 +124,7 @@ public class MalisisRegistry
 				icon = provider.getParticleIcon(state);
 		}
 
-		return icon != null ? icon : MalisisIcon.missing();
+		return icon != null ? icon : MalisisIcon.missing;
 	}
 
 	//#end IBlockRenderer
