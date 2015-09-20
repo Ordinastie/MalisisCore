@@ -52,7 +52,7 @@ import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
- * This class is the enty point for all the chunk collision related calculation.<br>
+ * This class is the entry point for all the chunk collision related calculation.<br>
  * The static methods are called via ASM which then call the process for the corresponding server or client instance.
  *
  * @author Ordinastie
@@ -133,7 +133,6 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 		}
 
 		return !canceled;
-
 	}
 
 	/**
