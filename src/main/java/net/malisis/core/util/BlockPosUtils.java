@@ -24,6 +24,8 @@
 
 package net.malisis.core.util;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 
@@ -57,5 +59,17 @@ public class BlockPosUtils
 	{
 		return BlockPos.getAllInBox(new BlockPos(aabb.minX, aabb.minY, aabb.minZ),
 				new BlockPos(Math.ceil(aabb.maxX) - 1, Math.ceil(aabb.maxY) - 1, Math.ceil(aabb.maxZ) - 1));
+	}
+
+	public static ByteBuf toBytes(BlockPos pos)
+	{
+		ByteBuf buf = Unpooled.buffer(8);
+		buf.writeLong(pos.toLong());
+		return buf;
+	}
+
+	public static BlockPos fromBytes(ByteBuf buf)
+	{
+		return BlockPos.fromLong(buf.readLong());
 	}
 }
