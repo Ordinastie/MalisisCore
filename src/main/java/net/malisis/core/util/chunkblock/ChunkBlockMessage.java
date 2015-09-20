@@ -26,11 +26,11 @@ package net.malisis.core.util.chunkblock;
 
 import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
+import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -39,7 +39,7 @@ import net.minecraftforge.fml.relauncher.Side;
  *
  */
 @MalisisMessage
-public class ChunkBlockMessage implements IMessageHandler<ChunkBlockMessage.Packet, IMessage>
+public class ChunkBlockMessage implements IMalisisMessageHandler<ChunkBlockMessage.Packet, IMessage>
 {
 	public ChunkBlockMessage()
 	{
@@ -47,13 +47,9 @@ public class ChunkBlockMessage implements IMessageHandler<ChunkBlockMessage.Pack
 	}
 
 	@Override
-	public IMessage onMessage(Packet message, MessageContext ctx)
+	public void process(Packet message, MessageContext ctx)
 	{
-		if (ctx.side != Side.CLIENT)
-			return null;
-
 		ChunkBlockHandler.get().setCoords(message.x, message.z, message.coords);
-		return null;
 	}
 
 	public static void sendCoords(Chunk chunk, long[] coords, EntityPlayerMP player)
