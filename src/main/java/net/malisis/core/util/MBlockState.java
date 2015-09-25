@@ -25,9 +25,12 @@
 package net.malisis.core.util;
 
 import java.lang.ref.WeakReference;
+import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
@@ -78,7 +81,10 @@ public class MBlockState
 
 	public MBlockState(IBlockAccess world, BlockPos pos)
 	{
-		this(pos, world.getBlockState(pos));
+		this.pos = pos;
+		this.state = world.getBlockState(pos);
+		this.block = state.getBlock();
+		this.state = block.getActualState(state, world, pos);
 	}
 
 	public MBlockState(IBlockAccess world, long coord)
@@ -131,15 +137,19 @@ public class MBlockState
 		return new MBlockState(this.pos.add(pos), this);
 	}
 
-	public MBlockState rotate(int rotation)
+	public MBlockState rotate(int count)
 	{
-		return new MBlockState(BlockPosUtils.rotate(pos, rotation), this);
-	}
+		IBlockState newState = state;
+		for (IProperty prop : (Set<IProperty>) state.getProperties().keySet())
+		{
+			if (prop instanceof PropertyDirection)
+			{
+				EnumFacing facing = EnumFacingUtils.rotateFacing((EnumFacing) state.getValue(prop), 4 - count);
+				newState = newState.withProperty(prop, facing);
+			}
+		}
 
-	public void rotateInWorld(World world, int rotation)
-	{
-		EnumFacing[] dirs = new EnumFacing[] { EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST };
-		block.rotateBlock(world, pos, dirs[rotation / 90]);
+		return new MBlockState(BlockPosUtils.rotate(pos, count), newState);
 	}
 
 	public void placeBlock(World world)
