@@ -28,7 +28,7 @@ import net.malisis.core.util.MBlockState;
 import net.malisis.core.util.chunkblock.ChunkBlockHandler;
 import net.malisis.core.util.chunkblock.ChunkBlockHandler.ChunkProcedure;
 import net.malisis.core.util.chunkblock.IChunkBlockHandler;
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.chunk.Chunk;
@@ -40,9 +40,9 @@ import net.minecraft.world.chunk.Chunk;
 public class ChunkListener implements IChunkBlockHandler
 {
 	@Override
-	public boolean updateCoordinates(Chunk chunk, BlockPos pos, Block old, Block block)
+	public boolean updateCoordinates(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
 	{
-		BlockNotifierProcedure procedure = new BlockNotifierProcedure(new MBlockState(pos, block));
+		BlockNotifierProcedure procedure = new BlockNotifierProcedure(new MBlockState(pos, newState));
 
 		ChunkBlockHandler.get().callProcedure(chunk, procedure);
 
@@ -76,7 +76,7 @@ public class ChunkListener implements IChunkBlockHandler
 				return true;
 
 			IBlockListener block = (IBlockListener) state.getBlock();
-			if (state.getPos().distanceSq(newState.getPos()) >= block.blockRange())
+			if (state.getPos().distanceSq(newState.getPos()) > block.blockRange() * block.blockRange())
 				return true;
 
 			if (!state.getPos().equals(newState.getPos()))
