@@ -40,9 +40,7 @@ public class BlockPosUtils
 		int[] cos = { 1, 0, -1, 0 };
 		int[] sin = { 0, 1, 0, -1 };
 
-		int a = rotation % 4;
-		if (a < 0)
-			a += 4;
+		int a = -rotation & 3;
 
 		int newX = (pos.getX() * cos[a]) - (pos.getZ() * sin[a]);
 		int newZ = (pos.getX() * sin[a]) + (pos.getZ() * cos[a]);
