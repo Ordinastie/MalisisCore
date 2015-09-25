@@ -101,8 +101,8 @@ public class SidesIconProvider implements IBlockIconProvider
 	{
 		for (int i = 0; i < names.length; i++)
 		{
-			if (i < 6 && !StringUtils.isEmpty(names[i]))
-				sideIcons[i] = new MalisisIcon(names[i]);
+			if (!StringUtils.isEmpty(names[i]))
+				setSideIcon(EnumFacing.getFront(i), new MalisisIcon(names[i]));
 		}
 	}
 
@@ -115,7 +115,11 @@ public class SidesIconProvider implements IBlockIconProvider
 	 */
 	public void setSideIcons(MalisisIcon[] icons)
 	{
-		this.sideIcons = icons;
+		for (int i = 0; i < icons.length; i++)
+		{
+			if (icons[i] != null)
+				setSideIcon(EnumFacing.getFront(i), icons[i]);
+		}
 	}
 
 	public void setSideIcon(EnumFacing side, MalisisIcon icon)
@@ -178,13 +182,8 @@ public class SidesIconProvider implements IBlockIconProvider
 		if (side == null)
 			return defaultIcon;
 
-		EnumFacing direction = (EnumFacing) state.getValue(property);
-		int count = EnumFacingUtils.getRotationCount(direction);
-		if (side != EnumFacing.UP && side != EnumFacing.DOWN)
-		{
-			side = EnumFacingUtils.rotateFacing(side, count);
-			count = 0;
-		}
+		int count = getRotation(state, side);
+		side = getRealSide(state, side);
 
 		MalisisIcon dirIcon = ObjectUtils.firstNonNull(getIcon(side), defaultIcon);
 		if (dirIcon != null)
@@ -211,5 +210,26 @@ public class SidesIconProvider implements IBlockIconProvider
 	public MalisisIcon getIcon()
 	{
 		return defaultIcon;
+	}
+
+	protected EnumFacing getRealSide(IBlockState state, EnumFacing side)
+	{
+		if (side == EnumFacing.UP && side == EnumFacing.DOWN)
+			return side;
+
+		EnumFacing direction = (EnumFacing) state.getValue(property);
+		int count = EnumFacingUtils.getRotationCount(direction);
+		side = EnumFacingUtils.rotateFacing(side, count);
+
+		return side;
+	}
+
+	protected int getRotation(IBlockState state, EnumFacing side)
+	{
+		if (side != EnumFacing.UP && side != EnumFacing.DOWN)
+			return 0;
+
+		EnumFacing direction = (EnumFacing) state.getValue(property);
+		return EnumFacingUtils.getRotationCount(direction);
 	}
 }
