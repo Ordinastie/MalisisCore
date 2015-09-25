@@ -34,6 +34,7 @@ import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.RaytraceBlock;
+import net.malisis.core.util.multiblock.IMultiBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockState;
@@ -41,6 +42,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -140,6 +142,22 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 			return ((IBlockDirectional) this).onBlockPlaced(this, world, pos, facing, hitX, hitY, hitZ, meta, placer);
 
 		return super.onBlockPlaced(world, pos, facing, hitX, hitY, hitZ, meta, placer);
+	}
+
+	@Override
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+	{
+		if (this instanceof IMultiBlock)
+			((IMultiBlock) this).onBlockPlacedBy(this, world, pos, state, placer, stack);
+		else
+			super.onBlockPlacedBy(world, pos, state, placer, stack);
+	}
+
+	@Override
+	public void breakBlock(World world, BlockPos pos, IBlockState state)
+	{
+		if (this instanceof IMultiBlock)
+			((IMultiBlock) this).breakBlock(this, world, pos, state);
 	}
 
 	@Override
