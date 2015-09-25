@@ -30,34 +30,30 @@ import java.util.Map;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IBlockDirectional;
-import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.EnumFacingUtils;
 import net.malisis.core.util.MBlockState;
 import net.malisis.core.util.blockdata.BlockDataHandler;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeGenBase;
 
 /**
  * @author Ordinastie
  *
  */
-public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
+public abstract class MultiBlock implements Iterable<MBlockState>//, IBlockAccess
 {
 	public static String ORIGIN_BLOCK_DATA = MalisisCore.modid + ":multiBlockOrigin";
 
 	protected Map<BlockPos, MBlockState> states = new HashMap<>();
-	protected BlockPos offset;
+	protected BlockPos offset = new BlockPos(0, 0, 0);
 	protected PropertyDirection property = IBlockDirectional.DIRECTION;
 	private int rotation;
+	private boolean bulkPlace;
+	private boolean bulkBreak;
 
 	public void setOffset(BlockPos offset)
 	{
@@ -70,15 +66,43 @@ public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 		this.property = property;
 	}
 
-	private void setRotation(World world, BlockPos pos)
+	private void setRotation(IBlockState state)
 	{
-		EnumFacing direction = (EnumFacing) world.getBlockState(pos).getValue(property);
+		EnumFacing direction = (EnumFacing) state.getValue(property);
 		rotation = EnumFacingUtils.getRotationCount(direction);
 	}
 
-	public boolean isFromMultiblock(BlockPos pos)
+	public void setBulkProcess(boolean bulkPlace, boolean bulkBreak)
 	{
-		return getBlockState(pos) != null;
+		this.bulkPlace = bulkPlace;
+		this.bulkBreak = bulkBreak;
+	}
+
+	public boolean isBulkPlace()
+	{
+		return bulkPlace;
+	}
+
+	public boolean isBulkBreak()
+	{
+		return bulkBreak;
+	}
+
+	public boolean isFromMultiblock(World world, BlockPos pos)
+	{
+		BlockPos origin = getOrigin(world, pos);
+		if (origin == null)
+			return false;
+
+		IBlockState state = world.getBlockState(origin);
+		setRotation(state);
+		for (MBlockState mstate : this)
+		{
+			mstate = mstate.rotate(rotation).offset(pos);
+			if (mstate.getPos().equals(pos))
+				return true;
+		}
+		return false;
 	}
 
 	public MBlockState getState(BlockPos pos)
@@ -97,53 +121,57 @@ public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 		return pos.equals(getOrigin(world, pos));
 	}
 
-	public boolean canPlaceBlockAt(World world, BlockPos pos)
+	public boolean canPlaceBlockAt(World world, BlockPos pos, IBlockState state)
 	{
-		setRotation(world, pos);
-		for (MBlockState state : this)
+		setRotation(state);
+		for (MBlockState mstate : this)
 		{
-			BlockPos p = state.getPos().add(pos);
-			if (!state.getBlock().canPlaceBlockAt(world, p))
+			mstate = mstate.rotate(rotation).offset(pos);
+			if (!pos.equals(mstate.getPos()) && world.getBlockState(pos).getBlock().isReplaceable(world, pos))
+				//if (!pos.equals(mstate.getPos()) && !mstate.getBlock().canPlaceBlockAt(world, mstate.getPos()))
 				return false;
 		}
 		return true;
 	}
 
-	public void placeBlocks(World world, BlockPos pos)
+	public void placeBlocks(World world, BlockPos pos, IBlockState state)
 	{
-		setRotation(world, pos);
-		for (MBlockState state : this)
+		setRotation(state);
+		for (MBlockState mstate : this)
 		{
-			state = state.rotate(rotation).offset(pos);
-			if (!state.getPos().equals(pos))
+			mstate = mstate.rotate(rotation).offset(pos);
+			if (!mstate.getPos().equals(pos))
 			{
-				state.placeBlock(world, 2);
-				state.rotateInWorld(world, rotation);
-				BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, state.getPos(), pos);
+				mstate.placeBlock(world, 2);
+				BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, mstate.getPos(), pos);
 			}
 		}
 
 		BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, pos, pos);
 	}
 
-	public void breakBlocks(World world, BlockPos pos)
+	public void breakBlocks(World world, BlockPos pos, IBlockState state)
 	{
-		pos = getOrigin(world, pos);
-		if (pos == null)
+		BlockPos origin = getOrigin(world, pos);
+		if (origin == null)
 			return;
-		setRotation(world, pos);
-		for (MBlockState state : this)
+		if (!pos.equals(origin))
 		{
-			state = state.rotate(rotation).offset(pos);
-			if (!state.getPos().equals(pos))
-			{
-				state.breakBlock(world, 2);
-				BlockDataHandler.removeData(ORIGIN_BLOCK_DATA, world, state.getPos());
-			}
+			breakBlocks(world, origin, world.getBlockState(origin));
+			return;
 		}
 
-		world.setBlockToAir(pos);
-		BlockDataHandler.removeData(ORIGIN_BLOCK_DATA, world, pos);
+		BlockDataHandler.removeData(ORIGIN_BLOCK_DATA, world, origin);
+		setRotation(state);
+		for (MBlockState mstate : this)
+		{
+			mstate = mstate.rotate(rotation).offset(origin);
+			if (mstate.matchesWorld(world))
+			{
+				mstate.breakBlock(world, 2);
+				BlockDataHandler.removeData(ORIGIN_BLOCK_DATA, world, mstate.getPos());
+			}
+		}
 	}
 
 	public boolean isComplete(World world, BlockPos pos)
@@ -153,7 +181,7 @@ public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 
 	public boolean isComplete(World world, BlockPos pos, MBlockState newState)
 	{
-		setRotation(world, pos);
+		setRotation(world.getBlockState(pos));
 		for (MBlockState state : this)
 		{
 			state = state.offset(pos);
@@ -172,6 +200,7 @@ public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 
 	protected abstract void buildStates();
 
+	/*
 	@Override
 	public IBlockState getBlockState(BlockPos pos)
 	{
@@ -228,9 +257,10 @@ public abstract class MultiBlock implements Iterable<MBlockState>, IBlockAccess
 	{
 		return null;
 	}
-
+	*/
 	public static void regsiterBlockData()
 	{
 		BlockDataHandler.registerBlockData(ORIGIN_BLOCK_DATA, BlockPosUtils::fromBytes, BlockPosUtils::toBytes);
 	}
+
 }

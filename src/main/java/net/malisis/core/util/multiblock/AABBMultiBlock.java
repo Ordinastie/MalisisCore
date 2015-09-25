@@ -24,11 +24,14 @@
 
 package net.malisis.core.util.multiblock;
 
+import net.malisis.core.block.IBlockDirectional;
 import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.MBlockState;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
 /**
  * @author Ordinastie
@@ -39,10 +42,10 @@ public class AABBMultiBlock extends MultiBlock
 	private AxisAlignedBB aabb;
 	private IBlockState blockState;
 
-	public AABBMultiBlock(AxisAlignedBB aabb, IBlockState blockState)
+	public AABBMultiBlock(Block block, AxisAlignedBB aabb)
 	{
 		this.aabb = aabb;
-		this.blockState = blockState;
+		this.blockState = block.getDefaultState().withProperty(IBlockDirectional.DIRECTION, EnumFacing.SOUTH);
 		buildStates();
 	}
 

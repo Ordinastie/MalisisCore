@@ -24,9 +24,9 @@
 
 package net.malisis.core.util.multiblock;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +41,7 @@ import net.minecraft.util.BlockPos;
  */
 public class PatternMultiBlock extends MultiBlock
 {
-	private List<List<String>> pattern = new ArrayList<>();
+	private List<List<String>> pattern = new LinkedList<>();
 	private Map<Character, MBlockState> blocks = new HashMap<>();
 
 	public PatternMultiBlock()
