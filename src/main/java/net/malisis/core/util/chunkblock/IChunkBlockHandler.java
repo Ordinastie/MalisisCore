@@ -24,7 +24,7 @@
 
 package net.malisis.core.util.chunkblock;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 
@@ -34,5 +34,5 @@ import net.minecraft.world.chunk.Chunk;
  */
 public interface IChunkBlockHandler
 {
-	public boolean updateCoordinates(Chunk chunk, BlockPos pos, Block old, Block block);
+	public boolean updateCoordinates(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState);
 }

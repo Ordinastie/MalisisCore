@@ -52,34 +52,36 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 	@SuppressWarnings("deprecation")
 	private AsmHook updateCoordsHook()
 	{
-		McpMethodMapping func_150807_a = new McpMethodMapping("setBlockIDWithMetadata", "func_150807_a", "net.minecraft.world.chunk.Chunk",
-				"(IIILnet/minecraft/block/Block;I)Z");
-		McpMethodMapping setExtBlockID = new McpMethodMapping("setExtBlockID", "func_150818_a",
-				"net.minecraft.world.chunk.storage.ExtendedBlockStorage", "(IIILnet/minecraft/block/Block;)V");
+		McpMethodMapping setBlockState = new McpMethodMapping("setBlockState", "func_177436_a", "net.minecraft.world.chunk.Chunk",
+				"(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/state/IBlockState;");
+		McpMethodMapping set = new McpMethodMapping("set", "func_177484_a", "net.minecraft.world.chunk.storage.ExtendedBlockStorage",
+				"(IIILnet/minecraft/block/state/IBlockState;)V");
 
-		AsmHook ah = new AsmHook(func_150807_a);
+		AsmHook ah = new AsmHook(setBlockState);
 
-		//L653: extendedblockstorage.setExtBlockID(p_150807_1_, p_150807_2_ & 15, p_150807_3_, p_150807_4_);
-		//	    ALOAD 10
-		//	    ILOAD 1
-		//	    ILOAD 2
-		//	    BIPUSH 15
-		//	    IAND
-		//	    ILOAD 3
-		//	    ALOAD 4
-		//	    INVOKEVIRTUAL net/minecraft/world/chunk/storage/ExtendedBlockStorage.setExtBlockID (IIILnet/minecraft/block/Block;)V
+		//L:714 extendedblockstorage.set(i, j & 15, k, state);
+		//		 L25
+		//		    LINENUMBER 714 L25
+		//		    ALOAD 11
+		//		    ILOAD 3
+		//		    ILOAD 4
+		//		    BIPUSH 15
+		//		    IAND
+		//		    ILOAD 5
+		//		    ALOAD 2
+		//		    INVOKEVIRTUAL net/minecraft/world/chunk/storage/ExtendedBlockStorage.set (IIILnet/minecraft/block/state/IBlockState;)V
 
 		InsnList match = new InsnList();
-		match.add(new VarInsnNode(ALOAD, 10));
-		match.add(new VarInsnNode(ILOAD, 1));
-		match.add(new VarInsnNode(ILOAD, 2));
+		match.add(new VarInsnNode(ALOAD, 11));
+		match.add(new VarInsnNode(ILOAD, 3));
+		match.add(new VarInsnNode(ILOAD, 4));
 		match.add(new IntInsnNode(BIPUSH, 15));
 		match.add(new InsnNode(IAND));
-		match.add(new VarInsnNode(ILOAD, 3));
-		match.add(new VarInsnNode(ALOAD, 4));
-		match.add(setExtBlockID.getInsnNode(INVOKEVIRTUAL));
+		match.add(new VarInsnNode(ILOAD, 5));
+		match.add(new VarInsnNode(ALOAD, 2));
+		match.add(set.getInsnNode(INVOKEVIRTUAL));
 
-		//		if (!ChunkBlockHandler.get().updateCoordinates(chunk, x, y, z, old, block))
+		//		if (!ChunkBlockHandler.get().updateCoordinates(this, pos, blockState1, blockState))
 		//			return false;
 
 		LabelNode falseLabel = new LabelNode();
@@ -87,16 +89,17 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkblock/ChunkBlockHandler", "get",
 				"()Lnet/malisis/core/util/chunkblock/ChunkBlockHandler;"));
 		insert.add(new VarInsnNode(ALOAD, 0));
-		insert.add(new VarInsnNode(ILOAD, 12));
-		insert.add(new VarInsnNode(ILOAD, 2));
-		insert.add(new VarInsnNode(ILOAD, 13));
+		insert.add(new VarInsnNode(ALOAD, 1));
 		insert.add(new VarInsnNode(ALOAD, 8));
-		insert.add(new VarInsnNode(ALOAD, 4));
-		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkblock/ChunkBlockHandler", "updateCoordinates",
-				"(Lnet/minecraft/world/chunk/Chunk;IIILnet/minecraft/block/Block;Lnet/minecraft/block/Block;)Z"));
+		insert.add(new VarInsnNode(ALOAD, 2));
+		insert.add(new MethodInsnNode(
+				INVOKEVIRTUAL,
+				"net/malisis/core/util/chunkblock/ChunkBlockHandler",
+				"updateCoordinates",
+				"(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)Z"));
 		insert.add(new JumpInsnNode(IFNE, falseLabel));
-		insert.add(new InsnNode(ICONST_0));
-		insert.add(new InsnNode(IRETURN));
+		insert.add(new InsnNode(ACONST_NULL));
+		insert.add(new InsnNode(ARETURN));
 		insert.add(falseLabel);
 
 		ah.jumpTo(match).insert(insert);

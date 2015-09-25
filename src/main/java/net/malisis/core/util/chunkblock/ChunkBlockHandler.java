@@ -41,6 +41,7 @@ import net.malisis.core.util.chunkcollision.IChunkCollidable;
 import net.malisis.core.util.chunklistener.ChunkListener;
 import net.malisis.core.util.chunklistener.IBlockListener;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
@@ -117,19 +118,19 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 * @return true, if block can be placed, false if canceled
 	 */
 	@Override
-	public boolean updateCoordinates(Chunk chunk, BlockPos pos, Block old, Block block)
+	public boolean updateCoordinates(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
 	{
 		boolean canceled = false;
 		for (IChunkBlockHandler handler : handlers)
-			canceled |= handler.updateCoordinates(chunk, pos, old, block);
+			canceled |= handler.updateCoordinates(chunk, pos, oldState, newState);
 
 		//*this* handler needs to be canceled, so it's called last
 		if (!canceled)
 		{
-			if (old instanceof IChunkBlock)
-				removeCoord(chunk.getWorld(), pos, ((IChunkBlock) old).blockRange());
-			if (block instanceof IChunkBlock)
-				addCoord(chunk.getWorld(), pos, ((IChunkBlock) block).blockRange());
+			if (oldState.getBlock() instanceof IChunkBlock)
+				removeCoord(chunk.getWorld(), pos, ((IChunkBlock) oldState.getBlock()).blockRange());
+			if (newState.getBlock() instanceof IChunkBlock)
+				addCoord(chunk.getWorld(), pos, ((IChunkBlock) newState.getBlock()).blockRange());
 		}
 
 		return !canceled;
