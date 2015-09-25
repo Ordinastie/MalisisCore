@@ -136,7 +136,7 @@ public class BlockDataHandler
 			{
 				ByteBuf buf = Unpooled.buffer();
 				chunkData.toBytes(buf);
-				//nbt.setByteArray(handlerInfo.identifier, buf.array());
+				nbt.setByteArray(handlerInfo.identifier, buf.capacity(buf.writerIndex()).array());
 			}
 		}
 	}
