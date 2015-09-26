@@ -204,6 +204,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	public void set(Block block)
 	{
 		this.block = block;
+		this.blockState = block.getDefaultState();
 	}
 
 	/**
@@ -722,10 +723,10 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		vertex.setColor(color);
 
 		// alpha
-		if (!params.usePerVertexAlpha.get())
+		if (params != null && !params.usePerVertexAlpha.get())
 			vertex.setAlpha(params.alpha.get());
 
-		if (renderType == RenderType.ITEM)
+		if (renderType == RenderType.ITEM && params != null)
 			vertex.setNormal(params.direction.get());
 
 		wr.addVertexData(getVertexData(vertex));
