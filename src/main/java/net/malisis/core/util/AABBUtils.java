@@ -83,22 +83,6 @@ public class AABBUtils
 		return new AxisAlignedBB(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ);
 	}
 
-	private static int getAngle(EnumFacing dir)
-	{
-		switch (dir)
-		{
-			case EAST:
-				return 1;
-			case SOUTH:
-				return 2;
-			case WEST:
-				return 3;
-			case NORTH:
-			default:
-				return 0;
-		}
-	}
-
 	/**
 	 * Rotate the {@link AxisAlignedBB} based on the specified direction.<br>
 	 * Assumes {@link ForgeDirection#NORTH} to be the default non rotated direction.<br>
@@ -110,18 +94,18 @@ public class AABBUtils
 	 */
 	public static AxisAlignedBB rotate(AxisAlignedBB aabb, EnumFacing dir)
 	{
-		return rotate(aabb, getAngle(dir));
+		return rotate(aabb, EnumFacingUtils.getRotationCount(dir));
 	}
 
 	public static AxisAlignedBB[] rotate(AxisAlignedBB[] aabbs, EnumFacing dir)
 	{
-		return rotate(aabbs, getAngle(dir));
+		return rotate(aabbs, EnumFacingUtils.getRotationCount(dir));
 	}
 
 	public static AxisAlignedBB[] rotate(AxisAlignedBB[] aabbs, int angle)
 	{
-		for (AxisAlignedBB aabb : aabbs)
-			rotate(aabb, angle);
+		for (int i = 0; i < aabbs.length; i++)
+			aabbs[i] = rotate(aabbs[i], angle);
 		return aabbs;
 	}
 
@@ -135,13 +119,11 @@ public class AABBUtils
 		if (aabb == null)
 			return null;
 
-		int a = angle % 4;
-		if (a < 0)
-			a += 4;
+		int a = -angle & 3;
 		int s = sin[a];
 		int c = cos[a];
 
-		aabb.offset(-0.5F, -0.5F, -0.5F);
+		aabb = aabb.offset(-0.5F, -0.5F, -0.5F);
 
 		double minX = aabb.minX;
 		double minY = aabb.minY;
@@ -175,7 +157,7 @@ public class AABBUtils
 		}
 
 		aabb = new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
-		aabb.offset(0.5F, 0.5F, 0.5F);
+		aabb = aabb.offset(0.5F, 0.5F, 0.5F);
 
 		return aabb;
 	}
