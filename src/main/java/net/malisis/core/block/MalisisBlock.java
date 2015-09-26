@@ -29,6 +29,7 @@ import java.util.List;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.MalisisRegistry;
 import net.malisis.core.renderer.DefaultRenderer;
+import net.malisis.core.renderer.icon.VanillaIcon;
 import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
@@ -41,6 +42,7 @@ import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
@@ -97,6 +99,23 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 
 		if (MalisisCore.isClient())
 			setBlockIconProvider(new DefaultIconProvider(textureName));
+	}
+
+	public void setTexture(Item item)
+	{
+		if (MalisisCore.isClient())
+			setBlockIconProvider(new DefaultIconProvider(new VanillaIcon(item)));
+	}
+
+	public void setTexture(Block block)
+	{
+		setTexture(block.getDefaultState());
+	}
+
+	public void setTexture(IBlockState blockState)
+	{
+		if (MalisisCore.isClient())
+			setBlockIconProvider(new DefaultIconProvider(new VanillaIcon(blockState)));
 	}
 
 	public void setBlockIconProvider(IBlockIconProvider iconProvider)
