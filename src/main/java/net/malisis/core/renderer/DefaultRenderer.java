@@ -30,14 +30,19 @@ import java.util.Map;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 
+import net.malisis.core.block.BoundingBoxType;
+import net.malisis.core.block.IBlockDirectional;
+import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.face.SouthFace;
 import net.malisis.core.renderer.element.shape.Cube;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.malisis.core.renderer.model.loader.TextureModelLoader;
+import net.malisis.core.util.AABBUtils;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.client.model.TRSRTransformation;
 
 /**
@@ -75,7 +80,17 @@ public class DefaultRenderer
 		@Override
 		public void render()
 		{
-			drawShape(shape);
+			AxisAlignedBB[] aabbs = ((MalisisBlock) block).getBoundingBox(world, pos, BoundingBoxType.RENDER);
+			if (block instanceof IBlockDirectional)
+				aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) block).getDirection(blockState));
+
+			for (AxisAlignedBB aabb : aabbs)
+			{
+				shape.resetState().limit(aabb);
+				drawShape(shape);
+			}
+
+			//	drawShape(shape);
 		}
 	};
 	public static MalisisRenderer item = new MalisisRenderer()

@@ -169,7 +169,11 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 	@Override
 	public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity)
 	{
-		for (AxisAlignedBB aabb : AABBUtils.offset(pos, getBoundingBox(world, pos, BoundingBoxType.COLLISION)))
+		AxisAlignedBB[] aabbs = getBoundingBox(world, pos, BoundingBoxType.COLLISION);
+		if (this instanceof IBlockDirectional)
+			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(state));
+
+		for (AxisAlignedBB aabb : AABBUtils.offset(pos, aabbs))
 		{
 			if (aabb != null && mask.intersectsWith(aabb))
 				list.add(aabb);
