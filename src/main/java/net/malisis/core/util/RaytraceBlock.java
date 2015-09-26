@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.malisis.core.block.BoundingBoxType;
+import net.malisis.core.block.IBlockDirectional;
 import net.malisis.core.block.IBoundingBox;
 import net.minecraft.block.Block;
 import net.minecraft.util.AxisAlignedBB;
@@ -192,6 +193,8 @@ public class RaytraceBlock
 		//
 		IBoundingBox block = (IBoundingBox) this.block;
 		AxisAlignedBB[] aabbs = block.getBoundingBox(world(), pos, BoundingBoxType.RAYTRACE);
+		if (block instanceof IBlockDirectional)
+			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) block).getDirection(world.get(), pos));
 
 		double maxDist = Point.distanceSquared(src, dest);
 		for (AxisAlignedBB aabb : AABBUtils.offset(pos, aabbs))
