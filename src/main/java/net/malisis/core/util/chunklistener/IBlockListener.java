@@ -30,12 +30,33 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 /**
+ * Defines a block that will listen to block placement and breaking around it.
+ *
  * @author Ordinastie
  *
  */
 public interface IBlockListener extends IChunkBlock
 {
+
+	/**
+	 * Called when a block is placed around this {@link IBlockListener} block.<br>
+	 * The return value defines whether the block placement should be canceled.
+	 *
+	 * @param world the world
+	 * @param pos the pos
+	 * @param blockSet the block set
+	 * @return true, if the block is allowed to be placed, false to cancel block placement
+	 */
 	public boolean onBlockSet(World world, BlockPos pos, MBlockState blockSet);
 
+	/**
+	 * Called when a block is removed around this {@link IBlockListener} block.<br>
+	 * The return value defines whether the block placement should be canceled.
+	 *
+	 * @param world the world
+	 * @param pos the pos
+	 * @param blockRemoved the block removed
+	 * @return true, if the block is allowed to be placed, false to cancel block placement
+	 */
 	public boolean onBlockRemoved(World world, BlockPos pos, BlockPos blockRemoved);
 }
