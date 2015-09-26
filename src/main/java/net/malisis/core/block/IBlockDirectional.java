@@ -60,6 +60,16 @@ public interface IBlockDirectional
 
 	public default int getMetaFromState(Block block, IBlockState state)
 	{
-		return ((EnumFacing) state.getValue(DIRECTION)).getHorizontalIndex();
+		return getDirection(state).getHorizontalIndex();
+	}
+
+	public default EnumFacing getDirection(World world, BlockPos pos)
+	{
+		return getDirection(world.getBlockState(pos));
+	}
+
+	public default EnumFacing getDirection(IBlockState state)
+	{
+		return (EnumFacing) state.getValue(DIRECTION);
 	}
 }
