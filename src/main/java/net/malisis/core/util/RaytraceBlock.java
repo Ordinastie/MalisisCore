@@ -63,8 +63,6 @@ public class RaytraceBlock
 	private Point dest;
 	/** Ray describing the ray trace. */
 	private Ray ray;
-	/** List of points intersecting the bouding boxes of the block. **/
-	List<Point> points = new ArrayList<>();
 
 	/**
 	 * Instantiates a new {@link RaytraceBlock}.
@@ -189,15 +187,15 @@ public class RaytraceBlock
 	 */
 	public MovingObjectPosition trace()
 	{
-		points.clear();
-
 		if (!(block instanceof IBoundingBox))
 			return block.collisionRayTrace(world(), x, y, z, ray.origin.toVec3(), dest.toVec3());
 
-		//
 		IBoundingBox block = (IBoundingBox) this.block;
 		AxisAlignedBB[] aabbs = block.getBoundingBox(world(), x, y, z, BoundingBoxType.RAYTRACE);
+		if (aabbs == null || aabbs.length == 0)
+			return null;
 
+		List<Point> points = new ArrayList<>();
 		double maxDist = Point.distanceSquared(src, dest);
 		for (AxisAlignedBB aabb : aabbs)
 		{
@@ -216,6 +214,9 @@ public class RaytraceBlock
 			return null;
 
 		Point closest = getClosest(points);
+		if (closest == null)
+			return null;
+
 		ForgeDirection side = getSide(aabbs, closest);
 
 		return new MovingObjectPosition(x, y, z, side.ordinal(), closest.toVec3());

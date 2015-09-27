@@ -130,7 +130,7 @@ public class Ray
 	}
 
 	/**
-	 * Finds the points intersectint the {@link AxisAlignedBB}
+	 * Finds the points intersecting the {@link AxisAlignedBB}
 	 *
 	 * @param aabb the aabb
 	 * @return the list
