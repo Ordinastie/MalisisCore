@@ -25,28 +25,34 @@
 package net.malisis.core.inventory;
 
 import net.malisis.core.client.gui.MalisisGui;
-import net.minecraft.util.EnumFacing;
+import net.malisis.core.util.ItemUtils;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public interface IInventoryProvider
+public interface IInventoryProvider extends IInventory
 {
 	/**
-	 * Gets the {@link MalisisInventory} for this {@link IInventoryProvider}.
+	 * Gets the default inventory for this provider.<br>
+	 * Default inventory is used for default vanilla {@link IInventory} interactions, or if you know that the provider only contains one
+	 * inventory.
 	 *
-	 * @param data null for TileEntity, ItemStack for Item
-	 * @return the inventories
+	 * @return the default inventory
 	 */
-	public MalisisInventory[] getInventories(Object... data);
+	public MalisisInventory getInventory(Object... data);
 
 	/**
-	 * Gets the {@link MalisisInventory} for a specific side for this {@link IInventoryProvider}.
+	 * Gets all the {@link MalisisInventory inventories} for this {@link IInventoryProvider}.
 	 *
-	 * @param side the side
 	 * @param data null for TileEntity, ItemStack for Item
 	 * @return the inventories
 	 */
-	public MalisisInventory[] getInventories(EnumFacing side, Object... data);
+	public default MalisisInventory[] getInventories(Object... data)
+	{
+		return new MalisisInventory[] { getInventory(data) };
+	}
 
 	/**
 	 * Gets the {@link MalisisGui} associated with the {@link MalisisInventory}.
@@ -56,5 +62,160 @@ public interface IInventoryProvider
 	 */
 	@SideOnly(Side.CLIENT)
 	public MalisisGui getGui(MalisisInventoryContainer container);
+
+	//#region IInventory
+	/**
+	 * Gets the number of slots in the default inventory (first one).
+	 *
+	 * @return the size inventory
+	 */
+	@Override
+	public default int getSizeInventory()
+	{
+		return getInventory() != null ? getInventory().size : 0;
+	}
+
+	/**
+	 * Gets the {@link ItemStack} is the slot
+	 *
+	 * @param index the index
+	 * @return the stack in slot
+	 */
+	@Override
+	public default ItemStack getStackInSlot(int index)
+	{
+		return getInventory() != null ? getInventory().getItemStack(index) : null;
+	}
+
+	/**
+	 * Removes from an slot up to a specified count of items and returns them in a new stack.
+	 *
+	 * @param index the index
+	 * @param count the count
+	 * @return the item stack
+	 */
+	@Override
+	public default ItemStack decrStackSize(int index, int count)
+	{
+		return getInventory() != null ? (new ItemUtils.ItemStackSplitter(getInventory().getItemStack(index))).split(count) : null;
+	}
+
+	/**
+	 * When some containers are closed they call this on each slot, then drop whatever it returns as an EntityItem - like when you close a
+	 * workbench GUI.
+	 *
+	 * @param index the index
+	 * @return the stack in slot on closing
+	 */
+	@Override
+	public default ItemStack getStackInSlotOnClosing(int index)
+	{
+		return getStackInSlot(index);
+	}
+
+	/**
+	 * Sets the given item stack to the specified slot in the inventory
+	 *
+	 * @param index the index
+	 * @param stack the stack
+	 */
+	@Override
+	public default void setInventorySlotContents(int index, ItemStack stack)
+	{
+		MalisisInventory inventory = getInventory();
+		if (inventory != null)
+			inventory.setItemStack(index, stack);
+	}
+
+	/**
+	 * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended.
+	 */
+	@Override
+	public default int getInventoryStackLimit()
+	{
+		return getInventory() != null ? getInventory().getInventoryStackLimit() : 0;
+	}
+
+	/**
+	 * For tile entities, ensures the chunk containing the tile entity is saved to disk later - the game won't think it hasn't changed and
+	 * skip it.
+	 */
+	@Override
+	public default void markDirty()
+	{}
+
+	/**
+	 * Do not give this method the name canInteractWith because it clashes with Container.
+	 *
+	 * @param player the player
+	 * @return true, if is useable by player
+	 */
+	@Override
+	public default boolean isUseableByPlayer(EntityPlayer player)
+	{
+		return true;
+	}
+
+	/**
+	 * Opens inventory. *Does nothing*
+	 *
+	 * @param player the player
+	 */
+	@Override
+	public default void openInventory(EntityPlayer player)
+	{}
+
+	/**
+	 * Closes inventory. *Does nothing*
+	 *
+	 * @param player the player
+	 */
+	@Override
+	public default void closeInventory(EntityPlayer player)
+	{}
+
+	/**
+	 * Returns true if the {@link ItemStack} can be contained in the slot.
+	 *
+	 * @param index the index
+	 * @param stack the stack
+	 * @return true, if is item valid for slot
+	 */
+	@Override
+	public default boolean isItemValidForSlot(int index, ItemStack stack)
+	{
+		MalisisInventory inventory = getInventory();
+		if (inventory == null)
+			return false;
+		MalisisSlot slot = inventory.getSlot(index);
+		return slot != null && slot.isItemValid(stack);
+	}
+
+	@Override
+	public default int getField(int id)
+	{
+		return 0;
+	}
+
+	@Override
+	public default void setField(int id, int value)
+	{}
+
+	@Override
+	public default int getFieldCount()
+	{
+		return 0;
+	}
+
+	/**
+	 * Empties all the inventories of this {@link IInventoryProvider}
+	 */
+	@Override
+	public default void clear()
+	{
+		for (MalisisInventory inventory : getInventories())
+			inventory.emptyInventory();
+	}
+	//#end IInventory
 
 }

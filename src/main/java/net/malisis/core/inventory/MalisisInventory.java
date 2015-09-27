@@ -36,16 +36,11 @@ import net.malisis.core.inventory.message.OpenInventoryMessage;
 import net.malisis.core.inventory.player.PlayerInventory;
 import net.malisis.core.util.EntityUtils;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -61,7 +56,7 @@ import com.google.common.eventbus.EventBus;
  * @author Ordinastie
  *
  */
-public class MalisisInventory implements IInventory
+public class MalisisInventory
 {
 	/** List of {@link MalisisInventory} that is currently containing this {@link MalisisInventory}. */
 	protected Set<MalisisInventoryContainer> containers = Collections.newSetFromMap(new WeakHashMap<MalisisInventoryContainer, Boolean>());
@@ -192,7 +187,7 @@ public class MalisisInventory implements IInventory
 
 	// #region getters/setters
 	/**
-	 * Sets the name.
+	 * Sets this {@link MalisisInventory} name.
 	 *
 	 * @param name the new name
 	 */
@@ -202,37 +197,23 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Gets the inventory name.
+	 * Gets this {@link MalisisInventory} name.
 	 *
 	 * @return the inventory name
 	 */
-	@Override
-	public String getCommandSenderName()
+	public String getName()
 	{
 		return name;
 	}
 
 	/**
-	 * Checks for custom inventory name.
+	 * Checks if this {@link MalisisInventory} has a name set.
 	 *
 	 * @return true, if successful
 	 */
-	@Override
 	public boolean hasCustomName()
 	{
 		return !StringUtils.isEmpty(name);
-	}
-
-	/**
-	 * Gets the display name of this Inventory.
-	 *
-	 * @return the display name
-	 */
-	@Override
-	public IChatComponent getDisplayName()
-	{
-		return this.hasCustomName() ? new ChatComponentText(this.getCommandSenderName()) : new ChatComponentTranslation(
-				this.getCommandSenderName());
 	}
 
 	/**
@@ -330,7 +311,6 @@ public class MalisisInventory implements IInventory
 	 * @param itemStack the item stack
 	 * @return true, if is item valid for slot
 	 */
-	@Override
 	public boolean isItemValidForSlot(int slotNumber, ItemStack itemStack)
 	{
 		MalisisSlot slot = getSlot(slotNumber);
@@ -344,7 +324,6 @@ public class MalisisInventory implements IInventory
 	 *
 	 * @return size of this {@link MalisisInventory}.
 	 */
-	@Override
 	public int getSizeInventory()
 	{
 		return this.size;
@@ -355,7 +334,6 @@ public class MalisisInventory implements IInventory
 	 *
 	 * @return stack size limit for the slots
 	 */
-	@Override
 	public int getInventoryStackLimit()
 	{
 		return slotMaxStackSize;
@@ -526,7 +504,7 @@ public class MalisisInventory implements IInventory
 	}
 
 	/**
-	 * Transfer itemStack inside this {@link MalisisInventory} into slots at position from start to end. If <b>start</b> &gt; <b>end</b>,
+	 * Transfers itemStack inside this {@link MalisisInventory} into slots at position from start to end. If <b>start</b> &gt; <b>end</b>,
 	 * the slots will be filled backwards.
 	 *
 	 * @param itemStack the item stack
@@ -579,6 +557,16 @@ public class MalisisInventory implements IInventory
 		for (ItemStack itemStack : getItemStackList())
 			EntityUtils.spawnEjectedItem(world, x, y, z, itemStack);
 		closeContainers();
+		emptyInventory();
+	}
+
+	/**
+	 * Empties this {@link MalisisInventory} and sets all slots contents to null.
+	 */
+	public void emptyInventory()
+	{
+		for (MalisisSlot slot : slots)
+			slot.setItemStack(null);
 	}
 
 	/**
@@ -708,106 +696,4 @@ public class MalisisInventory implements IInventory
 
 		return c;
 	}
-
-	// #region Unused
-
-	/**
-	 * Unused.
-	 *
-	 * @param player the player
-	 * @return true, if is useable by player
-	 */
-	@Override
-	public boolean isUseableByPlayer(EntityPlayer player)
-	{
-		return true;
-	}
-
-	/**
-	 * Unused.
-	 */
-	@Override
-	public void markDirty()
-	{}
-
-	/**
-	 * Unused : always returns null.
-	 *
-	 * @param slot the slot
-	 * @param count the count
-	 * @return the item stack
-	 */
-	@Override
-	public ItemStack decrStackSize(int slot, int count)
-	{
-		return null;
-	}
-
-	/**
-	 * Unused : always returns null.
-	 *
-	 * @param slot the slot
-	 * @return the stack in slot on closing
-	 */
-	@Override
-	public ItemStack getStackInSlotOnClosing(int slot)
-	{
-		return null;
-	}
-
-	/**
-	 * Use MalisisInventory.getItemStack(int slotNumber);
-	 *
-	 * @param slotNumber the slot number
-	 * @return the stack in slot
-	 */
-	@Override
-	@Deprecated
-	public ItemStack getStackInSlot(int slotNumber)
-	{
-		return getItemStack(slotNumber);
-	}
-
-	/**
-	 * Use MalisisInventory.setItemStack(int slotNumber, ItemStack itemStack)
-	 *
-	 * @param slotNumber the slot number
-	 * @param itemStack the item stack
-	 */
-	@Override
-	@Deprecated
-	public void setInventorySlotContents(int slotNumber, ItemStack itemStack)
-	{
-		setItemStack(slotNumber, itemStack);
-	}
-
-	@Override
-	public void openInventory(EntityPlayer player)
-	{}
-
-	@Override
-	public void closeInventory(EntityPlayer player)
-	{}
-
-	@Override
-	public int getField(int id)
-	{
-		return 0;
-	}
-
-	@Override
-	public void setField(int id, int value)
-	{}
-
-	@Override
-	public int getFieldCount()
-	{
-		return 0;
-	}
-
-	@Override
-	public void clear()
-	{}
-
-	// #end Unused
 }
