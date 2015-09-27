@@ -41,6 +41,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -552,10 +553,10 @@ public class MalisisInventory
 	 * @param y the y
 	 * @param z the z
 	 */
-	public void breakInventory(World world, int x, int y, int z)
+	public void breakInventory(World world, BlockPos pos)
 	{
 		for (ItemStack itemStack : getItemStackList())
-			EntityUtils.spawnEjectedItem(world, x, y, z, itemStack);
+			EntityUtils.spawnEjectedItem(world, pos, itemStack);
 		closeContainers();
 		emptyInventory();
 	}

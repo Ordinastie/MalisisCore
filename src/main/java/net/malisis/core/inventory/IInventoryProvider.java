@@ -29,6 +29,11 @@ import net.malisis.core.util.ItemUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -63,7 +68,48 @@ public interface IInventoryProvider extends IInventory
 	@SideOnly(Side.CLIENT)
 	public MalisisGui getGui(MalisisInventoryContainer container);
 
+	/**
+	 * Empties all the inventories of this {@link IInventoryProvider}
+	 */
+	@Override
+	public default void clear()
+	{
+		for (MalisisInventory inventory : getInventories())
+			inventory.emptyInventory();
+	}
+
+	/**
+	 * Break all the inventories of this {@link IInventoryProvider}.
+	 *
+	 * @param world the world
+	 * @param pos the pos
+	 */
+	public default void breakInventories(World world, BlockPos pos)
+	{
+		for (MalisisInventory inventory : getInventories())
+			inventory.breakInventory(world, pos);
+	}
+
 	//#region IInventory
+	@Override
+	public default boolean hasCustomName()
+	{
+		return getInventory() != null && getInventory().hasCustomName();
+	}
+
+	@Override
+	public default String getCommandSenderName()
+	{
+		return getInventory() != null ? getInventory().getName() : null;
+	}
+
+	@Override
+	public default IChatComponent getDisplayName()
+	{
+		return hasCustomName() ? new ChatComponentText(this.getCommandSenderName()) : new ChatComponentTranslation(
+				this.getCommandSenderName());
+	}
+
 	/**
 	 * Gets the number of slots in the default inventory (first one).
 	 *
@@ -205,16 +251,6 @@ public interface IInventoryProvider extends IInventory
 	public default int getFieldCount()
 	{
 		return 0;
-	}
-
-	/**
-	 * Empties all the inventories of this {@link IInventoryProvider}
-	 */
-	@Override
-	public default void clear()
-	{
-		for (MalisisInventory inventory : getInventories())
-			inventory.emptyInventory();
 	}
 	//#end IInventory
 
