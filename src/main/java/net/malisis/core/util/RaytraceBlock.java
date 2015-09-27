@@ -49,7 +49,7 @@ public class RaytraceBlock
 {
 	/** World reference **/
 	private WeakReference<World> world;
-	/** Postion of the block being ray traced **/
+	/** Position of the block being ray traced **/
 	private BlockPos pos;
 	/** Block being ray traced. */
 	private Block block;
