@@ -41,6 +41,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -85,13 +86,13 @@ public class EntityUtils
 	 * @param z the z
 	 * @param itemStack the item stack
 	 */
-	public static void spawnEjectedItem(World world, int x, int y, int z, ItemStack itemStack)
+	public static void spawnEjectedItem(World world, BlockPos pos, ItemStack itemStack)
 	{
 		float rx = world.rand.nextFloat() * 0.8F + 0.1F;
 		float ry = world.rand.nextFloat() * 0.8F + 0.1F;
 		float rz = world.rand.nextFloat() * 0.8F + 0.1F;
 
-		EntityItem entityItem = new EntityItem(world, x + rx, y + ry, z + rz, itemStack);
+		EntityItem entityItem = new EntityItem(world, pos.getX() + rx, pos.getY() + ry, pos.getZ() + rz, itemStack);
 
 		float factor = 0.05F;
 		entityItem.motionX = world.rand.nextGaussian() * factor;
