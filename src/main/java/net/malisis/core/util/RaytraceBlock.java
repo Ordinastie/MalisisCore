@@ -45,8 +45,6 @@ import net.minecraftforge.common.util.ForgeDirection;
  */
 public class RaytraceBlock
 {
-	/** Unique instance of {@link RaytraceBlock}. */
-	private static RaytraceBlock instance = new RaytraceBlock();
 	/** World reference **/
 	private WeakReference<World> world;
 	/** X coordinate of the block being ray traced. */
@@ -66,19 +64,14 @@ public class RaytraceBlock
 
 	/**
 	 * Instantiates a new {@link RaytraceBlock}.
-	 */
-	private RaytraceBlock()
-	{}
-
-	/**
-	 * Sets the parameters for this {@link RaytraceBlock}
 	 *
+	 * @param world the world
 	 * @param ray the ray
 	 * @param x the x
 	 * @param y the y
 	 * @param z the z
 	 */
-	private void _set(World world, Ray ray, int x, int y, int z)
+	private RaytraceBlock(World world, Ray ray, int x, int y, int z)
 	{
 		this.world = new WeakReference<World>(world);
 		this.src = ray.origin;
@@ -90,68 +83,50 @@ public class RaytraceBlock
 	}
 
 	/**
-	 * Sets the parameters for the ray trace and returns the {@link RaytraceBlock} instance.
+	 * Instantiates a new {@link RaytraceBlock}.
 	 *
-	 * @param ray the ray
-	 * @param x the x coordinate of the block
-	 * @param y the y coordinate of the block
-	 * @param z the z coordinate of the block
-	 * @return the {@link RaytraceBlock} instance
-	 */
-	public static RaytraceBlock set(World world, Ray ray, int x, int y, int z)
-	{
-		instance._set(world, ray, x, y, z);
-		return instance;
-	}
-
-	/**
-	 * Sets the parameters for the ray trace and returns the {@link RaytraceBlock} instance.
-	 *
+	 * @param world the world
 	 * @param src the src
 	 * @param v the v
-	 * @param x the x coordinate of the block
-	 * @param y the y coordinate of the block
-	 * @param z the z coordinate of the block
-	 * @return the {@link RaytraceBlock} instance
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 */
-	public static RaytraceBlock set(World world, Point src, Vector v, int x, int y, int z)
+	public RaytraceBlock(World world, Point src, Vector v, int x, int y, int z)
 	{
-		instance._set(world, new Ray(src, v), x, y, z);
-		return instance;
+		this(world, new Ray(src, v), x, y, z);
 	}
 
 	/**
-	 * Sets the parameters for the ray trace and returns the {@link RaytraceBlock} instance.
+	 * Instantiates a new {@link RaytraceBlock}.
 	 *
+	 * @param world the world
 	 * @param src the src
 	 * @param dest the dest
-	 * @param x the x coordinate of the block
-	 * @param y the y coordinate of the block
-	 * @param z the z coordinate of the block
-	 * @return the {@link RaytraceBlock} instance
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 */
-	public static RaytraceBlock set(World world, Point src, Point dest, int x, int y, int z)
+	public RaytraceBlock(World world, Point src, Point dest, int x, int y, int z)
 	{
-		instance.dest = dest;
-		instance._set(world, new Ray(src, new Vector(src, dest)), x, y, z);
-		return instance;
+		this(world, new Ray(src, new Vector(src, dest)), x, y, z);
+		this.dest = dest;
 	}
 
 	/**
-	 * Sets the parameters for the ray trace and returns the {@link RaytraceBlock} instance.
+	 * Instantiates a new {@link RaytraceBlock}.
 	 *
+	 * @param world the world
 	 * @param src the src
 	 * @param dest the dest
-	 * @param x the x coordinate of the block
-	 * @param y the y coordinate of the block
-	 * @param z the z coordinate of the block
-	 * @return the {@link RaytraceBlock} instance
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
 	 */
-	public static RaytraceBlock set(World world, Vec3 src, Vec3 dest, int x, int y, int z)
+	public RaytraceBlock(World world, Vec3 src, Vec3 dest, int x, int y, int z)
 	{
-		instance.dest = new Point(dest);
-		instance._set(world, new Ray(src, dest), x, y, z);
-		return instance;
+		this(world, new Ray(src, dest), x, y, z);
+		this.dest = new Point(dest);
 	}
 
 	public World world()

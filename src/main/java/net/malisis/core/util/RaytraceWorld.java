@@ -337,7 +337,7 @@ public class RaytraceWorld
 			return null;
 		if (!block.canStopRayTrace(metadata, hasOption(Options.HIT_LIQUIDS)))
 			return null;
-		return RaytraceBlock.set(world, src, exit, x, y, z).trace();
+		return new RaytraceBlock(world, src, exit, x, y, z).trace();
 	}
 
 	/**
