@@ -47,8 +47,6 @@ import net.minecraft.world.World;
  */
 public class RaytraceBlock
 {
-	/** Unique instance of {@link RaytraceBlock}. */
-	private static RaytraceBlock instance = new RaytraceBlock();
 	/** World reference **/
 	private WeakReference<World> world;
 	/** Postion of the block being ray traced **/
@@ -61,24 +59,15 @@ public class RaytraceBlock
 	private Point dest;
 	/** Ray describing the ray trace. */
 	private Ray ray;
-	/** List of points intersecting the bouding boxes of the block. **/
-	List<Point> points = new ArrayList<>();
 
 	/**
-	 * Instantiates a new {@link RaytraceBlock}.
-	 */
-	private RaytraceBlock()
-	{}
-
-	/**
-	 * Sets the parameters for this {@link RaytraceBlock}
+	 * Sets the parameters for this {@link RaytraceBlock}.
 	 *
+	 * @param world the world
 	 * @param ray the ray
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
+	 * @param pos the pos
 	 */
-	private void _set(World world, Ray ray, BlockPos pos)
+	public RaytraceBlock(World world, Ray ray, BlockPos pos)
 	{
 		this.world = new WeakReference<World>(world);
 		this.src = ray.origin;
@@ -88,70 +77,51 @@ public class RaytraceBlock
 	}
 
 	/**
-	 * Sets the parameters for the ray trace and returns the {@link RaytraceBlock} instance.
+	 * Sets the parameters for this {@link RaytraceBlock}.
 	 *
-	 * @param ray the ray
-	 * @param x the x coordinate of the block
-	 * @param y the y coordinate of the block
-	 * @param z the z coordinate of the block
-	 * @return the {@link RaytraceBlock} instance
-	 */
-	public static RaytraceBlock set(World world, Ray ray, BlockPos pos)
-	{
-		instance._set(world, ray, pos);
-		return instance;
-	}
-
-	/**
-	 * Sets the parameters for the ray trace and returns the {@link RaytraceBlock} instance.
-	 *
+	 * @param world the world
 	 * @param src the src
 	 * @param v the v
-	 * @param x the x coordinate of the block
-	 * @param y the y coordinate of the block
-	 * @param z the z coordinate of the block
-	 * @return the {@link RaytraceBlock} instance
+	 * @param pos the pos
 	 */
-	public static RaytraceBlock set(World world, Point src, Vector v, BlockPos pos)
+	public RaytraceBlock(World world, Point src, Vector v, BlockPos pos)
 	{
-		instance._set(world, new Ray(src, v), pos);
-		return instance;
+		this(world, new Ray(src, v), pos);
 	}
 
 	/**
-	 * Sets the parameters for the ray trace and returns the {@link RaytraceBlock} instance.
+	 * Sets the parameters for this {@link RaytraceBlock}.
 	 *
+	 * @param world the world
 	 * @param src the src
 	 * @param dest the dest
-	 * @param x the x coordinate of the block
-	 * @param y the y coordinate of the block
-	 * @param z the z coordinate of the block
-	 * @return the {@link RaytraceBlock} instance
+	 * @param pos the pos
 	 */
-	public static RaytraceBlock set(World world, Point src, Point dest, BlockPos pos)
+	public RaytraceBlock(World world, Point src, Point dest, BlockPos pos)
 	{
-		instance.dest = dest;
-		instance._set(world, new Ray(src, new Vector(src, dest)), pos);
-		return instance;
+		this(world, new Ray(src, new Vector(src, dest)), pos);
+		this.dest = dest;
 	}
 
 	/**
-	 * Sets the parameters for the ray trace and returns the {@link RaytraceBlock} instance.
+	 * Sets the parameters for this {@link RaytraceBlock}.
 	 *
+	 * @param world the world
 	 * @param src the src
 	 * @param dest the dest
-	 * @param x the x coordinate of the block
-	 * @param y the y coordinate of the block
-	 * @param z the z coordinate of the block
-	 * @return the {@link RaytraceBlock} instance
+	 * @param pos the pos
 	 */
-	public static RaytraceBlock set(World world, Vec3 src, Vec3 dest, BlockPos pos)
+	public RaytraceBlock(World world, Vec3 src, Vec3 dest, BlockPos pos)
 	{
-		instance.dest = new Point(dest);
-		instance._set(world, new Ray(src, dest), pos);
-		return instance;
+		this(world, new Ray(src, dest), pos);
+		this.dest = new Point(dest);
 	}
 
+	/**
+	 * Get the world used by this {@link RaytraceBlock}.
+	 *
+	 * @return the world
+	 */
 	public World world()
 	{
 		return world.get();
@@ -185,17 +155,18 @@ public class RaytraceBlock
 	 */
 	public MovingObjectPosition trace()
 	{
-		points.clear();
-
 		if (!(block instanceof IBoundingBox))
 			return block.collisionRayTrace(world(), pos, ray.origin.toVec3(), dest.toVec3());
 
 		//
 		IBoundingBox block = (IBoundingBox) this.block;
 		AxisAlignedBB[] aabbs = block.getBoundingBox(world(), pos, BoundingBoxType.RAYTRACE);
+		if (aabbs == null || aabbs.length == 0)
+			return null;
 		if (block instanceof IBlockDirectional)
 			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) block).getDirection(world.get(), pos));
 
+		List<Point> points = new ArrayList<>();
 		double maxDist = Point.distanceSquared(src, dest);
 		for (AxisAlignedBB aabb : AABBUtils.offset(pos, aabbs))
 		{

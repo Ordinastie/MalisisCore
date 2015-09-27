@@ -202,7 +202,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 	@Override
 	public MovingObjectPosition collisionRayTrace(World world, BlockPos pos, Vec3 src, Vec3 dest)
 	{
-		return RaytraceBlock.set(world, src, dest, pos).trace();
+		return new RaytraceBlock(world, src, dest, pos).trace();
 	}
 
 	@Override
