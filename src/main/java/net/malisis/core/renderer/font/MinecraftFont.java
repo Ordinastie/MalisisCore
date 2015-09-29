@@ -174,7 +174,7 @@ public class MinecraftFont extends MalisisFont
 			return 0;
 
 		str = processString(str, null);
-		int width = 0;
+		float width = 0;
 		StringWalker walker = new StringWalker(str, this, fro);
 		walker.startIndex(start);
 		walker.endIndex(end);
