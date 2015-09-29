@@ -24,8 +24,13 @@
 
 package net.malisis.core.inventory;
 
+import net.malisis.core.block.IBlockDirectional;
+import net.malisis.core.util.EnumFacingUtils;
+import net.malisis.core.util.ItemUtils;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -38,7 +43,7 @@ public interface ISidedInventoryProvider extends IInventoryProvider, ISidedInven
 {
 
 	/**
-	 * Gets the {@link MalisisInventory} accessible from the side of this {@link IInventoryProvider}.
+	 * Gets the {@link MalisisInventory} accessible from the side of this {@link IInventoryProvider}.<br>
 	 *
 	 * @param side the side
 	 * @param data the data
@@ -55,7 +60,7 @@ public interface ISidedInventoryProvider extends IInventoryProvider, ISidedInven
 	 */
 	public default MalisisInventory[] getInventories(EnumFacing side)
 	{
-		return new MalisisInventory[] { getInventory(side) };
+		return getInventory(side) != null ? new MalisisInventory[] { getInventory(side) } : null;
 	}
 
 	/**
@@ -69,9 +74,31 @@ public interface ISidedInventoryProvider extends IInventoryProvider, ISidedInven
 	{
 		MalisisInventory[] inventories = new MalisisInventory[0];
 		for (EnumFacing facing : EnumFacing.values())
-			inventories = ArrayUtils.addAll(inventories, getInventories(facing));
+		{
+			MalisisInventory[] inv = getInventories(facing);
+			if (!ArrayUtils.isEmpty(inv))
+				inventories = ArrayUtils.addAll(inventories, inv);
+		}
 
 		return inventories;
+	}
+
+	/**
+	 * Gets the actual side wanted based on the direction of the block in the world.<br>
+	 * Assumes this interface is implemented by a subclass of {@link TileEntity}.
+	 *
+	 * @param side the side
+	 * @return the real side
+	 */
+	public default EnumFacing getRealSide(EnumFacing side)
+	{
+		if (!(this instanceof TileEntity))
+			return side;
+
+		IBlockState state = (((TileEntity) this).getWorld()).getBlockState(((TileEntity) this).getPos());
+		if (state.getBlock() instanceof IBlockDirectional)
+			return EnumFacingUtils.getRealSide(state, side);
+		return side;
 	}
 
 	/**
@@ -102,6 +129,27 @@ public interface ISidedInventoryProvider extends IInventoryProvider, ISidedInven
 	}
 
 	@Override
+	public default ItemStack getStackInSlot(int slotNumber)
+	{
+		return getInventory(slotNumber) != null ? getInventory(slotNumber).getItemStack(convertSlotNumber(slotNumber)) : null;
+	}
+
+	@Override
+	public default ItemStack decrStackSize(int slotNumber, int count)
+	{
+		return getInventory(slotNumber) != null ? (new ItemUtils.ItemStackSplitter(getInventory(slotNumber).getItemStack(
+				convertSlotNumber(slotNumber)))).split(count) : null;
+	}
+
+	@Override
+	public default void setInventorySlotContents(int slotNumber, ItemStack stack)
+	{
+		MalisisInventory inventory = getInventory(slotNumber);
+		if (inventory != null)
+			inventory.setItemStack(convertSlotNumber(slotNumber), stack);
+	}
+
+	@Override
 	public default boolean isItemValidForSlot(int slotNumber, ItemStack itemStack)
 	{
 		MalisisSlot slot = getInventory(slotNumber).getSlot(convertSlotNumber(slotNumber));
@@ -117,6 +165,7 @@ public interface ISidedInventoryProvider extends IInventoryProvider, ISidedInven
 	@Override
 	public default int[] getSlotsForFace(EnumFacing side)
 	{
+		side = getRealSide(side);
 		MalisisInventory inventory = getInventory(side);
 		if (inventory == null)
 			return new int[0];
@@ -139,7 +188,8 @@ public interface ISidedInventoryProvider extends IInventoryProvider, ISidedInven
 	@Override
 	public default boolean canInsertItem(int slotNumber, ItemStack itemStack, EnumFacing side)
 	{
-		if (isSlotInSide(slotNumber, side))
+		side = getRealSide(side);
+		if (!isSlotInSide(slotNumber, side))
 			return false;
 
 		MalisisInventory inventory = getInventory(side);
@@ -161,7 +211,8 @@ public interface ISidedInventoryProvider extends IInventoryProvider, ISidedInven
 	@Override
 	public default boolean canExtractItem(int slotNumber, ItemStack itemStack, EnumFacing side)
 	{
-		if (isSlotInSide(slotNumber, side))
+		side = getRealSide(side);
+		if (!isSlotInSide(slotNumber, side))
 			return false;
 
 		MalisisInventory inventory = getInventory(side);
