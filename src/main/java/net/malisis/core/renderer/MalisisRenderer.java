@@ -578,6 +578,30 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		Minecraft.getMinecraft().getTextureManager().bindTexture(resourceLocaltion);
 	}
 
+	/**
+	 * Sets billboard mode.<br>
+	 * Contents drawn will always be facing the player.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 */
+	public void setBillboard(float x, float y, float z)
+	{
+		EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(x, y, z);
+		GlStateManager.rotate(180 - player.rotationYaw, 0, 1, 0);
+	}
+
+	/**
+	 * End billboard mode.
+	 */
+	public void endBillboard()
+	{
+		GlStateManager.popMatrix();
+	}
+
 	// #end prepare()
 
 	/**
@@ -875,7 +899,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		if (ip instanceof IBlockIconProvider && block != null)
 		{
 			IBlockIconProvider iblockp = (IBlockIconProvider) ip;
-			if (renderType == RenderType.BLOCK)
+			if (renderType == RenderType.BLOCK || renderType == RenderType.TILE_ENTITY)
 				return iblockp.getIcon(world, pos, blockState, params.direction.get());
 			else if (renderType == RenderType.ITEM)
 				return iblockp.getIcon(itemStack, params.direction.get());
