@@ -48,6 +48,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.eventbus.EventBus;
@@ -651,13 +652,17 @@ public class MalisisInventory
 		MalisisInventoryContainer c = new MalisisInventoryContainer(player, 0);
 
 		MalisisInventory[] inventories = inventoryProvider.getInventories(data);
-		if (inventories != null)
+		if (!ArrayUtils.isEmpty(inventories))
+		{
 			for (MalisisInventory inv : inventories)
 			{
-				c.addInventory(inv);
-				inv.bus.post(new InventoryEvent.Open(c, inv));
+				if (inv != null)
+				{
+					c.addInventory(inv);
+					inv.bus.post(new InventoryEvent.Open(c, inv));
+				}
 			}
-
+		}
 		OpenInventoryMessage.send(inventoryProvider, player, c.windowId);
 		c.sendInventoryContent();
 
@@ -681,12 +686,17 @@ public class MalisisInventory
 
 		MalisisInventoryContainer c = new MalisisInventoryContainer(player, windowId);
 		MalisisInventory[] inventories = inventoryProvider.getInventories(data);
-		if (inventories != null)
+		if (!ArrayUtils.isEmpty(inventories))
+		{
 			for (MalisisInventory inv : inventories)
 			{
-				c.addInventory(inv);
-				inv.bus.post(new InventoryEvent.Open(c, inv));
+				if (inv != null)
+				{
+					c.addInventory(inv);
+					inv.bus.post(new InventoryEvent.Open(c, inv));
+				}
 			}
+		}
 
 		if (FMLCommonHandler.instance().getSide().isClient())
 		{
