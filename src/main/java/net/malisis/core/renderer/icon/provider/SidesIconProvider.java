@@ -59,6 +59,11 @@ public class SidesIconProvider implements IBlockIconProvider
 		setSideIcons(sideNames);
 	}
 
+	public SidesIconProvider(String defaultName)
+	{
+		setDefaultIcon(defaultName);
+	}
+
 	public SidesIconProvider(MalisisIcon defaultIcon, MalisisIcon[] sideIcons)
 	{
 		setDefaultIcon(defaultIcon);
@@ -127,6 +132,11 @@ public class SidesIconProvider implements IBlockIconProvider
 		sideIcons[side.getIndex()] = icon;
 	}
 
+	public void setSideIcon(EnumFacing side, String name)
+	{
+		setSideIcon(side, new MalisisIcon(name));
+	}
+
 	/**
 	 * Sets the property direction to used to determine the facing of the block.<br>
 	 * By default, uses {@link IBlockDirectional#DIRECTION}.
@@ -183,7 +193,7 @@ public class SidesIconProvider implements IBlockIconProvider
 			return defaultIcon;
 
 		int count = getRotation(state, side);
-		side = getRealSide(state, side);
+		side = EnumFacingUtils.getRealSide(state, side);
 
 		MalisisIcon dirIcon = ObjectUtils.firstNonNull(getIcon(side), defaultIcon);
 		if (dirIcon != null)
@@ -210,18 +220,6 @@ public class SidesIconProvider implements IBlockIconProvider
 	public MalisisIcon getIcon()
 	{
 		return defaultIcon;
-	}
-
-	protected EnumFacing getRealSide(IBlockState state, EnumFacing side)
-	{
-		if (side == EnumFacing.UP && side == EnumFacing.DOWN)
-			return side;
-
-		EnumFacing direction = (EnumFacing) state.getValue(property);
-		int count = EnumFacingUtils.getRotationCount(direction);
-		side = EnumFacingUtils.rotateFacing(side, count);
-
-		return side;
 	}
 
 	protected int getRotation(IBlockState state, EnumFacing side)

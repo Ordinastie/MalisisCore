@@ -29,6 +29,7 @@ import static net.minecraft.util.EnumFacing.*;
 import java.util.HashMap;
 
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.util.EnumFacingUtils;
 import net.malisis.core.util.MBlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
@@ -101,7 +102,7 @@ public class MegaTextureIconProvider extends SidesIconProvider
 		searchDirs.put(WEST, new EnumFacing[] { DOWN, NORTH });
 
 		MalisisIcon icon = super.getIcon(world, pos, state, side);
-		EnumFacing realSide = getRealSide(state, side);
+		EnumFacing realSide = EnumFacingUtils.getRealSide(state, side);
 		int numBlocks = getNumBlocks(icon, realSide);
 		if (!isMegaTexture(realSide))
 			return icon;

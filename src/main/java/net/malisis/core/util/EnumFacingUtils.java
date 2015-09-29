@@ -24,6 +24,9 @@
 
 package net.malisis.core.util;
 
+import net.malisis.core.block.IBlockDirectional;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 
 /**
@@ -66,5 +69,22 @@ public class EnumFacingUtils
 		while (count-- > 0)
 			facing = facing.rotateAround(EnumFacing.Axis.Y);
 		return facing;
+	}
+
+	public static EnumFacing getRealSide(IBlockState state, EnumFacing side)
+	{
+		return getRealSide(state, IBlockDirectional.DIRECTION, side);
+	}
+
+	public static EnumFacing getRealSide(IBlockState state, PropertyDirection property, EnumFacing side)
+	{
+		if (side == EnumFacing.UP && side == EnumFacing.DOWN)
+			return side;
+
+		EnumFacing direction = (EnumFacing) state.getValue(property);
+		int count = EnumFacingUtils.getRotationCount(direction);
+		side = EnumFacingUtils.rotateFacing(side, count);
+
+		return side;
 	}
 }
