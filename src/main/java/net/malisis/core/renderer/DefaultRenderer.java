@@ -30,7 +30,6 @@ import java.util.Map;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 
-import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockDirectional;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.renderer.element.Shape;
@@ -80,7 +79,7 @@ public class DefaultRenderer
 		@Override
 		public void render()
 		{
-			AxisAlignedBB[] aabbs = ((MalisisBlock) block).getBoundingBox(world, pos, BoundingBoxType.RENDER);
+			AxisAlignedBB[] aabbs = ((MalisisBlock) block).getRenderBoundingBox(world, pos, blockState);
 			if (block instanceof IBlockDirectional)
 				aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) block).getDirection(blockState));
 

@@ -33,7 +33,6 @@ import net.malisis.core.renderer.icon.VanillaIcon;
 import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
-import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.RaytraceBlock;
 import net.malisis.core.util.multiblock.IMultiBlock;
 import net.minecraft.block.Block;
@@ -54,7 +53,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -180,38 +178,27 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 	}
 
 	@Override
-	public AxisAlignedBB[] getBoundingBox(IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	public AxisAlignedBB getBoundingBox(IBlockAccess world, BlockPos pos, BoundingBoxType type)
 	{
-		return new AxisAlignedBB[] { new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ) };
+		return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 
 	@Override
 	public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity)
 	{
-		AxisAlignedBB[] aabbs = getBoundingBox(world, pos, BoundingBoxType.COLLISION);
-		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(state));
+		IBoundingBox.super.addCollisionBoxesToList(world, pos, state, mask, list, collidingEntity);
+	}
 
-		for (AxisAlignedBB aabb : AABBUtils.offset(pos, aabbs))
-		{
-			if (aabb != null && mask.intersectsWith(aabb))
-				list.add(aabb);
-		}
+	@Override
+	public AxisAlignedBB getSelectedBoundingBox(World world, BlockPos pos)
+	{
+		return IBoundingBox.super.getSelectedBoundingBox(world, pos);
 	}
 
 	@Override
 	public MovingObjectPosition collisionRayTrace(World world, BlockPos pos, Vec3 src, Vec3 dest)
 	{
 		return new RaytraceBlock(world, src, dest, pos).trace();
-	}
-
-	@Override
-	public AxisAlignedBB getSelectedBoundingBox(World world, BlockPos pos)
-	{
-		AxisAlignedBB[] aabbs = getBoundingBox(world, pos, BoundingBoxType.SELECTION);
-		if (ArrayUtils.isEmpty(aabbs) || aabbs[0] == null)
-			return AABBUtils.empty(pos);
-		return AABBUtils.offset(pos, aabbs)[0];
 	}
 
 	public boolean useDefaultRenderer()

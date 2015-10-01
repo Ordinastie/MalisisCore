@@ -24,10 +24,18 @@
 
 package net.malisis.core.block;
 
+import java.util.List;
+
+import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.RaytraceBlock;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * {@link IBoundingBox} defines an implementers that have bounding box.<br>
@@ -38,6 +46,7 @@ import net.minecraft.world.IBlockAccess;
  */
 public interface IBoundingBox
 {
+	public AxisAlignedBB getBoundingBox(IBlockAccess world, BlockPos pos, BoundingBoxType type);
 
 	/**
 	 * Gets the {@link AxisAlignedBB} for this {@link IBoundingBox}.
@@ -47,5 +56,59 @@ public interface IBoundingBox
 	 * @param type the type
 	 * @return the bounding box
 	 */
-	public AxisAlignedBB[] getBoundingBox(IBlockAccess world, BlockPos pos, BoundingBoxType type);
+	public default AxisAlignedBB[] getBoundingBoxes(IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	{
+		return new AxisAlignedBB[] { getBoundingBox(world, pos, type) };
+	}
+
+	public default AxisAlignedBB[] getCollisionBoundingBoxes(World world, BlockPos pos)
+	{
+		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.COLLISION);
+		if (this instanceof IBlockDirectional)
+			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(world.getBlockState(pos)));
+		return aabbs;
+	}
+
+	public default void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity)
+	{
+		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.COLLISION);
+		if (this instanceof IBlockDirectional)
+			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(state));
+
+		for (AxisAlignedBB aabb : AABBUtils.offset(pos, aabbs))
+		{
+			if (aabb != null && mask.intersectsWith(aabb))
+				list.add(aabb);
+		}
+	}
+
+	public default AxisAlignedBB getSelectedBoundingBox(World world, BlockPos pos)
+	{
+		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.SELECTION);
+		if (ArrayUtils.isEmpty(aabbs) || aabbs[0] == null)
+			return AABBUtils.empty(pos);
+
+		if (this instanceof IBlockDirectional)
+			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(world.getBlockState(pos)));
+
+		return AABBUtils.offset(pos, aabbs)[0];
+	}
+
+	public default AxisAlignedBB[] getRenderBoundingBox(IBlockAccess world, BlockPos pos, IBlockState state)
+	{
+		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.RENDER);
+		if (this instanceof IBlockDirectional)
+			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(state));
+
+		return aabbs;
+	}
+
+	public default AxisAlignedBB[] getRayTraceBoundingBox(IBlockAccess world, BlockPos pos, IBlockState state)
+	{
+		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.RAYTRACE);
+		if (this instanceof IBlockDirectional)
+			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(state));
+
+		return aabbs;
+	}
 }

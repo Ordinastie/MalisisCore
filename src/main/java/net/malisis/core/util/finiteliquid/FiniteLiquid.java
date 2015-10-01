@@ -171,7 +171,7 @@ public abstract class FiniteLiquid extends MalisisBlock
 	}
 
 	@Override
-	public AxisAlignedBB[] getBoundingBox(IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	public AxisAlignedBB[] getBoundingBoxes(IBlockAccess world, BlockPos pos, BoundingBoxType type)
 	{
 		int amount = getAmount(new MBlockState(world, pos));
 		return new AxisAlignedBB[] { new AxisAlignedBB(0, 0, 0, 1, (double) amount / 16F, 1) };

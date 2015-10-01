@@ -28,8 +28,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.malisis.core.block.BoundingBoxType;
-import net.malisis.core.block.IBlockDirectional;
 import net.malisis.core.block.IBoundingBox;
 import net.minecraft.block.Block;
 import net.minecraft.util.AxisAlignedBB;
@@ -38,6 +36,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * RayTrace class that offers more control to handle raytracing.
@@ -160,11 +160,9 @@ public class RaytraceBlock
 
 		//
 		IBoundingBox block = (IBoundingBox) this.block;
-		AxisAlignedBB[] aabbs = block.getBoundingBox(world(), pos, BoundingBoxType.RAYTRACE);
-		if (aabbs == null || aabbs.length == 0)
+		AxisAlignedBB[] aabbs = block.getRayTraceBoundingBox(world(), pos, world().getBlockState(pos));
+		if (ArrayUtils.isEmpty(aabbs))
 			return null;
-		if (block instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) block).getDirection(world.get(), pos));
 
 		List<Point> points = new ArrayList<>();
 		double maxDist = Point.distanceSquared(src, dest);
