@@ -26,7 +26,6 @@ package net.malisis.core.util.chunkcollision;
 
 import java.util.List;
 
-import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.MBlockState;
@@ -40,6 +39,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
@@ -47,7 +47,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
 /**
- * This class is the enty point for all the chunk collision related calculation.<br>
+ * This class is the entry point for all the chunk collision related calculation.<br>
  * The static methods are called via ASM which then call the process for the corresponding server or client instance.
  *
  * @author Ordinastie
@@ -171,7 +171,7 @@ public class ChunkCollision
 	 * @param z the z
 	 * @return true, if can be placed
 	 */
-	public boolean canPlaceBlockAt(ItemStack itemStack, EntityPlayer player, World world, Block block, BlockPos pos, int side)
+	public boolean canPlaceBlockAt(ItemStack itemStack, EntityPlayer player, World world, Block block, BlockPos pos, EnumFacing side)
 	{
 		AxisAlignedBB[] aabbs;
 		if (block instanceof IChunkCollidable)
@@ -268,12 +268,16 @@ public class ChunkCollision
 
 			if (state.getBlock() instanceof IChunkCollidable)
 			{
-				AxisAlignedBB[] aabbs = ((IChunkCollidable) state.getBlock()).getBoundingBox(world, state.getPos(),
-						BoundingBoxType.CHUNKCOLLISION);
+				AxisAlignedBB[] aabbs = ((IChunkCollidable) state.getBlock()).getCollisionBoundingBoxes(world, state.getPos());
 				for (AxisAlignedBB aabb : aabbs)
 				{
-					if (mask != null && aabb != null && mask.intersectsWith(aabb.offset(state.getX(), state.getY(), state.getZ())))
-						list.add(aabb);
+					if (mask != null && aabb != null)
+					{
+						aabb = AABBUtils.offset(state.getPos(), aabb);
+						if (mask.intersectsWith(aabb))
+							list.add(aabb);
+					}
+
 				}
 			}
 			return true;

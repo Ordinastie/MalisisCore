@@ -30,7 +30,6 @@ import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.asm.MalisisClassTransformer;
 import net.malisis.core.asm.mappings.McpFieldMapping;
 import net.malisis.core.asm.mappings.McpMethodMapping;
-import net.minecraft.entity.player.EntityPlayerMP;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -61,8 +60,6 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 	{
 		McpMethodMapping onChunkLoad = new McpMethodMapping("getCollidingBoundingBoxes", "func_72945_a", "net.minecraft.world.World",
 				"(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;");
-		McpFieldMapping collidingBoundingBoxes = new McpFieldMapping("collidingBoundingBoxes", "field_72998_d",
-				"net.minecraft.world.World", "Ljava/util/ArrayList;");
 
 		AsmHook ah = new AsmHook(onChunkLoad);
 
@@ -77,8 +74,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 				"()Lnet/malisis/core/util/chunkcollision/ChunkCollision;"));
 		insert.add(new VarInsnNode(ALOAD, 0));
 		insert.add(new VarInsnNode(ALOAD, 2));
-		insert.add(new VarInsnNode(ALOAD, 0));
-		insert.add(collidingBoundingBoxes.getInsnNode(GETFIELD));
+		insert.add(new VarInsnNode(ALOAD, 3));
 		insert.add(new VarInsnNode(ALOAD, 1));
 		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "getCollisionBoundingBoxes",
 				"(Lnet/minecraft/world/World;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;)V"));
@@ -111,25 +107,25 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		setRayTraceInfos.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "setRayTraceInfos",
 				"(Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)V"));
 
-		//L1195 return movingobjectposition;
-		//ALOAD 14
+		//L966 return movingobjectposition;
+		//ALOAD 15
 		//ARETURN
 		InsnList returnMop = new InsnList();
-		returnMop.add(new VarInsnNode(ALOAD, 14));
+		returnMop.add(new VarInsnNode(ALOAD, 15));
 		returnMop.add(new InsnNode(ARETURN));
 
-		//Before L1195
+		//Before L966
 		//getRayTraceResult(World world, MovingObjectPosition mop, Vec3 src, Vec3 dest)
 		InsnList insertMop = new InsnList();
 		insertMop.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "get",
 				"()Lnet/malisis/core/util/chunkcollision/ChunkCollision;"));
 		insertMop.add(new VarInsnNode(ALOAD, 0));
-		insertMop.add(new VarInsnNode(ALOAD, 14));
+		insertMop.add(new VarInsnNode(ALOAD, 15));
 		insertMop.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "getRayTraceResult",
 				"(Lnet/minecraft/world/World;Lnet/minecraft/util/MovingObjectPosition;)Lnet/minecraft/util/MovingObjectPosition;"));
-		insertMop.add(new VarInsnNode(ASTORE, 14));
+		insertMop.add(new VarInsnNode(ASTORE, 15));
 
-		//L1211 return p_147447_5_ ? movingobjectposition2 : null;
+		//L982 return returnLastUncollidableBlock ? movingobjectposition2 : null;
 		//ILOAD 5
 		//IFEQ L26
 		//ALOAD 14
@@ -137,22 +133,22 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		InsnList returnMop2OrNull = new InsnList();
 		returnMop2OrNull.add(new VarInsnNode(ILOAD, 5));
 		returnMop2OrNull.add(new JumpInsnNode(IFEQ, null));
-		returnMop2OrNull.add(new VarInsnNode(ALOAD, 14));
+		returnMop2OrNull.add(new VarInsnNode(ALOAD, 15));
 		returnMop2OrNull.add(new JumpInsnNode(GOTO, null));
 
-		//Before L1211
+		//Before L982
 		//getRayTraceResult(World world, MovingObjectPosition mop, Vec3 src, Vec3 dest)
 		//insertMop_2 = insertMop
 		InsnList insertMop_2 = AsmUtils.cloneList(insertMop);
 
-		//L1367 return movingobjectposition1;
+		//L1101 return movingobjectposition1;
 		//ALOAD 41
 		//ARETURN
 		InsnList returnMop1 = new InsnList();
 		returnMop1.add(new VarInsnNode(ALOAD, 41));
 		returnMop1.add(new InsnNode(ARETURN));
 
-		//Before L1367
+		//Before L1101
 		//getRayTraceResult(World world, MovingObjectPosition mop, Vec3 src, Vec3 dest)
 		InsnList insertMop1 = new InsnList();
 		insertMop1.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "get",
@@ -163,20 +159,20 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 				"(Lnet/minecraft/world/World;Lnet/minecraft/util/MovingObjectPosition;)Lnet/minecraft/util/MovingObjectPosition;"));
 		insertMop1.add(new VarInsnNode(ASTORE, 41));
 
-		//L1377 return p_147447_5_ ? movingobjectposition2 : null;
+		//L1111 return returnLastUncollidableBlock ? movingobjectposition2 : null;
 		//returnMop2OrNull
 
-		//Before L1377
+		//Before L1111
 		//insertMop
 		//insertMop_3 = insertMop
 		InsnList insertMop_3 = AsmUtils.cloneList(insertMop);
 
 		//@formatter:off
 		ah.insert(setRayTraceInfos)
-			.jumpTo(returnMop).insert(insertMop) //L1195
-			.jumpTo(returnMop2OrNull).insert(insertMop_2) //L1211
-			.jumpTo(returnMop1).insert(insertMop1) //L1367
-			.jumpTo(returnMop2OrNull).insert(insertMop_3); //L1377
+			.jumpTo(returnMop).insert(insertMop) //L966
+			.jumpTo(returnMop2OrNull).insert(insertMop_2) //L982
+			.jumpTo(returnMop1).insert(insertMop1) //L1101
+			.jumpTo(returnMop2OrNull).insert(insertMop_3); //L1111
 		//@formatter:on
 
 		return ah;
@@ -185,12 +181,15 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 	@SuppressWarnings("deprecation")
 	private AsmHook placeBlockHook()
 	{
-		McpMethodMapping canPlaceEntityOnSide = new McpMethodMapping("onItemUse", "func_77648_a", "net/minecraft/item/ItemBlock",
-				"(Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;IIIIFFF)Z");
+		McpMethodMapping canPlaceEntityOnSide = new McpMethodMapping(
+				"onItemUse",
+				"func_77648_a",
+				"net/minecraft/item/ItemBlock",
+				"(Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Z");
 
 		McpMethodMapping getItemStackMetadata = new McpMethodMapping("getMetadata", "func_77960_j", "net/minecraft/item/ItemStack", "()I");
 		McpMethodMapping getItemMetadata = new McpMethodMapping("getMetadata", "func_77647_b", "net/minecraft/item/ItemBlock", "(I)I");
-		McpFieldMapping blockInstance = new McpFieldMapping("blockInstance", "field_150939_a", "net/minecraft/item/ItemBlock",
+		McpFieldMapping block = new McpFieldMapping("block", "field_150939_a", "net/minecraft/item/ItemBlock",
 				"Lnet/minecraft/block/Block;");
 
 		AsmHook ah = new AsmHook(canPlaceEntityOnSide);
@@ -206,7 +205,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		match.add(getItemStackMetadata.getInsnNode(INVOKEVIRTUAL));
 		match.add(getItemMetadata.getInsnNode(INVOKEVIRTUAL));
 
-		//		if (!ChunkCollision.get().canPlaceBlockAt(itemStack, player, world, block, x, y, z, side))
+		//		if (!ChunkCollision.get().canPlaceBlockAt(itemStack, player, world, block, pos, side))
 		//			return null;
 		//		 IFNE L1
 		//		   L2
@@ -222,13 +221,14 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		insert.add(new VarInsnNode(ALOAD, 2)); //player,
 		insert.add(new VarInsnNode(ALOAD, 3)); //world,
 		insert.add(new VarInsnNode(ALOAD, 0)); //this.
-		insert.add(blockInstance.getInsnNode(GETFIELD)); //blockInstance
-		insert.add(new VarInsnNode(ILOAD, 4)); //x,
-		insert.add(new VarInsnNode(ILOAD, 5)); //y,
-		insert.add(new VarInsnNode(ILOAD, 6)); //z,
-		insert.add(new VarInsnNode(ILOAD, 7)); //side,
-		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "canPlaceBlockAt",
-				"(Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/block/Block;IIII)Z"));
+		insert.add(block.getInsnNode(GETFIELD)); //blockInstance
+		insert.add(new VarInsnNode(ALOAD, 4)); //pos,
+		insert.add(new VarInsnNode(ALOAD, 5)); //side,
+		insert.add(new MethodInsnNode(
+				INVOKEVIRTUAL,
+				"net/malisis/core/util/chunkcollision/ChunkCollision",
+				"canPlaceBlockAt",
+				"(Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/block/Block;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z"));
 		insert.add(new JumpInsnNode(IFNE, label));
 		insert.add(new InsnNode(ICONST_0));
 		insert.add(new InsnNode(IRETURN));
@@ -239,8 +239,6 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		return ah;
 	}
 
-	EntityPlayerMP playerEntity;
-
 	private AsmHook blockReachDistanceHook()
 	{
 		McpMethodMapping processPlayerDigging = new McpMethodMapping("processPlayerDigging", "func_147345_a",
@@ -250,48 +248,50 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 				"Lnet/minecraft/entity/player/EntityPlayerMP;");
 		McpFieldMapping worldObj = new McpFieldMapping("worldObj", "field_70170_p", "net/minecraft/entity/player/EntityPlayerMP",
 				"Lnet/minecraft/world/World;");
-		McpMethodMapping getBlock = new McpMethodMapping("getBlock", "func_147439_a", "net/minecraft/world/World",
-				"(III)Lnet/minecraft/block/Block;");
+		McpMethodMapping getBlockState = new McpMethodMapping("getBlockState", "func_180495_p", "net/minecraft/world/World",
+				"(Lnet/minecraft/util/BlockPos;)Lnet/minecraft/block/state/IBlockState;");
+		McpMethodMapping getBlock = new McpMethodMapping("getBlock", "func_177230_c", "net/minecraft/block/state/IBlockState",
+				"()Lnet/minecraft/block/Block;");
 
 		AsmHook ah = new AsmHook(processPlayerDigging);
 
+		//double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 		//		DMUL
 		//		DADD
-		//		DSTORE 13
+		//		DSTORE 10
 		InsnList match = new InsnList();
 		match.add(new InsnNode(DMUL));
 		match.add(new InsnNode(DADD));
-		match.add(new VarInsnNode(DSTORE, 13));
+		match.add(new VarInsnNode(DSTORE, 10));
 
-		//		if (this.playerEntity.worldObj.getBlock(i, j, k) instanceof IChunkCollidable)
+		//		if (this.playerEntity.worldObj.getBlockState(pos).getBlock() instanceof IChunkCollidable)
 		//			d3 = 0;
+		//	    LINENUMBER 273 L22
 		//	    ALOAD 0
-		//	    GETFIELD net/minecraft/network/NetHandlerPlayServer.playerEntity : Lnet/minecraft/entity/player/EntityPlayerMP;
+		//	    GETFIELD net/malisis/core/util/chunkcollision/ChunkCollisionTransformer.playerEntity : Lnet/minecraft/entity/player/EntityPlayerMP;
 		//	    GETFIELD net/minecraft/entity/player/EntityPlayerMP.worldObj : Lnet/minecraft/world/World;
-		//	    ILOAD 2
-		//	    ILOAD 3
-		//	    ILOAD 4
-		//	    INVOKEVIRTUAL net/minecraft/world/World.getBlock (III)Lnet/minecraft/block/Block;
+		//	    ALOAD 3
+		//	    INVOKEVIRTUAL net/minecraft/world/World.getBlockState (Lnet/minecraft/util/BlockPos;)Lnet/minecraft/block/state/IBlockState;
+		//	    INVOKEINTERFACE net/minecraft/block/state/IBlockState.getBlock ()Lnet/minecraft/block/Block;
 		//	    INSTANCEOF net/malisis/core/util/chunkcollision/IChunkCollidable
-		//	    IFEQ L8
-		//	   L9
-		//	    LINENUMBER 252 L9
+		//	    IFEQ L23
+		//	   L24
+		//	    LINENUMBER 274 L24
 		//	    DCONST_0
-		//	    DSTORE 5
-		//	   L8
+		//	    DSTORE 10
+		//	   L23
 		InsnList insert = new InsnList();
 		LabelNode label = new LabelNode();
 		insert.add(new VarInsnNode(ALOAD, 0)); //this.
 		insert.add(playerEntity.getInsnNode(GETFIELD)); //playerEntity.
 		insert.add(worldObj.getInsnNode(GETFIELD)); //worldObj.
-		insert.add(new VarInsnNode(ILOAD, 4)); //i,
-		insert.add(new VarInsnNode(ILOAD, 5)); //j,
-		insert.add(new VarInsnNode(ILOAD, 6)); //k,
-		insert.add(getBlock.getInsnNode(INVOKEVIRTUAL));//getBlock()
+		insert.add(new VarInsnNode(ALOAD, 3)); //pos
+		insert.add(getBlockState.getInsnNode(INVOKEVIRTUAL));//getBlockState()
+		insert.add(getBlock.getInsnNode(INVOKEINTERFACE));//getBlock()
 		insert.add(new TypeInsnNode(INSTANCEOF, "net/malisis/core/util/chunkcollision/IChunkCollidable")); //instanceof IChunkCollidable
 		insert.add(new JumpInsnNode(IFEQ, label));
 		insert.add(new InsnNode(DCONST_0));
-		insert.add(new VarInsnNode(DSTORE, 13));
+		insert.add(new VarInsnNode(DSTORE, 10));
 		insert.add(label);
 
 		ah.jumpAfter(match).insert(insert);

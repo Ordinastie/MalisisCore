@@ -24,19 +24,43 @@
 
 package net.malisis.core.util.chunkcollision;
 
+import net.malisis.core.block.BoundingBoxType;
+import net.malisis.core.block.IBlockDirectional;
 import net.malisis.core.block.IBoundingBox;
+import net.malisis.core.util.AABBUtils;
+import net.malisis.core.util.EntityUtils;
 import net.malisis.core.util.chunkblock.IChunkBlock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 
 /**
- * @author Ordinastie
+ * This interface defines a block that will have wider bounding boxes that extend beyond they 1x1x1 block space.
  *
+ * @author Ordinastie
  */
 public interface IChunkCollidable extends IChunkBlock, IBoundingBox
 {
-	public AxisAlignedBB[] getPlacedBoundingBox(IBlockAccess world, BlockPos pos, int side, EntityPlayer entity, ItemStack itemStack);
+
+	/**
+	 * Gets the bounding box used to determine if the block has enough room to be placed at the position.
+	 *
+	 * @param world the world
+	 * @param pos the pos
+	 * @param side the side
+	 * @param entity the entity
+	 * @param itemStack the item stack
+	 * @return the placed bounding box
+	 */
+	public default AxisAlignedBB[] getPlacedBoundingBox(IBlockAccess world, BlockPos pos, EnumFacing side, EntityPlayer entity, ItemStack itemStack)
+	{
+		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.PLACEDBOUNDINGBOX);
+		if (this instanceof IBlockDirectional)
+			aabbs = AABBUtils.rotate(aabbs, EntityUtils.getEntityFacing(entity).getOpposite());
+
+		return aabbs;
+	}
 }
