@@ -892,6 +892,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 */
 	protected MalisisIcon getIcon(Face face, RenderParameters params)
 	{
+		if (params.icon.get() != null)
+			return params.icon.get();
+
 		IIconProvider ip = getIconProvider(params);
 		if (ip instanceof IItemIconProvider && itemStack != null)
 			return ((IItemIconProvider) ip).getIcon(itemStack);

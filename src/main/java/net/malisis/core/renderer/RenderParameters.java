@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.malisis.core.renderer.animation.transformation.ITransformable;
+import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
@@ -38,76 +39,66 @@ import net.minecraft.util.EnumFacing;
  */
 public class RenderParameters implements ITransformable.Color, ITransformable.Alpha, ITransformable.Brightness, Cloneable
 {
+	/** List of parameters inside this {@link RenderParameters}. */
 	protected List<Parameter> listParams;
-	/**
-	 * Defines whether to render all faces even if shoudSideBeRendered is false
-	 */
+
+	/** Defines whether to render all faces even if shoudSideBeRendered is false */
 	public Parameter<Boolean> renderAllFaces = new Parameter<>(false);
-	/**
-	 * Defines whether to use the block bounding box instead of renderBounds (Block Level)
-	 */
+
+	/** Defines whether to use the block bounding box instead of renderBounds (Block Level) */
 	public Parameter<Boolean> useBlockBounds = new Parameter<>(true);
-	/**
-	 * Defines the rendering bounds to limit the vertex inside (Block Level)
-	 */
+
+	/** Defines the rendering bounds to limit the vertex inside (Block Level) */
 	public Parameter<AxisAlignedBB> renderBounds = new Parameter<>(null);
-	/**
-	 * Define whether a custom texture for drawing. It disable default icon behavior. A ResourceLocation need to be bound.
-	 */
+
+	/** Define whether a custom texture for drawing. It disable default icon behavior. A ResourceLocation need to be bound. */
 	public Parameter<Boolean> useCustomTexture = new Parameter<>(false);
-	/**
-	 * Define whether to apply texture UV for the shape (Block level)
-	 */
+
+	/** Define whether to apply texture UV for the shape (Block level) */
 	public Parameter<Boolean> applyTexture = new Parameter<>(true);
-	/**
-	 * Defines an {@link IIconProvider} to be used to get the icon for the faces. (Block Level)
-	 */
+
+	/** Defines an {@link IIconProvider} to be used to get the icon for the faces. (Block Level) */
 	public Parameter<IIconProvider> iconProvider = new Parameter<>(null);
-	/**
-	 * Defines whether to use block.getIcon(world, x, y, z, side) instead of block.getIcon(side, metadata) to get the IIcon
-	 */
+
+	/** Defines a {@link MalisisIcon} to be used for the rendering. */
+	public Parameter<MalisisIcon> icon = new Parameter<>(null);
+
+	/** Defines whether to use block.getIcon(world, x, y, z, side) instead of block.getIcon(side, metadata) to get the IIcon */
 	public Parameter<Boolean> useWorldSensitiveIcon = new Parameter<Boolean>(true);
-	/**
-	 * Defines whether to use a texture (will call addVertexWithUV instead of addVertex)
-	 */
+
+	/** Defines whether to use a texture (will call addVertexWithUV instead of addVertex) */
 	public Parameter<Boolean> useTexture = new Parameter<>(true);
-	/**
-	 * Defines whether to calculate interpolated textures coordinates depending on block bounds (Block Level)
-	 */
+
+	/** Defines whether to calculate interpolated textures coordinates depending on block bounds (Block Level) */
 	public Parameter<Boolean> interpolateUV = new Parameter<>(true);
-	/**
-	 * Defines whether to calculate ambient occlusion color or not (Block Level)
-	 */
+
+	/** Defines whether to calculate ambient occlusion color or not (Block Level) */
 	public Parameter<Boolean> calculateAOColor = new Parameter<>(true);
-	/**
-	 * Defines whether to calculate brightness or not (Block Level)
-	 */
+
+	/** Defines whether to calculate brightness or not (Block Level) */
 	public Parameter<Boolean> calculateBrightness = new Parameter<>(true);
-	/**
-	 * Define whether to override each vertex color. If false, FaceParams.colorMultiplier will be used instead (Block Level)
-	 */
+
+	/** Define whether to override each vertex color. If false, FaceParams.colorMultiplier will be used instead (Block Level) */
 	public Parameter<Boolean> usePerVertexColor = new Parameter<>(false);
-	/**
-	 * Define whether to override each vertex alpha. If false, FaceParams.alpha will be used instead (Block Level)
-	 */
+
+	/** Define whether to override each vertex alpha. If false, FaceParams.alpha will be used instead (Block Level) */
 	public Parameter<Boolean> usePerVertexAlpha = new Parameter<>(false);
-	/**
-	 * Define whether to override each vertex brightness. If false, FaceParams.brightness will be used instead (Block Level)
-	 */
+
+	/** Define whether to override each vertex brightness. If false, FaceParams.brightness will be used instead (Block Level) */
 	public Parameter<Boolean> usePerVertexBrightness = new Parameter<>(false);
-	/**
-	 * Defines whether to use the block mixBlockBrightness (if false, RenderParameters.brightness will be used) (Block Level)
-	 */
+
+	/** Defines whether to use the block mixBlockBrightness (if false, RenderParameters.brightness will be used) (Block Level) */
 	public Parameter<Boolean> useEnvironmentBrightness = new Parameter<>(true);
-	/**
-	 * Defines whether to use the defined normals
-	 */
+
+	/** Defines whether to use the defined normals */
 	public Parameter<Boolean> useNormals = new Parameter<>(false);
+
 	/**
 	 * Defines the color to apply to the face (useful for grass and leaves) usePerVertexColor must be false (Block Level).<br>
 	 * Overrides the Block.colorMultiplier() and Block.getRenderColor()
 	 */
 	public Parameter<Integer> colorMultiplier = new Parameter<>(null);
+
 	/**
 	 * Defines the color factor for the face (Block Level). Used for shading the faces depending on their orientation : <br>
 	 * - NORTH/SOUTH : 0.8<br>
@@ -116,40 +107,50 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	 * - BOTTOM : 0.5<br>
 	 */
 	public Parameter<Float> colorFactor = new Parameter<>(1.0F);
-	/**
-	 * Defines brightness of the face (only used if useBlockBrightness = false) (Block Level)
-	 */
+
+	/** Defines brightness of the face (only used if useBlockBrightness = false) (Block Level) */
 	public Parameter<Integer> brightness = new Parameter<>(15728640); // 983055 - 15728640
-	/**
-	 * Defines alpha transparency for the face (GL11.GL_BLEND needs to be set before). usePerVertexAlpha must be false (Block Level)
-	 */
+
+	/** Defines alpha transparency for the face (GL11.GL_BLEND needs to be set before). usePerVertexAlpha must be false (Block Level) */
 	public Parameter<Integer> alpha = new Parameter<>(255);
-	/**
-	 * Defines the general direction of a face. Used for normals, and offset for AO and brightness calculation (Face Level)
-	 */
+
+	/** Defines the general direction of a face. Used for normals, and offset for AO and brightness calculation (Face Level) */
 	public Parameter<EnumFacing> direction = new Parameter<>(null);
-	/**
-	 * Defines which direction will be used to get the block icon. If ForgeDirection.UNKNOWN, no texture will be used (Face Level)
-	 */
+
+	/** Defines which direction will be used to get the block icon. If ForgeDirection.UNKNOWN, no texture will be used (Face Level) */
 	public Parameter<EnumFacing> textureSide = new Parameter<>(null);
-	/**
-	 * Defines which block to take into account for AO calculation (Face Level)
-	 */
+
+	/** Defines which block to take into account for AO calculation (Face Level) */
 	public Parameter<int[][][]> aoMatrix = new Parameter<>(null);
-	/**
-	 * Defines whether to flip the texture on the U coordinates (Face Level)
-	 */
+
+	/** Defines whether to flip the texture on the U coordinates (Face Level) */
 	public Parameter<Boolean> flipU = new Parameter<>(false);
-	/**
-	 * Defines whether to flip the texture on the U coordinates (Face Level)
-	 */
+
+	/** Defines whether to flip the texture on the U coordinates (Face Level) */
 	public Parameter<Boolean> flipV = new Parameter<>(false);
 
+	/**
+	 * Instantiates a new {@link RenderParameters}.
+	 */
 	public RenderParameters()
 	{
 		buildList();
 	}
 
+	/**
+	 * Instantiates a new {@link RenderParameters} with the {@link Parameter} values inside <code>params</code>.
+	 *
+	 * @param params the params
+	 */
+	public RenderParameters(RenderParameters params)
+	{
+		this();
+		merge(params);
+	}
+
+	/**
+	 * Builds the list of {@link Parameter} in this {@link RenderParameters}.
+	 */
 	protected void buildList()
 	{
 		listParams = new LinkedList<>();
@@ -180,12 +181,12 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 		listParams.add(flipV);
 	}
 
-	public RenderParameters(RenderParameters params)
-	{
-		this();
-		merge(params);
-	}
-
+	/**
+	 * Gets the {@link Parameter} at <code>index</code>.
+	 *
+	 * @param index the index
+	 * @return the parameter
+	 */
 	private Parameter getParameter(int index)
 	{
 		if (index < 0 || index >= listParams.size())
@@ -193,12 +194,20 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 		return listParams.get(index);
 	}
 
+	/**
+	 * Resets all {@link Parameter parameters} to their default value.
+	 */
 	public void reset()
 	{
 		for (Parameter param : listParams)
 			param.reset();
 	}
 
+	/**
+	 * Merges all the values of <code>params</code> inside this {@link RenderParameters} {@link Parameter parameters}.
+	 *
+	 * @param params the params
+	 */
 	public void merge(RenderParameters params)
 	{
 		if (params == null)
@@ -226,6 +235,13 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 		this.brightness.set(brightness);
 	}
 
+	/**
+	 * Merges <code>rp1</code> and <code>rp2</code> into a new {@link RenderParameters}.
+	 *
+	 * @param rp1 the rp1
+	 * @param rp2 the rp2
+	 * @return the render parameters
+	 */
 	public static RenderParameters merge(RenderParameters rp1, RenderParameters rp2)
 	{
 		if (rp1 == null)
