@@ -43,6 +43,9 @@ public class EnumFacingUtils
 	 */
 	public static int getRotationCount(EnumFacing facing)
 	{
+		if (facing == null)
+			return 0;
+
 		switch (facing)
 		{
 			case EAST:
