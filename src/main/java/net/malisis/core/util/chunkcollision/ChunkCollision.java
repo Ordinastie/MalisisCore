@@ -268,7 +268,8 @@ public class ChunkCollision
 
 			if (state.getBlock() instanceof IChunkCollidable)
 			{
-				AxisAlignedBB[] aabbs = ((IChunkCollidable) state.getBlock()).getCollisionBoundingBoxes(world, state.getPos());
+				AxisAlignedBB[] aabbs = ((IChunkCollidable) state.getBlock()).getCollisionBoundingBoxes(world, state.getPos(),
+						state.getBlockState());
 				for (AxisAlignedBB aabb : aabbs)
 				{
 					if (mask != null && aabb != null)

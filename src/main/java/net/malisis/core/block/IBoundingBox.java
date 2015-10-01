@@ -61,11 +61,11 @@ public interface IBoundingBox
 		return new AxisAlignedBB[] { getBoundingBox(world, pos, type) };
 	}
 
-	public default AxisAlignedBB[] getCollisionBoundingBoxes(World world, BlockPos pos)
+	public default AxisAlignedBB[] getCollisionBoundingBoxes(World world, BlockPos pos, IBlockState state)
 	{
 		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.COLLISION);
 		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(world.getBlockState(pos)));
+			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(state));
 		return aabbs;
 	}
 
