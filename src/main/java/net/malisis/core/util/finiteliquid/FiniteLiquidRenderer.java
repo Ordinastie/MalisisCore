@@ -1,66 +1,90 @@
 package net.malisis.core.util.finiteliquid;
 
 import net.malisis.core.renderer.MalisisRenderer;
+import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.element.MergedVertex;
+import net.malisis.core.renderer.element.Shape;
+import net.malisis.core.renderer.element.shape.Cube;
+import net.malisis.core.util.MBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
 public class FiniteLiquidRenderer extends MalisisRenderer
 {
-	/*	@Override
-		protected void initialize()
+	private Shape shape;
+	private RenderParameters rp;
+	private FiniteLiquid block;
+
+	@Override
+	protected void initialize()
+	{
+		shape = new Cube();
+		shape.enableMergedVertexes();
+
+		rp = new RenderParameters();
+		rp.calculateAOColor.set(false);
+	}
+
+	@Override
+	public void render()
+	{
+		rp.calculateAOColor.set(false);
+		block = (FiniteLiquid) super.block;
+		shape.resetState();
+		if (world == null)
 		{
-			shape = new Cube();
-			shape.enableMergedVertexes();
+			drawShape(shape);
+			return;
 		}
 
-		@Override
-		public void render()
+		initialize();
+		shape.resetState();
+		rp.renderAllFaces.set(false);
+
+		//draw full cube if same liquid is above
+		if (hasLiquidAbove(pos))
 		{
-			if (world == null)
-			{
-				drawShape(new Cube());
-				return;
-			}
+			drawShape(shape);
+			return;
+		}
 
-			initialize();
-			shape.resetState();
-			rp.renderAllFaces.set(false);
+		for (MergedVertex v : shape.getMergedVertexes(shape.getFace("top")))
+		{
+			//cheat: we get the same coords that we use to calculate AO
+			int[][] aom = v.getBase().getAoMatrix(EnumFacing.UP);
+			boolean full = false;
+			float height = block.getAmount(new MBlockState(blockState)) / 16F;
+			int count = 1;
 
-			if (world.getBlock(x, y + 1, z) == block)
+			for (int i = 0; i < aom.length; i++)
 			{
-				drawShape(new Cube());
-				return;
-			}
+				int oX = aom[i][0];
+				int oY = aom[i][1] - 1;
+				int oZ = aom[i][2];
 
-			for (MergedVertex v : shape.getMergedVertexes(shape.getFace("top")))
-			{
-				int[][] aom = v.getBase().getAoMatrix(ForgeDirection.UP);
-				boolean air = false;
-				float height = (float) blockMetadata / 16;
-				int count = 1;
-				for (int i = 0; i < aom.length; i++)
+				MBlockState state = new MBlockState(world, pos.add(oX, oY, oZ));
+				if (state.getBlock() == block)
 				{
-					//				if (i == 1)
-					//					continue;
-					int oX = aom[i][0];
-					int oY = aom[i][1] - 1;
-					int oZ = aom[i][2];
-					MBlockState state = new MBlockState(world, x + oX, y + oY, z + oZ);
-					if (state.getBlock() == Blocks.air && i != 1)
+					if (hasLiquidAbove(state.getPos()))
 					{
-						//					air = true;
-						//					count++;
+						full = true;
+						break;
 					}
-					else if (state.getBlock() == block)
-					{
-						height += (float) state.getMetadata() / 16;
-						count++;
-					}
+
+					height += block.getAmount(state) / 16F;
+					count++;
 				}
-
-				v.setY(air ? 0 : height / count);
-
 			}
 
-			drawShape(shape, rp);
+			v.setY(full ? 1 : height / count);
+
 		}
-		*/
+
+		drawShape(shape, rp);
+	}
+
+	private boolean hasLiquidAbove(BlockPos pos)
+	{
+		return world.getBlockState(pos.up()).getBlock() == block;
+	}
 }
