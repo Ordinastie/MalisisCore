@@ -261,7 +261,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 
 	//#region IBlockRenderer
 	@Override
-	public boolean renderBlock(WorldRenderer wr, IBlockAccess world, BlockPos pos, IBlockState state)
+	public synchronized boolean renderBlock(WorldRenderer wr, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		this.wr = wr;
 		set(world, state.getBlock(), pos, state);
@@ -276,7 +276,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 
 	//#region IItemRenderer
 	@Override
-	public boolean renderItem(ItemStack itemStack, float partialTick)
+	public synchronized boolean renderItem(ItemStack itemStack, float partialTick)
 	{
 		this.wr = Tessellator.getInstance().getWorldRenderer();
 		set(itemStack);
@@ -312,7 +312,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 * @param partialTick the partial tick
 	 */
 	@Override
-	public void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTick, int destroyStage)
+	public synchronized void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTick, int destroyStage)
 	{
 		this.wr = Tessellator.getInstance().getWorldRenderer();
 		set(te, partialTick);
