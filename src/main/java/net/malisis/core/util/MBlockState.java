@@ -66,6 +66,7 @@ public class MBlockState
 	{
 		this.pos = pos;
 		this.block = block;
+		this.state = block.getDefaultState();
 	}
 
 	public MBlockState(IBlockState state)
