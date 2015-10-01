@@ -216,6 +216,11 @@ public class AABBUtils
 		return offset(new BlockPos(x, y, z), aabbs);
 	}
 
+	public static AxisAlignedBB offset(BlockPos pos, AxisAlignedBB aabb)
+	{
+		return aabb.offset(pos.getX(), pos.getY(), pos.getZ());
+	}
+
 	public static AxisAlignedBB[] offset(BlockPos pos, AxisAlignedBB... aabbs)
 	{
 		if (aabbs == null)
