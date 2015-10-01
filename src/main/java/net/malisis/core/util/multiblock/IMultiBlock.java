@@ -30,6 +30,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 /**
@@ -38,7 +39,7 @@ import net.minecraft.world.World;
  */
 public interface IMultiBlock extends IBlockDirectional
 {
-	public MultiBlock getMultiBlock(World world, BlockPos pos, IBlockState state);
+	public MultiBlock getMultiBlock(IBlockAccess world, BlockPos pos, IBlockState state);
 
 	public default void onBlockPlacedBy(Block block, World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
 	{
