@@ -77,6 +77,7 @@ public class MBlockState
 	public MBlockState(Block block)
 	{
 		this.block = block;
+		this.state = block.getDefaultState();
 	}
 
 	public MBlockState(IBlockAccess world, BlockPos pos)
@@ -169,7 +170,9 @@ public class MBlockState
 
 	public boolean matchesWorld(IBlockAccess world)
 	{
-		return new MBlockState(world, pos).equals(this);
+		MBlockState mstate = new MBlockState(world, pos);
+		return mstate.getBlock() == getBlock()
+				&& getBlock().getMetaFromState(mstate.getBlockState()) == getBlock().getMetaFromState(getBlockState());
 	}
 
 	public static Iterable<MBlockState> getAllInBox(IBlockAccess world, BlockPos from, BlockPos to, Block block, boolean skipAir)
