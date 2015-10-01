@@ -44,7 +44,7 @@ import net.minecraft.world.World;
  * @author Ordinastie
  *
  */
-public abstract class MultiBlock implements Iterable<MBlockState>//, IBlockAccess
+public abstract class MultiBlock implements Iterable<MBlockState>
 {
 	public static String ORIGIN_BLOCK_DATA = MalisisCore.modid + ":multiBlockOrigin";
 
@@ -66,10 +66,15 @@ public abstract class MultiBlock implements Iterable<MBlockState>//, IBlockAcces
 		this.property = property;
 	}
 
-	private void setRotation(IBlockState state)
+	public void setRotation(IBlockState state)
 	{
 		EnumFacing direction = (EnumFacing) state.getValue(property);
 		rotation = EnumFacingUtils.getRotationCount(direction);
+	}
+
+	public int getRotation()
+	{
+		return rotation;
 	}
 
 	public void setBulkProcess(boolean bulkPlace, boolean bulkBreak)
@@ -182,10 +187,11 @@ public abstract class MultiBlock implements Iterable<MBlockState>//, IBlockAcces
 	public boolean isComplete(World world, BlockPos pos, MBlockState newState)
 	{
 		setRotation(world.getBlockState(pos));
-		for (MBlockState state : this)
+		MultiBlockAccess mba = new MultiBlockAccess(this, world);
+		for (MBlockState mstate : this)
 		{
-			state = state.offset(pos);
-			if (!state.matchesWorld(world) && (newState == null || !state.equals(newState)))
+			mstate = new MBlockState(mba, mstate.getPos()).rotate(rotation).offset(pos);
+			if (!mstate.matchesWorld(world) && (newState == null || !mstate.equals(newState)))
 				return false;
 		}
 
@@ -200,64 +206,6 @@ public abstract class MultiBlock implements Iterable<MBlockState>//, IBlockAcces
 
 	protected abstract void buildStates();
 
-	/*
-	@Override
-	public IBlockState getBlockState(BlockPos pos)
-	{
-		MBlockState state = getState(pos);
-		if (state == null)
-			return Blocks.air.getDefaultState();
-		return state.getBlockState();
-	}
-
-	@Override
-	public TileEntity getTileEntity(BlockPos pos)
-	{
-		return null;
-	}
-
-	@Override
-	public int getCombinedLight(BlockPos pos, int lightValue)
-	{
-		return Vertex.BRIGHTNESS_MAX;
-	}
-
-	@Override
-	public boolean isAirBlock(BlockPos pos)
-	{
-		return getState(pos).getBlock() == Blocks.air;
-	}
-
-	@Override
-	public BiomeGenBase getBiomeGenForCoords(BlockPos pos)
-	{
-		return null;
-	}
-
-	@Override
-	public boolean extendedLevelsInChunkCache()
-	{
-		return false;
-	}
-
-	@Override
-	public boolean isSideSolid(BlockPos pos, EnumFacing side, boolean _default)
-	{
-		return getBlockState(pos).getBlock().isSideSolid(this, pos, side);
-	}
-
-	@Override
-	public int getStrongPower(BlockPos pos, EnumFacing direction)
-	{
-		return 0;
-	}
-
-	@Override
-	public WorldType getWorldType()
-	{
-		return null;
-	}
-	*/
 	public static void regsiterBlockData()
 	{
 		BlockDataHandler.registerBlockData(ORIGIN_BLOCK_DATA, BlockPosUtils::fromBytes, BlockPosUtils::toBytes);
