@@ -505,7 +505,7 @@ public abstract class MalisisGui extends GuiScreen
 			if (hoveredComponent != null && !keyListeners.contains(hoveredComponent) && hoveredComponent.onKeyTyped(keyChar, keyCode))
 				return;
 
-			if (isGuiCloseKey(keyCode) && !isOverlay)
+			if (isGuiCloseKey(keyCode) && mc.currentScreen == this)
 				close();
 
 			if (!MalisisCore.isObfEnv && isCtrlKeyDown() && (currentGui() != null || isOverlay))
@@ -707,7 +707,7 @@ public abstract class MalisisGui extends GuiScreen
 	@SubscribeEvent
 	public void keyEvent(InputEvent.KeyInputEvent event)
 	{
-		if (!isOverlay)
+		if (!isOverlay || mc.currentScreen == this)
 			return;
 
 		if (Keyboard.getEventKeyState())
