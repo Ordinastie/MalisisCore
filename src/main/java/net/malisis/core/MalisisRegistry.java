@@ -37,10 +37,10 @@ import net.malisis.core.renderer.IItemRenderer;
 import net.malisis.core.renderer.IItemRenderer.IItemRenderInfo;
 import net.malisis.core.renderer.IRenderWorldLast;
 import net.malisis.core.renderer.MalisisRenderer;
+import net.malisis.core.renderer.icon.IIconProvider;
+import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
-import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
-import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -117,11 +117,13 @@ public class MalisisRegistry
 	{
 		Block block = state.getBlock();
 		MalisisIcon icon = null;
-		if (block instanceof IBlockMetaIconProvider)
+		if (block instanceof IIconProvider)
 		{
-			IBlockIconProvider provider = ((IBlockMetaIconProvider) block).getBlockIconProvider();
-			if (provider != null)
-				icon = provider.getParticleIcon(state);
+			IIconProvider provider = ((IMetaIconProvider) block).getIconProvider();
+			if (provider instanceof IBlockIconProvider)
+				icon = ((IBlockIconProvider) provider).getParticleIcon(state);
+			else if (provider != null)
+				icon = provider.getIcon();
 		}
 
 		return icon != null ? icon : MalisisIcon.missing;

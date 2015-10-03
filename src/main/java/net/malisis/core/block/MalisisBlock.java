@@ -29,10 +29,10 @@ import java.util.List;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.MalisisRegistry;
 import net.malisis.core.renderer.DefaultRenderer;
+import net.malisis.core.renderer.icon.IIconProvider;
+import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.VanillaIcon;
-import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
-import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.util.RaytraceBlock;
 import net.malisis.core.util.multiblock.IMultiBlock;
 import net.minecraft.block.Block;
@@ -59,11 +59,11 @@ import org.apache.commons.lang3.StringUtils;
  * @author Ordinastie
  *
  */
-public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconProvider
+public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvider
 {
 	protected String name;
 	protected AxisAlignedBB boundingBox;
-	protected IBlockIconProvider iconProvider;
+	protected IIconProvider iconProvider;
 
 	protected MalisisBlock(Material material)
 	{
@@ -96,13 +96,13 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 			return;
 
 		if (MalisisCore.isClient())
-			setBlockIconProvider(new DefaultIconProvider(textureName));
+			setIconProvider(new DefaultIconProvider(textureName));
 	}
 
 	public void setTexture(Item item)
 	{
 		if (MalisisCore.isClient())
-			setBlockIconProvider(new DefaultIconProvider(new VanillaIcon(item)));
+			setIconProvider(new DefaultIconProvider(new VanillaIcon(item)));
 	}
 
 	public void setTexture(Block block)
@@ -113,16 +113,16 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 	public void setTexture(IBlockState blockState)
 	{
 		if (MalisisCore.isClient())
-			setBlockIconProvider(new DefaultIconProvider(new VanillaIcon(blockState)));
+			setIconProvider(new DefaultIconProvider(new VanillaIcon(blockState)));
 	}
 
-	public void setBlockIconProvider(IBlockIconProvider iconProvider)
+	public void setIconProvider(IIconProvider iconProvider)
 	{
 		this.iconProvider = iconProvider;
 	}
 
 	@Override
-	public IBlockIconProvider getBlockIconProvider()
+	public IIconProvider getIconProvider()
 	{
 		return iconProvider;
 	}
@@ -150,6 +150,11 @@ public class MalisisBlock extends Block implements IBoundingBox, IBlockMetaIconP
 			return ((IBlockDirectional) this).createBlockState(this);
 
 		return super.createBlockState();
+	}
+
+	public IBlockState getStateFromItemStack(ItemStack itemStack)
+	{
+		return getStateFromMeta(itemStack.getMetadata());
 	}
 
 	@Override

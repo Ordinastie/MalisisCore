@@ -37,11 +37,10 @@ import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.shape.Cube;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.icon.IIconProvider;
+import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
-import net.malisis.core.renderer.icon.metaprovider.IBlockMetaIconProvider;
-import net.malisis.core.renderer.icon.metaprovider.IItemMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
-import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.malisis.core.renderer.icon.provider.IItemIconProvider;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.malisis.core.util.BlockPosUtils;
@@ -895,20 +894,19 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		if (params.icon.get() != null)
 			return params.icon.get();
 
-		IIconProvider ip = getIconProvider(params);
-		if (ip instanceof IItemIconProvider && itemStack != null)
-			return ((IItemIconProvider) ip).getIcon(itemStack);
+		IIconProvider iconProvider = getIconProvider(params);
+		if (iconProvider instanceof IItemIconProvider && itemStack != null)
+			return ((IItemIconProvider) iconProvider).getIcon(itemStack);
 
-		if (ip instanceof IBlockIconProvider && block != null)
+		if (iconProvider instanceof IBlockIconProvider && block != null)
 		{
-			IBlockIconProvider iblockp = (IBlockIconProvider) ip;
+			IBlockIconProvider iblockp = (IBlockIconProvider) iconProvider;
 			if (renderType == RenderType.BLOCK || renderType == RenderType.TILE_ENTITY)
 				return iblockp.getIcon(world, pos, blockState, params.direction.get());
 			else if (renderType == RenderType.ITEM)
 				return iblockp.getIcon(itemStack, params.direction.get());
 		}
 
-		IIconProvider iconProvider = params.iconProvider.get();
 		return iconProvider != null ? iconProvider.getIcon() : null;
 	}
 
@@ -917,16 +915,16 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 *
 	 * @return the icon provider
 	 */
-	private IIconProvider getIconProvider(RenderParameters params)
+	protected IIconProvider getIconProvider(RenderParameters params)
 	{
 		if (params.iconProvider.get() != null)
 			return params.iconProvider.get();
 
-		if (item instanceof IItemMetaIconProvider && ((IItemMetaIconProvider) item).getItemIconProvider() != null)
-			return ((IItemMetaIconProvider) item).getItemIconProvider();
+		if (item instanceof IMetaIconProvider && ((IMetaIconProvider) item).getIconProvider() != null)
+			return ((IMetaIconProvider) item).getIconProvider();
 
-		if (block instanceof IBlockMetaIconProvider && ((IBlockMetaIconProvider) block).getBlockIconProvider() != null)
-			return ((IBlockMetaIconProvider) block).getBlockIconProvider();
+		if (block instanceof IMetaIconProvider && ((IMetaIconProvider) block).getIconProvider() != null)
+			return ((IMetaIconProvider) block).getIconProvider();
 
 		return null;
 	}

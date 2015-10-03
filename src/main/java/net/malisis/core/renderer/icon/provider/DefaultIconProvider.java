@@ -24,6 +24,7 @@
 
 package net.malisis.core.renderer.icon.provider;
 
+import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.client.renderer.texture.TextureMap;
 
@@ -31,26 +32,16 @@ import net.minecraft.client.renderer.texture.TextureMap;
  * @author Ordinastie
  *
  */
-public class DefaultIconProvider implements IBlockIconProvider, IItemIconProvider
+public class DefaultIconProvider implements IIconProvider
 {
 	protected MalisisIcon icon;
 
 	public DefaultIconProvider(String name)
 	{
-		setIcon(name);
-	}
-
-	public DefaultIconProvider(MalisisIcon icon)
-	{
-		setIcon(icon);
-	}
-
-	public void setIcon(String name)
-	{
 		icon = new MalisisIcon(name);
 	}
 
-	public void setIcon(MalisisIcon icon)
+	public DefaultIconProvider(MalisisIcon icon)
 	{
 		this.icon = icon;
 	}
@@ -58,7 +49,7 @@ public class DefaultIconProvider implements IBlockIconProvider, IItemIconProvide
 	@Override
 	public void registerIcons(TextureMap map)
 	{
-		icon.register(map);
+		icon = icon.register(map);
 	}
 
 	@Override

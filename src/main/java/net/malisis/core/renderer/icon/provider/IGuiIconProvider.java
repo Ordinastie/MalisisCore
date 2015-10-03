@@ -25,6 +25,7 @@
 package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.client.renderer.texture.TextureMap;
 

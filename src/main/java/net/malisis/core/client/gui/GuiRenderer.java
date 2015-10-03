@@ -37,6 +37,7 @@ import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.GuiIcon;
+import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
 import net.minecraft.client.Minecraft;
@@ -242,22 +243,32 @@ public class GuiRenderer extends MalisisRenderer
 	@Override
 	public void applyTexture(Shape shape, RenderParameters params)
 	{
-		IGuiIconProvider iconProvider;
-		if (params.iconProvider.get() instanceof IGuiIconProvider)
-			iconProvider = (IGuiIconProvider) params.iconProvider.get();
-		else
-			iconProvider = currentComponent.getGuiIconProvider();
-
+		IIconProvider iconProvider = getIconProvider(params);
 		if (iconProvider == null)
 			return;
 
+		MalisisIcon icon;
+		if (iconProvider instanceof IGuiIconProvider)
+			icon = ((IGuiIconProvider) iconProvider).getIcon(currentComponent);
+		else
+			icon = iconProvider.getIcon();
+		boolean isGuiIcon = icon instanceof GuiIcon;
+
 		Face[] faces = shape.getFaces();
 		for (int i = 0; i < faces.length; i++)
-		{
-			MalisisIcon icon = iconProvider.getIcon(currentComponent);
-			boolean isGuiIcon = icon instanceof GuiIcon;
 			faces[i].setTexture(isGuiIcon ? ((GuiIcon) icon).getIcon(i) : icon, false, false, false);
-		}
+	}
+
+	@Override
+	protected IIconProvider getIconProvider(RenderParameters params)
+	{
+		if (params.iconProvider.get() != null)
+			return params.iconProvider.get();
+
+		if (currentComponent.getIconProvider() != null)
+			return currentComponent.getIconProvider();
+
+		return null;
 	}
 
 	@Override

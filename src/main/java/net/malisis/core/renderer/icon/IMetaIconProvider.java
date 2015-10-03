@@ -22,15 +22,14 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.icon.metaprovider;
+package net.malisis.core.renderer.icon;
 
-import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 
 /**
  * @author Ordinastie
  *
  */
-public interface IBlockMetaIconProvider
+public interface IMetaIconProvider
 {
-	public IBlockIconProvider getBlockIconProvider();
+	public IIconProvider getIconProvider();
 }

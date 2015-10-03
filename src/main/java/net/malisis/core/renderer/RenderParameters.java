@@ -28,8 +28,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.malisis.core.renderer.animation.transformation.ITransformable;
+import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
-import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
 

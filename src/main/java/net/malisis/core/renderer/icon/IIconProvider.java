@@ -22,15 +22,32 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.icon.metaprovider;
+package net.malisis.core.renderer.icon;
 
-import net.malisis.core.renderer.icon.provider.IItemIconProvider;
+import net.malisis.core.MalisisRegistry;
+import net.minecraft.client.renderer.texture.TextureMap;
 
 /**
- * @author Ordinastie
+ * The IIconProvider interface allows to pass {@link MalisisIcon} to the rendering processes.<br>
+ * Implementers of this interface can be registered with {@link MalisisRegistry#registerIconProvider(IIconProvider)} so that icons used can
+ * be registered and stitched to the {@link TextureMap}.
  *
+ * @author Ordinastie
  */
-public interface IItemMetaIconProvider
+public interface IIconProvider
 {
-	public IItemIconProvider getItemIconProvider();
+
+	/**
+	 * Gets the {@link MalisisIcon} to use.
+	 *
+	 * @return the icon
+	 */
+	public MalisisIcon getIcon();
+
+	/**
+	 * Registers the icons to the {@link TextureMap}.
+	 *
+	 * @param map the map
+	 */
+	public void registerIcons(TextureMap map);
 }

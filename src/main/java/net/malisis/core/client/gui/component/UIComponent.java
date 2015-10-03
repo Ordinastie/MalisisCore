@@ -49,7 +49,8 @@ import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleState
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.icon.GuiIcon;
-import net.malisis.core.renderer.icon.metaprovider.IGuiMetaIconProvider;
+import net.malisis.core.renderer.icon.IIconProvider;
+import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.renderer.GlStateManager;
@@ -68,7 +69,7 @@ import com.google.common.eventbus.EventBus;
  * @param <T> the type of <code>UIComponent</code>
  */
 public abstract class UIComponent<T extends UIComponent> implements ITransformable.Position<T>, ITransformable.Size<T>,
-		ITransformable.Alpha, IKeyListener, IGuiMetaIconProvider
+		ITransformable.Alpha, IKeyListener, IMetaIconProvider
 {
 	/** The Exception handler for all Compoenent events. */
 	private static final ComponentExceptionHandler exceptionHandler = new ComponentExceptionHandler();
@@ -605,7 +606,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	// #end getters/setters
 
 	@Override
-	public IGuiIconProvider getGuiIconProvider()
+	public IIconProvider getIconProvider()
 	{
 		return iconProvider;
 	}

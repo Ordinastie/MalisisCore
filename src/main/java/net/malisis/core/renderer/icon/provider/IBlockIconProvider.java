@@ -24,6 +24,7 @@
 
 package net.malisis.core.renderer.icon.provider;
 
+import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -38,7 +39,6 @@ import net.minecraft.world.IBlockAccess;
  */
 public interface IBlockIconProvider extends IIconProvider
 {
-
 	/**
 	 * Gets the {@link MalisisIcon} to use.
 	 *

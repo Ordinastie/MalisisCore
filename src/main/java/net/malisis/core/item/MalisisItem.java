@@ -27,9 +27,9 @@ package net.malisis.core.item;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.MalisisRegistry;
 import net.malisis.core.renderer.DefaultRenderer;
-import net.malisis.core.renderer.icon.metaprovider.IItemMetaIconProvider;
+import net.malisis.core.renderer.icon.IIconProvider;
+import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
-import net.malisis.core.renderer.icon.provider.IItemIconProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -43,10 +43,10 @@ import org.apache.commons.lang3.StringUtils;
  * @author Ordinastie
  *
  */
-public class MalisisItem extends Item implements IItemMetaIconProvider
+public class MalisisItem extends Item implements IMetaIconProvider
 {
 	protected String name;
-	protected IItemIconProvider iconProvider;
+	protected IIconProvider iconProvider;
 
 	public Item setName(String name)
 	{
@@ -74,17 +74,17 @@ public class MalisisItem extends Item implements IItemMetaIconProvider
 			return;
 
 		if (MalisisCore.isClient())
-			setItemIconProvider(new DefaultIconProvider(textureName));
+			setIconProvider(new DefaultIconProvider(textureName));
 	}
 
 	@SideOnly(Side.CLIENT)
-	public void setItemIconProvider(IItemIconProvider iconProvider)
+	public void setIconProvider(IIconProvider iconProvider)
 	{
 		this.iconProvider = iconProvider;
 	}
 
 	@Override
-	public IItemIconProvider getItemIconProvider()
+	public IIconProvider getIconProvider()
 	{
 		return iconProvider;
 	}
