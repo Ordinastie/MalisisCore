@@ -76,7 +76,7 @@ public class EnumFacingUtils
 
 	public static EnumFacing getRealSide(IBlockState state, EnumFacing side)
 	{
-		return getRealSide(state, IBlockDirectional.DIRECTION, side);
+		return getRealSide(state, IBlockDirectional.HORIZONTAL, side);
 	}
 
 	public static EnumFacing getRealSide(IBlockState state, PropertyDirection property, EnumFacing side)

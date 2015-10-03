@@ -50,7 +50,7 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 
 	protected Map<BlockPos, MBlockState> states = new HashMap<>();
 	protected BlockPos offset = new BlockPos(0, 0, 0);
-	protected PropertyDirection property = IBlockDirectional.DIRECTION;
+	protected PropertyDirection property = IBlockDirectional.HORIZONTAL;
 	private int rotation;
 	private boolean bulkPlace;
 	private boolean bulkBreak;
