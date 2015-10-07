@@ -129,6 +129,11 @@ public class RaytraceBlock
 		this.dest = new Point(dest);
 	}
 
+	/**
+	 * Get the world used by this {@link RaytraceBlock}.
+	 *
+	 * @return the world
+	 */
 	public World world()
 	{
 		return world.get();

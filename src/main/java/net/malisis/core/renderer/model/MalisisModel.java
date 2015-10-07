@@ -36,7 +36,6 @@ import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.model.loader.ObjFileImporter;
 import net.minecraft.util.ResourceLocation;
 
-// TODO: Auto-generated Javadoc
 /**
  * This class is a holder for multiple shapes.<br>
  * If a {@link ResourceLocation} is provided, the model will be populated using the specified {@link IModelLoader}. If no loaded is giver,
@@ -180,7 +179,8 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
-	 * Renders a specific {@link Shape} of this {@link MalisisModel} using the specified {@link MalisisRenderer} and {@link RenderParameters}.
+	 * Renders a specific {@link Shape} of this {@link MalisisModel} using the specified {@link MalisisRenderer} and
+	 * {@link RenderParameters}.
 	 *
 	 * @param renderer the renderer
 	 * @param name the name of the shape
