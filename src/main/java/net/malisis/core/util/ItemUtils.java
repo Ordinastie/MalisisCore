@@ -24,6 +24,10 @@
 
 package net.malisis.core.util;
 
+import net.malisis.core.block.MalisisBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 /**
@@ -215,5 +219,23 @@ public class ItemUtils
 				&& (!stack2.getHasSubtypes() || stack2.getMetadata() == stack1.getMetadata())
 				&& ItemStack.areItemStackTagsEqual(stack2, stack1);
 
+	}
+
+	public static IBlockState getStateFromItemStack(ItemStack itemStack)
+	{
+		if (itemStack == null)
+			return null;
+
+		Block block = Block.getBlockFromItem(itemStack.getItem());
+		if (block instanceof MalisisBlock)
+			return ((MalisisBlock) block).getStateFromItemStack(itemStack);
+
+		return block.getStateFromMeta(itemStack.getItem().getMetadata(itemStack.getMetadata()));
+	}
+
+	public static ItemStack getItemStackFromState(IBlockState state)
+	{
+		Item item = Item.getItemFromBlock(state.getBlock());
+		return new ItemStack(item, 0, state.getBlock().getMetaFromState(state));
 	}
 }
