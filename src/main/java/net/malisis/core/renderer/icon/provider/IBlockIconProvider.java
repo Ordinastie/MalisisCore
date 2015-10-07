@@ -48,7 +48,7 @@ public interface IBlockIconProvider extends IIconProvider
 	 * @param facing the facing
 	 * @return the icon
 	 */
-	public default MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
+	public default MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
 	{
 		return getIcon();
 	}
@@ -61,7 +61,7 @@ public interface IBlockIconProvider extends IIconProvider
 	 * @param facing the facing
 	 * @return the icon
 	 */
-	public default MalisisIcon getIcon(ItemStack itemStack, EnumFacing facing)
+	public default MalisisIcon getIcon(ItemStack itemStack, EnumFacing side)
 	{
 		return getIcon();
 	}
