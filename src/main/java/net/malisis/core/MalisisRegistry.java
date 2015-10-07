@@ -117,7 +117,7 @@ public class MalisisRegistry
 	{
 		Block block = state.getBlock();
 		MalisisIcon icon = null;
-		if (block instanceof IIconProvider)
+		if (block instanceof IMetaIconProvider)
 		{
 			IIconProvider provider = ((IMetaIconProvider) block).getIconProvider();
 			if (provider instanceof IBlockIconProvider)
