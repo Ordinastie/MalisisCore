@@ -46,6 +46,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 /**
  * This class is the entry point for all the chunk collision related calculation.<br>
  * The static methods are called via ASM which then call the process for the corresponding server or client instance.
@@ -179,7 +181,7 @@ public class ChunkCollision
 		else
 			aabbs = AABBUtils.getCollisionBoundingBoxes(world, block, pos);
 
-		if (aabbs == null)
+		if (ArrayUtils.isEmpty(aabbs))
 			return true;
 
 		AABBUtils.offset(pos, aabbs);
