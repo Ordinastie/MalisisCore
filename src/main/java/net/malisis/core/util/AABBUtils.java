@@ -30,6 +30,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.world.World;
 
 /**
@@ -38,11 +39,6 @@ import net.minecraft.world.World;
  */
 public class AABBUtils
 {
-	public static enum Axis
-	{
-		X, Y, Z
-	};
-
 	private static int[] cos = { 1, 0, -1, 0 };
 	private static int[] sin = { 0, 1, 0, -1 };
 
