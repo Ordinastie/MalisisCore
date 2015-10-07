@@ -315,6 +315,8 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 		List<Chunk> chunks = new ArrayList<>();
 		for (AxisAlignedBB aabb : aabbs)
 		{
+			if (aabb == null)
+				continue;
 			for (int cx = (int) Math.floor(aabb.minX) >> 4; cx <= (int) Math.ceil(aabb.maxX) >> 4; cx++)
 			{
 				for (int cz = (int) Math.floor(aabb.minZ) >> 4; cz <= (int) Math.ceil(aabb.maxZ) >> 4; cz++)
