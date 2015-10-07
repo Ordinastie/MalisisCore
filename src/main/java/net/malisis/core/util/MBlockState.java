@@ -33,10 +33,12 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants.NBT;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -199,6 +201,39 @@ public class MBlockState
 	public String toString()
 	{
 		return "[" + pos + "] " + (block != null ? block.getUnlocalizedName().substring(5) + " (" + state + ")" : "");
+	}
+
+	public static IBlockState fromNBT(NBTTagCompound nbt)
+	{
+		return fromNBT(nbt, "");
+	}
+
+	public static IBlockState fromNBT(NBTTagCompound nbt, String suffix)
+	{
+		Block block;
+		if (nbt.hasKey("block1", NBT.TAG_INT))
+			block = Block.getBlockById(nbt.getInteger("block" + suffix));
+		else
+			block = Block.getBlockFromName(nbt.getString("block" + suffix));
+
+		int metadata = nbt.getInteger("metadata" + suffix);
+
+		return block.getStateFromMeta(metadata);
+	}
+
+	public static NBTTagCompound toNBT(NBTTagCompound nbt, IBlockState state)
+	{
+		return toNBT(nbt, state, "");
+	}
+
+	public static NBTTagCompound toNBT(NBTTagCompound nbt, IBlockState state, String suffix)
+	{
+		if (state == null)
+			return nbt;
+
+		nbt.setString("block" + suffix, (String) Block.blockRegistry.getNameForObject(state.getBlock()));
+		nbt.setInteger("metadata" + suffix, state.getBlock().getMetaFromState(state));
+		return nbt;
 	}
 
 	public static class BlockStateFunction implements Function<BlockPos, MBlockState>
