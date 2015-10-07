@@ -39,9 +39,11 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.RegistryNamespaced;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import net.minecraftforge.fml.common.registry.GameData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -107,12 +109,13 @@ public class ReplacementTool
 	 * For blocks, changes the instance inside the corresponding ItemBlock if any.
 	 *
 	 * @param id the id
-	 * @param name the name
-	 * @param srgFieldName the srg field name
+	 * @param registryName the registry name
+	 * @param fieldName the field name in {@link Blocks} or {@link Items} class.
+	 * @param srgFieldName the srg field name in {@link Blocks} or {@link Items} class.
 	 * @param replacement the replacement
 	 * @param vanilla the vanilla
 	 */
-	private void replaceVanilla(int id, String name, String srgFieldName, Object replacement, Object vanilla)
+	private void replaceVanilla(int id, String registryName, String fieldName, String srgFieldName, Object replacement, Object vanilla)
 	{
 		boolean block = replacement instanceof Block;
 		RegistryNamespaced registry = block ? Block.blockRegistry : Item.itemRegistry;
@@ -122,12 +125,15 @@ public class ReplacementTool
 
 		try
 		{
-			method.invoke(registry, id, "minecraft:" + name, replacement);
-			Field f = AsmUtils.changeFieldAccess(clazz, name, srgFieldName);
+			method.invoke(registry, id, new ResourceLocation("minecraft", registryName), replacement);
+			Field f = AsmUtils.changeFieldAccess(clazz, fieldName, srgFieldName);
 			f.set(null, replacement);
 
 			if (ib != null)
-				AsmUtils.changeFieldAccess(ItemBlock.class, "blockInstance", "field_150939_a").set(ib, replacement);
+			{
+				AsmUtils.changeFieldAccess(ItemBlock.class, "block", "field_150939_a").set(ib, replacement);
+				GameData.getBlockItemMap().put(replacement, ib);
+			}
 
 			map.put(replacement, vanilla);
 			replaceIn(CraftingManager.getInstance().getRecipeList(), vanilla, replacement);
@@ -158,28 +164,31 @@ public class ReplacementTool
 	 * Changes the registry by removing the vanilla block and adding the replacement.
 	 *
 	 * @param id the id
-	 * @param name the name
-	 * @param srgFieldName the srg field name
+	 * @param registryName the registry name
+	 * @param fieldName the field name in {@link Blocks} class.
+	 * @param srgFieldName the srg field name in {@link Blocks} class.
 	 * @param replacement the block
 	 * @param vanilla the vanilla
 	 */
-	public static void replaceVanillaBlock(int id, String name, String srgFieldName, Block replacement, Block vanilla)
+	public static void replaceVanillaBlock(int id, String registryName, String fieldName, String srgFieldName, Block replacement, Block vanilla)
 	{
-		instance().replaceVanilla(id, name, srgFieldName, replacement, vanilla);
+		instance().replaceVanilla(id, registryName, fieldName, srgFieldName, replacement, vanilla);
 	}
 
 	/**
-	 * Replace vanilla item.
+	 * Replaces vanilla item with another one.<br>
+	 * Changes the registry by removing the vanilla item and adding the replacement.
 	 *
 	 * @param id the id
-	 * @param name the name
-	 * @param srgFieldName the srg field name
+	 * @param registryName the registry name
+	 * @param fieldName the field name in {@link Items} class.
+	 * @param srgFieldName the srg field name in {@link Items} class.
 	 * @param replacement the replacement
 	 * @param vanilla the vanilla
 	 */
-	public static void replaceVanillaItem(int id, String name, String srgFieldName, Item replacement, Item vanilla)
+	public static void replaceVanillaItem(int id, String registryName, String fieldName, String srgFieldName, Item replacement, Item vanilla)
 	{
-		instance().replaceVanilla(id, name, srgFieldName, replacement, vanilla);
+		instance().replaceVanilla(id, registryName, fieldName, srgFieldName, replacement, vanilla);
 	}
 
 	/**
