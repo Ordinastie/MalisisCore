@@ -66,9 +66,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
@@ -213,6 +215,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 */
 	public void set(IBlockState blockState)
 	{
+		this.block = blockState.getBlock();
 		this.blockState = blockState;
 	}
 
@@ -1167,6 +1170,11 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		}
 
 		return timer.elapsedPartialTicks;
+	}
+
+	public static EnumWorldBlockLayer getRenderLayer()
+	{
+		return MinecraftForgeClient.getRenderLayer();
 	}
 
 	/**
