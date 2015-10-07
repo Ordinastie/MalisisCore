@@ -27,7 +27,6 @@ package net.malisis.core.block;
 import java.util.List;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.MalisisRegistry;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.IMetaIconProvider;
@@ -52,6 +51,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -63,6 +64,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 {
 	protected String name;
 	protected AxisAlignedBB boundingBox;
+	@SideOnly(Side.CLIENT)
 	protected IIconProvider iconProvider;
 
 	protected MalisisBlock(Material material)
@@ -137,7 +139,6 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 		GameRegistry.registerBlock(this, item, getName());
 		if (MalisisCore.isClient())
 		{
-			MalisisRegistry.registerIconProvider(iconProvider);
 			if (useDefaultRenderer())
 				DefaultRenderer.block.registerFor(this);
 		}
@@ -154,7 +155,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 
 	public IBlockState getStateFromItemStack(ItemStack itemStack)
 	{
-		return getStateFromMeta(itemStack.getMetadata());
+		return getStateFromMeta(itemStack.getItem().getMetadata(itemStack.getMetadata()));
 	}
 
 	@Override

@@ -25,7 +25,6 @@
 package net.malisis.core.item;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.MalisisRegistry;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.IMetaIconProvider;
@@ -99,7 +98,6 @@ public class MalisisItem extends Item implements IMetaIconProvider
 		GameRegistry.registerItem(this, getName());
 		if (FMLCommonHandler.instance().getSide() == Side.CLIENT)
 		{
-			MalisisRegistry.registerIconProvider(iconProvider);
 			if (useDefaultRenderer())
 				DefaultRenderer.item.registerFor(this);
 		}

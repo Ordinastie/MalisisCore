@@ -24,8 +24,11 @@
 
 package net.malisis.core.renderer.icon;
 
+import java.util.function.Consumer;
+
 import net.malisis.core.MalisisRegistry;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraftforge.fml.common.registry.GameData;
 
 /**
  * The IIconProvider interface allows to pass {@link MalisisIcon} to the rendering processes.<br>
@@ -50,4 +53,15 @@ public interface IIconProvider
 	 * @param map the map
 	 */
 	public void registerIcons(TextureMap map);
+
+	public static void registerIconProviders()
+	{
+		Consumer<?> consumer = (obj) -> {
+			if (obj instanceof IMetaIconProvider)
+				MalisisRegistry.registerIconProvider(((IMetaIconProvider) obj).getIconProvider());
+		};
+
+		GameData.getBlockRegistry().forEach(consumer);
+		GameData.getItemRegistry().forEach(consumer);
+	}
 }

@@ -33,6 +33,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.configuration.ConfigurationGui;
 import net.malisis.core.configuration.Settings;
 import net.malisis.core.network.MalisisNetwork;
+import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.util.blockdata.BlockDataHandler;
 import net.malisis.core.util.chunkblock.ChunkBlockHandler;
 import net.malisis.core.util.multiblock.MultiBlock;
@@ -192,6 +193,8 @@ public class MalisisCore implements IMalisisMod
 	{
 		ClientCommandHandler.instance.registerCommand(new MalisisCommand());
 
+		if (isClient())
+			IIconProvider.registerIconProviders();
 		//		if (FMLCommonHandler.instance().getSide() == Side.CLIENT)
 		//			new FiniteLiquidRenderer().registerFor(FiniteLiquid.class);
 	}
