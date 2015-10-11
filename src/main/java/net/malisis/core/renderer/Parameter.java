@@ -24,7 +24,6 @@
 
 package net.malisis.core.renderer;
 
-import java.lang.reflect.Array;
 
 /**
  *
@@ -114,7 +113,7 @@ public class Parameter<T>
 		if (index < 0 || index >= v.length)
 			return null;
 
-		return Array.get(value, index);
+		return v[index];
 	}
 
 	/**
