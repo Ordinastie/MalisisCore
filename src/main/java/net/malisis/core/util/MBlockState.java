@@ -205,34 +205,34 @@ public class MBlockState
 
 	public static IBlockState fromNBT(NBTTagCompound nbt)
 	{
-		return fromNBT(nbt, "");
+		return fromNBT(nbt, "block", "metadata");
 	}
 
-	public static IBlockState fromNBT(NBTTagCompound nbt, String suffix)
+	public static IBlockState fromNBT(NBTTagCompound nbt, String blockName, String metadataName)
 	{
 		Block block;
-		if (nbt.hasKey("block1", NBT.TAG_INT))
-			block = Block.getBlockById(nbt.getInteger("block" + suffix));
+		if (nbt.hasKey(blockName, NBT.TAG_INT))
+			block = Block.getBlockById(nbt.getInteger(blockName));
 		else
-			block = Block.getBlockFromName(nbt.getString("block" + suffix));
+			block = Block.getBlockFromName(nbt.getString(blockName));
 
-		int metadata = nbt.getInteger("metadata" + suffix);
+		int metadata = nbt.getInteger(metadataName);
 
 		return block.getStateFromMeta(metadata);
 	}
 
 	public static NBTTagCompound toNBT(NBTTagCompound nbt, IBlockState state)
 	{
-		return toNBT(nbt, state, "");
+		return toNBT(nbt, state, "block", "metadata");
 	}
 
-	public static NBTTagCompound toNBT(NBTTagCompound nbt, IBlockState state, String suffix)
+	public static NBTTagCompound toNBT(NBTTagCompound nbt, IBlockState state, String blockName, String metadataName)
 	{
 		if (state == null)
 			return nbt;
 
-		nbt.setString("block" + suffix, (String) Block.blockRegistry.getNameForObject(state.getBlock()));
-		nbt.setInteger("metadata" + suffix, state.getBlock().getMetaFromState(state));
+		nbt.setString(blockName, Block.blockRegistry.getNameForObject(state.getBlock()).toString());
+		nbt.setInteger(metadataName, state.getBlock().getMetaFromState(state));
 		return nbt;
 	}
 
