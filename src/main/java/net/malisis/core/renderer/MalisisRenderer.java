@@ -316,6 +316,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	@Override
 	public synchronized void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTick, int destroyStage)
 	{
+		if (te.getBlockType() != te.getWorld().getBlockState(te.getPos()).getBlock())
+			return;
 		this.wr = Tessellator.getInstance().getWorldRenderer();
 		set(te, partialTick);
 		prepare(RenderType.TILE_ENTITY, x, y, z);
@@ -444,6 +446,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		else if (renderType == RenderType.TILE_ENTITY)
 		{
 			draw();
+			disableBlending();
 			GlStateManager.enableLighting();
 			GlStateManager.popMatrix();
 			GlStateManager.popAttrib();
@@ -554,8 +557,10 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		if (renderType == RenderType.BLOCK)
 			return;
 
-		GlStateManager.disableBlend();
 		GlStateManager.disableColorMaterial();
+		GlStateManager.shadeModel(GL11.GL_FLAT);
+		GlStateManager.disableBlend();
+
 	}
 
 	/**
@@ -752,7 +757,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		if (params != null && !params.usePerVertexAlpha.get())
 			vertex.setAlpha(params.alpha.get());
 
-		if (renderType == RenderType.ITEM && params != null)
+		if (renderType == RenderType.ITEM)
 			vertex.setNormal(params.direction.get());
 
 		wr.addVertexData(getVertexData(vertex));
@@ -905,9 +910,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		{
 			IBlockIconProvider iblockp = (IBlockIconProvider) iconProvider;
 			if (renderType == RenderType.BLOCK || renderType == RenderType.TILE_ENTITY)
-				return iblockp.getIcon(world, pos, blockState, params.direction.get());
+				return iblockp.getIcon(world, pos, blockState, params.textureSide.get());
 			else if (renderType == RenderType.ITEM)
-				return iblockp.getIcon(itemStack, params.direction.get());
+				return iblockp.getIcon(itemStack, params.textureSide.get());
 		}
 
 		return iconProvider != null ? iconProvider.getIcon() : null;
@@ -964,7 +969,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		float factor = 1;
 		//calculate AO
 		if (params.calculateAOColor.get() && aoMatrix != null && Minecraft.isAmbientOcclusionEnabled()
-				&& block.getLightValue(world, pos) == 0)
+				&& block.getLightValue(world, pos) == 0 && params.direction.get() != null)
 		{
 			factor = getBlockAmbientOcclusion(world, pos.offset(params.direction.get()));
 
