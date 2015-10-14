@@ -159,6 +159,7 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 		listParams.add(renderBounds);
 		listParams.add(useCustomTexture);
 		listParams.add(applyTexture);
+		listParams.add(icon);
 		listParams.add(iconProvider);
 		listParams.add(useWorldSensitiveIcon);
 		listParams.add(useTexture);
@@ -264,6 +265,7 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 			rp.useCustomTexture = useCustomTexture.clone();
 			rp.applyTexture = applyTexture.clone();
 			rp.iconProvider = iconProvider.clone();
+			rp.icon = icon.clone();
 			rp.useWorldSensitiveIcon = useWorldSensitiveIcon.clone();
 			rp.useTexture = useTexture.clone();
 			rp.interpolateUV = interpolateUV.clone();
