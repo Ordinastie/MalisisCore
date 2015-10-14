@@ -106,6 +106,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 		setImage(image);
 
 		shape = new XYResizableGuiShape();
+		iconProvider = new GuiIconProvider(null);
 	}
 
 	//#region Getters/Setters
