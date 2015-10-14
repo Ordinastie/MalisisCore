@@ -62,6 +62,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.collect.ImmutableMap;
 
 /**
@@ -184,6 +186,13 @@ public class MalisisRegistry
 	{
 		String modid = Loader.instance().activeModContainer().getModId();
 		String name = item.getUnlocalizedName().substring(5);
+
+		if (StringUtils.isEmpty(name) || name.equals("null"))
+		{
+			MalisisCore.log.error("[MalisisRegistry] Attempted to register ItemRenderInfos for item " + item.getClass().getSimpleName()
+					+ " with no name. Ignored.");
+			return;
+		}
 		ModelResourceLocation rl = new ModelResourceLocation(modid + ":" + name, "inventory");
 		ModelLoader.setCustomModelResourceLocation(item, 0, rl);
 		instance.renderInfos.put(rl, renderInfos);
@@ -193,6 +202,14 @@ public class MalisisRegistry
 	{
 		String modid = Loader.instance().activeModContainer().getModId();
 		String name = block.getUnlocalizedName().substring(5);
+
+		if (StringUtils.isEmpty(name) || name.equals("null"))
+		{
+			MalisisCore.log.error("[MalisisRegistry] Attempted to register ItemRenderInfos for block " + block.getClass().getSimpleName()
+					+ " with no name. Ignored.");
+			return;
+		}
+
 		ModelResourceLocation rl = new ModelResourceLocation(modid + ":" + name, "inventory");
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, rl);
 		instance.renderInfos.put(rl, renderInfos);
