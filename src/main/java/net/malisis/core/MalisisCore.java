@@ -37,6 +37,7 @@ import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.util.blockdata.BlockDataHandler;
 import net.malisis.core.util.chunkblock.ChunkBlockHandler;
 import net.malisis.core.util.multiblock.MultiBlock;
+import net.malisis.core.util.remapping.RemappingTool;
 import net.malisis.core.util.replacement.ReplacementTool;
 import net.malisis.core.util.syncer.Syncer;
 import net.minecraft.client.Minecraft;
@@ -52,6 +53,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -175,6 +177,8 @@ public class MalisisCore implements IMalisisMod
 		MinecraftForge.EVENT_BUS.register(ReplacementTool.instance());
 		MinecraftForge.EVENT_BUS.register(ChunkBlockHandler.get());
 		MinecraftForge.EVENT_BUS.register(BlockDataHandler.get());
+
+		FMLCommonHandler.instance().bus().register(RemappingTool.instance());
 		//MinecraftForge.EVENT_BUS.register(ChunkCollision.client);
 
 		MalisisNetwork.createMessages(event.getAsmData());
@@ -197,6 +201,12 @@ public class MalisisCore implements IMalisisMod
 			IIconProvider.registerIconProviders();
 		//		if (FMLCommonHandler.instance().getSide() == Side.CLIENT)
 		//			new FiniteLiquidRenderer().registerFor(FiniteLiquid.class);
+	}
+
+	@EventHandler
+	public void missingMapping(FMLMissingMappingsEvent event)
+	{
+		RemappingTool.processMissingMappings(event);
 	}
 
 	/**
@@ -229,7 +239,7 @@ public class MalisisCore implements IMalisisMod
 		if (settings == null)
 			return false;
 
-		(new ConfigurationGui(settings)).display(true);
+		new ConfigurationGui(settings).display(true);
 
 		return true;
 	}
