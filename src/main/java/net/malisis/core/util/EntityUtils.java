@@ -33,6 +33,11 @@ import java.util.UUID;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.particle.EffectRenderer;
+import net.minecraft.client.particle.EntityDiggingFX;
+import net.minecraft.client.particle.EntityDiggingFX.Factory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -44,9 +49,12 @@ import net.minecraft.server.management.PlayerManager;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * Utility class for Entities.
@@ -236,5 +244,76 @@ public class EntityUtils
 			MalisisCore.log.info("Failed to get players watching chunk :", e);
 			return new ArrayList<>();
 		}
+	}
+
+	public static void addDestroyEffects(World world, BlockPos pos, EffectRenderer effectRenderer, IBlockState... states)
+	{
+		if (ArrayUtils.isEmpty(states))
+			states = new IBlockState[] { world.getBlockState(pos) };
+
+		byte nb = 4;
+		Factory factory = new EntityDiggingFX.Factory();
+
+		for (int i = 0; i < nb; ++i)
+		{
+			for (int j = 0; j < nb; ++j)
+			{
+				for (int k = 0; k < nb; ++k)
+				{
+					double fxX = pos.getX() + (i + 0.5D) / nb;
+					double fxY = pos.getY() + (j + 0.5D) / nb;
+					double fxZ = pos.getZ() + (k + 0.5D) / nb;
+
+					int id = Block.getStateId(states[world.rand.nextInt(states.length)]);
+
+					EntityDiggingFX fx = (EntityDiggingFX) factory.getEntityFX(0, world, fxX, fxY, fxZ, fxX - pos.getX() - 0.5D,
+							fxY - pos.getY() - 0.5D, fxZ - pos.getZ() - 0.5D, id);
+					effectRenderer.addEffect(fx);
+				}
+			}
+		}
+	}
+
+	public static void addHitEffects(World world, MovingObjectPosition target, EffectRenderer effectRenderer, IBlockState... states)
+	{
+		if (ArrayUtils.isEmpty(states))
+			states = new IBlockState[] { world.getBlockState(target.getBlockPos()) };
+
+		Block block = world.getBlockState(target.getBlockPos()).getBlock();
+
+		double fxX = target.getBlockPos().getX() + world.rand.nextDouble();
+		double fxY = target.getBlockPos().getY() + world.rand.nextDouble();
+		double fxZ = target.getBlockPos().getZ() + world.rand.nextDouble();
+
+		switch (target.sideHit)
+		{
+			case DOWN:
+				fxY = target.getBlockPos().getY() + block.getBlockBoundsMinY() - 0.1F;
+				break;
+			case UP:
+				fxY = target.getBlockPos().getY() + block.getBlockBoundsMaxY() + 0.1F;
+				break;
+			case NORTH:
+				fxZ = target.getBlockPos().getZ() + block.getBlockBoundsMinZ() - 0.1F;
+				break;
+			case SOUTH:
+				fxZ = target.getBlockPos().getZ() + block.getBlockBoundsMaxY() + 0.1F;
+				break;
+			case EAST:
+				fxX = target.getBlockPos().getX() + block.getBlockBoundsMaxX() + 0.1F;
+				break;
+			case WEST:
+				fxX = target.getBlockPos().getX() + block.getBlockBoundsMinX() + 0.1F;
+				break;
+			default:
+				break;
+		}
+
+		int id = Block.getStateId(states[world.rand.nextInt(states.length)]);
+
+		Factory factory = new EntityDiggingFX.Factory();
+		EntityDiggingFX fx = (EntityDiggingFX) factory.getEntityFX(0, world, fxX, fxY, fxZ, 0, 0, 0, id);
+		fx.multiplyVelocity(0.2F).multipleParticleScaleBy(0.6F);
+		effectRenderer.addEffect(fx);
 	}
 }
