@@ -27,7 +27,7 @@ package net.malisis.core.block;
 import java.util.List;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.renderer.DefaultRenderer;
+import net.malisis.core.renderer.IMalisisRendered;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.VanillaIcon;
@@ -41,7 +41,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -50,7 +49,6 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -60,7 +58,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author Ordinastie
  *
  */
-public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvider
+public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvider, IMalisisRendered, IRegisterable
 {
 	protected String name;
 	protected AxisAlignedBB boundingBox;
@@ -80,14 +78,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	}
 
 	@Override
-	public Block setUnlocalizedName(String name)
-	{
-		this.name = name;
-		super.setUnlocalizedName(name);
-		return this;
-	}
-
-	public String getName()
+	public String getRegistryName()
 	{
 		return name;
 	}
@@ -127,21 +118,6 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	public IIconProvider getIconProvider()
 	{
 		return iconProvider;
-	}
-
-	public void register()
-	{
-		register(ItemBlock.class);
-	}
-
-	public void register(Class<? extends ItemBlock> item)
-	{
-		GameRegistry.registerBlock(this, item, getName());
-		if (MalisisCore.isClient())
-		{
-			if (useDefaultRenderer())
-				DefaultRenderer.block.registerFor(this);
-		}
 	}
 
 	@Override
@@ -205,11 +181,6 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	public MovingObjectPosition collisionRayTrace(World world, BlockPos pos, Vec3 src, Vec3 dest)
 	{
 		return new RaytraceBlock(world, src, dest, pos).trace();
-	}
-
-	public boolean useDefaultRenderer()
-	{
-		return true;
 	}
 
 	@Override

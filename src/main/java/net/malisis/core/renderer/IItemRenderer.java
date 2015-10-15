@@ -28,11 +28,14 @@ import java.util.List;
 
 import javax.vecmath.Matrix4f;
 
+import net.malisis.core.MalisisRegistry;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
@@ -48,28 +51,49 @@ public interface IItemRenderer
 {
 	public boolean renderItem(ItemStack itemStack, float partialTick);
 
-	public boolean isGui3d();
-
 	public Matrix4f getTransform(TransformType tranformType);
 
-	public static interface IItemRenderInfo extends IPerspectiveAwareModel
+	public boolean isGui3d();
+
+	public static class DummyModel implements IPerspectiveAwareModel
 	{
-		public Matrix4f getTransform(TransformType tranformType);
+		private Item item;
+		private ModelResourceLocation rl;
+
+		public DummyModel(Item item, String name)
+		{
+			this.item = item;
+			this.rl = new ModelResourceLocation(name, "inventory");
+		}
+
+		public ModelResourceLocation getResourceLocation()
+		{
+			return rl;
+		}
 
 		@Override
-		public default Pair<IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType)
+		public Pair<IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType)
 		{
-			return Pair.of(this, getTransform(cameraTransformType));
+			IItemRenderer itemRenderer = MalisisRegistry.getItemRenderer(item);
+			return Pair.of(this, itemRenderer != null ? itemRenderer.getTransform(cameraTransformType) : null);
+		}
+
+		@Override
+		public boolean isGui3d()
+		{
+			IItemRenderer itemRenderer = MalisisRegistry.getItemRenderer(item);
+			return itemRenderer != null && itemRenderer.isGui3d();
 		}
 
 		//@formatter:off
-		@Override public default boolean isAmbientOcclusion() 					{ return false; }
-		@Override public default boolean isBuiltInRenderer() 					{ return false; }
-		@Override public default TextureAtlasSprite getTexture() 				{ return null; }
-		@Override public default ItemCameraTransforms getItemCameraTransforms() { return null; }
-		@Override public default List<BakedQuad> getFaceQuads(EnumFacing side) 	{ return null; }
-		@Override public default List<BakedQuad> getGeneralQuads() 				{ return null; }
-		//@formatter:on
 
-	}
+		@Override public boolean isAmbientOcclusion() 					{ return false; }
+		@Override public boolean isBuiltInRenderer() 					{ return false; }
+		@Override public TextureAtlasSprite getTexture() 				{ return null; }
+		@Override public ItemCameraTransforms getItemCameraTransforms() { return null; }
+		@Override public List<BakedQuad> getFaceQuads(EnumFacing side) 	{ return null; }
+		@Override public List<BakedQuad> getGeneralQuads() 				{ return null; }
+		//@formatter:on
+	};
+
 }

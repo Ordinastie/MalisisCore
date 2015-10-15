@@ -1183,38 +1183,21 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	}
 
 	/**
-	 * Registers this {@link MalisisRenderer} to be used for rendering the specified <b>block</b>.
+	 * Registers this {@link MalisisRenderer} to be used for rendering the specified {@link IMalisisRendered}.<br>
+	 * <code>obj</code> has to be either a {@link Block} or an {@link Item}.
 	 *
-	 * @param block the block
+	 * @param obj the obj
 	 */
-	public void registerFor(Block block)
+	public void registerFor(IMalisisRendered obj)
 	{
-		registerFor(block, getDefaultRenderInfos());
-	}
-
-	public void registerFor(Block block, IItemRenderInfo renderInfos)
-	{
-		MalisisRegistry.registerBlockRenderer(block, this, renderInfos);
+		if (obj instanceof Block)
+			MalisisRegistry.registerBlockRenderer(obj, this);
+		if (obj instanceof Item)
+			MalisisRegistry.registerItemRenderer(obj, this);
 	}
 
 	/**
-	 * Registers this {@link MalisisRenderer} to be used for rendering the specified <b>item</b>.
-	 *
-	 * @param item the item
-	 */
-	public void registerFor(Item item)
-	{
-		registerFor(item, getDefaultRenderInfos());
-	}
-
-	public void registerFor(Item item, IItemRenderInfo renderInfos)
-	{
-		MalisisRegistry.registerItemRenderer(item, this, renderInfos);
-	}
-
-	/**
-	 * Registers this {@link MalisisRenderer} to be used for rendering for a specified class.<br>
-	 * Class has to extend TileEntity.<br>
+	 * Registers this {@link MalisisRenderer} to be used for rendering {@link TileEntity}.
 	 *
 	 * @param clazz the clazz
 	 */
@@ -1230,23 +1213,4 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	{
 		MalisisRegistry.registerRenderWorldLast(this);
 	}
-
-	private IItemRenderInfo getDefaultRenderInfos()
-	{
-		return new IItemRenderInfo()
-		{
-			@Override
-			public boolean isGui3d()
-			{
-				return MalisisRenderer.this.isGui3d();
-			}
-
-			@Override
-			public Matrix4f getTransform(TransformType tranformType)
-			{
-				return MalisisRenderer.this.getTransform(tranformType);
-			}
-		};
-	}
-
 }

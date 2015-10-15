@@ -31,9 +31,9 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.Set;
 
-import net.malisis.core.MalisisCore;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.MalisisBlock;
+import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.util.MBlockState;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -59,14 +59,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class FiniteLiquid extends MalisisBlock
 {
-	@SideOnly(Side.CLIENT)
-	protected static FiniteLiquidRenderer renderer;
-	static
-	{
-		if (MalisisCore.isClient())
-			renderer = new FiniteLiquidRenderer();
-	}
-
 	protected String name;
 
 	public static final PropertyInteger AMOUNT = PropertyInteger.create("amount", 0, 15);
@@ -88,9 +80,6 @@ public abstract class FiniteLiquid extends MalisisBlock
 	public void register()
 	{
 		super.register();
-
-		if (MalisisCore.isClient())
-			renderer.registerFor(this);
 	}
 
 	@Override
@@ -173,7 +162,7 @@ public abstract class FiniteLiquid extends MalisisBlock
 	@Override
 	public AxisAlignedBB[] getBoundingBoxes(IBlockAccess world, BlockPos pos, BoundingBoxType type)
 	{
-		int amount = getAmount(new MBlockState(world, pos));
+		int amount = world != null ? getAmount(new MBlockState(world, pos)) : 15;
 		return new AxisAlignedBB[] { new AxisAlignedBB(0, 0, 0, 1, (double) amount / 16F, 1) };
 	}
 
@@ -209,9 +198,10 @@ public abstract class FiniteLiquid extends MalisisBlock
 	}
 
 	@Override
-	public boolean useDefaultRenderer()
+	@SideOnly(Side.CLIENT)
+	public MalisisRenderer getRenderer()
 	{
-		return false;
+		return new FiniteLiquidRenderer();
 	}
 
 	public static class FloodFill

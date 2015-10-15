@@ -25,14 +25,12 @@
 package net.malisis.core.item;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.renderer.DefaultRenderer;
+import net.malisis.core.block.IRegisterable;
+import net.malisis.core.renderer.IMalisisRendered;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -42,7 +40,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author Ordinastie
  *
  */
-public class MalisisItem extends Item implements IMetaIconProvider
+public class MalisisItem extends Item implements IMetaIconProvider, IMalisisRendered, IRegisterable
 {
 	protected String name;
 	protected IIconProvider iconProvider;
@@ -55,14 +53,7 @@ public class MalisisItem extends Item implements IMetaIconProvider
 	}
 
 	@Override
-	public Item setUnlocalizedName(String name)
-	{
-		this.name = name;
-		super.setUnlocalizedName(name);
-		return this;
-	}
-
-	public String getName()
+	public String getRegistryName()
 	{
 		return name;
 	}
@@ -86,25 +77,5 @@ public class MalisisItem extends Item implements IMetaIconProvider
 	public IIconProvider getIconProvider()
 	{
 		return iconProvider;
-	}
-
-	public void register()
-	{
-		register(ItemBlock.class);
-	}
-
-	public void register(Class<? extends ItemBlock> item)
-	{
-		GameRegistry.registerItem(this, getName());
-		if (FMLCommonHandler.instance().getSide() == Side.CLIENT)
-		{
-			if (useDefaultRenderer())
-				DefaultRenderer.item.registerFor(this);
-		}
-	}
-
-	public boolean useDefaultRenderer()
-	{
-		return true;
 	}
 }
