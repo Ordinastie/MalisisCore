@@ -36,6 +36,7 @@ import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 /**
@@ -76,6 +77,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		match.add(getRenderType.getInsnNode(INVOKEVIRTUAL));
 		match.add(new VarInsnNode(ISTORE, 5));
 
+		//TODO: convert to instanceof check (see below)
 		//if (i == MalisisCore.malisisRenderType)
 		//	return MalisisRegistry.render(wr, world, pos, state);
 		//		ILOAD 6
@@ -146,26 +148,24 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 				"(Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;");
 		AsmHook ah = new AsmHook(getTexture);
 
-		//if (state.getBlock().getRedenr == MalisisCore.malisisRenderType)
+		//if (state.getBlock() instanceof IMetaIconProvider)
 		//	return MalisisRegistry.getParticleIcon(state);
 		//		ALOAD 1
-		//	    INVOKEINTERFACE net/minecraft/block/state/IBlockState.getBlock ()Lnet/minecraft/block/Block;
-		//	    INVOKEVIRTUAL net/minecraft/block/Block.getRenderType ()I
-		//		ICONST_4 | SIPUSH 4
-		//		IF_ICMPNE L18
+		//		INVOKEINTERFACE net/minecraft/block/state/IBlockState.getBlock ()Lnet/minecraft/block/Block;
+		//		INSTANCEOF net/malisis/core/renderer/IMalisisRendered
+		//		IFEQ L2
 		//	    ALOAD 1
 		//	    INVOKESTATIC net/malisis/core/MalisisRegistry.getParticleIcon (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
+		//		ARETURN
 
 		McpMethodMapping getBlock = new McpMethodMapping("getBlock", "func_177230_c", "net/minecraft/block/state/IBlockState",
 				"()Lnet/minecraft/block/Block;");
-		McpMethodMapping getRenderType = new McpMethodMapping("getRenderType", "func_149645_b", "net/minecraft/block/Block", "()I");
 		LabelNode falseLabel = new LabelNode();
 		InsnList insert = new InsnList();
 		insert.add(new VarInsnNode(ALOAD, 1));
 		insert.add(getBlock.getInsnNode(INVOKEINTERFACE));
-		insert.add(getRenderType.getInsnNode(INVOKEVIRTUAL));
-		insert.add(new IntInsnNode(SIPUSH, MalisisCore.malisisRenderType));
-		insert.add(new JumpInsnNode(IF_ICMPNE, falseLabel));
+		insert.add(new TypeInsnNode(INSTANCEOF, "net/malisis/core/renderer/icon/IMetaIconProvider"));
+		insert.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert.add(new VarInsnNode(ALOAD, 1));
 		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/MalisisRegistry", "getParticleIcon",
 				"(Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;", false));
