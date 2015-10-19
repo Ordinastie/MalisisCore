@@ -94,6 +94,12 @@ public interface IItemRenderer
 		@Override public List<BakedQuad> getFaceQuads(EnumFacing side) 	{ return null; }
 		@Override public List<BakedQuad> getGeneralQuads() 				{ return null; }
 		//@formatter:on
+
+		@Override
+		public String toString()
+		{
+			return item.getUnlocalizedName() + "[" + rl + "]";
+		}
 	};
 
 }
