@@ -131,7 +131,7 @@ public class Parameter<T> implements Cloneable
 	@Override
 	public String toString()
 	{
-		return value.toString() + " [" + defaultValue.toString() + "]";
+		return value + " [" + defaultValue + "]";
 	}
 
 	@Override
