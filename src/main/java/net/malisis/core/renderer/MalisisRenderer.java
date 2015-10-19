@@ -395,7 +395,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	public void prepare(RenderType renderType, double... data)
 	{
 		_initialize();
-
+		vertexDrawn = false;
 		this.renderType = renderType;
 
 		if (renderType == RenderType.BLOCK)
@@ -915,7 +915,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 				return iblockp.getIcon(itemStack, params.textureSide.get());
 		}
 
-		return iconProvider != null ? iconProvider.getIcon() : null;
+		return iconProvider != null ? iconProvider.getIcon() : MalisisIcon.missing;
 	}
 
 	/**
@@ -1177,27 +1177,39 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		return timer.elapsedPartialTicks;
 	}
 
+	/**
+	 * Gets the current {@link EnumWorldBlockLayer}.
+	 *
+	 * @return the render layer
+	 */
 	public static EnumWorldBlockLayer getRenderLayer()
 	{
 		return MinecraftForgeClient.getRenderLayer();
 	}
 
 	/**
-	 * Registers this {@link MalisisRenderer} to be used for rendering the specified {@link IMalisisRendered}.<br>
-	 * <code>obj</code> has to be either a {@link Block} or an {@link Item}.
+	 * Registers this {@link MalisisRenderer} to be used for rendering the {@link Block}.<br>
 	 *
-	 * @param obj the obj
+	 * @param block the block
 	 */
-	public void registerFor(IMalisisRendered obj)
+	public void registerFor(Block block)
 	{
-		if (obj instanceof Block)
-			MalisisRegistry.registerBlockRenderer(obj, this);
-		if (obj instanceof Item)
-			MalisisRegistry.registerItemRenderer(obj, this);
+		MalisisRegistry.registerBlockRenderer(block, this);
+
 	}
 
 	/**
-	 * Registers this {@link MalisisRenderer} to be used for rendering {@link TileEntity}.
+	 * Registers this {@link MalisisRenderer} to be used for rendering the {@link Item}.<br>
+	 *
+	 * @param item the item
+	 */
+	public void registerFor(Item item)
+	{
+		MalisisRegistry.registerItemRenderer(item, this);
+	}
+
+	/**
+	 * Registers this {@link MalisisRenderer} to be used for rendering the {@link TileEntity}.
 	 *
 	 * @param clazz the clazz
 	 */
