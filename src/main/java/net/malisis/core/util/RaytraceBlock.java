@@ -38,6 +38,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * RayTrace class that offers more control to handle raytracing.
@@ -164,30 +165,28 @@ public class RaytraceBlock
 		if (ArrayUtils.isEmpty(aabbs))
 			return null;
 
-		List<Point> points = new ArrayList<>();
+		List<Pair<EnumFacing, Point>> points = new ArrayList<>();
 		double maxDist = Point.distanceSquared(src, dest);
 		for (AxisAlignedBB aabb : AABBUtils.offset(pos, aabbs))
 		{
 			if (aabb == null)
 				continue;
 
-			for (Point p : ray.intersect(aabb))
+			for (Pair<EnumFacing, Point> pair : ray.intersect(aabb))
 			{
-				if (Point.distanceSquared(src, p) < maxDist)
-					points.add(p);
+				if (Point.distanceSquared(src, pair.getRight()) < maxDist)
+					points.add(pair);
 			}
 		}
 
 		if (points.size() == 0)
 			return null;
 
-		Point closest = getClosest(points);
+		Pair<EnumFacing, Point> closest = getClosest(points);
 		if (closest == null)
 			return null;
 
-		EnumFacing side = getSide(aabbs, closest);
-
-		return new MovingObjectPosition(closest.toVec3(), side, pos);
+		return new MovingObjectPosition(closest.getRight().toVec3(), closest.getLeft(), pos);
 	}
 
 	/**
@@ -196,43 +195,20 @@ public class RaytraceBlock
 	 * @param points the points
 	 * @return the closest point
 	 */
-	private Point getClosest(List<Point> points)
+	private Pair<EnumFacing, Point> getClosest(List<Pair<EnumFacing, Point>> points)
 	{
 		double distance = Double.MAX_VALUE;
-		Point ret = null;
-		for (Point p : points)
+		Pair<EnumFacing, Point> ret = null;
+		for (Pair<EnumFacing, Point> pair : points)
 		{
-			double d = Point.distanceSquared(src, p);
+			double d = Point.distanceSquared(src, pair.getRight());
 			if (distance > d)
 			{
 				distance = d;
-				ret = p;
+				ret = pair;
 			}
 		}
 
 		return ret;
-	}
-
-	private EnumFacing getSide(AxisAlignedBB[] aabbs, Point point)
-	{
-		for (AxisAlignedBB aabb : aabbs)
-		{
-			if (aabb == null)
-				continue;
-
-			if (point.x == aabb.minX)
-				return EnumFacing.WEST;
-			if (point.x == aabb.maxX)
-				return EnumFacing.EAST;
-			if (point.y == aabb.minY)
-				return EnumFacing.DOWN;
-			if (point.y == aabb.maxY)
-				return EnumFacing.UP;
-			if (point.z == aabb.minZ)
-				return EnumFacing.NORTH;
-			if (point.z == aabb.maxZ)
-				return EnumFacing.SOUTH;
-		}
-		return null;
 	}
 }

@@ -28,7 +28,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Vec3;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  *
@@ -135,7 +138,7 @@ public class Ray
 	 * @param aabb the aabb
 	 * @return the list
 	 */
-	public List<Point> intersect(AxisAlignedBB aabb)
+	public List<Pair<EnumFacing, Point>> intersect(AxisAlignedBB aabb)
 	{
 		double ix = intersectX(aabb.minX);
 		double iX = intersectX(aabb.maxX);
@@ -150,21 +153,21 @@ public class Ray
 		Point interz = iz >= 0 ? getPointAt(iz) : null;
 		Point interZ = iZ >= 0 ? getPointAt(iZ) : null;
 
-		List<Point> list = new ArrayList<>();
+		List<Pair<EnumFacing, Point>> list = new ArrayList<>();
 		if (interx != null && interx.isInside(aabb))
-			list.add(interx);
+			list.add(Pair.of(EnumFacing.WEST, interx));
 		if (interX != null && interX.isInside(aabb))
-			list.add(interX);
+			list.add(Pair.of(EnumFacing.EAST, interX));
 
 		if (intery != null && intery.isInside(aabb))
-			list.add(intery);
+			list.add(Pair.of(EnumFacing.DOWN, intery));
 		if (interY != null && interY.isInside(aabb))
-			list.add(interY);
+			list.add(Pair.of(EnumFacing.UP, interY));
 
 		if (interz != null && interz.isInside(aabb))
-			list.add(interz);
+			list.add(Pair.of(EnumFacing.NORTH, interz));
 		if (interZ != null && interZ.isInside(aabb))
-			list.add(interZ);
+			list.add(Pair.of(EnumFacing.SOUTH, interZ));
 
 		return list;
 	}
