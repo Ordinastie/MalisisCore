@@ -227,6 +227,9 @@ public class ItemUtils
 			return null;
 
 		Block block = Block.getBlockFromItem(itemStack.getItem());
+		if (block == null)
+			return null;
+
 		if (block instanceof MalisisBlock)
 			return ((MalisisBlock) block).getStateFromItemStack(itemStack);
 
@@ -236,6 +239,8 @@ public class ItemUtils
 	public static ItemStack getItemStackFromState(IBlockState state)
 	{
 		Item item = Item.getItemFromBlock(state.getBlock());
+		if (item == null)
+			return null;
 		return new ItemStack(item, 0, state.getBlock().getMetaFromState(state));
 	}
 }
