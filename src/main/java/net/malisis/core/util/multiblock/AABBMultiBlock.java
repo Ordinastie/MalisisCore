@@ -45,8 +45,15 @@ public class AABBMultiBlock extends MultiBlock
 	public AABBMultiBlock(Block block, AxisAlignedBB aabb)
 	{
 		this.aabb = aabb;
-		this.blockState = block.getDefaultState().withProperty(IBlockDirectional.HORIZONTAL, EnumFacing.SOUTH);
+		this.blockState = block.getDefaultState();
+		if (blockState.getProperties().containsKey(IBlockDirectional.HORIZONTAL))
+			blockState = blockState.withProperty(IBlockDirectional.HORIZONTAL, EnumFacing.SOUTH);
 		buildStates();
+	}
+
+	public AxisAlignedBB getBoundingBox()
+	{
+		return aabb;
 	}
 
 	@Override
