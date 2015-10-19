@@ -65,8 +65,13 @@ public interface IMalisisRendered
 			if (obj instanceof IMalisisRendered)
 			{
 				MalisisRenderer renderer = ((IMalisisRendered) obj).getRenderer();
-				if (renderer != null)
-					renderer.registerFor((IMalisisRendered) obj);
+				if (renderer == null)
+					return;
+
+				if (obj instanceof Block)
+					renderer.registerFor((Block) obj);
+				else
+					renderer.registerFor((Item) obj);
 			}
 		};
 

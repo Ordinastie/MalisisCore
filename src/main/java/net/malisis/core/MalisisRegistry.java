@@ -35,7 +35,6 @@ import net.malisis.core.block.IRegisterable;
 import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
 import net.malisis.core.renderer.IItemRenderer.DummyModel;
-import net.malisis.core.renderer.IMalisisRendered;
 import net.malisis.core.renderer.IRenderWorldLast;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.icon.IIconProvider;
@@ -125,7 +124,7 @@ public class MalisisRegistry
 				ModelLoader.setCustomStateMapper(block, emptyMapper);
 				Item item = Item.getItemFromBlock(block);
 				if (item != null)
-					registerItemModel(item);
+					registerItemModel(item, name);
 			}
 		}
 		else if (registerable instanceof Item)
@@ -133,7 +132,7 @@ public class MalisisRegistry
 			Item item = (Item) registerable;
 			GameRegistry.registerItem(item, name);
 			if (MalisisCore.isClient())
-				registerItemModel(item);
+				registerItemModel(item, name);
 		}
 	}
 
@@ -145,16 +144,10 @@ public class MalisisRegistry
 	 * @param renderer the renderer
 	 */
 	@SideOnly(Side.CLIENT)
-	public static void registerBlockRenderer(IMalisisRendered block, IBlockRenderer renderer)
+	public static void registerBlockRenderer(Block block, IBlockRenderer renderer)
 	{
-		if (!(block instanceof Block))
-		{
-			MalisisCore.log.error("[MalisisRegistry] Cannot register {} as it's not a block.", block.getClass().getSimpleName());
-			return;
-		}
-
-		instance.blockRenderers.put((Block) block, renderer);
-		instance.itemRenderers.put(Item.getItemFromBlock((Block) block), renderer);
+		instance.blockRenderers.put(block, renderer);
+		instance.itemRenderers.put(Item.getItemFromBlock(block), renderer);
 	}
 
 	/**
@@ -220,15 +213,9 @@ public class MalisisRegistry
 	 * @param renderer the renderer
 	 */
 	@SideOnly(Side.CLIENT)
-	public static void registerItemRenderer(IMalisisRendered item, IItemRenderer renderer)
+	public static void registerItemRenderer(Item item, IItemRenderer renderer)
 	{
-		if (!(item instanceof Item))
-		{
-			MalisisCore.log.error("[MalisisRegistry] Cannot register {} as it's not a block.", item.getClass().getSimpleName());
-			return;
-		}
-
-		instance.itemRenderers.put((Item) item, renderer);
+		instance.itemRenderers.put(item, renderer);
 	}
 
 	/**
@@ -328,15 +315,18 @@ public class MalisisRegistry
 	//#region ItemModels
 	/**
 	 * Registers a {@link DummyModel} for the {@link Item}.<br>
-	 * Registered <code>DummyModels<code> will prevent complaints from MC about missing model definitions.<br>
+	 * Registered DummyModels will prevent complaints from MC about missing model definitions and will redirect method calls to the
+	 * registered renderer for the item.
 	 *
 	 * @param item the item
 	 */
-	private static void registerItemModel(Item item)
+	public static void registerItemModel(Item item, String name)
 	{
-		String modid = Loader.instance().activeModContainer().getModId();
-		String name = item.getUnlocalizedName().substring(5);
+		registerItemModel(item, Loader.instance().activeModContainer().getModId(), name);
+	}
 
+	public static void registerItemModel(Item item, String modid, String name)
+	{
 		DummyModel model = new DummyModel(item, modid + ":" + name);
 		ModelLoader.setCustomModelResourceLocation(item, 0, model.getResourceLocation());
 		instance.itemModels.add(model);
