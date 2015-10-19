@@ -177,9 +177,9 @@ public class EntityUtils
 
 		float pitch = entity.rotationPitch;
 		if (sixWays && pitch < -45)
-			return 5;
-		if (sixWays && pitch > 45)
 			return 4;
+		if (sixWays && pitch > 45)
+			return 5;
 
 		return (MathHelper.floor_double(entity.rotationYaw * 4.0F / 360.0F + 0.5D) + 2) & 3;
 	}
