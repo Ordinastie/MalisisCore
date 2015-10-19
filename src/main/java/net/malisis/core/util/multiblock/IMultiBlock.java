@@ -39,24 +39,24 @@ import net.minecraft.world.World;
  */
 public interface IMultiBlock extends IBlockDirectional
 {
-	public MultiBlock getMultiBlock(IBlockAccess world, BlockPos pos, IBlockState state);
+	public MultiBlock getMultiBlock(IBlockAccess world, BlockPos pos, IBlockState state, ItemStack itemStack);
 
 	public default void onBlockPlacedBy(Block block, World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
 	{
-		MultiBlock multiBlock = getMultiBlock(world, pos, state);
-		if (!multiBlock.isBulkPlace())
+		MultiBlock multiBlock = getMultiBlock(world, pos, state, stack);
+		if (multiBlock == null || !multiBlock.isBulkPlace())
 			return;
 
-		if (multiBlock.canPlaceBlockAt(world, pos, state))
-			multiBlock.placeBlocks(world, pos, state);
+		if (multiBlock.canPlaceBlockAt(world, pos, state, false))
+			multiBlock.placeBlocks(world, pos, state, false);
 		else
 			world.setBlockToAir(pos);
 	}
 
 	public default void breakBlock(Block block, World world, BlockPos pos, IBlockState state)
 	{
-		MultiBlock multiBlock = getMultiBlock(world, pos, state);
-		if (multiBlock.isBulkBreak())
+		MultiBlock multiBlock = getMultiBlock(world, pos, state, null);
+		if (multiBlock != null && multiBlock.isBulkBreak())
 			multiBlock.breakBlocks(world, pos, state);
 	}
 }
