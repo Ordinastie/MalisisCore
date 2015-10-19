@@ -116,6 +116,8 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	/** Alpha transparency of this {@link UIComponent}. */
 	protected int alpha = 255;
 
+	private Object data;
+
 	/**
 	 * Instantiates a new {@link UIComponent}.
 	 *
@@ -601,6 +603,16 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 			return alpha;
 
 		return Math.min(alpha, parent.getAlpha());
+	}
+
+	public void attachData(Object data)
+	{
+		this.data = data;
+	}
+
+	public Object getData()
+	{
+		return this.data;
 	}
 
 	// #end getters/setters
