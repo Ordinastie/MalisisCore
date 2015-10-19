@@ -136,7 +136,6 @@ public class DefaultRenderer
 		@Override
 		public void render()
 		{
-			initialize();
 			RenderParameters rp = new RenderParameters();
 			rp.applyTexture.set(false);
 			if (tranformType == TransformType.GUI)
