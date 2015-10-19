@@ -216,8 +216,10 @@ public class MBlockState
 		else
 			block = Block.getBlockFromName(nbt.getString(blockName));
 
-		int metadata = nbt.getInteger(metadataName);
+		if (block == null)
+			return null;
 
+		int metadata = nbt.getInteger(metadataName);
 		return block.getStateFromMeta(metadata);
 	}
 
