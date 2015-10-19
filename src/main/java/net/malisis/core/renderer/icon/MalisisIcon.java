@@ -44,6 +44,7 @@ public class MalisisIcon extends TextureAtlasSprite
 {
 	/** The private field for registered sprites. */
 	private static Field mapRegisteredSprites = AsmUtils.changeFieldAccess(TextureMap.class, "mapRegisteredSprites", "field_110574_e");
+	//TODO: fix missing icon not properly loaded
 	/** Missing texture {@link MalisisIcon} **/
 	public static MalisisIcon missing = new MalisisIcon("missingno");
 
