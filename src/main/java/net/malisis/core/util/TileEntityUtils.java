@@ -25,10 +25,14 @@
 package net.malisis.core.util;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.client.gui.MalisisGui;
+import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -93,7 +97,7 @@ public class TileEntityUtils
 	{
 		currentTileEntity = te;
 		currenGui = gui;
-		//currenGui.updateGui();
+		currenGui.updateGui();
 	}
 
 	/**
@@ -109,4 +113,15 @@ public class TileEntityUtils
 		currenGui.updateGui();
 	}
 
+	public static AxisAlignedBB getRenderingBounds(TileEntity tileEntity)
+	{
+		Block block = tileEntity.getBlockType();
+		BlockPos pos = tileEntity.getPos();
+		World world = tileEntity.getWorld();
+		if (block instanceof IBoundingBox)
+			return AABBUtils.offset(pos, ((IBoundingBox) block).getRenderBoundingBox(world, pos, world.getBlockState(pos))[0]);
+
+		return AABBUtils.identity(pos);
+
+	}
 }
