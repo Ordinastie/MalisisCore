@@ -179,7 +179,7 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 				checked = !checked;
 		}
 
-		return true;
+		return false;
 	}
 
 	@Override
