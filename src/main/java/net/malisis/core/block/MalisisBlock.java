@@ -157,6 +157,8 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	{
 		if (this instanceof IMultiBlock)
 			((IMultiBlock) this).breakBlock(this, world, pos, state);
+
+		super.breakBlock(world, pos, state);
 	}
 
 	@Override
