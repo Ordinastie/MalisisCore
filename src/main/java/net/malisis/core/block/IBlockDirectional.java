@@ -57,14 +57,9 @@ public interface IBlockDirectional
 		return HORIZONTAL;
 	}
 
-	/**
-	 * Checks whether the placed block direction is determined from the side the block is placed on or from the entity placing the block.
-	 *
-	 * @return true, if is placed against wall
-	 */
-	public default boolean isPlacedAgainstWall()
+	public default EnumFacing getPlacingDirection(EnumFacing side, EntityLivingBase placer)
 	{
-		return false;
+		return EntityUtils.getEntityFacing(placer, getPropertyDirection() == ALL).getOpposite();
 	}
 
 	/**
@@ -94,10 +89,7 @@ public interface IBlockDirectional
 	 */
 	public default IBlockState onBlockPlaced(Block block, World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
-		EnumFacing dir = facing;
-		if (!isPlacedAgainstWall())
-			dir = EntityUtils.getEntityFacing(placer, getPropertyDirection() == ALL).getOpposite();
-		return block.getDefaultState().withProperty(getPropertyDirection(), dir);
+		return block.getDefaultState().withProperty(getPropertyDirection(), getPlacingDirection(facing, placer));
 	}
 
 	/**
@@ -141,7 +133,7 @@ public interface IBlockDirectional
 	 */
 	public default EnumFacing getDirection(IBlockAccess world, BlockPos pos)
 	{
-		return getDirection(world.getBlockState(pos));
+		return world != null ? getDirection(world.getBlockState(pos)) : EnumFacing.SOUTH;
 	}
 
 	/**
