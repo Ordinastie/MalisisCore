@@ -27,13 +27,18 @@ package net.malisis.core.util.blockdata;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.malisis.core.asm.AsmUtils;
+import net.malisis.core.util.Silenced;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
+import net.minecraft.world.ChunkCache;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.world.ChunkDataEvent;
@@ -51,6 +56,7 @@ import com.google.common.collect.Table;
 public class BlockDataHandler
 {
 	private static BlockDataHandler instance = new BlockDataHandler();
+	private static Field worldField = AsmUtils.changeFieldAccess(ChunkCache.class, "worldObj", "field_72815_e");
 
 	private Map<String, HandlerInfo> handlerInfos = new HashMap<>();
 	private Table<String, Chunk, ChunkData<?>> serverDatas = HashBasedTable.create();
@@ -63,7 +69,16 @@ public class BlockDataHandler
 
 	private Table<String, Chunk, ChunkData<?>> data(World world)
 	{
-		return world.isRemote ? instance.clientDatas : instance.serverDatas;
+		return world(world).isRemote ? instance.clientDatas : instance.serverDatas;
+	}
+
+	private World world(IBlockAccess world)
+	{
+		if (world instanceof World)
+			return (World) world;
+		else if (world instanceof ChunkCache)
+			return Silenced.get(() -> ((World) worldField.get(world)));
+		return null;
 	}
 
 	private ChunkData<?> chunkData(String identifier, World world, BlockPos pos)
@@ -87,17 +102,17 @@ public class BlockDataHandler
 		instance.handlerInfos.put(identifier, new HandlerInfo<T>(identifier, from, to));
 	}
 
-	public static <T> T getData(String identifier, World world, BlockPos pos)
+	public static <T> T getData(String identifier, IBlockAccess world, BlockPos pos)
 	{
-		return (T) instance.chunkData(identifier, world, pos).getData(pos);
+		return (T) instance.chunkData(identifier, instance.world(world), pos).getData(pos);
 	}
 
-	public static <T> void setData(String identifier, World world, BlockPos pos, T data)
+	public static <T> void setData(String identifier, IBlockAccess world, BlockPos pos, T data)
 	{
-		((ChunkData<T>) instance.chunkData(identifier, world, pos)).setData(pos, data);
+		((ChunkData<T>) instance.chunkData(identifier, instance.world(world), pos)).setData(pos, data);
 	}
 
-	public static <T> void removeData(String identifier, World world, BlockPos pos)
+	public static <T> void removeData(String identifier, IBlockAccess world, BlockPos pos)
 	{
 		setData(identifier, world, pos, null);
 	}
@@ -161,7 +176,7 @@ public class BlockDataHandler
 
 	//#end Events
 
-	public static void setBlockData(int chunkX, int chunkZ, String identifier, ByteBuf data)
+	static void setBlockData(int chunkX, int chunkZ, String identifier, ByteBuf data)
 	{
 		HandlerInfo<?> handlerInfo = instance.handlerInfos.get(identifier);
 		if (handlerInfo == null)
