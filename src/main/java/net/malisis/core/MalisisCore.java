@@ -185,7 +185,7 @@ public class MalisisCore implements IMalisisMod
 		MalisisNetwork.createMessages(event.getAsmData());
 		Syncer.get().discover(event.getAsmData());
 
-		MultiBlock.regsiterBlockData();
+		MultiBlock.registerBlockData();
 	}
 
 	/**

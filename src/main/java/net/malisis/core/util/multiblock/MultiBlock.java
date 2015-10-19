@@ -38,6 +38,7 @@ import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 /**
@@ -68,8 +69,13 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 
 	public void setRotation(IBlockState state)
 	{
-		EnumFacing direction = (EnumFacing) state.getValue(property);
-		rotation = EnumFacingUtils.getRotationCount(direction);
+		if (state == null || !state.getProperties().containsKey(property))
+			rotation = 0;
+		else
+		{
+			EnumFacing direction = (EnumFacing) state.getValue(property);
+			rotation = EnumFacingUtils.getRotationCount(direction);
+		}
 	}
 
 	public int getRotation()
@@ -116,39 +122,29 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 		return states.get(pos);
 	}
 
-	public BlockPos getOrigin(World world, BlockPos pos)
-	{
-		return BlockDataHandler.getData(ORIGIN_BLOCK_DATA, world, pos);
-	}
-
-	public boolean isOrigin(World world, BlockPos pos)
-	{
-		return pos.equals(getOrigin(world, pos));
-	}
-
-	public boolean canPlaceBlockAt(World world, BlockPos pos, IBlockState state)
+	public boolean canPlaceBlockAt(World world, BlockPos pos, IBlockState state, boolean placeOrigin)
 	{
 		setRotation(state);
 		for (MBlockState mstate : this)
 		{
 			mstate = mstate.rotate(rotation).offset(pos);
-			if (!pos.equals(mstate.getPos()) && world.getBlockState(pos).getBlock().isReplaceable(world, pos))
-				//if (!pos.equals(mstate.getPos()) && !mstate.getBlock().canPlaceBlockAt(world, mstate.getPos()))
+			if ((!mstate.getPos().equals(pos) || placeOrigin)
+					&& !world.getBlockState(mstate.getPos()).getBlock().isReplaceable(world, mstate.getPos()))
 				return false;
 		}
 		return true;
 	}
 
-	public void placeBlocks(World world, BlockPos pos, IBlockState state)
+	public void placeBlocks(World world, BlockPos pos, IBlockState state, boolean placeOrigin)
 	{
 		setRotation(state);
 		for (MBlockState mstate : this)
 		{
 			mstate = mstate.rotate(rotation).offset(pos);
-			if (!mstate.getPos().equals(pos))
+			if (!mstate.getPos().equals(pos) || placeOrigin)
 			{
-				mstate.placeBlock(world, 2);
 				BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, mstate.getPos(), pos);
+				mstate.placeBlock(world, 2);
 			}
 		}
 
@@ -159,7 +155,10 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 	{
 		BlockPos origin = getOrigin(world, pos);
 		if (origin == null)
+		{
+			world.setBlockToAir(pos);
 			return;
+		}
 		if (!pos.equals(origin))
 		{
 			breakBlocks(world, origin, world.getBlockState(origin));
@@ -206,9 +205,18 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 
 	protected abstract void buildStates();
 
-	public static void regsiterBlockData()
+	public static void registerBlockData()
 	{
 		BlockDataHandler.registerBlockData(ORIGIN_BLOCK_DATA, BlockPosUtils::fromBytes, BlockPosUtils::toBytes);
 	}
 
+	public static BlockPos getOrigin(IBlockAccess world, BlockPos pos)
+	{
+		return BlockDataHandler.getData(ORIGIN_BLOCK_DATA, world, pos);
+	}
+
+	public static boolean isOrigin(World world, BlockPos pos)
+	{
+		return pos.equals(getOrigin(world, pos));
+	}
 }
