@@ -24,14 +24,13 @@
 
 package net.malisis.core.util.multiblock;
 
-import net.malisis.core.block.IBlockDirectional;
 import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.MBlockState;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.world.World;
 
 /**
  * @author Ordinastie
@@ -46,14 +45,18 @@ public class AABBMultiBlock extends MultiBlock
 	{
 		this.aabb = aabb;
 		this.blockState = block.getDefaultState();
-		if (blockState.getProperties().containsKey(IBlockDirectional.HORIZONTAL))
-			blockState = blockState.withProperty(IBlockDirectional.HORIZONTAL, EnumFacing.SOUTH);
 		buildStates();
 	}
 
 	public AxisAlignedBB getBoundingBox()
 	{
 		return aabb;
+	}
+
+	public AxisAlignedBB getRelativeBoundingBox(BlockPos pos, BlockPos origin)
+	{
+		pos = pos.subtract(origin);
+		return aabb.offset(-pos.getX(), -pos.getY(), -pos.getZ());
 	}
 
 	@Override
@@ -66,5 +69,13 @@ public class AABBMultiBlock extends MultiBlock
 				pos = pos.add(offset);
 			states.put(pos, new MBlockState(pos, blockState));
 		}
+	}
+
+	@Override
+	public void placeBlocks(World world, BlockPos pos, IBlockState state, boolean placeOrigin)
+	{
+		blockState = state.withProperty(IMultiBlock.ORIGIN, false);
+		buildStates();
+		super.placeBlocks(world, pos, state, placeOrigin);
 	}
 }
