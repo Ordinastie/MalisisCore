@@ -49,7 +49,10 @@ import net.minecraftforge.client.model.TRSRTransformation;
 @SuppressWarnings("deprecation")
 public class DefaultRenderer
 {
-	public static MalisisRenderer block = new MalisisRenderer()
+	public static MalisisRenderer block = new Block();
+	public static MalisisRenderer item = new Item();
+
+	public static class Block extends MalisisRenderer
 	{
 		//"thirdperson": {
 		//    "rotation": [ 10, -45, 170 ],
@@ -89,9 +92,9 @@ public class DefaultRenderer
 				}
 			}
 		}
-	};
+	}
 
-	public static MalisisRenderer item = new MalisisRenderer()
+	public static class Item extends MalisisRenderer
 	{
 		//"thirdperson": {
 		//    "rotation": [ -90, 0, 0 ],
