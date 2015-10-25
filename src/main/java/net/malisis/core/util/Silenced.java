@@ -55,12 +55,12 @@ public class Silenced
 		}
 	}
 
-	private static interface Supplier<T>
+	public static interface Supplier<T>
 	{
 		public T get() throws Exception;
 	}
 
-	private static interface Exec
+	public static interface Exec
 	{
 		public void exec() throws Exception;
 	}
