@@ -182,7 +182,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	public void set(IBlockAccess world, Block block, BlockPos pos, IBlockState blockState)
 	{
 		this.world = world;
-		this.pos = pos;
+		this.pos = new BlockPos(pos);
 		this.block = block;
 		this.blockState = blockState;
 	}
@@ -228,7 +228,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 */
 	public void set(BlockPos pos)
 	{
-		this.pos = pos;
+		this.pos = new BlockPos(pos);
 	}
 
 	/**

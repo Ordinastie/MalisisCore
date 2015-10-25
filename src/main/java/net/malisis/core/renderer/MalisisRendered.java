@@ -22,36 +22,26 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.icon;
+package net.malisis.core.renderer;
 
-import net.malisis.core.MalisisRegistry;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * The IIconProvider interface allows to pass {@link MalisisIcon} to the rendering processes.<br>
- * Implementers of this interface can be registered with {@link MalisisRegistry#registerIconProvider(IIconProvider)} so that icons used can
- * be registered and stitched to the {@link TextureMap}.
- *
  * @author Ordinastie
+ *
  */
-@SideOnly(Side.CLIENT)
-public interface IIconProvider
+@Inherited
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MalisisRendered
 {
+	Class<? extends MalisisRenderer> value() default DefaultRenderer.Block.class;
 
-	/**
-	 * Gets the {@link MalisisIcon} to use.
-	 *
-	 * @return the icon
-	 */
-	public MalisisIcon getIcon();
+	Class<? extends MalisisRenderer> block() default DefaultRenderer.Block.class;
 
-	/**
-	 * Registers the icons to the {@link TextureMap}.
-	 *
-	 * @param map the map
-	 */
-	public void registerIcons(TextureMap textureMap);
-
+	Class<? extends MalisisRenderer> item() default DefaultRenderer.Item.class;
 }

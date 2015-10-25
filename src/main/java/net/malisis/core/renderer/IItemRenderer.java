@@ -42,6 +42,8 @@ import net.minecraftforge.client.model.IPerspectiveAwareModel;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * @author Ordinastie
  *
@@ -91,8 +93,8 @@ public interface IItemRenderer
 		@Override public boolean isBuiltInRenderer() 					{ return false; }
 		@Override public TextureAtlasSprite getTexture() 				{ return null; }
 		@Override public ItemCameraTransforms getItemCameraTransforms() { return null; }
-		@Override public List<BakedQuad> getFaceQuads(EnumFacing side) 	{ return null; }
-		@Override public List<BakedQuad> getGeneralQuads() 				{ return null; }
+		@Override public List<BakedQuad> getFaceQuads(EnumFacing side) 	{ return ImmutableList.of(); }
+		@Override public List<BakedQuad> getGeneralQuads() 				{ return ImmutableList.of(); }
 		//@formatter:on
 
 		@Override

@@ -24,9 +24,9 @@
 
 package net.malisis.core.item;
 
-import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IRegisterable;
-import net.malisis.core.renderer.IMalisisRendered;
+import net.malisis.core.renderer.DefaultRenderer;
+import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
@@ -34,18 +34,17 @@ import net.minecraft.item.Item;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * @author Ordinastie
  *
  */
-public class MalisisItem extends Item implements IMetaIconProvider, IMalisisRendered, IRegisterable
+@MalisisRendered(DefaultRenderer.Item.class)
+public class MalisisItem extends Item implements IMetaIconProvider, IRegisterable
 {
 	protected String name;
 	protected IIconProvider iconProvider;
 
-	public Item setName(String name)
+	public MalisisItem setName(String name)
 	{
 		this.name = name;
 		super.setUnlocalizedName(name);
@@ -58,19 +57,12 @@ public class MalisisItem extends Item implements IMetaIconProvider, IMalisisRend
 		return name;
 	}
 
-	public void setTextureName(String textureName)
-	{
-		if (StringUtils.isEmpty(textureName))
-			return;
-
-		if (MalisisCore.isClient())
-			setIconProvider(new DefaultIconProvider(textureName));
-	}
-
+	@Override
 	@SideOnly(Side.CLIENT)
-	public void setIconProvider(IIconProvider iconProvider)
+	public void createIconProvider(Object object)
 	{
-		this.iconProvider = iconProvider;
+		if (object != null)
+			iconProvider = DefaultIconProvider.from(object);
 	}
 
 	@Override

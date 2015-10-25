@@ -32,10 +32,12 @@ import java.util.Map;
 import java.util.Set;
 
 import net.malisis.core.block.IRegisterable;
+import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
 import net.malisis.core.renderer.IItemRenderer.DummyModel;
 import net.malisis.core.renderer.IRenderWorldLast;
+import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.IMetaIconProvider;
@@ -58,11 +60,13 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.GameData;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -73,30 +77,150 @@ import com.google.common.collect.ImmutableMap;
 public class MalisisRegistry
 {
 	/** Unique instance of {@link MalisisRegistry}. */
-	private static MalisisRegistry instance = new MalisisRegistry();
-	/** List of registered {@link IBlockRenderer}. */
-	private Map<Block, IBlockRenderer> blockRenderers = new HashMap<>();
-	/** List of registered {@link IItemRenderer} */
-	private Map<Item, IItemRenderer> itemRenderers = new HashMap<>();
-	/** List of registered {@link IRenderWorldLast} */
-	private List<IRenderWorldLast> renderWorldLastRenderers = new ArrayList<>();
-	/** List of registered {@link IIconProvider} */
-	private Set<IIconProvider> iconProviders = new HashSet<>();
-	/** List of {@link DummyModel} for registered items */
-	private Set<DummyModel> itemModels = new HashSet<>();
-	/** Empty {@link IStateMapper} **/
-	private static final IStateMapper emptyMapper = new IStateMapper()
+	@SideOnly(Side.CLIENT)
+	private static ClientRegistry instance;
+	static
 	{
-		@Override
-		public Map putStateModelLocations(Block block)
+		if (MalisisCore.isClient())
 		{
-			return ImmutableMap.of();
+			instance = new ClientRegistry();
+			MinecraftForge.EVENT_BUS.register(instance);
 		}
-	};
+	}
 
-	private MalisisRegistry()
+	@SideOnly(Side.CLIENT)
+	private static class ClientRegistry
 	{
-		MinecraftForge.EVENT_BUS.register(this);
+		/** List of registered {@link IBlockRenderer}. */
+		private Map<Block, IBlockRenderer> blockRenderers = new HashMap<>();
+		/** List of registered {@link IItemRenderer} */
+		private Map<Item, IItemRenderer> itemRenderers = new HashMap<>();
+		/** List of registered {@link IRenderWorldLast} */
+		private List<IRenderWorldLast> renderWorldLastRenderers = new ArrayList<>();
+		/** List of registered {@link IIconProvider} */
+		private Set<IIconProvider> iconProviders = new HashSet<>();
+		/** List of {@link DummyModel} for registered items */
+		private Set<DummyModel> itemModels = new HashSet<>();
+		private Map<Class<? extends MalisisRenderer>, MalisisRenderer> registeredRenderers = new HashMap<>();
+
+		/** Empty {@link IStateMapper} **/
+		private static final IStateMapper emptyMapper = new IStateMapper()
+		{
+			@Override
+			public Map putStateModelLocations(Block block)
+			{
+				return ImmutableMap.of();
+			}
+		};
+
+		@SubscribeEvent
+		public void onRenderLast(RenderWorldLastEvent event)
+		{
+			for (IRenderWorldLast renderer : renderWorldLastRenderers)
+			{
+				if (renderer.shouldRender(event, Minecraft.getMinecraft().theWorld))
+					renderer.renderWorldLastEvent(event, Minecraft.getMinecraft().theWorld);
+			}
+		}
+
+		public void registerIconProvider(Object object)
+		{
+			if (object instanceof IMetaIconProvider)
+			{
+				((IMetaIconProvider) object).createIconProvider(null);
+				MalisisRegistry.registerIconProvider(((IMetaIconProvider) object).getIconProvider());
+			}
+		}
+
+		@SubscribeEvent
+		public void onModelBakeEvent(ModelBakeEvent event)
+		{
+			for (DummyModel model : itemModels)
+				event.modelRegistry.putObject(model.getResourceLocation(), model);
+		}
+
+		@SideOnly(Side.CLIENT)
+		@SubscribeEvent
+		public void onTextureStitchEvent(TextureStitchEvent.Pre event)
+		{
+			for (IIconProvider iconProvider : iconProviders)
+				iconProvider.registerIcons(event.map);
+		}
+
+		private MalisisRenderer getRenderer(Class<? extends MalisisRenderer> clazz) throws InstantiationException, IllegalAccessException
+		{
+			if (clazz == DefaultRenderer.Block.class)
+				return DefaultRenderer.block;
+			else if (clazz == DefaultRenderer.Block.class)
+				return DefaultRenderer.item;
+
+			MalisisRenderer renderer = registeredRenderers.get(clazz);
+			if (renderer == null)
+			{
+				renderer = clazz.newInstance();
+				registeredRenderers.put(clazz, renderer);
+			}
+
+			return renderer;
+		}
+
+		private Pair<Class<? extends MalisisRenderer>, Class<? extends MalisisRenderer>> getRendererClasses(Object object)
+		{
+			Class<?> objClass = object.getClass();
+			MalisisRendered annotation = objClass.getAnnotation(MalisisRendered.class);
+			if (annotation == null)
+				return null;
+
+			if (annotation.value() != DefaultRenderer.Block.class)
+				return Pair.of(annotation.value(), annotation.value());
+			else
+				return Pair.of(annotation.block(), annotation.item());
+		}
+
+		private void registerRenderer(Object object)
+		{
+			Pair<Class<? extends MalisisRenderer>, Class<? extends MalisisRenderer>> rendererClasses = getRendererClasses(object);
+			if (rendererClasses == null)
+				return;
+
+			MalisisCore.log.info("[MalisisRegistry] Found annotation for {}", object.getClass().getSimpleName());
+			MalisisRenderer renderer = null;
+			try
+			{
+				renderer = getRenderer(rendererClasses.getLeft());
+			}
+			catch (InstantiationException | IllegalAccessException e)
+			{
+				MalisisCore.log.error("[MalisisRegistry] Failed to load {} renderer for {}", rendererClasses.getLeft().getSimpleName(),
+						object.getClass().getSimpleName());
+				return;
+			}
+
+			if (object instanceof Block && renderer != null)
+			{
+				registerBlockRenderer((Block) object, renderer);
+				MalisisCore.log.info("[MalisisRegistry] Registered block {} for {}", renderer.getClass().getSimpleName(), object.getClass()
+						.getSimpleName());
+				object = Item.getItemFromBlock((Block) object);
+			}
+
+			try
+			{
+				renderer = getRenderer(rendererClasses.getRight());
+			}
+			catch (InstantiationException | IllegalAccessException e)
+			{
+				MalisisCore.log.error("[MalisisRegistry] Failed to load {} renderer for {}", rendererClasses.getLeft().getSimpleName(),
+						object.getClass().getSimpleName());
+				return;
+			}
+			if (object instanceof Item && renderer != null)
+			{
+				registerItemRenderer((Item) object, renderer);
+				MalisisCore.log.info("[MalisisRegistry] Registered item {} for {}", renderer.getClass().getSimpleName(), object.getClass()
+						.getSimpleName());
+			}
+		}
 	}
 
 	/**
@@ -121,7 +245,7 @@ public class MalisisRegistry
 
 			if (MalisisCore.isClient())
 			{
-				ModelLoader.setCustomStateMapper(block, emptyMapper);
+				ModelLoader.setCustomStateMapper(block, ClientRegistry.emptyMapper);
 				Item item = Item.getItemFromBlock(block);
 				if (item != null)
 					registerItemModel(item, name);
@@ -146,6 +270,8 @@ public class MalisisRegistry
 	@SideOnly(Side.CLIENT)
 	public static void registerBlockRenderer(Block block, IBlockRenderer renderer)
 	{
+		if (block == null || renderer == null)
+			return;
 		instance.blockRenderers.put(block, renderer);
 		instance.itemRenderers.put(Item.getItemFromBlock(block), renderer);
 	}
@@ -215,6 +341,8 @@ public class MalisisRegistry
 	@SideOnly(Side.CLIENT)
 	public static void registerItemRenderer(Item item, IItemRenderer renderer)
 	{
+		if (item == null || renderer == null)
+			return;
 		instance.itemRenderers.put(item, renderer);
 	}
 
@@ -269,14 +397,6 @@ public class MalisisRegistry
 			instance.iconProviders.add(iconProvider);
 	}
 
-	@SideOnly(Side.CLIENT)
-	@SubscribeEvent
-	public void onTextureStitchEvent(TextureStitchEvent.Pre event)
-	{
-		for (IIconProvider iconProvider : instance.iconProviders)
-			iconProvider.registerIcons(event.map);
-	}
-
 	//#end IIconProvider
 
 	//#region RenderWorldLast
@@ -285,6 +405,7 @@ public class MalisisRegistry
 	 *
 	 * @param renderer the renderer
 	 */
+	@SideOnly(Side.CLIENT)
 	public static void registerRenderWorldLast(IRenderWorldLast renderer)
 	{
 		instance.renderWorldLastRenderers.add(renderer);
@@ -295,19 +416,10 @@ public class MalisisRegistry
 	 *
 	 * @param renderer the renderer
 	 */
+	@SideOnly(Side.CLIENT)
 	public static void unregisterRenderWorldLast(IRenderWorldLast renderer)
 	{
 		instance.renderWorldLastRenderers.remove(renderer);
-	}
-
-	@SubscribeEvent
-	public void onRenderLast(RenderWorldLastEvent event)
-	{
-		for (IRenderWorldLast renderer : renderWorldLastRenderers)
-		{
-			if (renderer.shouldRender(event, Minecraft.getMinecraft().theWorld))
-				renderer.renderWorldLastEvent(event, Minecraft.getMinecraft().theWorld);
-		}
 	}
 
 	//#end RenderWorldLast
@@ -320,11 +432,13 @@ public class MalisisRegistry
 	 *
 	 * @param item the item
 	 */
+	@SideOnly(Side.CLIENT)
 	public static void registerItemModel(Item item, String name)
 	{
 		registerItemModel(item, Loader.instance().activeModContainer().getModId(), name);
 	}
 
+	@SideOnly(Side.CLIENT)
 	public static void registerItemModel(Item item, String modid, String name)
 	{
 		DummyModel model = new DummyModel(item, modid + ":" + name);
@@ -332,12 +446,19 @@ public class MalisisRegistry
 		instance.itemModels.add(model);
 	}
 
-	@SubscribeEvent
-	public void onModelBakeEvent(ModelBakeEvent event)
+	//#end ItemModels
+
+	@SideOnly(Side.CLIENT)
+	public static void registerRenderers()
 	{
-		for (DummyModel model : itemModels)
-			event.modelRegistry.putObject(model.getResourceLocation(), model);
+		GameData.getBlockRegistry().forEach(instance::registerRenderer);
+		GameData.getItemRegistry().forEach(instance::registerRenderer);
 	}
 
-	//#end ItemModels
+	@SideOnly(Side.CLIENT)
+	public static void registerIconProviders()
+	{
+		GameData.getBlockRegistry().forEach(instance::registerIconProvider);
+		GameData.getItemRegistry().forEach(instance::registerIconProvider);
+	}
 }

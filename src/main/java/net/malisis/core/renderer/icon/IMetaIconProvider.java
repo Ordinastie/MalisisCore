@@ -24,6 +24,14 @@
 
 package net.malisis.core.renderer.icon;
 
+import net.malisis.core.MalisisCore;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.Item;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Ordinastie
@@ -31,5 +39,33 @@ package net.malisis.core.renderer.icon;
  */
 public interface IMetaIconProvider
 {
+	public default void setTexture(String textureName)
+	{
+		if (!StringUtils.isEmpty(textureName) && MalisisCore.isClient())
+			createIconProvider(textureName);
+	}
+
+	public default void setTexture(Item item)
+	{
+		if (item != null && MalisisCore.isClient())
+			createIconProvider(item);
+	}
+
+	public default void setTexture(Block block)
+	{
+		if (block != null && block.getDefaultState() != null && MalisisCore.isClient())
+			createIconProvider(block.getDefaultState());
+	}
+
+	public default void setTexture(IBlockState blockState)
+	{
+		if (blockState != null && MalisisCore.isClient())
+			createIconProvider(blockState);
+	}
+
+	@SideOnly(Side.CLIENT)
+	public void createIconProvider(Object object);
+
+	@SideOnly(Side.CLIENT)
 	public IIconProvider getIconProvider();
 }

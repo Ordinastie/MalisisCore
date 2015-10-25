@@ -618,6 +618,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	// #end getters/setters
 
 	@Override
+	public void createIconProvider(Object object)
+	{}
+
+	@Override
 	public IIconProvider getIconProvider()
 	{
 		return iconProvider;

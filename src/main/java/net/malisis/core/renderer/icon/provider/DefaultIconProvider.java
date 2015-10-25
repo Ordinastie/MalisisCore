@@ -26,7 +26,11 @@ package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.VanillaIcon;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.item.Item;
 
 /**
  * @author Ordinastie
@@ -35,11 +39,6 @@ import net.minecraft.client.renderer.texture.TextureMap;
 public class DefaultIconProvider implements IIconProvider
 {
 	protected MalisisIcon icon;
-
-	public DefaultIconProvider(String name)
-	{
-		icon = new MalisisIcon(name);
-	}
 
 	public DefaultIconProvider(MalisisIcon icon)
 	{
@@ -56,5 +55,25 @@ public class DefaultIconProvider implements IIconProvider
 	public MalisisIcon getIcon()
 	{
 		return icon;
+	}
+
+	public static DefaultIconProvider from(Object object)
+	{
+		if (object == null)
+			return null;
+
+		if (object instanceof String)
+			return (String) object != "" ? new DefaultIconProvider(new MalisisIcon((String) object)) : null;
+
+		if (object instanceof Item)
+			return new DefaultIconProvider(new VanillaIcon((Item) object));
+
+		if (object instanceof Block)
+			return new DefaultIconProvider(new VanillaIcon((Block) object));
+
+		if (object instanceof IBlockState)
+			return new DefaultIconProvider(new VanillaIcon((IBlockState) object));
+
+		throw new IllegalArgumentException("Parameter has to be a String, a Block, an IBlockState or an Item");
 	}
 }

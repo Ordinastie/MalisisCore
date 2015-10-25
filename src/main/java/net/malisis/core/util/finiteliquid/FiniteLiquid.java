@@ -33,7 +33,7 @@ import java.util.Set;
 
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.MalisisBlock;
-import net.malisis.core.renderer.MalisisRenderer;
+import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.util.MBlockState;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -49,14 +49,12 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
  *
  */
-
+@MalisisRendered(FiniteLiquidRenderer.class)
 public abstract class FiniteLiquid extends MalisisBlock
 {
 	protected String name;
@@ -195,13 +193,6 @@ public abstract class FiniteLiquid extends MalisisBlock
 	public boolean canRenderInLayer(EnumWorldBlockLayer layer)
 	{
 		return layer == EnumWorldBlockLayer.TRANSLUCENT;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public MalisisRenderer getRenderer()
-	{
-		return new FiniteLiquidRenderer();
 	}
 
 	public static class FloodFill
