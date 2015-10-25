@@ -33,6 +33,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.world.World;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 /**
  * @author Ordinastie
  *
@@ -98,6 +100,9 @@ public class AABBUtils
 
 	public static AxisAlignedBB[] rotate(AxisAlignedBB[] aabbs, int angle)
 	{
+		if (ArrayUtils.isEmpty(aabbs) || angle == 0)
+			return aabbs;
+
 		for (int i = 0; i < aabbs.length; i++)
 			aabbs[i] = rotate(aabbs[i], angle);
 		return aabbs;
@@ -110,8 +115,8 @@ public class AABBUtils
 
 	public static AxisAlignedBB rotate(AxisAlignedBB aabb, int angle, Axis axis)
 	{
-		if (aabb == null)
-			return null;
+		if (aabb == null || angle == 0 || axis == null)
+			return aabb;
 
 		int a = -angle & 3;
 		int s = sin[a];
@@ -158,13 +163,13 @@ public class AABBUtils
 
 	public static AxisAlignedBB readFromNBT(NBTTagCompound tag)
 	{
-		return new AxisAlignedBB(tag.getDouble("minX"), tag.getDouble("minY"), tag.getDouble("minZ"), tag.getDouble("maxX"),
-				tag.getDouble("maxY"), tag.getDouble("maxZ"));
+		return tag != null ? new AxisAlignedBB(tag.getDouble("minX"), tag.getDouble("minY"), tag.getDouble("minZ"), tag.getDouble("maxX"),
+				tag.getDouble("maxY"), tag.getDouble("maxZ")) : null;
 	}
 
 	public static void writeToNBT(NBTTagCompound tag, AxisAlignedBB aabb)
 	{
-		if (aabb == null)
+		if (tag == null || aabb == null)
 			return;
 		tag.setDouble("minX", aabb.minX);
 		tag.setDouble("minY", aabb.minY);
@@ -182,7 +187,7 @@ public class AABBUtils
 	 */
 	public static AxisAlignedBB combine(AxisAlignedBB[] aabbs)
 	{
-		if (aabbs == null || aabbs.length == 0)
+		if (ArrayUtils.isEmpty(aabbs))
 			return null;
 
 		AxisAlignedBB ret = null;
@@ -212,13 +217,15 @@ public class AABBUtils
 
 	public static AxisAlignedBB offset(BlockPos pos, AxisAlignedBB aabb)
 	{
+		if (aabb == null || pos == null)
+			return aabb;
 		return aabb.offset(pos.getX(), pos.getY(), pos.getZ());
 	}
 
 	public static AxisAlignedBB[] offset(BlockPos pos, AxisAlignedBB... aabbs)
 	{
-		if (aabbs == null)
-			return null;
+		if (ArrayUtils.isEmpty(aabbs))
+			return aabbs;
 
 		for (int i = 0; i < aabbs.length; i++)
 			if (aabbs[i] != null)
@@ -245,6 +252,9 @@ public class AABBUtils
 	 */
 	public static boolean isColliding(AxisAlignedBB[] aabbs1, AxisAlignedBB[] aabbs2)
 	{
+		if (ArrayUtils.isEmpty(aabbs1) || ArrayUtils.isEmpty(aabbs2))
+			return false;
+
 		for (AxisAlignedBB aabb1 : aabbs1)
 		{
 			if (aabb1 != null)
@@ -311,6 +321,8 @@ public class AABBUtils
 	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, MBlockState state, boolean offset)
 	{
 		AxisAlignedBB[] aabbs = new AxisAlignedBB[0];
+		if (world == null || state == null)
+			return aabbs;
 
 		if (state.getBlock() instanceof IBoundingBox)
 			aabbs = ((IBoundingBox) state.getBlock()).getCollisionBoundingBoxes(world, state.getPos(), state.getBlockState());
