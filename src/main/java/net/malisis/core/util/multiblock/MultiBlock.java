@@ -215,7 +215,7 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 		return BlockDataHandler.getData(ORIGIN_BLOCK_DATA, world, pos);
 	}
 
-	public static boolean isOrigin(World world, BlockPos pos)
+	public static boolean isOrigin(IBlockAccess world, BlockPos pos)
 	{
 		return pos.equals(getOrigin(world, pos));
 	}
