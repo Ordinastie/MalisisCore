@@ -65,7 +65,7 @@ public interface IBoundingBox
 	{
 		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.COLLISION);
 		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(state));
+			aabbs = AABBUtils.rotate(aabbs, IBlockDirectional.getDirection(state));
 		return aabbs;
 	}
 
@@ -73,7 +73,7 @@ public interface IBoundingBox
 	{
 		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.COLLISION);
 		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(state));
+			aabbs = AABBUtils.rotate(aabbs, IBlockDirectional.getDirection(state));
 
 		for (AxisAlignedBB aabb : AABBUtils.offset(pos, aabbs))
 		{
@@ -89,7 +89,7 @@ public interface IBoundingBox
 			return AABBUtils.empty(pos);
 
 		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(world.getBlockState(pos)));
+			aabbs = AABBUtils.rotate(aabbs, IBlockDirectional.getDirection(world.getBlockState(pos)));
 
 		return AABBUtils.offset(pos, aabbs)[0];
 	}
@@ -98,7 +98,7 @@ public interface IBoundingBox
 	{
 		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.RENDER);
 		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(state));
+			aabbs = AABBUtils.rotate(aabbs, IBlockDirectional.getDirection(state));
 
 		return aabbs;
 	}
@@ -107,7 +107,7 @@ public interface IBoundingBox
 	{
 		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.RAYTRACE);
 		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getDirection(state));
+			aabbs = AABBUtils.rotate(aabbs, IBlockDirectional.getDirection(state));
 
 		return aabbs;
 	}
