@@ -26,10 +26,12 @@ package net.malisis.core.util.multiblock;
 
 import net.malisis.core.block.IBlockDirectional;
 import net.minecraft.block.Block;
+import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -39,7 +41,21 @@ import net.minecraft.world.World;
  */
 public interface IMultiBlock extends IBlockDirectional
 {
+	public static PropertyBool ORIGIN = PropertyBool.create("origin");
+
 	public MultiBlock getMultiBlock(IBlockAccess world, BlockPos pos, IBlockState state, ItemStack itemStack);
+
+	public default PropertyBool getOriginProperty()
+	{
+		return ORIGIN;
+	}
+
+	@Override
+	public default IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+	{
+		return IBlockDirectional.super.onBlockPlaced(block, world, pos, state, facing, hitX, hitY, hitZ, meta, placer).withProperty(
+				getOriginProperty(), true);
+	}
 
 	public default void onBlockPlacedBy(Block block, World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
 	{
@@ -58,5 +74,34 @@ public interface IMultiBlock extends IBlockDirectional
 		MultiBlock multiBlock = getMultiBlock(world, pos, state, null);
 		if (multiBlock != null && multiBlock.isBulkBreak())
 			multiBlock.breakBlocks(world, pos, state);
+	}
+
+	@Override
+	public default IBlockState getStateFromMeta(Block block, IBlockState state, int meta)
+	{
+		return IBlockDirectional.super.getStateFromMeta(block, state, meta).withProperty(getOriginProperty(), (meta & 8) != 0);
+	}
+
+	@Override
+	public default int getMetaFromState(Block block, IBlockState state)
+	{
+		return IBlockDirectional.super.getMetaFromState(block, state) + (isOrigin(state) ? 8 : 0);
+	}
+
+	public static boolean isOrigin(World world, BlockPos pos)
+	{
+		return world != null && pos != null && isOrigin(world.getBlockState(pos));
+	}
+
+	public static boolean isOrigin(IBlockState state)
+	{
+		if (!(state.getBlock() instanceof IMultiBlock))
+			return false;
+
+		PropertyBool property = ((IMultiBlock) state.getBlock()).getOriginProperty();
+		if (property == null || !state.getProperties().containsKey(property))
+			return false;
+
+		return (boolean) state.getValue(property);
 	}
 }
