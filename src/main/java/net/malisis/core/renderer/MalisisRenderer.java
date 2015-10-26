@@ -472,7 +472,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements ISimpl
 	public void prepare(RenderType renderType, double... data)
 	{
 		_initialize();
-
+		vertexDrawn = false;
 		this.renderType = renderType;
 		if (renderType == RenderType.ISBRH_WORLD)
 		{
