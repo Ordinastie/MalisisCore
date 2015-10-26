@@ -24,7 +24,6 @@
 
 package net.malisis.core.renderer;
 
-
 /**
  *
  * @author Ordinastie
@@ -130,6 +129,6 @@ public class Parameter<T>
 	@Override
 	public String toString()
 	{
-		return value.toString() + " [" + defaultValue.toString() + "]";
+		return value + " [" + defaultValue + "]";
 	}
 }
