@@ -29,6 +29,9 @@ import java.util.List;
 
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.common.util.ForgeDirection;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  *
@@ -130,12 +133,12 @@ public class Ray
 	}
 
 	/**
-	 * Finds the points intersecting the {@link AxisAlignedBB}
+	 * Finds the points intersecting the {@link AxisAlignedBB}.
 	 *
 	 * @param aabb the aabb
 	 * @return the list
 	 */
-	public List<Point> intersect(AxisAlignedBB aabb)
+	public List<Pair<ForgeDirection, Point>> intersect(AxisAlignedBB aabb)
 	{
 		double ix = intersectX(aabb.minX);
 		double iX = intersectX(aabb.maxX);
@@ -150,21 +153,21 @@ public class Ray
 		Point interz = iz >= 0 ? getPointAt(iz) : null;
 		Point interZ = iZ >= 0 ? getPointAt(iZ) : null;
 
-		List<Point> list = new ArrayList<>();
+		List<Pair<ForgeDirection, Point>> list = new ArrayList<>();
 		if (interx != null && interx.isInside(aabb))
-			list.add(interx);
+			list.add(Pair.of(ForgeDirection.WEST, interx));
 		if (interX != null && interX.isInside(aabb))
-			list.add(interX);
+			list.add(Pair.of(ForgeDirection.EAST, interX));
 
 		if (intery != null && intery.isInside(aabb))
-			list.add(intery);
+			list.add(Pair.of(ForgeDirection.DOWN, intery));
 		if (interY != null && interY.isInside(aabb))
-			list.add(interY);
+			list.add(Pair.of(ForgeDirection.UP, interY));
 
 		if (interz != null && interz.isInside(aabb))
-			list.add(interz);
+			list.add(Pair.of(ForgeDirection.NORTH, interz));
 		if (interZ != null && interZ.isInside(aabb))
-			list.add(interZ);
+			list.add(Pair.of(ForgeDirection.SOUTH, interZ));
 
 		return list;
 	}

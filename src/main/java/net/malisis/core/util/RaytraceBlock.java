@@ -37,6 +37,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 /**
  * RayTrace class that offers more control to handle raytracing.
  *
@@ -175,7 +177,7 @@ public class RaytraceBlock
 		if (aabbs == null || aabbs.length == 0)
 			return null;
 
-		List<Point> points = new ArrayList<>();
+		List<Pair<ForgeDirection, Point>> points = new ArrayList<>();
 		double maxDist = Point.distanceSquared(src, dest);
 		for (AxisAlignedBB aabb : aabbs)
 		{
@@ -183,23 +185,21 @@ public class RaytraceBlock
 				continue;
 
 			aabb.offset(x, y, z);
-			for (Point p : ray.intersect(aabb))
+			for (Pair<ForgeDirection, Point> pair : ray.intersect(aabb))
 			{
-				if (Point.distanceSquared(src, p) < maxDist)
-					points.add(p);
+				if (Point.distanceSquared(src, pair.getRight()) < maxDist)
+					points.add(pair);
 			}
 		}
 
 		if (points.size() == 0)
 			return null;
 
-		Point closest = getClosest(points);
+		Pair<ForgeDirection, Point> closest = getClosest(points);
 		if (closest == null)
 			return null;
 
-		ForgeDirection side = getSide(aabbs, closest);
-
-		return new MovingObjectPosition(x, y, z, side.ordinal(), closest.toVec3());
+		return new MovingObjectPosition(x, y, z, closest.getLeft().ordinal(), closest.getRight().toVec3());
 	}
 
 	/**
@@ -208,43 +208,20 @@ public class RaytraceBlock
 	 * @param points the points
 	 * @return the closest point
 	 */
-	private Point getClosest(List<Point> points)
+	private Pair<ForgeDirection, Point> getClosest(List<Pair<ForgeDirection, Point>> points)
 	{
 		double distance = Double.MAX_VALUE;
-		Point ret = null;
-		for (Point p : points)
+		Pair<ForgeDirection, Point> ret = null;
+		for (Pair<ForgeDirection, Point> pair : points)
 		{
-			double d = Point.distanceSquared(src, p);
+			double d = Point.distanceSquared(src, pair.getRight());
 			if (distance > d)
 			{
 				distance = d;
-				ret = p;
+				ret = pair;
 			}
 		}
 
 		return ret;
-	}
-
-	private ForgeDirection getSide(AxisAlignedBB[] aabbs, Point point)
-	{
-		for (AxisAlignedBB aabb : aabbs)
-		{
-			if (aabb == null)
-				continue;
-
-			if (point.x == aabb.minX)
-				return ForgeDirection.WEST;
-			if (point.x == aabb.maxX)
-				return ForgeDirection.EAST;
-			if (point.y == aabb.minY)
-				return ForgeDirection.DOWN;
-			if (point.y == aabb.maxY)
-				return ForgeDirection.UP;
-			if (point.z == aabb.minZ)
-				return ForgeDirection.NORTH;
-			if (point.z == aabb.maxZ)
-				return ForgeDirection.SOUTH;
-		}
-		return ForgeDirection.UNKNOWN;
 	}
 }
