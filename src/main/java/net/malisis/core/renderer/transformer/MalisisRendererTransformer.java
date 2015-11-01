@@ -25,14 +25,12 @@
 package net.malisis.core.renderer.transformer;
 
 import static org.objectweb.asm.Opcodes.*;
-import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmHook;
 import net.malisis.core.asm.MalisisClassTransformer;
 import net.malisis.core.asm.mappings.McpMethodMapping;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -77,12 +75,13 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		match.add(getRenderType.getInsnNode(INVOKEVIRTUAL));
 		match.add(new VarInsnNode(ISTORE, 5));
 
-		//TODO: convert to instanceof check (see below)
-		//if (i == MalisisCore.malisisRenderType)
+		//if (MalisisRegistry.shouldRenderBlock(world, pos, state))
 		//	return MalisisRegistry.render(wr, world, pos, state);
-		//		ILOAD 6
-		//		ICONST_4 | SIPUSH 4
-		//		IF_ICMPNE L18
+		//		ALOAD 6
+		//		ALOAD 7
+		//		ALOAD 8
+		//		INVOKESTATIC net/malisis/core/MalisisRegistry.shouldRenderBlock (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z
+		//		IFEQ L20
 		//		ALOAD 6
 		//	    ALOAD 7
 		//	    ALOAD 8
@@ -90,9 +89,12 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		//	    INVOKESTATIC net/malisis/core/renderer/BlockRendererRegistry.render (Lnet/minecraft/client/renderer/BlockModelRenderer;Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z
 		LabelNode falseLabel = new LabelNode();
 		InsnList insert = new InsnList();
-		insert.add(new VarInsnNode(ILOAD, 5));
-		insert.add(new IntInsnNode(SIPUSH, MalisisCore.malisisRenderType));
-		insert.add(new JumpInsnNode(IF_ICMPNE, falseLabel));
+		insert.add(new VarInsnNode(ALOAD, 3));
+		insert.add(new VarInsnNode(ALOAD, 2));
+		insert.add(new VarInsnNode(ALOAD, 1));
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/MalisisRegistry", "shouldRenderBlock",
+				"(Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z", false));
+		insert.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert.add(new VarInsnNode(ALOAD, 4));
 		insert.add(new VarInsnNode(ALOAD, 3));
 		insert.add(new VarInsnNode(ALOAD, 2));

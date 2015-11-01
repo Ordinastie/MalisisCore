@@ -69,6 +69,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 /**
  * @author Ordinastie
@@ -113,6 +114,11 @@ public class MalisisRegistry
 			}
 		};
 
+		/**
+		 * Calls the {@link IRenderWorldLast} registered to render.<br>
+		 *
+		 * @param event the event
+		 */
 		@SubscribeEvent
 		public void onRenderLast(RenderWorldLastEvent event)
 		{
@@ -123,6 +129,39 @@ public class MalisisRegistry
 			}
 		}
 
+		/**
+		 * Registers {@link DummyModel DummyModels}.<br>
+		 * {@code DummyModel} forwards transforms to the {@link IItemRenderer} for the {@link Item}.
+		 *
+		 * @param event the event
+		 */
+		@SubscribeEvent
+		public void onModelBakeEvent(ModelBakeEvent event)
+		{
+			for (DummyModel model : itemModels)
+				event.modelRegistry.putObject(model.getResourceLocation(), model);
+		}
+
+		/**
+		 * Calls {@link IIconProvider#registerIcons(net.minecraft.client.renderer.texture.TextureMap)} for every registered
+		 * {@link IIconProvider}.
+		 *
+		 * @param event the event
+		 */
+		@SideOnly(Side.CLIENT)
+		@SubscribeEvent
+		public void onTextureStitchEvent(TextureStitchEvent.Pre event)
+		{
+			for (IIconProvider iconProvider : iconProviders)
+				iconProvider.registerIcons(event.map);
+		}
+
+		/**
+		 * Registers the {@link IIconProvider} provided by the object, if it's a {@link IMetaIconProvider}.<br>
+		 * Automatically called for blocks and items in the registries.
+		 *
+		 * @param object the object
+		 */
 		public void registerIconProvider(Object object)
 		{
 			if (object instanceof IMetaIconProvider)
@@ -132,21 +171,91 @@ public class MalisisRegistry
 			}
 		}
 
-		@SubscribeEvent
-		public void onModelBakeEvent(ModelBakeEvent event)
+		/**
+		 * Registers a {@link MalisisRenderer} associated with the object.<br>
+		 * The object class needs to have the {@link MalisisRendered} annotation.<br>
+		 * Automatically called for blocks and items in the registries.
+		 *
+		 * @param object the object
+		 */
+		private void registerRenderer(Object object)
 		{
-			for (DummyModel model : itemModels)
-				event.modelRegistry.putObject(model.getResourceLocation(), model);
+			//get the classes to use to render
+			Pair<Class<? extends MalisisRenderer>, Class<? extends MalisisRenderer>> rendererClasses = getRendererClasses(object);
+			if (rendererClasses == null)
+				return;
+
+			MalisisCore.log.info("[MalisisRegistry] Found annotation for {}", object.getClass().getSimpleName());
+			//get the block renderer
+			MalisisRenderer renderer = null;
+			try
+			{
+				renderer = getRenderer(rendererClasses.getLeft());
+			}
+			catch (InstantiationException | IllegalAccessException e)
+			{
+				MalisisCore.log.error("[MalisisRegistry] Failed to load {} renderer for {}", rendererClasses.getLeft().getSimpleName(),
+						object.getClass().getSimpleName(), e);
+				return;
+			}
+
+			//register the block renderer
+			if (object instanceof Block && renderer != null)
+			{
+				registerBlockRenderer((Block) object, renderer);
+				MalisisCore.log.info("[MalisisRegistry] Registered block {} for {}", renderer.getClass().getSimpleName(), object.getClass()
+						.getSimpleName());
+				object = Item.getItemFromBlock((Block) object);
+			}
+
+			//get the item renderer
+			try
+			{
+				renderer = getRenderer(rendererClasses.getRight());
+			}
+			catch (InstantiationException | IllegalAccessException e)
+			{
+				MalisisCore.log.error("[MalisisRegistry] Failed to load {} renderer for {}", rendererClasses.getLeft().getSimpleName(),
+						object.getClass().getSimpleName());
+				return;
+			}
+			//register the item renderer
+			if (object instanceof Item && renderer != null)
+			{
+				registerItemRenderer((Item) object, renderer);
+				MalisisCore.log.info("[MalisisRegistry] Registered item {} for {}", renderer.getClass().getSimpleName(), object.getClass()
+						.getSimpleName());
+			}
 		}
 
-		@SideOnly(Side.CLIENT)
-		@SubscribeEvent
-		public void onTextureStitchEvent(TextureStitchEvent.Pre event)
+		/**
+		 * Gets the {@link MalisisRenderer} classes to use for the object.<br>
+		 * the Classes are given by the {@link MalisisRendered} annotation on that object class.
+		 *
+		 * @param object the object
+		 * @return the renderer classes
+		 */
+		private Pair<Class<? extends MalisisRenderer>, Class<? extends MalisisRenderer>> getRendererClasses(Object object)
 		{
-			for (IIconProvider iconProvider : iconProviders)
-				iconProvider.registerIcons(event.map);
+			Class<?> objClass = object.getClass();
+			MalisisRendered annotation = objClass.getAnnotation(MalisisRendered.class);
+			if (annotation == null)
+				return null;
+
+			if (annotation.value() != DefaultRenderer.Block.class)
+				return Pair.of(annotation.value(), annotation.value());
+			else
+				return Pair.of(annotation.block(), annotation.item());
 		}
 
+		/**
+		 * Gets and eventually instantiates the render {@link MalisisRenderer} class.
+		 *
+		 * @param clazz the class
+		 * @return the renderer
+		 * @throws InstantiationException the instantiation exception
+		 * @throws IllegalAccessException the illegal access exception
+		 */
 		private MalisisRenderer getRenderer(Class<? extends MalisisRenderer> clazz) throws InstantiationException, IllegalAccessException
 		{
 			if (clazz == DefaultRenderer.Block.class)
@@ -163,66 +272,9 @@ public class MalisisRegistry
 
 			return renderer;
 		}
-
-		private Pair<Class<? extends MalisisRenderer>, Class<? extends MalisisRenderer>> getRendererClasses(Object object)
-		{
-			Class<?> objClass = object.getClass();
-			MalisisRendered annotation = objClass.getAnnotation(MalisisRendered.class);
-			if (annotation == null)
-				return null;
-
-			if (annotation.value() != DefaultRenderer.Block.class)
-				return Pair.of(annotation.value(), annotation.value());
-			else
-				return Pair.of(annotation.block(), annotation.item());
-		}
-
-		private void registerRenderer(Object object)
-		{
-			Pair<Class<? extends MalisisRenderer>, Class<? extends MalisisRenderer>> rendererClasses = getRendererClasses(object);
-			if (rendererClasses == null)
-				return;
-
-			MalisisCore.log.info("[MalisisRegistry] Found annotation for {}", object.getClass().getSimpleName());
-			MalisisRenderer renderer = null;
-			try
-			{
-				renderer = getRenderer(rendererClasses.getLeft());
-			}
-			catch (InstantiationException | IllegalAccessException e)
-			{
-				MalisisCore.log.error("[MalisisRegistry] Failed to load {} renderer for {}", rendererClasses.getLeft().getSimpleName(),
-						object.getClass().getSimpleName());
-				return;
-			}
-
-			if (object instanceof Block && renderer != null)
-			{
-				registerBlockRenderer((Block) object, renderer);
-				MalisisCore.log.info("[MalisisRegistry] Registered block {} for {}", renderer.getClass().getSimpleName(), object.getClass()
-						.getSimpleName());
-				object = Item.getItemFromBlock((Block) object);
-			}
-
-			try
-			{
-				renderer = getRenderer(rendererClasses.getRight());
-			}
-			catch (InstantiationException | IllegalAccessException e)
-			{
-				MalisisCore.log.error("[MalisisRegistry] Failed to load {} renderer for {}", rendererClasses.getLeft().getSimpleName(),
-						object.getClass().getSimpleName());
-				return;
-			}
-			if (object instanceof Item && renderer != null)
-			{
-				registerItemRenderer((Item) object, renderer);
-				MalisisCore.log.info("[MalisisRegistry] Registered item {} for {}", renderer.getClass().getSimpleName(), object.getClass()
-						.getSimpleName());
-			}
-		}
 	}
 
+	//TODO: register TEs so we can discover the @MalisisRendered annotation
 	/**
 	 * Registers a {@link IRegisterable}.<br>
 	 * The object has to be either a {@link Block} or an {@link Item}.
@@ -288,6 +340,15 @@ public class MalisisRegistry
 		return instance.blockRenderers.get(block);
 	}
 
+	public static boolean shouldRenderBlock(IBlockAccess world, BlockPos pos, IBlockState state)
+	{
+		IBlockRenderer renderer = getBlockRendererOverride(world, pos, state);
+		if (renderer == null)
+			renderer = getBlockRenderer(state.getBlock());
+
+		return renderer != null;
+	}
+
 	/**
 	 * Renders a {@link IBlockState} with a registered {@link IBlockRenderer}.
 	 *
@@ -300,7 +361,9 @@ public class MalisisRegistry
 	@SideOnly(Side.CLIENT)
 	public static boolean renderBlock(WorldRenderer wr, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
-		IBlockRenderer renderer = getBlockRenderer(state.getBlock());
+		IBlockRenderer renderer = getBlockRendererOverride(world, pos, state);
+		if (renderer == null)
+			renderer = getBlockRenderer(state.getBlock());
 		if (renderer == null)
 			return false;
 		return renderer.renderBlock(wr, world, pos, state);
@@ -370,18 +433,17 @@ public class MalisisRegistry
 		if (itemStack == null)
 			return false;
 
-		Item item = itemStack.getItem();
-		IItemRenderer ir = getItemRenderer(item);
-		if (ir == null)
+		IItemRenderer renderer = getItemRendererOverride(itemStack);
+		if (renderer == null)
+			renderer = getItemRenderer(itemStack.getItem());
+		if (renderer == null)
 			return false;
 
-		ir.renderItem(itemStack, MalisisRenderer.getPartialTick());
+		renderer.renderItem(itemStack, MalisisRenderer.getPartialTick());
 		return true;
 	}
 
 	//#end IItemRenderer
-
-	//#region IIconProvider
 
 	/**
 	 * Registers an {@link IIconProvider}.<br>
@@ -397,9 +459,6 @@ public class MalisisRegistry
 			instance.iconProviders.add(iconProvider);
 	}
 
-	//#end IIconProvider
-
-	//#region RenderWorldLast
 	/**
 	 * Registers a {@link IRenderWorldLast}.
 	 *
@@ -422,9 +481,6 @@ public class MalisisRegistry
 		instance.renderWorldLastRenderers.remove(renderer);
 	}
 
-	//#end RenderWorldLast
-
-	//#region ItemModels
 	/**
 	 * Registers a {@link DummyModel} for the {@link Item}.<br>
 	 * Registered DummyModels will prevent complaints from MC about missing model definitions and will redirect method calls to the
@@ -446,7 +502,48 @@ public class MalisisRegistry
 		instance.itemModels.add(model);
 	}
 
-	//#end ItemModels
+	private static List<BlockRendererOverride> blockRendererOverrides = Lists.newArrayList();
+	private static List<ItemRendererOverride> itemRendererOverrides = Lists.newArrayList();
+
+	@SideOnly(Side.CLIENT)
+	public static void registerBlockRendererOverride(BlockRendererOverride override)
+	{
+		if (override != null)
+			blockRendererOverrides.add(override);
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static void registerItemRendererOverride(ItemRendererOverride override)
+	{
+		if (override != null)
+			itemRendererOverrides.add(override);
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static IBlockRenderer getBlockRendererOverride(IBlockAccess world, BlockPos pos, IBlockState state)
+	{
+		for (BlockRendererOverride overrides : blockRendererOverrides)
+		{
+			IBlockRenderer renderer = overrides.get(world, pos, state);
+			if (renderer != null)
+				return renderer;
+		}
+
+		return null;
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static IItemRenderer getItemRendererOverride(ItemStack itemStack)
+	{
+		for (ItemRendererOverride overrides : itemRendererOverrides)
+		{
+			IItemRenderer renderer = overrides.get(itemStack);
+			if (renderer != null)
+				return renderer;
+		}
+
+		return null;
+	}
 
 	@SideOnly(Side.CLIENT)
 	public static void registerRenderers()
@@ -460,5 +557,15 @@ public class MalisisRegistry
 	{
 		GameData.getBlockRegistry().forEach(instance::registerIconProvider);
 		GameData.getItemRegistry().forEach(instance::registerIconProvider);
+	}
+
+	public interface BlockRendererOverride
+	{
+		public IBlockRenderer get(IBlockAccess world, BlockPos pos, IBlockState state);
+	}
+
+	public interface ItemRendererOverride
+	{
+		public IItemRenderer get(ItemStack itemStack);
 	}
 }
