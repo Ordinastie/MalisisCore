@@ -67,10 +67,10 @@ public final class JavaCompatibility implements Runnable, HyperlinkListener, Act
 		Logger logger = LogManager.getLogger("MalisisCore");
 		logger.error("");
 		logger.error(StringUtils.repeat('=', 80));
-		logger.error("MalisisCore requires Java 8 to be installed.");
+		logger.error("MalisisCore requires Java 7 to be installed.");
 		logger.error("Please install the latest Java 8 appropriate for your System from https://java.com/download/"
 				+ (isWindowsClient ? " or use the latest launcher from https://minecraft.net/" : ""));
-		logger.error("If Java 8 is already installed, please make sure the right Java version is for the current profile in the Minecraft launcher.");
+		logger.error("If Java 7 is already installed, please make sure the right Java version is for the current profile in the Minecraft launcher.");
 		logger.error("Thank you. The game will exit now.");
 		logger.error(StringUtils.repeat('=', 80));
 		logger.error("");
@@ -157,8 +157,8 @@ public final class JavaCompatibility implements Runnable, HyperlinkListener, Act
 		return "<html><body style=\""
 				+ style
 				+ "\">"
-				+ "<strong>MalisisCore requires Java 8 to be used.</strong><br /><br />"
-				+ "Please install the latest Java 8 appropriate for your system from <a href=\"https://java.com/download/\">java.com/download</a>"
+				+ "<strong>MalisisCore requires Java 7 to be used.</strong><br /><br />"
+				+ "Please install the latest Java 7 appropriate for your system from <a href=\"https://java.com/download/\">java.com/download</a>"
 				+ (isWindowsClient ? "or use the latest launcher from <a href=\"https://minecraft.net/\">minecraft.net</a>" : "")
 				+ "<br /><br />"
 				+ "If Java 8 is already installed, please make sure the right Java version is used for the current profile in the Minecraft launcher.<br /><br />"
