@@ -24,7 +24,6 @@
 
 package net.malisis.core;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
@@ -40,6 +39,7 @@ import net.malisis.core.util.remapping.RemappingTool;
 import net.malisis.core.util.replacement.ReplacementTool;
 import net.malisis.core.util.syncer.Syncer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
@@ -76,8 +76,6 @@ public class MalisisCore implements IMalisisMod
 	public static final String version = "${version}";
 	/** Url for the mod. */
 	public static final String url = "";
-	/** Path for the mod. */
-	public static File coremodLocation;
 	/** Reference to the mod instance */
 	public static MalisisCore instance;
 	/** Logger for the mod. */
@@ -99,6 +97,7 @@ public class MalisisCore implements IMalisisMod
 		instance = this;
 		network = new MalisisNetwork(this);
 		log = LogManager.getLogger(modid);
+		isObfEnv = !(boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 	}
 
 	//#region IMalisisMod
