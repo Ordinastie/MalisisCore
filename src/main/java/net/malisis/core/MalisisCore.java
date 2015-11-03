@@ -40,6 +40,7 @@ import net.malisis.core.util.finiteliquid.FiniteLiquidRenderer;
 import net.malisis.core.util.replacement.ReplacementTool;
 import net.malisis.core.util.syncer.Syncer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
@@ -97,6 +98,7 @@ public class MalisisCore implements IMalisisMod
 	{
 		instance = this;
 		network = new MalisisNetwork(this);
+		isObfEnv = !(boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 	}
 
 	//#region IMalisisMod

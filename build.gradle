@@ -51,9 +51,6 @@ ext.projectName = 'MalisisCore'
 ext.description = 'MalisisCore is a framework dedicated to simplify many processes required during a mod development.'
 ext.url = 'http://github.com/Ordinastie/MalisisCore'
 
-// Java version target/source compatibility
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
 
 // Compilation variables
 ext.buildNumber = project.hasProperty("buildNumber") ? buildNumber : '0'
@@ -130,6 +127,37 @@ task deobfJar(type: Jar) {
 	from sourceSets.main.output
 	classifier = 'dev'
 }
+
+task compilePlugin(type : JavaCompile) {
+ 	source = fileTree(dir: "src/main/java")
+    classpath = sourceSets.main.compileClasspath
+    destinationDir = sourceSets.main.output.classesDir
+    include 'net/malisis/core/asm/MalisisCorePlugin*'
+    include 'net/malisis/core/asm/MalisisCoreAccessTransformer*'
+    include 'net/malisis/javacompat/JavaCompatibility*'
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
+}
+
+compileJava {
+	exclude 'net/malisis/core/asm/MalisisCorePlugin*'
+	exclude 'net/malisis/core/asm/MalisisCoreAccessTransformer*'
+    exclude 'net/malisis/javacompat/JavaCompatibility*'
+
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+}
+
+tasks.compileJava.dependsOn('compilePlugin')
+
+
+makeStart {
+    // TODO do this properly with FG2
+    addReplacement("parseArgs(args);", "parseArgs(args); String __malisis_coremodProp = System.getProperty(\"fml.coreMods.load\", \"\");" +
+            "__malisis_coremodProp += \"net.malisis.core.asm.MalisisCorePlugin\";" +
+            "System.setProperty(\"fml.coreMods.load\", __malisis_coremodProp);")
+}
+
 
 // Set all artifacts
 artifacts {
