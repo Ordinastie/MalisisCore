@@ -34,8 +34,10 @@ import net.malisis.core.MalisisCore;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
 import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent.MissingMapping;
 
@@ -55,13 +57,23 @@ public class RemappingTool
 	{
 		ModContainer mod = null;
 		int index = name.indexOf(":");
-		if (index != -1)
+		if (index == -1)
 		{
-			String modid = name.substring(0, index);
-			mod = Loader.instance().getIndexedModList().get(modid);
+			MalisisCore.log.warn("[RemappingTool] No mod ID found for {}, using current active container.", name);
+			return Loader.instance().activeModContainer();
 		}
 
-		return mod != null ? mod : Loader.instance().activeModContainer();
+		String modid = name.substring(0, index);
+		mod = Loader.instance().getIndexedModList().get(modid);
+		if (mod == null)
+		{
+			MalisisCore.log.warn("[RemappingTool] No mod found for {}, using dummy container.", name);
+			ModMetadata md = new ModMetadata();
+			md.modId = modid;
+			return new DummyModContainer(md);
+		}
+
+		return mod;
 	}
 
 	public static void remap(String old, Block block)
@@ -118,4 +130,5 @@ public class RemappingTool
 	{
 		return instance;
 	}
+
 }
