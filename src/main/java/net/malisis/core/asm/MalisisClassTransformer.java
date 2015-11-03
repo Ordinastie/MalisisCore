@@ -26,8 +26,8 @@ package net.malisis.core.asm;
 
 import java.util.Collection;
 
-import net.malisis.core.MalisisCore;
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.Launch;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,7 +80,7 @@ public abstract class MalisisClassTransformer implements IClassTransformer
 					LogManager.getLogger(logString).error("[{}] The instruction list was not found in {}:{}{}", hook.getTransformer(),
 							hook.getTargetClass(), hook.getMethodName(), hook.getMethodDescriptor());
 
-				if (hook.isDebug() == true && !MalisisCore.isObfEnv)
+				if (hook.isDebug() == true && (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment"))
 				{
 					System.err.println(AsmUtils.getMethodNodeAsString(methodNode));
 				}
