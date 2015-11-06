@@ -24,7 +24,6 @@
 
 package net.malisis.core.util;
 
-import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.client.gui.MalisisGui;
 import net.minecraft.block.Block;
@@ -52,7 +51,7 @@ public class TileEntityUtils
 	private static MalisisGui currenGui;
 
 	/**
-	 * Gets the {@link TileEntity} or type <b>T</b> at the specified coordinates.<br>
+	 * Gets the {@link TileEntity} of type <b>T</b> at the specified {@link BlockPos}.<br>
 	 * If no <code>TileEntity</code> was found at the coordinates, or if the <code>TileEntity</code> is not of type <b>T</b>, returns
 	 * <code>null</code> instead.
 	 *
@@ -70,19 +69,7 @@ public class TileEntityUtils
 			return null;
 
 		TileEntity te = world.getTileEntity(pos);
-		if (te == null)
-			return null;
-
-		try
-		{
-			return clazz.cast(te);
-		}
-		catch (ClassCastException e)
-		{
-			MalisisCore.log.error("Tried to get {} at {},{},{}, but found {} instead.", clazz.getSimpleName(), pos.getX(), pos.getY(),
-					pos.getZ(), te.getClass().getSimpleName());
-			return null;
-		}
+		return te != null ? Silenced.get(() -> clazz.cast(te)) : null;
 	}
 
 	/**
