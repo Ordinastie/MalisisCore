@@ -55,11 +55,20 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 											{ SOUTH, UP, NORTH, DOWN }};
 	//@formatter:on
 
+	/** First texture to use for connections. */
 	private MalisisIcon part1;
+	/** Second texture to use for connections. */
 	private MalisisIcon part2;
+	/** Array of all possible icons */
 	private MalisisIcon[] icons = new MalisisIcon[16];
+	/** Whether the icons have been initialized */
 	private boolean initialized = false;
 
+	/**
+	 * Instantiates a new {@link ConnectedIconsProvider} with the name.
+	 *
+	 * @param name the name
+	 */
 	public ConnectedIconsProvider(String name)
 	{
 		part1 = new MalisisIcon(name);
@@ -73,6 +82,10 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 		part2.register(map);
 	}
 
+	/**
+	 * Initializes the connected icons.<br>
+	 * Fills up the {@link #icons} array.
+	 */
 	protected void initializeIcons()
 	{
 		float f = 1F / 3F;
@@ -105,7 +118,7 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 	}
 
 	/**
-	 * Gets the {@link IIcon} with no connection on any side.
+	 * Gets the {@link MalisisIcon} with no connection on any side.
 	 *
 	 * @return the full icon
 	 */
@@ -119,13 +132,12 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 	}
 
 	/**
-	 * Gets the corresponding {@link IIcon} based on the connections available.
+	 * Gets the corresponding {@link MalisisIcon} based on the connections available.
 	 *
 	 * @param world the world
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
-	 * @param side the side
+	 * @param pos the pos
+	 * @param state the state
+	 * @param facing the facing
 	 * @return the icon
 	 */
 	@Override
@@ -141,10 +153,8 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 	 * Determines the connections available at this position for the specified <b>side</b>.
 	 *
 	 * @param world the world
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
-	 * @param side the side
+	 * @param pos the pos
+	 * @param facing the facing
 	 * @return the connections
 	 */
 	private int getConnections(IBlockAccess world, BlockPos pos, EnumFacing facing)

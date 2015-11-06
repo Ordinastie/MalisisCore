@@ -550,9 +550,7 @@ public class MalisisInventory
 	 * Spills out all the itemStack contained inside this {@link MalisisInventory}.
 	 *
 	 * @param world the world
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
+	 * @param pos the pos
 	 */
 	public void breakInventory(World world, BlockPos pos)
 	{
@@ -572,7 +570,7 @@ public class MalisisInventory
 	}
 
 	/**
-	 * Close all currently opened containers
+	 * Closes all currently opened containers
 	 */
 	public void closeContainers()
 	{
@@ -637,12 +635,12 @@ public class MalisisInventory
 	}
 
 	/**
-	 * Opens this {@link MalisisInventory}. Called server-side only
+	 * Opens this {@link MalisisInventory}. Called server-side only.
 	 *
 	 * @param player the player
 	 * @param inventoryProvider the inventory provider
 	 * @param data the data
-	 * @return the malisis inventory container
+	 * @return the {@link MalisisInventoryContainer}
 	 */
 	public static MalisisInventoryContainer open(EntityPlayerMP player, IInventoryProvider inventoryProvider, Object... data)
 	{
@@ -676,7 +674,7 @@ public class MalisisInventory
 	 * @param inventoryProvider the inventory provider
 	 * @param windowId the window id
 	 * @param data the data
-	 * @return the malisis inventory container
+	 * @return the {@link MalisisInventoryContainer}
 	 */
 	@SideOnly(Side.CLIENT)
 	public static MalisisInventoryContainer open(EntityPlayerSP player, IInventoryProvider inventoryProvider, int windowId, Object... data)

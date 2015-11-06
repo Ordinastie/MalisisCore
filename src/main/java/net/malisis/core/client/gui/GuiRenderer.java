@@ -301,7 +301,7 @@ public class GuiRenderer extends MalisisRenderer
 	/**
 	 * Draws a {@link Shape} to the GUI with the specified {@link RenderParameters}.
 	 *
-	 * @param s the s
+	 * @param shape the shape
 	 * @param params the params
 	 */
 	public void drawShape(GuiShape shape, RenderParameters params)
@@ -319,11 +319,34 @@ public class GuiRenderer extends MalisisRenderer
 			drawFace(face, params);
 	}
 
+	/**
+	 * Draws an non-textured rectangle in the GUI at a position relative to {@link #currentComponent}.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param width the width
+	 * @param height the height
+	 * @param color the color
+	 * @param alpha the alpha
+	 */
 	public void drawRectangle(int x, int y, int z, int width, int height, int color, int alpha)
 	{
 		drawRectangle(x, y, z, width, height, color, alpha, true);
 	}
 
+	/**
+	 * Draws an non-textured rectangle in the GUI.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param width the width
+	 * @param height the height
+	 * @param color the color
+	 * @param alpha the alpha
+	 * @param relative true if the position of the rectangle is relative to {@link #currentComponent}
+	 */
 	public void drawRectangle(int x, int y, int z, int width, int height, int color, int alpha, boolean relative)
 	{
 		if (relative && currentComponent != null)

@@ -36,6 +36,7 @@ import net.malisis.core.util.chunkblock.ChunkBlockHandler.ChunkProcedure;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -161,16 +162,17 @@ public class ChunkCollision
 	//#region canPlaceBlockAt
 	/**
 	 * Checks whether the block can be placed at the position.<br>
-	 * Called via ASM from {@link World#canPlaceEntityOnSide(Block, int, int, int, boolean, int, Entity, net.minecraft.item.ItemStack)} at
-	 * the begining.<br>
+	 * Called via ASM from {@link ItemBlock#onItemUse(ItemStack, EntityPlayer, World, BlockPos, EnumFacing, float, float, float)} at the
+	 * beginning.<br>
 	 * Tests the block bounding box (boxes if {@link IChunkCollidable}) against the occupied blocks position, then against all the bounding
 	 * boxes of the {@link IChunkCollidable} available for those chunks.
 	 *
+	 * @param itemStack the item stack
+	 * @param player the player
 	 * @param world the world
 	 * @param block the block
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
+	 * @param pos the pos
+	 * @param side the side
 	 * @return true, if can be placed
 	 */
 	public boolean canPlaceBlockAt(ItemStack itemStack, EntityPlayer player, World world, Block block, BlockPos pos, EnumFacing side)
@@ -214,6 +216,12 @@ public class ChunkCollision
 
 	//#end canPlaceBlockAt
 
+	/**
+	 * Replaces to air all the blocks colliding with the {@link AxisAlignedBB} of the {@link MBlockState}.
+	 *
+	 * @param world the world
+	 * @param state the state
+	 */
 	public void replaceBlocks(World world, MBlockState state)
 	{
 		AxisAlignedBB[] aabbs = AABBUtils.getCollisionBoundingBoxes(world, state, true);
@@ -230,6 +238,12 @@ public class ChunkCollision
 		}
 	}
 
+	/**
+	 * Notifies all the blocks colliding with the {@link AxisAlignedBB} of the {@link MBlockState}.
+	 *
+	 * @param world the world
+	 * @param state the state
+	 */
 	public void updateBlocks(World world, MBlockState state)
 	{
 		AxisAlignedBB[] aabbs = AABBUtils.getCollisionBoundingBoxes(world, state, true);
@@ -243,6 +257,11 @@ public class ChunkCollision
 		}
 	}
 
+	/**
+	 * Gets the {@link ChunkCollision} instance.
+	 *
+	 * @return the chunk collision
+	 */
 	public static ChunkCollision get()
 	{
 		return instance;

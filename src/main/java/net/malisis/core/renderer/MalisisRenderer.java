@@ -174,10 +174,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 *
 	 * @param world the world
 	 * @param block the block
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
-	 * @param metadata the metadata
+	 * @param pos the pos
+	 * @param blockState the block state
 	 */
 	public void set(IBlockAccess world, Block block, BlockPos pos, IBlockState blockState)
 	{
@@ -211,7 +209,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	/**
 	 * Sets informations for this {@link MalisisRenderer}.
 	 *
-	 * @param blockMetadata the block metadata
+	 * @param blockState the block state
 	 */
 	public void set(IBlockState blockState)
 	{
@@ -222,9 +220,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	/**
 	 * Sets informations for this {@link MalisisRenderer}.
 	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
+	 * @param pos the pos
 	 */
 	public void set(BlockPos pos)
 	{
@@ -247,7 +243,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	/**
 	 * Sets informations for this {@link MalisisRenderer}.
 	 *
-	 * @param type the type
 	 * @param itemStack the item stack
 	 */
 	public void set(ItemStack itemStack)
@@ -632,8 +627,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 
 	/**
 	 * Renders the blocks using the default Minecraft rendering system.
-	 *
-	 * @param renderer the renderer
 	 */
 	public void renderStandard()
 	{
@@ -876,7 +869,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	/**
 	 * Applies the texture to the {@link Face} with specified {@link RenderParameters}.<br>
 	 *
-	 * @param shape the shape
+	 * @param face the face
 	 * @param params the parameters
 	 */
 	public void applyTexture(Face face, RenderParameters params)
@@ -943,7 +936,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 * Also, <i>params.colorMultiplier</i> is applied as well.
 	 *
 	 * @param vertex the vertex
-	 * @param aoMatrix the ao matrix
+	 * @param number the number
+	 * @param params the params
 	 * @return the int
 	 */
 	protected int calcVertexColor(Vertex vertex, int number, RenderParameters params)
@@ -996,6 +990,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 * If <i>params.useBlockBrightness</i> = false, <i>params.brightness</i>. Else, the brightness is determined based on
 	 * <i>params.offset</i> and <i>getBlockBounds()</i>
 	 *
+	 * @param params the params
 	 * @return the base brightness
 	 */
 	protected int getBaseBrightness(RenderParameters params)
@@ -1053,7 +1048,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 * compute AO. Only first 3 blocks are used.<br>
 	 *
 	 * @param vertex the vertex
-	 * @param aoMatrix the ao matrix
+	 * @param number the number
+	 * @param params the params
 	 * @return the int
 	 */
 	protected int calcVertexBrightness(Vertex vertex, int number, RenderParameters params)
@@ -1109,9 +1105,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 * values for a block.
 	 *
 	 * @param world the world
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
+	 * @param pos the pos
 	 * @return the block ambient occlusion
 	 */
 	protected float getBlockAmbientOcclusion(IBlockAccess world, BlockPos pos)
@@ -1127,9 +1121,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 * Gets the mix brightness for a block (sky + block source).
 	 *
 	 * @param world the world
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
+	 * @param pos the pos
 	 * @return the mixed brightness for block
 	 */
 	protected int getMixedBrightnessForBlock(IBlockAccess world, BlockPos pos)
@@ -1142,6 +1134,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 * Gets the rendering bounds. If <i>params.useBlockBounds</i> = false, <i>params.renderBounds</i> is used instead of the actual block
 	 * bounds.
 	 *
+	 * @param params the params
 	 * @return the render bounds
 	 */
 	protected AxisAlignedBB getRenderBounds(RenderParameters params)

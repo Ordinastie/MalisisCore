@@ -89,9 +89,7 @@ public class EntityUtils
 	 * Eject a new item corresponding to the {@link ItemStack}.
 	 *
 	 * @param world the world
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
+	 * @param pos the pos
 	 * @param itemStack the item stack
 	 */
 	public static void spawnEjectedItem(World world, BlockPos pos, ItemStack itemStack)
@@ -246,6 +244,14 @@ public class EntityUtils
 		}
 	}
 
+	/**
+	 * Adds the destroy effects into the world for the specified {@link IBlockState}.
+	 *
+	 * @param world the world
+	 * @param pos the pos
+	 * @param effectRenderer the effect renderer
+	 * @param states the states
+	 */
 	public static void addDestroyEffects(World world, BlockPos pos, EffectRenderer effectRenderer, IBlockState... states)
 	{
 		if (ArrayUtils.isEmpty(states))
@@ -274,6 +280,14 @@ public class EntityUtils
 		}
 	}
 
+	/**
+	 * Adds the hit effects into the world for the specified {@link IBlockState}.
+	 *
+	 * @param world the world
+	 * @param target the target
+	 * @param effectRenderer the effect renderer
+	 * @param states the states
+	 */
 	public static void addHitEffects(World world, MovingObjectPosition target, EffectRenderer effectRenderer, IBlockState... states)
 	{
 		if (ArrayUtils.isEmpty(states))

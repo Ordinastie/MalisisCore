@@ -44,44 +44,72 @@ public class AABBUtils
 	private static int[] cos = { 1, 0, -1, 0 };
 	private static int[] sin = { 0, 1, 0, -1 };
 
+	/**
+	 * Gets an empty {@link AxisAlignedBB} (size 0x0x0) at position 0,0,0.
+	 *
+	 * @return the axis aligned bb
+	 */
 	public static AxisAlignedBB empty()
 	{
 		return empty(new BlockPos(0, 0, 0));
 	}
 
+	/**
+	 * Gets an empty {@link AxisAlignedBB} (size 0x0x0) at the {@link BlockPos} position.
+	 *
+	 * @param pos the pos
+	 * @return the axis aligned bb
+	 */
 	public static AxisAlignedBB empty(BlockPos pos)
 	{
 		return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(), pos.getX(), pos.getY(), pos.getZ());
 	}
 
+	/**
+	 * Gets an identity {@link AxisAlignedBB} (size 1x1x1) at position 0,0,0.
+	 *
+	 * @return the axis aligned bb
+	 */
 	public static AxisAlignedBB identity()
 	{
 		return identity(new BlockPos(0, 0, 0));
 	}
 
+	/**
+	 * Gets an identity {@link AxisAlignedBB} (size 1x1x1) at {@link BlockPos} position;
+	 *
+	 * @param pos the pos
+	 * @return the axis aligned bb
+	 */
 	public static AxisAlignedBB identity(BlockPos pos)
 	{
 		return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
 	}
 
+	/**
+	 * Gets an identity {@link AxisAlignedBB} (size 1x1x1) at position 0,0,0 returned as an array.
+	 *
+	 * @return the axis aligned b b[]
+	 */
 	public static AxisAlignedBB[] identities()
 	{
 		return identities(new BlockPos(0, 0, 0));
 	}
 
+	/**
+	 * Gets an identity {@link AxisAlignedBB} (size 1x1x1) at {@link BlockPos} position returned as an array.
+	 *
+	 * @param pos the pos
+	 * @return the axis aligned b b[]
+	 */
 	public static AxisAlignedBB[] identities(BlockPos pos)
 	{
 		return new AxisAlignedBB[] { identity(pos) };
 	}
 
-	public static AxisAlignedBB copy(AxisAlignedBB aabb)
-	{
-		return new AxisAlignedBB(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ);
-	}
-
 	/**
-	 * Rotate the {@link AxisAlignedBB} based on the specified direction.<br>
-	 * Assumes {@link ForgeDirection#NORTH} to be the default non rotated direction.<br>
+	 * Rotates the {@link AxisAlignedBB} based on the specified direction.<br>
+	 * Assumes {@link EnumFacing#SOUTH} to be the default non rotated direction.<br>
 	 *
 	 *
 	 * @param aabb the aabb
@@ -93,11 +121,26 @@ public class AABBUtils
 		return rotate(aabb, EnumFacingUtils.getRotationCount(dir));
 	}
 
+	/**
+	 * Rotates an array of {@link AxisAlignedBB} around the Y axis based on the specified direction.<br>
+	 * Assumes {@link EnumFacing#SOUTH} to be the default non rotated direction.<br>
+	 *
+	 * @param aabbs the aabbs
+	 * @param dir the dir
+	 * @return the axis aligned b b[]
+	 */
 	public static AxisAlignedBB[] rotate(AxisAlignedBB[] aabbs, EnumFacing dir)
 	{
 		return rotate(aabbs, EnumFacingUtils.getRotationCount(dir));
 	}
 
+	/**
+	 * Rotates an array {@link AxisAlignedBB} around the Y axis based on the specified angle.<br>
+	 *
+	 * @param aabbs the aabbs
+	 * @param angle the angle
+	 * @return the axis aligned b b[]
+	 */
 	public static AxisAlignedBB[] rotate(AxisAlignedBB[] aabbs, int angle)
 	{
 		if (ArrayUtils.isEmpty(aabbs) || angle == 0)
@@ -108,11 +151,26 @@ public class AABBUtils
 		return aabbs;
 	}
 
+	/**
+	 * Rotates the {@link AxisAlignedBB} around the Y axis based on the specified angle.<br>
+	 *
+	 * @param aabb the aabb
+	 * @param angle the angle
+	 * @return the axis aligned bb
+	 */
 	public static AxisAlignedBB rotate(AxisAlignedBB aabb, int angle)
 	{
 		return rotate(aabb, angle, Axis.Y);
 	}
 
+	/**
+	 * Rotates the {@link AxisAlignedBB} around the axis based on the specified angle.<br>
+	 *
+	 * @param aabb the aabb
+	 * @param angle the angle
+	 * @param axis the axis
+	 * @return the axis aligned bb
+	 */
 	public static AxisAlignedBB rotate(AxisAlignedBB aabb, int angle, Axis axis)
 	{
 		if (aabb == null || angle == 0 || axis == null)
@@ -161,12 +219,26 @@ public class AABBUtils
 		return aabb;
 	}
 
+	/**
+	 * Reads a {@link AxisAlignedBB} from {@link NBTTagCompound}.<br>
+	 * TODO: allow custom name prefix
+	 *
+	 * @param tag the tag
+	 * @return the axis aligned bb
+	 */
 	public static AxisAlignedBB readFromNBT(NBTTagCompound tag)
 	{
 		return tag != null ? new AxisAlignedBB(tag.getDouble("minX"), tag.getDouble("minY"), tag.getDouble("minZ"), tag.getDouble("maxX"),
 				tag.getDouble("maxY"), tag.getDouble("maxZ")) : null;
 	}
 
+	/**
+	 * Writes a {@link AxisAlignedBB} to a {@link NBTTagCompound}.<br>
+	 * TODO: allow custom name prefix
+	 *
+	 * @param tag the tag
+	 * @param aabb the aabb
+	 */
 	public static void writeToNBT(NBTTagCompound tag, AxisAlignedBB aabb)
 	{
 		if (tag == null || aabb == null)
@@ -180,7 +252,7 @@ public class AABBUtils
 	}
 
 	/**
-	 * Gets a {@link AxisAlignedBB} that englobes the passed {@code AxisAlignedBB}.
+	 * Gets a {@link AxisAlignedBB} that encompasses the passed {@code AxisAlignedBB}.
 	 *
 	 * @param aabbs the aabbs
 	 * @return the axis aligned bb
@@ -203,7 +275,7 @@ public class AABBUtils
 	}
 
 	/**
-	 * Offsets the passed {@link AxisAlignedBB}s by the specified coordinates.
+	 * Offsets the passed {@link AxisAlignedBB} array by the specified coordinates.
 	 *
 	 * @param x the x
 	 * @param y the y
@@ -215,6 +287,13 @@ public class AABBUtils
 		return offset(new BlockPos(x, y, z), aabbs);
 	}
 
+	/**
+	 * Offsets the passed {@link AxisAlignedBB} by the {@link BlockPos} coordinates.
+	 *
+	 * @param pos the pos
+	 * @param aabb the aabb
+	 * @return the axis aligned bb
+	 */
 	public static AxisAlignedBB offset(BlockPos pos, AxisAlignedBB aabb)
 	{
 		if (aabb == null || pos == null)
@@ -222,6 +301,13 @@ public class AABBUtils
 		return aabb.offset(pos.getX(), pos.getY(), pos.getZ());
 	}
 
+	/**
+	 * Offsets the passed {@link AxisAlignedBB} array by the {@link BlockPos} coordinates.
+	 *
+	 * @param pos the pos
+	 * @param aabbs the aabbs
+	 * @return the axis aligned b b[]
+	 */
 	public static AxisAlignedBB[] offset(BlockPos pos, AxisAlignedBB... aabbs)
 	{
 		if (ArrayUtils.isEmpty(aabbs))
@@ -233,18 +319,32 @@ public class AABBUtils
 		return aabbs;
 	}
 
+	/**
+	 * Checks if an {@link AxisAlignedBB} is colliding with an {@code AxisAlignedBB} array.
+	 *
+	 * @param aabb the aabb
+	 * @param aabbs the aabbs
+	 * @return true, if is colliding
+	 */
 	public static boolean isColliding(AxisAlignedBB aabb, AxisAlignedBB[] aabbs)
 	{
 		return isColliding(new AxisAlignedBB[] { aabb }, aabbs);
 	}
 
+	/**
+	 * Checks if an {@link AxisAlignedBB} array is colliding with an {@code AxisAlignedBB}.
+	 *
+	 * @param aabbs the aabbs
+	 * @param aabb the aabb
+	 * @return true, if is colliding
+	 */
 	public static boolean isColliding(AxisAlignedBB[] aabbs, AxisAlignedBB aabb)
 	{
 		return isColliding(aabbs, new AxisAlignedBB[] { aabb });
 	}
 
 	/**
-	 * Checks if a group of {@link AxisAlignedBB} is colliding with another one.
+	 * Checks if an {@link AxisAlignedBB} array is colliding with another one.
 	 *
 	 * @param aabbs1 the aabbs1
 	 * @param aabbs2 the aabbs2
@@ -269,13 +369,11 @@ public class AABBUtils
 	}
 
 	/**
-	 * Gets the collision bounding boxes.
+	 * Gets the collision {@link AxisAlignedBB} for the {@link Block} as the {@link BlockPos} coordinates.
 	 *
 	 * @param world the world
 	 * @param block the block
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
+	 * @param pos the pos
 	 * @return the collision bounding boxes
 	 */
 	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, Block block, BlockPos pos)
@@ -284,13 +382,11 @@ public class AABBUtils
 	}
 
 	/**
-	 * Gets the collision bounding boxes for the block.
+	 * Gets the collision {@link AxisAlignedBB} for the {@link Block} as the {@link BlockPos} coordinates.
 	 *
 	 * @param world the world
 	 * @param block the block
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
+	 * @param pos the pos
 	 * @param offset if true, the boxes are offset by the coordinate
 	 * @return the collision bounding boxes
 	 */
@@ -300,7 +396,7 @@ public class AABBUtils
 	}
 
 	/**
-	 * Gets the collision bounding boxes.
+	 * Gets the collision {@link AxisAlignedBB} for the {@link MBlockState}.
 	 *
 	 * @param world the world
 	 * @param state the state
@@ -312,10 +408,11 @@ public class AABBUtils
 	}
 
 	/**
-	 * Gets the collision bounding boxes for the state.
+	 * Gets the collision {@link AxisAlignedBB} for the {@link MBlockState}.
 	 *
 	 * @param world the world
 	 * @param state the state
+	 * @param offset the offset
 	 * @return the collision bounding boxes
 	 */
 	public static AxisAlignedBB[] getCollisionBoundingBoxes(World world, MBlockState state, boolean offset)

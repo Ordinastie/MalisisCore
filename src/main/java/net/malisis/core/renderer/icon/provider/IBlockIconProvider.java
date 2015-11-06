@@ -39,13 +39,14 @@ import net.minecraft.world.IBlockAccess;
  */
 public interface IBlockIconProvider extends IIconProvider
 {
+
 	/**
 	 * Gets the {@link MalisisIcon} to use.
 	 *
 	 * @param world the world
 	 * @param pos the pos
 	 * @param state the state
-	 * @param facing the facing
+	 * @param side the side
 	 * @return the icon
 	 */
 	public default MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
@@ -58,7 +59,7 @@ public interface IBlockIconProvider extends IIconProvider
 	 * {@link IItemIconProvider}).
 	 *
 	 * @param itemStack the item stack
-	 * @param facing the facing
+	 * @param side the side
 	 * @return the icon
 	 */
 	public default MalisisIcon getIcon(ItemStack itemStack, EnumFacing side)

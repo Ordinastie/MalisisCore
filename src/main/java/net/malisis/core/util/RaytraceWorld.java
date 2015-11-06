@@ -323,11 +323,9 @@ public class RaytraceWorld
 
 	/**
 	 * Raytraces inside an actual block area. Calls
-	 * {@link Block#collisionRayTrace(World, int, int, int, net.minecraft.util.Vec3, net.minecraft.util.Vec3)}
+	 * {@link Block#collisionRayTrace(World, BlockPos, net.minecraft.util.Vec3, net.minecraft.util.Vec3)}
 	 *
-	 * @param x the x coordinate of the block to trace
-	 * @param y the y coordinate of the block to trace
-	 * @param z the z coordinate of the block to trace
+	 * @param pos the pos
 	 * @param exit the exit
 	 * @return the {@link MovingObjectPosition} return by block raytrace
 	 */

@@ -46,7 +46,6 @@ public interface ISidedInventoryProvider extends IInventoryProvider, ISidedInven
 	 * Gets the {@link MalisisInventory} accessible from the side of this {@link IInventoryProvider}.<br>
 	 *
 	 * @param side the side
-	 * @param data the data
 	 * @return the inventory
 	 */
 	public MalisisInventory getInventory(EnumFacing side);
@@ -55,7 +54,6 @@ public interface ISidedInventoryProvider extends IInventoryProvider, ISidedInven
 	 * Gets all the {@link MalisisInventory inventories} accessible from the side of this {@link IInventoryProvider}.
 	 *
 	 * @param side the side
-	 * @param data null for TileEntity, ItemStack for Item
 	 * @return the inventories
 	 */
 	public default MalisisInventory[] getInventories(EnumFacing side)
@@ -112,6 +110,13 @@ public interface ISidedInventoryProvider extends IInventoryProvider, ISidedInven
 		return slotNumber >> 3;
 	}
 
+	/**
+	 * Checks if is slot is available from the <code>side</code>.
+	 *
+	 * @param slotNumber the slot number
+	 * @param side the side
+	 * @return true, if is slot in side
+	 */
 	public default boolean isSlotInSide(int slotNumber, EnumFacing side)
 	{
 		return getInventory(slotNumber) == getInventory(side);

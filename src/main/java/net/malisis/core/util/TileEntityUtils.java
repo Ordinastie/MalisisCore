@@ -58,9 +58,7 @@ public class TileEntityUtils
 	 * @param <T> type of TileEntity requested
 	 * @param clazz the class of the TileEntity
 	 * @param world the world
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
+	 * @param pos the pos
 	 * @return the tile entity at the coordinates, or null if no tile entity, or not of type T
 	 */
 	public static <T> T getTileEntity(Class<T> clazz, IBlockAccess world, BlockPos pos)

@@ -37,10 +37,8 @@ import java.util.WeakHashMap;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.util.MBlockPos;
 import net.malisis.core.util.MBlockState;
-import net.malisis.core.util.chunkcollision.IChunkCollidable;
 import net.malisis.core.util.chunklistener.ChunkListener;
 import net.malisis.core.util.chunklistener.IBlockListener;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
@@ -53,7 +51,7 @@ import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
- * This class is the entry point for all the chunk collision related calculation.<br>
+ * This class is the entry point for blocks that need to stored inside a chunk for later processing.<br>
  * The static methods are called via ASM which then call the process for the corresponding server or client instance.
  *
  * @author Ordinastie
@@ -72,6 +70,12 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 		handlers.add(new ChunkListener());
 	}
 
+	/**
+	 * Gets all the coordinates stored in the chunk.
+	 *
+	 * @param chunk the chunk
+	 * @return the coords
+	 */
 	private TLongHashSet getCoords(Chunk chunk)
 	{
 		Map<Chunk, TLongHashSet> chunks = chunk.getWorld().isRemote ? clientChunks : serverChunks;
@@ -85,7 +89,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	}
 
 	/**
-	 * Call a {@link ChunkProcedure} this specified {@link Chunk}.
+	 * Calls a {@link ChunkProcedure} for the specified {@link Chunk}.
 	 *
 	 * @param chunk the chunk
 	 * @param procedure the procedure
@@ -98,6 +102,11 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 			coords.forEach(procedure);
 	}
 
+	/**
+	 * Adds a {@link IChunkBlockHandler} to be managed by this {@link ChunkBlockHandler}.
+	 *
+	 * @param handler the handler
+	 */
 	public void addHandler(IChunkBlockHandler handler)
 	{
 		handlers.add(handler);
@@ -105,16 +114,14 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 
 	//#region updateCoordinates
 	/**
-	 * Update chunk coordinates.<br>
-	 * Called via ASM from {@link Chunk#setBlockIDWithMetadata(int, int, int, Block, int)} Notifies all {@link IBlockListener} for that
-	 * chunk.<br>
+	 * Updates chunk coordinates.<br>
+	 * Called via ASM from {@link Chunk#setBlockState(BlockPos, IBlockState)}.<br>
+	 * Notifies all {@link IBlockListener} for that chunk.<br>
 	 *
 	 * @param chunk the chunk
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
-	 * @param old the old
-	 * @param block the block
+	 * @param pos the pos
+	 * @param oldState the old state
+	 * @param newState the new state
 	 * @return true, if block can be placed, false if canceled
 	 */
 	@Override
@@ -137,7 +144,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	}
 
 	/**
-	 * Adds coordinate for the {@link Chunk}s around {@link MBlockPos}.
+	 * Adds a coordinate for the {@link Chunk}s around {@link MBlockPos}.
 	 *
 	 * @param world the world
 	 * @param pos the pos
@@ -151,7 +158,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	}
 
 	/**
-	 * Adds coordinate for the specified {@link Chunk}.
+	 * Adds a coordinate for the specified {@link Chunk}.
 	 *
 	 * @param chunk the chunk
 	 * @param pos the pos
@@ -163,7 +170,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	}
 
 	/**
-	 * Removes coordinate from the {@link Chunk}s around the {@link MBlockPos}.
+	 * Removes a coordinate from the {@link Chunk}s around the {@link MBlockPos}.
 	 *
 	 * @param world the world
 	 * @param pos the pos
@@ -177,7 +184,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	}
 
 	/**
-	 * Removes coordiante from the specified {@link Chunk}.
+	 * Removes a coordinate from the specified {@link Chunk}.
 	 *
 	 * @param chunk the chunk
 	 * @param pos the pos
@@ -194,7 +201,8 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 
 	//#region Events
 	/**
-	 * On data load.
+	 * Called when a {@link Chunk} is loaded on the server.<br>
+	 * Reads the coordinates saved in the Chunk's NBT.
 	 *
 	 * @param event the event
 	 */
@@ -210,6 +218,12 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 		chunks.put(event.getChunk(), new TLongHashSet(coords));
 	}
 
+	/**
+	 * Called when a {@link Chunk} is saved on the server.<br>
+	 * Writes the coordinates to be saved in the Chunk's NBT.
+	 *
+	 * @param event the event
+	 */
 	@SubscribeEvent
 	public void onDataSave(ChunkDataEvent.Save event)
 	{
@@ -222,12 +236,12 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	}
 
 	/**
-	 * Read long array from {@link NBTTagCompound}.<br>
+	 * Reads a long array from {@link NBTTagCompound}.<br>
 	 * From IvNBTHelper.readNBTLongs()
 	 *
+	 * @author Ivorius
 	 * @param compound the compound
 	 * @return the long[]
-	 * @author Ivorius
 	 */
 	private long[] readLongArray(NBTTagCompound compound)
 	{
@@ -242,9 +256,9 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 * Write long array into {@link NBTTagCompound}.<br>
 	 * From IvNBTHelper.writeNBTLongs()
 	 *
+	 * @author Ivorius
 	 * @param compound the compound
 	 * @param longs the longs
-	 * @author Ivorius
 	 */
 	private void writeLongArray(NBTTagCompound compound, long[] longs)
 	{
@@ -255,8 +269,8 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	}
 
 	/**
-	 * Server only.<br>
-	 * Sends the chunks coordinates to the client when they get watched by them.
+	 * Called when a client requests a {@link Chunk} from the server only.<br>
+	 * Sends the chunks coordinates to the client.
 	 *
 	 * @param event the event
 	 */
@@ -329,17 +343,30 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 		return chunks;
 	}
 
+	/**
+	 * Gets the {@link ChunkBlockHandler} instance.
+	 *
+	 * @return the chunk block handler
+	 */
 	public static ChunkBlockHandler get()
 	{
 		return instance;
 	}
 
+	/**
+	 * This class is the base for a process that is to be called for every coordinate stored inside a {@link Chunk}.
+	 */
 	public static abstract class ChunkProcedure implements TLongProcedure
 	{
 		protected World world;
 		protected Chunk chunk;
 		protected MBlockState state;
 
+		/**
+		 * Sets the {@link Chunk} (and {@link World}) for this {@link ChunkProcedure}.
+		 *
+		 * @param chunk the chunk
+		 */
 		protected void set(Chunk chunk)
 		{
 			this.world = chunk.getWorld();
@@ -347,8 +374,8 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 		}
 
 		/**
-		 * Checks whether the passed coordinate is a valid {@link IChunkCollidable} and that it belong to the current {@link Chunk}.<br>
-		 * Also sets the x, y, z and block field for this {@link ChunkProcedure}.
+		 * Checks whether the passed coordinate is a valid {@link IChunkBlock}.<br>
+		 * Also sets the {@link MBlockState} for this {@link ChunkProcedure}.
 		 *
 		 * @param coord the coord
 		 * @return true, if successful
@@ -368,6 +395,9 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 			return true;
 		}
 
+		/**
+		 * Cleans the current state for this {@link ChunkProcedure} for the next coordinate.
+		 */
 		protected void clean()
 		{
 			world = null;

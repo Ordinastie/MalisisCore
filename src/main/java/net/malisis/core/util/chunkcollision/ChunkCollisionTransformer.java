@@ -181,7 +181,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 	@SuppressWarnings("deprecation")
 	private AsmHook placeBlockHook()
 	{
-		McpMethodMapping canPlaceEntityOnSide = new McpMethodMapping(
+		McpMethodMapping onItemUse = new McpMethodMapping(
 				"onItemUse",
 				"func_77648_a",
 				"net/minecraft/item/ItemBlock",
@@ -192,7 +192,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		McpFieldMapping block = new McpFieldMapping("block", "field_150939_a", "net/minecraft/item/ItemBlock",
 				"Lnet/minecraft/block/Block;");
 
-		AsmHook ah = new AsmHook(canPlaceEntityOnSide);
+		AsmHook ah = new AsmHook(onItemUse);
 
 		//		int i1 = this.getMetadata(p_77648_1_.getMetadata());
 		//	    ALOAD 0

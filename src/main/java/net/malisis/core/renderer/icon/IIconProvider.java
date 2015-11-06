@@ -50,7 +50,7 @@ public interface IIconProvider
 	/**
 	 * Registers the icons to the {@link TextureMap}.
 	 *
-	 * @param map the map
+	 * @param textureMap the texture map
 	 */
 	public void registerIcons(TextureMap textureMap);
 
