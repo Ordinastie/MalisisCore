@@ -40,11 +40,10 @@ import org.apache.logging.log4j.Logger;
  * @author diesieben07
  */
 
-public final class JavaCompatibility implements Runnable, HyperlinkListener, ActionListener
+public final class JavaCompatibility implements Runnable, HyperlinkListener
 {
 	private final boolean isWindowsClient = SystemUtils.IS_OS_WINDOWS && FMLLaunchHandler.side().isClient();
 	private final Object mutex = new Object();
-	final JFrame frame = new JFrame("Java 8 required");
 
 	public JavaCompatibility()
 	{}
@@ -118,8 +117,16 @@ public final class JavaCompatibility implements Runnable, HyperlinkListener, Act
 
 		text.addHyperlinkListener(this);
 
+		JFrame frame = new JFrame("Java 8 required");
 		JButton button = new JButton("Exit");
-		button.addActionListener(this);
+		button.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				frame.dispose();
+			}
+		});
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -177,12 +184,6 @@ public final class JavaCompatibility implements Runnable, HyperlinkListener, Act
 			catch (Exception ignored)
 			{}
 		}
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e)
-	{
-		frame.dispose();
 	}
 
 	private void exit()
