@@ -40,11 +40,10 @@ import cpw.mods.fml.relauncher.FMLLaunchHandler;
  * @author diesieben07
  */
 
-public final class JavaCompatibility implements Runnable, HyperlinkListener, ActionListener
+public final class JavaCompatibility implements Runnable, HyperlinkListener
 {
 	private final boolean isWindowsClient = SystemUtils.IS_OS_WINDOWS && FMLLaunchHandler.side().isClient();
 	private final Object mutex = new Object();
-	final JFrame frame = new JFrame("Java 7 required");
 
 	public JavaCompatibility()
 	{}
@@ -68,7 +67,7 @@ public final class JavaCompatibility implements Runnable, HyperlinkListener, Act
 		logger.error("");
 		logger.error(StringUtils.repeat('=', 80));
 		logger.error("MalisisCore requires Java 7 to be installed.");
-		logger.error("Please install the latest Java 8 appropriate for your System from https://java.com/download/"
+		logger.error("Please install the latest Java 7 appropriate for your System from https://java.com/download/"
 				+ (isWindowsClient ? " or use the latest launcher from https://minecraft.net/" : ""));
 		logger.error("If Java 7 is already installed, please make sure the right Java version is for the current profile in the Minecraft launcher.");
 		logger.error("Thank you. The game will exit now.");
@@ -118,8 +117,16 @@ public final class JavaCompatibility implements Runnable, HyperlinkListener, Act
 
 		text.addHyperlinkListener(this);
 
+		final JFrame frame = new JFrame("Java 7 required");
 		JButton button = new JButton("Exit");
-		button.addActionListener(this);
+		button.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				frame.dispose();
+			}
+		});
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -161,7 +168,7 @@ public final class JavaCompatibility implements Runnable, HyperlinkListener, Act
 				+ "Please install the latest Java 7 appropriate for your system from <a href=\"https://java.com/download/\">java.com/download</a>"
 				+ (isWindowsClient ? "or use the latest launcher from <a href=\"https://minecraft.net/\">minecraft.net</a>" : "")
 				+ "<br /><br />"
-				+ "If Java 8 is already installed, please make sure the right Java version is used for the current profile in the Minecraft launcher.<br /><br />"
+				+ "If Java 7 is already installed, please make sure the right Java version is used for the current profile in the Minecraft launcher.<br /><br />"
 				+ "The game will exit now." + "</body></html>";
 	}
 
@@ -177,12 +184,6 @@ public final class JavaCompatibility implements Runnable, HyperlinkListener, Act
 			catch (Exception ignored)
 			{}
 		}
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e)
-	{
-		frame.dispose();
 	}
 
 	private void exit()
