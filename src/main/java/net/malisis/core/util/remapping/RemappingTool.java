@@ -93,18 +93,19 @@ public class RemappingTool
 
 	public static void processMissingMappings(FMLMissingMappingsEvent event)
 	{
-		for (ModContainer mod : instance.mods)
-		{
-			event.applyModContainer(mod);
-			instance.processMappings(event.get());
-		}
-
+		instance.processMappings(event.getAll());
 	}
 
 	private void processMappings(List<MissingMapping> mappings)
 	{
 		for (FMLMissingMappingsEvent.MissingMapping missingMapping : mappings)
 		{
+			if (!MalisisCore.isObfEnv)
+			{
+				missingMapping.ignore();
+				continue;
+			}
+
 			switch (missingMapping.type)
 			{
 				case BLOCK:
