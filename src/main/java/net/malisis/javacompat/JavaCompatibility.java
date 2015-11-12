@@ -117,7 +117,7 @@ public final class JavaCompatibility implements Runnable, HyperlinkListener
 
 		text.addHyperlinkListener(this);
 
-		JFrame frame = new JFrame("Java 8 required");
+		final JFrame frame = new JFrame("Java 8 required");
 		JButton button = new JButton("Exit");
 		button.addActionListener(new ActionListener()
 		{
