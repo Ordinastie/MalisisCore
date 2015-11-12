@@ -171,12 +171,12 @@ public class MalisisCore implements IMalisisMod
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event)
 	{
-		MinecraftForge.EVENT_BUS.register(instance);
+		MinecraftForge.EVENT_BUS.register(this);
 		MinecraftForge.EVENT_BUS.register(ReplacementTool.instance());
 		MinecraftForge.EVENT_BUS.register(ChunkBlockHandler.get());
 		MinecraftForge.EVENT_BUS.register(BlockDataHandler.get());
 
-		FMLCommonHandler.instance().bus().register(RemappingTool.instance());
+		//FMLCommonHandler.instance().bus().register(this);
 		//MinecraftForge.EVENT_BUS.register(ChunkCollision.client);
 
 		MalisisNetwork.createMessages(event.getAsmData());
