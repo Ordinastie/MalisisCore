@@ -41,7 +41,6 @@ import net.minecraft.item.Item;
  */
 public class VanillaIcon extends MalisisIcon
 {
-	private TextureAtlasSprite icon;
 	protected Item item;
 	protected IBlockState blockState;
 	protected int metadata;
@@ -69,10 +68,7 @@ public class VanillaIcon extends MalisisIcon
 
 	private TextureAtlasSprite getIcon()
 	{
-		if (icon != null)
-			return icon;
-
-		icon = item != null ? getItemIcon() : getBlockIcon();
+		TextureAtlasSprite icon = item != null ? getItemIcon() : getBlockIcon();
 		return icon == null ? missing : icon;
 	}
 
@@ -219,6 +215,6 @@ public class VanillaIcon extends MalisisIcon
 	@Override
 	public String toString()
 	{
-		return "VanillaIcon [" + icon + "]";
+		return "VanillaIcon [" + getIcon() + "]";
 	}
 }
