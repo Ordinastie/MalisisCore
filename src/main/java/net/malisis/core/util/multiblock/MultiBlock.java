@@ -212,11 +212,11 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 
 	public static BlockPos getOrigin(IBlockAccess world, BlockPos pos)
 	{
-		return BlockDataHandler.getData(ORIGIN_BLOCK_DATA, world, pos);
+		return world != null && pos != null ? BlockDataHandler.getData(ORIGIN_BLOCK_DATA, world, pos) : null;
 	}
 
 	public static boolean isOrigin(IBlockAccess world, BlockPos pos)
 	{
-		return pos.equals(getOrigin(world, pos));
+		return world != null && pos != null && pos.equals(getOrigin(world, pos));
 	}
 }

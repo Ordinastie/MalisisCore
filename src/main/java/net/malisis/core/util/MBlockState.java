@@ -210,6 +210,9 @@ public class MBlockState
 
 	public static IBlockState fromNBT(NBTTagCompound nbt, String blockName, String metadataName)
 	{
+		if (nbt == null)
+			return null;
+
 		Block block;
 		if (nbt.hasKey(blockName, NBT.TAG_INT))
 			block = Block.getBlockById(nbt.getInteger(blockName));
