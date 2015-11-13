@@ -53,6 +53,8 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -252,6 +254,7 @@ public class EntityUtils
 	 * @param effectRenderer the effect renderer
 	 * @param states the states
 	 */
+	@SideOnly(Side.CLIENT)
 	public static void addDestroyEffects(World world, BlockPos pos, EffectRenderer effectRenderer, IBlockState... states)
 	{
 		if (ArrayUtils.isEmpty(states))
@@ -288,6 +291,7 @@ public class EntityUtils
 	 * @param effectRenderer the effect renderer
 	 * @param states the states
 	 */
+	@SideOnly(Side.CLIENT)
 	public static void addHitEffects(World world, MovingObjectPosition target, EffectRenderer effectRenderer, IBlockState... states)
 	{
 		if (ArrayUtils.isEmpty(states))
