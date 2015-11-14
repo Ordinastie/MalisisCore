@@ -105,7 +105,10 @@ public class TileEntityUtils
 		World world = tileEntity.getWorld();
 		AxisAlignedBB aabb = null;
 		if (block instanceof IBoundingBox)
-			aabb = AABBUtils.offset(pos, ((IBoundingBox) block).getRenderBoundingBox(world, pos, world.getBlockState(pos))[0]);
+		{
+			aabb = AABBUtils.combine(((IBoundingBox) block).getRenderBoundingBox(world, pos, world.getBlockState(pos)));
+			aabb = AABBUtils.offset(pos, aabb);
+		}
 
 		return aabb != null ? aabb : AABBUtils.identity(pos);
 
