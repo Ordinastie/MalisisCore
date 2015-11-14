@@ -268,7 +268,7 @@ public class AABBUtils
 			if (ret == null)
 				ret = aabb;
 			else if (aabb != null)
-				ret.union(aabb);
+				ret = ret.union(aabb);
 		}
 
 		return ret;
