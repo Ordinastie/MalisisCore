@@ -163,6 +163,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		this.pos = null;
 		this.block = null;
 		this.blockState = null;
+		this.tileEntity = null;
 		this.item = null;
 		this.itemStack = null;
 		this.overrideTexture = null;
@@ -183,6 +184,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		this.pos = new BlockPos(pos);
 		this.block = block;
 		this.blockState = blockState;
+		this.tileEntity = world.getTileEntity(pos);
 	}
 
 	/**
