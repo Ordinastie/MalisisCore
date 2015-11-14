@@ -24,22 +24,22 @@
 
 package net.malisis.core.renderer.icon;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.malisis.core.MalisisRegistry;
+import net.minecraft.client.renderer.texture.TextureMap;
 
 /**
- * The IIconProvider interface allows to pass {@link MalisisIcon} to the rendering processes.<br>
+ * Implementers of this interface can be registered with {@link MalisisRegistry#registerIconProvider(IIconRegister)} so that icons used can
+ * be registered and stitched to the {@link TextureMap}.
  *
  * @author Ordinastie
+ *
  */
-@SideOnly(Side.CLIENT)
-public interface IIconProvider extends IIconRegister
+public interface IIconRegister
 {
-
 	/**
-	 * Gets the {@link MalisisIcon} to use.
+	 * Registers the icons to the {@link TextureMap}.
 	 *
-	 * @return the icon
+	 * @param textureMap the texture map
 	 */
-	public MalisisIcon getIcon();
+	public void registerIcons(TextureMap textureMap);
 }

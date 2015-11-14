@@ -40,6 +40,7 @@ import net.malisis.core.renderer.IRenderWorldLast;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.icon.IIconProvider;
+import net.malisis.core.renderer.icon.IIconRegister;
 import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
@@ -99,7 +100,7 @@ public class MalisisRegistry
 		/** List of registered {@link IRenderWorldLast} */
 		private List<IRenderWorldLast> renderWorldLastRenderers = new ArrayList<>();
 		/** List of registered {@link IIconProvider} */
-		private Set<IIconProvider> iconProviders = new HashSet<>();
+		private Set<IIconRegister> iconRegisters = new HashSet<>();
 		/** List of {@link DummyModel} for registered items */
 		private Set<DummyModel> itemModels = new HashSet<>();
 		private Map<Class<? extends MalisisRenderer>, MalisisRenderer> registeredRenderers = new HashMap<>();
@@ -152,8 +153,8 @@ public class MalisisRegistry
 		@SubscribeEvent
 		public void onTextureStitchEvent(TextureStitchEvent.Pre event)
 		{
-			for (IIconProvider iconProvider : iconProviders)
-				iconProvider.registerIcons(event.map);
+			for (IIconRegister iconRegister : iconRegisters)
+				iconRegister.registerIcons(event.map);
 		}
 
 		/**
@@ -162,12 +163,12 @@ public class MalisisRegistry
 		 *
 		 * @param object the object
 		 */
-		public void registerIconProvider(Object object)
+		public void registerIconRegister(Object object)
 		{
 			if (object instanceof IMetaIconProvider)
 			{
 				((IMetaIconProvider) object).createIconProvider(null);
-				MalisisRegistry.registerIconProvider(((IMetaIconProvider) object).getIconProvider());
+				MalisisRegistry.registerIconRegister(((IMetaIconProvider) object).getIconProvider());
 			}
 		}
 
@@ -242,7 +243,7 @@ public class MalisisRegistry
 			if (annotation == null)
 				return null;
 
-			if (annotation.value() != DefaultRenderer.Block.class)
+			if (annotation.value() != DefaultRenderer.Null.class)
 				return Pair.of(annotation.value(), annotation.value());
 			else
 				return Pair.of(annotation.block(), annotation.item());
@@ -262,6 +263,8 @@ public class MalisisRegistry
 				return DefaultRenderer.block;
 			else if (clazz == DefaultRenderer.Block.class)
 				return DefaultRenderer.item;
+			else if (clazz == DefaultRenderer.Null.class)
+				return DefaultRenderer.nullRender;
 
 			MalisisRenderer renderer = registeredRenderers.get(clazz);
 			if (renderer == null)
@@ -453,10 +456,10 @@ public class MalisisRegistry
 	 * @param iconProvider the icon provider
 	 */
 	@SideOnly(Side.CLIENT)
-	public static void registerIconProvider(IIconProvider iconProvider)
+	public static void registerIconRegister(IIconRegister iconRegister)
 	{
-		if (iconProvider != null)
-			instance.iconProviders.add(iconProvider);
+		if (iconRegister != null)
+			instance.iconRegisters.add(iconRegister);
 	}
 
 	/**
@@ -555,8 +558,8 @@ public class MalisisRegistry
 	@SideOnly(Side.CLIENT)
 	public static void registerIconProviders()
 	{
-		GameData.getBlockRegistry().forEach(instance::registerIconProvider);
-		GameData.getItemRegistry().forEach(instance::registerIconProvider);
+		GameData.getBlockRegistry().forEach(instance::registerIconRegister);
+		GameData.getItemRegistry().forEach(instance::registerIconRegister);
 	}
 
 	public interface BlockRendererOverride

@@ -58,7 +58,7 @@ import com.google.common.collect.Lists;
  * @author Ordinastie
  *
  */
-@MalisisRendered(block = DefaultRenderer.Block.class, item = DefaultRenderer.Block.class)
+@MalisisRendered(DefaultRenderer.Block.class)
 public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvider, IRegisterable
 {
 	protected String name;

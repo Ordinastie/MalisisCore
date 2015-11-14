@@ -49,8 +49,18 @@ import net.minecraftforge.client.model.TRSRTransformation;
 @SuppressWarnings("deprecation")
 public class DefaultRenderer
 {
+	public static MalisisRenderer nullRender = new Null();
 	public static MalisisRenderer block = new Block();
 	public static MalisisRenderer item = new Item();
+
+	public static class Null extends MalisisRenderer
+	{
+		@Override
+		public void render()
+		{
+
+		}
+	}
 
 	public static class Block extends MalisisRenderer
 	{

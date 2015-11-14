@@ -39,9 +39,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MalisisRendered
 {
-	Class<? extends MalisisRenderer> value() default DefaultRenderer.Block.class;
+	Class<? extends MalisisRenderer> value() default DefaultRenderer.Null.class;
 
-	Class<? extends MalisisRenderer> block() default DefaultRenderer.Block.class;
+	Class<? extends MalisisRenderer> block() default DefaultRenderer.Null.class;
 
-	Class<? extends MalisisRenderer> item() default DefaultRenderer.Item.class;
+	Class<? extends MalisisRenderer> item() default DefaultRenderer.Null.class;
 }
