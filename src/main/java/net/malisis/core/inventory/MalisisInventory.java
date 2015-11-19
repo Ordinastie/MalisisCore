@@ -103,7 +103,7 @@ public class MalisisInventory
 	 * @param provider the provider
 	 * @param slots the slots
 	 */
-	public MalisisInventory(IInventoryProvider provider, MalisisSlot[] slots)
+	public MalisisInventory(IInventoryProvider provider, MalisisSlot... slots)
 	{
 		this.inventoryProvider = provider;
 		setSlots(slots);
