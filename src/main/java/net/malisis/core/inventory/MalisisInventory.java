@@ -32,10 +32,13 @@ import java.util.WeakHashMap;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.inventory.IInventoryProvider.IDeferredInventoryProvider;
+import net.malisis.core.inventory.IInventoryProvider.IDirectInventoryProvider;
 import net.malisis.core.inventory.message.OpenInventoryMessage;
 import net.malisis.core.inventory.player.PlayerInventory;
 import net.malisis.core.util.EntityUtils;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -44,7 +47,6 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants.NBT;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -476,6 +478,21 @@ public class MalisisInventory
 	}
 
 	/**
+	 * Transfers into this {@link MalisisInventory} the contents of <code>inventory</code>.
+	 *
+	 * @param inventory the inventory
+	 */
+	public void transfer(MalisisInventory inventory)
+	{
+		for (MalisisSlot s : inventory.getSlots())
+		{
+			ItemStack itemStack = transferInto(s.getItemStack());
+			s.setItemStack(itemStack);
+			s.onSlotChanged();
+		}
+	}
+
+	/**
 	 * Transfers an {@link ItemStack} inside this {@link MalisisInventory}.
 	 *
 	 * @param itemStack the item stack
@@ -530,16 +547,7 @@ public class MalisisInventory
 		{
 			slot = getSlot(current);
 			if (slot.isItemValid(itemStack) && !slot.isOutputSlot() && (emptySlot || slot.getItemStack() != null))
-			{
 				itemStack = slot.insert(itemStack);
-				//				ItemUtils.ItemStacksMerger ism = new ItemUtils.ItemStacksMerger(itemStack, slot.getItemStack());
-				//				if (ism.merge(ItemUtils.FULL_STACK, slot.getSlotStackLimit()))
-				//				{
-				//					itemStack = ism.merge;
-				//					slot.setItemStack(ism.into);
-				//					slot.onSlotChanged();
-				//				}
-			}
 			current += step;
 		}
 
@@ -642,27 +650,49 @@ public class MalisisInventory
 	 * @param data the data
 	 * @return the {@link MalisisInventoryContainer}
 	 */
-	public static MalisisInventoryContainer open(EntityPlayerMP player, IInventoryProvider inventoryProvider, Object... data)
+	public static MalisisInventoryContainer open(EntityPlayerMP player, IDirectInventoryProvider inventoryProvider)
 	{
 		if (inventoryProvider == null)
 			return null;
 
-		MalisisInventoryContainer c = new MalisisInventoryContainer(player, 0);
+		return openInventories(player, inventoryProvider, inventoryProvider.getInventories(), 0);
+	}
 
-		MalisisInventory[] inventories = inventoryProvider.getInventories(data);
-		if (!ArrayUtils.isEmpty(inventories))
-		{
-			for (MalisisInventory inv : inventories)
-			{
-				if (inv != null)
-				{
-					c.addInventory(inv);
-					inv.bus.post(new InventoryEvent.Open(c, inv));
-				}
-			}
-		}
-		OpenInventoryMessage.send(inventoryProvider, player, c.windowId);
-		c.sendInventoryContent();
+	/**
+	 * Opens this {@link MalisisInventory}. Called server-side only.
+	 *
+	 * @param player the player
+	 * @param inventoryProvider the inventory provider
+	 * @param data the data
+	 * @return the {@link MalisisInventoryContainer}
+	 */
+	public static <T> MalisisInventoryContainer open(EntityPlayerMP player, IDeferredInventoryProvider<T> inventoryProvider, T data)
+	{
+		if (inventoryProvider == null)
+			return null;
+
+		return openInventories(player, inventoryProvider, inventoryProvider.getInventories(data), 0);
+	}
+
+	/**
+	 * Opens this {@link MalisisInventory}. Called client-side only.
+	 *
+	 * @param player the player
+	 * @param inventoryProvider the inventory provider
+	 * @param windowId the window id
+	 * @param data the data
+	 * @return the {@link MalisisInventoryContainer}
+	 */
+	@SideOnly(Side.CLIENT)
+	public static MalisisInventoryContainer open(EntityPlayerSP player, IDirectInventoryProvider inventoryProvider, int windowId)
+	{
+		if (inventoryProvider == null)
+			return null;
+
+		MalisisInventoryContainer c = openInventories(player, inventoryProvider, inventoryProvider.getInventories(), windowId);
+		MalisisGui gui = inventoryProvider.getGui(c);
+		if (gui != null)
+			gui.display();
 
 		return c;
 	}
@@ -677,13 +707,22 @@ public class MalisisInventory
 	 * @return the {@link MalisisInventoryContainer}
 	 */
 	@SideOnly(Side.CLIENT)
-	public static MalisisInventoryContainer open(EntityPlayerSP player, IInventoryProvider inventoryProvider, int windowId, Object... data)
+	public static <T> MalisisInventoryContainer open(EntityPlayerSP player, IDeferredInventoryProvider<T> inventoryProvider, T data, int windowId)
 	{
 		if (inventoryProvider == null)
 			return null;
 
+		MalisisInventoryContainer c = openInventories(player, inventoryProvider, inventoryProvider.getInventories(data), windowId);
+		MalisisGui gui = inventoryProvider.getGui(data, c);
+		if (gui != null)
+			gui.display();
+
+		return c;
+	}
+
+	private static MalisisInventoryContainer openInventories(EntityPlayer player, IInventoryProvider inventoryProvider, MalisisInventory[] inventories, int windowId)
+	{
 		MalisisInventoryContainer c = new MalisisInventoryContainer(player, windowId);
-		MalisisInventory[] inventories = inventoryProvider.getInventories(data);
 		if (!ArrayUtils.isEmpty(inventories))
 		{
 			for (MalisisInventory inv : inventories)
@@ -696,11 +735,10 @@ public class MalisisInventory
 			}
 		}
 
-		if (FMLCommonHandler.instance().getSide().isClient())
+		if (player instanceof EntityPlayerMP)
 		{
-			MalisisGui gui = inventoryProvider.getGui(c);
-			if (gui != null)
-				gui.display();
+			OpenInventoryMessage.send(inventoryProvider, (EntityPlayerMP) player, c.windowId);
+			c.sendInventoryContent();
 		}
 
 		return c;

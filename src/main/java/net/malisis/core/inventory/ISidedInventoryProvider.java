@@ -25,6 +25,7 @@
 package net.malisis.core.inventory;
 
 import net.malisis.core.block.IBlockDirectional;
+import net.malisis.core.inventory.IInventoryProvider.IDirectInventoryProvider;
 import net.malisis.core.util.EnumFacingUtils;
 import net.malisis.core.util.ItemUtils;
 import net.minecraft.block.state.IBlockState;
@@ -39,7 +40,7 @@ import org.apache.commons.lang3.ArrayUtils;
  * @author Ordinastie
  *
  */
-public interface ISidedInventoryProvider extends IInventoryProvider, ISidedInventory
+public interface ISidedInventoryProvider extends IDirectInventoryProvider, ISidedInventory
 {
 
 	/**
@@ -68,7 +69,7 @@ public interface ISidedInventoryProvider extends IInventoryProvider, ISidedInven
 	 * @return the inventories
 	 */
 	@Override
-	public default MalisisInventory[] getInventories(Object... data)
+	public default MalisisInventory[] getInventories()
 	{
 		MalisisInventory[] inventories = new MalisisInventory[0];
 		for (EnumFacing facing : EnumFacing.values())

@@ -27,6 +27,8 @@ package net.malisis.core.inventory.message;
 import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.IInventoryProvider;
+import net.malisis.core.inventory.IInventoryProvider.IDeferredInventoryProvider;
+import net.malisis.core.inventory.IInventoryProvider.IDirectInventoryProvider;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
@@ -72,23 +74,25 @@ public class OpenInventoryMessage implements IMalisisMessageHandler<OpenInventor
 	public void process(Packet message, MessageContext ctx)
 	{
 		EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
-		IInventoryProvider inventoryProvider = null;
-		Object data = null;
 		if (message.type == ContainerType.TYPE_TILEENTITY)
-			inventoryProvider = TileEntityUtils.getTileEntity(IInventoryProvider.class, Minecraft.getMinecraft().theWorld, message.pos);
-		else if (message.type == ContainerType.TYPE_ITEM)
 		{
-			ItemStack itemStack = player.getCurrentEquippedItem();
-			if (itemStack != null && itemStack.getItem() instanceof IInventoryProvider)
-			{
-				inventoryProvider = (IInventoryProvider) itemStack.getItem();
-				data = itemStack;
-			}
+			IDirectInventoryProvider inventoryProvider = TileEntityUtils.getTileEntity(IDirectInventoryProvider.class,
+					Minecraft.getMinecraft().theWorld, message.pos);
+			if (inventoryProvider != null)
+				MalisisInventory.open(player, inventoryProvider, message.windowId);
 		}
 
-		if (inventoryProvider != null)
-			MalisisInventory.open(player, inventoryProvider, message.windowId, data);
+		else if (message.type == ContainerType.TYPE_ITEM)
+		{
+			//TODO: send and use slot number instead of limited to equipped
+			ItemStack itemStack = player.getCurrentEquippedItem();
+			if (itemStack == null || !(itemStack.getItem() instanceof IDeferredInventoryProvider<?>))
+				return;
 
+			IDeferredInventoryProvider inventoryProvider = (IDeferredInventoryProvider) itemStack.getItem();
+			MalisisInventory.open(player, inventoryProvider, itemStack, message.windowId);
+
+		}
 	}
 
 	/**
