@@ -393,14 +393,15 @@ public abstract class MalisisGui extends GuiScreen
 			UIComponent component = getComponentAt(x, y);
 			if (component != null && !component.isDisabled())
 			{
-				component.onButtonPress(x, y, MouseButton.getButton(button));
 				//double click
-
 				if (button == lastClickButton && time - lastClickTime < 250)
 				{
 					component.onDoubleClick(x, y, MouseButton.getButton(button));
 					lastClickTime = 0;
 				}
+				else
+					component.onButtonPress(x, y, MouseButton.getButton(button));
+
 				component.setFocused(true);
 			}
 			else
