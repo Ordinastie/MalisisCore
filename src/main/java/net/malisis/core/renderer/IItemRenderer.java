@@ -53,6 +53,8 @@ public interface IItemRenderer
 {
 	public boolean renderItem(ItemStack itemStack, float partialTick);
 
+	public void setTransformType(TransformType transformType);
+
 	public Matrix4f getTransform(TransformType tranformType);
 
 	public boolean isGui3d();
@@ -74,10 +76,14 @@ public interface IItemRenderer
 		}
 
 		@Override
-		public Pair<IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType)
+		public Pair<IBakedModel, Matrix4f> handlePerspective(TransformType transformType)
 		{
 			IItemRenderer itemRenderer = MalisisRegistry.getItemRenderer(item);
-			return Pair.of(this, itemRenderer != null ? itemRenderer.getTransform(cameraTransformType) : null);
+			if (itemRenderer == null)
+				return Pair.of(this, null);
+
+			itemRenderer.setTransformType(transformType);
+			return Pair.of(this, itemRenderer.getTransform(transformType));
 		}
 
 		@Override

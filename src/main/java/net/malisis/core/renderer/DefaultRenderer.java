@@ -138,7 +138,6 @@ public class DefaultRenderer
 		@Override
 		public Matrix4f getTransform(ItemCameraTransforms.TransformType tranformType)
 		{
-			this.tranformType = tranformType;
 			if (tranformType == TransformType.THIRD_PERSON)
 				return thirdPerson;
 			else if (tranformType == TransformType.FIRST_PERSON)
@@ -158,15 +157,13 @@ public class DefaultRenderer
 				//drawShape(gui);
 				drawShape(getModelShape(), rp);
 			}
-
-			tranformType = null;
 		}
 
-		private Shape getModelShape()
+		protected Shape getModelShape()
 		{
 			MalisisIcon icon = getIcon(null, new RenderParameters());
 			MalisisModel model = itemModels.get(icon);
-			//if (model == null)
+			if (model == null)
 			{
 				model = new MalisisModel(new TextureModelLoader(icon));
 				itemModels.put(icon, model);

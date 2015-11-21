@@ -168,6 +168,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		this.itemStack = null;
 		this.overrideTexture = null;
 		this.destroyBlockProgress = null;
+		this.tranformType = null;
 	}
 
 	/**
@@ -283,6 +284,11 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		render();
 		clean();
 		return true;
+	}
+
+	public void setTransformType(TransformType transformType)
+	{
+		this.tranformType = transformType;
 	}
 
 	@Override
