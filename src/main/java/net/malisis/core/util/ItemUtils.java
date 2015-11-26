@@ -238,9 +238,11 @@ public class ItemUtils
 
 	public static ItemStack getItemStackFromState(IBlockState state)
 	{
+		if (state == null)
+			return null;
 		Item item = Item.getItemFromBlock(state.getBlock());
 		if (item == null)
 			return null;
-		return new ItemStack(item, 0, state.getBlock().getMetaFromState(state));
+		return new ItemStack(item, 1, state.getBlock().damageDropped(state));
 	}
 }

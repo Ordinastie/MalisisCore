@@ -96,6 +96,9 @@ public class EntityUtils
 	 */
 	public static void spawnEjectedItem(World world, BlockPos pos, ItemStack itemStack)
 	{
+		if (itemStack == null || world.isRemote)
+			return;
+
 		float rx = world.rand.nextFloat() * 0.8F + 0.1F;
 		float ry = world.rand.nextFloat() * 0.8F + 0.1F;
 		float rz = world.rand.nextFloat() * 0.8F + 0.1F;
