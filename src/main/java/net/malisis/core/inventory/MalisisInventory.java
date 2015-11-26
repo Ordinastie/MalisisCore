@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import net.malisis.core.ExceptionHandler;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.inventory.IInventoryProvider.IDeferredInventoryProvider;
@@ -79,7 +80,7 @@ public class MalisisInventory
 	/** Maximum stack size for the slots. */
 	protected int slotMaxStackSize = 64;
 	/** Event bus on which inventory events will be fired. */
-	private EventBus bus = new EventBus();
+	private EventBus bus = new EventBus(ExceptionHandler.instance);
 	/** Current inventory state. */
 	public InventoryState state = new InventoryState();
 

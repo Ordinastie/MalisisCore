@@ -22,9 +22,9 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.event;
+package net.malisis.core;
 
-import net.malisis.core.MalisisCore;
+import net.malisis.core.client.gui.event.ComponentEvent;
 
 import org.apache.logging.log4j.Level;
 
@@ -36,8 +36,11 @@ import com.google.common.eventbus.SubscriberExceptionHandler;
  *
  * @author Ordinastie
  */
-public class ComponentExceptionHandler implements SubscriberExceptionHandler
+public class ExceptionHandler implements SubscriberExceptionHandler
 {
+	/** The Exception handler for all Compoenent events. */
+	public static final ExceptionHandler instance = new ExceptionHandler();
+
 	@Override
 	public void handleException(Throwable exception, SubscriberExceptionContext context)
 	{
