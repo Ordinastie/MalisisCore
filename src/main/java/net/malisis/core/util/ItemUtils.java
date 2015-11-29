@@ -196,10 +196,10 @@ public class ItemUtils
 				amount = source.stackSize;
 			else if (amount == HALF_STACK)
 				amount = (int) Math.ceil((float) source.stackSize / 2);
-			this.amount = amount;
+			this.amount = Math.min(amount, source.stackSize);
 
-			split = source.splitStack(amount);
-			if (source.stackSize == 0)
+			split = source.splitStack(this.amount);
+			if (source.stackSize <= 0)
 				source = null;
 
 			return split;
