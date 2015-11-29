@@ -81,6 +81,8 @@ public class VanillaIcon extends MalisisIcon
 
 	private TextureAtlasSprite getBlockIcon()
 	{
+		if (blockState == null)
+			return null;
 		return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getTexture(blockState);
 	}
 
