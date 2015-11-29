@@ -139,6 +139,7 @@ public class MalisisRegistry
 		@SubscribeEvent
 		public void onModelBakeEvent(ModelBakeEvent event)
 		{
+			DefaultRenderer.item.clearModels();
 			for (DummyModel model : itemModels)
 				event.modelRegistry.putObject(model.getResourceLocation(), model);
 		}

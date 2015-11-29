@@ -50,8 +50,8 @@ import net.minecraftforge.client.model.TRSRTransformation;
 public class DefaultRenderer
 {
 	public static MalisisRenderer nullRender = new Null();
-	public static MalisisRenderer block = new Block();
-	public static MalisisRenderer item = new Item();
+	public static Block block = new Block();
+	public static Item item = new Item();
 
 	public static class Null extends MalisisRenderer
 	{
@@ -170,6 +170,11 @@ public class DefaultRenderer
 			}
 
 			return model.getShape("shape");
+		}
+
+		public void clearModels()
+		{
+			itemModels.clear();
 		}
 
 	};
