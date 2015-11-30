@@ -86,7 +86,8 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 	protected boolean isWysiwyg = false;
 
 	private int defaultColor = 0xFFFFFF;
-	private int activeColor = 0x006633;
+
+	//	private int activeColor = 0x006633;
 
 	public BBCodeEditor(MalisisGui gui)
 	{
@@ -295,7 +296,7 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 	public void onClick(UIButton.ClickEvent event)
 	{
 		UIButton button = event.getComponent();
-		boolean active = false;
+		//		boolean active = false;
 		if (button == btnBold)
 			bbTexfield.addTag(Tag.BOLD);
 		else if (button == btnItalic)
