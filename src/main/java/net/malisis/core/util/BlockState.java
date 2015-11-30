@@ -30,8 +30,10 @@ import net.malisis.core.util.BlockPos.BlockIterator;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import com.google.common.base.Function;
@@ -197,6 +199,43 @@ public class BlockState
 	public String toString()
 	{
 		return "[" + pos + "] " + (block != null ? block.getUnlocalizedName().substring(5) + " (" + metadata + ")" : "");
+	}
+
+	public static BlockState fromNBT(NBTTagCompound nbt)
+	{
+		return fromNBT(nbt, "block", "metadata");
+	}
+
+	public static BlockState fromNBT(NBTTagCompound nbt, String blockName, String metadataName)
+	{
+		if (nbt == null)
+			return null;
+
+		Block block;
+		if (nbt.hasKey(blockName, NBT.TAG_INT))
+			block = Block.getBlockById(nbt.getInteger(blockName));
+		else
+			block = Block.getBlockFromName(nbt.getString(blockName));
+
+		if (block == null)
+			return null;
+
+		return new BlockState(block, nbt.getInteger(metadataName));
+	}
+
+	public static NBTTagCompound toNBT(NBTTagCompound nbt, BlockState state)
+	{
+		return toNBT(nbt, state, "block", "metadata");
+	}
+
+	public static NBTTagCompound toNBT(NBTTagCompound nbt, BlockState state, String blockName, String metadataName)
+	{
+		if (state == null)
+			return nbt;
+
+		nbt.setString(blockName, Block.blockRegistry.getNameForObject(state.getBlock()).toString());
+		nbt.setInteger(metadataName, state.getMetadata());
+		return nbt;
 	}
 
 	public static class BlockStateFunction implements Function<BlockPos, BlockState>
