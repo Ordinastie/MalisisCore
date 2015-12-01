@@ -40,12 +40,9 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.RegistryNamespaced;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
 import net.minecraftforge.fml.common.registry.GameData;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.common.registry.RegistryDelegate.Delegate;
 
 /**
  * @author Ordinastie
@@ -61,7 +58,8 @@ public class ReplacementTool
 	private HashMap<Item, Item> originalItems = new HashMap<>();
 
 	private Class[] types = { Integer.TYPE, Object.class, Object.class };
-	private Method method = AsmUtils.changeMethodAccess(FMLControlledNamespacedRegistry.class, "addObjectRaw", types);
+	private Method addObjectRaw = AsmUtils.changeMethodAccess(FMLControlledNamespacedRegistry.class, "addObjectRaw", types);
+	private Method setName = AsmUtils.changeMethodAccess(Delegate.class, "setName", String.class);
 
 	private ReplacementTool()
 	{
@@ -70,25 +68,6 @@ public class ReplacementTool
 		new ShapelessRecipesHandler();
 		new ShapelessOreRecipeHandler();
 		new StatCraftingHandler();
-	}
-
-	/**
-	 * Texture stitch event.<br>
-	 * Used to register the icons of the replaced vanilla blocks since they're not in the registry anymore and won't be called to register
-	 * their icons.
-	 *
-	 * @param event the event
-	 */
-	@SideOnly(Side.CLIENT)
-	@SubscribeEvent
-	public void onTextureStitchEvent(TextureStitchEvent.Pre event)
-	{
-		//TODO
-		//		for (Entry<Block, Block> entry : originalBlocks.entrySet())
-		//		{
-		//			Block block = entry.getValue();
-		//			block.registerIcons(event.map);
-		//		}
 	}
 
 	/**
@@ -125,7 +104,10 @@ public class ReplacementTool
 
 		try
 		{
-			method.invoke(registry, id, new ResourceLocation("minecraft", registryName), replacement);
+			//set the delegate name manually
+			setName.invoke(block ? ((Block) replacement).delegate : ((Item) replacement).delegate, registryName);
+			//add the replacement into the registry
+			addObjectRaw.invoke(registry, id, new ResourceLocation("minecraft", registryName), replacement);
 			Field f = AsmUtils.changeFieldAccess(clazz, fieldName, srgFieldName);
 			f.set(null, replacement);
 
