@@ -723,6 +723,11 @@ public class MalisisFont
 		try
 		{
 			BufferedImage img = ImageIO.read(textureFile);
+			if (img == null)
+			{
+				MalisisCore.log.error("Failed to read font texture, no image could be read from the file.");
+				return null;
+			}
 			size = img.getWidth();
 			return img;
 		}
