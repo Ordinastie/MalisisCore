@@ -38,13 +38,13 @@ import com.google.common.eventbus.SubscriberExceptionHandler;
  */
 public class ExceptionHandler implements SubscriberExceptionHandler
 {
-	/** The Exception handler for all Compoenent events. */
+	/** The Exception handler for all events. */
 	public static final ExceptionHandler instance = new ExceptionHandler();
 
 	@Override
 	public void handleException(Throwable exception, SubscriberExceptionContext context)
 	{
-		MalisisCore.log.log(Level.ERROR, "An error occured wile processing event : " + context.getEvent().getClass().getSimpleName(),
+		MalisisCore.log.log(Level.ERROR, "An error occured while processing event : " + context.getEvent().getClass().getSimpleName(),
 				exception);
 	}
 }
