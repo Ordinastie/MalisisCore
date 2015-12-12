@@ -30,7 +30,9 @@ import net.malisis.javacompat.JavaCompatibility;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
-@TransformerExclusions({ "net.malisis.core.asm." })
+@TransformerExclusions({ "net.malisis.core.asm." ,
+				"net.malisis.core.util.chunkcollision.",
+				"net.malisis.core.util.chunkblock." })
 @IFMLLoadingPlugin.SortingIndex(1001)
 public class MalisisCorePlugin implements IFMLLoadingPlugin
 {
