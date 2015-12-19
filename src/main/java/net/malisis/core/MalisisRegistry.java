@@ -187,7 +187,7 @@ public class MalisisRegistry
 			if (rendererClasses == null)
 				return;
 
-			MalisisCore.log.info("[MalisisRegistry] Found annotation for {}", object.getClass().getSimpleName());
+			//MalisisCore.log.info("[MalisisRegistry] Found annotation for {}", object.getClass().getSimpleName());
 			//get the block renderer
 			MalisisRenderer renderer = null;
 			try
@@ -205,8 +205,8 @@ public class MalisisRegistry
 			if (object instanceof Block && renderer != null)
 			{
 				registerBlockRenderer((Block) object, renderer);
-				MalisisCore.log.info("[MalisisRegistry] Registered block {} for {}", renderer.getClass().getSimpleName(), object.getClass()
-						.getSimpleName());
+				//MalisisCore.log.info("[MalisisRegistry] Registered block {} for {}", renderer.getClass().getSimpleName(), object.getClass()
+				//		.getSimpleName());
 				object = Item.getItemFromBlock((Block) object);
 			}
 
@@ -225,8 +225,8 @@ public class MalisisRegistry
 			if (object instanceof Item && renderer != null)
 			{
 				registerItemRenderer((Item) object, renderer);
-				MalisisCore.log.info("[MalisisRegistry] Registered item {} for {}", renderer.getClass().getSimpleName(), object.getClass()
-						.getSimpleName());
+				//MalisisCore.log.info("[MalisisRegistry] Registered item {} for {}", renderer.getClass().getSimpleName(), object.getClass()
+				//		.getSimpleName());
 			}
 		}
 

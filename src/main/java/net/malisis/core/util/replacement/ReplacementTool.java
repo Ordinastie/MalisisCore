@@ -29,7 +29,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
-import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -134,9 +133,9 @@ public class ReplacementTool
 			ReplacementHandler rh = ReplacementHandler.getHandler(object);
 			if (rh != null)
 			{
-				if (rh.replace(object, vanilla, replacement))
-					MalisisCore.log.info("Replaced {} by {} in {}", vanilla.getClass().getSimpleName(), replacement.getClass()
-							.getSimpleName(), object.getClass().getSimpleName());
+				rh.replace(object, vanilla, replacement);
+				//MalisisCore.log.info("Replaced {} by {} in {}", vanilla.getClass().getSimpleName(), replacement.getClass()
+				//.getSimpleName(), object.getClass().getSimpleName());
 			}
 		}
 	}
