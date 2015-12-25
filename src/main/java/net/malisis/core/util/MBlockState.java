@@ -213,10 +213,10 @@ public class MBlockState
 		if (nbt == null)
 			return null;
 
-		Block block;
+		Block block = null;
 		if (nbt.hasKey(blockName, NBT.TAG_INT))
 			block = Block.getBlockById(nbt.getInteger(blockName));
-		else
+		else if (nbt.hasKey(blockName))
 			block = Block.getBlockFromName(nbt.getString(blockName));
 
 		if (block == null)
