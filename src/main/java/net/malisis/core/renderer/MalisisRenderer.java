@@ -286,6 +286,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		return true;
 	}
 
+	@Override
 	public void setTransformType(TransformType transformType)
 	{
 		this.tranformType = transformType;
@@ -758,7 +759,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		if (params != null && !params.usePerVertexAlpha.get())
 			vertex.setAlpha(params.alpha.get());
 
-		if (renderType == RenderType.ITEM)
+		if (params != null && renderType == RenderType.ITEM)
 			vertex.setNormal(params.direction.get());
 
 		wr.addVertexData(getVertexData(vertex));
@@ -956,13 +957,12 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 
 		if (params.usePerVertexColor.get()) //vertex should use their own colors
 			color = vertex.getColor();
-
-		if (params.colorMultiplier.get() != null) //global color multiplier is set
+		else if (params.colorMultiplier.get() != null) //global color multiplier is set
 			color = params.colorMultiplier.get();
 		else if (block != null) //use block color multiplier
 			color = world != null ? block.colorMultiplier(world, pos, 0) : block.getRenderColor(blockState);
 
-		if (drawMode == GL11.GL_LINE) //no AO for lines
+		if (drawMode == GL11.GL_LINES) //no AO for lines
 			return color;
 		if (renderType != RenderType.BLOCK && renderType != RenderType.TILE_ENTITY) //no AO for item/inventories
 			return color;
