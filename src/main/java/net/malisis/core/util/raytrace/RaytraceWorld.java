@@ -22,11 +22,14 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.util;
+package net.malisis.core.util.raytrace;
 
 import java.util.HashMap;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.util.Point;
+import net.malisis.core.util.Ray;
+import net.malisis.core.util.Vector;
 import net.malisis.core.util.chunkcollision.ChunkCollision;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;

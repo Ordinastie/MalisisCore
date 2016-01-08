@@ -22,13 +22,15 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.util;
+package net.malisis.core.util.raytrace;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 
 import net.malisis.core.block.IBoundingBox;
+import net.malisis.core.util.AABBUtils;
+import net.malisis.core.util.Point;
+import net.malisis.core.util.Ray;
+import net.malisis.core.util.Vector;
 import net.minecraft.block.Block;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -37,7 +39,6 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -46,7 +47,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @author Ordinastie
  *
  */
-public class RaytraceBlock
+public class RaytraceBlock extends Raytrace
 {
 	/** World reference **/
 	private WeakReference<World> world;
@@ -54,12 +55,6 @@ public class RaytraceBlock
 	private BlockPos pos;
 	/** Block being ray traced. */
 	private Block block;
-	/** Source of the ray trace. */
-	private Point src;
-	/** Destination of the ray trace. */
-	private Point dest;
-	/** Ray describing the ray trace. */
-	private Ray ray;
 
 	/**
 	 * Sets the parameters for this {@link RaytraceBlock}.
@@ -70,9 +65,8 @@ public class RaytraceBlock
 	 */
 	public RaytraceBlock(World world, Ray ray, BlockPos pos)
 	{
+		super(ray);
 		this.world = new WeakReference<World>(world);
-		this.src = ray.origin;
-		this.ray = ray;
 		this.pos = pos;
 		this.block = world().getBlockState(pos).getBlock();
 	}
@@ -129,26 +123,6 @@ public class RaytraceBlock
 	}
 
 	/**
-	 * Gets the direction vector of the ray.
-	 *
-	 * @return the direction
-	 */
-	public Vector direction()
-	{
-		return ray.direction;
-	}
-
-	/**
-	 * Gets the length of the ray.
-	 *
-	 * @return the distance
-	 */
-	public double distance()
-	{
-		return ray.direction.length();
-	}
-
-	/**
 	 * Does the raytracing.
 	 *
 	 * @return {@link MovingObjectPosition} with <code>typeOfHit</code> <b>BLOCK</b> if a ray hits a block in the way, or <b>MISS</b> if it
@@ -159,56 +133,12 @@ public class RaytraceBlock
 		if (!(block instanceof IBoundingBox))
 			return block.collisionRayTrace(world(), pos, ray.origin.toVec3(), dest.toVec3());
 
-		//
 		IBoundingBox block = (IBoundingBox) this.block;
 		AxisAlignedBB[] aabbs = block.getRayTraceBoundingBox(world(), pos, world().getBlockState(pos));
-		if (ArrayUtils.isEmpty(aabbs))
-			return null;
-
-		List<Pair<EnumFacing, Point>> points = new ArrayList<>();
-		double maxDist = Point.distanceSquared(src, dest);
-		for (AxisAlignedBB aabb : AABBUtils.offset(pos, aabbs))
-		{
-			if (aabb == null)
-				continue;
-
-			for (Pair<EnumFacing, Point> pair : ray.intersect(aabb))
-			{
-				if (Point.distanceSquared(src, pair.getRight()) < maxDist)
-					points.add(pair);
-			}
-		}
-
-		if (points.size() == 0)
-			return null;
-
-		Pair<EnumFacing, Point> closest = getClosest(points);
+		Pair<EnumFacing, Point> closest = super.trace(AABBUtils.offset(pos, aabbs));
 		if (closest == null)
 			return null;
 
 		return new MovingObjectPosition(closest.getRight().toVec3(), closest.getLeft(), pos);
-	}
-
-	/**
-	 * Gets the closest {@link Point} of the origin.
-	 *
-	 * @param points the points
-	 * @return the closest point
-	 */
-	private Pair<EnumFacing, Point> getClosest(List<Pair<EnumFacing, Point>> points)
-	{
-		double distance = Double.MAX_VALUE;
-		Pair<EnumFacing, Point> ret = null;
-		for (Pair<EnumFacing, Point> pair : points)
-		{
-			double d = Point.distanceSquared(src, pair.getRight());
-			if (distance > d)
-			{
-				distance = d;
-				ret = pair;
-			}
-		}
-
-		return ret;
 	}
 }

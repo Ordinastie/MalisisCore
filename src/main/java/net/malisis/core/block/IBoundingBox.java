@@ -27,7 +27,7 @@ package net.malisis.core.block;
 import java.util.List;
 
 import net.malisis.core.util.AABBUtils;
-import net.malisis.core.util.RaytraceBlock;
+import net.malisis.core.util.raytrace.RaytraceBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
