@@ -26,38 +26,50 @@ package net.malisis.core.client.gui.component.container;
 
 import java.util.Collection;
 
+import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.control.IScrollable;
+import net.malisis.core.client.gui.component.control.UIScrollBar;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
+import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
+import net.minecraft.client.gui.GuiScreen;
 
 /**
  * @author Ordinastie
  *
  */
-public abstract class UIListContainer<T extends UIListContainer, S> extends UIComponent<T>
+public abstract class UIListContainer<T extends UIListContainer, S> extends UIComponent<T> implements IScrollable, IClipable
 {
 	protected int elementSpacing = 0;
 	protected boolean unselect = true;
 	protected Collection<S> elements;
-	protected S hovered;
 	protected S selected;
-	protected S current;
+
+	//IScrollable
+	/** Vertical Scrollbar. */
+	protected UIScrollBar scrollbar;
+	/** Y Offset for the contents of this {@link UIListContainer} from 0 to 1. */
+	protected int yOffset;
 
 	public UIListContainer(MalisisGui gui)
 	{
 		super(gui);
+		scrollbar = new UIScrollBar(gui, this, UIScrollBar.Type.VERTICAL);
 	}
 
 	public UIListContainer(MalisisGui gui, int width, int height)
 	{
-		super(gui);
+		this(gui);
 		setSize(width, height);
 	}
 
 	public void setElements(Collection<S> elements)
 	{
 		this.elements = elements;
+		fireEvent(new ContentUpdateEvent(this));
 	}
 
 	public Iterable<S> getElements()
@@ -104,69 +116,189 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 		return element;
 	}
 
+	//#region IClipable
+	/**
+	 * Gets the {@link ClipArea}.
+	 *
+	 * @return the clip area
+	 */
 	@Override
-	public UIComponent getComponentAt(int x, int y)
+	public ClipArea getClipArea()
 	{
-		hovered = null;
-		UIComponent c = super.getComponentAt(x, y);
-		if (c != this)
-			return c;
+		return new ClipArea(this);
+	}
 
+	/**
+	 * Sets whether this {@link UIContainer} should clip its contents
+	 *
+	 * @param clipContent if true, clip contents
+	 */
+	@Override
+	public void setClipContent(boolean clipContent)
+	{}
+
+	/**
+	 * Checks whether this {@link UIContainer} should clip its contents
+	 *
+	 * @return true, if should clip contents
+	 */
+	@Override
+	public boolean shouldClipContent()
+	{
+		return true;
+	}
+
+	//#end IClipable
+
+	//#region IScrollable
+	@Override
+	public int getContentWidth()
+	{
+		return getWidth();
+	}
+
+	@Override
+	public int getContentHeight()
+	{
+		if (elements == null || elements.size() == 0)
+			return 0;
+
+		int height = 0;
+		for (S element : elements)
+			height += getElementHeight(element) + elementSpacing;
+		return height;
+	}
+
+	@Override
+	public float getOffsetX()
+	{
+		return 0;
+	}
+
+	@Override
+	public void setOffsetX(float offsetX, int delta)
+	{}
+
+	@Override
+	public float getOffsetY()
+	{
+		return (float) yOffset / (getContentHeight() - getHeight());
+	}
+
+	@Override
+	public void setOffsetY(float offsetY, int delta)
+	{
+		this.yOffset = (int) ((getContentHeight() - getHeight() + delta) * offsetY);
+	}
+
+	@Override
+	public float getScrollStep()
+	{
+		return (GuiScreen.isCtrlKeyDown() ? 0.125F : 0.025F);
+	}
+
+	/**
+	 * Gets the horizontal padding.
+	 *
+	 * @return horizontal padding of this {@link UIContainer}.
+	 */
+	@Override
+	public int getHorizontalPadding()
+	{
+		return 0;
+	}
+
+	/**
+	 * Gets the vertical padding.
+	 *
+	 * @return horizontal padding of this {@link UIContainer}.
+	 */
+	@Override
+	public int getVerticalPadding()
+	{
+		return 0;
+	}
+
+	//#end IScrollable
+
+	public S getElementAt(int x, int y)
+	{
+		if (!isHovered())
+			return null;
 		int ey = 0;
-		int cy = relativeY(y);
+		int cy = relativeY(y) + yOffset;
 		for (S element : elements)
 		{
-			int h = getElementHeight(element);
+			int h = getElementHeight(element) + elementSpacing;
 			if (ey + h > cy)
-			{
-				hovered = element;
-				return this;
-			}
+				return element;
 			ey += h;
 		}
 
-		return this;
+		return null;
 	}
 
 	@Override
 	public boolean onClick(int x, int y)
 	{
-		if (!canUnselect())
-		{
-			if (hovered == null || hovered == getSelected())
-				return super.onClick(x, y);
-		}
+		S element = getElementAt(x, y);
+		if (!canUnselect() && (element == null || isSelected(element)))
+			return super.onClick(x, y);
 
-		if (hovered == getSelected())
-			hovered = null;
-		select(hovered);
-
+		select(isSelected(element) ? null : element);
 		return true;
 	}
 
 	@Override
 	public void draw(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (elements.size() == 0)
+		super.draw(renderer, mouseX, mouseY, partialTick);
+		getGui().addDebug("Pos", relativeX(mouseX), relativeY(mouseY));
+	}
+
+	@Override
+	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{}
+
+	@Override
+	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		drawElements(renderer, mouseX, mouseY, partialTick);
+	}
+
+	public void drawElements(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		if (elements == null || elements.size() == 0)
 		{
 			drawEmtpy(renderer, mouseX, mouseY, partialTick);
 			return;
 		}
 
+		S hoveredElement = getElementAt(mouseX, mouseY);
+
 		int bk = y;
+		y -= yOffset;
 		for (S element : elements)
 		{
-			current = element;
-			super.draw(renderer, mouseX, mouseY, partialTick);
+			drawElementBackground(renderer, mouseX, mouseY, partialTick, element, hoveredElement == element);
+			drawElementForeground(renderer, mouseX, mouseY, partialTick, element, hoveredElement == element);
 			y += getElementHeight(element) + elementSpacing;
 		}
 
 		y = bk;
+
+	}
+
+	public void drawEmtpy(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		renderer.drawText("No element");
 	}
 
 	public abstract int getElementHeight(S element);
 
-	public abstract void drawEmtpy(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
+	public abstract void drawElementBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick, S element, boolean isHovered);
+
+	public abstract void drawElementForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick, S element, boolean isHovered);
 
 	/**
 	 * Event fired when a {@link UIListContainer} changes its selected element.<br>
