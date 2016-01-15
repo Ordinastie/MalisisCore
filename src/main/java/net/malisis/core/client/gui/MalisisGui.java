@@ -266,7 +266,7 @@ public abstract class MalisisGui extends GuiScreen
 				@Override
 				public String call()
 				{
-					return StringUtils.join(objects);
+					return StringUtils.join(objects, ',');
 				}
 			};
 		}
