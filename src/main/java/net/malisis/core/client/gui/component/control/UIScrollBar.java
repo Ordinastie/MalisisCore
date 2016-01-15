@@ -358,6 +358,12 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	}
 
 	@Override
+	public boolean onClick(int x, int y)
+	{
+		return true;
+	}
+
+	@Override
 	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
 	{
 		if (button != MouseButton.LEFT)
