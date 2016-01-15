@@ -38,6 +38,7 @@ import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.ComponentExceptionHandler;
+import net.malisis.core.client.gui.event.GuiEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.PositionChangeEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
@@ -66,7 +67,7 @@ import com.google.common.eventbus.EventBus;
 public abstract class UIComponent<T extends UIComponent> implements ITransformable.Position<T>, ITransformable.Size<T>,
 		ITransformable.Alpha, IKeyListener
 {
-	/** The Exception handler for all Compoenent events. */
+	/** The Exception handler for all Component events. */
 	private static final ComponentExceptionHandler exceptionHandler = new ComponentExceptionHandler();
 
 	/** The Constant INHERITED. */
@@ -96,10 +97,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	protected UITooltip tooltip;
 	/** Determines whether this {@link UIComponent} is visible. */
 	protected boolean visible = true;
-	/**
-	 * Determines whether this {@link UIComponent} is enabled. If set to false, will cancel any
-	 * {@link net.malisis.core.client.gui.event.GuiEvent events} received.
-	 */
+	/** Determines whether this {@link UIComponent} is enabled. If set to false, will cancel any {@link GuiEvent events} received. */
 	protected boolean disabled = false;
 	/** Hover state of this {@link UIComponent}. */
 	protected boolean hovered = false;
