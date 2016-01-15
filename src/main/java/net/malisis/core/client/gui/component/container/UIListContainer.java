@@ -51,12 +51,6 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	//IScrollable
 	/** Vertical Scrollbar. */
 	protected UIScrollBar scrollbar;
-	/** Width of the contents of this {@link UIListContainer}. */
-	protected int contentWidth;
-	/** Height of the contents of this {@link UIListContainer}. */
-	protected int contentHeight;
-	/** X Offset for the contents of this {@link UIListContainer} from 0 to 1. */
-	protected int xOffset;
 	/** Y Offset for the contents of this {@link UIListContainer} from 0 to 1. */
 	protected int yOffset;
 
