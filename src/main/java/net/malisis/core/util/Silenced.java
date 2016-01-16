@@ -43,15 +43,16 @@ public class Silenced
 		}
 	}
 
-	public static void exec(Exec exec)
+	public static boolean exec(Exec exec)
 	{
 		try
 		{
 			exec.exec();
+			return true;
 		}
 		catch (Exception e)
 		{
-
+			return false;
 		}
 	}
 
