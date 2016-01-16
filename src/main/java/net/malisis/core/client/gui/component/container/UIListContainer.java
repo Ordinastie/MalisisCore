@@ -47,6 +47,7 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	protected boolean unselect = true;
 	protected Collection<S> elements;
 	protected S selected;
+	protected int lastSize = 0;
 
 	//IScrollable
 	/** Vertical Scrollbar. */
@@ -58,6 +59,7 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	{
 		super(gui);
 		scrollbar = new UIScrollBar(gui, this, UIScrollBar.Type.VERTICAL);
+		scrollbar.setAutoHide(true);
 	}
 
 	public UIListContainer(MalisisGui gui, int width, int height)
@@ -188,7 +190,8 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
-		this.yOffset = (int) ((getContentHeight() - getHeight() + delta) * offsetY);
+		float newOffset = (getContentHeight() - getHeight() + delta) * offsetY;
+		this.yOffset = (int) (yOffset - newOffset > 0 ? Math.floor(newOffset) : Math.ceil(newOffset));
 	}
 
 	@Override
@@ -252,6 +255,12 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	@Override
 	public void draw(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		if (lastSize != elements.size())
+		{
+			scrollbar.updateScrollbar();
+			lastSize = elements.size();
+		}
+
 		super.draw(renderer, mouseX, mouseY, partialTick);
 		getGui().addDebug("Pos", relativeX(mouseX), relativeY(mouseY));
 	}
