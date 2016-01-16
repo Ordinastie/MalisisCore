@@ -183,7 +183,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 	{
 		McpMethodMapping onItemUse = new McpMethodMapping(
 				"onItemUse",
-				"func_77648_a",
+				"func_180614_a",
 				"net/minecraft/item/ItemBlock",
 				"(Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Z");
 
