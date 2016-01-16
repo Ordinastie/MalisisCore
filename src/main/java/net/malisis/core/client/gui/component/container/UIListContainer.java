@@ -47,11 +47,12 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	protected boolean unselect = true;
 	protected Collection<S> elements;
 	protected S selected;
+	protected int lastSize = 0;
 
 	//IScrollable
 	/** Vertical Scrollbar. */
 	protected UIScrollBar scrollbar;
-	/** Y Offset for the contents of this {@link UIListContainer} from 0 to 1. */
+	/** Y Offset for the contents of this {@link UIListContainer}. */
 	protected int yOffset;
 
 	public UIListContainer(MalisisGui gui)
@@ -188,7 +189,8 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
-		this.yOffset = (int) ((getContentHeight() - getHeight() + delta) * offsetY);
+		float newOffset = (getContentHeight() - getHeight() + delta) * offsetY;
+		this.yOffset = (int) (yOffset - newOffset > 0 ? Math.floor(newOffset) : Math.ceil(newOffset));
 	}
 
 	@Override
