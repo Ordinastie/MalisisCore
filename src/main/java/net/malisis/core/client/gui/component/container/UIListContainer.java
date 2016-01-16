@@ -52,7 +52,7 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	//IScrollable
 	/** Vertical Scrollbar. */
 	protected UIScrollBar scrollbar;
-	/** Y Offset for the contents of this {@link UIListContainer} from 0 to 1. */
+	/** Y Offset for the contents of this {@link UIListContainer}. */
 	protected int yOffset;
 
 	public UIListContainer(MalisisGui gui)
