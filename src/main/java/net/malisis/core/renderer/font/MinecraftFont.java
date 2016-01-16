@@ -71,8 +71,8 @@ public class MinecraftFont extends MalisisFont
 	private void setFields()
 	{
 		String srg = "field_78286_d";
-		if (FMLClientHandler.instance().hasOptifine())
-			srg = "d";
+		//		if (FMLClientHandler.instance().hasOptifine())
+		//			srg = "d";
 
 		Field charWidthField = AsmUtils.changeFieldAccess(FontRenderer.class, "charWidth", srg);
 		Field glyphWidthField = AsmUtils.changeFieldAccess(FontRenderer.class, "glyphWidth", "field_78287_e");
@@ -80,8 +80,12 @@ public class MinecraftFont extends MalisisFont
 
 		try
 		{
+			if (charWidthField == null)
+				throw new IllegalStateException("charWidthField (" + srg + ") is null");
+			if (fontRenderer == null)
+				throw new IllegalStateException("fontRenderer not initialized");
 
-			if (FMLClientHandler.instance().hasOptifine())
+			if (FMLClientHandler.instance().hasOptifine() && charWidthField != null)
 				optifineCharWidth = (float[]) charWidthField.get(fontRenderer);
 			else
 				mcCharWidth = (int[]) charWidthField.get(fontRenderer);
@@ -89,7 +93,7 @@ public class MinecraftFont extends MalisisFont
 			unicodePages = (ResourceLocation[]) unicodePagesField.get(fontRenderer);
 
 		}
-		catch (IllegalArgumentException | IllegalAccessException e)
+		catch (IllegalStateException | IllegalArgumentException | IllegalAccessException e)
 		{
 			MalisisCore.log.error("[MinecraftFont] Failed to gets the FontRenderer fields :", e);
 		}
