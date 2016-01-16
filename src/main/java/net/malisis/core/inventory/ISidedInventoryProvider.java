@@ -65,7 +65,6 @@ public interface ISidedInventoryProvider extends IDirectInventoryProvider, ISide
 	/**
 	 * Gets all the {@link MalisisInventory inventories} accessible from all the side of this {@link IInventoryProvider}.
 	 *
-	 * @param data the data
 	 * @return the inventories
 	 */
 	@Override

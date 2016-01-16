@@ -648,7 +648,6 @@ public class MalisisInventory
 	 *
 	 * @param player the player
 	 * @param inventoryProvider the inventory provider
-	 * @param data the data
 	 * @return the {@link MalisisInventoryContainer}
 	 */
 	public static MalisisInventoryContainer open(EntityPlayerMP player, IDirectInventoryProvider inventoryProvider)
@@ -662,6 +661,7 @@ public class MalisisInventory
 	/**
 	 * Opens this {@link MalisisInventory}. Called server-side only.
 	 *
+	 * @param <T> the generic type
 	 * @param player the player
 	 * @param inventoryProvider the inventory provider
 	 * @param data the data
@@ -681,7 +681,6 @@ public class MalisisInventory
 	 * @param player the player
 	 * @param inventoryProvider the inventory provider
 	 * @param windowId the window id
-	 * @param data the data
 	 * @return the {@link MalisisInventoryContainer}
 	 */
 	@SideOnly(Side.CLIENT)

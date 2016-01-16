@@ -28,7 +28,7 @@ import net.malisis.core.MalisisRegistry;
 import net.minecraft.client.renderer.texture.TextureMap;
 
 /**
- * Implementers of this interface can be registered with {@link MalisisRegistry#registerIconProvider(IIconRegister)} so that icons used can
+ * Implementers of this interface can be registered with {@link MalisisRegistry#registerIconRegister(IIconRegister)} so that icons used can
  * be registered and stitched to the {@link TextureMap}.
  *
  * @author Ordinastie

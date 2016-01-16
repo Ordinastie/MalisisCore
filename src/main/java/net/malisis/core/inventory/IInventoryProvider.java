@@ -53,7 +53,6 @@ public interface IInventoryProvider
 		/**
 		 * Gets all the {@link MalisisInventory inventories} for this {@link IInventoryProvider}.
 		 *
-		 * @param data null for TileEntity, ItemStack for Item
 		 * @return the inventories
 		 */
 		public default MalisisInventory[] getInventories()

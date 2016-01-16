@@ -52,7 +52,7 @@ public class ModMessageManager
 	 * Only static methods will be registered to handle messages.
 	 *
 	 * @param mod the mod
-	 * @param messageHandler the message handler
+	 * @param messageHandlerClass the message handler class
 	 */
 	public static void register(IMalisisMod mod, Class<?> messageHandlerClass)
 	{

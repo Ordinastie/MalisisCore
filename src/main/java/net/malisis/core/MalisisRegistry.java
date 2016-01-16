@@ -454,7 +454,7 @@ public class MalisisRegistry
 	 * When the texture is stitched, {@link IIconProvider#registerIcons(net.minecraft.client.renderer.texture.TextureMap)} will be called
 	 * for all registered providers.
 	 *
-	 * @param iconProvider the icon provider
+	 * @param iconRegister the icon register
 	 */
 	@SideOnly(Side.CLIENT)
 	public static void registerIconRegister(IIconRegister iconRegister)
