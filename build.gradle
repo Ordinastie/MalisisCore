@@ -19,9 +19,12 @@ buildscript {
 plugins {
 	id "maven"
 	id "signing"
+	id "com.matthewprenger.cursegradle" version "1.0.7"
 }
 
 apply plugin: 'forge'
+
+afterEvaluate { project.curseforge.curseProjects.each { p -> p.gameVersionStrings -= ["Java 6", "Java 7"] } }
 
 // Project repositories
 repositories {
@@ -43,7 +46,7 @@ defaultTasks 'build', 'install'
 // Basic project information
 group = 'net.malisis'
 archivesBaseName = 'malisiscore'
-version = '1.8-1.2.1-SNAPSHOT'
+version = '1.8-1.3.1-SNAPSHOT'
 ext.packaging = 'jar'
 
 // Extended project information
@@ -224,6 +227,20 @@ uploadArchives {
 				system 'github'
 				url 'https://github.com/Ordinastie/MalisisCore/issues'
 			}
+		}
+	}
+}
+
+if (project.hasProperty('curseapi')) {
+	curseforge {
+		apiKey = curseapi
+		project {
+			id = '223896'
+			releaseType = 'release'
+			
+			addArtifact deobfJar
+			addArtifact sourcesJar
+			addArtifact javadocJar			   		
 		}
 	}
 }
