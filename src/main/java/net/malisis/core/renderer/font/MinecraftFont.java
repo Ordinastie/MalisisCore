@@ -80,6 +80,10 @@ public class MinecraftFont extends MalisisFont
 
 		try
 		{
+			if (charWidthField == null)
+				throw new IllegalStateException("charWidthField (" + srg + ") is null");
+			if (fontRenderer == null)
+				throw new IllegalStateException("fontRenderer not initialized");
 
 			if (FMLClientHandler.instance().hasOptifine())
 				optifineCharWidth = (float[]) charWidthField.get(fontRenderer);
@@ -89,7 +93,7 @@ public class MinecraftFont extends MalisisFont
 			unicodePages = (ResourceLocation[]) unicodePagesField.get(fontRenderer);
 
 		}
-		catch (IllegalArgumentException | IllegalAccessException e)
+		catch (IllegalStateException | IllegalArgumentException | IllegalAccessException e)
 		{
 			MalisisCore.log.error("[MinecraftFont] Failed to gets the FontRenderer fields :", e);
 		}
