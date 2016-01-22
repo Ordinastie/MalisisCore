@@ -65,7 +65,7 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 	private boolean initialized = false;
 
 	/**
-	 * Instantiates a new {@link ConnectedIconsProvider} with the name.
+	 * Instantiates a new {@link ConnectedIconsProvider} with the given name.
 	 *
 	 * @param name the name
 	 */
@@ -75,11 +75,23 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 		part2 = new MalisisIcon(name + "2");
 	}
 
+	/**
+	 * Instantiates a new {@link ConnectedIconsProvider} using given icons.
+	 *
+	 * @param part1 the part1
+	 * @param part2 the part2
+	 */
+	public ConnectedIconsProvider(MalisisIcon part1, MalisisIcon part2)
+	{
+		this.part1 = part1;
+		this.part2 = part2;
+	}
+
 	@Override
 	public void registerIcons(TextureMap map)
 	{
-		part1.register(map);
-		part2.register(map);
+		part1 = part1.register(map);
+		part2 = part2.register(map);
 	}
 
 	/**
