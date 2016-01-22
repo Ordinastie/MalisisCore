@@ -35,12 +35,16 @@ import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
 import net.malisis.core.util.multiblock.IMultiBlock;
 import net.malisis.core.util.raytrace.RaytraceBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockSlab.EnumBlockHalf;
+import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -76,6 +80,8 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 			setDefaultState(getDefaultState().withProperty(((IBlockDirectional) this).getPropertyDirection(), EnumFacing.SOUTH));
 		if (this instanceof IMultiBlock)
 			setDefaultState(getDefaultState().withProperty(((IMultiBlock) this).getOriginProperty(), false));
+		if (this instanceof IBlockSlab && ((IBlockSlab) this).isDouble())
+			setDefaultState(getDefaultState().withProperty(((IBlockSlab) this).getPropertyHalf(), EnumBlockHalf.BOTTOM));
 	}
 
 	public Block setName(String name)
@@ -116,6 +122,9 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 		if (this instanceof IMultiBlock)
 			properties.add(((IMultiBlock) this).getOriginProperty());
 
+		if (this instanceof IBlockColor)
+			properties.add(((IBlockColor) this).getPropertyColor());
+
 		return new BlockState(this, properties.toArray(new IProperty[0]));
 	}
 
@@ -141,8 +150,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	{
 		if (this instanceof IMultiBlock)
 			((IMultiBlock) this).onBlockPlacedBy(this, world, pos, state, placer, stack);
-		else
-			super.onBlockPlacedBy(world, pos, state, placer, stack);
+
 	}
 
 	@Override
@@ -179,6 +187,33 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	}
 
 	@Override
+	public int damageDropped(IBlockState state)
+	{
+		if (this instanceof IBlockColor)
+			return ((IBlockColor) this).damageDropped(this, state);
+
+		return super.damageDropped(state);
+	}
+
+	@Override
+	public void getSubBlocks(Item item, CreativeTabs tab, List list)
+	{
+		if (this instanceof IBlockColor)
+			((IBlockColor) this).getSubBlocks(this, item, tab, list);
+		else
+			super.getSubBlocks(item, tab, list);
+	}
+
+	@Override
+	public MapColor getMapColor(IBlockState state)
+	{
+		if (this instanceof IBlockColor)
+			return ((IBlockColor) this).getMapColor(this, state);
+
+		return super.getMapColor(state);
+	}
+
+	@Override
 	public IBlockState getStateFromMeta(int meta)
 	{
 		IBlockState state = getDefaultState();
@@ -186,6 +221,8 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 			state = ((IMultiBlock) this).getStateFromMeta(this, state, meta);
 		else if (this instanceof IBlockDirectional)
 			state = ((IBlockDirectional) this).getStateFromMeta(this, state, meta);
+		else if (this instanceof IBlockColor)
+			state = ((IBlockColor) this).getStateFromMeta(this, state, meta);
 
 		return state;
 	}
@@ -198,6 +235,8 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 			meta = ((IMultiBlock) this).getMetaFromState(this, state);
 		else if (this instanceof IBlockDirectional)
 			meta = ((IBlockDirectional) this).getMetaFromState(this, state);
+		else if (this instanceof IBlockColor)
+			meta = ((IBlockColor) this).getMetaFromState(this, state);
 
 		return meta;
 	}
