@@ -73,6 +73,16 @@ public class PropertyEnumIconProvider<T extends Enum<T>> implements IBlockIconPr
 	}
 
 	@Override
+	public void registerIcons(TextureMap map)
+	{
+		if (defaultIcon != null)
+			defaultIcon = defaultIcon.register(map);
+
+		for (Entry<T, MalisisIcon> entry : icons.entrySet())
+			entry.setValue(entry.getValue().register(map));
+	}
+
+	@Override
 	public MalisisIcon getIcon()
 	{
 		return defaultIcon;
@@ -101,13 +111,5 @@ public class PropertyEnumIconProvider<T extends Enum<T>> implements IBlockIconPr
 
 		IBlockState state = ((MalisisBlock) ib.getBlock()).getStateFromItemStack(itemStack);
 		return getIcon((T) state.getValue(property));
-	}
-
-	@Override
-	public void registerIcons(TextureMap map)
-	{
-		defaultIcon = defaultIcon.register(map);
-		for (Entry<T, MalisisIcon> entry : icons.entrySet())
-			entry.setValue(entry.getValue().register(map));
 	}
 }
