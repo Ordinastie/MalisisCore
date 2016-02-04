@@ -31,6 +31,8 @@ import javax.vecmath.Matrix4f;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.MalisisRegistry;
 import net.malisis.core.asm.AsmUtils;
+import net.malisis.core.block.BoundingBoxType;
+import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
@@ -44,6 +46,7 @@ import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IItemIconProvider;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.malisis.core.util.BlockPosUtils;
+import net.malisis.core.util.ItemUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -60,7 +63,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -252,9 +254,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	{
 		this.itemStack = itemStack;
 		this.item = itemStack.getItem();
-		if (item instanceof ItemBlock)
-			set(Block.getBlockFromItem(itemStack.getItem()));
-
+		IBlockState state = ItemUtils.getStateFromItemStack(itemStack);
+		if (state != null)
+			this.set(state);
 	}
 
 	// #end
@@ -1149,6 +1151,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	{
 		if (block == null || !params.useBlockBounds.get())
 			return params.renderBounds.get();
+
+		if (block instanceof IBoundingBox)
+			return ((IBoundingBox) block).getBoundingBox(world, pos, BoundingBoxType.RENDER);
 
 		if (world != null)
 			block.setBlockBoundsBasedOnState(world, pos);
