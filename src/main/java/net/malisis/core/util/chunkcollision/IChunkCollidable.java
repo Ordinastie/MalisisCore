@@ -25,9 +25,7 @@
 package net.malisis.core.util.chunkcollision;
 
 import net.malisis.core.block.BoundingBoxType;
-import net.malisis.core.block.IBlockDirectional;
 import net.malisis.core.block.IBoundingBox;
-import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.chunkblock.IChunkBlock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -57,8 +55,9 @@ public interface IChunkCollidable extends IChunkBlock, IBoundingBox
 	public default AxisAlignedBB[] getPlacedBoundingBox(IBlockAccess world, BlockPos pos, EnumFacing side, EntityPlayer entity, ItemStack itemStack)
 	{
 		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.PLACEDBOUNDINGBOX);
-		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getPlacingDirection(side, entity));
+		//TODO: FIXME!
+		//		if (this instanceof IBlockDirectional)
+		//			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getPlacingDirection(side, entity));
 
 		return aabbs;
 	}

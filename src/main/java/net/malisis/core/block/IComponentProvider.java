@@ -24,29 +24,38 @@
 
 package net.malisis.core.block;
 
-import net.malisis.core.MalisisRegistry;
+import java.util.List;
+
 import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 
 /**
- * @author Ordinastie
+ * The Interface IComponentProvider defines a {@link Block} that can handle {@link IBlockComponent}.
  *
+ * @author Ordinastie
  */
-public interface IRegisterable
+public interface IComponentProvider
 {
-	public String getRegistryName();
+	/**
+	 * Gets the {@link IBlockComponent} for this {@link IComponentProvider}.
+	 *
+	 * @return the components
+	 */
+	public List<IBlockComponent> getComponents();
 
-	public default Item getItem(Block block)
-	{
-		if (this instanceof Block)
-			return new ItemBlock(block);
+	/**
+	 * Adds the {@link IBlockComponent} to this {@link IComponentProvider}.
+	 *
+	 * @param component the component
+	 */
+	public void addComponent(IBlockComponent component);
 
-		throw new IllegalStateException("Trying to get item class for " + this.getClass().getName());
-	}
+	/**
+	 * Gets the {@link IBlockComponent} of the specified type from this {@link IComponentProvider}.
+	 *
+	 * @param <T> the generic type
+	 * @param type the type
+	 * @return the component
+	 */
+	public <T extends IBlockComponent> T getComponent(Class<T> type);
 
-	public default void register()
-	{
-		MalisisRegistry.register(this);
-	}
 }

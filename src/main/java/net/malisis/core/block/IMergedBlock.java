@@ -24,29 +24,16 @@
 
 package net.malisis.core.block;
 
-import net.malisis.core.MalisisRegistry;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
 
 /**
  * @author Ordinastie
  *
  */
-public interface IRegisterable
+public interface IMergedBlock
 {
-	public String getRegistryName();
-
-	public default Item getItem(Block block)
-	{
-		if (this instanceof Block)
-			return new ItemBlock(block);
-
-		throw new IllegalStateException("Trying to get item class for " + this.getClass().getName());
-	}
-
-	public default void register()
-	{
-		MalisisRegistry.register(this);
-	}
+	public IBlockState mergeBlock(World world, BlockPos pos, IBlockState current, ItemStack itemStack);
 }

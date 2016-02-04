@@ -22,10 +22,11 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.block;
+package net.malisis.core.block.component;
 
 import java.util.List;
 
+import net.malisis.core.block.IBlockComponent;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.material.MapColor;
@@ -34,10 +35,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemColored;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -45,23 +47,45 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * @author Ordinastie
  *
  */
-public interface IBlockColor
+public class ColorComponent implements IBlockComponent
 {
-	public default PropertyEnum getPropertyColor()
+	//TODO : colors by icons
+	@Override
+	public PropertyEnum getProperty()
 	{
 		return BlockColored.COLOR;
 	}
 
-	public default int damageDropped(Block block, IBlockState state)
+	@Override
+	public IBlockState setDefaultState(Block block, IBlockState state)
 	{
-		return ((EnumDyeColor) state.getValue(getPropertyColor())).getMetadata();
+		return state.withProperty(getProperty(), EnumDyeColor.WHITE);
 	}
 
+	@Override
+	public Item getItem(Block block)
+	{
+		return new ItemColored(block, true);
+	}
+
+	@Override
+	public int damageDropped(Block block, IBlockState state)
+	{
+		return ((EnumDyeColor) state.getValue(getProperty())).getMetadata();
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
-	public default void getSubBlocks(Block block, Item item, CreativeTabs tab, List list)
+	public void getSubBlocks(Block block, Item item, CreativeTabs tab, List list)
 	{
 		for (EnumDyeColor color : EnumDyeColor.values())
-			list.add(new ItemStack(item, color.getMetadata()));
+			list.add(new ItemStack(item, 1, color.getMetadata()));
+	}
+
+	@Override
+	public int colorMultiplier(Block block, IBlockAccess world, BlockPos pos, int renderPass)
+	{
+		return getRenderColor(block, world.getBlockState(pos));
 	}
 
 	/**
@@ -71,7 +95,8 @@ public interface IBlockColor
 	 * @param state the state
 	 * @return the render color
 	 */
-	public default int getRenderColor(Block block, IBlockState state)
+	@Override
+	public int getRenderColor(Block block, IBlockState state)
 	{
 		return ItemDye.dyeColors[getColor(state).getDyeDamage()];
 	}
@@ -83,9 +108,10 @@ public interface IBlockColor
 	 * @param state the state
 	 * @return the map color
 	 */
-	public default MapColor getMapColor(Block block, IBlockState state)
+	@Override
+	public MapColor getMapColor(Block block, IBlockState state)
 	{
-		return ((EnumDyeColor) state.getValue(getPropertyColor())).getMapColor();
+		return ((EnumDyeColor) state.getValue(getProperty())).getMapColor();
 	}
 
 	/**
@@ -96,9 +122,10 @@ public interface IBlockColor
 	 * @param meta the meta
 	 * @return the state from meta
 	 */
-	public default IBlockState getStateFromMeta(Block block, IBlockState state, int meta)
+	@Override
+	public IBlockState getStateFromMeta(Block block, IBlockState state, int meta)
 	{
-		return state.withProperty(getPropertyColor(), EnumDyeColor.byMetadata(meta));
+		return state.withProperty(getProperty(), EnumDyeColor.byMetadata(meta));
 	}
 
 	/**
@@ -108,9 +135,10 @@ public interface IBlockColor
 	 * @param state the state
 	 * @return the meta from state
 	 */
-	public default int getMetaFromState(Block block, IBlockState state)
+	@Override
+	public int getMetaFromState(Block block, IBlockState state)
 	{
-		return ((EnumDyeColor) state.getValue(getPropertyColor())).getMetadata();
+		return ((EnumDyeColor) state.getValue(getProperty())).getMetadata();
 	}
 
 	/**
@@ -118,9 +146,9 @@ public interface IBlockColor
 	 *
 	 * @param world the world
 	 * @param pos the pos
-	 * @return the EnumDyeColor, null if the block is not {@link IBlockColor}
+	 * @return the EnumDyeColor, null if the block is not {@link ColorComponent}
 	 */
-	public static EnumDyeColor getColor(World world, BlockPos pos)
+	public static EnumDyeColor getColor(IBlockAccess world, BlockPos pos)
 	{
 		return world != null && pos != null ? getColor(world.getBlockState(pos)) : EnumDyeColor.WHITE;
 	}
@@ -129,18 +157,19 @@ public interface IBlockColor
 	 * Gets the {@link EnumDyeColor color} for the {@link IBlockState}.
 	 *
 	 * @param state the state
-	 * @return the EnumDyeColor, null if the block is not {@link IBlockColor}
+	 * @return the EnumDyeColor, null if the block is not {@link ColorComponent}
 	 */
 	public static EnumDyeColor getColor(IBlockState state)
 	{
-		if (!(state.getBlock() instanceof IBlockColor))
+		ColorComponent cc = IBlockComponent.getComponent(ColorComponent.class, state.getBlock());
+		if (cc == null)
 			return EnumDyeColor.WHITE;
 
-		PropertyEnum property = ((IBlockColor) state.getBlock()).getPropertyColor();
+		PropertyEnum property = cc.getProperty();
 		if (property == null || !state.getProperties().containsKey(property))
 			return EnumDyeColor.WHITE;
 
 		return (EnumDyeColor) state.getValue(property);
-
 	}
+
 }

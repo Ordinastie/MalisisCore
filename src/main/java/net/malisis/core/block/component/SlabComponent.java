@@ -1,0 +1,235 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Ordinastie
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+package net.malisis.core.block.component;
+
+import java.util.Random;
+
+import net.malisis.core.MalisisCore;
+import net.malisis.core.block.BoundingBoxType;
+import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.MalisisBlock;
+import net.malisis.core.item.MalisisItemSlab;
+import net.malisis.core.util.AABBUtils;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockSlab;
+import net.minecraft.block.BlockSlab.EnumBlockHalf;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.GameData;
+
+/**
+ * @author Ordinastie
+ *
+ */
+public class SlabComponent implements IBlockComponent
+{
+	private MalisisBlock singleSlab;
+	private MalisisBlock doubleSlab;
+	private MalisisItemSlab item;
+
+	public SlabComponent(MalisisBlock singleSlab, MalisisBlock doubleSlab)
+	{
+		this.singleSlab = singleSlab;
+		this.doubleSlab = doubleSlab;
+
+		singleSlab.addComponent(this);
+		doubleSlab.addComponent(this);
+		doubleSlab.setName(singleSlab.getRegistryName() + "Double");
+
+		item = new MalisisItemSlab(singleSlab, doubleSlab);
+		if (MalisisCore.isClient())
+			item.setCreativeTab(singleSlab.getCreativeTabToDisplayOn());
+	}
+
+	public boolean isDouble(Block block)
+	{
+		return block == doubleSlab;
+	}
+
+	@Override
+	public PropertyEnum getProperty()
+	{
+		return BlockSlab.HALF;
+	}
+
+	@Override
+	public IBlockState setDefaultState(Block block, IBlockState state)
+	{
+		return state.withProperty(getProperty(), EnumBlockHalf.BOTTOM);
+	}
+
+	@Override
+	public Item getItem(Block block)
+	{
+		if (isDouble(block))
+			return null;
+		return item;
+	}
+
+	@Override
+	public IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+	{
+		if (isDouble(block))
+			return state;
+
+		return state.withProperty(getProperty(),
+				facing != EnumFacing.DOWN && (facing == EnumFacing.UP || hitY <= 0.5F) ? EnumBlockHalf.BOTTOM : EnumBlockHalf.TOP);
+	}
+
+	@Override
+	public AxisAlignedBB getBoundingBox(Block block, IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	{
+		if (isDouble(block))
+			return AABBUtils.identity();
+
+		AxisAlignedBB aabb = new AxisAlignedBB(0, 0, 0, 1, 0.5F, 1);
+		if (isTop(world, pos))
+			aabb = aabb.offset(0, 0.5F, 0);
+		return aabb;
+	}
+
+	@Override
+	public IBlockState getStateFromMeta(Block block, IBlockState state, int meta)
+	{
+		return state.withProperty(getProperty(), (meta & 8) != 0 ? EnumBlockHalf.TOP : EnumBlockHalf.BOTTOM);
+	}
+
+	@Override
+	public int getMetaFromState(Block block, IBlockState state)
+	{
+		return isTop(state) ? 8 : 0;
+	}
+
+	@Override
+	public Boolean shouldSideBeRendered(Block block, IBlockAccess world, BlockPos pos, EnumFacing side)
+	{
+		if (isDouble(block))
+			return null;
+
+		boolean isTop = isTop(world, pos.offset(side.getOpposite()));
+		if (isTop && side == EnumFacing.UP)
+			return null;
+		if (!isTop && side == EnumFacing.DOWN)
+			return null;
+
+		//TODO: check for neighbor slab
+		return true;
+	}
+
+	@Override
+	public Boolean isFullCube(Block block)
+	{
+		return false;//isDouble(block);
+	}
+
+	@Override
+	public Boolean isFullBlock(Block block)
+	{
+		return false;// isDouble(block);
+	}
+
+	@Override
+	public Boolean isOpaqueCube(Block block)
+	{
+		return false;//isDouble(block);
+	}
+
+	@Override
+	public Integer getMixedBrightnessForBlock(Block block, IBlockAccess world, BlockPos pos)
+	{
+		return null;
+	}
+
+	@Override
+	public Integer quantityDropped(Block block, IBlockState state, int fortune, Random random)
+	{
+		//TODO: smart slab break
+		return isDouble(block) ? 2 : 1;
+	}
+
+	@Override
+	public Integer getLightOpacity(Block block, IBlockAccess world, BlockPos pos)
+	{
+		return isDouble(block) ? 255 : 0;
+	}
+
+	public static boolean isTop(IBlockAccess world, BlockPos pos)
+	{
+		return world != null ? isTop(world.getBlockState(pos)) : false;
+	}
+
+	public static boolean isTop(IBlockState state)
+	{
+		SlabComponent sc = IBlockComponent.getComponent(SlabComponent.class, state.getBlock());
+		if (sc == null)
+			return false;
+
+		PropertyEnum property = sc.getProperty();
+		if (property == null || !state.getProperties().containsKey(property))
+			return false;
+
+		return (EnumBlockHalf) state.getValue(property) == EnumBlockHalf.TOP;
+	}
+
+	public static boolean isDouble(IBlockAccess world, BlockPos pos)
+	{
+		return isDouble(world.getBlockState(pos));
+	}
+
+	public static boolean isDouble(IBlockState state)
+	{
+		SlabComponent sc = IBlockComponent.getComponent(SlabComponent.class, state.getBlock());
+		return sc != null && sc.isDouble(state.getBlock());
+	}
+
+	public static boolean isSlab(IBlockAccess world, BlockPos pos)
+	{
+		return isSlab(world.getBlockState(pos).getBlock());
+	}
+
+	public static boolean isSlab(Block block)
+	{
+		if (block == Blocks.stone_slab || block == Blocks.wooden_slab || block == Blocks.stone_slab2)
+			return true;
+
+		return IBlockComponent.getComponent(SlabComponent.class, block) != null;
+	}
+
+	public void register()
+	{
+		singleSlab.register();
+		doubleSlab.register();
+
+		GameData.getBlockItemMap().put(doubleSlab, item);
+	}
+}

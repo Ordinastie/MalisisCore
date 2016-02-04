@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.block.IBlockDirectional;
+import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.EnumFacingUtils;
 import net.malisis.core.util.MBlockState;
@@ -51,7 +51,7 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 
 	protected Map<BlockPos, MBlockState> states = new HashMap<>();
 	protected BlockPos offset = new BlockPos(0, 0, 0);
-	protected PropertyDirection property = IBlockDirectional.HORIZONTAL;
+	protected PropertyDirection property = DirectionalComponent.HORIZONTAL;
 	private int rotation;
 	private boolean bulkPlace;
 	private boolean bulkBreak;

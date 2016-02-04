@@ -24,7 +24,6 @@
 
 package net.malisis.core.inventory;
 
-import net.malisis.core.block.IBlockDirectional;
 import net.malisis.core.inventory.IInventoryProvider.IDirectInventoryProvider;
 import net.malisis.core.util.EnumFacingUtils;
 import net.malisis.core.util.ItemUtils;
@@ -94,9 +93,7 @@ public interface ISidedInventoryProvider extends IDirectInventoryProvider, ISide
 			return side;
 
 		IBlockState state = (((TileEntity) this).getWorld()).getBlockState(((TileEntity) this).getPos());
-		if (state.getBlock() instanceof IBlockDirectional)
-			return EnumFacingUtils.getRealSide(state, side);
-		return side;
+		return EnumFacingUtils.getRealSide(state, side);
 	}
 
 	/**

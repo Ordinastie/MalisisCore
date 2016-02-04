@@ -297,12 +297,17 @@ public class MalisisRegistry
 		if (registerable instanceof Block)
 		{
 			Block block = (Block) registerable;
-			GameRegistry.registerBlock(block, registerable.getItemClass(), name);
+			Item item = registerable.getItem(block);
+			GameRegistry.registerBlock(block, null, name);
+			if (item != null)
+			{
+				GameRegistry.registerItem(item, name);
+				GameData.getBlockItemMap().put(block, item);
+			}
 
 			if (MalisisCore.isClient())
 			{
 				ModelLoader.setCustomStateMapper(block, ClientRegistry.emptyMapper);
-				Item item = Item.getItemFromBlock(block);
 				if (item != null)
 					registerItemModel(item, name);
 			}

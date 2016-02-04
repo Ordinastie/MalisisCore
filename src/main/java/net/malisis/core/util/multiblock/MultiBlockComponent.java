@@ -24,12 +24,17 @@
 
 package net.malisis.core.util.multiblock;
 
+import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.component.DirectionalComponent;
 import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -37,25 +42,53 @@ import net.minecraft.world.World;
  * @author Ordinastie
  *
  */
-public interface IMultiBlock// extends IBlockDirectional
+public class MultiBlockComponent extends DirectionalComponent
 {
 	public static PropertyBool ORIGIN = PropertyBool.create("origin");
 
-	public MultiBlock getMultiBlock(IBlockAccess world, BlockPos pos, IBlockState state, ItemStack itemStack);
+	private MultiBlock multiBlock;
 
-	public default PropertyBool getOriginProperty()
+	public MultiBlockComponent(MultiBlock multiBlock)
+	{
+		this.multiBlock = multiBlock;
+	}
+
+	public MultiBlock getMultiBlock(IBlockAccess world, BlockPos pos, IBlockState state, ItemStack itemStack)
+	{
+		return multiBlock;
+	}
+
+	public PropertyBool getOriginProperty()
 	{
 		return ORIGIN;
 	}
 
-	//	@Override
-	//	public default IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
-	//	{
-	//		return IBlockDirectional.super.onBlockPlaced(block, world, pos, state, facing, hitX, hitY, hitZ, meta, placer).withProperty(
-	//				getOriginProperty(), true);
-	//	}
+	public PropertyDirection getDirectionProperty()
+	{
+		return HORIZONTAL;
+	}
 
-	public default void onBlockPlacedBy(Block block, World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+	@Override
+	public IProperty[] getProperties()
+	{
+		return new IProperty[] { HORIZONTAL, ORIGIN };
+	}
+
+	@Override
+	public IBlockState setDefaultState(Block block, IBlockState state)
+	{
+		return super.setDefaultState(block, state).withProperty(ORIGIN, false);
+	}
+
+	@Override
+	public IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+	{
+		state = super.onBlockPlaced(block, world, pos, state, facing, hitX, hitY, hitZ, meta, placer);
+		return state.withProperty(getOriginProperty(), true);
+	}
+
+	@Override
+	public void onBlockPlacedBy(Block block, World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
 	{
 		MultiBlock multiBlock = getMultiBlock(world, pos, state, stack);
 		if (multiBlock == null || !multiBlock.isBulkPlace())
@@ -67,24 +100,27 @@ public interface IMultiBlock// extends IBlockDirectional
 			world.setBlockToAir(pos);
 	}
 
-	//	public default void breakBlock(Block block, World world, BlockPos pos, IBlockState state)
-	//	{
-	//		MultiBlock multiBlock = getMultiBlock(world, pos, state, null);
-	//		if (multiBlock != null && multiBlock.isBulkBreak())
-	//			multiBlock.breakBlocks(world, pos, state);
-	//	}
-	//
-	//	@Override
-	//	public default IBlockState getStateFromMeta(Block block, IBlockState state, int meta)
-	//	{
-	//		return IBlockDirectional.super.getStateFromMeta(block, state, meta).withProperty(getOriginProperty(), (meta & 8) != 0);
-	//	}
-	//
-	//	@Override
-	//	public default int getMetaFromState(Block block, IBlockState state)
-	//	{
-	//		return IBlockDirectional.super.getMetaFromState(block, state) + (isOrigin(state) ? 8 : 0);
-	//	}
+	@Override
+	public void breakBlock(Block block, World world, BlockPos pos, IBlockState state)
+	{
+		MultiBlock multiBlock = getMultiBlock(world, pos, state, null);
+		if (multiBlock != null && multiBlock.isBulkBreak())
+			multiBlock.breakBlocks(world, pos, state);
+	}
+
+	@Override
+	public IBlockState getStateFromMeta(Block block, IBlockState state, int meta)
+	{
+		state = super.getStateFromMeta(block, state, meta);
+		return state.withProperty(getOriginProperty(), (meta & 8) != 0);
+	}
+
+	@Override
+	public int getMetaFromState(Block block, IBlockState state)
+	{
+		int meta = super.getMetaFromState(block, state);
+		return meta + (isOrigin(state) ? 8 : 0);
+	}
 
 	public static boolean isOrigin(World world, BlockPos pos)
 	{
@@ -93,10 +129,11 @@ public interface IMultiBlock// extends IBlockDirectional
 
 	public static boolean isOrigin(IBlockState state)
 	{
-		if (!(state.getBlock() instanceof IMultiBlock))
+		MultiBlockComponent mbc = IBlockComponent.getComponent(MultiBlockComponent.class, state.getBlock());
+		if (mbc == null)
 			return false;
 
-		PropertyBool property = ((IMultiBlock) state.getBlock()).getOriginProperty();
+		PropertyBool property = mbc.getOriginProperty();
 		if (property == null || !state.getProperties().containsKey(property))
 			return false;
 

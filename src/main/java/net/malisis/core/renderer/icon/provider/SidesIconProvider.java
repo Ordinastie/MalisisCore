@@ -24,7 +24,7 @@
 
 package net.malisis.core.renderer.icon.provider;
 
-import net.malisis.core.block.IBlockDirectional;
+import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.util.EnumFacingUtils;
@@ -42,8 +42,8 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * This {@link IIconProvider} allows a {@link Block} to have different icons for its sides.<br>
- * By default, it will also use the {@link IBlockDirectional#HORIZONTAL} property to determine the facing of the block and rotate the icons
- * accordingly.
+ * By default, it will also use the {@link DirectionalComponent#HORIZONTAL} property to determine the facing of the block and rotate the
+ * icons accordingly.
  *
  * @author Ordinastie
  *
@@ -52,7 +52,7 @@ public class SidesIconProvider implements IBlockIconProvider
 {
 	private MalisisIcon defaultIcon;
 	private MalisisIcon[] sideIcons = new MalisisIcon[6];
-	private PropertyDirection property = IBlockDirectional.HORIZONTAL;
+	private PropertyDirection property = DirectionalComponent.HORIZONTAL;
 
 	public SidesIconProvider(String defaultName, String[] sideNames)
 	{
@@ -140,7 +140,7 @@ public class SidesIconProvider implements IBlockIconProvider
 
 	/**
 	 * Sets the property direction to used to determine the facing of the block.<br>
-	 * By default, uses {@link IBlockDirectional#HORIZONTAL}.
+	 * By default, uses {@link DirectionalComponent#HORIZONTAL}.
 	 *
 	 * @param property the new property direction
 	 */
@@ -226,6 +226,9 @@ public class SidesIconProvider implements IBlockIconProvider
 	protected int getRotation(IBlockState state, EnumFacing side)
 	{
 		if (side != EnumFacing.UP && side != EnumFacing.DOWN)
+			return 0;
+
+		if (!state.getProperties().containsKey(property))
 			return 0;
 
 		EnumFacing direction = (EnumFacing) state.getValue(property);

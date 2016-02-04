@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.block;
+package net.malisis.core.block.icomponent;
 
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.properties.PropertyEnum;

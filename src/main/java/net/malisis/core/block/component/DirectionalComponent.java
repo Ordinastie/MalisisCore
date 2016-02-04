@@ -22,8 +22,9 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.block;
+package net.malisis.core.block.component;
 
+import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.util.EntityUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyDirection;
@@ -35,37 +36,65 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 /**
- * The Interface IBlockDirectional gives default implementations for blocks that have a facing.<br>
- * If the block extends {@link MalisisBlock}, relevant methods automatically redirect the implement to this interface.
- *
  * @author Ordinastie
+ *
  */
-public interface IBlockDirectional
+public class DirectionalComponent implements IBlockComponent
 {
-	/** The {@link PropertyDirection} direction that is used by default. */
 	public static final PropertyDirection HORIZONTAL = PropertyDirection.create("direction", EnumFacing.Plane.HORIZONTAL);
 	public static final PropertyDirection ALL = PropertyDirection.create("direction");
 
-	/**
-	 * Gets the property direction to use for this {@link IBlockDirectional}.
-	 *
-	 * @return the property direction
-	 */
-	public default PropertyDirection getPropertyDirection()
+	private PropertyDirection property = HORIZONTAL;
+	private boolean placedOnSide = false;
+
+	public DirectionalComponent()
+	{}
+
+	public DirectionalComponent(PropertyDirection property)
 	{
-		return HORIZONTAL;
+		this.property = property;
+	}
+
+	public DirectionalComponent(PropertyDirection property, boolean placedOnSide)
+	{
+		this.property = property;
+		this.placedOnSide = placedOnSide;
 	}
 
 	/**
-	 * Gets the direction to use when placing this {@link IBlockDirectional}.
+	 * Gets the property direction to use for this {@link DirectionalComponent}.
+	 *
+	 * @return the property direction
+	 */
+	@Override
+	public PropertyDirection getProperty()
+	{
+		return property;
+	}
+
+	/**
+	 * Sets the default value to use for the {@link IBlockState}.
+	 *
+	 * @param block the block
+	 * @param state the state
+	 * @return the i block state
+	 */
+	@Override
+	public IBlockState setDefaultState(Block block, IBlockState state)
+	{
+		return state.withProperty(getProperty(), EnumFacing.SOUTH);
+	}
+
+	/**
+	 * Gets the direction to use when placing this {@link DirectionalComponent}.
 	 *
 	 * @param side the side
 	 * @param placer the placer
 	 * @return the placing direction
 	 */
-	public default EnumFacing getPlacingDirection(EnumFacing side, EntityLivingBase placer)
+	public EnumFacing getPlacingDirection(EnumFacing side, EntityLivingBase placer)
 	{
-		return EntityUtils.getEntityFacing(placer, getPropertyDirection() == ALL).getOpposite();
+		return placedOnSide ? side : EntityUtils.getEntityFacing(placer, getProperty() == ALL).getOpposite();
 	}
 
 	/**
@@ -82,9 +111,10 @@ public interface IBlockDirectional
 	 * @param placer the placer
 	 * @return the i block state
 	 */
-	public default IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+	@Override
+	public IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
-		return state.withProperty(getPropertyDirection(), getPlacingDirection(facing, placer));
+		return state.withProperty(getProperty(), getPlacingDirection(facing, placer));
 	}
 
 	/**
@@ -94,14 +124,15 @@ public interface IBlockDirectional
 	 * @param meta the meta
 	 * @return the state from meta
 	 */
-	public default IBlockState getStateFromMeta(Block block, IBlockState state, int meta)
+	@Override
+	public IBlockState getStateFromMeta(Block block, IBlockState state, int meta)
 	{
 		EnumFacing facing = null;
-		if (getPropertyDirection() == HORIZONTAL)
+		if (getProperty() == HORIZONTAL)
 			facing = EnumFacing.getHorizontal(meta & 3);
 		else
 			facing = EnumFacing.getFront(meta & 7);
-		return state.withProperty(getPropertyDirection(), facing);
+		return state.withProperty(getProperty(), facing);
 	}
 
 	/**
@@ -111,9 +142,10 @@ public interface IBlockDirectional
 	 * @param state the state
 	 * @return the meta from state
 	 */
-	public default int getMetaFromState(Block block, IBlockState state)
+	@Override
+	public int getMetaFromState(Block block, IBlockState state)
 	{
-		if (getPropertyDirection() == HORIZONTAL)
+		if (getProperty() == HORIZONTAL)
 			return getDirection(state).getHorizontalIndex();
 		else
 			return getDirection(state).getIndex();
@@ -124,7 +156,7 @@ public interface IBlockDirectional
 	 *
 	 * @param world the world
 	 * @param pos the pos
-	 * @return the EnumFacing, null if the block is not {@link IBlockDirectional}
+	 * @return the EnumFacing, null if the block is not {@link DirectionalComponent}
 	 */
 	public static EnumFacing getDirection(IBlockAccess world, BlockPos pos)
 	{
@@ -135,17 +167,19 @@ public interface IBlockDirectional
 	 * Gets the {@link EnumFacing direction} for the {@link IBlockState}
 	 *
 	 * @param state the state
-	 * @return the EnumFacing, null if the block is not {@link IBlockDirectional}
+	 * @return the EnumFacing, null if the block is not {@link DirectionalComponent}
 	 */
 	public static EnumFacing getDirection(IBlockState state)
 	{
-		if (!(state.getBlock() instanceof IBlockDirectional))
+		DirectionalComponent dc = IBlockComponent.getComponent(DirectionalComponent.class, state.getBlock());
+		if (dc == null)
 			return EnumFacing.SOUTH;
 
-		PropertyDirection property = ((IBlockDirectional) state.getBlock()).getPropertyDirection();
+		PropertyDirection property = dc.getProperty();
 		if (property == null || !state.getProperties().containsKey(property))
 			return EnumFacing.SOUTH;
 
 		return (EnumFacing) state.getValue(property);
 	}
+
 }

@@ -26,12 +26,15 @@ package net.malisis.core.block;
 
 import java.util.List;
 
+import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.raytrace.RaytraceBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -64,16 +67,14 @@ public interface IBoundingBox
 	public default AxisAlignedBB[] getCollisionBoundingBoxes(World world, BlockPos pos, IBlockState state)
 	{
 		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.COLLISION);
-		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, IBlockDirectional.getDirection(state));
+		aabbs = AABBUtils.rotate(aabbs, DirectionalComponent.getDirection(state));
 		return aabbs;
 	}
 
 	public default void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity)
 	{
 		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.COLLISION);
-		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, IBlockDirectional.getDirection(state));
+		aabbs = AABBUtils.rotate(aabbs, DirectionalComponent.getDirection(state));
 
 		for (AxisAlignedBB aabb : AABBUtils.offset(pos, aabbs))
 		{
@@ -88,8 +89,7 @@ public interface IBoundingBox
 		if (ArrayUtils.isEmpty(aabbs) || aabbs[0] == null)
 			return AABBUtils.empty(pos);
 
-		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, IBlockDirectional.getDirection(world.getBlockState(pos)));
+		aabbs = AABBUtils.rotate(aabbs, DirectionalComponent.getDirection(world, pos));
 
 		return AABBUtils.offset(pos, aabbs)[0];
 	}
@@ -97,8 +97,7 @@ public interface IBoundingBox
 	public default AxisAlignedBB[] getRenderBoundingBox(IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.RENDER);
-		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, IBlockDirectional.getDirection(state));
+		aabbs = AABBUtils.rotate(aabbs, DirectionalComponent.getDirection(state));
 
 		return aabbs;
 	}
@@ -106,9 +105,13 @@ public interface IBoundingBox
 	public default AxisAlignedBB[] getRayTraceBoundingBox(IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.RAYTRACE);
-		if (this instanceof IBlockDirectional)
-			aabbs = AABBUtils.rotate(aabbs, IBlockDirectional.getDirection(state));
+		aabbs = AABBUtils.rotate(aabbs, DirectionalComponent.getDirection(state));
 
 		return aabbs;
+	}
+
+	public default MovingObjectPosition collisionRayTrace(World world, BlockPos pos, Vec3 src, Vec3 dest)
+	{
+		return new RaytraceBlock(world, src, dest, pos).trace();
 	}
 }
