@@ -173,7 +173,6 @@ public class MethodDescriptor
 			try
 			{
 				String name = s.substring(isArray ? index : index + 1, isArray ? e + 1 : e).replace('/', '.');
-				System.out.println(name);
 				size = name.length() + (isArray ? 0 : 2);
 				return Class.forName(name);
 			}
