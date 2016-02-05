@@ -26,11 +26,11 @@ package net.malisis.core.block.component;
 
 import java.util.Random;
 
-import net.malisis.core.MalisisCore;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.IMergedBlock;
 import net.malisis.core.block.MalisisBlock;
-import net.malisis.core.item.MalisisItemSlab;
+import net.malisis.core.item.MalisisItemBlock;
 import net.malisis.core.util.AABBUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
@@ -38,8 +38,10 @@ import net.minecraft.block.BlockSlab.EnumBlockHalf;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -51,11 +53,10 @@ import net.minecraftforge.fml.common.registry.GameData;
  * @author Ordinastie
  *
  */
-public class SlabComponent implements IBlockComponent
+public class SlabComponent implements IBlockComponent, IMergedBlock
 {
 	private MalisisBlock singleSlab;
 	private MalisisBlock doubleSlab;
-	private MalisisItemSlab item;
 
 	public SlabComponent(MalisisBlock singleSlab, MalisisBlock doubleSlab)
 	{
@@ -65,10 +66,6 @@ public class SlabComponent implements IBlockComponent
 		singleSlab.addComponent(this);
 		doubleSlab.addComponent(this);
 		doubleSlab.setName(singleSlab.getRegistryName() + "Double");
-
-		item = new MalisisItemSlab(singleSlab, doubleSlab);
-		if (MalisisCore.isClient())
-			item.setCreativeTab(singleSlab.getCreativeTabToDisplayOn());
 	}
 
 	public boolean isDouble(Block block)
@@ -93,7 +90,19 @@ public class SlabComponent implements IBlockComponent
 	{
 		if (isDouble(block))
 			return null;
-		return item;
+		return new MalisisItemBlock(singleSlab);
+	}
+
+	@Override
+	public boolean canMerge(ItemStack itemStack, EntityPlayer player, World world, BlockPos pos, EnumFacing side)
+	{
+		return world.getBlockState(pos).getBlock() == singleSlab;
+	}
+
+	@Override
+	public IBlockState mergeBlock(World world, BlockPos pos, IBlockState state, ItemStack itemStack, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ)
+	{
+		return doubleSlab.getDefaultState();
 	}
 
 	@Override
@@ -171,9 +180,14 @@ public class SlabComponent implements IBlockComponent
 	}
 
 	@Override
+	public Item getItemDropped(Block block, IBlockState state, Random rand, int fortune)
+	{
+		return Item.getItemFromBlock(singleSlab);
+	}
+
+	@Override
 	public Integer quantityDropped(Block block, IBlockState state, int fortune, Random random)
 	{
-		//TODO: smart slab break
 		return isDouble(block) ? 2 : 1;
 	}
 
@@ -230,6 +244,6 @@ public class SlabComponent implements IBlockComponent
 		singleSlab.register();
 		doubleSlab.register();
 
-		GameData.getBlockItemMap().put(doubleSlab, item);
+		GameData.getBlockItemMap().put(doubleSlab, Item.getItemFromBlock(singleSlab));
 	}
 }

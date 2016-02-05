@@ -25,26 +25,42 @@
 package net.malisis.core.block;
 
 import net.malisis.core.MalisisRegistry;
+import net.malisis.core.item.MalisisItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 
 /**
- * @author Ordinastie
+ * This interface allows {@link Block} or {@link Item} implementing it to be registered via {@link MalisisRegistry#register(IRegisterable)}.
  *
+ * @author Ordinastie
  */
 public interface IRegisterable
 {
+	/**
+	 * Gets the registry name to use.
+	 *
+	 * @return the registry name
+	 */
 	public String getRegistryName();
 
+	/**
+	 * Gets the item to register the implementing {@link Block} with.<br>
+	 * Throws {@link IllegalStateException} if called on a implementor that is not a Block.
+	 *
+	 * @param block the block
+	 * @return the item
+	 */
 	public default Item getItem(Block block)
 	{
 		if (this instanceof Block)
-			return new ItemBlock(block);
+			return new MalisisItemBlock(block);
 
 		throw new IllegalStateException("Trying to get item class for " + this.getClass().getName());
 	}
 
+	/**
+	 * Registers this {@link IRegisterable} into the {@link MalisisRegistry}.
+	 */
 	public default void register()
 	{
 		MalisisRegistry.register(this);

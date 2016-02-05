@@ -31,6 +31,7 @@ import java.util.Random;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
+import net.malisis.core.item.MalisisItemBlock;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.icon.IIconProvider;
@@ -46,7 +47,6 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -116,16 +116,20 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	public void addComponent(IBlockComponent component)
 	{
 		components.add(component);
+		for (IBlockComponent dep : component.getDependencies())
+			components.add(dep);
+
 		buildBlockState();
 		buildDefaultState();
+		lightOpacity = isOpaqueCube() ? 255 : 0;
 	}
 
 	@Override
-	public <T extends IBlockComponent> T getComponent(Class<T> type)
+	public <T> T getComponent(Class<T> type)
 	{
 		for (IBlockComponent component : components)
 		{
-			if (component.getClass().isAssignableFrom(type))
+			if (type.isAssignableFrom(component.getClass()))
 				return (T) component;
 		}
 
@@ -145,7 +149,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 		for (IBlockComponent component : components)
 		{
 			Item item = component.getItem(this);
-			if (item == null || item.getClass() != ItemBlock.class)
+			if (item == null || item.getClass() != MalisisItemBlock.class)
 				return item;
 		}
 
@@ -217,6 +221,20 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 		}
 
 		return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+	}
+
+	@Override
+	public AxisAlignedBB[] getBoundingBoxes(IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	{
+		List<AxisAlignedBB> list = Lists.newArrayList();
+		for (IBlockComponent component : getComponents())
+		{
+			AxisAlignedBB[] aabbs = component.getBoundingBoxes(this, world, pos, type);
+			if (aabbs != null)
+				list.addAll(Arrays.asList(aabbs));
+		}
+
+		return list.size() != 0 ? list.toArray(new AxisAlignedBB[0]) : IBoundingBox.super.getBoundingBoxes(world, pos, type);
 	}
 
 	@Override
@@ -397,6 +415,20 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	}
 
 	@Override
+	public Item getItemDropped(IBlockState state, Random rand, int fortune)
+	{
+		for (IBlockComponent component : getComponents())
+		{
+			Item item = component.getItemDropped(this, state, rand, fortune);
+			if (item != null)
+				return item;
+		}
+
+		return super.getItemDropped(state, rand, fortune);
+
+	}
+
+	@Override
 	public int quantityDropped(IBlockState state, int fortune, Random random)
 	{
 		for (IBlockComponent component : getComponents())
@@ -405,6 +437,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 			if (quantity != null)
 				return quantity;
 		}
+
 		return super.quantityDropped(state, fortune, random);
 	}
 
