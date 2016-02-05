@@ -73,6 +73,14 @@ public class SlabComponent implements IBlockComponent, IMergedBlock
 		return block == doubleSlab;
 	}
 
+	public void register()
+	{
+		singleSlab.register();
+		doubleSlab.register();
+
+		GameData.getBlockItemMap().put(doubleSlab, Item.getItemFromBlock(singleSlab));
+	}
+
 	@Override
 	public PropertyEnum getProperty()
 	{
@@ -237,13 +245,5 @@ public class SlabComponent implements IBlockComponent, IMergedBlock
 			return true;
 
 		return IBlockComponent.getComponent(SlabComponent.class, block) != null;
-	}
-
-	public void register()
-	{
-		singleSlab.register();
-		doubleSlab.register();
-
-		GameData.getBlockItemMap().put(doubleSlab, Item.getItemFromBlock(singleSlab));
 	}
 }
