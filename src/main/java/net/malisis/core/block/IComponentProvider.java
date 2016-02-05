@@ -56,6 +56,6 @@ public interface IComponentProvider
 	 * @param type the type
 	 * @return the component
 	 */
-	public <T extends IBlockComponent> T getComponent(Class<T> type);
+	public <T> T getComponent(Class<T> type);
 
 }

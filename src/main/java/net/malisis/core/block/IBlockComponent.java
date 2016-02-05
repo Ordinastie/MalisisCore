@@ -27,6 +27,7 @@ package net.malisis.core.block;
 import java.util.List;
 import java.util.Random;
 
+import net.malisis.core.item.MalisisItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.properties.IProperty;
@@ -34,7 +35,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -43,6 +43,8 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * @author Ordinastie
@@ -81,7 +83,17 @@ public interface IBlockComponent
 
 	public default Item getItem(Block block)
 	{
-		return new ItemBlock(block);
+		return new MalisisItemBlock(block);
+	}
+
+	/**
+	 * Gets the additional components that this {@link IBlockComponent} depends on.
+	 *
+	 * @return the dependencies
+	 */
+	public default List<IBlockComponent> getDependencies()
+	{
+		return ImmutableList.of();
 	}
 
 	//#region Events
@@ -132,7 +144,7 @@ public interface IBlockComponent
 	//#end Events
 
 	/**
-	 * Gets the bounding box for the Block.
+	 * Gets the bounding box for the {@link Block}.
 	 *
 	 * @param world the world
 	 * @param pos the pos
@@ -140,6 +152,20 @@ public interface IBlockComponent
 	 * @return the bounding box
 	 */
 	public default AxisAlignedBB getBoundingBox(Block block, IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	{
+		return null;
+	}
+
+	/**
+	 * Gets the bounding boxes for the {@link Block}.
+	 *
+	 * @param block the block
+	 * @param world the world
+	 * @param pos the pos
+	 * @param type the type
+	 * @return the bounding boxes
+	 */
+	public default AxisAlignedBB[] getBoundingBoxes(Block block, IBlockAccess world, BlockPos pos, BoundingBoxType type)
 	{
 		return null;
 	}
@@ -174,7 +200,7 @@ public interface IBlockComponent
 
 	//#region Colors
 	/**
-	 * Gets the color multiplier to render the block in the world
+	 * Gets the color multiplier to render the block in the world.
 	 *
 	 * @param block the block
 	 * @param world the world
@@ -240,21 +266,48 @@ public interface IBlockComponent
 	//#end State<->Meta
 
 	//#region Fullness
+	/**
+	 * Checks whether a side should be rendered.
+	 *
+	 * @param block the block
+	 * @param world the world
+	 * @param pos the pos
+	 * @param side the side
+	 * @return the boolean
+	 */
 	public default Boolean shouldSideBeRendered(Block block, IBlockAccess world, BlockPos pos, EnumFacing side)
 	{
 		return null;
 	}
 
+	/**
+	 * Checks whether this {@link IBlockComponent} represents a full {@link Block}.
+	 *
+	 * @param block the block
+	 * @return the boolean
+	 */
 	public default Boolean isFullBlock(Block block)
 	{
 		return null;
 	}
 
+	/**
+	 * Checks whether this {@link IBlockComponent} represents a full cube.
+	 *
+	 * @param block the block
+	 * @return the boolean
+	 */
 	public default Boolean isFullCube(Block block)
 	{
 		return null;
 	}
 
+	/**
+	 * Checks whether this {@link IBlockComponent} represents an opaque cube.
+	 *
+	 * @param block the block
+	 * @return the boolean
+	 */
 	public default Boolean isOpaqueCube(Block block)
 	{
 		return null;
@@ -263,16 +316,54 @@ public interface IBlockComponent
 	//#end Fullness
 
 	//#region Other
+	/**
+	 * Gets the mixed brightness for the {@link Block}.
+	 *
+	 * @param block the block
+	 * @param world the world
+	 * @param pos the pos
+	 * @return the mixed brightness for block
+	 */
 	public default Integer getMixedBrightnessForBlock(Block block, IBlockAccess world, BlockPos pos)
 	{
 		return null;
 	}
 
+	/**
+	 * Gets the item dropped by the {@link Block} when broken.
+	 *
+	 * @param state the state
+	 * @param rand the rand
+	 * @param fortune the fortune
+	 * @return the item dropped
+	 */
+	public default Item getItemDropped(Block block, IBlockState state, Random rand, int fortune)
+	{
+		return null;
+	}
+
+	/**
+	 * Quantity the quantity dropped by the {@link Block} when broken.
+	 *
+	 * @param block the block
+	 * @param state the state
+	 * @param fortune the fortune
+	 * @param random the random
+	 * @return the integer
+	 */
 	public default Integer quantityDropped(Block block, IBlockState state, int fortune, Random random)
 	{
 		return null;
 	}
 
+	/**
+	 * Gets the light opacity for the {@link Block}.
+	 *
+	 * @param block the block
+	 * @param world the world
+	 * @param pos the pos
+	 * @return the light opacity
+	 */
 	public default Integer getLightOpacity(Block block, IBlockAccess world, BlockPos pos)
 	{
 		return null;
@@ -280,8 +371,21 @@ public interface IBlockComponent
 
 	//#end Other
 
-	public static <T extends IBlockComponent> T getComponent(Class<T> type, Block block)
+	/**
+	 * Gets the component of the specify <code>type</code> for the {@link Block}.<br>
+	 * The returned object may <b>not</b> be a component but the block itself if it implements an interface used for a
+	 * {@link IBlockComponent}.
+	 *
+	 * @param <T> the generic type
+	 * @param type the type
+	 * @param block the block
+	 * @return the component
+	 */
+	public static <T> T getComponent(Class<T> type, Block block)
 	{
+		if (block.getClass().isAssignableFrom(type))
+			return (T) block;
+
 		if (!(block instanceof IComponentProvider))
 			return null;
 
