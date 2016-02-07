@@ -148,22 +148,6 @@ public class SlabComponent implements IBlockComponent, IMergedBlock
 	}
 
 	@Override
-	public Boolean shouldSideBeRendered(Block block, IBlockAccess world, BlockPos pos, EnumFacing side)
-	{
-		if (isDouble(block))
-			return null;
-
-		boolean isTop = isTop(world, pos.offset(side.getOpposite()));
-		if (isTop && side == EnumFacing.UP)
-			return null;
-		if (!isTop && side == EnumFacing.DOWN)
-			return null;
-
-		//TODO: check for neighbor slab
-		return true;
-	}
-
-	@Override
 	public Boolean isFullCube(Block block)
 	{
 		return false;//isDouble(block);
