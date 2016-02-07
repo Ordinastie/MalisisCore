@@ -24,10 +24,8 @@
 
 package net.malisis.core.renderer.icon.provider;
 
-import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
-import net.malisis.core.util.EnumFacingUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
@@ -53,9 +51,7 @@ public interface IBlockIconProvider extends IIconProvider
 	 */
 	public default MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
 	{
-		MalisisIcon icon = getIcon();
-		icon.setRotation(getRotationCount(state, side));
-		return icon;
+		return getIcon();
 	}
 
 	/**
@@ -68,8 +64,6 @@ public interface IBlockIconProvider extends IIconProvider
 	 */
 	public default MalisisIcon getIcon(ItemStack itemStack, EnumFacing side)
 	{
-		MalisisIcon icon = getIcon();
-		icon.setRotation(0);
 		return getIcon();
 	}
 
@@ -82,14 +76,5 @@ public interface IBlockIconProvider extends IIconProvider
 	public default MalisisIcon getParticleIcon(IBlockState state)
 	{
 		return getIcon();
-	}
-
-	public static int getRotationCount(IBlockState state, EnumFacing side)
-	{
-		if (side != EnumFacing.UP && side != EnumFacing.DOWN)
-			return 0;
-
-		EnumFacing direction = DirectionalComponent.getDirection(state);
-		return EnumFacingUtils.getRotationCount(direction);
 	}
 }

@@ -60,6 +60,18 @@ public class EnumFacingUtils
 	}
 
 	/**
+	 * Gets the rotation count for the {@link IBlockState}
+	 *
+	 * @param state the state
+	 * @return the rotation count
+	 */
+	public static int getRotationCount(IBlockState state)
+	{
+		EnumFacing direction = DirectionalComponent.getDirection(state);
+		return EnumFacingUtils.getRotationCount(direction);
+	}
+
+	/**
 	 * Rotates facing {@code count} times.
 	 *
 	 * @param facing the facing
@@ -97,4 +109,5 @@ public class EnumFacingUtils
 
 		return side;
 	}
+
 }

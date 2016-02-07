@@ -46,6 +46,7 @@ import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IItemIconProvider;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.malisis.core.util.BlockPosUtils;
+import net.malisis.core.util.EnumFacingUtils;
 import net.malisis.core.util.ItemUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -917,6 +918,11 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	public void applyTexture(Face face, RenderParameters params)
 	{
 		MalisisIcon icon = getIcon(face, params);
+		if (params.textureSide.get() != EnumFacing.UP && params.textureSide.get() != EnumFacing.DOWN)
+			icon.setRotation(0);
+		else
+			icon.setRotation(EnumFacingUtils.getRotationCount(blockState));
+
 		boolean flipU = params.flipU.get();
 		if (params.direction.get() == EnumFacing.NORTH || params.direction.get() == EnumFacing.EAST)
 			flipU = !flipU;
@@ -943,11 +949,13 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 
 		if (iconProvider instanceof IBlockIconProvider && block != null)
 		{
+			EnumFacing side = EnumFacingUtils.getRealSide(blockState, params.textureSide.get());
+
 			IBlockIconProvider iblockp = (IBlockIconProvider) iconProvider;
 			if (renderType == RenderType.BLOCK || renderType == RenderType.TILE_ENTITY)
-				return iblockp.getIcon(world, pos, blockState, params.textureSide.get());
+				return iblockp.getIcon(world, pos, blockState, side);
 			else if (renderType == RenderType.ITEM)
-				return iblockp.getIcon(itemStack, params.textureSide.get());
+				return iblockp.getIcon(itemStack, side);
 		}
 
 		return iconProvider != null ? iconProvider.getIcon() : MalisisIcon.missing;

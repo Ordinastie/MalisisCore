@@ -27,7 +27,6 @@ package net.malisis.core.renderer.icon.provider;
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
-import net.malisis.core.util.EnumFacingUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -158,9 +157,9 @@ public class SidesIconProvider implements IBlockIconProvider
 	public MalisisIcon getIcon(EnumFacing side)
 	{
 		if (side == null || side.getIndex() > sideIcons.length)
-			return null;
+			return defaultIcon;
 
-		return sideIcons[side.getIndex()];
+		return ObjectUtils.firstNonNull(sideIcons[side.getIndex()], defaultIcon);
 	}
 
 	/**
@@ -177,14 +176,7 @@ public class SidesIconProvider implements IBlockIconProvider
 	@Override
 	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
 	{
-		if (side == null)
-			return defaultIcon;
-
-		side = EnumFacingUtils.getRealSide(state, side);
-		MalisisIcon icon = ObjectUtils.firstNonNull(getIcon(side), defaultIcon);
-		if (icon != null)
-			icon.setRotation(IBlockIconProvider.getRotationCount(state, side));
-		return icon;
+		return getIcon(side);
 	}
 
 	/**
@@ -198,10 +190,7 @@ public class SidesIconProvider implements IBlockIconProvider
 	@Override
 	public MalisisIcon getIcon(ItemStack itemStack, EnumFacing side)
 	{
-		MalisisIcon icon = ObjectUtils.firstNonNull(getIcon(side), defaultIcon);
-		if (icon != null)
-			icon.setRotation(0);
-		return icon;
+		return getIcon(side);
 	}
 
 	@Override
