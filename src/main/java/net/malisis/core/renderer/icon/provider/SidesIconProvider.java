@@ -29,7 +29,6 @@ import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.util.EnumFacingUtils;
 import net.minecraft.block.Block;
-import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
@@ -52,7 +51,6 @@ public class SidesIconProvider implements IBlockIconProvider
 {
 	private MalisisIcon defaultIcon;
 	private MalisisIcon[] sideIcons = new MalisisIcon[6];
-	private PropertyDirection property = DirectionalComponent.HORIZONTAL;
 
 	public SidesIconProvider(String defaultName, String[] sideNames)
 	{
@@ -138,17 +136,6 @@ public class SidesIconProvider implements IBlockIconProvider
 		setSideIcon(side, new MalisisIcon(name));
 	}
 
-	/**
-	 * Sets the property direction to used to determine the facing of the block.<br>
-	 * By default, uses {@link DirectionalComponent#HORIZONTAL}.
-	 *
-	 * @param property the new property direction
-	 */
-	public void setPropertyDirection(PropertyDirection property)
-	{
-		this.property = property;
-	}
-
 	@Override
 	public void registerIcons(TextureMap map)
 	{
@@ -193,13 +180,11 @@ public class SidesIconProvider implements IBlockIconProvider
 		if (side == null)
 			return defaultIcon;
 
-		int count = getRotation(state, side);
 		side = EnumFacingUtils.getRealSide(state, side);
-
-		MalisisIcon dirIcon = ObjectUtils.firstNonNull(getIcon(side), defaultIcon);
-		if (dirIcon != null)
-			dirIcon.setRotation(count);
-		return dirIcon;
+		MalisisIcon icon = ObjectUtils.firstNonNull(getIcon(side), defaultIcon);
+		if (icon != null)
+			icon.setRotation(IBlockIconProvider.getRotationCount(state, side));
+		return icon;
 	}
 
 	/**
@@ -213,25 +198,15 @@ public class SidesIconProvider implements IBlockIconProvider
 	@Override
 	public MalisisIcon getIcon(ItemStack itemStack, EnumFacing side)
 	{
-		MalisisIcon dirIcon = getIcon(side);
-		return dirIcon != null ? dirIcon : defaultIcon;
+		MalisisIcon icon = ObjectUtils.firstNonNull(getIcon(side), defaultIcon);
+		if (icon != null)
+			icon.setRotation(0);
+		return icon;
 	}
 
 	@Override
 	public MalisisIcon getIcon()
 	{
 		return defaultIcon;
-	}
-
-	protected int getRotation(IBlockState state, EnumFacing side)
-	{
-		if (side != EnumFacing.UP && side != EnumFacing.DOWN)
-			return 0;
-
-		if (!state.getProperties().containsKey(property))
-			return 0;
-
-		EnumFacing direction = (EnumFacing) state.getValue(property);
-		return EnumFacingUtils.getRotationCount(direction);
 	}
 }
