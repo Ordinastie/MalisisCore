@@ -91,7 +91,7 @@ public interface IBoundingBox
 
 		aabbs = AABBUtils.rotate(aabbs, DirectionalComponent.getDirection(world, pos));
 
-		return AABBUtils.offset(pos, aabbs)[0];
+		return AABBUtils.offset(pos, AABBUtils.combine(aabbs));
 	}
 
 	public default AxisAlignedBB[] getRenderBoundingBox(IBlockAccess world, BlockPos pos, IBlockState state)
