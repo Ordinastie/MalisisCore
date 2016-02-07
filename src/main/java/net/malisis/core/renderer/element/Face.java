@@ -183,57 +183,50 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 
 	public Face interpolateUV()
 	{
-		float u = 0;
-		float v = 0;
-		float U = 1;
-		float V = 1;
-
-		double factorU, factorV;
-
-		float uvs[][] = new float[vertexes.length][2];
-		for (int i = 0; i < vertexes.length; i++)
-		{
-			Vertex vertex = vertexes[i];
-
-			factorU = getFactorU(vertex);
-			factorV = getFactorV(vertex);
-
-			int k = i;
-			uvs[k] = new float[] { interpolate(u, U, factorU, false), interpolate(v, V, factorV, false) };
-		}
-
-		for (int i = 0; i < vertexes.length; i++)
-			vertexes[i].setUV(uvs[i][0], uvs[i][1]);
-
-		return this;
+		return setTexture(null, false, false, true);
 	}
 
 	public Face setTexture(MalisisIcon icon, boolean flippedU, boolean flippedV, boolean interpolate)
 	{
-		if (icon == null)
-			return this;
-
-		float u = icon.getMinU();
-		float v = icon.getMinV();
-		float U = icon.getMaxU();
-		float V = icon.getMaxV();
-
+		float u = 0;
+		float v = 0;
+		float U = 1;
+		float V = 1;
+		int rotation = 0;
 		double factorU, factorV;
-
 		float uvs[][] = new float[vertexes.length][2];
+
+		if (icon != null)
+		{
+			u = icon.getMinU();
+			v = icon.getMinV();
+			U = icon.getMaxU();
+			V = icon.getMaxV();
+			rotation = icon.getRotation();
+		}
+
+		switch (rotation)
+		{
+			case 1:
+				flippedU = !flippedU;
+				break;
+			case 2:
+				flippedU = !flippedU;
+				flippedV = !flippedV;
+				break;
+			case 3:
+				flippedV = !flippedV;
+				break;
+		}
+
 		for (int i = 0; i < vertexes.length; i++)
 		{
 			Vertex vertex = vertexes[i];
 
-			factorU = interpolate ? getFactorU(vertex) : vertex.getU();
-			factorV = interpolate ? getFactorV(vertex) : vertex.getV();
+			factorU = interpolate ? getFactorU(vertex, rotation) : vertex.getU();
+			factorV = interpolate ? getFactorV(vertex, rotation) : vertex.getV();
 
-			int k = i;
-			if (icon instanceof MalisisIcon)
-			{
-				k = (i + icon.getRotation()) % vertexes.length;
-			}
-			uvs[k] = new float[] { interpolate(u, U, factorU, flippedU), interpolate(v, V, factorV, flippedV) };
+			uvs[i] = new float[] { interpolate(u, U, factorU, flippedU), interpolate(v, V, factorV, flippedV) };
 		}
 
 		for (int i = 0; i < vertexes.length; i++)
@@ -242,33 +235,33 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		return this;
 	}
 
-	private double getFactorU(Vertex vertex)
+	private double getFactorU(Vertex vertex, int rotation)
 	{
 		if (params.direction.get() == null)
 			return vertex.getU();
 
+		boolean isEven = (rotation % 2) == 0;
 		switch (params.direction.get())
 		{
 			case EAST:
-				return vertex.getZ();
 			case WEST:
-				return vertex.getZ();
+				return isEven ? vertex.getZ() : vertex.getX();
 			case NORTH:
-				return vertex.getX();
 			case SOUTH:
 			case UP:
 			case DOWN:
-				return vertex.getX();
+				return isEven ? vertex.getX() : vertex.getZ();
 			default:
 				return 0;
 		}
 	}
 
-	private double getFactorV(Vertex vertex)
+	private double getFactorV(Vertex vertex, int rotation)
 	{
 		if (params.direction.get() == null)
 			return vertex.getV();
 
+		boolean isEven = (rotation % 2) == 0;
 		switch (params.direction.get())
 		{
 			case EAST:
@@ -278,7 +271,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 				return 1 - vertex.getY();
 			case UP:
 			case DOWN:
-				return vertex.getZ();
+				return isEven ? vertex.getZ() : vertex.getX();
 			default:
 				return 0;
 		}
@@ -296,7 +289,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		return min + (max - min) * (float) factor;
 	}
 
-	//#end Textures manipaluation
+	//#end Textures manipulation
 
 	//#region Transformations
 	@Override
