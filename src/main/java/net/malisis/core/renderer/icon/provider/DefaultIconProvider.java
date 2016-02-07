@@ -24,7 +24,6 @@
 
 package net.malisis.core.renderer.icon.provider;
 
-import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.VanillaIcon;
 import net.minecraft.block.Block;
@@ -36,7 +35,7 @@ import net.minecraft.item.Item;
  * @author Ordinastie
  *
  */
-public class DefaultIconProvider implements IIconProvider
+public class DefaultIconProvider implements IBlockIconProvider
 {
 	protected MalisisIcon icon;
 
