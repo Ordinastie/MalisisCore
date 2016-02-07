@@ -34,6 +34,7 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
@@ -129,6 +130,39 @@ public interface IBlockComponent
 	 */
 	public default void onBlockPlacedBy(Block block, World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
 	{}
+
+	/**
+	 * Called when the {@link Block} is right-clicked by the player.
+	 *
+	 * @param block the block
+	 * @param world the world
+	 * @param pos the pos
+	 * @param state the state
+	 * @param player the player
+	 * @param side the side
+	 * @param hitX the hit x
+	 * @param hitY the hit y
+	 * @param hitZ the hit z
+	 * @return true, if successful
+	 */
+	public default boolean onBlockActivated(Block block, World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ)
+	{
+		return false;
+	}
+
+	/**
+	 * Called when a neighboring {@link Block} changes.
+	 *
+	 * @param block the block
+	 * @param world the world
+	 * @param pos the pos
+	 * @param state the state
+	 * @param neighborBlock the neighbor block
+	 */
+	public default void onNeighborBlockChange(Block block, World world, BlockPos pos, IBlockState state, Block neighborBlock)
+	{
+
+	}
 
 	/**
 	 * Called when the {@link Block} is broken.

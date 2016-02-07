@@ -46,6 +46,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
@@ -198,6 +199,23 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	{
 		for (IBlockComponent component : getComponents())
 			component.onBlockPlacedBy(this, world, pos, state, placer, stack);
+	}
+
+	@Override
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ)
+	{
+		boolean b = false;
+		for (IBlockComponent component : getComponents())
+			b |= component.onBlockActivated(this, world, pos, state, player, side, hitX, hitY, hitZ);
+
+		return b;
+	}
+
+	@Override
+	public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block neighborBlock)
+	{
+		for (IBlockComponent component : getComponents())
+			component.onNeighborBlockChange(this, world, pos, state, neighborBlock);
 	}
 
 	@Override
