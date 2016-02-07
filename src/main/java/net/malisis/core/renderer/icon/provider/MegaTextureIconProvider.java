@@ -49,6 +49,8 @@ public class MegaTextureIconProvider extends SidesIconProvider
 		searchDirs.put(SOUTH, new EnumFacing[] { DOWN, WEST });
 		searchDirs.put(EAST, new EnumFacing[] { DOWN, SOUTH });
 		searchDirs.put(WEST, new EnumFacing[] { DOWN, NORTH });
+		searchDirs.put(UP, new EnumFacing[] { SOUTH, WEST });
+		searchDirs.put(DOWN, new EnumFacing[] { SOUTH, WEST });
 	}
 
 	private int[] numBlocks = new int[6];
@@ -95,12 +97,6 @@ public class MegaTextureIconProvider extends SidesIconProvider
 	@Override
 	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
 	{
-		searchDirs = new HashMap<>();
-		searchDirs.put(NORTH, new EnumFacing[] { DOWN, EAST });
-		searchDirs.put(SOUTH, new EnumFacing[] { DOWN, WEST });
-		searchDirs.put(EAST, new EnumFacing[] { DOWN, SOUTH });
-		searchDirs.put(WEST, new EnumFacing[] { DOWN, NORTH });
-
 		MalisisIcon icon = super.getIcon(world, pos, state, side);
 		EnumFacing realSide = EnumFacingUtils.getRealSide(state, side);
 		int numBlocks = getNumBlocks(icon, realSide);
@@ -141,8 +137,13 @@ public class MegaTextureIconProvider extends SidesIconProvider
 		int v = ((pos.getY() - state.getY()) % numBlocks) + 1;
 		if (side == NORTH || side == SOUTH)
 			u = Math.abs(pos.getX() - state.getX()) % numBlocks;
-		else
+		else if (side == EAST || side == WEST)
 			u = Math.abs(pos.getZ() - state.getZ()) % numBlocks;
+		else
+		{
+			u = Math.abs(pos.getX() - state.getX()) % numBlocks;
+			v = (Math.abs(pos.getZ() - state.getZ()) % numBlocks) + 1;
+		}
 
 		float factor = 1.0F / numBlocks;
 		MalisisIcon copy = new MalisisIcon();
