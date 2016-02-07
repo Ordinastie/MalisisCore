@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.malisis.core.configuration.Settings;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -55,6 +56,7 @@ public class MalisisCommand extends CommandBase
 	{
 		parameters.add("config");
 		parameters.add("version");
+		parameters.add("reloadTextures");
 	}
 
 	/**
@@ -114,10 +116,11 @@ public class MalisisCommand extends CommandBase
 				if (mod != null)
 					MalisisCore.message("malisiscore.commands.modversion", mod.getName(), mod.getVersion());
 				break;
-			case "gui":
-				// Minecraft.getMinecraft().displayGuiScreen(new UIWindow(100, 100).createScreenProxy());
+			case "reloadTextures":
+				MalisisRegistry.clearIconProviders();
+				MalisisRegistry.registerIconProviders();
+				Minecraft.getMinecraft().refreshResources();
 				break;
-
 			default:
 				MalisisCore.message("Not yet implemented");
 				break;

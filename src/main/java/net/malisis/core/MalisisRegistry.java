@@ -562,6 +562,12 @@ public class MalisisRegistry
 	}
 
 	@SideOnly(Side.CLIENT)
+	public static void clearIconProviders()
+	{
+		instance.iconRegisters.clear();
+	}
+
+	@SideOnly(Side.CLIENT)
 	public static void registerIconProviders()
 	{
 		GameData.getBlockRegistry().forEach(instance::registerIconRegister);
