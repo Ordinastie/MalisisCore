@@ -188,6 +188,12 @@ public class StairComponent implements IBlockComponent
 		return false;
 	}
 
+	@Override
+	public Boolean isFullCube(Block block)
+	{
+		return false;
+	}
+
 	public static boolean isStairs(Block block)
 	{
 		if (block instanceof BlockStairs)
