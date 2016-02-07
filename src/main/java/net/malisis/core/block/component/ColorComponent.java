@@ -49,11 +49,23 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class ColorComponent implements IBlockComponent
 {
-	//TODO : colors by icons
+	public static PropertyEnum COLOR = BlockColored.COLOR;
+	private boolean useColorMultiplier = true;
+
+	public ColorComponent(boolean useColorMultiplier)
+	{
+		this.useColorMultiplier = useColorMultiplier;
+	}
+
+	public boolean useColorMultiplier()
+	{
+		return useColorMultiplier;
+	}
+
 	@Override
 	public PropertyEnum getProperty()
 	{
-		return BlockColored.COLOR;
+		return COLOR;
 	}
 
 	@Override
@@ -85,6 +97,8 @@ public class ColorComponent implements IBlockComponent
 	@Override
 	public int colorMultiplier(Block block, IBlockAccess world, BlockPos pos, int renderPass)
 	{
+		if (!useColorMultiplier)
+			return 0xFFFFFF;
 		return getRenderColor(block, world.getBlockState(pos));
 	}
 
