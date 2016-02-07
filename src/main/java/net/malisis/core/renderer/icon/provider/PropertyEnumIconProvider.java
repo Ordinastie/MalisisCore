@@ -62,6 +62,11 @@ public class PropertyEnumIconProvider<T extends Enum<T>> implements IBlockIconPr
 		this.defaultIcon = defaultIcon;
 	}
 
+	public PropertyEnumIconProvider(PropertyEnum property, Class<T> enumClass)
+	{
+		this(property, enumClass, (MalisisIcon) null);
+	}
+
 	public void setIcon(T enumValue, MalisisIcon icon)
 	{
 		icons.put(enumValue, icon);
