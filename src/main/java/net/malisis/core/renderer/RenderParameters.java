@@ -45,6 +45,9 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	/** Defines whether to render all faces even if shoudSideBeRendered is false */
 	public Parameter<Boolean> renderAllFaces = new Parameter<>(false);
 
+	/** Defines whether the renderer tries to cull the faces from current render bounds instead of blocks bounds. */
+	public Parameter<Boolean> smartCulling = new Parameter<>(false);
+
 	/** Defines whether to use the block bounding box instead of renderBounds (Block Level) */
 	public Parameter<Boolean> useBlockBounds = new Parameter<>(true);
 

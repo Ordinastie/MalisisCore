@@ -843,8 +843,39 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		if (p.direction.get() == null || p.renderAllFaces.get())
 			return true;
 
+		if (params.smartCulling.get())
+			return smartCull(face, params);
+
 		boolean b = block.shouldSideBeRendered(world, pos.offset(p.direction.get()), p.direction.get());
 		return b;
+	}
+
+	/**
+	 * Culls a face based on the actual render bounds used and not block bounding box.
+	 *
+	 * @param face the face
+	 * @param params the params
+	 * @return true, if successful
+	 */
+	protected boolean smartCull(Face face, RenderParameters params)
+	{
+		EnumFacing side = params.direction.get();
+		AxisAlignedBB bounds = getRenderBounds(params);
+
+		if (side == EnumFacing.DOWN && bounds.minY > 0)
+			return true;
+		if (side == EnumFacing.UP && bounds.maxY < 1)
+			return true;
+		if (side == EnumFacing.NORTH && bounds.minZ > 0)
+			return true;
+		if (side == EnumFacing.SOUTH && bounds.maxZ < 1)
+			return true;
+		if (side == EnumFacing.WEST && bounds.minX > 0)
+			return true;
+		if (side == EnumFacing.EAST && bounds.maxX < 1)
+			return true;
+
+		return !world.getBlockState(pos.offset(side)).getBlock().isOpaqueCube();
 	}
 
 	/**
