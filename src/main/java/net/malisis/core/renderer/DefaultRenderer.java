@@ -74,7 +74,16 @@ public class DefaultRenderer
 		private Matrix4f thirdPerson = new TRSRTransformation(new Vector3f(0, 0.09375F, -0.171875F),
 				TRSRTransformation.quatFromYXZDegrees(new Vector3f(10, -45, 170)), new Vector3f(0.375F, 0.375F, 0.375F),
 				TRSRTransformation.quatFromYXZDegrees(new Vector3f(0, 180, 0))).getMatrix();
+
 		private Shape shape = new Cube();
+		private RenderParameters rp = new RenderParameters();
+
+		@Override
+		protected void initialize()
+		{
+			rp.useBlockBounds.set(false);
+			rp.smartCulling.set(true);
+		}
 
 		@Override
 		public boolean isGui3d()
@@ -92,13 +101,15 @@ public class DefaultRenderer
 		public void render()
 		{
 			AxisAlignedBB[] aabbs = ((MalisisBlock) block).getRenderBoundingBox(world, pos, blockState);
-
 			for (AxisAlignedBB aabb : aabbs)
 			{
 				if (aabb != null)
 				{
+					//shape = new Cube();
+					//shape = new Shape(new SouthFace());
 					shape.resetState().limit(aabb);
-					drawShape(shape);
+					rp.renderBounds.set(aabb);
+					drawShape(shape, rp);
 				}
 			}
 		}
