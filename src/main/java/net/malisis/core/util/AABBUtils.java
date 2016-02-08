@@ -51,7 +51,7 @@ public class AABBUtils
 	 */
 	public static AxisAlignedBB empty()
 	{
-		return empty(new BlockPos(0, 0, 0));
+		return empty(BlockPos.ORIGIN);
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class AABBUtils
 	 */
 	public static AxisAlignedBB identity()
 	{
-		return identity(new BlockPos(0, 0, 0));
+		return identity(BlockPos.ORIGIN);
 	}
 
 	/**
@@ -93,7 +93,7 @@ public class AABBUtils
 	 */
 	public static AxisAlignedBB[] identities()
 	{
-		return identities(new BlockPos(0, 0, 0));
+		return identities(BlockPos.ORIGIN);
 	}
 
 	/**
