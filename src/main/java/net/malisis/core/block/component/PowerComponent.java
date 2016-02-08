@@ -134,4 +134,9 @@ public class PowerComponent implements IBlockComponent
 		return false;
 	}
 
+	public static PropertyBool getProperty(Block block)
+	{
+		return (PropertyBool) IBlockComponent.getProperty(PowerComponent.class, block);
+	}
+
 }
