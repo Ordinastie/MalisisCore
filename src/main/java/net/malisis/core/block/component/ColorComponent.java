@@ -27,6 +27,7 @@ package net.malisis.core.block.component;
 import java.util.List;
 
 import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.item.MalisisItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.material.MapColor;
@@ -35,7 +36,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemColored;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
@@ -75,9 +75,15 @@ public class ColorComponent implements IBlockComponent
 	}
 
 	@Override
+	public String getUnlocalizedName(Block block, IBlockState state)
+	{
+		return block.getUnlocalizedName() + "." + getColor(state).getUnlocalizedName();
+	}
+
+	@Override
 	public Item getItem(Block block)
 	{
-		return new ItemColored(block, true);
+		return new MalisisItemBlock(block);
 	}
 
 	@Override

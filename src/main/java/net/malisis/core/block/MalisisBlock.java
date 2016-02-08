@@ -144,6 +144,17 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 		return this;
 	}
 
+	public String getUnlocalizedName(IBlockState state)
+	{
+		for (IBlockComponent component : components)
+		{
+			String name = component.getUnlocalizedName(this, state);
+			if (name != null)
+				return name;
+		}
+		return getUnlocalizedName();
+	}
+
 	@Override
 	public Item getItem(Block block)
 	{

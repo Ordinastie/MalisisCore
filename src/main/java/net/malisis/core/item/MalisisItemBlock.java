@@ -27,6 +27,7 @@ package net.malisis.core.item;
 import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IMergedBlock;
 import net.malisis.core.block.IRegisterable;
+import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -43,7 +44,6 @@ import net.minecraft.world.World;
  */
 public class MalisisItemBlock extends ItemBlock implements IRegisterable
 {
-
 	protected String name;
 	protected IIconProvider iconProvider;
 
@@ -60,9 +60,27 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable
 	}
 
 	@Override
+	public String getUnlocalizedName(ItemStack itemStack)
+	{
+		if (block instanceof MalisisBlock)
+		{
+			IBlockState state = ((MalisisBlock) block).getStateFromItemStack(itemStack);
+			return ((MalisisBlock) block).getUnlocalizedName(state);
+		}
+
+		return super.getUnlocalizedName(itemStack);
+	}
+
+	@Override
 	public String getRegistryName()
 	{
 		return name;
+	}
+
+	@Override
+	public int getMetadata(int damage)
+	{
+		return damage;
 	}
 
 	@Override
