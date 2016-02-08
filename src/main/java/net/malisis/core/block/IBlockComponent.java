@@ -216,6 +216,32 @@ public interface IBlockComponent
 		return null;
 	}
 
+	/**
+	 * Whether the {@link Block} can be placed on the side of another block.
+	 *
+	 * @param block the block
+	 * @param world the world
+	 * @param pos the pos
+	 * @param side the side
+	 * @return true, if successful
+	 */
+	public default boolean canPlaceBlockOnSide(Block block, World world, BlockPos pos, EnumFacing side)
+	{
+		return true;
+	}
+
+	/**
+	 * Whether the {@link Block} can be placed at the position.
+	 *
+	 * @param world the world
+	 * @param pos the pos
+	 * @return true, if successful
+	 */
+	public default boolean canPlaceBlockAt(Block block, World world, BlockPos pos)
+	{
+		return true;
+	}
+
 	//#region Sub-Blocks
 	/**
 	 * Gets the damage value for the item when the {@link Block} is dropped.
@@ -436,5 +462,13 @@ public interface IBlockComponent
 			return null;
 
 		return ((IComponentProvider) block).getComponent(type);
+	}
+
+	public static IProperty getProperty(Class<?> type, Block block)
+	{
+		Object component = getComponent(type, block);
+		if (component instanceof IBlockComponent)
+			return ((IBlockComponent) component).getProperty();
+		return null;
 	}
 }

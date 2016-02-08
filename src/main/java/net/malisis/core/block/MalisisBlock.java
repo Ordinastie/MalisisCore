@@ -31,6 +31,7 @@ import java.util.Random;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
+import net.malisis.core.block.component.LadderComponent;
 import net.malisis.core.item.MalisisItemBlock;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.MalisisRendered;
@@ -82,9 +83,14 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 		super(material);
 	}
 
+	protected List<IProperty> getProperties()
+	{
+		return Lists.newArrayList();
+	}
+
 	protected void buildBlockState()
 	{
-		List<IProperty> properties = Lists.newArrayList();
+		List<IProperty> properties = getProperties();
 		for (IBlockComponent component : getComponents())
 			properties.addAll(Arrays.asList(component.getProperties()));
 
@@ -284,6 +290,26 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 		return IBoundingBox.super.collisionRayTrace(world, pos, src, dest);
 	}
 
+	@Override
+	public boolean canPlaceBlockOnSide(World world, BlockPos pos, EnumFacing side)
+	{
+		for (IBlockComponent component : getComponents())
+			if (!component.canPlaceBlockOnSide(this, world, pos, side))
+				return false;
+
+		return super.canPlaceBlockOnSide(world, pos, side);
+	}
+
+	@Override
+	public boolean canPlaceBlockAt(World world, BlockPos pos)
+	{
+		for (IBlockComponent component : getComponents())
+			if (!component.canPlaceBlockAt(this, world, pos))
+				return false;
+
+		return super.canPlaceBlockAt(world, pos);
+	}
+
 	//SUB BLOCKS
 	@Override
 	public int damageDropped(IBlockState state)
@@ -480,6 +506,12 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 				return quantity;
 		}
 		return super.getLightOpacity(world, pos);
+	}
+
+	@Override
+	public boolean isLadder(IBlockAccess world, BlockPos pos, EntityLivingBase entity)
+	{
+		return IBlockComponent.getComponent(LadderComponent.class, this) != null;
 	}
 
 	@Override
