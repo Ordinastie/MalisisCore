@@ -28,8 +28,8 @@ import static net.minecraft.util.EnumFacing.*;
 
 import java.util.HashMap;
 
+import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.icon.MalisisIcon;
-import net.malisis.core.util.EnumFacingUtils;
 import net.malisis.core.util.MBlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
@@ -98,16 +98,16 @@ public class MegaTextureIconProvider extends SidesIconProvider
 	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
 	{
 		MalisisIcon icon = super.getIcon(world, pos, state, side);
-		EnumFacing realSide = EnumFacingUtils.getRealSide(state, side);
-		int numBlocks = getNumBlocks(icon, realSide);
-		if (!isMegaTexture(realSide))
+		EnumFacing blockDir = DirectionalComponent.getDirection(state);
+		int numBlocks = getNumBlocks(icon, side);
+		if (!isMegaTexture(side))
 			return icon;
 
-		MBlockState baseState = getBaseState(world, new MBlockState(pos, state), side);
+		MBlockState baseState = getBaseState(world, new MBlockState(pos, state), blockDir);
 		if (baseState == null)
 			return icon;
 
-		return getIconPart(icon, pos, baseState, side, numBlocks);
+		return getIconPart(icon, pos, baseState, blockDir, numBlocks);
 	}
 
 	private MBlockState getBaseState(IBlockAccess world, MBlockState state, EnumFacing side)
@@ -124,7 +124,14 @@ public class MegaTextureIconProvider extends SidesIconProvider
 			while (lastState.getBlock() == state.getBlock())
 			{
 				baseState = lastState;
-				lastState = new MBlockState(world, baseState.getPos().offset(dir));
+				try
+				{
+					lastState = new MBlockState(world, baseState.getPos().offset(dir));
+				}
+				catch (Exception e)
+				{
+					break;
+				}
 			}
 		}
 
