@@ -189,8 +189,11 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 		MultiBlockAccess mba = new MultiBlockAccess(this, world);
 		for (MBlockState mstate : this)
 		{
-			mstate = new MBlockState(mba, mstate.getPos()).rotate(rotation).offset(pos);
-			if (!mstate.matchesWorld(world) && (newState == null || !mstate.equals(newState)))
+			mstate = new MBlockState(mba, mstate.getPos())/*.rotate(rotation)*/.offset(pos);
+			boolean matches = mstate.matchesWorld(world);
+			if (!matches)
+				mstate.matchesWorld(world);
+			if (!matches && (newState == null || !mstate.equals(newState)))
 				return false;
 		}
 

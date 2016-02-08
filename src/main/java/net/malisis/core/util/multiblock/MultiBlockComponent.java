@@ -24,12 +24,12 @@
 
 package net.malisis.core.util.multiblock;
 
+import java.util.List;
+
 import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.component.DirectionalComponent;
 import net.minecraft.block.Block;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
@@ -38,53 +38,61 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
+import com.google.common.collect.Lists;
+
 /**
  * @author Ordinastie
  *
  */
-public class MultiBlockComponent extends DirectionalComponent
+public class MultiBlockComponent implements IBlockComponent
 {
 	public static PropertyBool ORIGIN = PropertyBool.create("origin");
 
 	private MultiBlock multiBlock;
+	private IMultiBlockProvider provider;
 
 	public MultiBlockComponent(MultiBlock multiBlock)
 	{
 		this.multiBlock = multiBlock;
 	}
 
-	public MultiBlock getMultiBlock(IBlockAccess world, BlockPos pos, IBlockState state, ItemStack itemStack)
+	public MultiBlockComponent(IMultiBlockProvider provider)
+	{
+		this.provider = provider;
+	}
+
+	public MultiBlock getMultiBlock()
 	{
 		return multiBlock;
 	}
 
-	public PropertyBool getOriginProperty()
+	public IMultiBlockProvider getProvider()
 	{
-		return ORIGIN;
-	}
-
-	public PropertyDirection getDirectionProperty()
-	{
-		return HORIZONTAL;
+		return provider;
 	}
 
 	@Override
-	public IProperty[] getProperties()
+	public PropertyBool getProperty()
 	{
-		return new IProperty[] { HORIZONTAL, ORIGIN };
+		return ORIGIN;
 	}
 
 	@Override
 	public IBlockState setDefaultState(Block block, IBlockState state)
 	{
-		return super.setDefaultState(block, state).withProperty(ORIGIN, false);
+		return state.withProperty(getProperty(), false);
+	}
+
+	@Override
+	public List<IBlockComponent> getDependencies()
+	{
+		return Lists.newArrayList(new DirectionalComponent());
 	}
 
 	@Override
 	public IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
-		state = super.onBlockPlaced(block, world, pos, state, facing, hitX, hitY, hitZ, meta, placer);
-		return state.withProperty(getOriginProperty(), true);
+		return state.withProperty(getProperty(), true);
 	}
 
 	@Override
@@ -111,15 +119,13 @@ public class MultiBlockComponent extends DirectionalComponent
 	@Override
 	public IBlockState getStateFromMeta(Block block, IBlockState state, int meta)
 	{
-		state = super.getStateFromMeta(block, state, meta);
-		return state.withProperty(getOriginProperty(), (meta & 8) != 0);
+		return state.withProperty(getProperty(), (meta & 8) != 0);
 	}
 
 	@Override
 	public int getMetaFromState(Block block, IBlockState state)
 	{
-		int meta = super.getMetaFromState(block, state);
-		return meta + (isOrigin(state) ? 8 : 0);
+		return (isOrigin(state) ? 8 : 0);
 	}
 
 	public static boolean isOrigin(World world, BlockPos pos)
@@ -133,10 +139,29 @@ public class MultiBlockComponent extends DirectionalComponent
 		if (mbc == null)
 			return false;
 
-		PropertyBool property = mbc.getOriginProperty();
+		PropertyBool property = mbc.getProperty();
 		if (property == null || !state.getProperties().containsKey(property))
 			return false;
 
 		return (boolean) state.getValue(property);
+	}
+
+	public static MultiBlock getMultiBlock(IBlockAccess world, BlockPos pos, IBlockState state, ItemStack itemStack)
+	{
+		MultiBlockComponent mbc = IBlockComponent.getComponent(MultiBlockComponent.class, state.getBlock());
+		if (mbc == null)
+			return null;
+		MultiBlock multiBlock = mbc.getMultiBlock();
+		if (multiBlock != null)
+			return multiBlock;
+
+		IMultiBlockProvider provider = mbc.getProvider();
+		return provider != null ? provider.getMultiBlock(world, pos, state, itemStack) : null;
+
+	}
+
+	public interface IMultiBlockProvider
+	{
+		public MultiBlock getMultiBlock(IBlockAccess world, BlockPos pos, IBlockState state, ItemStack itemStack);
 	}
 }

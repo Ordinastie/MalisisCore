@@ -97,6 +97,18 @@ public interface IBlockComponent
 		return ImmutableList.of();
 	}
 
+	/**
+	 * Gets the unlocalized name for the specific {@link IBlockState}.
+	 *
+	 * @param block the block
+	 * @param state the state
+	 * @return the unlocalized name
+	 */
+	public default String getUnlocalizedName(Block block, IBlockState state)
+	{
+		return null;
+	}
+
 	//#region Events
 	/**
 	 * Called when the {@link Block} is placed in the {@link World}.
