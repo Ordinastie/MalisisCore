@@ -221,7 +221,7 @@ public class DirectionalComponent implements IBlockComponent
 	}
 
 	/**
-	 * Rotates the {@link IBlockState} by 90° counter-clockwise.
+	 * Rotates the {@link IBlockState} by 90 degrees counter-clockwise.
 	 *
 	 * @param world the world
 	 * @param pos the pos
@@ -234,7 +234,7 @@ public class DirectionalComponent implements IBlockComponent
 	}
 
 	/**
-	 * Rotates the {@link IBlockState} by a factor of 90° counter-clockwise.
+	 * Rotates the {@link IBlockState} by a factor of 90 degrees counter-clockwise.
 	 *
 	 * @param state the state
 	 * @param angle the angle
