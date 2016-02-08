@@ -27,6 +27,7 @@ package net.malisis.core.util;
 import net.malisis.core.block.component.DirectionalComponent;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
 
 /**
  * @author Ordinastie
@@ -97,17 +98,33 @@ public class EnumFacingUtils
 	 */
 	public static EnumFacing getRealSide(IBlockState state, EnumFacing side)
 	{
-		if (state == null || side == EnumFacing.UP || side == EnumFacing.DOWN)
+		if (state == null || side == null)
 			return side;
 
 		EnumFacing direction = DirectionalComponent.getDirection(state);
 		if (direction == EnumFacing.SOUTH)
 			return side;
 
+		if (direction == EnumFacing.DOWN)
+			return side.rotateAround(Axis.X);
+		else if (direction == EnumFacing.UP)
+			switch (side)
+			{
+				case UP:
+					return EnumFacing.SOUTH;
+				case DOWN:
+					return EnumFacing.NORTH;
+				case NORTH:
+					return EnumFacing.UP;
+				case SOUTH:
+					return EnumFacing.DOWN;
+				default:
+					return side;
+			}
+
 		int count = EnumFacingUtils.getRotationCount(direction);
 		side = EnumFacingUtils.rotateFacing(side, count);
 
 		return side;
 	}
-
 }
