@@ -50,54 +50,76 @@ public class DirectionalComponent implements IBlockComponent
 	public static final PropertyDirection HORIZONTAL = PropertyDirection.create("direction", EnumFacing.Plane.HORIZONTAL);
 	public static final PropertyDirection ALL = PropertyDirection.create("direction");
 
+	public enum Placement implements IPlacement
+	{
+		//@formatter:off
+		//direction is determined by the side of the block click
+		BLOCKSIDE((state, side, placer) -> side),
+		//direction is determined by the facing of the entity placing the block
+		PLACER((state, side, placer) ->
+		{
+			EnumFacing facing = EntityUtils.getEntityFacing(placer, DirectionalComponent.getProperty(state.getBlock()) == ALL);
+			return placer.isSneaking() ? facing : facing.getOpposite();
+		});
+		//@formatter:on
+
+		IPlacement placement;
+
+		private Placement(IPlacement placement)
+		{
+			this.placement = placement;
+		}
+
+		@Override
+		public EnumFacing getPlacement(IBlockState state, EnumFacing side, EntityLivingBase placer)
+		{
+			return placement.getPlacement(state, side, placer);
+		};
+	}
+
+	/** The type of placement to use. */
+	private IPlacement placement = Placement.PLACER;
 	/** The property used for this {@link DirectionalComponent}. */
 	private PropertyDirection property = HORIZONTAL;
-	/** Whether the placement is based on the side the player clicked. */
-	private boolean placedOnSide = false;
-	/** Whether the neigbor determines the direction of the block placed. */
-	private boolean mimicNeighbor = false;
 
 	/**
-	 * Instantiates a new {@link DirectionalComponent} with {@link #HORIZONTAL} property by default.
+	 * Instantiates a new {@link DirectionalComponent}.
+	 *
+	 * @param property the property
+	 * @param placement the placement
+	 */
+	public DirectionalComponent(PropertyDirection property, IPlacement placement)
+	{
+		this.property = property;
+		this.placement = placement;
+	}
+
+	/**
+	 * Instantiates a new {@link DirectionalComponent} with {@link #HORIZONTAL} property and {@link Placement#PLACER} by default.
 	 */
 	public DirectionalComponent()
-	{}
+	{
+		this(HORIZONTAL, Placement.PLACER);
+	}
 
 	/**
-	 * Instantiates a new {@link DirectionalComponent} with specified property.
+	 * Instantiates a new {@link DirectionalComponent} with specified property and {@link Placement#PLACER} by default.
 	 *
 	 * @param property the property
 	 */
 	public DirectionalComponent(PropertyDirection property)
 	{
-		this.property = property;
+		this(property, Placement.PLACER);
 	}
 
 	/**
-	 * Sets the behavior of the placement.<br>
-	 * The direction of the block placed will be determined by the side clicked on when placing the block.
+	 * Instantiates a new {@link DirectionalComponent} with specified placement and {@link #HORIZONTAL} property by default.
 	 *
-	 * @param placedOnSide the placed on side
-	 * @return the directional component
+	 * @param placement the placement
 	 */
-	public DirectionalComponent setPlacedOnSide(boolean placedOnSide)
+	public DirectionalComponent(IPlacement placement)
 	{
-		this.placedOnSide = placedOnSide;
-		return this;
-	}
-
-	/**
-	 * Sets the behavior of the placement.<br>
-	 * The direction of the block will be determined by the block it's placed against, granted it's of the same type.<br>
-	 * Overrides {@link #setPlacedOnSide(boolean)}.
-	 *
-	 * @param mimicNeighbor the mimic neighbor
-	 * @return the directional component
-	 */
-	public DirectionalComponent mimicNeighbor(boolean mimicNeighbor)
-	{
-		this.mimicNeighbor = mimicNeighbor;
-		return this;
+		this(HORIZONTAL, placement);
 	}
 
 	/**
@@ -141,18 +163,7 @@ public class DirectionalComponent implements IBlockComponent
 	@Override
 	public IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
-		EnumFacing direction = facing;
-		if (!placedOnSide)
-			direction = EntityUtils.getEntityFacing(placer, getProperty() == ALL).getOpposite();
-		if (mimicNeighbor)
-		{
-			IBlockState neighbor = world.getBlockState(pos.offset(facing.getOpposite()));
-			DirectionalComponent dc = IBlockComponent.getComponent(DirectionalComponent.class, neighbor.getBlock());
-			if (neighbor.getBlock() == block && dc != null)
-				direction = DirectionalComponent.getDirection(neighbor);
-		}
-
-		return state.withProperty(getProperty(), direction);
+		return state.withProperty(getProperty(), placement.getPlacement(state, facing, placer));
 	}
 
 	/**
@@ -221,6 +232,17 @@ public class DirectionalComponent implements IBlockComponent
 	}
 
 	/**
+	 * Gets the {@link PropertyDirection} used by the block.
+	 *
+	 * @param block the block
+	 * @return the property
+	 */
+	public static PropertyDirection getProperty(Block block)
+	{
+		return (PropertyDirection) IBlockComponent.getProperty(DirectionalComponent.class, block);
+	}
+
+	/**
 	 * Rotates the {@link IBlockState} by 90 degrees counter-clockwise.
 	 *
 	 * @param world the world
@@ -257,4 +279,8 @@ public class DirectionalComponent implements IBlockComponent
 		return state.withProperty(property, EnumFacingUtils.rotateFacing((EnumFacing) state.getValue(property), a));
 	}
 
+	public static interface IPlacement
+	{
+		public EnumFacing getPlacement(IBlockState state, EnumFacing side, EntityLivingBase placer);
+	}
 }
