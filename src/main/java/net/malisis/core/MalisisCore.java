@@ -198,7 +198,7 @@ public class MalisisCore implements IMalisisMod
 		if (isClient())
 		{
 			MalisisRegistry.registerRenderers();
-			MalisisRegistry.registerIconProviders();
+			MalisisRegistry.registerIconRegisters();
 		}
 	}
 

@@ -562,16 +562,16 @@ public class MalisisRegistry
 	}
 
 	@SideOnly(Side.CLIENT)
-	public static void clearIconProviders()
-	{
-		instance.iconRegisters.clear();
-	}
-
-	@SideOnly(Side.CLIENT)
-	public static void registerIconProviders()
+	public static void registerIconRegisters()
 	{
 		GameData.getBlockRegistry().forEach(instance::registerIconRegister);
 		GameData.getItemRegistry().forEach(instance::registerIconRegister);
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static void clearIconRegisters()
+	{
+		instance.iconRegisters.clear();
 	}
 
 	public interface BlockRendererOverride

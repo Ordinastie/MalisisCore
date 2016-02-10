@@ -117,8 +117,8 @@ public class MalisisCommand extends CommandBase
 					MalisisCore.message("malisiscore.commands.modversion", mod.getName(), mod.getVersion());
 				break;
 			case "reloadTextures":
-				MalisisRegistry.clearIconProviders();
-				MalisisRegistry.registerIconProviders();
+				MalisisRegistry.clearIconRegisters();
+				MalisisRegistry.registerIconRegisters();
 				Minecraft.getMinecraft().refreshResources();
 				break;
 			default:
