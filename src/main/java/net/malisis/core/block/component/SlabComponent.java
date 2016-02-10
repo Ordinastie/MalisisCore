@@ -207,15 +207,15 @@ public class SlabComponent implements IBlockComponent, IMergedBlock
 		return (EnumBlockHalf) state.getValue(property) == EnumBlockHalf.TOP;
 	}
 
-	public static boolean isDouble(IBlockAccess world, BlockPos pos)
+	public static boolean isDoubleSlab(IBlockAccess world, BlockPos pos)
 	{
-		return isDouble(world.getBlockState(pos));
+		return isDoubleSlab(world.getBlockState(pos).getBlock());
 	}
 
-	public static boolean isDouble(IBlockState state)
+	public static boolean isDoubleSlab(Block block)
 	{
-		SlabComponent sc = IBlockComponent.getComponent(SlabComponent.class, state.getBlock());
-		return sc != null && sc.isDouble(state.getBlock());
+		SlabComponent sc = IBlockComponent.getComponent(SlabComponent.class, block);
+		return sc != null && sc.isDouble(block);
 	}
 
 	public static boolean isSlab(IBlockAccess world, BlockPos pos)
