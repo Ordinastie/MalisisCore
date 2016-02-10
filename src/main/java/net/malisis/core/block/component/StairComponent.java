@@ -29,6 +29,7 @@ import java.util.List;
 
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.ISmartCull;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.block.properties.PropertyBool;
@@ -46,7 +47,7 @@ import com.google.common.collect.Lists;
  * @author Ordinastie
  *
  */
-public class StairComponent implements IBlockComponent
+public class StairComponent implements IBlockComponent, ISmartCull
 {
 	public static PropertyBool TOP = PropertyBool.create("top");
 

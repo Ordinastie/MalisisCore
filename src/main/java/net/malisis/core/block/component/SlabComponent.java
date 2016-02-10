@@ -29,6 +29,7 @@ import java.util.Random;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IMergedBlock;
+import net.malisis.core.block.ISmartCull;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.item.MalisisItemBlock;
 import net.malisis.core.util.AABBUtils;
@@ -53,7 +54,7 @@ import net.minecraftforge.fml.common.registry.GameData;
  * @author Ordinastie
  *
  */
-public class SlabComponent implements IBlockComponent, IMergedBlock
+public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 {
 	private MalisisBlock singleSlab;
 	private MalisisBlock doubleSlab;

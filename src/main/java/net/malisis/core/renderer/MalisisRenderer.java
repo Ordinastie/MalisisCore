@@ -33,6 +33,7 @@ import net.malisis.core.MalisisRegistry;
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBoundingBox;
+import net.malisis.core.block.ISmartCull;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
@@ -844,7 +845,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		if (p.direction.get() == null || p.renderAllFaces.get())
 			return true;
 
-		if (params.smartCulling.get())
+		if (ISmartCull.shouldSmartCull(block))
 			return smartCull(face, params);
 
 		boolean b = block.shouldSideBeRendered(world, pos.offset(p.direction.get()), p.direction.get());

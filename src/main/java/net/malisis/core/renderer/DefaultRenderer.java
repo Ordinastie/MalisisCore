@@ -82,7 +82,6 @@ public class DefaultRenderer
 		protected void initialize()
 		{
 			rp.useBlockBounds.set(false);
-			rp.smartCulling.set(true);
 		}
 
 		@Override
