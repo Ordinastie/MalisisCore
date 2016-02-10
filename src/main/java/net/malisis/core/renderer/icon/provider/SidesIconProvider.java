@@ -127,6 +127,9 @@ public class SidesIconProvider implements IBlockIconProvider
 
 	public void setSideIcon(EnumFacing side, MalisisIcon icon)
 	{
+		//set default icon too to get at least an icon for particles
+		if (defaultIcon == null)
+			defaultIcon = icon;
 		sideIcons[side.getIndex()] = icon;
 	}
 
