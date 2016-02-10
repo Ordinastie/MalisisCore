@@ -262,7 +262,6 @@ public interface IBlockComponent
 	 * @param item the item
 	 * @param tab the tab
 	 * @param list the list
-	 * @return the sub blocks
 	 */
 	@SideOnly(Side.CLIENT)
 	public default void getSubBlocks(Block block, Item item, CreativeTabs tab, List list)
@@ -276,8 +275,9 @@ public interface IBlockComponent
 	 *
 	 * @param block the block
 	 * @param world the world
-	 * @param state the state
+	 * @param pos the pos
 	 * @param renderPass the render pass
+	 * @return the color
 	 */
 	public default int colorMultiplier(Block block, IBlockAccess world, BlockPos pos, int renderPass)
 	{

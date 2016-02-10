@@ -26,6 +26,7 @@ package net.malisis.core.block;
 
 import net.malisis.core.block.component.SlabComponent;
 import net.malisis.core.block.component.WallComponent;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
