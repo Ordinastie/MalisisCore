@@ -27,6 +27,7 @@ package net.malisis.core.renderer;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
@@ -71,6 +72,9 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 
 	/** Defines whether to calculate interpolated textures coordinates depending on block bounds (Block Level) */
 	public Parameter<Boolean> interpolateUV = new Parameter<>(true);
+
+	/** Defines whether to automatically rotate the icons for {@link DirectionalComponent} */
+	public Parameter<Boolean> rotateIcon = new Parameter<>(true);
 
 	/** Defines whether to calculate ambient occlusion color or not (Block Level) */
 	public Parameter<Boolean> calculateAOColor = new Parameter<>(true);
@@ -164,6 +168,7 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 		listParams.add(useWorldSensitiveIcon);
 		listParams.add(useTexture);
 		listParams.add(interpolateUV);
+		listParams.add(rotateIcon);
 		listParams.add(calculateAOColor);
 		listParams.add(calculateBrightness);
 		listParams.add(usePerVertexColor);
@@ -269,6 +274,7 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 			rp.useWorldSensitiveIcon = useWorldSensitiveIcon.clone();
 			rp.useTexture = useTexture.clone();
 			rp.interpolateUV = interpolateUV.clone();
+			rp.rotateIcon = rotateIcon.clone();
 			rp.calculateAOColor = calculateAOColor.clone();
 			rp.calculateBrightness = calculateBrightness.clone();
 			rp.usePerVertexColor = usePerVertexColor.clone();

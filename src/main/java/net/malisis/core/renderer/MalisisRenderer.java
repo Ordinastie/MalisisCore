@@ -70,6 +70,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
@@ -919,10 +920,10 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	public void applyTexture(Face face, RenderParameters params)
 	{
 		MalisisIcon icon = getIcon(face, params);
-		if (blockState == null || (params.textureSide.get() != EnumFacing.UP && params.textureSide.get() != EnumFacing.DOWN))
-			icon.setRotation(0);
-		else
+		if (shouldRotateIcon(params) && params.textureSide.get().getAxis() == Axis.Y)
 			icon.setRotation(EnumFacingUtils.getRotationCount(blockState));
+		else
+			icon.setRotation(0);
 
 		boolean flipU = params.flipU.get();
 		if (params.direction.get() == EnumFacing.NORTH || params.direction.get() == EnumFacing.EAST)
@@ -950,7 +951,9 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 
 		if (iconProvider instanceof IBlockIconProvider && block != null)
 		{
-			EnumFacing side = EnumFacingUtils.getRealSide(blockState, params.textureSide.get());
+			EnumFacing side = params.textureSide.get();
+			if (shouldRotateIcon(params))
+				side = EnumFacingUtils.getRealSide(blockState, side);
 
 			IBlockIconProvider iblockp = (IBlockIconProvider) iconProvider;
 			if (renderType == RenderType.BLOCK || renderType == RenderType.TILE_ENTITY)
@@ -979,6 +982,11 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			return ((IMetaIconProvider) block).getIconProvider();
 
 		return null;
+	}
+
+	protected boolean shouldRotateIcon(RenderParameters params)
+	{
+		return blockState != null && params.rotateIcon.get();
 	}
 
 	/**
