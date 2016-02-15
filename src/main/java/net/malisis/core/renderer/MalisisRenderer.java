@@ -920,7 +920,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	public void applyTexture(Face face, RenderParameters params)
 	{
 		MalisisIcon icon = getIcon(face, params);
-		if (shouldRotateIcon(params) && params.textureSide.get().getAxis() == Axis.Y)
+		if (shouldRotateIcon(params) && params.textureSide.get() != null && params.textureSide.get().getAxis() == Axis.Y)
 			icon.setRotation(EnumFacingUtils.getRotationCount(blockState));
 		else
 			icon.setRotation(0);
