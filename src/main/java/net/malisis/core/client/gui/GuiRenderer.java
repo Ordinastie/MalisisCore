@@ -236,15 +236,19 @@ public class GuiRenderer extends MalisisRenderer
 	@Override
 	public void applyTexture(Shape shape, RenderParameters params)
 	{
-		IIconProvider iconProvider = getIconProvider(params);
-		if (iconProvider == null)
-			return;
+		MalisisIcon icon = params.icon.get();
 
-		MalisisIcon icon;
-		if (iconProvider instanceof IGuiIconProvider)
-			icon = ((IGuiIconProvider) iconProvider).getIcon(currentComponent);
-		else
-			icon = iconProvider.getIcon();
+		if (icon == null)
+		{
+			IIconProvider iconProvider = getIconProvider(params);
+			if (iconProvider == null)
+				return;
+
+			if (iconProvider instanceof IGuiIconProvider)
+				icon = ((IGuiIconProvider) iconProvider).getIcon(currentComponent);
+			else
+				icon = iconProvider.getIcon();
+		}
 		boolean isGuiIcon = icon instanceof GuiIcon;
 
 		Face[] faces = shape.getFaces();
