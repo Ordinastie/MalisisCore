@@ -24,28 +24,18 @@
 
 package net.malisis.core.renderer.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.model.loader.ObjFileImporter;
 import net.malisis.core.renderer.model.loader.TextureModelLoader;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.IFlexibleBakedModel;
 
 /**
  * This class is a holder for multiple shapes.<br>
@@ -54,9 +44,7 @@ import net.minecraftforge.client.model.IFlexibleBakedModel;
  *
  * @author Ordinastie
  */
-@SuppressWarnings("deprecation")
-public class MalisisModel implements IFlexibleBakedModel, ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale,
-		Iterable<Shape>
+public class MalisisModel implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale, Iterable<Shape>
 {
 	/** Shapes building this {@link MalisisModel}. */
 	protected Map<String, Shape> shapes = new HashMap<>();
@@ -263,69 +251,4 @@ public class MalisisModel implements IFlexibleBakedModel, ITransformable.Transla
 	{
 		return shapes.values().iterator();
 	}
-
-	//#region IFlexibleModel
-	@Override
-	public boolean isAmbientOcclusion()
-	{
-		return false;
-	}
-
-	@Override
-	public boolean isGui3d()
-	{
-		return false;
-	}
-
-	@Override
-	public boolean isBuiltInRenderer()
-	{
-		return false;
-	}
-
-	@Override
-	public TextureAtlasSprite getTexture()
-	{
-		return null;
-	}
-
-	@Override
-	public ItemCameraTransforms getItemCameraTransforms()
-	{
-		return null;
-	}
-
-	@Override
-	public List<BakedQuad> getFaceQuads(EnumFacing side)
-	{
-		return getQuads(side);
-	}
-
-	@Override
-	public List<BakedQuad> getGeneralQuads()
-	{
-		return getQuads(null);
-	}
-
-	public List<BakedQuad> getQuads(EnumFacing side)
-	{
-		List<BakedQuad> quads = new ArrayList<>();
-		for (Shape s : this)
-		{
-			for (Face f : s.getFaces())
-			{
-				if (f.getParameters().direction.get() == side)
-					quads.add(f.toBakedQuad());
-			}
-		}
-
-		return quads;
-	}
-
-	@Override
-	public VertexFormat getFormat()
-	{
-		return DefaultVertexFormats.BLOCK;
-	}
-
 }

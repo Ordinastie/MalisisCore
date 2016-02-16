@@ -94,7 +94,7 @@ public class BBItemNode extends BBNode
 			itemStack = new ItemStack(b, 0, metadata);
 		else
 		{
-			Item i = (Item) Item.itemRegistry.getObject(name);
+			Item i = Item.getByNameOrId(name);
 			if (i != null)
 				itemStack = new ItemStack(i, 0, metadata);
 		}

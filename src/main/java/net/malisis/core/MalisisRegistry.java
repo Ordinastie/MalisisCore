@@ -287,7 +287,7 @@ public class MalisisRegistry
 	 */
 	public static void register(IRegisterable registerable)
 	{
-		String name = registerable.getRegistryName();
+		String name = registerable.getName();
 		if (StringUtils.isEmpty(name))
 			throw new IllegalArgumentException("No name specified for registration for " + registerable.getClass().getName());
 		if (!(registerable instanceof Block || registerable instanceof Item))

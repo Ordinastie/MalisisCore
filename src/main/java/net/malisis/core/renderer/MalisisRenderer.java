@@ -94,15 +94,15 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	/** Reference to Tessellator.isDrawing field **/
 	private static Field isDrawingField;
 
-	public static VertexFormat vertexFormat = new VertexFormat()
+	public static VertexFormat malisisVertexFormat = new VertexFormat()
 	{
 		{
-			setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
-			setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.UBYTE, VertexFormatElement.EnumUsage.COLOR, 4));
-			setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 2));
-			setElement(new VertexFormatElement(1, VertexFormatElement.EnumType.SHORT, VertexFormatElement.EnumUsage.UV, 2));
-			setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.NORMAL, 3));
-			setElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.PADDING, 1));
+			addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
+			addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.UBYTE, VertexFormatElement.EnumUsage.COLOR, 4));
+			addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 2));
+			addElement(new VertexFormatElement(1, VertexFormatElement.EnumType.SHORT, VertexFormatElement.EnumUsage.UV, 2));
+			addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.NORMAL, 3));
+			addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.PADDING, 1));
 		}
 	};
 
@@ -110,6 +110,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	private boolean initialized = false;
 	/** Tessellator reference. */
 	protected WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+	/** Current used vertex format. */
+	protected VertexFormat vertexFormat = malisisVertexFormat;
 	/** Current world reference (BLOCK/TESR/IRWL). */
 	protected IBlockAccess world;
 	/** Position of the block (BLOCK/TESR). */
@@ -406,10 +408,11 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		_initialize();
 		vertexDrawn = false;
 		this.renderType = renderType;
+		vertexFormat = malisisVertexFormat;
 
 		if (renderType == RenderType.BLOCK)
 		{
-			wr.setVertexFormat(DefaultVertexFormats.BLOCK);
+			vertexFormat = DefaultVertexFormats.BLOCK;
 		}
 		else if (renderType == RenderType.ITEM)
 		{
@@ -487,8 +490,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		if (isDrawing())
 			draw();
 
-		wr.startDrawing(drawMode);
-		wr.setVertexFormat(vertexFormat);
+		wr.begin(drawMode, vertexFormat);
 		this.drawMode = drawMode;
 	}
 
@@ -726,15 +728,15 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		if (params.applyTexture.get())
 			applyTexture(face, params);
 
-		//use normals if available
-		if ((renderType == RenderType.ITEM || params.useNormals.get()) && params.direction.get() != null)
-			wr.setNormal(params.direction.get().getFrontOffsetX(), params.direction.get().getFrontOffsetY(), params.direction.get()
-					.getFrontOffsetZ());
-
 		baseBrightness = getBaseBrightness(params);
 
 		for (int i = 0; i < face.getVertexes().length; i++)
 			drawVertex(face.getVertexes()[i], i, params);
+
+		//use normals if available
+		if ((renderType == RenderType.ITEM || params.useNormals.get()) && params.direction.get() != null)
+			wr.putNormal(params.direction.get().getFrontOffsetX(), params.direction.get().getFrontOffsetY(), params.direction.get()
+					.getFrontOffsetZ());
 
 		//we need to separate each face
 		if (drawMode == GL11.GL_POLYGON || drawMode == GL11.GL_LINE || drawMode == GL11.GL_LINE_STRIP || drawMode == GL11.GL_LINE_LOOP)
@@ -920,7 +922,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	public void applyTexture(Face face, RenderParameters params)
 	{
 		MalisisIcon icon = getIcon(face, params);
-		if (shouldRotateIcon(params) && params.textureSide.get().getAxis() == Axis.Y)
+		if (shouldRotateIcon(params) && params.textureSide.get() != null && params.textureSide.get().getAxis() == Axis.Y)
 			icon.setRotation(EnumFacingUtils.getRotationCount(blockState));
 		else
 			icon.setRotation(0);

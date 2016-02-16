@@ -47,12 +47,13 @@ public class MalisisItem extends Item implements IMetaIconProvider, IRegisterabl
 	public MalisisItem setName(String name)
 	{
 		this.name = name;
-		super.setUnlocalizedName(name);
+		setRegistryName(name);
+		setUnlocalizedName(name);
 		return this;
 	}
 
 	@Override
-	public String getRegistryName()
+	public String getName()
 	{
 		return name;
 	}

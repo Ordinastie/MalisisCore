@@ -57,7 +57,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
@@ -230,7 +229,7 @@ public abstract class MalisisGui extends GuiScreen
 		displayHeight = Display.getHeight();
 		currentGuiScale = mc.gameSettings.guiScale;
 
-		resolution = new ScaledResolution(mc, displayWidth, displayHeight);
+		resolution = new ScaledResolution(mc);
 		renderer.setScaleFactor(resolution.getScaleFactor());
 
 		width = renderer.isIgnoreScale() ? displayWidth : resolution.getScaledWidth();
@@ -677,7 +676,6 @@ public abstract class MalisisGui extends GuiScreen
 			return;
 
 		MinecraftForge.EVENT_BUS.register(this);
-		FMLCommonHandler.instance().bus().register(this);
 	}
 
 	public void closeOverlay()
@@ -685,7 +683,6 @@ public abstract class MalisisGui extends GuiScreen
 		if (mc.currentScreen == this)
 			close();
 		MinecraftForge.EVENT_BUS.unregister(this);
-		FMLCommonHandler.instance().bus().unregister(this);
 		onGuiClosed();
 	}
 

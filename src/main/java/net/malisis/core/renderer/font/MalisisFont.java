@@ -48,7 +48,6 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.face.SouthFace;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
@@ -289,6 +288,7 @@ public class MalisisFont
 		float w = cd.getFullWidth(options) * factor;
 		float h = cd.getFullHeight(options) * factor;
 		float i = fro.italic ? fro.fontScale : 0;
+		int color = drawingShadow ? fro.getShadowColor() : fro.color;
 
 		if (drawingShadow)
 		{
@@ -296,12 +296,34 @@ public class MalisisFont
 			offsetY += fro.fontScale;
 		}
 
+		wr.pos(offsetX + i, offsetY, 0);
+		wr.tex(cd.u(), cd.v());
+		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		wr.endVertex();
+
+		wr.pos(offsetX - i, offsetY + h, 0);
+		wr.tex(cd.u(), cd.V());
+		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		wr.endVertex();
+
+		wr.pos(offsetX + w - i, offsetY + h, 0);
+		wr.tex(cd.U(), cd.V());
+		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		wr.endVertex();
+
+		wr.pos(offsetX + w + i, offsetY, 0);
+		wr.tex(cd.U(), cd.v());
+		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		wr.endVertex();
+
+		/*
 		wr.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
 		wr.setBrightness(Vertex.BRIGHTNESS_MAX);
 		wr.addVertexWithUV(offsetX + i, offsetY, 0, cd.u(), cd.v());
 		wr.addVertexWithUV(offsetX - i, offsetY + h, 0, cd.u(), cd.V());
 		wr.addVertexWithUV(offsetX + w - i, offsetY + h, 0, cd.U(), cd.V());
 		wr.addVertexWithUV(offsetX + w + i, offsetY, 0, cd.U(), cd.v());
+		*/
 	}
 
 	protected void drawLines(String text, FontRenderOptions fro)
@@ -332,6 +354,7 @@ public class MalisisFont
 		float factor = fro.fontScale / options.fontSize * 9;
 		float w = cd.getFullWidth(options) * factor;
 		float h = cd.getFullHeight(options) / 9F * factor;
+		int color = drawingShadow ? fro.getShadowColor() : fro.color;
 
 		if (drawingShadow)
 		{
@@ -339,11 +362,29 @@ public class MalisisFont
 			offsetY += fro.fontScale;
 		}
 
+		wr.pos(offsetX, offsetY, 0);
+		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		wr.endVertex();
+
+		wr.pos(offsetX, offsetY + h, 0);
+		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		wr.endVertex();
+
+		wr.pos(offsetX + w, offsetY + h, 0);
+		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		wr.endVertex();
+
+		wr.pos(offsetX + w, offsetY, 0);
+		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		wr.endVertex();
+
+		/*
 		wr.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
 		wr.addVertex(offsetX, offsetY, 0);
 		wr.addVertex(offsetX, offsetY + h, 0);
 		wr.addVertex(offsetX + w, offsetY + h, 0);
 		wr.addVertex(offsetX + w, offsetY, 0);
+		*/
 	}
 
 	//#region String processing

@@ -48,7 +48,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.GameData;
 
 /**
  * @author Ordinastie
@@ -66,7 +65,7 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 
 		singleSlab.addComponent(this);
 		doubleSlab.addComponent(this);
-		doubleSlab.setName(singleSlab.getRegistryName() + "Double");
+		doubleSlab.setName(singleSlab.getName() + "Double");
 	}
 
 	public boolean isDouble(Block block)
@@ -79,7 +78,7 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 		singleSlab.register();
 		doubleSlab.register();
 
-		GameData.getBlockItemMap().put(doubleSlab, Item.getItemFromBlock(singleSlab));
+		//	GameData.getBlockItemMap().put(doubleSlab, Item.getItemFromBlock(singleSlab));
 	}
 
 	@Override

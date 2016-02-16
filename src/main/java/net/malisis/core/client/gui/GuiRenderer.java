@@ -205,13 +205,6 @@ public class GuiRenderer extends MalisisRenderer
 		bindDefaultTexture();
 	}
 
-	@Override
-	public void startDrawing(int drawMode)
-	{
-		super.startDrawing(drawMode);
-		this.wr.setVertexFormat(vertexFormat);
-	}
-
 	/**
 	 * Bind a new texture for rendering.
 	 *
@@ -563,7 +556,7 @@ public class GuiRenderer extends MalisisRenderer
 
 		currentTexture = null;
 		bindDefaultTexture();
-		wr.startDrawingQuads();
+		startDrawing();
 	}
 
 	/**

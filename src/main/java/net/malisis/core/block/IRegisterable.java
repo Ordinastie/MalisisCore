@@ -41,7 +41,7 @@ public interface IRegisterable
 	 *
 	 * @return the registry name
 	 */
-	public String getRegistryName();
+	public String getName();
 
 	/**
 	 * Gets the item to register the implementing {@link Block} with.<br>

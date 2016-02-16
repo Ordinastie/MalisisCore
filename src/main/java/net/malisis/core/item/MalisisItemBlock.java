@@ -55,8 +55,15 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable
 	public MalisisItemBlock setName(String name)
 	{
 		this.name = name;
-		super.setUnlocalizedName(name);
+		setRegistryName(name);
+		setUnlocalizedName(name);
 		return this;
+	}
+
+	@Override
+	public String getName()
+	{
+		return name;
 	}
 
 	@Override
@@ -69,12 +76,6 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable
 		}
 
 		return super.getUnlocalizedName(itemStack);
-	}
-
-	@Override
-	public String getRegistryName()
-	{
-		return name;
 	}
 
 	@Override

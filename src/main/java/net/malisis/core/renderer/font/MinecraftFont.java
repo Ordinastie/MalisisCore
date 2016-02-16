@@ -160,15 +160,26 @@ public class MinecraftFont extends MalisisFont
 		float factor = fro.fontScale / options.fontSize * 9;
 		float w = cd.getFullWidth(options) * factor;
 		float h = cd.getFullHeight(options) / 9F * factor;
+		int color = drawingShadow ? fro.getShadowColor() : fro.color;
 
 		offsetY -= factor + h;
 		w += 1.01F * factor;
 
-		wr.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
-		wr.addVertex(offsetX, offsetY, 0);
-		wr.addVertex(offsetX, offsetY + h, 0);
-		wr.addVertex(offsetX + w, offsetY + h, 0);
-		wr.addVertex(offsetX + w, offsetY, 0);
+		wr.pos(offsetX, offsetY, 0);
+		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		wr.endVertex();
+
+		wr.pos(offsetX, offsetY + h, 0);
+		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		wr.endVertex();
+
+		wr.pos(offsetX + w, offsetY + h, 0);
+		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		wr.endVertex();
+
+		wr.pos(offsetX + w, offsetY, 0);
+		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		wr.endVertex();
 	}
 
 	@Override

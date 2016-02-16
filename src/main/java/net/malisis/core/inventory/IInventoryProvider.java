@@ -99,7 +99,7 @@ public interface IInventoryProvider
 		}
 
 		@Override
-		public default String getCommandSenderName()
+		public default String getName()
 		{
 			return getInventory() != null ? getInventory().getName() : null;
 		}
@@ -107,8 +107,7 @@ public interface IInventoryProvider
 		@Override
 		public default IChatComponent getDisplayName()
 		{
-			return hasCustomName() ? new ChatComponentText(this.getCommandSenderName()) : new ChatComponentTranslation(
-					this.getCommandSenderName());
+			return hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName());
 		}
 
 		/**
@@ -155,7 +154,7 @@ public interface IInventoryProvider
 		 * @return the stack in slot on closing
 		 */
 		@Override
-		public default ItemStack getStackInSlotOnClosing(int index)
+		public default ItemStack removeStackFromSlot(int index)
 		{
 			return getStackInSlot(index);
 		}

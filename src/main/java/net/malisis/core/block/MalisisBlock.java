@@ -146,8 +146,14 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	public Block setName(String name)
 	{
 		this.name = name;
-		super.setUnlocalizedName(name);
+		setUnlocalizedName(name);
 		return this;
+	}
+
+	@Override
+	public String getName()
+	{
+		return name;
 	}
 
 	public String getUnlocalizedName(IBlockState state)
@@ -172,12 +178,6 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 		}
 
 		return IRegisterable.super.getItem(this);
-	}
-
-	@Override
-	public String getRegistryName()
-	{
-		return name;
 	}
 
 	@Override
