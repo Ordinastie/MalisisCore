@@ -25,10 +25,13 @@
 package net.malisis.core.client.gui.component.decoration;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.GuiTexture;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.VanillaIcon;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 /**
  * @author Ordinastie
@@ -38,28 +41,50 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 {
 	protected float progress = 0;
 	protected boolean reversed = false;
+	protected boolean vertical = false;
 
-	protected GuiIconProvider filledIconProvider;
+	protected GuiTexture texture;
+	protected MalisisIcon backgroundIcon;
+	protected MalisisIcon filledIcon;
 
+	//by default, use furnace arrows
 	public UIProgressBar(MalisisGui gui)
 	{
 		super(gui);
 		setSize(22, 16);
 
 		shape = new SimpleGuiShape();
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(246, 0, 22, 16));
-		filledIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(246, 16, 22, 16));
+		texture = getGui().getGuiTexture();
+		backgroundIcon = texture.createIcon(246, 0, 22, 16);
+		filledIcon = texture.createIcon(246, 16, 22, 16);
 	}
 
-	public float getProgress()
+	public UIProgressBar(MalisisGui gui, int width, int height, GuiTexture texture, MalisisIcon backgroundIcon, MalisisIcon filledIcon)
 	{
-		return progress;
+		super(gui);
+		setSize(width, height);
+
+		shape = new SimpleGuiShape();
+		this.texture = texture;
+		this.backgroundIcon = backgroundIcon;
+		this.filledIcon = filledIcon;
 	}
 
 	public UIProgressBar setReversed()
 	{
 		reversed = true;
 		return this;
+	}
+
+	public UIProgressBar setVertical()
+	{
+		vertical = true;
+		return this;
+	}
+
+	public float getProgress()
+	{
+		return progress;
 	}
 
 	public void setProgress(float progress)
@@ -75,24 +100,34 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		renderer.bindTexture(texture);
+		rp.icon.set(backgroundIcon.flip(!vertical && reversed, vertical && reversed));
 		shape.resetState();
 		shape.setSize(width, height);
-		//TODO:
-		//		barIcon.flip(reversed, false);
-		//		rp.icon.set(barIcon);
 		renderer.drawShape(shape, rp);
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int width = (int) (this.width * progress);
-		//		barFilledIcon.clip(0, 0, width, 16);
-		//		barFilledIcon.flip(reversed, false);
+		renderer.bindTexture(texture);
+		int length = (int) ((vertical ? height : width) * progress);
+		MalisisIcon icon = filledIcon;
+		if (icon instanceof VanillaIcon)
+			icon = new MalisisIcon((TextureAtlasSprite) icon);
+		if (vertical)
+			icon = icon.clip(0, icon.getIconHeight() - length, icon.getIconWidth(), length);
+		else
+			icon = icon.clip(0, 0, length, icon.getIconHeight());
+		icon.flip(!vertical && reversed, vertical && reversed);
+		rp.icon.set(icon);
+
 		shape.resetState();
-		shape.setSize(width, 16);
-		shape.translate(reversed ? this.width - width : 0, 0);
-		//		rp.icon.set(barFilledIcon);
+		shape.setSize(vertical ? width : length, vertical ? length : height);
+		if (vertical)
+			shape.translate(0, reversed ? 0 : height - length);
+		else
+			shape.translate(reversed ? width - length : 0, 0);
 		renderer.drawShape(shape, rp);
 	}
 }
