@@ -135,7 +135,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	/** Type of rendering. */
 	protected RenderType renderType;
 	/** Mode of rendering (GL constant). */
-	protected int drawMode;
+	protected int drawMode = GL11.GL_QUADS;
 	/** Base brightness of the block. */
 	protected int baseBrightness;
 	/** An override texture set by the renderer. */
@@ -408,7 +408,6 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		_initialize();
 		vertexDrawn = false;
 		this.renderType = renderType;
-		vertexFormat = malisisVertexFormat;
 
 		if (renderType == RenderType.BLOCK)
 		{
@@ -473,25 +472,47 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	}
 
 	/**
-	 * Tells the {@link Tessellator} to start drawing GL_QUADS.
+	 * Tells the {@link Tessellator} to start drawing with GL11.GL_QUADS and {@link #malisisVertexFormat}.
 	 */
 	public void startDrawing()
 	{
-		startDrawing(GL11.GL_QUADS);
+		startDrawing(GL11.GL_QUADS, malisisVertexFormat);
 	}
 
 	/**
-	 * Tells the {@link Tessellator} to start drawing <b>drawMode</b>.
+	 * Tells the {@link Tessellator} to start drawing with specified <b>drawMode</b> and {@link #malisisVertexFormat}.
 	 *
 	 * @param drawMode the draw mode
 	 */
 	public void startDrawing(int drawMode)
+	{
+		startDrawing(drawMode, malisisVertexFormat);
+	}
+
+	/**
+	 * Tells the {@link Tessellator} to start drawing with GL11.GL_QUADS and specified {@link VertexFormat}.
+	 *
+	 * @param vertexFormat the vertex format
+	 */
+	public void startDrawing(VertexFormat vertexFormat)
+	{
+		startDrawing(GL11.GL_QUADS, vertexFormat);
+	}
+
+	/**
+	 * Tells the {@link Tessellator} to start drawing with specified <b>drawMode and specified {@link VertexFormat}.
+	 *
+	 * @param drawMode the draw mode
+	 * @param vertexFormat the vertex format
+	 */
+	public void startDrawing(int drawMode, VertexFormat vertexFormat)
 	{
 		if (isDrawing())
 			draw();
 
 		wr.begin(drawMode, vertexFormat);
 		this.drawMode = drawMode;
+		this.vertexFormat = vertexFormat;
 	}
 
 	/**
@@ -526,14 +547,36 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	}
 
 	/**
-	 * Triggers a draw and restart drawing with <b>drawMode</b>.
+	 * Triggers a draw and restart drawing with <b>drawMode</b> and current {@link VertexFormat}.
 	 *
 	 * @param drawMode the draw mode
 	 */
 	public void next(int drawMode)
 	{
+		next(drawMode, vertexFormat);
+
+	}
+
+	/**
+	 * Triggers a draw and restart drawing with current {@link MalisisRenderer#drawMode} and specified {@link VertexFormat}
+	 *
+	 * @param vertexFormat the vertex format
+	 */
+	public void next(VertexFormat vertexFormat)
+	{
+		next(GL11.GL_QUADS, vertexFormat);
+	}
+
+	/**
+	 * Triggers a draw and restart drawing with current {@link MalisisRenderer#drawMode} and {@link VertexFormat}
+	 *
+	 * @param drawMode the draw mode
+	 * @param vertexFormat the vertex format
+	 */
+	public void next(int drawMode, VertexFormat vertexFormat)
+	{
 		draw();
-		startDrawing(drawMode);
+		startDrawing(drawMode, vertexFormat);
 	}
 
 	/**
@@ -786,10 +829,8 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 		float y = (float) vertex.getY();
 		float z = (float) vertex.getZ();
 
-		int size = vertexFormat.getNextOffset();
 		if (renderType == RenderType.BLOCK)
 		{
-			size = DefaultVertexFormats.BLOCK.getNextOffset();
 			//when drawing a block, the position to draw is relative to current chunk
 			BlockPos chunkPos = BlockPosUtils.chunkPosition(pos);
 			x += chunkPos.getX();
@@ -797,15 +838,26 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			z += chunkPos.getZ();
 		}
 
-		int[] data = new int[size / 4];
-		data[0] = Float.floatToRawIntBits(x);
-		data[1] = Float.floatToRawIntBits(y);
-		data[2] = Float.floatToRawIntBits(z);
-		data[3] = vertex.getRGBA();
-		data[4] = Float.floatToRawIntBits((float) vertex.getU());
-		data[5] = Float.floatToRawIntBits((float) vertex.getV());
-		data[6] = vertex.getBrightness();
-		if (renderType != RenderType.BLOCK)
+		//func_181719_f = getIntegerSize
+		int[] data = new int[vertexFormat.func_181719_f()];
+		int index = 0;
+		//private
+		//if(vertexFormat.hasPosition())
+		{
+			data[index++] = Float.floatToRawIntBits(x);
+			data[index++] = Float.floatToRawIntBits(y);
+			data[index++] = Float.floatToRawIntBits(z);
+		}
+		if (vertexFormat.hasColor())
+			data[index++] = vertex.getRGBA();
+		if (vertexFormat.hasUvOffset(0)) //normal UVs
+		{
+			data[index++] = Float.floatToRawIntBits((float) vertex.getU());
+			data[index++] = Float.floatToRawIntBits((float) vertex.getV());
+		}
+		if (vertexFormat.hasUvOffset(1)) //brightness UVs
+			data[index++] = vertex.getBrightness();
+		if (vertexFormat.hasNormal())
 			data[7] = vertex.getNormal();
 
 		return data;
