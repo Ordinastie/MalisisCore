@@ -48,6 +48,9 @@ public class MalisisIcon extends TextureAtlasSprite
 	/** Missing texture {@link MalisisIcon} **/
 	public static MalisisIcon missing = new MalisisIcon("missingno");
 
+	public static int BLOCK_TEXTURE_WIDTH = -1;
+	public static int BLOCK_TEXTURE_HEIGHT = -1;
+
 	/** Width of the global texture sheet. */
 	protected int sheetWidth;
 	/** Height of the global texture sheet. */
@@ -353,6 +356,12 @@ public class MalisisIcon extends TextureAtlasSprite
 	@Override
 	public void initSprite(int width, int height, int x, int y, boolean rotated)
 	{
+		if (width == 0 || height == 0)
+		{
+			//assume block atlas
+			width = BLOCK_TEXTURE_WIDTH;
+			height = BLOCK_TEXTURE_HEIGHT;
+		}
 		this.sheetWidth = width;
 		this.sheetHeight = height;
 		super.initSprite(width, height, x, y, rotated);
@@ -361,7 +370,7 @@ public class MalisisIcon extends TextureAtlasSprite
 			if (dep instanceof MalisisIcon)
 				((MalisisIcon) dep).initIcon(this, width, height, x, y, rotated);
 			else
-				copyFrom(this);
+				dep.copyFrom(this);
 		}
 	}
 
@@ -373,7 +382,15 @@ public class MalisisIcon extends TextureAtlasSprite
 	@Override
 	public void copyFrom(TextureAtlasSprite base)
 	{
-		super.copyFrom(base);
+		this.originX = base.getOriginX();
+		this.originY = base.getOriginY();
+		this.width = base.getIconWidth();
+		this.height = base.getIconHeight();
+		this.minU = base.getMinU();
+		this.maxU = base.getMaxU();
+		this.minV = base.getMinV();
+		this.maxV = base.getMaxV();
+
 		for (int i = 0; i < base.getFrameCount(); i++)
 			this.framesTextureData.add(base.getFrameTextureData(i));
 
