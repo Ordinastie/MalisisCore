@@ -46,7 +46,7 @@ defaultTasks 'build', 'install'
 // Basic project information
 group = 'net.malisis'
 archivesBaseName = 'malisiscore'
-version = '1.8-1.4.2-SNAPSHOT'
+version = '1.8.9-2.0.0-SNAPSHOT'
 ext.packaging = 'jar'
 
 // Extended project information
@@ -62,12 +62,14 @@ ext.commit = project.hasProperty("commit") ? commit : 'unknown'
 
 // MinecraftForge version
 minecraft {
-	version = "1.8-11.14.3.1487"
+	version = "1.8.9-11.15.1.1722"
+	mappings = "stable_20"
+	
 	if(file("../../run").exists()) 
 		runDir = "../../run/assets"
 	else
 		runDir = "run/assets"
-	mappings = "snapshot_20150711"
+	
 	
 	replace '${version}', project.version
     replaceIn "MalisisCore.java"
