@@ -141,7 +141,7 @@ public class GuiTexture
 	 * @param height the height
 	 * @return the {@link MalisisIcon}
 	 */
-	private MalisisIcon createIcon(int x, int y, int width, int height)
+	public MalisisIcon createIcon(int x, int y, int width, int height)
 	{
 		MalisisIcon icon = new MalisisIcon();
 		icon.setSize(width, height);
