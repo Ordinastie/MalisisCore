@@ -53,6 +53,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
@@ -173,7 +174,7 @@ public class MalisisFont
 	protected void prepare(MalisisRenderer renderer, float x, float y, float z, FontRenderOptions fro)
 	{
 		boolean isGui = renderer instanceof GuiRenderer;
-		renderer.next(GL11.GL_QUADS);
+		renderer.next(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 
 		Minecraft.getMinecraft().getTextureManager().bindTexture(textureRl);
 		GL11.glPushMatrix();
@@ -186,7 +187,7 @@ public class MalisisFont
 	protected void clean(MalisisRenderer renderer, boolean isDrawing)
 	{
 		if (isDrawing)
-			renderer.next();
+			renderer.next(MalisisRenderer.malisisVertexFormat);
 		else
 			renderer.draw();
 		if (renderer instanceof GuiRenderer)
@@ -216,7 +217,7 @@ public class MalisisFont
 
 	protected void prepareLines(MalisisRenderer renderer, FontRenderOptions fro)
 	{
-		renderer.next();
+		renderer.next(DefaultVertexFormats.POSITION_COLOR);
 		renderer.disableTextures();
 	}
 
