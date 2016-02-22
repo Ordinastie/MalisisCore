@@ -71,8 +71,8 @@ public class MinecraftFont extends MalisisFont
 	private void setFields()
 	{
 		String srg = "field_78286_d";
-		//		if (FMLClientHandler.instance().hasOptifine())
-		//			srg = "d";
+		if (FMLClientHandler.instance().hasOptifine())
+			srg = "d";
 
 		Field charWidthField = AsmUtils.changeFieldAccess(FontRenderer.class, "charWidth", srg);
 		Field glyphWidthField = AsmUtils.changeFieldAccess(FontRenderer.class, "glyphWidth", "field_78287_e");
