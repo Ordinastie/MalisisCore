@@ -27,16 +27,10 @@ package net.malisis.core.renderer.icon.provider;
 import java.util.EnumMap;
 import java.util.Map.Entry;
 
-import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.world.IBlockAccess;
 
 /**
  * @author Ordinastie
@@ -95,26 +89,12 @@ public class PropertyEnumIconProvider<T extends Enum<T>> implements IBlockIconPr
 
 	public MalisisIcon getIcon(T value)
 	{
-		MalisisIcon icon = icons.get(value);
-		return icon != null ? icon : getIcon();
+		return icons.getOrDefault(value, getIcon());
 	}
 
 	@Override
-	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
+	public MalisisIcon getIcon(IBlockState state)
 	{
-		return getIcon((T) state.getValue(property));
-	}
-
-	@Override
-	public MalisisIcon getIcon(ItemStack itemStack, EnumFacing facing)
-	{
-		if (!(itemStack.getItem() instanceof ItemBlock))
-			return getIcon();
-		ItemBlock ib = (ItemBlock) itemStack.getItem();
-		if (!(ib.getBlock() instanceof MalisisBlock))
-			return getIcon();
-
-		IBlockState state = ((MalisisBlock) ib.getBlock()).getStateFromItemStack(itemStack);
-		return getIcon((T) state.getValue(property));
+		return state != null ? getIcon((T) state.getValue(property)) : getIcon();
 	}
 }

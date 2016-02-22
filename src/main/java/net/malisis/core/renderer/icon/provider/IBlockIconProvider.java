@@ -26,6 +26,7 @@ package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.util.ItemUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
@@ -41,6 +42,17 @@ public interface IBlockIconProvider extends IIconProvider
 {
 
 	/**
+	 * Gets the {@link MalisisIcon} to use for the specified {@link IBlockState}.
+	 *
+	 * @param state the state
+	 * @return the icon
+	 */
+	public default MalisisIcon getIcon(IBlockState state)
+	{
+		return getIcon();
+	}
+
+	/**
 	 * Gets the {@link MalisisIcon} to use.
 	 *
 	 * @param world the world
@@ -51,7 +63,7 @@ public interface IBlockIconProvider extends IIconProvider
 	 */
 	public default MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
 	{
-		return getIcon();
+		return getIcon(state);
 	}
 
 	/**
@@ -64,7 +76,7 @@ public interface IBlockIconProvider extends IIconProvider
 	 */
 	public default MalisisIcon getIcon(ItemStack itemStack, EnumFacing side)
 	{
-		return getIcon();
+		return getIcon(ItemUtils.getStateFromItemStack(itemStack));
 	}
 
 	/**
@@ -75,6 +87,6 @@ public interface IBlockIconProvider extends IIconProvider
 	 */
 	public default MalisisIcon getParticleIcon(IBlockState state)
 	{
-		return getIcon();
+		return getIcon(state);
 	}
 }
