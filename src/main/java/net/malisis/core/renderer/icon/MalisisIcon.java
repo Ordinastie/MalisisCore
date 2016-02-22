@@ -48,7 +48,9 @@ public class MalisisIcon extends TextureAtlasSprite
 	/** Missing texture {@link MalisisIcon} **/
 	public static MalisisIcon missing = new MalisisIcon("missingno");
 
+	/** Width of the block's texture atlas. */
 	public static int BLOCK_TEXTURE_WIDTH = -1;
+	/** Height of the block's texture atlas. */
 	public static int BLOCK_TEXTURE_HEIGHT = -1;
 
 	/** Width of the global texture sheet. */
