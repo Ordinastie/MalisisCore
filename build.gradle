@@ -97,7 +97,7 @@ processResources {
 
 // JAR manifest configuration
 def commonManifest = {
-		mainAttributes(	"Built-By": System.properties['user.name'],
+		mainAttributes(	"Built-By": "Ordinastie",
 						"Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
 						"Implementation-Title": name,
 						"Implementation-Version": version,
