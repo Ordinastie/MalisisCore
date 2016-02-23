@@ -838,8 +838,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 			z += chunkPos.getZ();
 		}
 
-		//func_181719_f = getIntegerSize
-		int[] data = new int[vertexFormat.func_181719_f()];
+		int[] data = new int[vertexFormat.getIntegerSize()];
 		int index = 0;
 		//private
 		//if(vertexFormat.hasPosition())
