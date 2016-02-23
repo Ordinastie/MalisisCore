@@ -71,7 +71,7 @@ public class TextureMapTransformer extends MalisisClassTransformer
 		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/minecraft/client/renderer/texture/Stitcher", "getCurrentHeight", "()I"));
 		insert.add(new FieldInsnNode(PUTSTATIC, "net/malisis/core/renderer/icon/MalisisIcon", "BLOCK_TEXTURE_HEIGHT", "I"));
 
-		ah.jumpToEnd().jump(-2).insert(insert).debug();
+		ah.jumpToEnd().jump(-2).insert(insert);
 
 		return ah;
 	}
