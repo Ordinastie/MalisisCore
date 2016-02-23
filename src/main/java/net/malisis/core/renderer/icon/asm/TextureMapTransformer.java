@@ -31,7 +31,6 @@ import net.malisis.core.asm.mappings.McpMethodMapping;
 
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 /**
@@ -46,12 +45,16 @@ public class TextureMapTransformer extends MalisisClassTransformer
 		register(loadTextureAtlas());
 	}
 
-	@SuppressWarnings("deprecation")
 	private AsmHook loadTextureAtlas()
 	{
 		McpMethodMapping loadTextureAtlas = new McpMethodMapping("loadTextureAtlas", "func_110571_b",
 				"net/minecraft/client/renderer/texture/TextureMap", "(Lnet/minecraft/client/resources/IResourceManager;)V");
 		AsmHook ah = new AsmHook(loadTextureAtlas);
+
+		McpMethodMapping width = new McpMethodMapping("getCurrentWidth", "func_110935_a", "net/minecraft/client/renderer/texture/Stitcher",
+				"()I");
+		McpMethodMapping height = new McpMethodMapping("getCurrentHeight", "func_110936_b",
+				"net/minecraft/client/renderer/texture/Stitcher", "()I");
 
 		//		Stitcher stitcher = new Stitcher(0, 0, false, 0, 0);
 		//		MalisisIcon.BLOCK_TEXTURE_WIDTH = stitcher.getCurrentWidth();
@@ -65,10 +68,10 @@ public class TextureMapTransformer extends MalisisClassTransformer
 
 		InsnList insert = new InsnList();
 		insert.add(new VarInsnNode(ALOAD, 3));
-		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/minecraft/client/renderer/texture/Stitcher", "getCurrentWidth", "()I"));
+		insert.add(width.getInsnNode(INVOKEVIRTUAL));
 		insert.add(new FieldInsnNode(PUTSTATIC, "net/malisis/core/renderer/icon/MalisisIcon", "BLOCK_TEXTURE_WIDTH", "I"));
 		insert.add(new VarInsnNode(ALOAD, 3));
-		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/minecraft/client/renderer/texture/Stitcher", "getCurrentHeight", "()I"));
+		insert.add(height.getInsnNode(INVOKEVIRTUAL));
 		insert.add(new FieldInsnNode(PUTSTATIC, "net/malisis/core/renderer/icon/MalisisIcon", "BLOCK_TEXTURE_HEIGHT", "I"));
 
 		ah.jumpToEnd().jump(-2).insert(insert);
