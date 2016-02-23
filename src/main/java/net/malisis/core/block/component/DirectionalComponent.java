@@ -228,7 +228,7 @@ public class DirectionalComponent implements IBlockComponent
 		if (property == null || !state.getProperties().containsKey(property))
 			return EnumFacing.SOUTH;
 
-		return (EnumFacing) state.getValue(property);
+		return state.getValue(property);
 	}
 
 	/**
@@ -274,7 +274,7 @@ public class DirectionalComponent implements IBlockComponent
 		if (property == null || !state.getProperties().containsKey(property))
 			return state;
 
-		return state.withProperty(property, EnumFacingUtils.rotateFacing((EnumFacing) state.getValue(property), a));
+		return state.withProperty(property, EnumFacingUtils.rotateFacing(state.getValue(property), a));
 	}
 
 	public static interface IPlacement
