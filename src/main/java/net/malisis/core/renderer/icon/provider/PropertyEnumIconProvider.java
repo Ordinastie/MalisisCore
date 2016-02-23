@@ -31,12 +31,13 @@ import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.util.IStringSerializable;
 
 /**
  * @author Ordinastie
  *
  */
-public class PropertyEnumIconProvider<T extends Enum<T>> implements IBlockIconProvider
+public class PropertyEnumIconProvider<T extends Enum<T> & IStringSerializable> implements IBlockIconProvider
 {
 	private PropertyEnum property;
 	private MalisisIcon defaultIcon;
@@ -49,7 +50,7 @@ public class PropertyEnumIconProvider<T extends Enum<T>> implements IBlockIconPr
 		this.defaultIcon = new MalisisIcon(defaultName);
 	}
 
-	public PropertyEnumIconProvider(PropertyEnum property, Class<T> enumClass, MalisisIcon defaultIcon)
+	public PropertyEnumIconProvider(PropertyEnum<T> property, Class<T> enumClass, MalisisIcon defaultIcon)
 	{
 		this.property = property;
 		this.icons = new EnumMap<>(enumClass);
