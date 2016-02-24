@@ -54,7 +54,7 @@ import org.objectweb.asm.util.TraceMethodVisitor;
 public class AsmUtils
 {
 	/**
-	 * find the method with the given name. If multiple methods with the same parameters exist, the first one will be returned
+	 * Finds the method with the given name. If multiple methods with the same name exist, the first one will be returned
 	 *
 	 * @param clazz the class
 	 * @param name the method name to search for
@@ -73,7 +73,7 @@ public class AsmUtils
 	}
 
 	/**
-	 * find the method with the given name and method descriptor.
+	 * Finds the method with the given name and method descriptor.
 	 *
 	 * @param clazz the class
 	 * @param name the method name to search for
@@ -93,11 +93,26 @@ public class AsmUtils
 		return null;
 	}
 
+	/**
+	 * Finds instruction a specific instruction list inside a method, starting from the begining.
+	 *
+	 * @param method the method
+	 * @param matches the matches
+	 * @return the abstract insn node
+	 */
 	public static AbstractInsnNode findInstruction(MethodNode method, InsnList matches)
 	{
 		return findInstruction(method, matches, 0);
 	}
 
+	/**
+	 * Finds instruction a specific instruction list inside a method, starting from the specified index.
+	 *
+	 * @param method the method
+	 * @param matches the matches
+	 * @param index the index
+	 * @return the abstract insn node
+	 */
 	public static AbstractInsnNode findInstruction(MethodNode method, InsnList matches, int index)
 	{
 		AbstractInsnNode node = method.instructions.get(index);
@@ -122,6 +137,13 @@ public class AsmUtils
 		return null;
 	}
 
+	/**
+	 * Checks if two {@link AbstractInsnNode} are equals.
+	 *
+	 * @param node1 the node1
+	 * @param node2 the node2
+	 * @return true, if equal
+	 */
 	public static boolean insnEqual(AbstractInsnNode node1, AbstractInsnNode node2)
 	{
 		if (node1 == null || node2 == null || node1.getOpcode() != node2.getOpcode())
@@ -148,6 +170,13 @@ public class AsmUtils
 		}
 	}
 
+	/**
+	 * Checks if two {@link VarInsnNode} are equals.
+	 *
+	 * @param insn1 the insn1
+	 * @param insn2 the insn2
+	 * @return true, if successful
+	 */
 	public static boolean varInsnEqual(VarInsnNode insn1, VarInsnNode insn2)
 	{
 		if (insn1.var == -1 || insn2.var == -1)
@@ -156,16 +185,37 @@ public class AsmUtils
 		return insn1.var == insn2.var;
 	}
 
+	/**
+	 * Checks if two {@link MethodInsnNode} are equals.
+	 *
+	 * @param insn1 the insn1
+	 * @param insn2 the insn2
+	 * @return true, if successful
+	 */
 	public static boolean methodInsnEqual(MethodInsnNode insn1, MethodInsnNode insn2)
 	{
 		return insn1.owner.equals(insn2.owner) && insn1.name.equals(insn2.name) && insn1.desc.equals(insn2.desc);
 	}
 
+	/**
+	 * Checks if two {@link FieldInsnNode} are equals.
+	 *
+	 * @param insn1 the insn1
+	 * @param insn2 the insn2
+	 * @return true, if successful
+	 */
 	public static boolean fieldInsnEqual(FieldInsnNode insn1, FieldInsnNode insn2)
 	{
 		return insn1.owner.equals(insn2.owner) && insn1.name.equals(insn2.name) && insn1.desc.equals(insn2.desc);
 	}
 
+	/**
+	 * Checks if two {@link LdcInsnNode} are equals.
+	 *
+	 * @param insn1 the insn1
+	 * @param insn2 the insn2
+	 * @return true, if successful
+	 */
 	public static boolean ldcInsnEqual(LdcInsnNode insn1, LdcInsnNode insn2)
 	{
 		if (insn1.cst.equals("~") || insn2.cst.equals("~"))
@@ -174,6 +224,13 @@ public class AsmUtils
 		return insn1.cst.equals(insn2.cst);
 	}
 
+	/**
+	 * Checks if two {@link TypeInsnNode} are equals.
+	 *
+	 * @param insn1 the insn1
+	 * @param insn2 the insn2
+	 * @return true, if successful
+	 */
 	public static boolean typeInsnEqual(TypeInsnNode insn1, TypeInsnNode insn2)
 	{
 		if (insn1.desc.equals("~") || insn2.desc.equals("~"))
@@ -182,11 +239,25 @@ public class AsmUtils
 		return insn1.desc.equals(insn2.desc);
 	}
 
+	/**
+	 * Checks if two {@link IincInsnNode} are equals.
+	 *
+	 * @param node1 the node1
+	 * @param node2 the node2
+	 * @return true, if successful
+	 */
 	public static boolean iincInsnEqual(IincInsnNode node1, IincInsnNode node2)
 	{
 		return node1.var == node2.var && node1.incr == node2.incr;
 	}
 
+	/**
+	 * Checks if two {@link IntInsnNode} are equals.
+	 *
+	 * @param node1 the node1
+	 * @param node2 the node2
+	 * @return true, if successful
+	 */
 	public static boolean intInsnEqual(IntInsnNode node1, IntInsnNode node2)
 	{
 		if (node1.operand == -1 || node2.operand == -1)
@@ -195,6 +266,12 @@ public class AsmUtils
 		return node1.operand == node2.operand;
 	}
 
+	/**
+	 * Gets the {@link MethodNode} as string.
+	 *
+	 * @param methodNode the method node
+	 * @return the method node as string
+	 */
 	public static String getMethodNodeAsString(MethodNode methodNode)
 	{
 		Printer printer = new Textifier();
@@ -209,6 +286,12 @@ public class AsmUtils
 		return sw.toString();
 	}
 
+	/**
+	 * Clones a {@link InsnList}.
+	 *
+	 * @param list the list
+	 * @return the insn list
+	 */
 	public static InsnList cloneList(InsnList list)
 	{
 		InsnList clone = new InsnList();
@@ -228,7 +311,7 @@ public class AsmUtils
 	 */
 	public static Field changeFieldAccess(Class clazz, String fieldName)
 	{
-		return changeFieldAccess(clazz, fieldName, fieldName);
+		return changeFieldAccess(clazz, fieldName, fieldName, false);
 	}
 
 	/**
@@ -241,9 +324,22 @@ public class AsmUtils
 	 */
 	public static Field changeFieldAccess(Class clazz, String fieldName, String srgName)
 	{
+		return changeFieldAccess(clazz, fieldName, srgName, false);
+	}
+
+	/**
+	 * Changes the access level for the specified field for a class.
+	 *
+	 * @param clazz the clazz
+	 * @param fieldName the field name
+	 * @param srgName the srg name
+	 * @param silenced the silenced
+	 * @return the field
+	 */
+	public static Field changeFieldAccess(Class clazz, String fieldName, String srgName, boolean silenced)
+	{
 		try
 		{
-			// modify reference in Blocks class
 			Field f = clazz.getDeclaredField(MalisisCore.isObfEnv ? srgName : fieldName);
 			f.setAccessible(true);
 			Field modifiers = Field.class.getDeclaredField("modifiers");
@@ -254,20 +350,39 @@ public class AsmUtils
 		}
 		catch (ReflectiveOperationException e)
 		{
-			e.printStackTrace();
+			if (!silenced)
+				MalisisCore.log.error("Could not change access for field " + clazz.getSimpleName() + "."
+						+ (MalisisCore.isObfEnv ? srgName : fieldName), e);
+			return null;
 		}
 
-		return null;
 	}
 
+	/**
+	 * Changes the access level for the specified method for a class.
+	 *
+	 * @param clazz the clazz
+	 * @param methodName the method name
+	 * @param params the params
+	 * @return the method
+	 */
 	public static Method changeMethodAccess(Class clazz, String methodName, String params)
 	{
 		return changeMethodAccess(clazz, methodName, methodName, params);
 	}
 
+	/**
+	 * Changes the access level for the specified method for a class.
+	 *
+	 * @param clazz the clazz
+	 * @param methodName the method name
+	 * @param srgName the srg name
+	 * @param params the params
+	 * @return the method
+	 */
 	public static Method changeMethodAccess(Class clazz, String methodName, String srgName, String params)
 	{
-		return changeMethodAccess(clazz, methodName, srgName, new MethodDescriptor(params).getParams());
+		return changeMethodAccess(clazz, methodName, srgName, false, new MethodDescriptor(params).getParams());
 	}
 
 	/**
@@ -279,7 +394,21 @@ public class AsmUtils
 	 */
 	public static Method changeMethodAccess(Class clazz, String methodName, Class<?>... params)
 	{
-		return changeMethodAccess(clazz, methodName, methodName, params);
+		return changeMethodAccess(clazz, methodName, methodName, false, params);
+	}
+
+	/**
+	 * Changes the access level for the specified method for a class.
+	 *
+	 * @param clazz the clazz
+	 * @param methodName the method name
+	 * @param srgName the srg name
+	 * @param params the params
+	 * @return the method
+	 */
+	public static Method changeMethodAccess(Class clazz, String methodName, String srgName, Class<?>... params)
+	{
+		return changeMethodAccess(clazz, methodName, srgName, false, params);
 	}
 
 	/**
@@ -288,20 +417,22 @@ public class AsmUtils
 	 * @param clazz the clazz
 	 * @param methodName the field name
 	 * @param srgName the srg name
+	 * @param silenced the silenced
+	 * @param params the params
 	 * @return the field
 	 */
-	public static Method changeMethodAccess(Class clazz, String methodName, String srgName, Class<?>... params)
+	public static Method changeMethodAccess(Class clazz, String methodName, String srgName, boolean silenced, Class<?>... params)
 	{
 		try
 		{
-			// modify reference in Blocks class
 			Method m = clazz.getDeclaredMethod(MalisisCore.isObfEnv ? srgName : methodName, params);
 			m.setAccessible(true);
 			return m;
 		}
 		catch (ReflectiveOperationException e)
 		{
-			e.printStackTrace();
+			MalisisCore.log.error("Could not change access for method " + clazz.getSimpleName() + "."
+					+ (MalisisCore.isObfEnv ? srgName : methodName), e);
 		}
 
 		return null;
