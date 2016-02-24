@@ -146,8 +146,8 @@ public abstract class MalisisGui extends GuiScreen
 		}
 		catch (Exception e)
 		{
-			MalisisCore.message("A problem occured while constructing " + e.getClass().getSimpleName() + ": " + e.getMessage());
-			e.printStackTrace(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+			MalisisCore.message("A problem occured while constructing " + getClass().getSimpleName() + ": " + e.getMessage());
+			MalisisCore.log.error("A problem occured while constructing " + getClass().getSimpleName(), e);
 		}
 
 		return constructed;
