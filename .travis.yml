@@ -3,13 +3,13 @@ language: java
 jdk: oraclejdk8
 
 # Compile and package JAR and set build properties
-install: gradle setupCIWorkspace
-script: gradle build -PbuildNumber=$TRAVIS_BUILD_NUMBER -PciSystem=travis -Pcommit=${TRAVIS_COMMIT:0:7}
+install: gradlew setupCIWorkspace
+script: gradlew build -PbuildNumber=$TRAVIS_BUILD_NUMBER -PciSystem=travis -Pcommit=${TRAVIS_COMMIT:0:7}
 
 # Perform steps after compilation/test success
 after_success:
   # Check if commit s not a pull request, if git repo is official, and if branch is 1.7. If checks pass, add libs and deploy artifacts to Maven repository.
-  - "[[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_REPO_SLUG == Ordinastie/MalisisCore ]] && [[ $TRAVIS_BRANCH == 1.7 ]] && gradle uploadArchives"
+  - "[[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_REPO_SLUG == Ordinastie/MalisisCore ]] && [[ $TRAVIS_BRANCH == 1.8]] && gradlew uploadArchives"
 
 # Notification services
 notifications:
