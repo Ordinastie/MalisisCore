@@ -79,7 +79,7 @@ public class MalisisCore implements IMalisisMod
 	/** Reference to the mod instance */
 	public static MalisisCore instance;
 	/** Logger for the mod. */
-	public static Logger log;
+	public static Logger log = LogManager.getLogger(modid);
 	/** Network for the mod */
 	public static MalisisNetwork network;
 
@@ -96,7 +96,6 @@ public class MalisisCore implements IMalisisMod
 	{
 		instance = this;
 		network = new MalisisNetwork(this);
-		log = LogManager.getLogger(modid);
 		isObfEnv = !(boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 	}
 
