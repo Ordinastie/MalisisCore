@@ -24,11 +24,15 @@
 
 package net.malisis.core.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import net.malisis.core.block.MalisisBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.oredict.OreDictionary;
 
 /**
  * Utility class for items.
@@ -43,6 +47,9 @@ public class ItemUtils
 
 	/** Defines a half stack amount to process. */
 	public static final int HALF_STACK = -2;
+
+	/** Regex pattern to convert a string into an {@link ItemStack}. Format : [modid:]item[@damage[xsize]] */
+	public static final Pattern pattern = Pattern.compile("((?<modid>.*?):)?(?<item>[^@]*)(@(?<damage>[\\d+|*])(x(?<size>\\d+))?)?");
 
 	/**
 	 * Utility class to help merge {@link ItemStack itemStacks}.<br>
@@ -221,6 +228,12 @@ public class ItemUtils
 
 	}
 
+	/**
+	 * Gets a {@link IBlockState} corresponding to the specified {@link ItemStack}
+	 *
+	 * @param itemStack the item stack
+	 * @return the state from item stack
+	 */
 	public static IBlockState getStateFromItemStack(ItemStack itemStack)
 	{
 		if (itemStack == null)
@@ -236,6 +249,12 @@ public class ItemUtils
 		return block.getStateFromMeta(itemStack.getItem().getMetadata(itemStack.getMetadata()));
 	}
 
+	/**
+	 * Gets the {@link ItemStack} matching the specified {@link IBlockState}
+	 *
+	 * @param state the state
+	 * @return the item stack from state
+	 */
 	public static ItemStack getItemStackFromState(IBlockState state)
 	{
 		if (state == null)
@@ -244,5 +263,40 @@ public class ItemUtils
 		if (item == null)
 			return null;
 		return new ItemStack(item, 1, state.getBlock().damageDropped(state));
+	}
+
+	/**
+	 * Construct an {@link ItemStack} from a string in the format modid:itemName@damagexstackSize.
+	 *
+	 * @param str the str
+	 * @return the item
+	 */
+	public static ItemStack getItemStack(String str)
+	{
+		Matcher matcher = pattern.matcher(str);
+		if (!matcher.find())
+			return null;
+
+		String itemString = matcher.group("item");
+		if (itemString == null)
+			return null;
+
+		String modid = matcher.group("modid");
+		if (modid == null)
+			modid = "minecraft";
+
+		int damage = 0;
+		String strDamage = matcher.group("damage");
+		if (strDamage != null)
+			damage = strDamage.equals("*") ? OreDictionary.WILDCARD_VALUE : Silenced.get(() -> Integer.parseInt(matcher.group("damage")));
+		int size = matcher.group("size") == null ? 1 : Silenced.get(() -> Integer.parseInt(matcher.group("size")));
+		if (size == 0)
+			size = 1;
+
+		Item item = Item.getByNameOrId(modid + ":" + itemString);
+		if (item == null)
+			return null;
+
+		return new ItemStack(item, size, damage);
 	}
 }
