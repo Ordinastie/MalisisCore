@@ -51,7 +51,7 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 	public static String ORIGIN_BLOCK_DATA = MalisisCore.modid + ":multiBlockOrigin";
 
 	protected Map<BlockPos, MBlockState> states = new HashMap<>();
-	protected BlockPos offset = new BlockPos(0, 0, 0);
+	protected BlockPos offset = BlockPos.ORIGIN;
 	protected PropertyDirection property = DirectionalComponent.HORIZONTAL;
 	private int rotation;
 	private boolean bulkPlace;
