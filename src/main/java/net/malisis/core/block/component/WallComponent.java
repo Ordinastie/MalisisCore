@@ -27,10 +27,10 @@ package net.malisis.core.block.component;
 import java.util.List;
 import java.util.Random;
 
-import net.malisis.core.MalisisCore;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IMergedBlock;
+import net.malisis.core.block.ISmartCull;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.EnumFacingUtils;
@@ -54,7 +54,7 @@ import com.google.common.collect.Lists;
  *
  * @author Ordinastie
  */
-public class WallComponent implements IBlockComponent, IMergedBlock
+public class WallComponent implements IBlockComponent, IMergedBlock, ISmartCull
 {
 	public static PropertyBool CORNER = PropertyBool.create("corner");
 
@@ -132,9 +132,6 @@ public class WallComponent implements IBlockComponent, IMergedBlock
 	{
 		EnumFacing direction = DirectionalComponent.getDirection(state);
 		EnumFacing realSide = EnumFacingUtils.getRealSide(state, side);
-
-		if (!world.isRemote)
-			MalisisCore.message(hitX + ", " + hitY + ", " + hitZ);
 
 		if (realSide == EnumFacing.EAST && hitX == 1)
 			return null;
@@ -219,26 +216,6 @@ public class WallComponent implements IBlockComponent, IMergedBlock
 			return new AxisAlignedBB[] { aabb };
 
 		return new AxisAlignedBB[] { aabb, AABBUtils.rotate(aabb, -1) };
-	}
-
-	/**
-	 * Checks whether a side should be rendered.
-	 *
-	 * @param block the block
-	 * @param world the world
-	 * @param pos the pos
-	 * @param side the side
-	 * @return the boolean
-	 */
-	@Override
-	public Boolean shouldSideBeRendered(Block block, IBlockAccess world, BlockPos pos, EnumFacing side)
-	{
-		IBlockState state = world.getBlockState(pos);
-		EnumFacing realSide = EnumFacingUtils.getRealSide(state, side);
-		if (realSide == EnumFacing.SOUTH || (isCorner(state) && realSide == EnumFacing.EAST))
-			return true;
-
-		return null;
 	}
 
 	@Override
