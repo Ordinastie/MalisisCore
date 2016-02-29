@@ -211,6 +211,8 @@ public class WallComponent implements IBlockComponent, IMergedBlock, ISmartCull
 			return AABBUtils.identities();
 
 		AxisAlignedBB aabb = new AxisAlignedBB(0, 0, 0, 1, 1, 3 / 16F);
+		if (world == null)
+			aabb = AABBUtils.rotate(aabb.offset(0, 0, 0.5F), -1);
 
 		if (!corner)
 			return new AxisAlignedBB[] { aabb };
