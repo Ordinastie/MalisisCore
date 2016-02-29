@@ -49,7 +49,7 @@ public class ItemUtils
 	public static final int HALF_STACK = -2;
 
 	/** Regex pattern to convert a string into an {@link ItemStack}. Format : [modid:]item[@damage[xsize]] */
-	public static final Pattern pattern = Pattern.compile("((?<modid>.*?):)?(?<item>[^@]*)(@(?<damage>[\\d+|*])(x(?<size>\\d+))?)?");
+	public static final Pattern pattern = Pattern.compile("((?<modid>.*?):)?(?<item>[^@]*)(@(?<damage>\\d+|[*])(x(?<size>\\d+))?)?");
 
 	/**
 	 * Utility class to help merge {@link ItemStack itemStacks}.<br>
