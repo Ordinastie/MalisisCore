@@ -507,7 +507,8 @@ public class MalisisRegistry
 	public static void registerItemModel(Item item, String modid, String name)
 	{
 		DummyModel model = new DummyModel(item, modid + ":" + name);
-		ModelLoader.setCustomModelResourceLocation(item, 0, model.getResourceLocation());
+		//ModelLoader.setCustomModelResourceLocation(item, 0, model.getResourceLocation());
+		ModelLoader.setCustomMeshDefinition(item, (stack) -> model.getResourceLocation());
 		instance.itemModels.add(model);
 	}
 
