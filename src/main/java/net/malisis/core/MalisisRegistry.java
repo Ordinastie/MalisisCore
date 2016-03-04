@@ -47,9 +47,11 @@ import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.block.statemap.IStateMapper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
@@ -508,7 +510,14 @@ public class MalisisRegistry
 	{
 		DummyModel model = new DummyModel(item, modid + ":" + name);
 		//ModelLoader.setCustomModelResourceLocation(item, 0, model.getResourceLocation());
-		ModelLoader.setCustomMeshDefinition(item, (stack) -> model.getResourceLocation());
+		ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition()
+		{
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack)
+			{
+				return model.getResourceLocation();
+			}
+		});
 		instance.itemModels.add(model);
 	}
 
