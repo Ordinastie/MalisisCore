@@ -37,7 +37,7 @@ import net.malisis.core.renderer.icon.provider.GuiIconProvider;
  */
 public class UICloseHandle extends UIComponent<UICloseHandle> implements IControlComponent
 {
-	public <T extends UIComponent & ICloseable> UICloseHandle(MalisisGui gui, T parent)
+	public <T extends UIComponent<T> & ICloseable> UICloseHandle(MalisisGui gui, T parent)
 	{
 		super(gui);
 
@@ -45,8 +45,8 @@ public class UICloseHandle extends UIComponent<UICloseHandle> implements IContro
 		int y = 1;
 		if (parent instanceof UIContainer)
 		{
-			x += ((UIContainer) parent).getHorizontalPadding();
-			y -= ((UIContainer) parent).getVerticalPadding();
+			x += ((UIContainer<?>) parent).getHorizontalPadding();
+			y -= ((UIContainer<?>) parent).getVerticalPadding();
 		}
 		setPosition(x, y, Anchor.RIGHT);
 		setSize(5, 5);

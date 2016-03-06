@@ -89,7 +89,8 @@ public class OpenInventoryMessage implements IMalisisMessageHandler<OpenInventor
 			if (itemStack == null || !(itemStack.getItem() instanceof IDeferredInventoryProvider<?>))
 				return;
 
-			IDeferredInventoryProvider inventoryProvider = (IDeferredInventoryProvider) itemStack.getItem();
+			@SuppressWarnings("unchecked")
+			IDeferredInventoryProvider<ItemStack> inventoryProvider = (IDeferredInventoryProvider<ItemStack>) itemStack.getItem();
 			MalisisInventory.open(player, inventoryProvider, itemStack, message.windowId);
 
 		}

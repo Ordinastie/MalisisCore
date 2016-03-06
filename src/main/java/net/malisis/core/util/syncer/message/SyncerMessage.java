@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.MalisisInventoryContainer;
+import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
 import net.malisis.core.util.syncer.FieldData;
 import net.malisis.core.util.syncer.ISyncHandler;
@@ -39,7 +40,6 @@ import net.malisis.core.util.syncer.ISyncableData;
 import net.malisis.core.util.syncer.Syncer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -50,11 +50,17 @@ import net.minecraftforge.fml.relauncher.Side;
  *
  */
 @MalisisMessage
-public class SyncerMessage implements IMessageHandler<SyncerMessage.Packet, IMessage>
+public class SyncerMessage implements IMalisisMessageHandler<SyncerMessage.Packet<?, ?>, IMessage>
 {
 	public SyncerMessage()
 	{
-		MalisisCore.network.registerMessage(this, Packet.class, Side.CLIENT);
+		MalisisCore.network.registerMessage(this, getPacketClass(), Side.CLIENT);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Class<Packet<?, ?>> getPacketClass()
+	{
+		return (Class<Packet<?, ?>>) new Packet<>().getClass();
 	}
 
 	/**
@@ -63,31 +69,30 @@ public class SyncerMessage implements IMessageHandler<SyncerMessage.Packet, IMes
 	 *
 	 * @param message the message
 	 * @param ctx the ctx
-	 * @return the i message
 	 */
 	@Override
-	public IMessage onMessage(Packet message, MessageContext ctx)
+	public void process(Packet<?, ?> message, MessageContext ctx)
 	{
-		if (ctx.side == Side.CLIENT)
-		{
-			Object caller = message.handler.getReceiver(ctx, message.data);
-			Syncer.get().updateValues(caller, message.handler, message.values);
-		}
-
-		return null;
+		process(message, ctx);
 	}
 
-	public static class Packet<T> implements IMessage
+	public <T, S extends ISyncableData> void process(ISyncHandler<T, S> handler, MessageContext ctx, S data, Map<String, Object> values)
 	{
-		private ISyncHandler<? super T, ? extends ISyncableData> handler;
-		private ISyncableData data;
+		T receiver = handler.getReceiver(ctx, data);
+		Syncer.get().updateValues(receiver, handler, values);
+	}
+
+	public static class Packet<T, S extends ISyncableData> implements IMessage
+	{
+		private ISyncHandler<T, S> handler;
+		private S data;
 		private int indexes;
 		private Map<String, Object> values;
 
 		public Packet()
 		{}
 
-		public Packet(ISyncHandler<? super T, ? extends ISyncableData> handler, ISyncableData data, int fieldIndexes, Map<String, Object> fieldValues)
+		public Packet(ISyncHandler<T, S> handler, S data, int fieldIndexes, Map<String, Object> fieldValues)
 		{
 			this.handler = handler;
 			this.data = data;
@@ -95,11 +100,12 @@ public class SyncerMessage implements IMessageHandler<SyncerMessage.Packet, IMes
 			this.values = fieldValues;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void fromBytes(ByteBuf buf)
 		{
 			//handler
-			handler = (ISyncHandler<? super T, ? extends ISyncableData>) Syncer.get().getHandlerFromId(buf.readInt());
+			handler = (ISyncHandler<T, S>) Syncer.get().getHandlerFromId(buf.readInt());
 			if (handler == null)
 				return;
 

@@ -78,7 +78,7 @@ public class DoubleKeyMap<K, V>
 
 		int i = data.size();
 		keys.put(key, i);
-		data.add(new DoubleKeyEntry<K, V>(i, key, value));
+		data.add(new DoubleKeyEntry<>(i, key, value));
 		return i;
 	}
 

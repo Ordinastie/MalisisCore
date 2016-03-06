@@ -60,14 +60,14 @@ public interface IBlockComponent
 	 *
 	 * @return the property
 	 */
-	public IProperty getProperty();
+	public IProperty<?> getProperty();
 
 	/**
 	 * Gets the all the {@link IProperty properties} used by this {@link IBlockComponent}.
 	 *
 	 * @return the properties
 	 */
-	public default IProperty[] getProperties()
+	public default IProperty<?>[] getProperties()
 	{
 		if (getProperty() == null)
 			return new IProperty[0];
@@ -264,7 +264,7 @@ public interface IBlockComponent
 	 * @param list the list
 	 */
 	@SideOnly(Side.CLIENT)
-	public default void getSubBlocks(Block block, Item item, CreativeTabs tab, List list)
+	public default void getSubBlocks(Block block, Item item, CreativeTabs tab, List<ItemStack> list)
 	{}
 
 	//#end Sub-blocks
@@ -456,7 +456,7 @@ public interface IBlockComponent
 	public static <T> T getComponent(Class<T> type, Block block)
 	{
 		if (block.getClass().isAssignableFrom(type))
-			return (T) block;
+			return type.cast(block);
 
 		if (!(block instanceof IComponentProvider))
 			return null;
@@ -464,7 +464,7 @@ public interface IBlockComponent
 		return ((IComponentProvider) block).getComponent(type);
 	}
 
-	public static IProperty getProperty(Class<?> type, Block block)
+	public static IProperty<?> getProperty(Class<?> type, Block block)
 	{
 		Object component = getComponent(type, block);
 		if (component instanceof IBlockComponent)

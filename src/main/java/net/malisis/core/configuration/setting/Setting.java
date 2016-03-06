@@ -137,6 +137,11 @@ public abstract class Setting<T>
 		return comments;
 	}
 
+	public void applySettingFromComponent()
+	{
+		set(getValueFromComponent());
+	}
+
 	/**
 	 * Reads the value.
 	 *
@@ -160,7 +165,7 @@ public abstract class Setting<T>
 	 * @return the component
 	 */
 	@SideOnly(Side.CLIENT)
-	public abstract UIComponent getComponent(MalisisGui gui);
+	public abstract UIComponent<?> getComponent(MalisisGui gui);
 
 	/**
 	 * Gets the value from component.

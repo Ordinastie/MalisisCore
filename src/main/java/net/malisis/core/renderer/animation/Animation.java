@@ -32,10 +32,10 @@ import net.malisis.core.util.Timer;
  * @author Ordinastie
  *
  */
-public class Animation
+public class Animation<S extends ITransformable>
 {
-	private ITransformable transformable;
-	private Transformation transform;
+	private S transformable;
+	private Transformation<?, S> transform;
 	private int delay;
 	private boolean started = false;
 	private boolean finished = false;
@@ -43,7 +43,7 @@ public class Animation
 	private boolean renderBefore = true;
 	private boolean renderAfter = true;
 
-	public Animation(ITransformable transformable, Transformation transform)
+	public Animation(S transformable, Transformation<?, S> transform)
 	{
 		this.transformable = transformable;
 		this.transform = transform;
@@ -70,7 +70,7 @@ public class Animation
 		this.delay = delay;
 	}
 
-	public ITransformable animate(long elapsedTime)
+	public S animate(long elapsedTime)
 	{
 		if (transform == null || transformable == null)
 			return transformable;

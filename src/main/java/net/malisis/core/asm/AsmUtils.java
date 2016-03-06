@@ -297,7 +297,7 @@ public class AsmUtils
 		InsnList clone = new InsnList();
 		ListIterator<AbstractInsnNode> it = list.iterator();
 		while (it.hasNext())
-			clone.add(it.next().clone(Collections.EMPTY_MAP));
+			clone.add(it.next().clone(Collections.emptyMap()));
 
 		return clone;
 	}
@@ -309,7 +309,7 @@ public class AsmUtils
 	 * @param fieldName the field name
 	 * @return the field
 	 */
-	public static Field changeFieldAccess(Class clazz, String fieldName)
+	public static Field changeFieldAccess(Class<?> clazz, String fieldName)
 	{
 		return changeFieldAccess(clazz, fieldName, fieldName, false);
 	}
@@ -322,7 +322,7 @@ public class AsmUtils
 	 * @param srgName the srg name
 	 * @return the field
 	 */
-	public static Field changeFieldAccess(Class clazz, String fieldName, String srgName)
+	public static Field changeFieldAccess(Class<?> clazz, String fieldName, String srgName)
 	{
 		return changeFieldAccess(clazz, fieldName, srgName, false);
 	}
@@ -336,7 +336,7 @@ public class AsmUtils
 	 * @param silenced the silenced
 	 * @return the field
 	 */
-	public static Field changeFieldAccess(Class clazz, String fieldName, String srgName, boolean silenced)
+	public static Field changeFieldAccess(Class<?> clazz, String fieldName, String srgName, boolean silenced)
 	{
 		try
 		{
@@ -366,7 +366,7 @@ public class AsmUtils
 	 * @param params the params
 	 * @return the method
 	 */
-	public static Method changeMethodAccess(Class clazz, String methodName, String params)
+	public static Method changeMethodAccess(Class<?> clazz, String methodName, String params)
 	{
 		return changeMethodAccess(clazz, methodName, methodName, params);
 	}
@@ -380,7 +380,7 @@ public class AsmUtils
 	 * @param params the params
 	 * @return the method
 	 */
-	public static Method changeMethodAccess(Class clazz, String methodName, String srgName, String params)
+	public static Method changeMethodAccess(Class<?> clazz, String methodName, String srgName, String params)
 	{
 		return changeMethodAccess(clazz, methodName, srgName, false, new MethodDescriptor(params).getParams());
 	}
@@ -392,7 +392,7 @@ public class AsmUtils
 	 * @param methodName the field name
 	 * @return the field
 	 */
-	public static Method changeMethodAccess(Class clazz, String methodName, Class<?>... params)
+	public static Method changeMethodAccess(Class<?> clazz, String methodName, Class<?>... params)
 	{
 		return changeMethodAccess(clazz, methodName, methodName, false, params);
 	}
@@ -406,7 +406,7 @@ public class AsmUtils
 	 * @param params the params
 	 * @return the method
 	 */
-	public static Method changeMethodAccess(Class clazz, String methodName, String srgName, Class<?>... params)
+	public static Method changeMethodAccess(Class<?> clazz, String methodName, String srgName, Class<?>... params)
 	{
 		return changeMethodAccess(clazz, methodName, srgName, false, params);
 	}
@@ -421,7 +421,7 @@ public class AsmUtils
 	 * @param params the params
 	 * @return the field
 	 */
-	public static Method changeMethodAccess(Class clazz, String methodName, String srgName, boolean silenced, Class<?>... params)
+	public static Method changeMethodAccess(Class<?> clazz, String methodName, String srgName, boolean silenced, Class<?>... params)
 	{
 		try
 		{

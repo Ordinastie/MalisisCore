@@ -41,7 +41,7 @@ import net.minecraft.util.EnumFacing;
 public class RenderParameters implements ITransformable.Color, ITransformable.Alpha, ITransformable.Brightness, Cloneable
 {
 	/** List of parameters inside this {@link RenderParameters}. */
-	protected List<Parameter> listParams;
+	protected List<Parameter<?>> listParams;
 
 	/** Defines whether to render all faces even if shoudSideBeRendered is false */
 	public Parameter<Boolean> renderAllFaces = new Parameter<>(false);
@@ -65,7 +65,7 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	public Parameter<MalisisIcon> icon = new Parameter<>(null);
 
 	/** Defines whether to use block.getIcon(world, x, y, z, side) instead of block.getIcon(side, metadata) to get the IIcon */
-	public Parameter<Boolean> useWorldSensitiveIcon = new Parameter<Boolean>(true);
+	public Parameter<Boolean> useWorldSensitiveIcon = new Parameter<>(true);
 
 	/** Defines whether to use a texture (will call addVertexWithUV instead of addVertex) */
 	public Parameter<Boolean> useTexture = new Parameter<>(true);
@@ -193,7 +193,7 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	 * @param index the index
 	 * @return the parameter
 	 */
-	private Parameter getParameter(int index)
+	private Parameter<?> getParameter(int index)
 	{
 		if (index < 0 || index >= listParams.size())
 			return null;
@@ -205,7 +205,7 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	 */
 	public void reset()
 	{
-		for (Parameter param : listParams)
+		for (Parameter<?> param : listParams)
 			param.reset();
 	}
 

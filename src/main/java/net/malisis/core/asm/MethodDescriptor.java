@@ -90,7 +90,7 @@ public class MethodDescriptor
 		public MethodDescriptor parse()
 		{
 			boolean isParam = true;
-			Mutable<Class> clazz = new MutableObject<>();
+			Mutable<Class<?>> clazz = new MutableObject<>();
 			while (!isEnd())
 			{
 				if (match(OpenPar))

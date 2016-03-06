@@ -37,12 +37,12 @@ import net.minecraftforge.common.config.Configuration;
 
 /**
  * @author Ordinastie
- * 
+ *
  */
 public class Settings
 {
 	private Configuration config;
-	private HashMap<String, ArrayList<Setting>> categorySettings = new HashMap<>();
+	private HashMap<String, ArrayList<Setting<?>>> categorySettings = new HashMap<>();
 
 	public Settings(File file)
 	{
@@ -68,7 +68,7 @@ public class Settings
 		return categorySettings.keySet();
 	}
 
-	public List<Setting> getSettings(String category)
+	public List<Setting<?>> getSettings(String category)
 	{
 		return categorySettings.get(category);
 	}
@@ -87,10 +87,10 @@ public class Settings
 			if ((annotation = field.getAnnotation(ConfigurationSetting.class)) == null || field.getType() != Setting.class)
 				continue;
 
-			Setting setting = null;
+			Setting<?> setting = null;
 			try
 			{
-				setting = (Setting) field.get(this);
+				setting = (Setting<?>) field.get(this);
 			}
 			catch (IllegalArgumentException | IllegalAccessException e)
 			{
@@ -103,7 +103,7 @@ public class Settings
 				setting.setCategory(category);
 				setting.load(config);
 
-				ArrayList<Setting> settings = categorySettings.get(category);
+				ArrayList<Setting<?>> settings = categorySettings.get(category);
 				if (settings == null)
 					settings = new ArrayList<>();
 				settings.add(setting);
@@ -114,9 +114,9 @@ public class Settings
 
 	public void save()
 	{
-		for (Entry<String, ArrayList<Setting>> entry : categorySettings.entrySet())
+		for (Entry<String, ArrayList<Setting<?>>> entry : categorySettings.entrySet())
 		{
-			for (Setting setting : entry.getValue())
+			for (Setting<?> setting : entry.getValue())
 			{
 				setting.save();
 			}

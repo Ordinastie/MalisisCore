@@ -65,7 +65,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	/** Whether the height of this {@link UITab} is calculated based on the {@link #label} or {@link #image} . */
 	protected boolean autoHeight = false;
 	/** The container this {@link UITab} is linked to. */
-	protected UIContainer container;
+	protected UIContainer<?> container;
 	/** Whether this {@link UITab} is currently active. */
 	protected boolean active = false;
 
@@ -234,7 +234,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	 * @exception IllegalArgumentException if the parent is not a {@link UITabGroup}
 	 */
 	@Override
-	public void setParent(UIComponent parent)
+	public void setParent(UIComponent<?> parent)
 	{
 		if (!(parent instanceof UITabGroup))
 			throw new IllegalArgumentException("UITabs can only be added to UITabGroup");
@@ -291,7 +291,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	 * @param container the container
 	 * @return this {@link UITab}
 	 */
-	public UITab setContainer(UIContainer container)
+	public UITab setContainer(UIContainer<?> container)
 	{
 		this.container = container;
 		return this;
@@ -329,7 +329,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 		this.bgColor = color;
 		if (parent != null)
 		{
-			UIContainer cont = ((UITabGroup) parent).getAttachedContainer();
+			UIContainer<?> cont = ((UITabGroup) parent).getAttachedContainer();
 			if (cont instanceof ITransformable.Color)
 				((Color) cont).setColor(color);
 		}
@@ -378,7 +378,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 		this.container.setDisabled(!active);
 		this.zIndex = container.getZIndex() + (active ? 1 : 0);
 
-		fireEvent(new ActiveStateChange(this, active));
+		fireEvent(new ActiveStateChange<>(this, active));
 		return this;
 	}
 

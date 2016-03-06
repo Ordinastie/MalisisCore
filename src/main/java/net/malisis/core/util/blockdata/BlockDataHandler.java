@@ -58,7 +58,7 @@ public class BlockDataHandler
 	private static BlockDataHandler instance = new BlockDataHandler();
 	private static Field worldField = AsmUtils.changeFieldAccess(ChunkCache.class, "worldObj", "field_72815_e");
 
-	private Map<String, HandlerInfo> handlerInfos = new HashMap<>();
+	private Map<String, HandlerInfo<?>> handlerInfos = new HashMap<>();
 	private Table<String, Chunk, ChunkData<?>> serverDatas = HashBasedTable.create();
 	private Table<String, Chunk, ChunkData<?>> clientDatas = HashBasedTable.create();
 
@@ -81,17 +81,18 @@ public class BlockDataHandler
 		return null;
 	}
 
-	private ChunkData<?> chunkData(String identifier, World world, BlockPos pos)
+	private <T> ChunkData<T> chunkData(String identifier, World world, BlockPos pos)
 	{
 		return chunkData(identifier, world, world.getChunkFromBlockCoords(pos));
 	}
 
-	private ChunkData<?> chunkData(String identifier, World world, Chunk chunk)
+	@SuppressWarnings("unchecked")
+	private <T> ChunkData<T> chunkData(String identifier, World world, Chunk chunk)
 	{
-		ChunkData<?> chunkData = instance.data(world).get(identifier, chunk);
+		ChunkData<T> chunkData = (ChunkData<T>) instance.data(world).get(identifier, chunk);
 		if (chunkData == null)
 		{
-			chunkData = new ChunkData<>(handlerInfos.get(identifier));
+			chunkData = new ChunkData<>((HandlerInfo<T>) handlerInfos.get(identifier));
 			instance.data(world).put(identifier, chunk, chunkData);
 		}
 		return chunkData;
@@ -99,17 +100,17 @@ public class BlockDataHandler
 
 	public static <T> void registerBlockData(String identifier, Function<ByteBuf, T> from, Function<T, ByteBuf> to)
 	{
-		instance.handlerInfos.put(identifier, new HandlerInfo<T>(identifier, from, to));
+		instance.handlerInfos.put(identifier, new HandlerInfo<>(identifier, from, to));
 	}
 
 	public static <T> T getData(String identifier, IBlockAccess world, BlockPos pos)
 	{
-		return (T) instance.chunkData(identifier, instance.world(world), pos).getData(pos);
+		return instance.<T> chunkData(identifier, instance.world(world), pos).getData(pos);
 	}
 
 	public static <T> void setData(String identifier, IBlockAccess world, BlockPos pos, T data)
 	{
-		((ChunkData<T>) instance.chunkData(identifier, instance.world(world), pos)).setData(pos, data);
+		instance.<T> chunkData(identifier, instance.world(world), pos).setData(pos, data);
 	}
 
 	public static <T> void removeData(String identifier, IBlockAccess world, BlockPos pos)
@@ -133,7 +134,7 @@ public class BlockDataHandler
 			if (!nbt.hasKey(handlerInfo.identifier))
 				continue;
 
-			ChunkData chunkData = new ChunkData(handlerInfo);
+			ChunkData<?> chunkData = new ChunkData<>(handlerInfo);
 			chunkData.fromBytes(Unpooled.copiedBuffer(nbt.getByteArray(handlerInfo.identifier)));
 			data(event.world).put(handlerInfo.identifier, event.getChunk(), chunkData);
 		}
@@ -144,9 +145,9 @@ public class BlockDataHandler
 	{
 		NBTTagCompound nbt = event.getData();
 
-		for (HandlerInfo handlerInfo : handlerInfos.values())
+		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
 		{
-			ChunkData chunkData = chunkData(handlerInfo.identifier, event.world, event.getChunk());
+			ChunkData<?> chunkData = chunkData(handlerInfo.identifier, event.world, event.getChunk());
 			if (chunkData.hasData())
 			{
 				ByteBuf buf = Unpooled.buffer();

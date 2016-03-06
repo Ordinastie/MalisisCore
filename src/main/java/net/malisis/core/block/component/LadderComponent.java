@@ -47,7 +47,7 @@ import com.google.common.collect.Lists;
 public class LadderComponent implements IBlockComponent
 {
 	@Override
-	public IProperty getProperty()
+	public IProperty<?> getProperty()
 	{
 		return null;
 	}

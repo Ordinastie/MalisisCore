@@ -40,9 +40,9 @@ public class AnimationRenderer
 {
 	private long startTime = -1;
 	private boolean clearFinished = false;
-	private LinkedList<Animation> animations = new LinkedList<>();
+	private LinkedList<Animation<?>> animations = new LinkedList<>();
 	private List<ITransformable> tranformables = new ArrayList<>();
-	private List<Animation> toClear = new ArrayList<>();
+	private List<Animation<?>> toClear = new ArrayList<>();
 
 	public AnimationRenderer()
 	{
@@ -84,12 +84,12 @@ public class AnimationRenderer
 		return (float) (((double) getElapsedTime() / 1000) * 20);
 	}
 
-	public void addAnimation(Animation animation)
+	public void addAnimation(Animation<?> animation)
 	{
 		animations.add(animation);
 	}
 
-	public void deleteAnimation(Animation animation)
+	public void deleteAnimation(Animation<?> animation)
 	{
 		animations.remove(animation);
 	}
@@ -104,7 +104,7 @@ public class AnimationRenderer
 		clearFinished = true;
 	}
 
-	public List<ITransformable> animate(Animation... animations)
+	public List<ITransformable> animate(Animation<?>... animations)
 	{
 		tranformables.clear();
 		toClear.clear();
@@ -115,7 +115,7 @@ public class AnimationRenderer
 		ITransformable tr = null;
 		long elapsedTime = getElapsedTime();
 
-		for (Animation animation : animations)
+		for (Animation<?> animation : animations)
 		{
 			tr = animation.animate(elapsedTime);
 			if (tr != null)
@@ -132,13 +132,13 @@ public class AnimationRenderer
 	{
 		List<ITransformable> anims = animate(animations.toArray(new Animation[0]));
 
-		for (Animation animation : toClear)
+		for (Animation<?> animation : toClear)
 			animations.remove(animation);
 
 		return anims;
 	}
 
-	public void animate(ITransformable transformable, Transformation animation)
+	public <S extends ITransformable> void animate(S transformable, Transformation<?, S> animation)
 	{
 		if (transformable == null)
 			return;

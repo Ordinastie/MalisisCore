@@ -94,7 +94,7 @@ public class UIPasswordField extends UITextField
 		if (!validateText(newValue))
 			return;
 
-		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
+		if (!fireEvent(new ComponentEvent.ValueChange<>(this, oldValue, newValue)))
 			return;
 
 		password.insert(position, text);

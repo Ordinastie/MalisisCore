@@ -230,6 +230,7 @@ public class EntityUtils
 	 * @param z the z
 	 * @return the players watching chunk
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<EntityPlayerMP> getPlayersWatchingChunk(WorldServer world, int x, int z)
 	{
 		if (playersWatchingChunk == null)

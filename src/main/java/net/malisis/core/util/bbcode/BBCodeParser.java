@@ -60,7 +60,8 @@ public class BBCodeParser extends Parser<BBNode>
 	@Override
 	public BBNode parse()
 	{
-		Mutable<String> c = new MutableObject<>();
+		Mutable<String> str = new MutableObject<>();
+		Mutable<Character> c = new MutableObject<>();
 		boolean close = false;
 
 		while (!isEnd())
@@ -69,19 +70,19 @@ public class BBCodeParser extends Parser<BBNode>
 			if (match(OpenCar))
 			{
 				close = match(Div);
-				if (match(Identifier, c))
+				if (match(Identifier, str))
 				{
-					switch (c.toString().toLowerCase())
+					switch (str.toString().toLowerCase())
 					{
 						case "b":
 						case "i":
 						case "u":
 						case "s":
-							node = new BBStyleNode(c.toString());
+							node = new BBStyleNode(str.toString());
 							break;
 						case "color":
 						case "bgcolor":
-							node = new BBColorNode(c.toString());
+							node = new BBColorNode(str.toString());
 							break;
 						case "item":
 							node = new BBItemNode("");
@@ -103,15 +104,15 @@ public class BBCodeParser extends Parser<BBNode>
 					}
 				}
 
-				else if (node instanceof BBColorNode && match(Equal) && match(HexNumber, c))
+				else if (node instanceof BBColorNode && match(Equal) && match(HexNumber, str))
 				{
-					((BBColorNode) node).setColor(c.toString());
+					((BBColorNode) node).setColor(str.toString());
 				}
 
-				else if (node instanceof BBItemNode && match(Equal) && match(Identifier, c))
+				else if (node instanceof BBItemNode && match(Equal) && match(Identifier, str))
 				{
 					String name = readUntil(CloseCar);
-					((BBItemNode) node).setName(c.toString());
+					((BBItemNode) node).setName(str.toString());
 					matched += name;
 				}
 			}

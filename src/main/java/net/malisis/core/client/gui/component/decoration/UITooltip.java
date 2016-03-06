@@ -34,6 +34,7 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.AlphaTransform;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
@@ -43,7 +44,7 @@ import net.malisis.core.renderer.icon.provider.GuiIconProvider;
  *
  * @author PaleoCrafter
  */
-public class UITooltip extends UIComponent implements IGuiText<UITooltip>
+public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITooltip>
 {
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
@@ -53,7 +54,7 @@ public class UITooltip extends UIComponent implements IGuiText<UITooltip>
 	protected List<String> lines;
 	protected int padding = 4;
 	protected int delay = 0;
-	protected Animation animation;
+	protected Animation<ITransformable.Alpha> animation;
 
 	public UITooltip(MalisisGui gui)
 	{
@@ -66,7 +67,7 @@ public class UITooltip extends UIComponent implements IGuiText<UITooltip>
 		shape = new XYResizableGuiShape();
 		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(227, 31, 15, 15, 5));
 
-		animation = new Animation(this, new AlphaTransform(0, 255).forTicks(2));
+		animation = new Animation<>(this, new AlphaTransform(0, 255).forTicks(2));
 	}
 
 	public UITooltip(MalisisGui gui, String text)

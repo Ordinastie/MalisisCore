@@ -45,7 +45,7 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 
 	private Type type;
 
-	public UIResizeHandle(MalisisGui gui, UIComponent parent, Type type)
+	public UIResizeHandle(MalisisGui gui, UIComponent<?> parent, Type type)
 	{
 		super(gui);
 		this.type = type != null ? type : Type.BOTH;
@@ -54,8 +54,8 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		int y = -1;
 		if (parent instanceof UIContainer)
 		{
-			x += ((UIContainer) parent).getHorizontalPadding();
-			y += ((UIContainer) parent).getVerticalPadding();
+			x += ((UIContainer<?>) parent).getHorizontalPadding();
+			y += ((UIContainer<?>) parent).getVerticalPadding();
 		}
 
 		setPosition(x, y, Anchor.BOTTOM | Anchor.RIGHT);
@@ -67,7 +67,7 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(268, 0, 15, 15));
 	}
 
-	public UIResizeHandle(MalisisGui gui, UIComponent parent)
+	public UIResizeHandle(MalisisGui gui, UIComponent<?> parent)
 	{
 		this(gui, parent, Type.BOTH);
 	}
@@ -78,7 +78,7 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		if (button != MouseButton.LEFT)
 			return super.onDrag(lastX, lastY, x, y, button);
 
-		UIComponent p = getParent();
+		UIComponent<?> p = getParent();
 		if (p.getAnchor() != Anchor.NONE)
 			p.setPosition(p.parentX(), p.parentY(), Anchor.NONE);
 

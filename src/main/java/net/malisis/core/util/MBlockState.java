@@ -25,7 +25,6 @@
 package net.malisis.core.util;
 
 import java.lang.ref.WeakReference;
-import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -144,12 +143,12 @@ public class MBlockState
 	public MBlockState rotate(int count)
 	{
 		IBlockState newState = state;
-		for (IProperty prop : (Set<IProperty>) state.getProperties().keySet())
+		for (IProperty<?> prop : state.getProperties().keySet())
 		{
 			if (prop instanceof PropertyDirection)
 			{
 				EnumFacing facing = EnumFacingUtils.rotateFacing((EnumFacing) state.getValue(prop), 4 - count);
-				newState = newState.withProperty(prop, facing);
+				newState = newState.withProperty((PropertyDirection) prop, facing);
 			}
 		}
 
@@ -247,7 +246,7 @@ public class MBlockState
 
 		public BlockStateFunction set(IBlockAccess world)
 		{
-			this.world = new WeakReference<IBlockAccess>(world);
+			this.world = new WeakReference<>(world);
 			return this;
 		}
 

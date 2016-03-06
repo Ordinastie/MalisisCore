@@ -26,24 +26,66 @@ package net.malisis.core.renderer.animation.transformation;
 
 public class Scale extends Transformation<Scale, ITransformable.Scale>
 {
+	/** Starting scale. */
 	protected float fromX = 1, fromY = 1, fromZ = 1;
+	/** Target scale. */
 	protected float toX = 1, toY = 1, toZ = 1;
+	/** Scaling offset. */
 	protected float offsetX = 0, offsetY = 0, offsetZ = 0;
 
+	/**
+	 * Instantiates a new {@link Scale}.
+	 */
 	public Scale()
 	{}
 
+	/**
+	 * Instantiates a new {@link Scale}.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 */
 	public Scale(float x, float y, float z)
 	{
 		to(x, y, z);
 	}
 
+	/**
+	 * Instantiates a new {@link Scale}.
+	 *
+	 * @param fromX the from x
+	 * @param fromY the from y
+	 * @param fromZ the from z
+	 * @param toX the to x
+	 * @param toY the to y
+	 * @param toZ the to z
+	 */
 	public Scale(float fromX, float fromY, float fromZ, float toX, float toY, float toZ)
 	{
 		from(fromX, fromY, fromZ);
 		to(toX, toY, toZ);
 	}
 
+	/**
+	 * Gets this {@link Scale}.
+	 *
+	 * @return the scale
+	 */
+	@Override
+	public Scale self()
+	{
+		return this;
+	}
+
+	/**
+	 * Sets the starting scale.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @return the scale
+	 */
 	protected Scale from(float x, float y, float z)
 	{
 		fromX = x;
@@ -52,6 +94,14 @@ public class Scale extends Transformation<Scale, ITransformable.Scale>
 		return this;
 	}
 
+	/**
+	 * Sets the target scale.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @return the scale
+	 */
 	protected Scale to(float x, float y, float z)
 	{
 		toX = x;
@@ -60,6 +110,14 @@ public class Scale extends Transformation<Scale, ITransformable.Scale>
 		return this;
 	}
 
+	/**
+	 * Sets the offset for the scaling.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @return the scale
+	 */
 	public Scale offset(float x, float y, float z)
 	{
 		offsetX = x;
@@ -68,6 +126,12 @@ public class Scale extends Transformation<Scale, ITransformable.Scale>
 		return this;
 	}
 
+	/**
+	 * Calculate the transformation.
+	 *
+	 * @param transformable the transformable
+	 * @param comp the comp
+	 */
 	@Override
 	protected void doTransform(ITransformable.Scale transformable, float comp)
 	{

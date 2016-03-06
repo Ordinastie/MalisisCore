@@ -38,6 +38,6 @@ public interface IMSerializable extends IStringSerializable
 	@Override
 	public default String getName()
 	{
-		return ((Enum) this).name();
+		return ((Enum<?>) this).name();
 	}
 }

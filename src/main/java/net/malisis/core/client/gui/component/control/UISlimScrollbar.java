@@ -32,6 +32,7 @@ import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.AlphaTransform;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -48,7 +49,7 @@ public class UISlimScrollbar extends UIScrollBar
 	/** Whether the scrollbar should fade in/out */
 	protected boolean fade = true;
 
-	public <T extends UIComponent & IScrollable> UISlimScrollbar(MalisisGui gui, T parent, Type type)
+	public <T extends UIComponent<T> & IScrollable> UISlimScrollbar(MalisisGui gui, T parent, Type type)
 	{
 		super(gui, parent, type);
 		setScrollSize(2, 15);
@@ -158,7 +159,7 @@ public class UISlimScrollbar extends UIScrollBar
 	}
 
 	@Subscribe
-	public void onMouseOver(HoveredStateChange event)
+	public void onMouseOver(HoveredStateChange<UIScrollBar> event)
 	{
 		if (!fade)
 			return;
@@ -169,7 +170,7 @@ public class UISlimScrollbar extends UIScrollBar
 		int from = event.getState() ? 0 : 255;
 		int to = event.getState() ? 255 : 0;
 
-		Animation anim = new Animation(this, new AlphaTransform(from, to).forTicks(5));
+		Animation<ITransformable.Alpha> anim = new Animation<>(this, new AlphaTransform(from, to).forTicks(5));
 
 		event.getComponent().getGui().animate(anim);
 	}

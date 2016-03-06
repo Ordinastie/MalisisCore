@@ -30,19 +30,41 @@ import java.util.ArrayList;
  * @author Ordinastie
  *
  */
-public class ParallelTransformation extends Transformation<ParallelTransformation, ITransformable>
+public class ParallelTransformation<S extends ITransformable> extends Transformation<ParallelTransformation<S>, S>
 {
-	protected ArrayList<Transformation> listTransformations = new ArrayList<>();
+	/** List of transformations. */
+	protected ArrayList<Transformation<?, S>> listTransformations = new ArrayList<>();
 
-	public ParallelTransformation(Transformation... transformations)
+	/**
+	 * Instantiates a new {@link ParallelTransformation}.
+	 *
+	 * @param transformations the transformations
+	 */
+	public ParallelTransformation(@SuppressWarnings("unchecked") Transformation<?, S>... transformations)
 	{
 		addTransformations(transformations);
-
 	}
 
-	public ParallelTransformation addTransformations(Transformation... transformations)
+	/**
+	 * Gets this {@link ParallelTransformation}
+	 *
+	 * @return the parallel transformation
+	 */
+	@Override
+	public ParallelTransformation<S> self()
 	{
-		for (Transformation transformation : transformations)
+		return this;
+	}
+
+	/**
+	 * Adds the {@link Transformation} this to {@link ParallelTransformation}
+	 *
+	 * @param transformations the transformations
+	 * @return the parallel transformation
+	 */
+	public ParallelTransformation<S> addTransformations(@SuppressWarnings("unchecked") Transformation<?, S>... transformations)
+	{
+		for (Transformation<?, S> transformation : transformations)
 		{
 			duration = Math.max(duration, transformation.totalDuration());
 			listTransformations.add(transformation);
@@ -51,23 +73,35 @@ public class ParallelTransformation extends Transformation<ParallelTransformatio
 		return this;
 	}
 
+	/**
+	 * Calculates the tranformation.
+	 *
+	 * @param transformable the transformable
+	 * @param comp the comp
+	 */
 	@Override
-	protected void doTransform(ITransformable transformable, float comp)
+	protected void doTransform(S transformable, float comp)
 	{
 		if (listTransformations.size() == 0)
 			return;
 
-		for (Transformation transformation : listTransformations)
+		for (Transformation<?, S> transformation : listTransformations)
 			transformation.transform(transformable, elapsedTimeCurrentLoop);
 	}
 
+	/**
+	 * Sets this trasformation in reverse.
+	 *
+	 * @param reversed the reversed
+	 * @return the parallel transformation
+	 */
 	@Override
-	public ParallelTransformation reversed(boolean reversed)
+	public ParallelTransformation<S> reversed(boolean reversed)
 	{
 		if (!reversed)
 			return this;
 
-		for (Transformation transformation : listTransformations)
+		for (Transformation<?, ?> transformation : listTransformations)
 			transformation.reversed(true);
 
 		return this;

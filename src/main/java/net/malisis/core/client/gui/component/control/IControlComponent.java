@@ -40,14 +40,14 @@ public interface IControlComponent
 	 *
 	 * @param component the parent
 	 */
-	public void setParent(UIComponent component);
+	public void setParent(UIComponent<?> component);
 
 	/**
 	 * Gets the {@link UIComponent} controlled by this {@link IControlComponent}.
 	 *
 	 * @return the parent
 	 */
-	public UIComponent getParent();
+	public UIComponent<?> getParent();
 
 	/**
 	 * Gets the component at the specified coordinates. See {@link UIComponent#getComponentAt(int, int)}.
@@ -56,7 +56,7 @@ public interface IControlComponent
 	 * @param y the y
 	 * @return the component at
 	 */
-	public UIComponent getComponentAt(int x, int y);
+	public UIComponent<?> getComponentAt(int x, int y);
 
 	/**
 	 * Called when a key is pressed when this {@link IControlComponent} or its parent is focused or hovered.<br>

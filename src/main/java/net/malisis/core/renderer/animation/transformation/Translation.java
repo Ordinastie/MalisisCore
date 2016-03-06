@@ -26,20 +26,58 @@ package net.malisis.core.renderer.animation.transformation;
 
 public class Translation extends Transformation<Translation, ITransformable.Translate>
 {
+	/** The starting point of the translation. */
 	protected float fromX, fromY, fromZ;
+	/** The to ending point of the translation. */
 	protected float toX, toY, toZ;
 
+	/**
+	 * Instantiates a new {@link Translation}.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 */
 	public Translation(float x, float y, float z)
 	{
 		to(x, y, z);
 	}
 
+	/**
+	 * Instantiates a new {@link Translation}.
+	 *
+	 * @param fromX the from x
+	 * @param fromY the from y
+	 * @param fromZ the from z
+	 * @param toX the to x
+	 * @param toY the to y
+	 * @param toZ the to z
+	 */
 	public Translation(float fromX, float fromY, float fromZ, float toX, float toY, float toZ)
 	{
 		from(fromX, fromY, fromZ);
 		to(toX, toY, toZ);
 	}
 
+	/**
+	 * Gets this {@link Translation}
+	 *
+	 * @return the translation
+	 */
+	@Override
+	public Translation self()
+	{
+		return this;
+	}
+
+	/**
+	 * Sets the starting point of this {@link Translation}.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @return the translation
+	 */
 	public Translation from(float x, float y, float z)
 	{
 		fromX = x;
@@ -48,6 +86,14 @@ public class Translation extends Transformation<Translation, ITransformable.Tran
 		return this;
 	}
 
+	/**
+	 * Sets the target point of the {@link Translation}.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @return the translation
+	 */
 	public Translation to(float x, float y, float z)
 	{
 		toX = x;
@@ -56,6 +102,12 @@ public class Translation extends Transformation<Translation, ITransformable.Tran
 		return this;
 	}
 
+	/**
+	 * Calculates the transformation.
+	 *
+	 * @param transformable the transformable
+	 * @param comp the comp
+	 */
 	@Override
 	protected void doTransform(ITransformable.Translate transformable, float comp)
 	{

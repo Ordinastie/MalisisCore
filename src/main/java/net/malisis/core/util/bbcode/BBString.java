@@ -178,7 +178,7 @@ public class BBString
 		renderer.buildLines(lines);
 	}
 
-	public void render(GuiRenderer guiRenderer, int x, int y, int z, IBBCodeRenderer bbcr)
+	public void render(GuiRenderer guiRenderer, int x, int y, int z, IBBCodeRenderer<?> bbcr)
 	{
 		renderer.render(guiRenderer, x, y, z, bbcr);
 	}

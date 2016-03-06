@@ -49,7 +49,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class ColorComponent implements IBlockComponent
 {
-	public static PropertyEnum COLOR = BlockColored.COLOR;
+	public static PropertyEnum<EnumDyeColor> COLOR = BlockColored.COLOR;
 	private boolean useColorMultiplier = true;
 
 	public ColorComponent(boolean useColorMultiplier)
@@ -63,7 +63,7 @@ public class ColorComponent implements IBlockComponent
 	}
 
 	@Override
-	public PropertyEnum getProperty()
+	public PropertyEnum<EnumDyeColor> getProperty()
 	{
 		return COLOR;
 	}
@@ -89,12 +89,12 @@ public class ColorComponent implements IBlockComponent
 	@Override
 	public int damageDropped(Block block, IBlockState state)
 	{
-		return ((EnumDyeColor) state.getValue(getProperty())).getMetadata();
+		return state.getValue(getProperty()).getMetadata();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Block block, Item item, CreativeTabs tab, List list)
+	public void getSubBlocks(Block block, Item item, CreativeTabs tab, List<ItemStack> list)
 	{
 		for (EnumDyeColor color : EnumDyeColor.values())
 			list.add(new ItemStack(item, 1, color.getMetadata()));
@@ -131,7 +131,7 @@ public class ColorComponent implements IBlockComponent
 	@Override
 	public MapColor getMapColor(Block block, IBlockState state)
 	{
-		return ((EnumDyeColor) state.getValue(getProperty())).getMapColor();
+		return state.getValue(getProperty()).getMapColor();
 	}
 
 	/**
@@ -158,7 +158,7 @@ public class ColorComponent implements IBlockComponent
 	@Override
 	public int getMetaFromState(Block block, IBlockState state)
 	{
-		return ((EnumDyeColor) state.getValue(getProperty())).getMetadata();
+		return state.getValue(getProperty()).getMetadata();
 	}
 
 	/**
@@ -185,11 +185,11 @@ public class ColorComponent implements IBlockComponent
 		if (cc == null)
 			return EnumDyeColor.WHITE;
 
-		PropertyEnum property = cc.getProperty();
+		PropertyEnum<EnumDyeColor> property = cc.getProperty();
 		if (property == null || !state.getProperties().containsKey(property))
 			return EnumDyeColor.WHITE;
 
-		return (EnumDyeColor) state.getValue(property);
+		return state.getValue(property);
 	}
 
 }

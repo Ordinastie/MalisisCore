@@ -163,7 +163,7 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	 *
 	 * @param renderer the renderer
 	 */
-	public void render(MalisisRenderer renderer)
+	public void render(MalisisRenderer<?> renderer)
 	{
 		render(renderer, (RenderParameters) null);
 	}
@@ -175,7 +175,7 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	 * @param renderer the renderer
 	 * @param rp the parameters
 	 */
-	public void render(MalisisRenderer renderer, RenderParameters rp)
+	public void render(MalisisRenderer<?> renderer, RenderParameters rp)
 	{
 		for (String name : shapes.keySet())
 			render(renderer, name, rp);
@@ -187,7 +187,7 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	 * @param renderer the renderer
 	 * @param name the name of the shape
 	 */
-	public void render(MalisisRenderer renderer, String name)
+	public void render(MalisisRenderer<?> renderer, String name)
 	{
 		render(renderer, name, null);
 	}
@@ -200,7 +200,7 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	 * @param name the name of the shape
 	 * @param rp the paramters
 	 */
-	public void render(MalisisRenderer renderer, String name, RenderParameters rp)
+	public void render(MalisisRenderer<?> renderer, String name, RenderParameters rp)
 	{
 		Shape shape = shapes.get(name);
 		if (shape != null)

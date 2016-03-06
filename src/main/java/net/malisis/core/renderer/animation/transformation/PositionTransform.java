@@ -31,7 +31,7 @@ import net.malisis.core.renderer.animation.transformation.ITransformable.Positio
  * @author Ordinastie
  * @param <T> the generic type of the Transformable
  */
-public class PositionTransform<T> extends Transformation<PositionTransform, ITransformable.Position<T>>
+public class PositionTransform<T> extends Transformation<PositionTransform<T>, ITransformable.Position<T>>
 {
 	/** Starting position. */
 	protected int fromX, fromY;
@@ -50,6 +50,17 @@ public class PositionTransform<T> extends Transformation<PositionTransform, ITra
 	{
 		from(fromX, fromY);
 		to(toX, toY);
+	}
+
+	/**
+	 * Gets this {@link PositionTransform}.
+	 *
+	 * @return the position transform
+	 */
+	@Override
+	public PositionTransform<T> self()
+	{
+		return this;
 	}
 
 	/**

@@ -89,7 +89,7 @@ import org.lwjgl.opengl.GL11;
  *
  */
 @SuppressWarnings("deprecation")
-public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlockRenderer, IRenderWorldLast
+public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRenderer<T> implements IBlockRenderer, IRenderWorldLast
 {
 	/** Reference to Tessellator.isDrawing field **/
 	private static Field isDrawingField;
@@ -121,7 +121,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	/** Metadata of the block to render (BLOCK/TESR). */
 	protected IBlockState blockState;
 	/** TileEntity currently drawing (TESR). */
-	protected TileEntity tileEntity;
+	protected T tileEntity;
 	/** Partial tick time (TESR/IRWL). */
 	protected float partialTick = 0;
 	/** ItemStack to render (ITEM). */
@@ -186,13 +186,14 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 * @param pos the pos
 	 * @param blockState the block state
 	 */
+	@SuppressWarnings("unchecked")
 	public void set(IBlockAccess world, Block block, BlockPos pos, IBlockState blockState)
 	{
 		this.world = world;
 		this.pos = new BlockPos(pos);
 		this.block = block;
 		this.blockState = blockState;
-		this.tileEntity = world.getTileEntity(pos);
+		this.tileEntity = (T) world.getTileEntity(pos);
 	}
 
 	/**
@@ -243,7 +244,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 * @param te the te
 	 * @param partialTick the partial tick
 	 */
-	public void set(TileEntity te, float partialTick)
+	public void set(T te, float partialTick)
 	{
 		set(te.getWorld(), te.getBlockType(), te.getPos(), te.getWorld().getBlockState(te.getPos()));
 		this.partialTick = partialTick;
@@ -325,7 +326,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 * @param partialTick the partial tick
 	 */
 	@Override
-	public synchronized void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTick, int destroyStage)
+	public synchronized void renderTileEntityAt(T te, double x, double y, double z, float partialTick, int destroyStage)
 	{
 		if (te.getBlockType() != te.getWorld().getBlockState(te.getPos()).getBlock())
 			return;
@@ -1322,7 +1323,7 @@ public class MalisisRenderer extends TileEntitySpecialRenderer implements IBlock
 	 *
 	 * @param clazz the clazz
 	 */
-	public void registerFor(Class<? extends TileEntity> clazz)
+	public void registerFor(Class<T> clazz)
 	{
 		ClientRegistry.bindTileEntitySpecialRenderer(clazz, this);
 	}

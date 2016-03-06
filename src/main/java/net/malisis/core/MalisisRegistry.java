@@ -105,13 +105,13 @@ public class MalisisRegistry
 		private Set<IIconRegister> iconRegisters = new HashSet<>();
 		/** List of {@link DummyModel} for registered items */
 		private Set<DummyModel> itemModels = new HashSet<>();
-		private Map<Class<? extends MalisisRenderer>, MalisisRenderer> registeredRenderers = new HashMap<>();
+		private Map<Class<? extends MalisisRenderer<?>>, MalisisRenderer<?>> registeredRenderers = new HashMap<>();
 
 		/** Empty {@link IStateMapper} **/
 		private static final IStateMapper emptyMapper = new IStateMapper()
 		{
 			@Override
-			public Map putStateModelLocations(Block block)
+			public Map<IBlockState, ModelResourceLocation> putStateModelLocations(Block block)
 			{
 				return ImmutableMap.of();
 			}
@@ -185,13 +185,13 @@ public class MalisisRegistry
 		private void registerRenderer(Object object)
 		{
 			//get the classes to use to render
-			Pair<Class<? extends MalisisRenderer>, Class<? extends MalisisRenderer>> rendererClasses = getRendererClasses(object);
+			Pair<Class<? extends MalisisRenderer<?>>, Class<? extends MalisisRenderer<?>>> rendererClasses = getRendererClasses(object);
 			if (rendererClasses == null)
 				return;
 
 			//MalisisCore.log.info("[MalisisRegistry] Found annotation for {}", object.getClass().getSimpleName());
 			//get the block renderer
-			MalisisRenderer renderer = null;
+			MalisisRenderer<?> renderer = null;
 			try
 			{
 				renderer = getRenderer(rendererClasses.getLeft());
@@ -239,7 +239,7 @@ public class MalisisRegistry
 		 * @param object the object
 		 * @return the renderer classes
 		 */
-		private Pair<Class<? extends MalisisRenderer>, Class<? extends MalisisRenderer>> getRendererClasses(Object object)
+		private Pair<Class<? extends MalisisRenderer<?>>, Class<? extends MalisisRenderer<?>>> getRendererClasses(Object object)
 		{
 			Class<?> objClass = object.getClass();
 			MalisisRendered annotation = objClass.getAnnotation(MalisisRendered.class);
@@ -260,7 +260,7 @@ public class MalisisRegistry
 		 * @throws InstantiationException the instantiation exception
 		 * @throws IllegalAccessException the illegal access exception
 		 */
-		private MalisisRenderer getRenderer(Class<? extends MalisisRenderer> clazz) throws InstantiationException, IllegalAccessException
+		private MalisisRenderer<?> getRenderer(Class<? extends MalisisRenderer<?>> clazz) throws InstantiationException, IllegalAccessException
 		{
 			if (clazz == DefaultRenderer.Block.class)
 				return DefaultRenderer.block;
@@ -269,7 +269,7 @@ public class MalisisRegistry
 			else if (clazz == DefaultRenderer.Null.class)
 				return DefaultRenderer.nullRender;
 
-			MalisisRenderer renderer = registeredRenderers.get(clazz);
+			MalisisRenderer<?> renderer = registeredRenderers.get(clazz);
 			if (renderer == null)
 			{
 				renderer = clazz.newInstance();

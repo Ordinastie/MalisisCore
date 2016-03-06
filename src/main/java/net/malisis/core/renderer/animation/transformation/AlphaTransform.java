@@ -30,15 +30,64 @@ package net.malisis.core.renderer.animation.transformation;
  */
 public class AlphaTransform extends Transformation<AlphaTransform, ITransformable.Alpha>
 {
+	/** Starting alpha. */
 	protected int fromAlpha;
+	/** Target alpha. */
 	protected int toAlpha;
 
+	/**
+	 * Instantiates a new {@link AlphaTransform}.
+	 *
+	 * @param fromAlpa the from alpa
+	 * @param toAlpha the to alpha
+	 */
 	public AlphaTransform(int fromAlpa, int toAlpha)
 	{
 		this.fromAlpha = fromAlpa;
 		this.toAlpha = toAlpha;
 	}
 
+	/**
+	 * Gets this {@link AlphaTransform}.
+	 *
+	 * @return the alpha transform
+	 */
+	@Override
+	public AlphaTransform self()
+	{
+		return this;
+	}
+
+	/**
+	 * Sets the starting alpha for this {@link AlphaTransform}.
+	 *
+	 * @param alpha the alpha
+	 * @return the alpha transform
+	 */
+	public AlphaTransform from(int alpha)
+	{
+		this.fromAlpha = alpha;
+		return this;
+	}
+
+	/**
+	 * Sets the target alpha for this {@link AlphaTransform}.
+	 *
+	 * @param alpha the alpha
+	 * @return the alpha transform
+	 */
+	public AlphaTransform to(int alpha)
+	{
+		this.toAlpha = alpha;
+		return this;
+	}
+
+	/**
+	 * Calculates the transformation.
+	 *
+	 * @param transformable the transformable
+	 * @param comp the comp
+	 */
 	@Override
 	protected void doTransform(ITransformable.Alpha transformable, float comp)
 	{

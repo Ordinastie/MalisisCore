@@ -30,7 +30,7 @@ import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.player.PlayerInventorySlot;
 
-public class UIPlayerInventory extends UIContainer
+public class UIPlayerInventory extends UIContainer<UIPlayerInventory>
 {
 	/** Width required for player inventory */
 	public static final int INVENTORY_WIDTH = 162;

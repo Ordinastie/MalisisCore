@@ -39,11 +39,11 @@ import net.minecraft.util.IStringSerializable;
  */
 public class PropertyEnumIconProvider<T extends Enum<T> & IStringSerializable> implements IBlockIconProvider
 {
-	private PropertyEnum property;
+	private PropertyEnum<T> property;
 	private MalisisIcon defaultIcon;
 	private EnumMap<T, MalisisIcon> icons;
 
-	public PropertyEnumIconProvider(PropertyEnum property, Class<T> enumClass, String defaultName)
+	public PropertyEnumIconProvider(PropertyEnum<T> property, Class<T> enumClass, String defaultName)
 	{
 		this.property = property;
 		this.icons = new EnumMap<>(enumClass);
@@ -57,7 +57,7 @@ public class PropertyEnumIconProvider<T extends Enum<T> & IStringSerializable> i
 		this.defaultIcon = defaultIcon;
 	}
 
-	public PropertyEnumIconProvider(PropertyEnum property, Class<T> enumClass)
+	public PropertyEnumIconProvider(PropertyEnum<T> property, Class<T> enumClass)
 	{
 		this(property, enumClass, (MalisisIcon) null);
 	}
@@ -96,6 +96,6 @@ public class PropertyEnumIconProvider<T extends Enum<T> & IStringSerializable> i
 	@Override
 	public MalisisIcon getIcon(IBlockState state)
 	{
-		return state != null ? getIcon((T) state.getValue(property)) : getIcon();
+		return state != null ? getIcon(state.getValue(property)) : getIcon();
 	}
 }

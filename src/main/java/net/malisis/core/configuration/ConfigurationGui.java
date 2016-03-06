@@ -52,7 +52,7 @@ public class ConfigurationGui extends MalisisGui
 {
 	private Settings settings;
 	protected ArrayList<UIPanel> pannels = new ArrayList<>();
-	protected HashMap<UIComponent, Setting> componentSettings = new HashMap<>();
+	protected HashMap<UIComponent<?>, Setting<?>> componentSettings = new HashMap<>();
 
 	protected int windowWidth = 400;
 	protected int windowHeight = 120;
@@ -104,15 +104,15 @@ public class ConfigurationGui extends MalisisGui
 		addToScreen(window);
 	}
 
-	private UIContainer createSettingContainer(String category)
+	private UIContainer<?> createSettingContainer(String category)
 	{
-		List<Setting> categorySettings = settings.getSettings(category);
-		UIContainer container = new UIContainer<UIContainer>(this, windowWidth - 105, windowHeight - 35).setPosition(5, 12);
+		List<Setting<?>> categorySettings = settings.getSettings(category);
+		UIContainer<?> container = new UIContainer<>(this, windowWidth - 105, windowHeight - 35).setPosition(5, 12);
 
 		int y = 0;
-		for (Setting setting : categorySettings)
+		for (Setting<?> setting : categorySettings)
 		{
-			UIComponent component = setting.getComponent(this);
+			UIComponent<?> component = setting.getComponent(this);
 			component.setPosition(0, y);
 			component.register(this);
 			container.add(component);
@@ -125,11 +125,11 @@ public class ConfigurationGui extends MalisisGui
 	}
 
 	@Subscribe
-	public void onMouseOver(HoveredStateChange event)
+	public void onMouseOver(HoveredStateChange<?> event)
 	{
 		if (event.getState() == true)
 		{
-			Setting setting = componentSettings.get(event.getComponent());
+			Setting<?> setting = componentSettings.get(event.getComponent());
 			if (setting != null)
 			{
 				String str = StringUtils.join(setting.getComments(), "\r");
@@ -147,16 +147,7 @@ public class ConfigurationGui extends MalisisGui
 			close();
 		else
 		{
-			Set<String> categories = settings.getCategories();
-			for (String category : categories)
-			{
-				List<Setting> categorySettings = settings.getSettings(category);
-				for (Setting setting : categorySettings)
-				{
-					setting.set(setting.getValueFromComponent());
-				}
-			}
-
+			settings.getCategories().forEach((cat) -> settings.getSettings(cat).forEach((setting) -> setting.applySettingFromComponent()));
 			settings.save();
 			close();
 		}

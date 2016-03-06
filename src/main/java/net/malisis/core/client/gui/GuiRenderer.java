@@ -47,6 +47,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
@@ -58,12 +59,12 @@ import org.lwjgl.opengl.GL11;
  * @author Ordinastie
  *
  */
-public class GuiRenderer extends MalisisRenderer
+public class GuiRenderer extends MalisisRenderer<TileEntity>
 {
 	/** RenderItem used to draw itemStacks. */
 	public static RenderItem itemRenderer = Minecraft.getMinecraft().getRenderItem();
 	/** Current component being drawn. */
-	public UIComponent currentComponent;
+	public UIComponent<?> currentComponent;
 	/** Multiplying factor between GUI size and pixel size. */
 	private int scaleFactor;
 	/** Should the rendering be done according to scaleFactor. */
@@ -282,7 +283,7 @@ public class GuiRenderer extends MalisisRenderer
 	 * @param mouseY the mouse y
 	 * @param partialTick the partial tick
 	 */
-	public void drawScreen(UIContainer container, int mouseX, int mouseY, float partialTick)
+	public void drawScreen(UIContainer<?> container, int mouseX, int mouseY, float partialTick)
 	{
 		if (container == null)
 			return;

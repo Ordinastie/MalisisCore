@@ -26,6 +26,7 @@ package net.malisis.core.client.gui.component.interaction;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Objects;
 
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
@@ -50,7 +51,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 
 import com.google.common.base.Function;
-import com.google.common.base.Functions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
@@ -93,7 +93,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	/** Function for option creation **/
 	protected Function<T, ? extends Option<T>> optionFunction;
 	/** Function for options label */
-	protected Function<T, String> labelFunction = (Function<T, String>) Functions.toStringFunction();
+	protected Function<T, String> labelFunction;
 	/** Predicate for option disability */
 	protected Predicate<T> disablePredicate = Predicates.alwaysFalse();
 	/** Default function to build options **/
@@ -102,8 +102,8 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		@Override
 		public Option<T> apply(T input)
 		{
-			Option<T> option = optionFunction != null ? optionFunction.apply(input) : new Option(input);
-			option.setLabel(labelFunction.apply(input));
+			Option<T> option = optionFunction != null ? optionFunction.apply(input) : new Option<>(input);
+			option.setLabel(labelFunction != null ? labelFunction.apply(input) : Objects.toString(input));
 			option.setDisabled(disablePredicate.apply(input));
 			return option;
 		}
@@ -316,8 +316,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 	public UISelect<T> setLabelFunction(Function<T, String> func)
 	{
-		if (func == null)
-			func = (Function<T, String>) Functions.toStringFunction();
 		this.labelFunction = func;
 		calcOptionsSize();
 		return this;
@@ -406,7 +404,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public UISelect<T> setOptions(Iterable<T> values)
 	{
 		if (values == null)
-			values = Collections.EMPTY_LIST;
+			values = Collections.emptyList();
 
 		options = FluentIterable.from(values).transform(toOption);
 
@@ -486,7 +484,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		if (option.equals(selectedOption))
 			return value;
 
-		if (fireEvent(new SelectEvent<T>(this, value)))
+		if (fireEvent(new SelectEvent<>(this, value)))
 			setSelectedOption(option);
 
 		if (expanded && maxDisplayedOptions < options.size())
@@ -765,7 +763,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		renderer.next();
 
 		int y = 14;
-		Option hover = getOptionAt(mouseX, mouseY);
+		Option<T> hover = getOptionAt(mouseX, mouseY);
 		for (int i = optionOffset; i < optionOffset + maxDisplayedOptions && i < options.size(); i++)
 		{
 			Option<T> option = options.get(i);
@@ -787,7 +785,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			return true;
 		}
 
-		Option opt = getOptionAt(x, y);
+		Option<T> opt = getOptionAt(x, y);
 		if (opt != null)
 		{
 			if (opt.isDisabled())
@@ -949,12 +947,12 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			this.disabled = disabled;
 		}
 
-		public int getHeight(UISelect select)
+		public int getHeight(UISelect<T> select)
 		{
 			return (int) (select.font.getStringHeight(select.fro) + 1);
 		}
 
-		public void draw(UISelect select, GuiRenderer renderer, int x, int y, int z, float partialTick, boolean hovered, boolean isTop)
+		public void draw(UISelect<T> select, GuiRenderer renderer, int x, int y, int z, float partialTick, boolean hovered, boolean isTop)
 		{
 			String text = getLabel(select.labelPattern);
 			if (StringUtils.isEmpty(text))
@@ -983,7 +981,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		@Override
 		public boolean equals(Object obj)
 		{
-			return obj != null && obj instanceof Option && key.equals(((Option) obj).key);
+			return obj != null && obj instanceof Option && key.equals(((Option<?>) obj).key);
 		}
 	}
 
@@ -992,7 +990,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	 * When catching the event, the state is not applied to the {@code UISelect} yet.<br>
 	 * Cancelling the event will prevent the {@code Option} to be set for the {@code UISelect} .
 	 */
-	public static class SelectEvent<T> extends ValueChange<UISelect, T>
+	public static class SelectEvent<T> extends ValueChange<UISelect<T>, T>
 	{
 		public SelectEvent(UISelect<T> component, T newValue)
 		{

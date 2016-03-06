@@ -53,7 +53,7 @@ public class MinecraftFont extends MalisisFont
 	private FontRenderer fontRenderer;
 	private MCCharData mcCharData = new MCCharData();
 	private UnicodeCharData unicodeCharData = new UnicodeCharData();
-	private MalisisRenderer renderer;
+	private MalisisRenderer<?> renderer;
 
 	public MinecraftFont()
 	{
@@ -120,14 +120,14 @@ public class MinecraftFont extends MalisisFont
 	}
 
 	@Override
-	protected void prepare(MalisisRenderer renderer, float x, float y, float z, FontRenderOptions fro)
+	protected void prepare(MalisisRenderer<?> renderer, float x, float y, float z, FontRenderOptions fro)
 	{
 		super.prepare(renderer, x, y, z, fro);
 		this.renderer = renderer;
 	}
 
 	@Override
-	protected void clean(MalisisRenderer renderer, boolean isDrawing)
+	protected void clean(MalisisRenderer<?> renderer, boolean isDrawing)
 	{
 		super.clean(renderer, isDrawing);
 		lastFontTexture = null;

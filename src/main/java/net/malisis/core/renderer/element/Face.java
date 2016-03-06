@@ -85,7 +85,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		if (name == null)
 		{
 			name = "";
-			HashMap<String, Integer> map = new HashMap<String, Integer>();
+			HashMap<String, Integer> map = new HashMap<>();
 			String[] dirs = new String[] { "North", "South", "East", "West", "Top", "Bottom" };
 			for (String dir : dirs)
 			{

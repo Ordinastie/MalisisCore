@@ -40,13 +40,13 @@ import org.apache.commons.lang3.mutable.Mutable;
 public abstract class Parser<T>
 {
 	protected String text;
-	protected Token token = Token.None;
+	protected Token<?> token = Token.None;
 	protected boolean cached = false;
 	protected int index = 0;
 	protected String matched = "";
 
-	protected Set<Token> listTokens = new LinkedHashSet<>();
-	protected Set<Token> ignoreTokens = new HashSet<>();
+	protected Set<Token<?>> listTokens = new LinkedHashSet<>();
+	protected Set<Token<?>> ignoreTokens = new HashSet<>();
 
 	//	protected Token currentToken;
 	//	protected int currentSize;
@@ -58,24 +58,24 @@ public abstract class Parser<T>
 		text = s;
 	}
 
-	protected void withTokens(Token... tokens)
+	protected void withTokens(Token<?>... tokens)
 	{
 		listTokens.addAll(Arrays.asList(tokens));
 	}
 
-	protected void ignoreTokens(Token... tokens)
+	protected void ignoreTokens(Token<?>... tokens)
 	{
 		withTokens(tokens);
 		ignoreTokens.addAll(Arrays.asList(tokens));
 	}
 
-	private Token getToken()
+	private Token<?> getToken()
 	{
 		cached = true;
 		if (isEnd())
 			return token = Token.EndOfInput;
 
-		for (Token t : listTokens)
+		for (Token<?> t : listTokens)
 		{
 			if (t.matches(text, index))
 			{
@@ -92,14 +92,14 @@ public abstract class Parser<T>
 		return token = Token.None;
 	}
 
-	public Token peekToken()
+	public Token<?> peekToken()
 	{
 		if (!cached)
 			getToken();
 		return token;
 	}
 
-	public Token readToken()
+	public Token<?> readToken()
 	{
 		forward();
 		peekToken();
@@ -129,12 +129,12 @@ public abstract class Parser<T>
 		return text.charAt(index);
 	}
 
-	public boolean match(Token token)
+	public <S> boolean match(Token<S> token)
 	{
 		return match(token, null);
 	}
 
-	public boolean match(Token t, Mutable obj)
+	public <S> boolean match(Token<S> t, Mutable<S> obj)
 	{
 		if (!listTokens.contains(t))
 			throw new IllegalArgumentException("Tried to match Token " + t + " not present is parser list tokens");
@@ -147,14 +147,14 @@ public abstract class Parser<T>
 			return false;
 
 		if (obj != null)
-			obj.setValue(token.getValue());
+			obj.setValue(t.getValue());
 
 		matched += token.getValue();
 		forward();
 		return true;
 	}
 
-	public String readUntil(Token... tokens)
+	public String readUntil(Token<?>... tokens)
 	{
 		int s = index;
 		int e = index;
@@ -171,7 +171,7 @@ public abstract class Parser<T>
 
 	public abstract T parse();
 
-	public void error(Token expected)
+	public void error(Token<?> expected)
 	{
 		throw new ParserException("Expecting '" + expected + "' at " + index + " but found " + token);
 	}

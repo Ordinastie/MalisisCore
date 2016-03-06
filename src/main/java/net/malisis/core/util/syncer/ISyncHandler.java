@@ -92,5 +92,5 @@ public interface ISyncHandler<T, S extends ISyncableData>
 	 * @param caller the caller
 	 * @param packet the packet
 	 */
-	public void send(T caller, Packet packet);
+	public void send(T caller, Packet<T, S> packet);
 }

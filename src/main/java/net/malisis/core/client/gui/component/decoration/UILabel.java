@@ -347,7 +347,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	 * @return the component at
 	 */
 	@Override
-	public UIComponent getComponentAt(int x, int y)
+	public UIComponent<?> getComponentAt(int x, int y)
 	{
 		//make single line label non interactible
 		return multiLine ? super.getComponentAt(x, y) : null;
@@ -363,7 +363,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		if (!StringUtils.isEmpty(text))
 			lines = font.wrapText(text, getWidth(), fro);
 
-		fireEvent(new ContentUpdateEvent<UILabel>(this));
+		fireEvent(new ContentUpdateEvent<>(this));
 	}
 
 	/**

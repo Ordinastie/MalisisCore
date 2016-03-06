@@ -33,7 +33,7 @@ import net.malisis.core.client.gui.event.ComponentEvent;
  * @author Ordinastie
  * @param <T> the type of {@link UIComponent} firing this event
  */
-public class ContentUpdateEvent<T extends UIComponent> extends ComponentEvent<T>
+public class ContentUpdateEvent<T extends UIComponent<T>> extends ComponentEvent<T>
 {
 	/**
 	 * Instantiates a new {@link ContentUpdateEvent}.

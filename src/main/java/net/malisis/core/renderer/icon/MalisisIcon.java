@@ -449,6 +449,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	{
 		try
 		{
+			@SuppressWarnings("unchecked")
 			HashMap<String, TextureAtlasSprite> map = (HashMap<String, TextureAtlasSprite>) mapRegisteredSprites.get(textureMap);
 			map.put(getIconName(), this);
 		}

@@ -68,7 +68,7 @@ import com.google.common.eventbus.EventBus;
  * @author Ordinastie, PaleoCrafter
  * @param <T> the type of <code>UIComponent</code>
  */
-public abstract class UIComponent<T extends UIComponent> implements ITransformable.Position<T>, ITransformable.Size<T>,
+public abstract class UIComponent<T extends UIComponent<T>> implements ITransformable.Position<T>, ITransformable.Size<T>,
 		ITransformable.Alpha, IKeyListener, IMetaIconProvider
 {
 	/** The Constant INHERITED. */
@@ -91,7 +91,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	/** Event bus on which event listeners are registered. */
 	private EventBus bus;
 	/** The parent {@link UIComponent} of this <code>UIComponent</code>. */
-	protected UIComponent parent;
+	protected UIComponent<?> parent;
 	/** The name of this {@link UIComponent}. Can be used to retrieve this back from a container. */
 	protected String name;
 	/** The tooltip for this {@link UIComponent} Automatically displayed when the {@link UIComponent} is hovered. */
@@ -132,6 +132,12 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	}
 
 	// #region getters/setters
+	@SuppressWarnings("unchecked")
+	public T self()
+	{
+		return (T) this;
+	}
+
 	/**
 	 * Gets the {@link MalisisGui} this {@link UIComponent} was added to.
 	 *
@@ -184,16 +190,16 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		this.y = y;
 		this.anchor = anchor;
 
-		if (!fireEvent(new PositionChangeEvent(this, x, y, anchor)))
+		if (!fireEvent(new PositionChangeEvent<>(self(), x, y, anchor)))
 		{
 			//event is cancelled, restore old values
 			this.x = oldX;
 			this.y = oldY;
 			this.anchor = oldAnchor;
-			return (T) this;
+			return self();
 		}
 
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -225,7 +231,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	public T setZIndex(int zIndex)
 	{
 		this.zIndex = zIndex;
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -249,13 +255,13 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		int oldAnchor = this.anchor;
 		this.anchor = anchor;
 
-		if (!fireEvent(new PositionChangeEvent(this, x, y, anchor)))
+		if (!fireEvent(new PositionChangeEvent<>(self(), x, y, anchor)))
 		{
 			//event is cancelled, restore old values
 			this.anchor = oldAnchor;
-			return (T) this;
+			return self();
 		}
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -284,15 +290,15 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		this.width = width;
 		this.height = height;
 
-		if (!fireEvent(new SizeChangeEvent(this, width, height)))
+		if (!fireEvent(new SizeChangeEvent<>(self(), width, height)))
 		{
 			//event is cancelled, restore old values
 			this.width = oldWidth;
 			this.height = oldHeight;
-			return (T) this;
+			return self();
 		}
 
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -321,7 +327,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		//if width < 0 consider it relative to parent container
 		int w = parent.getWidth() + width;
 		if (parent instanceof UIContainer)
-			w -= 2 * ((UIContainer) parent).getHorizontalPadding();
+			w -= 2 * ((UIContainer<?>) parent).getHorizontalPadding();
 
 		return w;
 	}
@@ -362,7 +368,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 		//if height < 0 consider it relative to parent container
 		int h = parent.getHeight() + height;
 		if (parent instanceof UIContainer)
-			h -= 2 * ((UIContainer) parent).getVerticalPadding();
+			h -= 2 * ((UIContainer<?>) parent).getVerticalPadding();
 
 		return h;
 	}
@@ -390,7 +396,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 			return;
 
 		this.hovered = hovered;
-		fireEvent(new HoveredStateChange(this, hovered));
+		fireEvent(new HoveredStateChange<>(self(), hovered));
 
 		if (tooltip != null && hovered)
 			tooltip.animate();
@@ -422,7 +428,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 			return;
 
 		this.focused = focused;
-		fireEvent(new FocusStateChange(this, focused));
+		fireEvent(new FocusStateChange<>(self(), focused));
 	}
 
 	/**
@@ -440,7 +446,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	 *
 	 * @return the parent
 	 */
-	public UIComponent getParent()
+	public UIComponent<?> getParent()
 	{
 		return parent;
 	}
@@ -450,10 +456,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	 *
 	 * @param parent the parent
 	 */
-	public void setParent(UIComponent parent)
+	public void setParent(UIComponent<?> parent)
 	{
 		this.parent = parent;
-		fireEvent(new ContentUpdateEvent(this));
+		fireEvent(new ContentUpdateEvent<>(self()));
 	}
 
 	/**
@@ -475,10 +481,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	public T setVisible(boolean visible)
 	{
 		if (isVisible() == visible)
-			return (T) this;
+			return self();
 
-		if (!fireEvent(new VisibleStateChange(this, visible)))
-			return (T) this;
+		if (!fireEvent(new VisibleStateChange<>(self(), visible)))
+			return self();
 
 		this.visible = visible;
 		if (!visible)
@@ -487,7 +493,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 			this.setFocused(false);
 		}
 
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -509,10 +515,10 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	public T setDisabled(boolean disabled)
 	{
 		if (isDisabled() == disabled)
-			return (T) this;
+			return self();
 
-		if (!fireEvent(new DisabledStateChange(this, disabled)))
-			return (T) this;
+		if (!fireEvent(new DisabledStateChange<>(self(), disabled)))
+			return self();
 
 		this.disabled = disabled;
 		if (disabled)
@@ -520,7 +526,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 			setHovered(false);
 			setFocused(false);
 		}
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -541,7 +547,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	public T setName(String name)
 	{
 		this.name = name;
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -563,7 +569,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	public T setTooltip(UITooltip tooltip)
 	{
 		this.tooltip = tooltip;
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -575,7 +581,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	public T setTooltip(String text)
 	{
 		setTooltip(new UITooltip(getGui(), text));
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -633,7 +639,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	public T register(Object object)
 	{
 		bus.register(object);
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -645,7 +651,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	public T unregister(Object object)
 	{
 		bus.unregister(object);
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -654,7 +660,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	 * @param event the event
 	 * @return true, if the even can propagate, false if cancelled
 	 */
-	public boolean fireEvent(ComponentEvent event)
+	public boolean fireEvent(ComponentEvent<?> event)
 	{
 		bus.post(event);
 		return !event.isCancelled();
@@ -832,12 +838,12 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	 * @param y the y
 	 * @return this {@link UIComponent} or null if outside its bounds.
 	 */
-	public UIComponent getComponentAt(int x, int y)
+	public UIComponent<?> getComponentAt(int x, int y)
 	{
 		//control components take precedence over regular components
 		for (IControlComponent c : controlComponents)
 		{
-			UIComponent component = c.getComponentAt(x, y);
+			UIComponent<?> component = c.getComponentAt(x, y);
 			if (component != null)
 				return component;
 		}
@@ -873,7 +879,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	 * @param component the component
 	 * @return the coordinate
 	 */
-	public int componentX(UIComponent component)
+	public int componentX(UIComponent<?> component)
 	{
 		int x = component.getX();
 		int w = getWidth() - component.getWidth();
@@ -891,7 +897,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	 * @param component the component
 	 * @return the coordinate
 	 */
-	public int componentY(UIComponent component)
+	public int componentY(UIComponent<?> component)
 	{
 		int y = component.getY();
 		int h = getHeight() - component.getHeight();
@@ -991,7 +997,7 @@ public abstract class UIComponent<T extends UIComponent> implements ITransformab
 	public void onAddedToScreen()
 	{
 		if (width <= 0 || height <= 0)
-			fireEvent(new SizeChangeEvent<UIComponent>(this, getWidth(), getHeight()));
+			fireEvent(new SizeChangeEvent<>(self(), getWidth(), getHeight()));
 	}
 
 	/**

@@ -59,6 +59,7 @@ public class ShapelessOreRecipeHandler extends ReplacementHandler<ShapelessOreRe
 				replaced = true;
 			}
 
+			@SuppressWarnings("unchecked")
 			ArrayList<Object> input = (ArrayList<Object>) inputField.get(recipe);
 			for (int i = 0; i < input.size(); i++)
 			{

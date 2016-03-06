@@ -40,7 +40,6 @@ import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
-import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.Link;
 import net.malisis.core.renderer.font.MalisisFont;
@@ -56,7 +55,6 @@ import org.lwjgl.opengl.GL11;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * UITextField.
@@ -181,7 +179,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	@Override
-	public void setParent(UIComponent parent)
+	public void setParent(UIComponent<?> parent)
 	{
 		if (parent != null)
 			register(parent);
@@ -670,7 +668,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			}
 		}
 
-		fireEvent(new ContentUpdateEvent<UITextField>(this));
+		fireEvent(new ContentUpdateEvent<>(this));
 	}
 
 	/**
@@ -702,7 +700,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (!validateText(newValue))
 			return;
 
-		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
+		if (!fireEvent(new ComponentEvent.ValueChange<>(this, oldValue, newValue)))
 			return;
 
 		text.insert(position, str);
@@ -724,7 +722,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		String oldValue = this.text.toString();
 		String newValue = new StringBuilder(oldValue).delete(start, end).toString();
 
-		if (!fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
+		if (!fireEvent(new ComponentEvent.ValueChange<>(this, oldValue, newValue)))
 			return;
 
 		text.delete(start, end);
@@ -1230,13 +1228,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	public String getPropertyString()
 	{
 		return text + " | " + super.getPropertyString();
-	}
-
-	@Subscribe
-	public void onSizeUpdate(SizeChangeEvent<UIComponent> event)
-	{
-		//if (event.getComponent() != this)
-		//buildLines();
 	}
 
 	//#region CursorPosition

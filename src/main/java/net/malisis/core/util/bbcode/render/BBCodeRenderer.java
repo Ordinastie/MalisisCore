@@ -95,7 +95,7 @@ public class BBCodeRenderer
 		}
 	}
 
-	public void render(GuiRenderer renderer, int x, int y, int z, IBBCodeRenderer bbsr)
+	public void render(GuiRenderer renderer, int x, int y, int z, IBBCodeRenderer<?> bbsr)
 	{
 		int ox = x;
 		int oy = y;

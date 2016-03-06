@@ -56,9 +56,9 @@ public class HTMLParser extends Parser<HTMLNode>
 	}
 
 	@Override
-	public Token readToken()
+	public Token<?> readToken()
 	{
-		Token t;
+		Token<?> t;
 		while ((t = super.readToken()) == Space);
 		return t;
 	}

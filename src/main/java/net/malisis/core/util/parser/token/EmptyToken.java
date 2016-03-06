@@ -28,7 +28,7 @@ package net.malisis.core.util.parser.token;
  * @author Ordinastie
  *
  */
-public class EmptyToken extends Token
+public class EmptyToken extends Token<Void>
 {
 	@Override
 	public boolean matches(String s, int index)

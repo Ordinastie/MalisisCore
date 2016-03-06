@@ -45,7 +45,7 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 
 	private Type type;
 
-	public UIMoveHandle(MalisisGui gui, UIComponent parent, Type type)
+	public UIMoveHandle(MalisisGui gui, UIComponent<?> parent, Type type)
 	{
 		super(gui);
 		this.type = type != null ? type : Type.BOTH;
@@ -54,8 +54,8 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 		int y = 1;
 		if (parent instanceof UIContainer)
 		{
-			x -= ((UIContainer) parent).getHorizontalPadding();
-			y -= ((UIContainer) parent).getVerticalPadding();
+			x -= ((UIContainer<?>) parent).getHorizontalPadding();
+			y -= ((UIContainer<?>) parent).getVerticalPadding();
 		}
 		setPosition(x, y);
 		setSize(5, 5);
@@ -67,7 +67,7 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(268, 15, 15, 15));
 	}
 
-	public UIMoveHandle(MalisisGui gui, UIComponent parent)
+	public UIMoveHandle(MalisisGui gui, UIComponent<?> parent)
 	{
 		this(gui, parent, Type.BOTH);
 	}
@@ -78,7 +78,7 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 		if (button != MouseButton.LEFT)
 			return super.onDrag(lastX, lastY, x, y, button);
 
-		UIComponent parentCont = getParent().getParent();
+		UIComponent<?> parentCont = getParent().getParent();
 		if (parentCont == null)
 			return super.onDrag(lastX, lastY, x, y, button);
 

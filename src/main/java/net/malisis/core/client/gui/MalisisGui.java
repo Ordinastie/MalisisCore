@@ -89,7 +89,7 @@ public abstract class MalisisGui extends GuiScreen
 	/** The resolution for the GUI **/
 	protected ScaledResolution resolution;
 	/** Top level container which hold the user components. Spans across the whole screen. */
-	private UIContainer screen;
+	private UIContainer<?> screen;
 	/** Determines if the screen should be darkened when the GUI is opened. */
 	protected boolean guiscreenBackground = true;
 	/** Last known position of the mouse. */
@@ -106,9 +106,9 @@ public abstract class MalisisGui extends GuiScreen
 	/** {@link AnimationRenderer} */
 	private AnimationRenderer ar;
 	/** Currently hovered child component. */
-	protected UIComponent hoveredComponent;
+	protected UIComponent<?> hoveredComponent;
 	/** Currently focused child component. */
-	protected UIComponent focusedComponent;
+	protected UIComponent<?> focusedComponent;
 	/** Whether this GUI has been constructed. */
 	protected boolean constructed = false;
 	/** List of {@link IKeyListener} registered. */
@@ -120,7 +120,7 @@ public abstract class MalisisGui extends GuiScreen
 	protected MalisisGui()
 	{
 		this.renderer = new GuiRenderer();
-		this.screen = new UIContainer(this);
+		this.screen = new UIContainer<>(this);
 		this.ar = new AnimationRenderer();
 		this.ar.autoClearAnimations();
 		this.screen.setClipContent(false);
@@ -238,6 +238,7 @@ public abstract class MalisisGui extends GuiScreen
 		screen.setSize(width, height);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addDebug(String name, final Object... objects)
 	{
 		Callable<String> call;
@@ -281,7 +282,7 @@ public abstract class MalisisGui extends GuiScreen
 	 *
 	 * @param component the component
 	 */
-	protected void addToScreen(UIComponent component)
+	protected void addToScreen(UIComponent<?> component)
 	{
 		screen.add(component);
 		component.onAddedToScreen();
@@ -322,9 +323,9 @@ public abstract class MalisisGui extends GuiScreen
 	 * @param y the y coordinate
 	 * @return the component, null if component is {@link #screen}
 	 */
-	public UIComponent getComponentAt(int x, int y)
+	public UIComponent<?> getComponentAt(int x, int y)
 	{
-		UIComponent component = screen.getComponentAt(x, y);
+		UIComponent<?> component = screen.getComponentAt(x, y);
 		return component == screen ? null : component;
 	}
 
@@ -343,7 +344,7 @@ public abstract class MalisisGui extends GuiScreen
 
 			if (lastMouseX != mouseX || lastMouseY != mouseY)
 			{
-				UIComponent component = getComponentAt(mouseX, mouseY);
+				UIComponent<?> component = getComponentAt(mouseX, mouseY);
 				if (component != null && !component.isDisabled())
 				{
 					component.onMouseMove(lastMouseX, lastMouseY, mouseX, mouseY);
@@ -364,7 +365,7 @@ public abstract class MalisisGui extends GuiScreen
 			else if (delta < -1)
 				delta = -1;
 
-			UIComponent component = getComponentAt(mouseX, mouseY);
+			UIComponent<?> component = getComponentAt(mouseX, mouseY);
 			if (component != null && !component.isDisabled())
 			{
 				component.onScrollWheel(mouseX, mouseY, delta);
@@ -387,7 +388,7 @@ public abstract class MalisisGui extends GuiScreen
 		{
 			long time = System.currentTimeMillis();
 
-			UIComponent component = getComponentAt(x, y);
+			UIComponent<?> component = getComponentAt(x, y);
 			if (component != null && !component.isDisabled())
 			{
 				//double click
@@ -464,7 +465,7 @@ public abstract class MalisisGui extends GuiScreen
 				}
 			}
 
-			UIComponent component = getComponentAt(x, y);
+			UIComponent<?> component = getComponentAt(x, y);
 			if (component != null && !component.isDisabled())
 			{
 				MouseButton mb = MouseButton.getButton(button);
@@ -612,12 +613,12 @@ public abstract class MalisisGui extends GuiScreen
 	public void updateGui()
 	{}
 
-	public void animate(Animation animation)
+	public void animate(Animation<?> animation)
 	{
 		animate(animation, 0);
 	}
 
-	public void animate(Animation animation, int delay)
+	public void animate(Animation<?> animation, int delay)
 	{
 		animation.setDelay((int) ar.getElapsedTicks() + delay);
 		ar.addAnimation(animation);
@@ -768,7 +769,7 @@ public abstract class MalisisGui extends GuiScreen
 	/**
 	 * @return the currently hovered {@link UIComponent}. null if there is no current GUI.
 	 */
-	public static UIComponent getHoveredComponent()
+	public static UIComponent<?> getHoveredComponent()
 	{
 		return currentGui() != null ? currentGui().hoveredComponent : null;
 	}
@@ -780,7 +781,7 @@ public abstract class MalisisGui extends GuiScreen
 	 * @param hovered the hovered state
 	 * @return true, if the state was changed
 	 */
-	public static boolean setHoveredComponent(UIComponent component, boolean hovered)
+	public static boolean setHoveredComponent(UIComponent<?> component, boolean hovered)
 	{
 		MalisisGui gui = currentGui();
 		if (gui == null)
@@ -812,12 +813,12 @@ public abstract class MalisisGui extends GuiScreen
 	 *
 	 * @return the component
 	 */
-	public static UIComponent getFocusedComponent()
+	public static UIComponent<?> getFocusedComponent()
 	{
 		return currentGui() != null ? currentGui().focusedComponent : null;
 	}
 
-	public static boolean setFocusedComponent(UIComponent component, boolean focused)
+	public static boolean setFocusedComponent(UIComponent<?> component, boolean focused)
 	{
 		MalisisGui gui = currentGui();
 		if (gui == null)

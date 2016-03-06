@@ -75,7 +75,7 @@ public class Bezier
 	 */
 	public void setControlPoints(List<Vertex> controlPoints)
 	{
-		this.controlPoints = controlPoints != null ? controlPoints : new ArrayList<Vertex>();
+		this.controlPoints = controlPoints != null ? controlPoints : new ArrayList<>();
 		dirty = true;
 	}
 

@@ -66,7 +66,7 @@ public class RaytraceBlock extends Raytrace
 	public RaytraceBlock(World world, Ray ray, BlockPos pos)
 	{
 		super(ray);
-		this.world = new WeakReference<World>(world);
+		this.world = new WeakReference<>(world);
 		this.pos = pos;
 		this.block = world().getBlockState(pos).getBlock();
 	}

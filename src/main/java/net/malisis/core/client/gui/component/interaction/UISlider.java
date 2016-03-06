@@ -165,7 +165,7 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 		this.offset = offset;
 		float oldValue = this.value;
 		float newValue = minValue + (maxValue - minValue) * offset;
-		if (fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue)))
+		if (fireEvent(new ComponentEvent.ValueChange<>(this, oldValue, newValue)))
 			value = newValue;
 	}
 

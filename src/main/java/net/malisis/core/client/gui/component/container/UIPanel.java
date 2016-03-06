@@ -70,7 +70,7 @@ public class UIPanel extends UIContainer<UIPanel> implements ITransformable.Colo
 	 * @param color the color
 	 * @return the UI container
 	 */
-	public UIContainer setBackgroundColor(int color)
+	public UIPanel setBackgroundColor(int color)
 	{
 		this.backgroundColor = color;
 		return this;

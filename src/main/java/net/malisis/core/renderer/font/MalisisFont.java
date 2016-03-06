@@ -171,7 +171,7 @@ public class MalisisFont
 	}
 
 	//#region Prepare/Clean
-	protected void prepare(MalisisRenderer renderer, float x, float y, float z, FontRenderOptions fro)
+	protected void prepare(MalisisRenderer<?> renderer, float x, float y, float z, FontRenderOptions fro)
 	{
 		boolean isGui = renderer instanceof GuiRenderer;
 		renderer.next(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
@@ -184,7 +184,7 @@ public class MalisisFont
 			GL11.glScalef(1 / 9F, -1 / 9F, 1 / 9F);
 	}
 
-	protected void clean(MalisisRenderer renderer, boolean isDrawing)
+	protected void clean(MalisisRenderer<?> renderer, boolean isDrawing)
 	{
 		if (isDrawing)
 			renderer.next(MalisisRenderer.malisisVertexFormat);
@@ -195,7 +195,7 @@ public class MalisisFont
 		GL11.glPopMatrix();
 	}
 
-	protected void prepareShadow(MalisisRenderer renderer)
+	protected void prepareShadow(MalisisRenderer<?> renderer)
 	{
 		drawingShadow = true;
 		if (renderer instanceof GuiRenderer)
@@ -205,7 +205,7 @@ public class MalisisFont
 		GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
 	}
 
-	protected void cleanShadow(MalisisRenderer renderer)
+	protected void cleanShadow(MalisisRenderer<?> renderer)
 	{
 		drawingShadow = false;
 		if (renderer instanceof GuiRenderer)
@@ -215,13 +215,13 @@ public class MalisisFont
 		GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
 	}
 
-	protected void prepareLines(MalisisRenderer renderer, FontRenderOptions fro)
+	protected void prepareLines(MalisisRenderer<?> renderer, FontRenderOptions fro)
 	{
 		renderer.next(DefaultVertexFormats.POSITION_COLOR);
 		renderer.disableTextures();
 	}
 
-	protected void cleanLines(MalisisRenderer renderer)
+	protected void cleanLines(MalisisRenderer<?> renderer)
 	{
 		renderer.next();
 		renderer.enableTextures();
@@ -229,7 +229,7 @@ public class MalisisFont
 
 	//#end Prepare/Clean
 
-	public void render(MalisisRenderer renderer, String text, float x, float y, float z, FontRenderOptions fro)
+	public void render(MalisisRenderer<?> renderer, String text, float x, float y, float z, FontRenderOptions fro)
 	{
 		if (StringUtils.isEmpty(text))
 			return;

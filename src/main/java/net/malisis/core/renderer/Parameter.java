@@ -122,10 +122,11 @@ public class Parameter<T> implements Cloneable
 	 *
 	 * @param parameter the parameter
 	 */
-	public void merge(Parameter<T> parameter)
+	@SuppressWarnings("unchecked")
+	public void merge(Parameter<?> parameter)
 	{
 		if (parameter.getValue() != null)
-			value = parameter.getValue();
+			value = (T) parameter.getValue();
 	}
 
 	@Override
@@ -134,12 +135,13 @@ public class Parameter<T> implements Cloneable
 		return value + " [" + defaultValue + "]";
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	protected Parameter clone()
+	protected Parameter<T> clone()
 	{
 		try
 		{
-			return (Parameter) super.clone();
+			return (Parameter<T>) super.clone();
 		}
 		catch (CloneNotSupportedException e)
 		{

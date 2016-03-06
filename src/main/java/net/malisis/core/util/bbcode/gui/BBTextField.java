@@ -131,7 +131,7 @@ public class BBTextField extends UITextField implements IBBCodeRenderer<BBTextFi
 		String newValue = bbText.getText();
 
 		//non cancellable
-		fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue));
+		fireEvent(new ComponentEvent.ValueChange<>(this, oldValue, newValue));
 
 		text.setLength(0);
 		text.append(bbText.getRawText());
@@ -162,7 +162,7 @@ public class BBTextField extends UITextField implements IBBCodeRenderer<BBTextFi
 		bbText.deleteText(start, end);
 		String newValue = bbText.getText();
 
-		fireEvent(new ComponentEvent.ValueChange(this, oldValue, newValue));
+		fireEvent(new ComponentEvent.ValueChange<>(this, oldValue, newValue));
 
 		text.setLength(0);
 		text.append(bbText.getRawText());

@@ -63,7 +63,7 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 		}
 	};
 
-	protected UIContainer menu;
+	protected UIContainer<?> menu;
 
 	protected UIButton btnBold;
 	protected UIButton btnItalic;
@@ -167,7 +167,7 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 
 	protected void createMenu(MalisisGui gui)
 	{
-		menu = new UIContainer(gui);
+		menu = new UIContainer<>(gui);
 		menu.setParent(this);
 
 		createButtons(gui);

@@ -30,30 +30,97 @@ package net.malisis.core.renderer.animation.transformation;
  */
 public class ColorTransform extends Transformation<ColorTransform, ITransformable.Color>
 {
+	/** Starting color. */
 	protected int fromColor;
+	/** Target color. */
 	protected int toColor;
 
+	/**
+	 * Instantiates a new {@link ColorTransform}.
+	 *
+	 * @param fromColor the from color
+	 * @param toColor the to color
+	 */
 	public ColorTransform(int fromColor, int toColor)
 	{
 		this.fromColor = fromColor;
 		this.toColor = toColor;
 	}
 
+	/**
+	 * Gets this {@link ColorTransform}.
+	 *
+	 * @return the color transform
+	 */
+	@Override
+	public ColorTransform self()
+	{
+		return this;
+	}
+
+	/**
+	 * Sets the starting color for this {@link ColorTransform}.
+	 *
+	 * @param color the color
+	 * @return the color transform
+	 */
+	public ColorTransform from(int color)
+	{
+		this.fromColor = color;
+		return this;
+	}
+
+	/**
+	 * Sets the target color for this {@link ColorTransform}.
+	 *
+	 * @param color the color
+	 * @return the color transform
+	 */
+	public ColorTransform to(int color)
+	{
+		this.toColor = color;
+		return this;
+	}
+
+	/**
+	 * Gets the red component of the color.
+	 *
+	 * @param color the color
+	 * @return the int
+	 */
 	private int red(int color)
 	{
 		return (color >> 16) & 0xFF;
 	}
 
+	/**
+	 * Gets the green component of the color.
+	 *
+	 * @param color the color
+	 * @return the int
+	 */
 	private int green(int color)
 	{
 		return (color >> 8) & 0xFF;
 	}
 
+	/**
+	 * Gets the blue component of the color.
+	 *
+	 * @param color the color
+	 * @return the int
+	 */
 	private int blue(int color)
 	{
 		return color & 0xFF;
 	}
 
+	/**
+	 * Calculates the transformation.
+	 *
+	 * @param transformable the transformable
+	 * @param comp the comp
+	 */
 	@Override
 	protected void doTransform(ITransformable.Color transformable, float comp)
 	{

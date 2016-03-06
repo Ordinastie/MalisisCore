@@ -155,7 +155,7 @@ public class MalisisNetwork extends SimpleNetworkWrapper
 		{
 			try
 			{
-				Class clazz = Class.forName(data.getClassName());
+				Class<?> clazz = Class.forName(data.getClassName());
 				if (IMessageHandler.class.isAssignableFrom(clazz))
 					clazz.newInstance();
 				else

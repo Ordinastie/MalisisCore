@@ -39,6 +39,7 @@ import net.malisis.core.renderer.model.MalisisModel;
 import net.malisis.core.renderer.model.loader.TextureModelLoader;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.client.model.TRSRTransformation;
 
@@ -49,11 +50,11 @@ import net.minecraftforge.client.model.TRSRTransformation;
 @SuppressWarnings("deprecation")
 public class DefaultRenderer
 {
-	public static MalisisRenderer nullRender = new Null();
+	public static MalisisRenderer<?> nullRender = new Null();
 	public static Block block = new Block();
 	public static Item item = new Item();
 
-	public static class Null extends MalisisRenderer
+	public static class Null extends MalisisRenderer<TileEntity>
 	{
 		@Override
 		public void render()
@@ -62,7 +63,7 @@ public class DefaultRenderer
 		}
 	}
 
-	public static class Block extends MalisisRenderer
+	public static class Block extends MalisisRenderer<TileEntity>
 	{
 		//"thirdperson": {
 		//    "rotation": [ 10, -45, 170 ],
@@ -114,7 +115,7 @@ public class DefaultRenderer
 		}
 	}
 
-	public static class Item extends MalisisRenderer
+	public static class Item extends MalisisRenderer<TileEntity>
 	{
 		//"thirdperson": {
 		//    "rotation": [ -90, 0, 0 ],

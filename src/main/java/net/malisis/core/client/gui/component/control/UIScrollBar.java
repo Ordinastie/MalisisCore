@@ -56,7 +56,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		HORIZONTAL, VERTICAL
 	}
 
-	private static Map<UIComponent, Map<Type, UIScrollBar>> scrollbars = new WeakHashMap();
+	private static Map<UIComponent<?>, Map<Type, UIScrollBar>> scrollbars = new WeakHashMap<>();
 
 	/** The scroll thickness (Width for vertical, height for horizontal). */
 	protected int scrollThickness = 10;
@@ -76,7 +76,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	private GuiIconProvider verticalIconProvider;
 	private GuiIconProvider horizontalIconProvider;
 
-	public <T extends UIComponent & IScrollable> UIScrollBar(MalisisGui gui, T parent, Type type)
+	public <T extends UIComponent<T> & IScrollable> UIScrollBar(MalisisGui gui, T parent, Type type)
 	{
 		super(gui);
 		this.type = type;
@@ -284,7 +284,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 */
 	public void updateScrollbar()
 	{
-		UIComponent component = getParent();
+		UIComponent<?> component = getParent();
 		IScrollable scrollable = getScrollable();
 		int delta = hasVisibleOtherScrollbar() ? scrollThickness : 0;
 		boolean hide = false;
@@ -333,7 +333,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	}
 
 	@Subscribe
-	public void onContentUpdate(ContentUpdateEvent event)
+	public void onContentUpdate(ContentUpdateEvent<UIScrollBar> event)
 	{
 		if (getParent() != event.getComponent())
 			return;
@@ -420,7 +420,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 * @param type the type
 	 * @return the scrollbar
 	 */
-	public static UIScrollBar getScrollbar(UIComponent component, Type type)
+	public static UIScrollBar getScrollbar(UIComponent<?> component, Type type)
 	{
 		Map<Type, UIScrollBar> bars = scrollbars.get(component);
 		if (bars == null)
@@ -435,7 +435,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 * @param component the component
 	 * @param scrollbar the scrollbar
 	 */
-	private static void addScrollbar(UIComponent component, UIScrollBar scrollbar)
+	private static void addScrollbar(UIComponent<?> component, UIScrollBar scrollbar)
 	{
 		Map<Type, UIScrollBar> bars = scrollbars.get(component);
 		if (bars == null)

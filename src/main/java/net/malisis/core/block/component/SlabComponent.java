@@ -82,7 +82,7 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 	}
 
 	@Override
-	public PropertyEnum getProperty()
+	public PropertyEnum<EnumBlockHalf> getProperty()
 	{
 		return BlockSlab.HALF;
 	}
@@ -200,11 +200,11 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 		if (sc == null)
 			return false;
 
-		PropertyEnum property = sc.getProperty();
+		PropertyEnum<EnumBlockHalf> property = sc.getProperty();
 		if (property == null || !state.getProperties().containsKey(property))
 			return false;
 
-		return (EnumBlockHalf) state.getValue(property) == EnumBlockHalf.TOP;
+		return state.getValue(property) == EnumBlockHalf.TOP;
 	}
 
 	public static boolean isDoubleSlab(IBlockAccess world, BlockPos pos)

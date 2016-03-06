@@ -26,16 +26,31 @@ package net.malisis.core.renderer.animation.transformation;
 
 public class Rotation extends Transformation<Rotation, ITransformable.Rotate>
 {
+	/** Starting angle. */
 	protected float fromAngle;
+	/** Target angle. */
 	protected float toAngle;
+	/** Axis for the rotation. */
 	protected float axisX, axisY, axisZ;
+	/** Axis position. */
 	protected float offsetX, offsetY, offsetZ;
 
+	/**
+	 * Instantiates a new {@link Rotation}.
+	 *
+	 * @param angle the angle
+	 */
 	public Rotation(float angle)
 	{
 		to(angle);
 	}
 
+	/**
+	 * Instantiates a new {@link Rotation}.
+	 *
+	 * @param fromAngle the from angle
+	 * @param toAngle the to angle
+	 */
 	public Rotation(float fromAngle, float toAngle)
 	{
 		from(fromAngle);
@@ -43,12 +58,31 @@ public class Rotation extends Transformation<Rotation, ITransformable.Rotate>
 
 	}
 
+	/**
+	 * Instantiates a new {@link Rotation}.
+	 *
+	 * @param angle the angle
+	 * @param axisX the axis x
+	 * @param axisY the axis y
+	 * @param axisZ the axis z
+	 */
 	public Rotation(float angle, float axisX, float axisY, float axisZ)
 	{
 		to(angle);
 		aroundAxis(axisX, axisY, axisZ);
 	}
 
+	/**
+	 * Instantiates a new {@link Rotation}.
+	 *
+	 * @param angle the angle
+	 * @param axisX the axis x
+	 * @param axisY the axis y
+	 * @param axisZ the axis z
+	 * @param offsetX the offset x
+	 * @param offsetY the offset y
+	 * @param offsetZ the offset z
+	 */
 	public Rotation(float angle, float axisX, float axisY, float axisZ, float offsetX, float offsetY, float offsetZ)
 	{
 		to(angle);
@@ -56,18 +90,49 @@ public class Rotation extends Transformation<Rotation, ITransformable.Rotate>
 		offset(offsetX, offsetY, offsetZ);
 	}
 
+	/**
+	 * Gets this {@link Rotation}.
+	 *
+	 * @return the rotation
+	 */
+	@Override
+	public Rotation self()
+	{
+		return this;
+	}
+
+	/**
+	 * Sets the starting angle for this {@link Rotation}.
+	 *
+	 * @param angle the angle
+	 * @return the rotation
+	 */
 	public Rotation from(float angle)
 	{
 		fromAngle = angle;
 		return this;
 	}
 
+	/**
+	 * Sets the target angle for this {@link Rotation}.
+	 *
+	 * @param angle the angle
+	 * @return the rotation
+	 */
 	public Rotation to(float angle)
 	{
 		toAngle = angle;
 		return this;
 	}
 
+	/**
+	 * Sets the axis for this {@link Rotation}.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @return the rotation
+	 */
 	public Rotation aroundAxis(float x, float y, float z)
 	{
 		axisX = x;
@@ -76,6 +141,14 @@ public class Rotation extends Transformation<Rotation, ITransformable.Rotate>
 		return this;
 	}
 
+	/**
+	 * Sets the axis position for this {@link Rotation}.
+	 *
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @return the rotation
+	 */
 	public Rotation offset(float x, float y, float z)
 	{
 		offsetX = x;
@@ -84,6 +157,12 @@ public class Rotation extends Transformation<Rotation, ITransformable.Rotate>
 		return this;
 	}
 
+	/**
+	 * Calculates the transformation.
+	 *
+	 * @param transformable the transformable
+	 * @param comp the comp
+	 */
 	@Override
 	protected void doTransform(ITransformable.Rotate transformable, float comp)
 	{

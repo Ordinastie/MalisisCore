@@ -30,15 +30,64 @@ package net.malisis.core.renderer.animation.transformation;
  */
 public class BrightnessTransform extends Transformation<BrightnessTransform, ITransformable.Brightness>
 {
+	/** Starting brightness. */
 	protected int fromBrightness;
+	/** Target brightness. */
 	protected int toBrightness;
 
+	/**
+	 * Instantiates a new {@link BrightnessTransform}.
+	 *
+	 * @param fromBrightness the from brightness
+	 * @param toBrightness the to brightness
+	 */
 	public BrightnessTransform(int fromBrightness, int toBrightness)
 	{
 		this.fromBrightness = fromBrightness;
 		this.toBrightness = toBrightness;
 	}
 
+	/**
+	 * Gets this {@link BrightnessTransform}.
+	 *
+	 * @return the brightness transform
+	 */
+	@Override
+	public BrightnessTransform self()
+	{
+		return this;
+	}
+
+	/**
+	 * Sets the starting brightness for this {@link BrightnessTransform}.
+	 *
+	 * @param brightness the brightness
+	 * @return the brightness transform
+	 */
+	public BrightnessTransform from(int brightness)
+	{
+		this.fromBrightness = brightness;
+		return this;
+	}
+
+	/**
+	 * Sets the target brightness for this {@link BrightnessTransform}.
+	 *
+	 * @param brightness the brightness
+	 * @return the brightness transform
+	 */
+	public BrightnessTransform to(int brightness)
+	{
+		this.toBrightness = brightness;
+		return this;
+	}
+
+	/**
+	 * Calculates the transformation.
+	 *
+	 * @param transformable the transformable
+	 * @param comp the comp
+	 */
 	@Override
 	protected void doTransform(ITransformable.Brightness transformable, float comp)
 	{

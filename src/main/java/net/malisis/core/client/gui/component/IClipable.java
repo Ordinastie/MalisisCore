@@ -89,5 +89,5 @@ public interface IClipable
 	 *
 	 * @return the parent
 	 */
-	public UIComponent getParent();
+	public UIComponent<?> getParent();
 }

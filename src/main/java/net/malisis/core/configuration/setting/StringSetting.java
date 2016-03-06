@@ -25,7 +25,6 @@
 package net.malisis.core.configuration.setting;
 
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UITextField;
@@ -59,12 +58,12 @@ public class StringSetting extends Setting<String>
 
 	@SideOnly(Side.CLIENT)
 	@Override
-	public UIComponent getComponent(MalisisGui gui)
+	public UIContainer<?> getComponent(MalisisGui gui)
 	{
 		UILabel label = new UILabel(gui, key);
 		textField = new UITextField(gui, writeValue(value)).setSize(50, 0).setPosition(label.getWidth() + 2, 0);
 
-		UIContainer container = new UIContainer(gui, label.getWidth() + 54, 12);
+		UIContainer<?> container = new UIContainer<>(gui, label.getWidth() + 54, 12);
 		container.add(label);
 		container.add(textField);
 

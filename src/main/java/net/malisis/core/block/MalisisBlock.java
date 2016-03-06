@@ -83,14 +83,14 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 		super(material);
 	}
 
-	protected List<IProperty> getProperties()
+	protected List<IProperty<?>> getProperties()
 	{
 		return Lists.newArrayList();
 	}
 
 	protected void buildBlockState()
 	{
-		List<IProperty> properties = getProperties();
+		List<IProperty<?>> properties = getProperties();
 		for (IBlockComponent component : getComponents())
 			properties.addAll(Arrays.asList(component.getProperties()));
 
@@ -137,7 +137,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 		for (IBlockComponent component : components)
 		{
 			if (type.isAssignableFrom(component.getClass()))
-				return (T) component;
+				return type.cast(component);
 		}
 
 		return null;
@@ -273,7 +273,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	}
 
 	@Override
-	public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity)
+	public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
 	{
 		IBoundingBox.super.addCollisionBoxesToList(world, pos, state, mask, list, collidingEntity);
 	}
@@ -325,9 +325,9 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	}
 
 	@Override
-	public void getSubBlocks(Item item, CreativeTabs tab, List list)
+	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list)
 	{
-		List l = Lists.newArrayList();
+		List<ItemStack> l = Lists.newArrayList();
 		for (IBlockComponent component : getComponents())
 			component.getSubBlocks(this, item, tab, l);
 

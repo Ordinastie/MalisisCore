@@ -91,7 +91,7 @@ public abstract class Token<T>
 	protected String name = "";
 	protected T value = null;
 
-	public Token name(String name)
+	public Token<T> name(String name)
 	{
 		this.name = name;
 		return this;
@@ -102,7 +102,7 @@ public abstract class Token<T>
 		return value;
 	}
 
-	public boolean isOneOf(Token... tokens)
+	public boolean isOneOf(Token<?>... tokens)
 	{
 		return ArrayUtils.contains(tokens, this);
 	}

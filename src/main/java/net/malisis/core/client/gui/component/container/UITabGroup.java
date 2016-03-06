@@ -44,13 +44,13 @@ public class UITabGroup extends UIContainer<UITabGroup>
 {
 
 	/** The list of {@link UITab} added to this {@link UITabGroup}. */
-	protected Map<UITab, UIContainer> listTabs = new LinkedHashMap<>();
+	protected Map<UITab, UIContainer<?>> listTabs = new LinkedHashMap<>();
 	/** The currently active {@link UITab}. */
 	protected UITab activeTab;
 	/** The position of this {@link UITabGroup} relative to its {@link #attachedContainer}. */
 	protected ComponentPosition tabPosition = ComponentPosition.TOP;
 	/** The {@link UIContainer} this {@link UITabGroup} is attached to. */
-	protected UIContainer attachedContainer;
+	protected UIContainer<?> attachedContainer;
 	/** Number of pixels this {@link UITabGroup} is offset to the border of the {@link #attachedContainer}. */
 	protected int offset = 3;
 	/** Number of pixels between each tab. */
@@ -124,7 +124,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 *
 	 * @return the attached container
 	 */
-	public UIContainer getAttachedContainer()
+	public UIContainer<?> getAttachedContainer()
 	{
 		return attachedContainer;
 	}
@@ -181,7 +181,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 * @param container {@link UIContainer} linked to the {@link UITab}
 	 * @return this {@link UITab}
 	 */
-	public UITab addTab(UITab tab, UIContainer container)
+	public UITab addTab(UITab tab, UIContainer<?> container)
 	{
 		if (tab.isActive())
 			activeTab = tab;
@@ -238,7 +238,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 
 	public void setActiveTab(String tabName)
 	{
-		UIComponent comp = getComponent(tabName);
+		UIComponent<?> comp = getComponent(tabName);
 		if (comp instanceof UITab)
 			setActiveTab((UITab) comp);
 	}
@@ -278,7 +278,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 * @param displace if true, moves and resize the UIContainer to make place for the UITabGroup
 	 * @return this {@link UITab}
 	 */
-	public UITabGroup attachTo(UIContainer container, boolean displace)
+	public UITabGroup attachTo(UIContainer<?> container, boolean displace)
 	{
 		attachedContainer = container;
 		if (activeTab != null && attachedContainer instanceof ITransformable.Color)

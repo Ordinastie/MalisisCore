@@ -66,7 +66,7 @@ public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 	 * @param color the color
 	 * @return the UI container
 	 */
-	public UIContainer setBackgroundColor(int color)
+	public UIWindow setBackgroundColor(int color)
 	{
 		this.backgroundColor = color;
 		return this;

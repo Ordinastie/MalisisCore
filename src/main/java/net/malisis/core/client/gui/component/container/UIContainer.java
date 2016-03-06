@@ -55,10 +55,10 @@ import com.google.common.eventbus.Subscribe;
  * @author Ordinastie, PaleoCrafter
  * @param <T> type of UIContainer
  */
-public class UIContainer<T extends UIContainer> extends UIComponent<T> implements IClipable, IScrollable, ICloseable
+public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implements IClipable, IScrollable, ICloseable
 {
 	/** List of {@link UIComponent} inside this {@link UIContainer}. */
-	protected final Set<UIComponent> components;
+	protected final Set<UIComponent<?>> components;
 	/** Horizontal padding to apply to this {@link UIContainer}. */
 	protected int horizontalPadding;
 	/** Vertical padding to apply to this {@link UIContainer}. */
@@ -141,18 +141,18 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	public T setVisible(boolean visible)
 	{
 		if (isVisible() == visible)
-			return (T) this;
+			return self();
 
 		super.setVisible(visible);
 		if (!visible)
 		{
-			for (UIComponent c : components)
+			for (UIComponent<?> c : components)
 			{
 				c.setHovered(false);
 				c.setFocused(false);
 			}
 		}
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -167,13 +167,13 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		super.setDisabled(disabled);
 		if (disabled)
 		{
-			for (UIComponent c : components)
+			for (UIComponent<?> c : components)
 			{
 				c.setHovered(false);
 				c.setFocused(false);
 			}
 		}
-		return (T) this;
+		return self();
 	}
 
 	/**
@@ -217,17 +217,17 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 * @param title the title
 	 * @return the UI container
 	 */
-	public UIContainer setTitle(String title)
+	public T setTitle(String title)
 	{
 		if (title == null || title == "")
 		{
 			remove(titleLabel);
-			return this;
+			return self();
 		}
 
 		titleLabel.setText(title);
 		add(titleLabel);
-		return this;
+		return self();
 	}
 
 	/**
@@ -249,7 +249,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 * @return the coordinate
 	 */
 	@Override
-	public int componentX(UIComponent component)
+	public int componentX(UIComponent<?> component)
 	{
 		int x = super.componentX(component);
 		int a = Anchor.horizontal(component.getAnchor());
@@ -271,7 +271,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 * @return the coordinate
 	 */
 	@Override
-	public int componentY(UIComponent component)
+	public int componentY(UIComponent<?> component)
 	{
 		int y = super.componentY(component);
 		int a = Anchor.vertical(component.getAnchor());
@@ -291,7 +291,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 * @param name the name
 	 * @return the component
 	 */
-	public UIComponent getComponent(String name)
+	public UIComponent<?> getComponent(String name)
 	{
 		return getComponent(name, false);
 	}
@@ -304,12 +304,12 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 * @param recursive if true, look inside child {@code UIContainer}
 	 * @return the component
 	 */
-	public UIComponent getComponent(String name, boolean recursive)
+	public UIComponent<?> getComponent(String name, boolean recursive)
 	{
 		if (StringUtils.isEmpty(name))
 			return null;
 
-		for (UIComponent c : components)
+		for (UIComponent<?> c : components)
 		{
 			if (name.equals(c.getName()))
 				return c;
@@ -318,11 +318,11 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		if (!recursive)
 			return null;
 
-		for (UIComponent c : components)
+		for (UIComponent<?> c : components)
 		{
 			if (c instanceof UIContainer)
 			{
-				UIComponent found = getComponent(name, true);
+				UIComponent<?> found = getComponent(name, true);
 				if (found != null)
 					return found;
 			}
@@ -340,19 +340,19 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 * @return the child component in this {@link UIContainer}, this {@link UIContainer} if none, or null if outside its bounds.
 	 */
 	@Override
-	public UIComponent getComponentAt(int x, int y)
+	public UIComponent<?> getComponentAt(int x, int y)
 	{
-		UIComponent superComp = super.getComponentAt(x, y);
+		UIComponent<?> superComp = super.getComponentAt(x, y);
 		if (superComp != null && superComp != this)
 			return superComp;
 
 		if (isDisabled() || !isVisible())
 			return null;
 
-		Set<UIComponent> list = new LinkedHashSet<>();
-		for (UIComponent c : components)
+		Set<UIComponent<?>> list = new LinkedHashSet<>();
+		for (UIComponent<?> c : components)
 		{
-			UIComponent component = c.getComponentAt(x, y);
+			UIComponent<?> component = c.getComponentAt(x, y);
 			if (component != null)
 				list.add(component);
 		}
@@ -360,8 +360,8 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		if (list.size() == 0)
 			return superComp;
 
-		UIComponent component = null;
-		for (UIComponent c : list)
+		UIComponent<?> component = null;
+		for (UIComponent<?> c : list)
 		{
 			if (component == null || component.getZIndex() <= c.getZIndex())
 				component = c;
@@ -382,7 +382,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	public void onContentUpdate()
 	{
 		calculateContentSize();
-		fireEvent(new ContentUpdateEvent(this));
+		fireEvent(new ContentUpdateEvent<>(self()));
 	}
 
 	/**
@@ -393,7 +393,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 		int contentWidth = 0;
 		int contentHeight = 0;
 
-		for (UIComponent c : components)
+		for (UIComponent<?> c : components)
 		{
 			if (c.isVisible())
 			{
@@ -492,9 +492,9 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 *
 	 * @param components the components
 	 */
-	public void add(UIComponent... components)
+	public void add(UIComponent<?>... components)
 	{
-		for (UIComponent component : components)
+		for (UIComponent<?> component : components)
 		{
 			if (component != null)
 			{
@@ -511,7 +511,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 *
 	 * @param component the component
 	 */
-	public void remove(UIComponent component)
+	public void remove(UIComponent<?> component)
 	{
 		if (component.getParent() != this)
 			return;
@@ -527,7 +527,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 */
 	public void removeAll()
 	{
-		for (UIComponent component : components)
+		for (UIComponent<?> component : components)
 			component.setParent(null);
 		components.clear();
 		onContentUpdate();
@@ -537,7 +537,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	public void onAddedToScreen()
 	{
 		super.onAddedToScreen();
-		for (UIComponent component : components)
+		for (UIComponent<?> component : components)
 			component.onAddedToScreen();
 	}
 
@@ -545,7 +545,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	public void onClose()
 	{
 		if (getParent() instanceof UIContainer)
-			((UIContainer) getParent()).remove(this);
+			((UIContainer<?>) getParent()).remove(this);
 	}
 
 	/**
@@ -573,7 +573,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		for (UIComponent c : components)
+		for (UIComponent<?> c : components)
 			c.draw(renderer, mouseX, mouseY, partialTick);
 	}
 
@@ -583,7 +583,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 * @param event the event
 	 */
 	@Subscribe
-	public void onComponentStateChange(VisibleStateChange event)
+	public void onComponentStateChange(VisibleStateChange<T> event)
 	{
 		onContentUpdate();
 	}
@@ -594,7 +594,7 @@ public class UIContainer<T extends UIContainer> extends UIComponent<T> implement
 	 * @param event the event
 	 */
 	@Subscribe
-	public void onComponentSpaceChange(SpaceChangeEvent event)
+	public void onComponentSpaceChange(SpaceChangeEvent<T> event)
 	{
 		onContentUpdate();
 	}

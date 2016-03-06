@@ -40,7 +40,7 @@ import net.minecraft.item.crafting.IRecipe;
  */
 public abstract class ReplacementHandler<T>
 {
-	private static HashMap<Class<?>, ReplacementHandler> handlers = new HashMap();
+	private static HashMap<Class<?>, ReplacementHandler<?>> handlers = new HashMap<>();
 
 	public ReplacementHandler(Class<T> clazz)
 	{
@@ -90,9 +90,10 @@ public abstract class ReplacementHandler<T>
 	 * @param object the object
 	 * @return the handler
 	 */
-	public static ReplacementHandler getHandler(Object object)
+	@SuppressWarnings("unchecked")
+	public static <T> ReplacementHandler<T> getHandler(T object)
 	{
-		return handlers.get(object.getClass());
+		return (ReplacementHandler<T>) handlers.get(object.getClass());
 	}
 
 }

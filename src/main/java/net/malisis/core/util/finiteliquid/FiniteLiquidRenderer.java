@@ -6,10 +6,11 @@ import net.malisis.core.renderer.element.MergedVertex;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.shape.Cube;
 import net.malisis.core.util.MBlockState;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 
-public class FiniteLiquidRenderer extends MalisisRenderer
+public class FiniteLiquidRenderer extends MalisisRenderer<TileEntity>
 {
 	private Shape shape;
 	private RenderParameters rp;

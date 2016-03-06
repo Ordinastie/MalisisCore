@@ -41,7 +41,7 @@ import net.minecraft.client.gui.GuiScreen;
  * @author Ordinastie
  *
  */
-public abstract class UIListContainer<T extends UIListContainer, S> extends UIComponent<T> implements IScrollable, IClipable
+public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extends UIComponent<T> implements IScrollable, IClipable
 {
 	protected int elementSpacing = 0;
 	protected boolean unselect = true;
@@ -58,7 +58,7 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	public UIListContainer(MalisisGui gui)
 	{
 		super(gui);
-		scrollbar = new UIScrollBar(gui, this, UIScrollBar.Type.VERTICAL);
+		scrollbar = new UIScrollBar(gui, self(), UIScrollBar.Type.VERTICAL);
 		scrollbar.setAutoHide(true);
 	}
 
@@ -71,7 +71,7 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	public void setElements(Collection<S> elements)
 	{
 		this.elements = elements;
-		fireEvent(new ContentUpdateEvent(this));
+		fireEvent(new ContentUpdateEvent<>(self()));
 	}
 
 	public Iterable<S> getElements()
@@ -111,7 +111,7 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 
 	public S select(S element)
 	{
-		if (!fireEvent(new SelectEvent<S>(this, element)))
+		if (!fireEvent(new SelectEvent<>(self(), element)))
 			return getSelected();
 
 		setSelected(element);
@@ -313,11 +313,11 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 	 * Event fired when a {@link UIListContainer} changes its selected element.<br>
 	 * Cancelling the event will prevent the element to be selected.
 	 */
-	public static class SelectEvent<T> extends ValueChange<UIListContainer, T>
+	public static class SelectEvent<T extends UIListContainer<T, S>, S> extends ValueChange<T, S>
 	{
-		public SelectEvent(UIListContainer component, T selected)
+		public SelectEvent(T component, S selected)
 		{
-			super(component, (T) component.getSelected(), selected);
+			super(component, component.getSelected(), selected);
 		}
 
 		/**
@@ -325,7 +325,7 @@ public abstract class UIListContainer<T extends UIListContainer, S> extends UICo
 		 *
 		 * @return the new option
 		 */
-		public T getSelected()
+		public S getSelected()
 		{
 			return newValue;
 		}

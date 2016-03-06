@@ -211,7 +211,7 @@ public class VanillaIcon extends MalisisIcon
 	}
 
 	@Override
-	public void setFramesTextureData(List newFramesTextureData)
+	public void setFramesTextureData(List<int[][]> newFramesTextureData)
 	{}
 
 	@Override

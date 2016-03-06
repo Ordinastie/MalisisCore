@@ -58,7 +58,7 @@ public class ReplacementTool
 	/** List of original {@link Item} being replaced. The key is the replacement, the value is the Vanilla {@code Item}. */
 	private HashMap<Item, Item> originalItems = new HashMap<>();
 
-	private Class[] types = { Integer.TYPE, ResourceLocation.class, Object.class };
+	private Class<?>[] types = { Integer.TYPE, ResourceLocation.class, Object.class };
 	private Method addObjectRaw = AsmUtils.changeMethodAccess(FMLControlledNamespacedRegistry.class, "addObjectRaw", types);
 	private Method setName = AsmUtils.changeMethodAccess(Delegate.class, "setResourceName", ResourceLocation.class);
 
@@ -98,10 +98,9 @@ public class ReplacementTool
 	private void replaceVanilla(int id, String registryName, String fieldName, String srgFieldName, Object replacement, Object vanilla)
 	{
 		boolean block = replacement instanceof Block;
-		RegistryNamespaced registry = block ? Block.blockRegistry : Item.itemRegistry;
+		RegistryNamespaced<ResourceLocation, ?> registry = block ? Block.blockRegistry : Item.itemRegistry;
 		ItemBlock ib = block ? (ItemBlock) Item.getItemFromBlock((Block) vanilla) : null;
 		Class<?> clazz = block ? Blocks.class : Items.class;
-		HashMap map = block ? originalBlocks : originalItems;
 		ResourceLocation rl = new ResourceLocation("minecraft", registryName);
 
 		try
@@ -119,7 +118,11 @@ public class ReplacementTool
 				((BiMap<Block, Item>) GameData.getBlockItemMap()).forcePut((Block) replacement, ib);
 			}
 
-			map.put(replacement, vanilla);
+			if (block)
+				originalBlocks.put((Block) replacement, (Block) vanilla);
+			else
+				originalItems.put((Item) replacement, (Item) vanilla);
+
 			replaceIn(CraftingManager.getInstance().getRecipeList(), vanilla, replacement);
 			replaceIn(StatList.allStats, vanilla, replacement);
 		}
@@ -129,11 +132,11 @@ public class ReplacementTool
 		}
 	}
 
-	public void replaceIn(List<?> list, Object vanilla, Object replacement) throws ReflectiveOperationException
+	public <T> void replaceIn(List<T> list, Object vanilla, Object replacement) throws ReflectiveOperationException
 	{
-		for (Object object : list)
+		for (T object : list)
 		{
-			ReplacementHandler rh = ReplacementHandler.getHandler(object);
+			ReplacementHandler<T> rh = ReplacementHandler.getHandler(object);
 			if (rh != null)
 			{
 				rh.replace(object, vanilla, replacement);

@@ -31,7 +31,7 @@ import net.malisis.core.renderer.animation.transformation.ITransformable.Size;
  * @author Ordinastie
  * @param <T> the generic type
  */
-public class SizeTransform<T> extends Transformation<SizeTransform, ITransformable.Size<T>>
+public class SizeTransform<T> extends Transformation<SizeTransform<T>, ITransformable.Size<T>>
 {
 	/** Starting size. */
 	protected int fromWidth, fromHeight;
@@ -61,6 +61,17 @@ public class SizeTransform<T> extends Transformation<SizeTransform, ITransformab
 	{
 		from(fromWidth, fromHeight);
 		to(toWidth, toHeight);
+	}
+
+	/**
+	 * Gets this {@link SizeTransform}.
+	 *
+	 * @return the size transform
+	 */
+	@Override
+	public SizeTransform<T> self()
+	{
+		return this;
 	}
 
 	/**

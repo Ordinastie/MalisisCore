@@ -164,7 +164,7 @@ public class AsmHook
 	{
 		ArrayList<AsmHook> hooks = listHooks.get(mapping.getTargetClass());
 		if (hooks == null)
-			hooks = new ArrayList<AsmHook>();
+			hooks = new ArrayList<>();
 		hooks.add(this);
 		listHooks.put(mapping.getTargetClass(), hooks);
 	}

@@ -104,7 +104,9 @@ public class Syncer
 	 */
 	public <T> ISyncHandler<? super T, ? extends ISyncableData> getHandler(T caller)
 	{
-		ISyncHandler handler = classToHandler.get(caller.getClass());
+		@SuppressWarnings("unchecked")
+		ISyncHandler<? super T, ? extends ISyncableData> handler = (ISyncHandler<? super T, ? extends ISyncableData>) classToHandler
+				.get(caller.getClass());
 		if (handler == null)
 		{
 			MalisisCore.log.error("No ISyncHandler registered for type '{}'", caller.getClass());
@@ -126,8 +128,8 @@ public class Syncer
 		{
 			try
 			{
-				Class clazz = Class.forName(data.getClassName());
-				Syncable anno = (Syncable) clazz.getAnnotation(Syncable.class);
+				Class<?> clazz = Class.forName(data.getClassName());
+				Syncable anno = clazz.getAnnotation(Syncable.class);
 				ISyncHandler<?, ? extends ISyncableData> handler = handlers.get(anno.value());
 				classToHandler.put(clazz, handler);
 
@@ -199,17 +201,18 @@ public class Syncer
 	 * @param caller the caller
 	 * @param syncNames the sync names
 	 */
-	private <T> void doSync(T caller, String... syncNames)
+	private <T, S extends ISyncableData> void doSync(T caller, String... syncNames)
 	{
-		ISyncHandler<? super T, ? extends ISyncableData> handler = getHandler(caller);
+		@SuppressWarnings("unchecked")
+		ISyncHandler<T, S> handler = (ISyncHandler<T, S>) getHandler(caller);
 		if (handler == null)
 			return;
 
-		ISyncableData data = handler.getSyncData(caller);
+		S data = handler.getSyncData(caller);
 		int indexes = getFieldIndexes(handler, syncNames);
 		Map<String, Object> values = getFieldValues(caller, handler, syncNames);
 
-		SyncerMessage.Packet<T> packet = new Packet<>(handler, data, indexes, values);
+		SyncerMessage.Packet<T, S> packet = new Packet<>(handler, data, indexes, values);
 
 		handler.send(caller, packet);
 	}
@@ -229,7 +232,7 @@ public class Syncer
 	 * @param handler the handler
 	 * @param values the values
 	 */
-	public void updateValues(Object receiver, ISyncHandler<?, ? extends ISyncableData> handler, Map<String, Object> values)
+	public <T> void updateValues(T receiver, ISyncHandler<T, ? extends ISyncableData> handler, Map<String, Object> values)
 	{
 		if (receiver == null || handler == null)
 			return;
