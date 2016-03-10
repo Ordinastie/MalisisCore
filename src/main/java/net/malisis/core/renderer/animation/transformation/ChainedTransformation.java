@@ -30,17 +30,17 @@ import java.util.ArrayList;
  * @author -
  *
  */
-public class ChainedTransformation<S extends ITransformable> extends Transformation<ChainedTransformation<S>, S>
+public class ChainedTransformation extends Transformation<ChainedTransformation, ITransformable>
 {
 	/** List of transformations. */
-	protected ArrayList<Transformation<?, S>> listTransformations = new ArrayList<>();
+	protected ArrayList<Transformation<?, ?>> listTransformations = new ArrayList<>();
 
 	/**
 	 * Instantiates a new {@link ChainedTransformation}.
 	 *
 	 * @param transformations the transformations
 	 */
-	public ChainedTransformation(@SuppressWarnings("unchecked") Transformation<?, S>... transformations)
+	public ChainedTransformation(Transformation<?, ?>... transformations)
 	{
 		addTransformations(transformations);
 	}
@@ -51,9 +51,9 @@ public class ChainedTransformation<S extends ITransformable> extends Transformat
 	 * @return the chained transformation
 	 */
 	@Override
-	public ChainedTransformation<S> self()
+	public ChainedTransformation self()
 	{
-		return null;
+		return this;
 	}
 
 	/**
@@ -62,10 +62,10 @@ public class ChainedTransformation<S extends ITransformable> extends Transformat
 	 * @param transformations the transformations
 	 * @return the chained transformation
 	 */
-	public ChainedTransformation<S> addTransformations(@SuppressWarnings("unchecked") Transformation<?, S>... transformations)
+	public ChainedTransformation addTransformations(Transformation<?, ?>... transformations)
 	{
 		duration = 0;
-		for (Transformation<?, S> transformation : transformations)
+		for (Transformation<?, ?> transformation : transformations)
 		{
 			duration += transformation.totalDuration();
 			listTransformations.add(transformation);
@@ -80,15 +80,16 @@ public class ChainedTransformation<S extends ITransformable> extends Transformat
 	 * @param transformable the transformable
 	 * @param comp the comp
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	protected void doTransform(S transformable, float comp)
+	protected void doTransform(ITransformable transformable, float comp)
 	{
 		if (listTransformations.size() == 0)
 			return;
 
 		if (reversed)
 			elapsedTimeCurrentLoop = Math.max(0, duration - elapsedTimeCurrentLoop);
-		for (Transformation<?, S> transformation : listTransformations)
+		for (Transformation transformation : listTransformations)
 		{
 			transformation.transform(transformable, elapsedTimeCurrentLoop);
 			elapsedTimeCurrentLoop -= transformation.totalDuration();

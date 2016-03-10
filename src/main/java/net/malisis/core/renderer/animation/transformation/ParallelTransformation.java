@@ -30,17 +30,17 @@ import java.util.ArrayList;
  * @author Ordinastie
  *
  */
-public class ParallelTransformation<S extends ITransformable> extends Transformation<ParallelTransformation<S>, S>
+public class ParallelTransformation extends Transformation<ParallelTransformation, ITransformable>
 {
 	/** List of transformations. */
-	protected ArrayList<Transformation<?, S>> listTransformations = new ArrayList<>();
+	protected ArrayList<Transformation<?, ?>> listTransformations = new ArrayList<>();
 
 	/**
 	 * Instantiates a new {@link ParallelTransformation}.
 	 *
 	 * @param transformations the transformations
 	 */
-	public ParallelTransformation(@SuppressWarnings("unchecked") Transformation<?, S>... transformations)
+	public ParallelTransformation(Transformation<?, ?>... transformations)
 	{
 		addTransformations(transformations);
 	}
@@ -51,7 +51,7 @@ public class ParallelTransformation<S extends ITransformable> extends Transforma
 	 * @return the parallel transformation
 	 */
 	@Override
-	public ParallelTransformation<S> self()
+	public ParallelTransformation self()
 	{
 		return this;
 	}
@@ -62,9 +62,9 @@ public class ParallelTransformation<S extends ITransformable> extends Transforma
 	 * @param transformations the transformations
 	 * @return the parallel transformation
 	 */
-	public ParallelTransformation<S> addTransformations(@SuppressWarnings("unchecked") Transformation<?, S>... transformations)
+	public ParallelTransformation addTransformations(Transformation<?, ?>... transformations)
 	{
-		for (Transformation<?, S> transformation : transformations)
+		for (Transformation<?, ?> transformation : transformations)
 		{
 			duration = Math.max(duration, transformation.totalDuration());
 			listTransformations.add(transformation);
@@ -79,13 +79,14 @@ public class ParallelTransformation<S extends ITransformable> extends Transforma
 	 * @param transformable the transformable
 	 * @param comp the comp
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	protected void doTransform(S transformable, float comp)
+	protected void doTransform(ITransformable transformable, float comp)
 	{
 		if (listTransformations.size() == 0)
 			return;
 
-		for (Transformation<?, S> transformation : listTransformations)
+		for (Transformation transformation : listTransformations)
 			transformation.transform(transformable, elapsedTimeCurrentLoop);
 	}
 
@@ -96,7 +97,7 @@ public class ParallelTransformation<S extends ITransformable> extends Transforma
 	 * @return the parallel transformation
 	 */
 	@Override
-	public ParallelTransformation<S> reversed(boolean reversed)
+	public ParallelTransformation reversed(boolean reversed)
 	{
 		if (!reversed)
 			return this;

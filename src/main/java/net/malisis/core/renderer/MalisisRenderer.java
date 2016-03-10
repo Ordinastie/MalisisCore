@@ -1323,7 +1323,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 *
 	 * @param clazz the clazz
 	 */
-	public void registerFor(Class<T> clazz)
+	public void registerFor(Class<? extends T> clazz)
 	{
 		ClientRegistry.bindTileEntitySpecialRenderer(clazz, this);
 	}
