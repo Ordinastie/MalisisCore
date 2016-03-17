@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 
+import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.face.SouthFace;
@@ -37,6 +38,7 @@ import net.malisis.core.renderer.element.shape.Cube;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.malisis.core.renderer.model.loader.TextureModelLoader;
+import net.malisis.core.util.AABBUtils;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.tileentity.TileEntity;
@@ -58,9 +60,7 @@ public class DefaultRenderer
 	{
 		@Override
 		public void render()
-		{
-
-		}
+		{}
 	}
 
 	public static class Block extends MalisisRenderer<TileEntity>
@@ -100,7 +100,19 @@ public class DefaultRenderer
 		@Override
 		public void render()
 		{
-			AxisAlignedBB[] aabbs = ((MalisisBlock) block).getRenderBoundingBox(world, pos, blockState);
+
+			AxisAlignedBB[] aabbs;
+			if (block instanceof IBoundingBox)
+			{
+				aabbs = ((MalisisBlock) block).getRenderBoundingBox(world, pos, blockState);
+				rp.useBlockBounds.set(false);
+			}
+			else
+			{
+				aabbs = AABBUtils.identities();
+				rp.useBlockBounds.set(true);
+			}
+
 			for (AxisAlignedBB aabb : aabbs)
 			{
 				if (aabb != null)
