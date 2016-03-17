@@ -80,12 +80,6 @@ public class DefaultRenderer
 		private RenderParameters rp = new RenderParameters();
 
 		@Override
-		protected void initialize()
-		{
-			rp.useBlockBounds.set(false);
-		}
-
-		@Override
 		public boolean isGui3d()
 		{
 			return true;
@@ -100,7 +94,6 @@ public class DefaultRenderer
 		@Override
 		public void render()
 		{
-
 			AxisAlignedBB[] aabbs;
 			if (block instanceof IBoundingBox)
 			{
