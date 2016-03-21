@@ -36,12 +36,13 @@ import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.util.Silenced;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ChunkCache;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.world.ChunkDataEvent;
+import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -89,12 +90,19 @@ public class BlockDataHandler
 	@SuppressWarnings("unchecked")
 	private <T> ChunkData<T> chunkData(String identifier, World world, Chunk chunk)
 	{
-		ChunkData<T> chunkData = (ChunkData<T>) instance.data(world).get(identifier, chunk);
-		if (chunkData == null)
-		{
-			chunkData = new ChunkData<>((HandlerInfo<T>) handlerInfos.get(identifier));
-			instance.data(world).put(identifier, chunk, chunkData);
-		}
+		return (ChunkData<T>) instance.data(world).get(identifier, chunk);
+
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> ChunkData<T> createChunkData(String identifier, World world, BlockPos pos)
+	{
+		Chunk chunk = world.getChunkFromBlockCoords(pos);
+
+		System.out.println("createChunkData (" + chunk.xPosition + "/" + chunk.zPosition + ") for " + identifier);
+
+		ChunkData<T> chunkData = new ChunkData<>((HandlerInfo<T>) handlerInfos.get(identifier));
+		instance.data(world).put(identifier, chunk, chunkData);
 		return chunkData;
 	}
 
@@ -105,12 +113,17 @@ public class BlockDataHandler
 
 	public static <T> T getData(String identifier, IBlockAccess world, BlockPos pos)
 	{
-		return instance.<T> chunkData(identifier, instance.world(world), pos).getData(pos);
+		ChunkData<T> chunkData = instance.<T> chunkData(identifier, instance.world(world), pos);
+		return chunkData != null ? chunkData.getData(pos) : null;
 	}
 
 	public static <T> void setData(String identifier, IBlockAccess world, BlockPos pos, T data)
 	{
-		instance.<T> chunkData(identifier, instance.world(world), pos).setData(pos, data);
+		ChunkData<T> chunkData = instance.<T> chunkData(identifier, instance.world(world), pos);
+		if (chunkData == null)
+			chunkData = instance.<T> createChunkData(identifier, instance.world(world), pos);
+
+		chunkData.setData(pos, data);
 	}
 
 	public static <T> void removeData(String identifier, IBlockAccess world, BlockPos pos)
@@ -134,6 +147,8 @@ public class BlockDataHandler
 			if (!nbt.hasKey(handlerInfo.identifier))
 				continue;
 
+			System.out.println("onDataLoad (" + event.getChunk().xPosition + "/" + event.getChunk().zPosition + ") for "
+					+ handlerInfo.identifier);
 			ChunkData<?> chunkData = new ChunkData<>(handlerInfo);
 			chunkData.fromBytes(Unpooled.copiedBuffer(nbt.getByteArray(handlerInfo.identifier)));
 			data(event.world).put(handlerInfo.identifier, event.getChunk(), chunkData);
@@ -148,12 +163,21 @@ public class BlockDataHandler
 		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
 		{
 			ChunkData<?> chunkData = chunkData(handlerInfo.identifier, event.world, event.getChunk());
-			if (chunkData.hasData())
+			if (chunkData != null && chunkData.hasData())
 			{
 				ByteBuf buf = Unpooled.buffer();
 				chunkData.toBytes(buf);
 				nbt.setByteArray(handlerInfo.identifier, buf.capacity(buf.writerIndex()).array());
 			}
+		}
+	}
+
+	@SubscribeEvent
+	public void onDataUnload(ChunkEvent.Unload event)
+	{
+		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
+		{
+			data(event.world).remove(handlerInfo.identifier, event.getChunk());
 		}
 	}
 
@@ -170,7 +194,7 @@ public class BlockDataHandler
 		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
 		{
 			ChunkData<?> chunkData = instance.chunkData(handlerInfo.identifier, chunk.getWorld(), chunk);
-			if (chunkData.hasData())
+			if (chunkData != null && chunkData.hasData())
 				BlockDataMessage.sendBlockData(chunk, handlerInfo.identifier, chunkData.toBytes(Unpooled.buffer()), event.player);
 		}
 	}
@@ -183,6 +207,7 @@ public class BlockDataHandler
 		if (handlerInfo == null)
 			return;
 
+		System.out.println("SetBlockData (" + chunkX + "/" + chunkZ + ") for " + identifier);
 		Chunk chunk = Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(chunkX, chunkZ);
 		ChunkData<?> chunkData = new ChunkData<>(handlerInfo).fromBytes(data);
 		instance.data(chunk.getWorld()).put(handlerInfo.identifier, chunk, chunkData);
@@ -261,5 +286,4 @@ public class BlockDataHandler
 		}
 
 	}
-
 }

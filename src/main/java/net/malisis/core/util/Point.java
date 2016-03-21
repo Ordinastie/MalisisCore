@@ -24,8 +24,8 @@
 
 package net.malisis.core.util;
 
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 
 /**
  *
@@ -75,7 +75,7 @@ public class Point
 	 *
 	 * @param v the v
 	 */
-	public Point(Vec3 v)
+	public Point(Vec3d v)
 	{
 		x = v.xCoord;
 		y = v.yCoord;
@@ -138,13 +138,13 @@ public class Point
 	}
 
 	/**
-	 * Creates a {@link Vec3} from this {@link Point} coordinates.
+	 * Creates a {@link Vec3d} from this {@link Point} coordinates.
 	 *
-	 * @return the vec3
+	 * @return the Vec3d
 	 */
-	public Vec3 toVec3()
+	public Vec3d toVec3d()
 	{
-		return new Vec3(x, y, z);
+		return new Vec3d(x, y, z);
 	}
 
 	/**

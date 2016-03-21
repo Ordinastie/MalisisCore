@@ -41,7 +41,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
 
 import org.lwjgl.input.Keyboard;
 
@@ -119,7 +120,7 @@ public class UISlot extends UIComponent<UISlot>
 
 		lines.set(0, slot.getItemStack().getRarity().rarityColor + lines.get(0));
 		for (int i = 1; i < lines.size(); i++)
-			lines.set(i, EnumChatFormatting.GRAY + lines.get(i));
+			lines.set(i, TextFormatting.GRAY + lines.get(i));
 
 		tooltip = new UITooltip(getGui()).setText(lines);
 	}
@@ -144,18 +145,18 @@ public class UISlot extends UIComponent<UISlot>
 		ItemStack draggedItemStack = slot.getDraggedItemStack();
 
 		// if dragged slots contains an itemStack for this slot, add the stack size
-		EnumChatFormatting format = null;
+		TextFormatting format = null;
 		if (itemStack == null)
 			itemStack = draggedItemStack;
 		else if (draggedItemStack != null)
 		{
 			itemStack.stackSize += draggedItemStack.stackSize;
 			if (itemStack.stackSize == itemStack.getMaxStackSize())
-				format = EnumChatFormatting.YELLOW;
+				format = TextFormatting.YELLOW;
 		}
 
 		if (itemStack != null)
-			renderer.drawItemStack(itemStack, 1, 1, format);
+			renderer.drawItemStack(itemStack, 1, 1, new Style().setColor(format));
 
 		// draw the white shade over the slot
 		if (hovered || draggedItemStack != null)

@@ -27,9 +27,9 @@ package net.malisis.core.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -69,12 +69,12 @@ public class Ray
 	}
 
 	/**
-	 * Instantiates a new {@link Ray} from two {@link Vec3}.
+	 * Instantiates a new {@link Ray} from two {@link Vec3d}.
 	 *
 	 * @param src the src
 	 * @param dest the dest
 	 */
-	public Ray(Vec3 src, Vec3 dest)
+	public Ray(Vec3d src, Vec3d dest)
 	{
 		origin = new Point(src);
 		direction = new Vector(origin, new Point(dest));

@@ -37,9 +37,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -98,6 +99,16 @@ public interface IBlockComponent
 	}
 
 	/**
+	 * Extra registration process for {@link IBlockComponent}
+	 *
+	 * @param block the block
+	 */
+	public default void register(Block block)
+	{
+
+	}
+
+	/**
 	 * Gets the unlocalized name for the specific {@link IBlockState}.
 	 *
 	 * @param block the block
@@ -151,13 +162,14 @@ public interface IBlockComponent
 	 * @param pos the pos
 	 * @param state the state
 	 * @param player the player
+	 * @param hand
 	 * @param side the side
 	 * @param hitX the hit x
 	 * @param hitY the hit y
 	 * @param hitZ the hit z
 	 * @return true, if successful
 	 */
-	public default boolean onBlockActivated(Block block, World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ)
+	public default boolean onBlockActivated(Block block, World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
 		return false;
 	}
@@ -271,32 +283,6 @@ public interface IBlockComponent
 
 	//#region Colors
 	/**
-	 * Gets the color multiplier to render the block in the world.
-	 *
-	 * @param block the block
-	 * @param world the world
-	 * @param pos the pos
-	 * @param renderPass the render pass
-	 * @return the color
-	 */
-	public default int colorMultiplier(Block block, IBlockAccess world, BlockPos pos, int renderPass)
-	{
-		return 0xFFFFFF;
-	}
-
-	/**
-	 * Gets the render color for this {@link Block}.
-	 *
-	 * @param block the block
-	 * @param state the state
-	 * @return the render color
-	 */
-	public default int getRenderColor(Block block, IBlockState state)
-	{
-		return 0xFFFFFF;
-	}
-
-	/**
 	 * Get the {@link MapColor} for this {@link Block} and the given {@link IBlockState}.
 	 *
 	 * @param block the block
@@ -344,10 +330,11 @@ public interface IBlockComponent
 	 * @param block the block
 	 * @param world the world
 	 * @param pos the pos
+	 * @param state the state
 	 * @param side the side
 	 * @return the boolean
 	 */
-	public default Boolean shouldSideBeRendered(Block block, IBlockAccess world, BlockPos pos, EnumFacing side)
+	public default Boolean shouldSideBeRendered(Block block, IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
 	{
 		return null;
 	}
@@ -356,9 +343,10 @@ public interface IBlockComponent
 	 * Checks whether this {@link IBlockComponent} represents a full {@link Block}.
 	 *
 	 * @param block the block
+	 * @param state the state
 	 * @return the boolean
 	 */
-	public default Boolean isFullBlock(Block block)
+	public default Boolean isFullBlock(Block block, IBlockState state)
 	{
 		return null;
 	}
@@ -367,9 +355,10 @@ public interface IBlockComponent
 	 * Checks whether this {@link IBlockComponent} represents a full cube.
 	 *
 	 * @param block the block
+	 * @param state the state
 	 * @return the boolean
 	 */
-	public default Boolean isFullCube(Block block)
+	public default Boolean isFullCube(Block block, IBlockState state)
 	{
 		return null;
 	}
@@ -378,9 +367,10 @@ public interface IBlockComponent
 	 * Checks whether this {@link IBlockComponent} represents an opaque cube.
 	 *
 	 * @param block the block
+	 * @param state the state
 	 * @return the boolean
 	 */
-	public default Boolean isOpaqueCube(Block block)
+	public default Boolean isOpaqueCube(Block block, IBlockState state)
 	{
 		return null;
 	}
@@ -394,9 +384,10 @@ public interface IBlockComponent
 	 * @param block the block
 	 * @param world the world
 	 * @param pos the pos
+	 * @param state
 	 * @return the mixed brightness for block
 	 */
-	public default Integer getMixedBrightnessForBlock(Block block, IBlockAccess world, BlockPos pos)
+	public default Integer getPackedLightmapCoords(Block block, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		return null;
 	}
@@ -434,9 +425,10 @@ public interface IBlockComponent
 	 * @param block the block
 	 * @param world the world
 	 * @param pos the pos
+	 * @param state
 	 * @return the light opacity
 	 */
-	public default Integer getLightOpacity(Block block, IBlockAccess world, BlockPos pos)
+	public default Integer getLightOpacity(Block block, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		return null;
 	}

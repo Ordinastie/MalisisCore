@@ -42,8 +42,8 @@ import net.malisis.core.util.chunklistener.IBlockListener;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.world.ChunkDataEvent;
@@ -335,7 +335,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 			{
 				for (int cz = (int) Math.floor(aabb.minZ) >> 4; cz <= (int) Math.ceil(aabb.maxZ) >> 4; cz++)
 				{
-					if (world.getChunkProvider() != null && world.getChunkProvider().chunkExists(cx, cz))
+					if (world.getChunkProvider() != null && world.getChunkProvider().getLoadedChunk(cx, cz) != null)
 						chunks.add(world.getChunkFromChunkCoords(cx, cz));
 				}
 			}

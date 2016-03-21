@@ -31,10 +31,10 @@ import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.raytrace.RaytraceBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -110,7 +110,7 @@ public interface IBoundingBox
 		return aabbs;
 	}
 
-	public default MovingObjectPosition collisionRayTrace(World world, BlockPos pos, Vec3 src, Vec3 dest)
+	public default RayTraceResult collisionRayTrace(World world, BlockPos pos, Vec3d src, Vec3d dest)
 	{
 		return new RaytraceBlock(world, src, dest, pos).trace();
 	}

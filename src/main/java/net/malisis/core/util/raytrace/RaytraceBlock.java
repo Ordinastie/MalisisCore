@@ -31,12 +31,12 @@ import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.Point;
 import net.malisis.core.util.Ray;
 import net.malisis.core.util.Vector;
-import net.minecraft.block.Block;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -54,7 +54,7 @@ public class RaytraceBlock extends Raytrace
 	/** Position of the block being ray traced **/
 	private BlockPos pos;
 	/** Block being ray traced. */
-	private Block block;
+	private IBlockState state;
 
 	/**
 	 * Sets the parameters for this {@link RaytraceBlock}.
@@ -68,7 +68,7 @@ public class RaytraceBlock extends Raytrace
 		super(ray);
 		this.world = new WeakReference<>(world);
 		this.pos = pos;
-		this.block = world().getBlockState(pos).getBlock();
+		this.state = world().getBlockState(pos);
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class RaytraceBlock extends Raytrace
 	 * @param dest the dest
 	 * @param pos the pos
 	 */
-	public RaytraceBlock(World world, Vec3 src, Vec3 dest, BlockPos pos)
+	public RaytraceBlock(World world, Vec3d src, Vec3d dest, BlockPos pos)
 	{
 		this(world, new Ray(src, dest), pos);
 		this.dest = new Point(dest);
@@ -128,17 +128,17 @@ public class RaytraceBlock extends Raytrace
 	 * @return {@link MovingObjectPosition} with <code>typeOfHit</code> <b>BLOCK</b> if a ray hits a block in the way, or <b>MISS</b> if it
 	 *         reaches <code>dest</code> without any hit
 	 */
-	public MovingObjectPosition trace()
+	public RayTraceResult trace()
 	{
-		if (!(block instanceof IBoundingBox))
-			return block.collisionRayTrace(world(), pos, ray.origin.toVec3(), dest.toVec3());
+		if (!(state.getBlock() instanceof IBoundingBox))
+			return state.getBlock().collisionRayTrace(state, world(), pos, ray.origin.toVec3d(), dest.toVec3d());
 
-		IBoundingBox block = (IBoundingBox) this.block;
+		IBoundingBox block = (IBoundingBox) state.getBlock();
 		AxisAlignedBB[] aabbs = block.getRayTraceBoundingBox(world(), pos, world().getBlockState(pos));
 		Pair<EnumFacing, Point> closest = super.trace(AABBUtils.offset(pos, aabbs));
 		if (closest == null)
 			return null;
 
-		return new MovingObjectPosition(closest.getRight().toVec3(), closest.getLeft(), pos);
+		return new RayTraceResult(closest.getRight().toVec3d(), closest.getLeft(), pos);
 	}
 }

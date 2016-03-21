@@ -42,7 +42,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -50,11 +50,13 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -96,7 +98,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 
 		try
 		{
-			blockStateField.set(this, new BlockState(this, properties.toArray(new IProperty[0])));
+			blockStateField.set(this, new BlockStateContainer(this, properties.toArray(new IProperty[0])));
 		}
 		catch (ReflectiveOperationException e)
 		{
@@ -128,7 +130,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 
 		buildBlockState();
 		buildDefaultState();
-		lightOpacity = isOpaqueCube() ? 255 : 0;
+		lightOpacity = getDefaultState().isOpaqueCube() ? 255 : 0;
 	}
 
 	@Override
@@ -219,11 +221,11 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	}
 
 	@Override
-	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ)
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
 		boolean b = false;
 		for (IBlockComponent component : getComponents())
-			b |= component.onBlockActivated(this, world, pos, state, player, side, hitX, hitY, hitZ);
+			b |= component.onBlockActivated(this, world, pos, state, player, hand, side, hitX, hitY, hitZ);
 
 		return b;
 	}
@@ -255,7 +257,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 				return aabb;
 		}
 
-		return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+		return FULL_BLOCK_AABB;
 	}
 
 	@Override
@@ -285,7 +287,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	}
 
 	@Override
-	public MovingObjectPosition collisionRayTrace(World world, BlockPos pos, Vec3 src, Vec3 dest)
+	public RayTraceResult collisionRayTrace(World world, BlockPos pos, Vec3d src, Vec3d dest)
 	{
 		return IBoundingBox.super.collisionRayTrace(world, pos, src, dest);
 	}
@@ -339,19 +341,6 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 
 	//COLORS
 	@Override
-	public int colorMultiplier(IBlockAccess world, BlockPos pos, int renderPass)
-	{
-		for (IBlockComponent component : components)
-		{
-			int color = component.colorMultiplier(this, world, pos, renderPass);
-			if (color != 0xFFFFFF)
-				return color;
-		}
-
-		return super.colorMultiplier(world, pos, renderPass);
-	}
-
-	@Override
 	public MapColor getMapColor(IBlockState state)
 	{
 		for (IBlockComponent component : getComponents())
@@ -362,19 +351,6 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 		}
 
 		return super.getMapColor(state);
-	}
-
-	@Override
-	public int getRenderColor(IBlockState state)
-	{
-		for (IBlockComponent component : getComponents())
-		{
-			int color = component.getRenderColor(this, state);
-			if (color != 0xFFFFFF)
-				return color;
-		}
-
-		return super.getRenderColor(state);
 	}
 
 	@Override
@@ -400,73 +376,73 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	//FULLNESS
 
 	@Override
-	public boolean shouldSideBeRendered(IBlockAccess world, BlockPos pos, EnumFacing side)
+	public boolean shouldSideBeRendered(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
 	{
 		for (IBlockComponent component : getComponents())
 		{
-			Boolean render = component.shouldSideBeRendered(this, world, pos, side);
+			Boolean render = component.shouldSideBeRendered(this, world, pos, state, side);
 			if (render != null)
 				return render;
 		}
-		return super.shouldSideBeRendered(world, pos, side);
+		return super.shouldSideBeRendered(state, world, pos, side);
 	}
 
 	@Override
-	public boolean isFullBlock()
+	public boolean isFullBlock(IBlockState state)
 	{
 		for (IBlockComponent component : getComponents())
 		{
-			Boolean full = component.isFullCube(this);
+			Boolean full = component.isFullBlock(this, state);
 			if (full != null)
 				return full;
 		}
 
-		return super.isFullCube();
+		return super.isFullCube(state);
 	}
 
 	@Override
-	public boolean isFullCube()
+	public boolean isFullCube(IBlockState state)
 	{
 		for (IBlockComponent component : getComponents())
 		{
-			Boolean full = component.isFullCube(this);
+			Boolean full = component.isFullCube(this, state);
 			if (full != null)
 				return full;
 		}
 
-		return super.isFullCube();
+		return super.isFullCube(state);
 	}
 
 	@Override
-	public boolean isOpaqueCube()
+	public boolean isOpaqueCube(IBlockState state)
 	{
 		//parent constructor call
 		if (getComponents() == null)
-			return super.isOpaqueCube();
+			return super.isOpaqueCube(state);
 
 		for (IBlockComponent component : getComponents())
 		{
-			Boolean opaque = component.isOpaqueCube(this);
+			Boolean opaque = component.isOpaqueCube(this, state);
 			if (opaque != null)
 				return opaque;
 		}
-		return super.isOpaqueCube();
+		return super.isOpaqueCube(state);
 	}
 
 	//OTHER
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public int getMixedBrightnessForBlock(IBlockAccess world, BlockPos pos)
+	public int getPackedLightmapCoords(IBlockState state, IBlockAccess world, BlockPos pos)
 	{
 		for (IBlockComponent component : getComponents())
 		{
 			//TODO: use max light value
-			Integer light = component.getMixedBrightnessForBlock(this, world, pos);
+			Integer light = component.getPackedLightmapCoords(this, world, pos, state);
 			if (light != null)
 				return light;
 		}
-		return super.getMixedBrightnessForBlock(world, pos);
+		return super.getPackedLightmapCoords(state, world, pos);
 	}
 
 	@Override
@@ -497,26 +473,27 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	}
 
 	@Override
-	public int getLightOpacity(IBlockAccess world, BlockPos pos)
+	public int getLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos)
 	{
 		for (IBlockComponent component : getComponents())
 		{
-			Integer quantity = component.getLightOpacity(this, world, pos);
+			Integer quantity = component.getLightOpacity(this, world, pos, state);
 			if (quantity != null)
 				return quantity;
 		}
-		return super.getLightOpacity(world, pos);
+		return super.getLightOpacity(state, world, pos);
 	}
 
 	@Override
-	public boolean isLadder(IBlockAccess world, BlockPos pos, EntityLivingBase entity)
+	public boolean isLadder(IBlockState state, IBlockAccess world, BlockPos pos, EntityLivingBase entity)
 	{
 		return IBlockComponent.getComponent(LadderComponent.class, this) != null;
 	}
 
 	@Override
-	public int getRenderType()
+	public EnumBlockRenderType getRenderType(IBlockState state)
 	{
-		return MalisisCore.malisisRenderType;
+		return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
 	}
+
 }

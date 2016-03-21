@@ -26,6 +26,7 @@ package net.malisis.core.block.component;
 
 import java.util.List;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.item.MalisisItemBlock;
 import net.minecraft.block.Block;
@@ -33,12 +34,14 @@ import net.minecraft.block.BlockColored;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -47,7 +50,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * @author Ordinastie
  *
  */
-public class ColorComponent implements IBlockComponent
+public class ColorComponent implements IBlockComponent, IBlockColor
 {
 	public static PropertyEnum<EnumDyeColor> COLOR = BlockColored.COLOR;
 	private boolean useColorMultiplier = true;
@@ -72,6 +75,13 @@ public class ColorComponent implements IBlockComponent
 	public IBlockState setDefaultState(Block block, IBlockState state)
 	{
 		return state.withProperty(getProperty(), EnumDyeColor.WHITE);
+	}
+
+	@Override
+	public void register(Block block)
+	{
+		if (MalisisCore.isClient())
+			Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(this, block);
 	}
 
 	@Override
@@ -101,11 +111,11 @@ public class ColorComponent implements IBlockComponent
 	}
 
 	@Override
-	public int colorMultiplier(Block block, IBlockAccess world, BlockPos pos, int renderPass)
+	public int colorMultiplier(IBlockState state, IBlockAccess world, BlockPos pos, int tintIndex)
 	{
 		if (!useColorMultiplier)
 			return 0xFFFFFF;
-		return getRenderColor(block, world.getBlockState(pos));
+		return getRenderColor(state.getBlock(), world.getBlockState(pos));
 	}
 
 	/**
@@ -115,7 +125,6 @@ public class ColorComponent implements IBlockComponent
 	 * @param state the state
 	 * @return the render color
 	 */
-	@Override
 	public int getRenderColor(Block block, IBlockState state)
 	{
 		return ItemDye.dyeColors[getColor(state).getDyeDamage()];

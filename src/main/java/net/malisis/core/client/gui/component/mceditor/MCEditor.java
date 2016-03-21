@@ -33,7 +33,7 @@ import net.malisis.core.client.gui.component.interaction.UISelect;
 import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -75,7 +75,7 @@ public class MCEditor extends UIContainer<MCEditor> implements IGuiText<MCEditor
 		return tf;
 	}
 
-	public UISelect<EnumChatFormatting> getSelect()
+	public UISelect<TextFormatting> getSelect()
 	{
 		return sel;
 	}

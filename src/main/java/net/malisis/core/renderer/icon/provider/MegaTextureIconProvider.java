@@ -33,8 +33,8 @@ import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.util.MBlockState;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
 /**

@@ -44,12 +44,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
@@ -114,18 +116,18 @@ public class EntityUtils
 	}
 
 	/**
-	 * Finds a player by its UUID.
+	 * Finds a player by its UUID. FIXME
 	 *
 	 * @param uuid the uuid
 	 * @return the player
 	 */
 	public static EntityPlayerMP findPlayerFromUUID(UUID uuid)
 	{
-		List<EntityPlayerMP> listPlayers = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
-
-		for (EntityPlayerMP player : listPlayers)
-			if (player.getUniqueID().equals(uuid))
-				return player;
+		//		List<EntityPlayerMP> listPlayers = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
+		//
+		//		for (EntityPlayerMP player : listPlayers)
+		//			if (player.getUniqueID().equals(uuid))
+		//				return player;
 
 		return null;
 	}
@@ -194,9 +196,9 @@ public class EntityUtils
 	 * @param item the item
 	 * @return true, if is equipped
 	 */
-	public static boolean isEquipped(EntityPlayer player, Item item)
+	public static boolean isEquipped(EntityPlayer player, Item item, EnumHand hand)
 	{
-		return player != null && player.getCurrentEquippedItem() != null && player.getCurrentEquippedItem().getItem() == item;
+		return player != null && player.getHeldItem(hand) != null && player.getHeldItemMainhand().getItem() == item;
 	}
 
 	/**
@@ -206,9 +208,9 @@ public class EntityUtils
 	 * @param itemStack the item stack
 	 * @return true, if is equipped
 	 */
-	public static boolean isEquipped(EntityPlayer player, ItemStack itemStack)
+	public static boolean isEquipped(EntityPlayer player, ItemStack itemStack, EnumHand hand)
 	{
-		return isEquipped(player, itemStack != null ? itemStack.getItem() : null);
+		return isEquipped(player, itemStack != null ? itemStack.getItem() : null, hand);
 	}
 
 	/**
@@ -238,7 +240,7 @@ public class EntityUtils
 
 		try
 		{
-			Object playerInstance = getPlayerInstance.invoke(world.getPlayerManager(), x, z, false);
+			Object playerInstance = getPlayerInstance.invoke(world.getPlayerChunkManager(), x, z, false);
 			if (playerInstance == null)
 				return new ArrayList<>();
 			return (List<EntityPlayerMP>) playersWatchingChunk.get(playerInstance);
@@ -296,36 +298,40 @@ public class EntityUtils
 	 * @param states the states
 	 */
 	@SideOnly(Side.CLIENT)
-	public static void addHitEffects(World world, MovingObjectPosition target, EffectRenderer effectRenderer, IBlockState... states)
+	public static void addHitEffects(World world, RayTraceResult target, EffectRenderer effectRenderer, IBlockState... states)
 	{
+		BlockPos pos = target.getBlockPos();
 		if (ArrayUtils.isEmpty(states))
-			states = new IBlockState[] { world.getBlockState(target.getBlockPos()) };
+			states = new IBlockState[] { world.getBlockState(pos) };
 
-		Block block = world.getBlockState(target.getBlockPos()).getBlock();
+		IBlockState baseState = world.getBlockState(pos);
+		if (baseState.getRenderType() != EnumBlockRenderType.INVISIBLE)
+			return;
 
-		double fxX = target.getBlockPos().getX() + world.rand.nextDouble();
-		double fxY = target.getBlockPos().getY() + world.rand.nextDouble();
-		double fxZ = target.getBlockPos().getZ() + world.rand.nextDouble();
+		double fxX = pos.getX() + world.rand.nextDouble();
+		double fxY = pos.getY() + world.rand.nextDouble();
+		double fxZ = pos.getZ() + world.rand.nextDouble();
 
+		AxisAlignedBB aabb = baseState.getBoundingBox(world, pos);
 		switch (target.sideHit)
 		{
 			case DOWN:
-				fxY = target.getBlockPos().getY() + block.getBlockBoundsMinY() - 0.1F;
+				fxY = pos.getY() + aabb.minY - 0.1F;
 				break;
 			case UP:
-				fxY = target.getBlockPos().getY() + block.getBlockBoundsMaxY() + 0.1F;
+				fxY = pos.getY() + aabb.maxY + 0.1F;
 				break;
 			case NORTH:
-				fxZ = target.getBlockPos().getZ() + block.getBlockBoundsMinZ() - 0.1F;
+				fxZ = pos.getZ() + aabb.minZ - 0.1F;
 				break;
 			case SOUTH:
-				fxZ = target.getBlockPos().getZ() + block.getBlockBoundsMaxY() + 0.1F;
+				fxZ = pos.getZ() + aabb.maxY + 0.1F;
 				break;
 			case EAST:
-				fxX = target.getBlockPos().getX() + block.getBlockBoundsMaxX() + 0.1F;
+				fxX = pos.getX() + aabb.maxX + 0.1F;
 				break;
 			case WEST:
-				fxX = target.getBlockPos().getX() + block.getBlockBoundsMinX() + 0.1F;
+				fxX = pos.getX() + aabb.minX + 0.1F;
 				break;
 			default:
 				break;

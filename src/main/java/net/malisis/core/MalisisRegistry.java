@@ -48,13 +48,13 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemMeshDefinition;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.IStateMapper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -143,7 +143,7 @@ public class MalisisRegistry
 		{
 			DefaultRenderer.item.clearModels();
 			for (DummyModel model : itemModels)
-				event.modelRegistry.putObject(model.getResourceLocation(), model);
+				event.getModelRegistry().putObject(model.getResourceLocation(), model);
 		}
 
 		/**
@@ -363,21 +363,21 @@ public class MalisisRegistry
 	/**
 	 * Renders a {@link IBlockState} with a registered {@link IBlockRenderer}.
 	 *
-	 * @param wr the wr
+	 * @param buffer the wr
 	 * @param world the world
 	 * @param pos the pos
 	 * @param state the state
 	 * @return true, if successful
 	 */
 	@SideOnly(Side.CLIENT)
-	public static boolean renderBlock(WorldRenderer wr, IBlockAccess world, BlockPos pos, IBlockState state)
+	public static boolean renderBlock(VertexBuffer buffer, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		IBlockRenderer renderer = getBlockRendererOverride(world, pos, state);
 		if (renderer == null)
 			renderer = getBlockRenderer(state.getBlock());
 		if (renderer == null)
 			return false;
-		return renderer.renderBlock(wr, world, pos, state);
+		return renderer.renderBlock(buffer, world, pos, state);
 	}
 
 	/**

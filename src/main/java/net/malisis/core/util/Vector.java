@@ -24,7 +24,7 @@
 
 package net.malisis.core.util;
 
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 
 /**
  *
@@ -98,7 +98,7 @@ public class Vector
 	 *
 	 * @param vec the vec
 	 */
-	public Vector(Vec3 vec)
+	public Vector(Vec3d vec)
 	{
 		x = vec.xCoord;
 		y = vec.yCoord;

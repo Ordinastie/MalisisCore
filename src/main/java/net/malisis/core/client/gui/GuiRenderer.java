@@ -44,12 +44,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
 
 import org.lwjgl.opengl.GL11;
 
@@ -169,7 +170,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	{
 		_initialize();
 		this.renderType = renderType;
-		this.wr = Tessellator.getInstance().getWorldRenderer();
+		this.buffer = Tessellator.getInstance().getBuffer();
 
 		currentTexture = null;
 		bindDefaultTexture();
@@ -497,7 +498,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	 * @param y the y
 	 * @param format the format
 	 */
-	public void drawItemStack(ItemStack itemStack, int x, int y, EnumChatFormatting format)
+	public void drawItemStack(ItemStack itemStack, int x, int y, Style format)
 	{
 		drawItemStack(itemStack, x, y, null, format, true);
 	}
@@ -526,7 +527,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	 * @param format the format
 	 * @param relative if true, coordinates are relative to current component
 	 */
-	public void drawItemStack(ItemStack itemStack, int x, int y, String label, EnumChatFormatting format, boolean relative)
+	public void drawItemStack(ItemStack itemStack, int x, int y, String label, Style format, boolean relative)
 	{
 		if (itemStack == null)
 			return;
@@ -577,7 +578,8 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 		itemRenderer.zLevel = 100;
 		prepare(RenderType.GUI);
 		startDrawing();
-		drawItemStack(itemStack, mouseX - 8, mouseY - 8, null, itemStack.stackSize == 0 ? EnumChatFormatting.YELLOW : null, false);
+		drawItemStack(itemStack, mouseX - 8, mouseY - 8, null,
+				itemStack.stackSize == 0 ? new Style().setColor(TextFormatting.YELLOW) : null, false);
 		draw();
 		itemRenderer.zLevel = 0;
 		clean();

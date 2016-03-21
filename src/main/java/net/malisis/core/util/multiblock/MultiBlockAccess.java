@@ -29,8 +29,8 @@ import net.malisis.core.util.MBlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -80,7 +80,8 @@ public class MultiBlockAccess implements IBlockAccess
 	@Override
 	public boolean isAirBlock(BlockPos pos)
 	{
-		return getBlockState(pos).getBlock().isAir(this, pos);
+		IBlockState state = getBlockState(pos);
+		return state.getBlock().isAir(state, this, pos);
 	}
 
 	@Override
@@ -110,7 +111,7 @@ public class MultiBlockAccess implements IBlockAccess
 	@Override
 	public boolean isSideSolid(BlockPos pos, EnumFacing side, boolean _default)
 	{
-		return getBlockState(pos).getBlock().isSideSolid(this, pos, side);
+		return getBlockState(pos).isSideSolid(this, pos, side);
 	}
 
 }

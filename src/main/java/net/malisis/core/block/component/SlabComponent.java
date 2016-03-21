@@ -43,9 +43,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -152,25 +152,25 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 	}
 
 	@Override
-	public Boolean isFullCube(Block block)
+	public Boolean isFullCube(Block block, IBlockState state)
 	{
 		return false;//isDouble(block);
 	}
 
 	@Override
-	public Boolean isFullBlock(Block block)
+	public Boolean isFullBlock(Block block, IBlockState state)
 	{
 		return false;// isDouble(block);
 	}
 
 	@Override
-	public Boolean isOpaqueCube(Block block)
+	public Boolean isOpaqueCube(Block block, IBlockState state)
 	{
 		return false;//isDouble(block);
 	}
 
 	@Override
-	public Integer getMixedBrightnessForBlock(Block block, IBlockAccess world, BlockPos pos)
+	public Integer getPackedLightmapCoords(Block block, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		return null;
 	}
@@ -188,7 +188,7 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 	}
 
 	@Override
-	public Integer getLightOpacity(Block block, IBlockAccess world, BlockPos pos)
+	public Integer getLightOpacity(Block block, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		return isDouble(block) ? 255 : 0;
 	}

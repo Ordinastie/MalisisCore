@@ -33,7 +33,7 @@ import net.malisis.core.renderer.MalisisRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.FMLClientHandler;
 
@@ -158,7 +158,7 @@ public class MinecraftFont extends MalisisFont
 	@Override
 	protected void drawLineChar(CharData cd, float offsetX, float offsetY, FontRenderOptions fro)
 	{
-		WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+		VertexBuffer buffer = Tessellator.getInstance().getBuffer();
 		float factor = fro.fontScale / options.fontSize * 9;
 		float w = cd.getFullWidth(options) * factor;
 		float h = cd.getFullHeight(options) / 9F * factor;
@@ -167,21 +167,21 @@ public class MinecraftFont extends MalisisFont
 		offsetY -= factor + h;
 		w += 1.01F * factor;
 
-		wr.pos(offsetX, offsetY, 0);
-		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		wr.endVertex();
+		buffer.pos(offsetX, offsetY, 0);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.endVertex();
 
-		wr.pos(offsetX, offsetY + h, 0);
-		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		wr.endVertex();
+		buffer.pos(offsetX, offsetY + h, 0);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.endVertex();
 
-		wr.pos(offsetX + w, offsetY + h, 0);
-		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		wr.endVertex();
+		buffer.pos(offsetX + w, offsetY + h, 0);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.endVertex();
 
-		wr.pos(offsetX + w, offsetY, 0);
-		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		wr.endVertex();
+		buffer.pos(offsetX + w, offsetY, 0);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.endVertex();
 	}
 
 	@Override

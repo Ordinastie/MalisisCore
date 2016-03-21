@@ -38,6 +38,7 @@ import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.GuiIcon;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
+import net.minecraft.init.SoundEvents;
 
 /**
  * UIButton
@@ -341,7 +342,7 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	@Override
 	public boolean onClick(int x, int y)
 	{
-		MalisisGui.playSound("gui.button.press");
+		MalisisGui.playSound(SoundEvents.ui_button_click);
 		fireEvent(new ClickEvent(this, x, y));
 		return true;
 	}

@@ -27,10 +27,10 @@ package net.malisis.core.util;
 import net.malisis.core.block.IBoundingBox;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -72,7 +72,7 @@ public class AABBUtils
 	 */
 	public static AxisAlignedBB identity()
 	{
-		return identity(BlockPos.ORIGIN);
+		return Block.FULL_BLOCK_AABB;
 	}
 
 	/**
@@ -425,7 +425,7 @@ public class AABBUtils
 			aabbs = ((IBoundingBox) state.getBlock()).getCollisionBoundingBoxes(world, state.getPos(), state.getBlockState());
 		else
 		{
-			AxisAlignedBB aabb = state.getBlock().getCollisionBoundingBox(world, state.getPos(), state.getBlockState());
+			AxisAlignedBB aabb = state.getBlock().getCollisionBoundingBox(state.getBlockState(), world, state.getPos());
 			if (aabb != null)
 				aabbs = new AxisAlignedBB[] { aabb.offset(-state.getX(), -state.getY(), -state.getZ()) };
 		}

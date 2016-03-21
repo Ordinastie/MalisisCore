@@ -35,9 +35,9 @@ import net.minecraft.block.BlockStairs;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -184,13 +184,13 @@ public class StairComponent implements IBlockComponent, ISmartCull
 	}
 
 	@Override
-	public Boolean isOpaqueCube(Block block)
+	public Boolean isOpaqueCube(Block block, IBlockState state)
 	{
 		return false;
 	}
 
 	@Override
-	public Boolean isFullCube(Block block)
+	public Boolean isFullCube(Block block, IBlockState state)
 	{
 		return false;
 	}
@@ -219,7 +219,7 @@ public class StairComponent implements IBlockComponent, ISmartCull
 		if (property == null || !state.getProperties().containsKey(property))
 			return false;
 
-		return (boolean) state.getValue(property);
+		return state.getValue(property);
 	}
 
 	public static EnumFacing getStairDirection(IBlockState state)
@@ -228,7 +228,7 @@ public class StairComponent implements IBlockComponent, ISmartCull
 			return null;
 
 		if (state.getBlock() instanceof BlockStairs)
-			return ((EnumFacing) state.getValue(BlockStairs.FACING)).getOpposite();
+			return state.getValue(BlockStairs.FACING).getOpposite();
 		else
 			return DirectionalComponent.getDirection(state);
 	}

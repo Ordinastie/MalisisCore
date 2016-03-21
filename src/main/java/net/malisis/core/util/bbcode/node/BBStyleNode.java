@@ -25,7 +25,7 @@
 package net.malisis.core.util.bbcode.node;
 
 import net.malisis.core.util.bbcode.render.BBRenderElement;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * @author Ordinastie
@@ -33,7 +33,7 @@ import net.minecraft.util.EnumChatFormatting;
  */
 public class BBStyleNode extends BBNode
 {
-	protected EnumChatFormatting ecf;
+	protected TextFormatting format;
 
 	public BBStyleNode(String tag)
 	{
@@ -41,30 +41,30 @@ public class BBStyleNode extends BBNode
 		switch (tag)
 		{
 			case "b":
-				ecf = EnumChatFormatting.BOLD;
+				format = TextFormatting.BOLD;
 				break;
 			case "i":
-				ecf = EnumChatFormatting.ITALIC;
+				format = TextFormatting.ITALIC;
 				break;
 			case "u":
-				ecf = EnumChatFormatting.UNDERLINE;
+				format = TextFormatting.UNDERLINE;
 				break;
 			case "s":
-				ecf = EnumChatFormatting.STRIKETHROUGH;
+				format = TextFormatting.STRIKETHROUGH;
 				break;
 			default:
 				throw new IllegalArgumentException("Invalid tag for BBStyleNode : " + tag);
 		}
 	}
 
-	public EnumChatFormatting getEcf()
+	public TextFormatting getEcf()
 	{
-		return ecf;
+		return format;
 	}
 
 	public String toFormattedString()
 	{
-		return ecf.toString();
+		return format.toString();
 	}
 
 	@Override
@@ -90,6 +90,6 @@ public class BBStyleNode extends BBNode
 	@Override
 	public void apply(BBRenderElement element)
 	{
-		element.styles.add(ecf);
+		element.styles.add(format);
 	}
 }

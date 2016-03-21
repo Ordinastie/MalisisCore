@@ -24,15 +24,15 @@
 
 package net.malisis.core.renderer.icon;
 
-import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.PngSizeInfo;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.resources.data.AnimationMetadataSection;
 import net.minecraft.item.Item;
 
 /**
@@ -193,7 +193,7 @@ public class VanillaIcon extends MalisisIcon
 	{}
 
 	@Override
-	public void loadSprite(BufferedImage[] images, AnimationMetadataSection meta)
+	public void loadSprite(PngSizeInfo sizeInfo, boolean animated) throws IOException
 	{}
 
 	@Override

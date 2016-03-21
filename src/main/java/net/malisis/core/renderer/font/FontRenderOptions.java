@@ -27,7 +27,7 @@ package net.malisis.core.renderer.font;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,14 +37,14 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class FontRenderOptions
 {
-	/** Map of EnumChatFormatting **/
-	private static Map<Character, EnumChatFormatting> charFormats = new HashMap<>();
+	/** Map of TextFormatting **/
+	private static Map<Character, TextFormatting> charFormats = new HashMap<>();
 	/** List of ECF colors **/
 	private static int[] colors = new int[32];
 	static
 	{
-		//could reflect to get EnumChatFormatting.formattingCodeMapping instead
-		for (EnumChatFormatting ecf : EnumChatFormatting.values())
+		//could reflect to get TextFormatting.formattingCodeMapping instead
+		for (TextFormatting ecf : TextFormatting.values())
 			charFormats.put(ecf.toString().charAt(1), ecf);
 
 		//build colors for ECF
@@ -120,7 +120,7 @@ public class FontRenderOptions
 	}
 
 	/**
-	 * Process styles applied to the beginning of the text with {@link EnumChatFormatting} values.<br>
+	 * Process styles applied to the beginning of the text with {@link TextFormatting} values.<br>
 	 * Applies the styles to this {@link FontRenderOptions} and returns the number of characters read.
 	 *
 	 * @param text the text
@@ -132,7 +132,7 @@ public class FontRenderOptions
 	}
 
 	/**
-	 * Process styles applied at the specified position in the text with {@link EnumChatFormatting} values.<br>
+	 * Process styles applied at the specified position in the text with {@link TextFormatting} values.<br>
 	 * Applies the styles to this {@link FontRenderOptions} and returns the number of characters read.
 	 *
 	 * @param text the text
@@ -145,7 +145,7 @@ public class FontRenderOptions
 			saveDefault();
 		if (disableECF)
 			return 0;
-		EnumChatFormatting ecf;
+		TextFormatting ecf;
 		int offset = 0;
 		while ((ecf = getFormatting(text, index + offset)) != null)
 		{
@@ -157,15 +157,15 @@ public class FontRenderOptions
 	}
 
 	/**
-	 * Applies the {@link EnumChatFormatting} style to this {@link FontRenderOptions}.
+	 * Applies the {@link TextFormatting} style to this {@link FontRenderOptions}.
 	 *
 	 * @param ecf the ecf
 	 */
-	public void apply(EnumChatFormatting ecf)
+	public void apply(TextFormatting ecf)
 	{
 		if (!defaultSaved)
 			saveDefault();
-		if (ecf == EnumChatFormatting.RESET)
+		if (ecf == TextFormatting.RESET)
 			resetStyles();
 		else if (ecf.isColor())
 		{
@@ -267,14 +267,14 @@ public class FontRenderOptions
 	}
 
 	/**
-	 * Gets the {@link EnumChatFormatting} at the specified position in the text.<br>
+	 * Gets the {@link TextFormatting} at the specified position in the text.<br>
 	 * Returns null if none is found.
 	 *
 	 * @param text the text
 	 * @param index the index
 	 * @return the formatting
 	 */
-	public static EnumChatFormatting getFormatting(String text, int index)
+	public static TextFormatting getFormatting(String text, int index)
 	{
 		if (StringUtils.isEmpty(text) || index < 0 || index > text.length() - 2)
 			return null;
@@ -286,7 +286,7 @@ public class FontRenderOptions
 	}
 
 	/**
-	 * Checks if there is a {@link EnumChatFormatting} at the specified position in the text.
+	 * Checks if there is a {@link TextFormatting} at the specified position in the text.
 	 *
 	 * @param text the text
 	 * @param index the index

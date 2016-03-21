@@ -28,7 +28,7 @@ import java.util.Arrays;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.interaction.UISelect;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 
 import com.google.common.base.Function;
 
@@ -36,7 +36,7 @@ import com.google.common.base.Function;
  * @author Ordinastie
  *
  */
-public class EcfSelect extends UISelect<EnumChatFormatting>
+public class EcfSelect extends UISelect<TextFormatting>
 {
 	private MCEditor editor;
 
@@ -45,20 +45,20 @@ public class EcfSelect extends UISelect<EnumChatFormatting>
 		super(gui, 80);
 		this.editor = editor;
 
-		labelFunction = new Function<EnumChatFormatting, String>()
+		labelFunction = new Function<TextFormatting, String>()
 		{
 			@Override
-			public String apply(EnumChatFormatting input)
+			public String apply(TextFormatting input)
 			{
 				return input.toString() + input.getFriendlyName();
 			}
 		};
 
-		setOptions(Arrays.asList(EnumChatFormatting.values()));
+		setOptions(Arrays.asList(TextFormatting.values()));
 	}
 
 	@Override
-	public void setSelectedOption(Option<EnumChatFormatting> option)
+	public void setSelectedOption(Option<TextFormatting> option)
 	{
 		editor.getTextfield().addText(option.getKey().toString());
 	}

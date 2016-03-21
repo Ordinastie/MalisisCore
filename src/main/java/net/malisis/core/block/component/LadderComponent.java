@@ -32,9 +32,9 @@ import net.malisis.core.block.component.DirectionalComponent.Placement;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -103,13 +103,13 @@ public class LadderComponent implements IBlockComponent
 	}
 
 	@Override
-	public Boolean isOpaqueCube(Block block)
+	public Boolean isOpaqueCube(Block block, IBlockState state)
 	{
 		return false;
 	}
 
 	@Override
-	public Boolean isFullCube(Block block)
+	public Boolean isFullCube(Block block, IBlockState state)
 	{
 		return false;
 	}

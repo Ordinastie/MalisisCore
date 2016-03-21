@@ -31,8 +31,8 @@ import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 
 /**
  * @author Ordinastie

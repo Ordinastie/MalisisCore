@@ -39,7 +39,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
@@ -85,7 +85,7 @@ public class OpenInventoryMessage implements IMalisisMessageHandler<OpenInventor
 		else if (message.type == ContainerType.TYPE_ITEM)
 		{
 			//TODO: send and use slot number instead of limited to equipped
-			ItemStack itemStack = player.getCurrentEquippedItem();
+			ItemStack itemStack = player.getHeldItemMainhand();
 			if (itemStack == null || !(itemStack.getItem() instanceof IDeferredInventoryProvider<?>))
 				return;
 

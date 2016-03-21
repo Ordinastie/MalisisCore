@@ -24,7 +24,7 @@
 
 package net.malisis.core.renderer.font;
 
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * @author Ordinastie
@@ -46,7 +46,7 @@ public class StringWalker
 	private int index;
 	private int endIndex;
 	private char c;
-	private EnumChatFormatting ecf;
+	private TextFormatting format;
 	private Link link;
 	private float width;
 
@@ -92,14 +92,14 @@ public class StringWalker
 		return c;
 	}
 
-	public EnumChatFormatting getFormatting()
+	public TextFormatting getFormatting()
 	{
-		return ecf;
+		return format;
 	}
 
-	public boolean isFormatting()
+	public boolean isFormatted()
 	{
-		return ecf != null;
+		return format != null;
 	}
 
 	public Link getLink()
@@ -154,15 +154,15 @@ public class StringWalker
 
 	private void checkEcf()
 	{
-		ecf = FontRenderOptions.getFormatting(str, index);
-		if (ecf == null)
-			ecf = FontRenderOptions.getFormatting(str, index - 1);
+		format = FontRenderOptions.getFormatting(str, index);
+		if (format == null)
+			format = FontRenderOptions.getFormatting(str, index - 1);
 
-		if (ecf == null)
+		if (format == null)
 			return;
 
 		if (applyStyles && fro != null && !isLink())
-			fro.apply(ecf);
+			fro.apply(format);
 
 		if (skipChars && !litteral)
 		{
@@ -224,7 +224,7 @@ public class StringWalker
 		c = str.charAt(index);
 		width = font.getCharWidth(c, fro);
 
-		if (!litteral && !skipChars && (ecf != null || (link != null && !isText)))
+		if (!litteral && !skipChars && (format != null || (link != null && !isText)))
 			width = 0;
 
 		index++;

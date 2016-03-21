@@ -51,12 +51,12 @@ import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.face.SouthFace;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.translation.I18n;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
@@ -284,7 +284,7 @@ public class MalisisFont
 		if (Character.isWhitespace(cd.getChar()))
 			return;
 
-		WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+		VertexBuffer buffer = Tessellator.getInstance().getBuffer();
 		float factor = fro.fontScale / options.fontSize * 9;
 		float w = cd.getFullWidth(options) * factor;
 		float h = cd.getFullHeight(options) * factor;
@@ -297,25 +297,25 @@ public class MalisisFont
 			offsetY += fro.fontScale;
 		}
 
-		wr.pos(offsetX + i, offsetY, 0);
-		wr.tex(cd.u(), cd.v());
-		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		wr.endVertex();
+		buffer.pos(offsetX + i, offsetY, 0);
+		buffer.tex(cd.u(), cd.v());
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.endVertex();
 
-		wr.pos(offsetX - i, offsetY + h, 0);
-		wr.tex(cd.u(), cd.V());
-		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		wr.endVertex();
+		buffer.pos(offsetX - i, offsetY + h, 0);
+		buffer.tex(cd.u(), cd.V());
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.endVertex();
 
-		wr.pos(offsetX + w - i, offsetY + h, 0);
-		wr.tex(cd.U(), cd.V());
-		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		wr.endVertex();
+		buffer.pos(offsetX + w - i, offsetY + h, 0);
+		buffer.tex(cd.U(), cd.V());
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.endVertex();
 
-		wr.pos(offsetX + w + i, offsetY, 0);
-		wr.tex(cd.U(), cd.v());
-		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		wr.endVertex();
+		buffer.pos(offsetX + w + i, offsetY, 0);
+		buffer.tex(cd.U(), cd.v());
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.endVertex();
 
 		/*
 		wr.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
@@ -336,7 +336,7 @@ public class MalisisFont
 		walker.applyStyles(true);
 		while (walker.walk())
 		{
-			if (!walker.isFormatting())
+			if (!walker.isFormatted())
 			{
 				CharData cd = getCharData(walker.getChar());
 				if (fro.underline)
@@ -351,7 +351,7 @@ public class MalisisFont
 
 	protected void drawLineChar(CharData cd, float offsetX, float offsetY, FontRenderOptions fro)
 	{
-		WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+		VertexBuffer buffer = Tessellator.getInstance().getBuffer();
 		float factor = fro.fontScale / options.fontSize * 9;
 		float w = cd.getFullWidth(options) * factor;
 		float h = cd.getFullHeight(options) / 9F * factor;
@@ -363,21 +363,21 @@ public class MalisisFont
 			offsetY += fro.fontScale;
 		}
 
-		wr.pos(offsetX, offsetY, 0);
-		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		wr.endVertex();
+		buffer.pos(offsetX, offsetY, 0);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.endVertex();
 
-		wr.pos(offsetX, offsetY + h, 0);
-		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		wr.endVertex();
+		buffer.pos(offsetX, offsetY + h, 0);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.endVertex();
 
-		wr.pos(offsetX + w, offsetY + h, 0);
-		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		wr.endVertex();
+		buffer.pos(offsetX + w, offsetY + h, 0);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.endVertex();
 
-		wr.pos(offsetX + w, offsetY, 0);
-		wr.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		wr.endVertex();
+		buffer.pos(offsetX + w, offsetY, 0);
+		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+		buffer.endVertex();
 
 		/*
 		wr.setColorOpaque_I(drawingShadow ? fro.getShadowColor() : fro.color);
@@ -406,13 +406,13 @@ public class MalisisFont
 	private String translate(String str)
 	{
 		if (str.indexOf('{') == -1 || str.indexOf('{') >= str.indexOf('}'))
-			return StatCollector.translateToLocal(str);
+			return I18n.translateToLocal(str);
 
 		StringBuffer output = new StringBuffer();
 		Matcher matcher = pattern.matcher(str);
 
 		while (matcher.find())
-			matcher.appendReplacement(output, StatCollector.translateToLocal(matcher.group(1)));
+			matcher.appendReplacement(output, I18n.translateToLocal(matcher.group(1)));
 
 		matcher.appendTail(output);
 		return output.toString();
@@ -420,8 +420,8 @@ public class MalisisFont
 
 	private boolean hasLines(String text, FontRenderOptions fro)
 	{
-		return fro.underline || fro.strikethrough || text.contains(EnumChatFormatting.UNDERLINE.toString())
-				|| text.contains(EnumChatFormatting.STRIKETHROUGH.toString());
+		return fro.underline || fro.strikethrough || text.contains(TextFormatting.UNDERLINE.toString())
+				|| text.contains(TextFormatting.STRIKETHROUGH.toString());
 	}
 
 	/**
@@ -494,7 +494,7 @@ public class MalisisFont
 			return 0;
 
 		if (fro != null && !fro.disableECF)
-			str = EnumChatFormatting.getTextWithoutFormattingCodes(str);
+			str = TextFormatting.getTextWithoutFormattingCodes(str);
 
 		if (StringUtils.isEmpty(str))
 			return 0;

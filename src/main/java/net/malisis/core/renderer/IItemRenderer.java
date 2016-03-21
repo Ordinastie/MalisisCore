@@ -29,16 +29,17 @@ import java.util.List;
 import javax.vecmath.Matrix4f;
 
 import net.malisis.core.MalisisRegistry;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.client.renderer.block.model.ItemOverrideList;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -49,7 +50,6 @@ import com.google.common.collect.ImmutableList;
  * @author Ordinastie
  *
  */
-@SuppressWarnings("deprecation")
 public interface IItemRenderer
 {
 	public boolean renderItem(ItemStack itemStack, float partialTick);
@@ -77,7 +77,7 @@ public interface IItemRenderer
 		}
 
 		@Override
-		public Pair<? extends IFlexibleBakedModel, Matrix4f> handlePerspective(TransformType transformType)
+		public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType transformType)
 		{
 			IItemRenderer itemRenderer = MalisisRegistry.getItemRenderer(item);
 			if (itemRenderer == null)
@@ -95,13 +95,12 @@ public interface IItemRenderer
 		}
 
 		//@formatter:off
-		@Override public VertexFormat getFormat() 						{ return null; }
 		@Override public boolean isAmbientOcclusion() 					{ return false; }
 		@Override public boolean isBuiltInRenderer() 					{ return false; }
 		@Override public TextureAtlasSprite getParticleTexture() 		{ return null; }
 		@Override public ItemCameraTransforms getItemCameraTransforms() { return ItemCameraTransforms.DEFAULT; }
-		@Override public List<BakedQuad> getFaceQuads(EnumFacing side) 	{ return ImmutableList.of(); }
-		@Override public List<BakedQuad> getGeneralQuads() 				{ return ImmutableList.of(); }
+		@Override public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand)	{ return ImmutableList.of(); }
+		@Override public ItemOverrideList getOverrides() 				{ return null; }
 		//@formatter:on
 
 		@Override
@@ -109,6 +108,7 @@ public interface IItemRenderer
 		{
 			return item.getUnlocalizedName() + "[" + rl + "]";
 		}
+
 	};
 
 }

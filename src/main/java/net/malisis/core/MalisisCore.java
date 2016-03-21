@@ -41,10 +41,10 @@ import net.malisis.core.util.syncer.Syncer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -268,22 +268,22 @@ public class MalisisCore implements IMalisisMod
 		String txt = text.toString();
 		if (text instanceof Object[])
 			txt = Arrays.deepToString((Object[]) text);
-		ChatComponentText msg = new ChatComponentText(StatCollector.translateToLocalFormatted(txt, data));
+		TextComponentString msg = new TextComponentString(I18n.translateToLocalFormatted(txt, data));
 		if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
 		{
-			MinecraftServer server = MinecraftServer.getServer();
+			MinecraftServer server = FMLCommonHandler.instance().getSidedDelegate().getServer();
 
 			if (server != null)
-				server.getConfigurationManager().sendChatMsg(msg);
+				server.getPlayerList().sendChatMsg(msg);
 		}
 		else
 		{
 			if (Minecraft.getMinecraft() == null || Minecraft.getMinecraft().thePlayer == null)
 				return;
 
-			ChatStyle cs = new ChatStyle();
+			Style cs = new Style();
 			cs.setItalic(true);
-			cs.setColor(EnumChatFormatting.GRAY);
+			cs.setColor(TextFormatting.GRAY);
 			msg.setChatStyle(cs);
 
 			Minecraft.getMinecraft().thePlayer.addChatMessage(msg);

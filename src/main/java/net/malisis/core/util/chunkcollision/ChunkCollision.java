@@ -38,12 +38,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
@@ -91,7 +90,7 @@ public class ChunkCollision
 	 * @param src the src
 	 * @param dest the dest
 	 */
-	public void setRayTraceInfos(Vec3 src, Vec3 dest)
+	public void setRayTraceInfos(Vec3d src, Vec3d dest)
 	{
 		if (src == null || dest == null)
 			return;
@@ -118,7 +117,7 @@ public class ChunkCollision
 	 * @param mop the mop
 	 * @return the ray trace result
 	 */
-	public MovingObjectPosition getRayTraceResult(World world, MovingObjectPosition mop)
+	public RayTraceResult getRayTraceResult(World world, RayTraceResult mop)
 	{
 		if (src == null || dest == null)
 			return mop;
@@ -133,23 +132,23 @@ public class ChunkCollision
 	}
 
 	/**
-	 * Gets the closest {@link MovingObjectPosition} to the source.
+	 * Gets the closest {@link RayTraceResult} to the source.
 	 *
 	 * @param src the src
 	 * @param mop1 the mop1
 	 * @param mop2 the mop2
 	 * @return the closest
 	 */
-	private MovingObjectPosition getClosest(Point src, MovingObjectPosition mop1, MovingObjectPosition mop2)
+	private RayTraceResult getClosest(Point src, RayTraceResult mop1, RayTraceResult mop2)
 	{
 		if (mop1 == null)
 			return mop2;
 		if (mop2 == null)
 			return mop1;
 
-		if (mop1.typeOfHit == MovingObjectType.MISS && mop2.typeOfHit != MovingObjectType.MISS)
+		if (mop1.typeOfHit == RayTraceResult.Type.MISS && mop2.typeOfHit != RayTraceResult.Type.MISS)
 			return mop2;
-		if (mop1.typeOfHit != MovingObjectType.MISS && mop2.typeOfHit == MovingObjectType.MISS)
+		if (mop1.typeOfHit != RayTraceResult.Type.MISS && mop2.typeOfHit == RayTraceResult.Type.MISS)
 			return mop1;
 
 		if (Point.distanceSquared(src, new Point(mop1.hitVec)) > Point.distanceSquared(src, new Point(mop2.hitVec)))
@@ -321,9 +320,9 @@ public class ChunkCollision
 	{
 		private Point src;
 		private Point dest;
-		private MovingObjectPosition mop;
+		private RayTraceResult mop;
 
-		public RayTraceProcedure(Point src, Point dest, MovingObjectPosition mop)
+		public RayTraceProcedure(Point src, Point dest, RayTraceResult mop)
 		{
 			this.src = src;
 			this.dest = dest;

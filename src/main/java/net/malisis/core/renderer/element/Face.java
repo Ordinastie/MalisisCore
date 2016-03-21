@@ -31,10 +31,7 @@ import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.util.Vector;
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
-
-import com.google.common.primitives.Ints;
 
 public class Face implements ITransformable.Translate, ITransformable.Rotate
 {
@@ -481,20 +478,6 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		//fry's patent
 		float f = (float) ((normal.x * normal.x * 0.6 + normal.y * (normal.y * 3 + 1) / 4 + normal.z * normal.z * 0.8));
 		params.colorFactor.set(f);
-	}
-
-	/**
-	 * Gets a {@link BakedQuad} from this {@link Face}
-	 *
-	 * @return the baked quad
-	 */
-	public BakedQuad toBakedQuad()
-	{
-		int[] data = new int[0];
-		for (Vertex v : getVertexes())
-			data = Ints.concat(data, v.toVertexData());
-
-		return new BakedQuad(data, params.colorMultiplier.get(), params.direction.get());
 	}
 
 	@Override

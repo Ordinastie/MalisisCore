@@ -29,8 +29,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -67,7 +68,7 @@ public class PowerComponent implements IBlockComponent
 	}
 
 	@Override
-	public boolean onBlockActivated(Block block, World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ)
+	public boolean onBlockActivated(Block block, World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
 		if (type == Type.REDSTONE)
 			return false;
@@ -114,7 +115,7 @@ public class PowerComponent implements IBlockComponent
 		if (property == null || !state.getProperties().containsKey(property))
 			return false;
 
-		return (boolean) state.getValue(property);
+		return state.getValue(property);
 	}
 
 	public static boolean isRemotelyPowered(World world, BlockPos pos)

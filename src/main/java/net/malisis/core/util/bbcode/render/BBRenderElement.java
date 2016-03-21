@@ -28,7 +28,7 @@ import java.util.EnumSet;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * @author Ordinastie
@@ -36,7 +36,7 @@ import net.minecraft.util.EnumChatFormatting;
  */
 public class BBRenderElement
 {
-	public EnumSet<EnumChatFormatting> styles = EnumSet.noneOf(EnumChatFormatting.class);
+	public EnumSet<TextFormatting> styles = EnumSet.noneOf(TextFormatting.class);
 	public boolean shadow;
 	public int color = 0;
 	public int bgColor = 0;

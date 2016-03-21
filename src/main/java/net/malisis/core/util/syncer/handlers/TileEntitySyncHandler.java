@@ -31,7 +31,7 @@ import net.malisis.core.util.syncer.handlers.TileEntitySyncHandler.TESyncData;
 import net.malisis.core.util.syncer.message.SyncerMessage.Packet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**

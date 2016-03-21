@@ -34,9 +34,8 @@ import net.malisis.core.util.chunkcollision.ChunkCollision;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
 /**
@@ -74,9 +73,9 @@ public class RaytraceWorld
 	 * The first block to be hit. If ray trace reaches <code>dest</code> without any hit, <code>firstHit</code> will have
 	 * <code>typeOfHit</code> = <b>MISS</b>
 	 */
-	public MovingObjectPosition firstHit;
+	public RayTraceResult firstHit;
 	/** List of blocks passed by the ray trace. Only set if options <code>LOG_BLOCK_PASSED</code> is set */
-	public HashMap<BlockPos, MovingObjectPosition> blockPassed;
+	public HashMap<BlockPos, RayTraceResult> blockPassed;
 	/** Options for the ray tracing. */
 	public int options = 0;
 
@@ -93,7 +92,7 @@ public class RaytraceWorld
 		this.ray = ray;
 		this.options = options;
 
-		blockSrc = new BlockPos(src.toVec3());
+		blockSrc = new BlockPos(src.toVec3d());
 
 		int stepX = 1, stepY = 1, stepZ = 1;
 		if (ray.direction.x < 0)
@@ -153,7 +152,7 @@ public class RaytraceWorld
 	{
 		this(new Ray(src, new Vector(src, dest)), options);
 		this.dest = dest;
-		blockDest = new BlockPos(dest.toVec3());
+		blockDest = new BlockPos(dest.toVec3d());
 	}
 
 	/**
@@ -166,7 +165,7 @@ public class RaytraceWorld
 	{
 		this(new Ray(src, new Vector(src, dest)), 0);
 		this.dest = dest;
-		blockDest = new BlockPos(dest.toVec3());
+		blockDest = new BlockPos(dest.toVec3d());
 	}
 
 	/**
@@ -217,7 +216,7 @@ public class RaytraceWorld
 	public void setLength(double length)
 	{
 		dest = ray.getPointAt(length);
-		blockDest = new BlockPos(dest.toVec3());
+		blockDest = new BlockPos(dest.toVec3d());
 	}
 
 	/**
@@ -234,12 +233,12 @@ public class RaytraceWorld
 	/**
 	 * Does the raytracing.
 	 *
-	 * @return {@link MovingObjectPosition} with <code>typeOfHit</code> <b>BLOCK</b> if a ray hits a block in the way, or <b>MISS</b> if it
+	 * @return {@link RayTraceResult} with <code>typeOfHit</code> <b>BLOCK</b> if a ray hits a block in the way, or <b>MISS</b> if it
 	 *         reaches <code>dest</code> without any hit
 	 */
-	public MovingObjectPosition trace()
+	public RayTraceResult trace()
 	{
-		MovingObjectPosition mop = null;
+		RayTraceResult mop = null;
 		double tX, tY, tZ, min;
 		int count = 0;
 		boolean ret = false;
@@ -284,7 +283,7 @@ public class RaytraceWorld
 		}
 
 		if (firstHit == null && dest != null)
-			firstHit = new MovingObjectPosition(MovingObjectType.MISS, dest.toVec3(), null, new BlockPos(currentX, currentY, currentZ));
+			firstHit = new RayTraceResult(RayTraceResult.Type.MISS, dest.toVec3d(), null, new BlockPos(currentX, currentY, currentZ));
 
 		ChunkCollision.get().setRayTraceInfos(src, dest);
 		firstHit = ChunkCollision.get().getRayTraceResult(world, firstHit);
@@ -330,13 +329,14 @@ public class RaytraceWorld
 	 *
 	 * @param pos the pos
 	 * @param exit the exit
-	 * @return the {@link MovingObjectPosition} return by block raytrace
+	 * @return the {@link RayTraceResult} return by block raytrace
 	 */
-	public MovingObjectPosition rayTraceBlock(BlockPos pos, Point exit)
+	public RayTraceResult rayTraceBlock(BlockPos pos, Point exit)
 	{
 		IBlockState state = world.getBlockState(pos);
 		Block block = state.getBlock();
-		if (hasOption(Options.CHECK_COLLISION) && block.getCollisionBoundingBox(world, pos, state) == null)
+		//TODO: fix getBoundingBox for IBoundingBox ?
+		if (hasOption(Options.CHECK_COLLISION) && state.getBoundingBox(world, pos) == null)
 			return null;
 		if (!block.canCollideCheck(state, hasOption(Options.HIT_LIQUIDS)))
 			return null;

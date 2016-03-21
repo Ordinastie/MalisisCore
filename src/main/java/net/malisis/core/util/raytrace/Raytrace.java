@@ -30,9 +30,9 @@ import java.util.List;
 import net.malisis.core.util.Point;
 import net.malisis.core.util.Ray;
 import net.malisis.core.util.Vector;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -79,7 +79,7 @@ public class Raytrace
 	 * @param src the src
 	 * @param dest the dest
 	 */
-	public Raytrace(Vec3 src, Vec3 dest)
+	public Raytrace(Vec3d src, Vec3d dest)
 	{
 		this(new Ray(src, dest));
 		this.dest = new Point(dest);

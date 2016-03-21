@@ -30,12 +30,16 @@ import net.malisis.core.block.IRegisterable;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.renderer.icon.IIconProvider;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 /**
@@ -85,12 +89,12 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable
 	}
 
 	@Override
-	public boolean onItemUse(ItemStack itemStack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+	public EnumActionResult onItemUse(ItemStack itemStack, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
 		if (itemStack.stackSize == 0)
-			return false;
+			return EnumActionResult.FAIL;
 		if (!player.canPlayerEdit(pos.offset(side), side, itemStack))
-			return false;
+			return EnumActionResult.FAIL;
 
 		IBlockState placedState = checkMerge(itemStack, player, world, pos, side, hitX, hitY, hitZ, false);
 		BlockPos p = pos;
@@ -104,17 +108,18 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable
 		}
 
 		if (placedState == null)
-			return super.onItemUse(itemStack, player, world, pos, side, hitX, hitY, hitZ);
+			return super.onItemUse(itemStack, player, world, pos, hand, side, hitX, hitY, hitZ);
 
 		Block block = placedState.getBlock();
-		if (world.checkNoEntityCollision(block.getCollisionBoundingBox(world, p, placedState)) && world.setBlockState(p, placedState, 3))
+		if (world.checkNoEntityCollision(block.getCollisionBoundingBox(placedState, world, p)) && world.setBlockState(p, placedState, 3))
 		{
-			world.playSoundEffect(p.getX() + 0.5F, p.getY() + 0.5F, p.getZ() + 0.5F, block.stepSound.getPlaceSound(),
-					(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F);
+			SoundType soundType = block.getStepSound();
+			world.playSound(player, pos, soundType.getPlaceSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F,
+					soundType.getPitch() * 0.8F);
 			--itemStack.stackSize;
 		}
 
-		return true;
+		return EnumActionResult.SUCCESS;
 	}
 
 	@Override

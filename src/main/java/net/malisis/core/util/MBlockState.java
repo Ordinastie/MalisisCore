@@ -33,8 +33,8 @@ import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants.NBT;
@@ -132,7 +132,7 @@ public class MBlockState
 
 	public boolean isAir()
 	{
-		return getBlock().getMaterial() == Material.air;
+		return getBlockState().getMaterial() == Material.air;
 	}
 
 	public MBlockState offset(BlockPos pos)

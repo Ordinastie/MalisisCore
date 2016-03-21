@@ -35,9 +35,9 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
 import com.google.common.collect.Lists;
@@ -117,28 +117,29 @@ public class PaneComponent implements IBlockComponent, ISmartCull
 	}
 
 	@Override
-	public Boolean isFullCube(Block block)
+	public Boolean isFullCube(Block block, IBlockState state)
 	{
 		return false;
 	}
 
 	@Override
-	public Boolean isOpaqueCube(Block block)
+	public Boolean isOpaqueCube(Block block, IBlockState state)
 	{
 		return false;
 	}
 
-	public final boolean canPaneConnectToBlock(Block block)
+	public final boolean canPaneConnectToBlock(Block block, IBlockState state)
 	{
-		return block.isFullBlock() || block == Blocks.glass || block == Blocks.stained_glass || block == Blocks.stained_glass_pane
+		return block.isFullBlock(state) || block == Blocks.glass || block == Blocks.stained_glass || block == Blocks.stained_glass_pane
 				|| block instanceof BlockPane;
 	}
 
 	public boolean canPaneConnectTo(Block block, IBlockAccess world, BlockPos pos, EnumFacing dir)
 	{
 		BlockPos offset = pos.offset(dir);
-		Block connected = world.getBlockState(offset).getBlock();
-		return connected == block || canPaneConnectToBlock(block) || connected.isSideSolid(world, offset, dir.getOpposite());
+		IBlockState state = world.getBlockState(offset);
+		Block connected = state.getBlock();
+		return connected == block || canPaneConnectToBlock(block, state) || connected.isSideSolid(state, world, offset, dir.getOpposite());
 	}
 
 	public static boolean isConnected(IBlockState state, PropertyBool property)

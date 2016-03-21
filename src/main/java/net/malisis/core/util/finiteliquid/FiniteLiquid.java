@@ -38,15 +38,15 @@ import net.malisis.core.util.MBlockState;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -81,9 +81,9 @@ public abstract class FiniteLiquid extends MalisisBlock
 	}
 
 	@Override
-	protected BlockState createBlockState()
+	protected BlockStateContainer createBlockState()
 	{
-		return new BlockState(this, AMOUNT);
+		return new BlockStateContainer(this, AMOUNT);
 	}
 
 	@Override
@@ -119,7 +119,7 @@ public abstract class FiniteLiquid extends MalisisBlock
 			return 0;
 		else if (state.getBlock() != this)
 			return -1;
-		return (int) state.getBlockState().getValue(AMOUNT);
+		return state.getBlockState().getValue(AMOUNT);
 	}
 
 	public void setAmount(World world, MBlockState state, int amount)
@@ -165,10 +165,10 @@ public abstract class FiniteLiquid extends MalisisBlock
 	}
 
 	@Override
-	public boolean shouldSideBeRendered(IBlockAccess world, BlockPos pos, EnumFacing side)
+	public boolean shouldSideBeRendered(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
 	{
-		Material material = world.getBlockState(pos).getBlock().getMaterial();
-		return material == this.blockMaterial ? false : (side == UP ? true : super.shouldSideBeRendered(world, pos, side));
+		Material material = world.getBlockState(pos).getMaterial();
+		return material == this.blockMaterial ? false : (side == UP ? true : super.shouldSideBeRendered(state, world, pos, side));
 	}
 
 	@Override
@@ -180,19 +180,19 @@ public abstract class FiniteLiquid extends MalisisBlock
 	@Override
 	public int getMetaFromState(IBlockState state)
 	{
-		return ((Integer) state.getValue(AMOUNT)).intValue();
+		return state.getValue(AMOUNT).intValue();
 	}
 
 	@Override
-	public boolean isOpaqueCube()
+	public boolean isOpaqueCube(IBlockState state)
 	{
 		return false;
 	}
 
 	@Override
-	public boolean canRenderInLayer(EnumWorldBlockLayer layer)
+	public boolean canRenderInLayer(BlockRenderLayer layer)
 	{
-		return layer == EnumWorldBlockLayer.TRANSLUCENT;
+		return layer == BlockRenderLayer.TRANSLUCENT;
 	}
 
 	public static class FloodFill

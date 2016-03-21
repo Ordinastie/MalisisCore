@@ -25,9 +25,9 @@
 package net.malisis.core.renderer;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.client.model.IFlexibleBakedModel;
 
 /**
  * @author Ordinastie
@@ -37,5 +37,5 @@ public interface IModelProvider
 {
 	public void createModels();
 
-	public IFlexibleBakedModel getModel(IBlockAccess world, BlockPos pos, IBlockState state);
+	public IBakedModel getModel(IBlockAccess world, BlockPos pos, IBlockState state);
 }

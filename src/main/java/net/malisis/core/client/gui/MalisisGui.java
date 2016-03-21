@@ -54,7 +54,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -844,14 +844,14 @@ public abstract class MalisisGui extends GuiScreen
 		return true;
 	}
 
-	public static void playSound(String name)
+	public static void playSound(SoundEvent sound)
 	{
-		playSound(name, 1.0F);
+		playSound(sound, 1.0F);
 	}
 
-	public static void playSound(String name, float level)
+	public static void playSound(SoundEvent sound, float level)
 	{
-		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation(name), level));
+		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(sound, level));
 	}
 
 	public static boolean isGuiCloseKey(int keyCode)

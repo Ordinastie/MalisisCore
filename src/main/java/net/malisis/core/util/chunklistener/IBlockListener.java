@@ -26,7 +26,7 @@ package net.malisis.core.util.chunklistener;
 
 import net.malisis.core.util.MBlockState;
 import net.malisis.core.util.chunkblock.IChunkBlock;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 /**

@@ -57,7 +57,7 @@ import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -67,13 +67,13 @@ import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
-import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -109,7 +109,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	/** Whether this {@link MalisisRenderer} initialized. (initialize() already called) */
 	private boolean initialized = false;
 	/** Tessellator reference. */
-	protected WorldRenderer wr = Tessellator.getInstance().getWorldRenderer();
+	protected VertexBuffer buffer = Tessellator.getInstance().getBuffer();
 	/** Current used vertex format. */
 	protected VertexFormat vertexFormat = malisisVertexFormat;
 	/** Current world reference (BLOCK/TESR/IRWL). */
@@ -163,7 +163,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	public void reset()
 	{
-		this.wr = null;
+		this.buffer = null;
 		this.renderType = RenderType.UNSET;
 		this.drawMode = 0;
 		this.world = null;
@@ -269,9 +269,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 	//#region IBlockRenderer
 	@Override
-	public synchronized boolean renderBlock(WorldRenderer wr, IBlockAccess world, BlockPos pos, IBlockState state)
+	public synchronized boolean renderBlock(VertexBuffer wr, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
-		this.wr = wr;
+		this.buffer = wr;
 		set(world, state.getBlock(), pos, state);
 		prepare(RenderType.BLOCK);
 		render();
@@ -286,7 +286,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	@Override
 	public synchronized boolean renderItem(ItemStack itemStack, float partialTick)
 	{
-		this.wr = Tessellator.getInstance().getWorldRenderer();
+		this.buffer = Tessellator.getInstance().getBuffer();
 		set(itemStack);
 		prepare(RenderType.ITEM);
 		render();
@@ -330,7 +330,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	{
 		if (te.getBlockType() != te.getWorld().getBlockState(te.getPos()).getBlock())
 			return;
-		this.wr = Tessellator.getInstance().getWorldRenderer();
+		this.buffer = Tessellator.getInstance().getBuffer();
 		set(te, partialTick);
 		prepare(RenderType.TILE_ENTITY, x, y, z);
 		render();
@@ -375,7 +375,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	public void renderWorldLastEvent(RenderWorldLastEvent event, IBlockAccess world)
 	{
 		set(world);
-		wr = Tessellator.getInstance().getWorldRenderer();
+		buffer = Tessellator.getInstance().getBuffer();
 		partialTick = event.partialTicks;
 		renderGlobal = event.context;
 		double x = 0, y = 0, z = 0;
@@ -511,7 +511,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (isDrawing())
 			draw();
 
-		wr.begin(drawMode, vertexFormat);
+		buffer.begin(drawMode, vertexFormat);
 		this.drawMode = drawMode;
 		this.vertexFormat = vertexFormat;
 	}
@@ -524,13 +524,13 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	public boolean isDrawing()
 	{
 		if (isDrawingField == null)
-			isDrawingField = AsmUtils.changeFieldAccess(WorldRenderer.class, "isDrawing", "field_179010_r");
+			isDrawingField = AsmUtils.changeFieldAccess(VertexBuffer.class, "isDrawing", "field_179010_r");
 
 		try
 		{
-			if (wr == null)
+			if (buffer == null)
 				throw new NullPointerException("[MalisisRenderer] WorldRenderer not set for " + renderType);
-			return isDrawingField.getBoolean(wr);
+			return isDrawingField.getBoolean(buffer);
 		}
 		catch (IllegalArgumentException | IllegalAccessException e)
 		{
@@ -690,7 +690,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	public void renderStandard()
 	{
-		Minecraft.getMinecraft().getBlockRendererDispatcher().renderBlock(blockState, pos, world, wr);
+		Minecraft.getMinecraft().getBlockRendererDispatcher().renderBlock(blockState, pos, world, buffer);
 	}
 
 	/**
@@ -779,7 +779,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 		//use normals if available
 		if ((renderType == RenderType.ITEM || params.useNormals.get()) && params.direction.get() != null)
-			wr.putNormal(params.direction.get().getFrontOffsetX(), params.direction.get().getFrontOffsetY(), params.direction.get()
+			buffer.putNormal(params.direction.get().getFrontOffsetX(), params.direction.get().getFrontOffsetY(), params.direction.get()
 					.getFrontOffsetZ());
 
 		//we need to separate each face
@@ -813,7 +813,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (params != null && renderType == RenderType.ITEM)
 			vertex.setNormal(params.direction.get());
 
-		wr.addVertexData(getVertexData(vertex));
+		buffer.addVertexData(getVertexData(vertex));
 
 		vertexDrawn = true;
 	}
@@ -903,7 +903,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (ISmartCull.shouldSmartCull(block))
 			return smartCull(face, params);
 
-		boolean b = block.shouldSideBeRendered(world, pos.offset(p.direction.get()), p.direction.get());
+		boolean b = block.shouldSideBeRendered(blockState, world, pos.offset(p.direction.get()), p.direction.get());
 		return b;
 	}
 
@@ -932,7 +932,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (side == EnumFacing.EAST && bounds.maxX < 1)
 			return true;
 
-		return !world.getBlockState(pos.offset(side)).getBlock().isOpaqueCube();
+		return !world.getBlockState(pos.offset(side)).isOpaqueCube();
 	}
 
 	/**
@@ -1066,7 +1066,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		else if (params.colorMultiplier.get() != null) //global color multiplier is set
 			color = params.colorMultiplier.get();
 		else if (block != null) //use block color multiplier
-			color = world != null ? block.colorMultiplier(world, pos, 0) : block.getRenderColor(blockState);
+			color = Minecraft.getMinecraft().getBlockColors().colorMultiplier(blockState, world, pos, 0);
+		//color = world != null ? block.colorMultiplier(world, pos, 0) : block.getRenderColor(blockState);
 
 		if (drawMode == GL11.GL_LINES) //no AO for lines
 			return color;
@@ -1077,7 +1078,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		float factor = 1;
 		//calculate AO
 		if (params.calculateAOColor.get() && aoMatrix != null && Minecraft.isAmbientOcclusionEnabled()
-				&& block.getLightValue(world, pos) == 0 && params.direction.get() != null)
+				&& blockState.getLightValue(world, pos) == 0 && params.direction.get() != null)
 		{
 			factor = getBlockAmbientOcclusion(world, pos.offset(params.direction.get()));
 
@@ -1114,10 +1115,10 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 		if (block != null)
 		{
-			if (world != null && block.getLightValue(world, pos) != 0)
-				return block.getLightValue(world, pos) << 4;
-			else if (block.getLightValue() != 0)
-				return block.getLightValue() << 4;
+			if (world != null && blockState.getLightValue(world, pos) != 0)
+				return blockState.getLightValue(world, pos) << 4;
+			else if (blockState.getlightValue() != 0)
+				return blockState.getlightValue() << 4;
 		}
 
 		if (renderType == RenderType.ITEM)
@@ -1129,7 +1130,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 		//no direction, we can only use current block brightness
 		if (params.direction.get() == null && block != null)
-			return block.getMixedBrightnessForBlock(world, pos);
+			return blockState.getPackedLightmapCoords(world, pos);
 
 		AxisAlignedBB bounds = getRenderBounds(params);
 		EnumFacing dir = params.direction.get();
@@ -1179,7 +1180,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		int[][] aoMatrix = (int[][]) params.aoMatrix.get(number);
 		if (!params.calculateBrightness.get() || aoMatrix == null) //no data
 			return baseBrightness;
-		if (!Minecraft.isAmbientOcclusionEnabled() || block.getLightValue(world, pos) != 0) // emit light
+		if (!Minecraft.isAmbientOcclusionEnabled() || blockState.getLightValue(world, pos) != 0) // emit light
 			return baseBrightness;
 
 		int[] b = new int[Math.max(3, aoMatrix.length)];
@@ -1228,7 +1229,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (block == null)
 			return 1.0F;
 
-		return block.getAmbientOcclusionLightValue();
+		return blockState.getAmbientOcclusionLightValue();
 	}
 
 	/**
@@ -1241,7 +1242,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	protected int getMixedBrightnessForBlock(IBlockAccess world, BlockPos pos)
 	{
 		// return world.getLightBrightnessForSkyBlocks(x, y, z, 0);
-		return world.getBlockState(pos).getBlock().getMixedBrightnessForBlock(world, pos);
+		return world.getBlockState(pos).getPackedLightmapCoords(world, pos);
 	}
 
 	/**
@@ -1260,10 +1261,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 			return ((IBoundingBox) block).getBoundingBox(world, pos, BoundingBoxType.RENDER);
 
 		if (world != null)
-			block.setBlockBoundsBasedOnState(world, pos);
+			return blockState.getBoundingBox(world, pos);
 
-		return new AxisAlignedBB(block.getBlockBoundsMinX(), block.getBlockBoundsMinY(), block.getBlockBoundsMinZ(),
-				block.getBlockBoundsMaxX(), block.getBlockBoundsMaxY(), block.getBlockBoundsMaxZ());
+		return Block.FULL_BLOCK_AABB;
 	}
 
 	private static Timer timer = null;
@@ -1292,7 +1292,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 *
 	 * @return the render layer
 	 */
-	public static EnumWorldBlockLayer getRenderLayer()
+	public static BlockRenderLayer getRenderLayer()
 	{
 		return MinecraftForgeClient.getRenderLayer();
 	}

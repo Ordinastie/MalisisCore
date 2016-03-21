@@ -25,7 +25,7 @@
 package net.malisis.core.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.math.AxisAlignedBB;
 
 /**
  * Defines a {@link IBlockComponent} or {@link Block} that should be smartly culled when rendering if {@link #shouldSmartCull()} return

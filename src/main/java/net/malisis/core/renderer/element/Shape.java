@@ -32,8 +32,8 @@ import java.util.Map;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.vector.Matrix4f;
