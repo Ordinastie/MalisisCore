@@ -128,13 +128,13 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 	}
 
 	@Override
-	public AxisAlignedBB getBoundingBox(Block block, IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	public AxisAlignedBB getBoundingBox(Block block, IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
 		if (isDouble(block))
 			return AABBUtils.identity();
 
 		AxisAlignedBB aabb = new AxisAlignedBB(0, 0, 0, 1, 0.5F, 1);
-		if (isTop(world, pos))
+		if (isTop(state))
 			aabb = aabb.offset(0, 0.5F, 0);
 		return aabb;
 	}

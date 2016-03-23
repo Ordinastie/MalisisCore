@@ -39,11 +39,12 @@ import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.malisis.core.renderer.model.loader.TextureModelLoader;
 import net.malisis.core.util.AABBUtils;
+import net.malisis.core.util.TransformBuilder;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.client.model.TRSRTransformation;
+import net.minecraftforge.common.model.TRSRTransformation;
 
 /**
  * @author Ordinastie
@@ -64,14 +65,46 @@ public class DefaultRenderer
 
 	public static class Block extends MalisisRenderer<TileEntity>
 	{
-		//"thirdperson": {
-		//    "rotation": [ 10, -45, 170 ],
-		//    "translation": [ 0, 1.5, -2.75 ] * 0.0625,
-		//    "scale": [ 0.375, 0.375, 0.375 ]
-		//}
-		private Matrix4f defaultTransform = new TRSRTransformation(null, TRSRTransformation.quatFromYXZ(0, 180, 0), null, null).getMatrix();
-		private Matrix4f thirdPerson = new TRSRTransformation(new Vector3f(0, 0.09375F, -0.171875F), TRSRTransformation.quatFromYXZ(10,
-				-45, 170), new Vector3f(0.375F, 0.375F, 0.375F), TRSRTransformation.quatFromYXZ(0, 180, 0)).getMatrix();
+		//		{
+		//		    "display": {
+		//		        "gui": {
+		//		            "rotation": [ 30, 225, 0 ],
+		//		            "translation": [ 0, 0, 0],
+		//		            "scale":[ 0.625, 0.625, 0.625 ]
+		//		        },
+		//		        "ground": {
+		//		            "rotation": [ 0, 0, 0 ],
+		//		            "translation": [ 0, 3, 0],
+		//		            "scale":[ 0.25, 0.25, 0.25 ]
+		//		        },
+		//		        "fixed": {
+		//		            "rotation": [ 0, 0, 0 ],
+		//		            "translation": [ 0, 0, 0],
+		//		            "scale":[ 0.5, 0.5, 0.5 ]
+		//		        },
+		//		        "thirdperson_righthand": {
+		//		            "rotation": [ 75, 45, 0 ],
+		//		            "translation": [ 0, 2.5, 0],
+		//		            "scale": [ 0.375, 0.375, 0.375 ]
+		//		        },
+		//		        "firstperson_righthand": {
+		//		            "rotation": [ 0, 45, 0 ],
+		//		            "translation": [ 0, 0, 0 ],
+		//		            "scale": [ 0.40, 0.40, 0.40 ]
+		//		        },
+		//		        "firstperson_lefthand": {
+		//		            "rotation": [ 0, 225, 0 ],
+		//		            "translation": [ 0, 0, 0 ],
+		//		            "scale": [ 0.40, 0.40, 0.40 ]
+		//		        }
+		//		    }
+		//		}
+		private Matrix4f gui = new TransformBuilder().rotate(30, 225, 0).scale(0.625F).get();
+		private Matrix4f firstPersonLeftHand = new TransformBuilder().rotate(0, 225, 0).scale(0.4F).get();
+		private Matrix4f firstPersonRightHand = new TransformBuilder().rotate(0, 45, 0).scale(0.4F).get();
+		private Matrix4f thirdPerson = new TransformBuilder().translate(0, 0F, 0).rotateAfter(75, 45, 0).scale(0.375F).get();
+		private Matrix4f fixed = new TransformBuilder().scale(0.5F).get();
+		private Matrix4f ground = new TransformBuilder().translate(0, 0.3F, 0).scale(0.25F).get();
 
 		private Shape shape = new Cube();
 		private RenderParameters rp = new RenderParameters();
@@ -85,7 +118,25 @@ public class DefaultRenderer
 		@Override
 		public Matrix4f getTransform(ItemCameraTransforms.TransformType tranformType)
 		{
-			return tranformType == TransformType.THIRD_PERSON_LEFT_HAND || tranformType == TransformType.THIRD_PERSON_RIGHT_HAND ? thirdPerson : defaultTransform;
+
+			switch (tranformType)
+			{
+				case GUI:
+					return gui;
+				case FIRST_PERSON_LEFT_HAND:
+					return firstPersonLeftHand;
+				case FIRST_PERSON_RIGHT_HAND:
+					return firstPersonRightHand;
+				case THIRD_PERSON_LEFT_HAND:
+				case THIRD_PERSON_RIGHT_HAND:
+					return thirdPerson;
+				case GROUND:
+					return ground;
+				case FIXED:
+					return fixed;
+				default:
+					return null;
+			}
 		}
 
 		@Override
@@ -151,10 +202,10 @@ public class DefaultRenderer
 		@Override
 		public Matrix4f getTransform(ItemCameraTransforms.TransformType tranformType)
 		{
-			if (tranformType == TransformType.THIRD_PERSON_LEFT_HAND || tranformType == TransformType.THIRD_PERSON_RIGHT_HAND)
-				return thirdPerson;
-			else if (tranformType == TransformType.FIRST_PERSON_LEFT_HAND || tranformType == TransformType.FIRST_PERSON_RIGHT_HAND)
-				return firstPerson;
+			//			if (tranformType == TransformType.THIRD_PERSON_LEFT_HAND || tranformType == TransformType.THIRD_PERSON_RIGHT_HAND)
+			//				return thirdPerson;
+			//			else if (tranformType == TransformType.FIRST_PERSON_LEFT_HAND || tranformType == TransformType.FIRST_PERSON_RIGHT_HAND)
+			//				return firstPerson;
 			return null;
 		}
 

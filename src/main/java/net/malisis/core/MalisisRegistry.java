@@ -30,7 +30,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
+import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.IRegisterable;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.IBlockRenderer;
@@ -307,6 +309,7 @@ public class MalisisRegistry
 				GameData.getBlockItemMap().put(block, item);
 			}
 
+			//register the mapper for the block and the model for the item
 			if (MalisisCore.isClient())
 			{
 				ModelLoader.setCustomStateMapper(block, ClientRegistry.emptyMapper);
@@ -576,6 +579,12 @@ public class MalisisRegistry
 	{
 		GameData.getBlockRegistry().forEach(instance::registerIconRegister);
 		GameData.getItemRegistry().forEach(instance::registerIconRegister);
+	}
+
+	public static void registerBlockComponents()
+	{
+		StreamSupport.stream(GameData.getBlockRegistry().spliterator(), false).filter(block -> block instanceof IComponentProvider)
+				.forEach(block -> ((IComponentProvider) block).getComponents().forEach(comp -> comp.register(block)));
 	}
 
 	@SideOnly(Side.CLIENT)

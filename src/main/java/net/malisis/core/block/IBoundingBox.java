@@ -49,7 +49,7 @@ import org.apache.commons.lang3.ArrayUtils;
  */
 public interface IBoundingBox
 {
-	public AxisAlignedBB getBoundingBox(IBlockAccess world, BlockPos pos, BoundingBoxType type);
+	public AxisAlignedBB getBoundingBox(IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type);
 
 	/**
 	 * Gets the {@link AxisAlignedBB} for this {@link IBoundingBox}.
@@ -59,21 +59,21 @@ public interface IBoundingBox
 	 * @param type the type
 	 * @return the bounding box
 	 */
-	public default AxisAlignedBB[] getBoundingBoxes(IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	public default AxisAlignedBB[] getBoundingBoxes(IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
-		return new AxisAlignedBB[] { getBoundingBox(world, pos, type) };
+		return new AxisAlignedBB[] { getBoundingBox(world, pos, state, type) };
 	}
 
 	public default AxisAlignedBB[] getCollisionBoundingBoxes(World world, BlockPos pos, IBlockState state)
 	{
-		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.COLLISION);
+		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, state, BoundingBoxType.COLLISION);
 		aabbs = AABBUtils.rotate(aabbs, DirectionalComponent.getDirection(state));
 		return aabbs;
 	}
 
-	public default void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
+	public default void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
 	{
-		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.COLLISION);
+		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, state, BoundingBoxType.COLLISION);
 		aabbs = AABBUtils.rotate(aabbs, DirectionalComponent.getDirection(state));
 
 		for (AxisAlignedBB aabb : AABBUtils.offset(pos, aabbs))
@@ -83,9 +83,9 @@ public interface IBoundingBox
 		}
 	}
 
-	public default AxisAlignedBB getSelectedBoundingBox(World world, BlockPos pos)
+	public default AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos)
 	{
-		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.SELECTION);
+		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, state, BoundingBoxType.SELECTION);
 		if (ArrayUtils.isEmpty(aabbs) || aabbs[0] == null)
 			return AABBUtils.empty(pos);
 
@@ -96,7 +96,7 @@ public interface IBoundingBox
 
 	public default AxisAlignedBB[] getRenderBoundingBox(IBlockAccess world, BlockPos pos, IBlockState state)
 	{
-		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.RENDER);
+		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, state, BoundingBoxType.RENDER);
 		aabbs = AABBUtils.rotate(aabbs, DirectionalComponent.getDirection(state));
 
 		return aabbs;
@@ -104,13 +104,13 @@ public interface IBoundingBox
 
 	public default AxisAlignedBB[] getRayTraceBoundingBox(IBlockAccess world, BlockPos pos, IBlockState state)
 	{
-		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.RAYTRACE);
+		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, state, BoundingBoxType.RAYTRACE);
 		aabbs = AABBUtils.rotate(aabbs, DirectionalComponent.getDirection(state));
 
 		return aabbs;
 	}
 
-	public default RayTraceResult collisionRayTrace(World world, BlockPos pos, Vec3d src, Vec3d dest)
+	public default RayTraceResult collisionRayTrace(IBlockState state, World world, BlockPos pos, Vec3d src, Vec3d dest)
 	{
 		return new RaytraceBlock(world, src, dest, pos).trace();
 	}

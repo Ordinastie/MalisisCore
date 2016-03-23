@@ -113,7 +113,7 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable
 		Block block = placedState.getBlock();
 		if (world.checkNoEntityCollision(block.getCollisionBoundingBox(placedState, world, p)) && world.setBlockState(p, placedState, 3))
 		{
-			SoundType soundType = block.getStepSound();
+			SoundType soundType = block.getSoundType();
 			world.playSound(player, pos, soundType.getPlaceSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F,
 					soundType.getPitch() * 0.8F);
 			--itemStack.stackSize;

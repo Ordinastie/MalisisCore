@@ -26,19 +26,23 @@ package net.malisis.core.util.chunkcollision;
 
 import java.util.List;
 
+import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.BlockPosUtils;
+import net.malisis.core.util.ItemUtils;
 import net.malisis.core.util.MBlockState;
 import net.malisis.core.util.Point;
 import net.malisis.core.util.chunkblock.ChunkBlockHandler;
 import net.malisis.core.util.chunkblock.ChunkBlockHandler.ChunkProcedure;
 import net.malisis.core.util.raytrace.RaytraceBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -174,11 +178,12 @@ public class ChunkCollision
 	 * @param side the side
 	 * @return true, if can be placed
 	 */
-	public boolean canPlaceBlockAt(ItemStack itemStack, EntityPlayer player, World world, Block block, BlockPos pos, EnumFacing side)
+	public boolean canPlaceBlockAt(ItemStack itemStack, EntityPlayer player, World world, Block block, BlockPos pos, EnumHand hand, EnumFacing side)
 	{
 		AxisAlignedBB[] aabbs;
+		IBlockState state = DirectionalComponent.getPlacedState(ItemUtils.getStateFromItemStack(itemStack), side, player);
 		if (block instanceof IChunkCollidable)
-			aabbs = ((IChunkCollidable) block).getPlacedBoundingBox(world, pos, side, player, itemStack);
+			aabbs = ((IChunkCollidable) block).getPlacedBoundingBox(world, pos, state, hand, side, player, itemStack);
 		else
 			aabbs = AABBUtils.getCollisionBoundingBoxes(world, block, pos);
 

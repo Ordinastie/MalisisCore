@@ -248,11 +248,11 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 
 	//BOUNDING BOX
 	@Override
-	public AxisAlignedBB getBoundingBox(IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	public AxisAlignedBB getBoundingBox(IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
 		for (IBlockComponent component : getComponents())
 		{
-			AxisAlignedBB aabb = component.getBoundingBox(this, world, pos, type);
+			AxisAlignedBB aabb = component.getBoundingBox(this, world, pos, state, type);
 			if (aabb != null)
 				return aabb;
 		}
@@ -261,35 +261,35 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	}
 
 	@Override
-	public AxisAlignedBB[] getBoundingBoxes(IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	public AxisAlignedBB[] getBoundingBoxes(IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
 		List<AxisAlignedBB> list = Lists.newArrayList();
 		for (IBlockComponent component : getComponents())
 		{
-			AxisAlignedBB[] aabbs = component.getBoundingBoxes(this, world, pos, type);
+			AxisAlignedBB[] aabbs = component.getBoundingBoxes(this, world, pos, state, type);
 			if (aabbs != null)
 				list.addAll(Arrays.asList(aabbs));
 		}
 
-		return list.size() != 0 ? list.toArray(new AxisAlignedBB[0]) : IBoundingBox.super.getBoundingBoxes(world, pos, type);
+		return list.size() != 0 ? list.toArray(new AxisAlignedBB[0]) : IBoundingBox.super.getBoundingBoxes(world, pos, state, type);
 	}
 
 	@Override
-	public void addCollisionBoxesToList(World world, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
+	public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
 	{
-		IBoundingBox.super.addCollisionBoxesToList(world, pos, state, mask, list, collidingEntity);
+		IBoundingBox.super.addCollisionBoxToList(state, world, pos, mask, list, collidingEntity);
 	}
 
 	@Override
-	public AxisAlignedBB getSelectedBoundingBox(World world, BlockPos pos)
+	public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos)
 	{
-		return IBoundingBox.super.getSelectedBoundingBox(world, pos);
+		return IBoundingBox.super.getSelectedBoundingBox(state, world, pos);
 	}
 
 	@Override
-	public RayTraceResult collisionRayTrace(World world, BlockPos pos, Vec3d src, Vec3d dest)
+	public RayTraceResult collisionRayTrace(IBlockState state, World world, BlockPos pos, Vec3d src, Vec3d dest)
 	{
-		return IBoundingBox.super.collisionRayTrace(world, pos, src, dest);
+		return IBoundingBox.super.collisionRayTrace(state, world, pos, src, dest);
 	}
 
 	@Override

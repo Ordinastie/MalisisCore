@@ -77,9 +77,8 @@ public class StairComponent implements IBlockComponent, ISmartCull
 	}
 
 	@Override
-	public AxisAlignedBB[] getBoundingBoxes(Block block, IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	public AxisAlignedBB[] getBoundingBoxes(Block block, IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
-		IBlockState state = world != null ? world.getBlockState(pos) : block.getDefaultState();
 		return getBounds(state.getBlock() == block ? world : null, pos, state).toArray(new AxisAlignedBB[0]);
 	}
 
@@ -126,7 +125,7 @@ public class StairComponent implements IBlockComponent, ISmartCull
 	private List<AxisAlignedBB> getStepBounds(IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		if (world == null)
-			return Lists.newArrayList(new AxisAlignedBB(0.5F, 0.5F, 0, 1, 1, 1));
+			return Lists.newArrayList(new AxisAlignedBB(0F, 0.5F, 0.5F, 1, 1, 1));
 
 		EnumFacing dir = getStairDirection(state);
 		boolean isTop = isTop(state);

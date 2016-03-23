@@ -78,9 +78,9 @@ public class EntityUtils
 	{
 		try
 		{
-			getPlayerInstance = AsmUtils.changeMethodAccess(PlayerManager.class, "getPlayerInstance", "func_72690_a", "IIZ");
+			getPlayerInstance = AsmUtils.changeMethodAccess(PlayerManager.class, "getEntry", "func_187301_b", "II");
 			Class<?> clazz = Class.forName("net.minecraft.server.management.PlayerManager$PlayerInstance");
-			playersWatchingChunk = AsmUtils.changeFieldAccess(clazz, "playersWatchingChunk", "field_73263_b");
+			playersWatchingChunk = AsmUtils.changeFieldAccess(clazz, "players", "field_187283_c");
 		}
 		catch (ClassNotFoundException e)
 		{
@@ -240,7 +240,7 @@ public class EntityUtils
 
 		try
 		{
-			Object playerInstance = getPlayerInstance.invoke(world.getPlayerChunkManager(), x, z, false);
+			Object playerInstance = getPlayerInstance.invoke(world.getPlayerChunkManager(), x, z);
 			if (playerInstance == null)
 				return new ArrayList<>();
 			return (List<EntityPlayerMP>) playersWatchingChunk.get(playerInstance);

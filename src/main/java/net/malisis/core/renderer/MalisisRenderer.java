@@ -800,6 +800,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 		// brightness
 		int brightness = calcVertexBrightness(vertex, number, params);
+		//brightness = 255;
 		vertex.setBrightness(brightness);
 
 		// color
@@ -903,7 +904,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (ISmartCull.shouldSmartCull(block))
 			return smartCull(face, params);
 
-		boolean b = block.shouldSideBeRendered(blockState, world, pos.offset(p.direction.get()), p.direction.get());
+		boolean b = blockState.shouldSideBeRendered(world, pos, p.direction.get());
 		return b;
 	}
 
@@ -1225,11 +1226,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	protected float getBlockAmbientOcclusion(IBlockAccess world, BlockPos pos)
 	{
-		Block block = world.getBlockState(pos).getBlock();
-		if (block == null)
-			return 1.0F;
-
-		return blockState.getAmbientOcclusionLightValue();
+		return world.getBlockState(pos).getAmbientOcclusionLightValue();
 	}
 
 	/**
@@ -1258,7 +1255,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 			return params.renderBounds.get();
 
 		if (block instanceof IBoundingBox)
-			return ((IBoundingBox) block).getBoundingBox(world, pos, BoundingBoxType.RENDER);
+			return ((IBoundingBox) block).getBoundingBox(world, pos, blockState, BoundingBoxType.RENDER);
 
 		if (world != null)
 			return blockState.getBoundingBox(world, pos);

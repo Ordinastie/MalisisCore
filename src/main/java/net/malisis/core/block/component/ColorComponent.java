@@ -115,7 +115,7 @@ public class ColorComponent implements IBlockComponent, IBlockColor
 	{
 		if (!useColorMultiplier)
 			return 0xFFFFFF;
-		return getRenderColor(state.getBlock(), world.getBlockState(pos));
+		return getRenderColor(state.getBlock(), state);
 	}
 
 	/**

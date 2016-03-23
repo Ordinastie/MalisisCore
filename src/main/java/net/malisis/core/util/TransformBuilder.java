@@ -24,20 +24,55 @@
 
 package net.malisis.core.util;
 
-import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.util.IStringSerializable;
+import javax.vecmath.Matrix4f;
+import javax.vecmath.Quat4f;
+import javax.vecmath.Vector3f;
+
+import net.minecraftforge.common.model.TRSRTransformation;
 
 /**
- * This interface adds a default implementation to {@link IStringSerializable} so its not necessary to implement getName() in the Enums used
- * for {@link PropertyEnum}
- *
  * @author Ordinastie
+ *
  */
-public interface IMSerializable extends IStringSerializable
+public class TransformBuilder
 {
-	@Override
-	public default String getName()
+	private Vector3f translation;
+	private Quat4f leftRot;
+	private Vector3f scale;
+	private Quat4f rightRot;
+
+	public TransformBuilder translate(float x, float y, float z)
 	{
-		return ((Enum<?>) this).name().toLowerCase();
+		translation = new Vector3f(x, y, z);
+		return this;
+	}
+
+	public TransformBuilder scale(float x, float y, float z)
+	{
+		scale = new Vector3f(x, y, z);
+		return this;
+	}
+
+	public TransformBuilder scale(float s)
+	{
+		scale = new Vector3f(s, s, s);
+		return this;
+	}
+
+	public TransformBuilder rotate(float x, float y, float z)
+	{
+		leftRot = TRSRTransformation.quatFromXYZ((float) Math.toRadians(x), (float) Math.toRadians(y), (float) Math.toRadians(z));
+		return this;
+	}
+
+	public TransformBuilder rotateAfter(float x, float y, float z)
+	{
+		rightRot = TRSRTransformation.quatFromXYZ((float) Math.toRadians(x), (float) Math.toRadians(y), (float) Math.toRadians(z));
+		return this;
+	}
+
+	public Matrix4f get()
+	{
+		return new TRSRTransformation(translation, leftRot, scale, rightRot).getMatrix();
 	}
 }

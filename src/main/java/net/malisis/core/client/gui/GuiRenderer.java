@@ -52,6 +52,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 
+import org.apache.logging.log4j.core.helpers.Strings;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -542,12 +543,13 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 		if (fontRenderer == null)
 			fontRenderer = Minecraft.getMinecraft().fontRendererObj;
 
-		if (label == null && (itemStack.stackSize > 1 || format != null))
+		String formatStr = format != null ? format.getFormattingCode() : null;
+		if (label == null && (itemStack.stackSize > 1 || !Strings.isEmpty(formatStr)))
 			label = Integer.toString(itemStack.stackSize);
 		if (label == null)
 			label = "";
-		if (format != null)
-			label = format + label;
+		if (!Strings.isEmpty(formatStr))
+			label = formatStr + label;
 
 		Tessellator.getInstance().draw();
 

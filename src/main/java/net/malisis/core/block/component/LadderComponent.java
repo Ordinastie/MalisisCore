@@ -82,7 +82,7 @@ public class LadderComponent implements IBlockComponent
 	}
 
 	@Override
-	public AxisAlignedBB getBoundingBox(Block block, IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	public AxisAlignedBB getBoundingBox(Block block, IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
 		return new AxisAlignedBB(0, 0, 0, 1, 1, 0.125F);
 	}

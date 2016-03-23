@@ -146,6 +146,11 @@ public class DirectionalComponent implements IBlockComponent
 		return state.withProperty(getProperty(), EnumFacing.SOUTH);
 	}
 
+	public IBlockState placedState(IBlockState state, EnumFacing facing, EntityLivingBase placer)
+	{
+		return state.withProperty(getProperty(), placement.getPlacement(state, facing, placer));
+	}
+
 	/**
 	 * Automatically gets the right {@link IBlockState} based on the <code>placer</code> facing.
 	 *
@@ -163,7 +168,7 @@ public class DirectionalComponent implements IBlockComponent
 	@Override
 	public IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
-		return state.withProperty(getProperty(), placement.getPlacement(state, facing, placer));
+		return placedState(state, facing, placer);
 	}
 
 	/**
@@ -275,6 +280,12 @@ public class DirectionalComponent implements IBlockComponent
 			return state;
 
 		return state.withProperty(property, EnumFacingUtils.rotateFacing(state.getValue(property), a));
+	}
+
+	public static IBlockState getPlacedState(IBlockState state, EnumFacing facing, EntityLivingBase placer)
+	{
+		DirectionalComponent dc = IBlockComponent.getComponent(DirectionalComponent.class, state.getBlock());
+		return dc != null ? dc.placedState(state, facing, placer) : state;
 	}
 
 	public static interface IPlacement

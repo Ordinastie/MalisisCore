@@ -83,11 +83,11 @@ public class PaneComponent implements IBlockComponent, ISmartCull
 	}
 
 	@Override
-	public AxisAlignedBB[] getBoundingBoxes(Block block, IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	public AxisAlignedBB[] getBoundingBoxes(Block block, IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
 		float f = 0.4375F;
 		AxisAlignedBB base = new AxisAlignedBB(f, 0, f, 1 - f, 1, 1 - f);
-		IBlockState state = world != null ? getFullState(block, world, pos) : block.getDefaultState();
+		state = world != null ? getFullState(block, world, pos) : block.getDefaultState();
 		boolean north = state.getValue(NORTH);
 		boolean south = state.getValue(SOUTH);
 		boolean east = state.getValue(EAST);

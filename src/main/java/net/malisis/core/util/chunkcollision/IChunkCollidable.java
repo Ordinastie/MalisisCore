@@ -26,10 +26,14 @@ package net.malisis.core.util.chunkcollision;
 
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBoundingBox;
+import net.malisis.core.block.component.DirectionalComponent;
+import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.chunkblock.IChunkBlock;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -52,13 +56,9 @@ public interface IChunkCollidable extends IChunkBlock, IBoundingBox
 	 * @param itemStack the item stack
 	 * @return the placed bounding box
 	 */
-	public default AxisAlignedBB[] getPlacedBoundingBox(IBlockAccess world, BlockPos pos, EnumFacing side, EntityPlayer entity, ItemStack itemStack)
+	public default AxisAlignedBB[] getPlacedBoundingBox(IBlockAccess world, BlockPos pos, IBlockState state, EnumHand hand, EnumFacing side, EntityPlayer entity, ItemStack itemStack)
 	{
-		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, BoundingBoxType.PLACEDBOUNDINGBOX);
-		//TODO: FIXME!
-		//		if (this instanceof IBlockDirectional)
-		//			aabbs = AABBUtils.rotate(aabbs, ((IBlockDirectional) this).getPlacingDirection(side, entity));
-
-		return aabbs;
+		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, state, BoundingBoxType.PLACEDBOUNDINGBOX);
+		return AABBUtils.rotate(aabbs, DirectionalComponent.getDirection(state));
 	}
 }

@@ -53,16 +53,24 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 	private AsmHook updateCoordsHook()
 	{
 		McpMethodMapping setBlockState = new McpMethodMapping("setBlockState", "func_177436_a", "net.minecraft.world.chunk.Chunk",
-				"(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/state/IBlockState;");
+				"(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/state/IBlockState;");
 		McpMethodMapping set = new McpMethodMapping("set", "func_177484_a", "net.minecraft.world.chunk.storage.ExtendedBlockStorage",
 				"(IIILnet/minecraft/block/state/IBlockState;)V");
 
 		AsmHook ah = new AsmHook(setBlockState);
 
+		//	    ALOAD 12
+		//	    ILOAD 3
+		//	    ILOAD 4
+		//	    BIPUSH 15
+		//	    IAND
+		//	    ILOAD 5
+		//	    ALOAD 2
+		//	    INVOKEVIRTUAL net/minecraft/world/chunk/storage/ExtendedBlockStorage.set (IIILnet/minecraft/block/state/IBlockState;)V
 		//L:714 extendedblockstorage.set(i, j & 15, k, state);
 		//		 L25
 		//		    LINENUMBER 714 L25
-		//		    ALOAD 11
+		//		    ALOAD 12
 		//		    ILOAD 3
 		//		    ILOAD 4
 		//		    BIPUSH 15
@@ -72,7 +80,7 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 		//		    INVOKEVIRTUAL net/minecraft/world/chunk/storage/ExtendedBlockStorage.set (IIILnet/minecraft/block/state/IBlockState;)V
 
 		InsnList match = new InsnList();
-		match.add(new VarInsnNode(ALOAD, 11));
+		match.add(new VarInsnNode(ALOAD, 12));
 		match.add(new VarInsnNode(ILOAD, 3));
 		match.add(new VarInsnNode(ILOAD, 4));
 		match.add(new IntInsnNode(BIPUSH, 15));
@@ -96,7 +104,7 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 				INVOKEVIRTUAL,
 				"net/malisis/core/util/chunkblock/ChunkBlockHandler",
 				"updateCoordinates",
-				"(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)Z"));
+				"(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)Z"));
 		insert.add(new JumpInsnNode(IFNE, falseLabel));
 		insert.add(new InsnNode(ACONST_NULL));
 		insert.add(new InsnNode(ARETURN));

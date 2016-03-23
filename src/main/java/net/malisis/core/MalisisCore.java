@@ -194,6 +194,7 @@ public class MalisisCore implements IMalisisMod
 	{
 		ClientCommandHandler.instance.registerCommand(new MalisisCommand());
 
+		MalisisRegistry.registerBlockComponents();
 		if (isClient())
 		{
 			MalisisRegistry.registerRenderers();

@@ -73,13 +73,13 @@ public class SyncerMessage implements IMalisisMessageHandler<SyncerMessage.Packe
 	@Override
 	public void process(Packet<?, ?> message, MessageContext ctx)
 	{
-		process(message, ctx);
+		doProcess(message, ctx);
 	}
 
-	public <T, S extends ISyncableData> void process(ISyncHandler<T, S> handler, MessageContext ctx, S data, Map<String, Object> values)
+	public <T, S extends ISyncableData> void doProcess(Packet<T, S> message, MessageContext ctx)
 	{
-		T receiver = handler.getReceiver(ctx, data);
-		Syncer.get().updateValues(receiver, handler, values);
+		T receiver = message.handler.getReceiver(ctx, message.data);
+		Syncer.get().updateValues(receiver, message.handler, message.values);
 	}
 
 	public static class Packet<T, S extends ISyncableData> implements IMessage

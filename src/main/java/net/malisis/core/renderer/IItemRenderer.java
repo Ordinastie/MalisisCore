@@ -100,7 +100,7 @@ public interface IItemRenderer
 		@Override public TextureAtlasSprite getParticleTexture() 		{ return null; }
 		@Override public ItemCameraTransforms getItemCameraTransforms() { return ItemCameraTransforms.DEFAULT; }
 		@Override public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand)	{ return ImmutableList.of(); }
-		@Override public ItemOverrideList getOverrides() 				{ return null; }
+		@Override public ItemOverrideList getOverrides() 				{ return ItemOverrideList.NONE; }
 		//@formatter:on
 
 		@Override

@@ -209,7 +209,7 @@ public interface IBlockComponent
 	 * @param type the type
 	 * @return the bounding box
 	 */
-	public default AxisAlignedBB getBoundingBox(Block block, IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	public default AxisAlignedBB getBoundingBox(Block block, IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
 		return null;
 	}
@@ -223,7 +223,7 @@ public interface IBlockComponent
 	 * @param type the type
 	 * @return the bounding boxes
 	 */
-	public default AxisAlignedBB[] getBoundingBoxes(Block block, IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	public default AxisAlignedBB[] getBoundingBoxes(Block block, IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
 		return null;
 	}

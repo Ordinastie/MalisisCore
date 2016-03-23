@@ -427,7 +427,7 @@ public class AABBUtils
 		{
 			AxisAlignedBB aabb = state.getBlock().getCollisionBoundingBox(state.getBlockState(), world, state.getPos());
 			if (aabb != null)
-				aabbs = new AxisAlignedBB[] { aabb.offset(-state.getX(), -state.getY(), -state.getZ()) };
+				aabbs = new AxisAlignedBB[] { aabb };
 		}
 
 		if (offset)

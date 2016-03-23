@@ -204,9 +204,9 @@ public class WallComponent implements IBlockComponent, IMergedBlock, ISmartCull
 	 * @return the bounding boxes
 	 */
 	@Override
-	public AxisAlignedBB[] getBoundingBoxes(Block block, IBlockAccess world, BlockPos pos, BoundingBoxType type)
+	public AxisAlignedBB[] getBoundingBoxes(Block block, IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
-		boolean corner = isCorner(world, pos);
+		boolean corner = isCorner(state);
 		if (type == BoundingBoxType.SELECTION && corner)
 			return AABBUtils.identities();
 
