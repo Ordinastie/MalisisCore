@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.vecmath.Matrix4f;
-import javax.vecmath.Vector3f;
 
 import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.block.MalisisBlock;
@@ -44,7 +43,6 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.common.model.TRSRTransformation;
 
 /**
  * @author Ordinastie
@@ -170,20 +168,35 @@ public class DefaultRenderer
 
 	public static class Item extends MalisisRenderer<TileEntity>
 	{
-		//"thirdperson": {
-		//    "rotation": [ -90, 0, 0 ],
-		//    "translation": [ 0, 1, -3 ],
-		//    "scale": [ 0.55, 0.55, 0.55 ]
-		//}
-		//"firstperson": {
-		//    "rotation": [ 0, -135, 25 ],
-		//    "translation": [ 0, 4, 2 ],
-		//    "scale": [ 1.7, 1.7, 1.7 ]
-		//}
-		private Matrix4f thirdPerson = new TRSRTransformation(new Vector3f(0.01F, 0.065F, -0.195F), TRSRTransformation.quatFromYXZ(-90, 0,
-				0), new Vector3f(0.55F, 0.55F, 0.55F), null).getMatrix();
-		private Matrix4f firstPerson = new TRSRTransformation(new Vector3f(0, 0.280F, 0.14F), TRSRTransformation.quatFromYXZ(0, -135, 25),
-				new Vector3f(1.7F, 1.7F, 1.7F), null).getMatrix();
+		//		{
+		//		    "display": {
+		//		        "thirdperson_righthand": {
+		//		            "rotation": [ 0, -90, 55 ],
+		//		            "translation": [ 0, 4.0, 0.5 ],
+		//		            "scale": [ 0.85, 0.85, 0.85 ]
+		//		        },
+		//		        "thirdperson_lefthand": {
+		//		            "rotation": [ 0, 90, -55 ],
+		//		            "translation": [ 0, 4.0, 0.5 ],
+		//		            "scale": [ 0.85, 0.85, 0.85 ]
+		//		        },
+		//		        "firstperson_righthand": {
+		//		            "rotation": [ 0, -90, 25 ],
+		//		            "translation": [ 1.13, 3.2, 1.13 ],
+		//		            "scale": [ 0.68, 0.68, 0.68 ]
+		//		        },
+		//		        "firstperson_lefthand": {
+		//		            "rotation": [ 0, 90, -25 ],
+		//		            "translation": [ 1.13, 3.2, 1.13 ],
+		//		            "scale": [ 0.68, 0.68, 0.68 ]
+		//		        }
+		//		    }
+		//		}
+		// translations manually ajusted
+		private Matrix4f firstPersonRightHand = new TransformBuilder().translate(0, .2F, .13F).scale(0.68F).rotate(0, -90, 25).get();
+		private Matrix4f firstPersonLeftHand = new TransformBuilder().translate(0, .2F, .13F).scale(0.68F).rotate(0, 90, -25).get();
+		private Matrix4f thirdPersonRightHand = new TransformBuilder().translate(0, 0.3F, 0.02F).scale(0.85F).rotate(0, -90, 55).get();
+		private Matrix4f thirdPersonLeftHand = new TransformBuilder().translate(0, 0.3F, 0.02F).scale(0.85F).rotate(0, 90, -55).get();
 		private Shape gui;
 		private Map<MalisisIcon, MalisisModel> itemModels = new HashMap<>();
 
@@ -202,11 +215,24 @@ public class DefaultRenderer
 		@Override
 		public Matrix4f getTransform(ItemCameraTransforms.TransformType tranformType)
 		{
+
+			switch (tranformType)
+			{
+				case FIRST_PERSON_LEFT_HAND:
+					return firstPersonLeftHand;
+				case FIRST_PERSON_RIGHT_HAND:
+					return firstPersonRightHand;
+				case THIRD_PERSON_LEFT_HAND:
+					return thirdPersonLeftHand;
+				case THIRD_PERSON_RIGHT_HAND:
+					return thirdPersonRightHand;
+				default:
+					return null;
+			}
 			//			if (tranformType == TransformType.THIRD_PERSON_LEFT_HAND || tranformType == TransformType.THIRD_PERSON_RIGHT_HAND)
 			//				return thirdPerson;
 			//			else if (tranformType == TransformType.FIRST_PERSON_LEFT_HAND || tranformType == TransformType.FIRST_PERSON_RIGHT_HAND)
 			//				return firstPerson;
-			return null;
 		}
 
 		@Override
