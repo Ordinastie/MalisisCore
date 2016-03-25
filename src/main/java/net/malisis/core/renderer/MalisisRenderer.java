@@ -1332,4 +1332,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	{
 		MalisisRegistry.registerRenderWorldLast(this);
 	}
+
+	public static int colorMultiplier(IBlockAccess world, BlockPos pos, IBlockState state)
+	{
+		return Minecraft.getMinecraft().getBlockColors().colorMultiplier(state, world, pos, 0);
+	}
 }
