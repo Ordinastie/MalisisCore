@@ -100,7 +100,7 @@ public class DefaultRenderer
 		private Matrix4f gui = new TransformBuilder().rotate(30, 225, 0).scale(0.625F).get();
 		private Matrix4f firstPersonLeftHand = new TransformBuilder().rotate(0, 225, 0).scale(0.4F).get();
 		private Matrix4f firstPersonRightHand = new TransformBuilder().rotate(0, 45, 0).scale(0.4F).get();
-		private Matrix4f thirdPerson = new TransformBuilder().translate(0, 0F, 0).rotateAfter(75, 45, 0).scale(0.375F).get();
+		private Matrix4f thirdPerson = new TransformBuilder().translate(0, 0.155F, 0).rotateAfter(75, 45, 0).scale(0.375F).get();
 		private Matrix4f fixed = new TransformBuilder().scale(0.5F).get();
 		private Matrix4f ground = new TransformBuilder().translate(0, 0.3F, 0).scale(0.25F).get();
 
@@ -116,7 +116,6 @@ public class DefaultRenderer
 		@Override
 		public Matrix4f getTransform(ItemCameraTransforms.TransformType tranformType)
 		{
-
 			switch (tranformType)
 			{
 				case GUI:
@@ -216,6 +215,8 @@ public class DefaultRenderer
 		public Matrix4f getTransform(ItemCameraTransforms.TransformType tranformType)
 		{
 
+			Matrix4f ground = new TransformBuilder().scale(0.5F).get();
+
 			switch (tranformType)
 			{
 				case FIRST_PERSON_LEFT_HAND:
@@ -226,13 +227,11 @@ public class DefaultRenderer
 					return thirdPersonLeftHand;
 				case THIRD_PERSON_RIGHT_HAND:
 					return thirdPersonRightHand;
+				case GROUND:
+					return ground;
 				default:
 					return null;
 			}
-			//			if (tranformType == TransformType.THIRD_PERSON_LEFT_HAND || tranformType == TransformType.THIRD_PERSON_RIGHT_HAND)
-			//				return thirdPerson;
-			//			else if (tranformType == TransformType.FIRST_PERSON_LEFT_HAND || tranformType == TransformType.FIRST_PERSON_RIGHT_HAND)
-			//				return firstPerson;
 		}
 
 		@Override
