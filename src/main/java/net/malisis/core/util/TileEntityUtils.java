@@ -27,6 +27,7 @@ package net.malisis.core.util;
 import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.client.gui.MalisisGui;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -111,6 +112,14 @@ public class TileEntityUtils
 		}
 
 		return aabb != null ? aabb : AABBUtils.identity(pos);
+	}
 
+	public static void notifyUpdate(TileEntity te)
+	{
+		World world = te.getWorld();
+		if (world == null)
+			return;
+		IBlockState state = world.getBlockState(te.getPos());
+		world.notifyBlockUpdate(te.getPos(), state, state, 3);
 	}
 }
