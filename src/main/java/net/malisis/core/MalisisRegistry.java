@@ -24,6 +24,7 @@
 
 package net.malisis.core;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
+import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.IRegisterable;
 import net.malisis.core.renderer.DefaultRenderer;
@@ -56,6 +58,8 @@ import net.minecraft.client.renderer.block.statemap.IStateMapper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -94,6 +98,8 @@ public class MalisisRegistry
 		}
 	}
 
+	private static Method registerSound = AsmUtils.changeMethodAccess(SoundEvent.class, "registerSound", "func_187502_a", String.class);
+
 	@SideOnly(Side.CLIENT)
 	private static class ClientRegistry
 	{
@@ -107,6 +113,7 @@ public class MalisisRegistry
 		private Set<IIconRegister> iconRegisters = new HashSet<>();
 		/** List of {@link DummyModel} for registered items */
 		private Set<DummyModel> itemModels = new HashSet<>();
+		/** List of all registered renderers. */
 		private Map<Class<? extends MalisisRenderer<?>>, MalisisRenderer<?>> registeredRenderers = new HashMap<>();
 
 		/** Empty {@link IStateMapper} **/
@@ -591,6 +598,21 @@ public class MalisisRegistry
 	public static void clearIconRegisters()
 	{
 		instance.iconRegisters.clear();
+	}
+
+	public static SoundEvent registerSound(String modId, String soundId)
+	{
+		ResourceLocation rl = new ResourceLocation(modId, soundId);
+		try
+		{
+			registerSound.invoke(null, rl.toString());
+			return SoundEvent.soundEventRegistry.getObject(rl);
+		}
+		catch (ReflectiveOperationException e)
+		{
+			MalisisCore.log.error("[MalisisRegistry] Failed to register sound :", e);
+			return null;
+		}
 	}
 
 	public interface BlockRendererOverride
