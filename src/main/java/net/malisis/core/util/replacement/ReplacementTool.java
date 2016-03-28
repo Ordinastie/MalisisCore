@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -125,10 +126,23 @@ public class ReplacementTool
 
 			replaceIn(CraftingManager.getInstance().getRecipeList(), vanilla, replacement);
 			replaceIn(StatList.allStats, vanilla, replacement);
+
+			//ReplacementTool.doubleCheck(registry, replacement, vanilla);
 		}
 		catch (ReflectiveOperationException e)
 		{
 			e.printStackTrace();
+		}
+	}
+
+	protected static void doubleCheck(RegistryNamespaced<ResourceLocation, ?> registry, Object replacement, Object vanilla)
+	{
+		for (Object obj : registry)
+		{
+			if (obj == vanilla)
+				MalisisCore.log.info("Found vanilla " + vanilla.getClass().getSimpleName() + " ( " + vanilla + ") in registry");
+			if (obj == replacement)
+				MalisisCore.log.info("Found replacement " + replacement.getClass().getSimpleName() + " ( " + replacement + ") in registry");
 		}
 	}
 
