@@ -323,7 +323,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 				return damage;
 		}
 
-		return super.damageDropped(state);
+		return getMetaFromState(state);
 	}
 
 	@Override
