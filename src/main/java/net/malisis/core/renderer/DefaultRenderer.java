@@ -97,7 +97,7 @@ public class DefaultRenderer
 		//		        }
 		//		    }
 		//		}
-		private Matrix4f gui = new TransformBuilder().rotate(30, 225, 0).scale(0.625F).get();
+		private Matrix4f gui = new TransformBuilder().rotate(30, 45, 0).scale(0.625F).get();
 		private Matrix4f firstPersonLeftHand = new TransformBuilder().rotate(0, 225, 0).scale(0.4F).get();
 		private Matrix4f firstPersonRightHand = new TransformBuilder().rotate(0, 45, 0).scale(0.4F).get();
 		private Matrix4f thirdPerson = new TransformBuilder().translate(0, 0.155F, 0).rotateAfter(75, 45, 0).scale(0.375F).get();
