@@ -99,8 +99,6 @@ public class BlockDataHandler
 	{
 		Chunk chunk = world.getChunkFromBlockCoords(pos);
 
-		System.out.println("createChunkData (" + chunk.xPosition + "/" + chunk.zPosition + ") for " + identifier);
-
 		ChunkData<T> chunkData = new ChunkData<>((HandlerInfo<T>) handlerInfos.get(identifier));
 		instance.data(world).put(identifier, chunk, chunkData);
 		return chunkData;
@@ -147,8 +145,6 @@ public class BlockDataHandler
 			if (!nbt.hasKey(handlerInfo.identifier))
 				continue;
 
-			System.out.println("onDataLoad (" + event.getChunk().xPosition + "/" + event.getChunk().zPosition + ") for "
-					+ handlerInfo.identifier);
 			ChunkData<?> chunkData = new ChunkData<>(handlerInfo);
 			chunkData.fromBytes(Unpooled.copiedBuffer(nbt.getByteArray(handlerInfo.identifier)));
 			data(event.world).put(handlerInfo.identifier, event.getChunk(), chunkData);
@@ -207,7 +203,6 @@ public class BlockDataHandler
 		if (handlerInfo == null)
 			return;
 
-		System.out.println("SetBlockData (" + chunkX + "/" + chunkZ + ") for " + identifier);
 		Chunk chunk = Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(chunkX, chunkZ);
 		ChunkData<?> chunkData = new ChunkData<>(handlerInfo).fromBytes(data);
 		instance.data(chunk.getWorld()).put(handlerInfo.identifier, chunk, chunkData);
