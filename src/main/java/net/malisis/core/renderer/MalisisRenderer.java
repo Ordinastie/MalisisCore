@@ -64,6 +64,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -328,7 +329,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	@Override
 	public synchronized void renderTileEntityAt(T te, double x, double y, double z, float partialTick, int destroyStage)
 	{
-		if (te.getBlockType() != te.getWorld().getBlockState(te.getPos()).getBlock())
+		if (te.getWorld().getBlockState(te.getPos()).getBlock() == Blocks.air)
 			return;
 		this.buffer = Tessellator.getInstance().getBuffer();
 		set(te, partialTick);
