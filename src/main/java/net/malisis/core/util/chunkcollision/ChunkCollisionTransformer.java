@@ -58,7 +58,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 	@SuppressWarnings("deprecation")
 	private AsmHook getBoundingBoxesHook()
 	{
-		McpMethodMapping getCubes = new McpMethodMapping("getCubes", "func_184144_a", "net.minecraft.world.World",
+		McpMethodMapping getCubes = new McpMethodMapping("getCollisionBoxes", "func_184144_a", "net.minecraft.world.World",
 				"(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;");
 
 		AsmHook ah = new AsmHook(getCubes);
