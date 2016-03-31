@@ -151,7 +151,7 @@ public class BlockDataHandler
 			//		+ handlerInfo.identifier);
 			ChunkData<?> chunkData = new ChunkData<>(handlerInfo);
 			chunkData.fromBytes(Unpooled.copiedBuffer(nbt.getByteArray(handlerInfo.identifier)));
-			data(event.world).put(handlerInfo.identifier, event.getChunk(), chunkData);
+			data(event.getWorld()).put(handlerInfo.identifier, event.getChunk(), chunkData);
 		}
 	}
 
@@ -162,7 +162,7 @@ public class BlockDataHandler
 
 		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
 		{
-			ChunkData<?> chunkData = chunkData(handlerInfo.identifier, event.world, event.getChunk());
+			ChunkData<?> chunkData = chunkData(handlerInfo.identifier, event.getWorld(), event.getChunk());
 			if (chunkData != null && chunkData.hasData())
 			{
 				ByteBuf buf = Unpooled.buffer();
@@ -177,7 +177,7 @@ public class BlockDataHandler
 	{
 		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
 		{
-			data(event.world).remove(handlerInfo.identifier, event.getChunk());
+			data(event.getWorld()).remove(handlerInfo.identifier, event.getChunk());
 		}
 	}
 
@@ -190,12 +190,12 @@ public class BlockDataHandler
 	@SubscribeEvent
 	public void onChunkWatched(ChunkWatchEvent.Watch event)
 	{
-		Chunk chunk = event.player.worldObj.getChunkFromChunkCoords(event.chunk.chunkXPos, event.chunk.chunkZPos);
+		Chunk chunk = event.getPlayer().worldObj.getChunkFromChunkCoords(event.getChunk().chunkXPos, event.getChunk().chunkZPos);
 		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
 		{
 			ChunkData<?> chunkData = instance.chunkData(handlerInfo.identifier, chunk.getWorld(), chunk);
 			if (chunkData != null && chunkData.hasData())
-				BlockDataMessage.sendBlockData(chunk, handlerInfo.identifier, chunkData.toBytes(Unpooled.buffer()), event.player);
+				BlockDataMessage.sendBlockData(chunk, handlerInfo.identifier, chunkData.toBytes(Unpooled.buffer()), event.getPlayer());
 		}
 	}
 

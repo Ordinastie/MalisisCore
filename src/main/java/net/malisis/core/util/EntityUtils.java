@@ -240,7 +240,7 @@ public class EntityUtils
 
 		try
 		{
-			Object playerInstance = getPlayerInstance.invoke(world.getPlayerChunkManager(), x, z);
+			Object playerInstance = getPlayerInstance.invoke(world.getPlayerChunkMap(), x, z);
 			if (playerInstance == null)
 				return new ArrayList<>();
 			return (List<EntityPlayerMP>) playersWatchingChunk.get(playerInstance);

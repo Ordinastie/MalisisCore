@@ -277,12 +277,12 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	@SubscribeEvent
 	public void onChunkWatched(ChunkWatchEvent.Watch event)
 	{
-		Chunk chunk = event.player.worldObj.getChunkFromChunkCoords(event.chunk.chunkXPos, event.chunk.chunkZPos);
+		Chunk chunk = event.getPlayer().worldObj.getChunkFromChunkCoords(event.getChunk().chunkXPos, event.getChunk().chunkZPos);
 		TLongHashSet coords = getCoords(chunk);
 		if (coords == null || coords.size() == 0)
 			return;
 
-		ChunkBlockMessage.sendCoords(chunk, coords.toArray(), event.player);
+		ChunkBlockMessage.sendCoords(chunk, coords.toArray(), event.getPlayer());
 	}
 
 	/**

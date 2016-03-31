@@ -377,8 +377,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	{
 		set(world);
 		buffer = Tessellator.getInstance().getBuffer();
-		partialTick = event.partialTicks;
-		renderGlobal = event.context;
+		partialTick = event.getPartialTicks();
+		renderGlobal = event.getContext();
 		double x = 0, y = 0, z = 0;
 		if (shouldSetViewportPosition())
 		{
@@ -1119,8 +1119,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		{
 			if (world != null && blockState.getLightValue(world, pos) != 0)
 				return blockState.getLightValue(world, pos) << 4;
-			else if (blockState.getlightValue() != 0)
-				return blockState.getlightValue() << 4;
+			else if (blockState.getLightValue() != 0)
+				return blockState.getLightValue() << 4;
 		}
 
 		if (renderType == RenderType.ITEM)

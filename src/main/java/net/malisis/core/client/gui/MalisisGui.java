@@ -697,11 +697,11 @@ public abstract class MalisisGui extends GuiScreen
 	@SubscribeEvent
 	public void renderOverlay(RenderGameOverlayEvent.Post event)
 	{
-		if (event.type != RenderGameOverlayEvent.ElementType.ALL || Minecraft.getMinecraft().currentScreen == this)
+		if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || Minecraft.getMinecraft().currentScreen == this)
 			return;
 
 		setResolution();
-		drawScreen(0, 0, event.partialTicks);
+		drawScreen(0, 0, event.getPartialTicks());
 	}
 
 	@SubscribeEvent

@@ -166,7 +166,7 @@ public class MalisisRegistry
 		public void onTextureStitchEvent(TextureStitchEvent.Pre event)
 		{
 			for (IIconRegister iconRegister : iconRegisters)
-				iconRegister.registerIcons(event.map);
+				iconRegister.registerIcons(event.getMap());
 		}
 
 		/**

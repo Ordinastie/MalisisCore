@@ -218,7 +218,7 @@ public class MalisisCore implements IMalisisMod
 	@SubscribeEvent
 	public void onGuiClose(GuiOpenEvent event)
 	{
-		if (!MalisisGui.cancelClose || event.gui != null)
+		if (!MalisisGui.cancelClose || event.getGui() != null)
 			return;
 
 		MalisisGui.cancelClose = false;
@@ -285,7 +285,7 @@ public class MalisisCore implements IMalisisMod
 			Style cs = new Style();
 			cs.setItalic(true);
 			cs.setColor(TextFormatting.GRAY);
-			msg.setChatStyle(cs);
+			msg.setStyle(cs);
 
 			Minecraft.getMinecraft().thePlayer.addChatMessage(msg);
 		}
