@@ -116,10 +116,9 @@ public class TileEntityUtils
 
 	public static void notifyUpdate(TileEntity te)
 	{
-		World world = te.getWorld();
-		if (world == null)
+		if (te.getWorld() == null)
 			return;
-		IBlockState state = world.getBlockState(te.getPos());
-		world.notifyBlockUpdate(te.getPos(), state, state, 3);
+		IBlockState state = te.getWorld().getBlockState(te.getPos());
+		te.getWorld().notifyBlockUpdate(te.getPos(), state, state, 3);
 	}
 }
