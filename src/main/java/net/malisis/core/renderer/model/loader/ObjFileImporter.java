@@ -178,7 +178,12 @@ public class ObjFileImporter implements IModelLoader
 						case "o":
 							addShape(data);
 							break;
-
+						case "s": 
+							// smoothing group, not supported by backing rendering implementation / ignore.
+							break;
+						case "#":
+							// Skip Comments
+							break;
 						default:
 							MalisisCore.log.debug("[ObjFileImporter] Skipped type {} at line {} : {}", type, lineNumber, currentLine);
 							break;
