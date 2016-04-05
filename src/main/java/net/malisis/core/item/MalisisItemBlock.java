@@ -59,7 +59,6 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable
 	public MalisisItemBlock setName(String name)
 	{
 		this.name = name;
-		setRegistryName(name);
 		setUnlocalizedName(name);
 		return this;
 	}

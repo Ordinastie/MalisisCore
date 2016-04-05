@@ -40,6 +40,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -63,17 +64,17 @@ public interface IItemRenderer
 	public static class DummyModel implements IPerspectiveAwareModel
 	{
 		private Item item;
-		private ModelResourceLocation rl;
+		private ModelResourceLocation mrl;
 
-		public DummyModel(Item item, String name)
+		public DummyModel(Item item, ResourceLocation rl)
 		{
 			this.item = item;
-			this.rl = new ModelResourceLocation(name, "inventory");
+			this.mrl = new ModelResourceLocation(rl, "inventory");
 		}
 
 		public ModelResourceLocation getResourceLocation()
 		{
-			return rl;
+			return mrl;
 		}
 
 		@Override
@@ -106,7 +107,7 @@ public interface IItemRenderer
 		@Override
 		public String toString()
 		{
-			return item.getUnlocalizedName() + "[" + rl + "]";
+			return item.getUnlocalizedName() + "[" + mrl + "]";
 		}
 
 	};

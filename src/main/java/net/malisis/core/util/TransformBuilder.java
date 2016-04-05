@@ -74,5 +74,6 @@ public class TransformBuilder
 	public Matrix4f get()
 	{
 		return new TRSRTransformation(translation, leftRot, scale, rightRot).getMatrix();
+		//return TRSRTransformation.blockCenterToCorner(new TRSRTransformation(translation, leftRot, scale, rightRot)).getMatrix();
 	}
 }

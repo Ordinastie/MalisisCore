@@ -68,6 +68,7 @@ import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameData;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -289,6 +290,26 @@ public class MalisisRegistry
 		}
 	}
 
+	private static ResourceLocation getResourceLocation(String name)
+	{
+		int index = name.lastIndexOf(':');
+		String res = null;
+		String modid = null;
+		if (index == -1)
+		{
+			ModContainer container = Loader.instance().activeModContainer();
+			modid = container != null ? container.getModId() : "minecraft";
+			res = name;
+		}
+		else
+		{
+			modid = name.substring(0, index);
+			res = name.substring(index + 1);
+		}
+
+		return new ResourceLocation(modid, res);
+	}
+
 	//TODO: register TEs so we can discover the @MalisisRendered annotation
 	/**
 	 * Registers a {@link IRegisterable}.<br>
@@ -305,14 +326,15 @@ public class MalisisRegistry
 			throw new IllegalArgumentException("Cannot register " + registerable.getClass().getName() + " (" + name
 					+ ") because it's neither a block or an item.");
 
+		ResourceLocation res = getResourceLocation(name);
 		if (registerable instanceof Block)
 		{
 			Block block = (Block) registerable;
 			Item item = registerable.getItem(block);
-			GameRegistry.registerBlock(block, null, name);
+			GameRegistry.register(block, res);
 			if (item != null)
 			{
-				GameRegistry.registerItem(item, name);
+				GameRegistry.register(item, res);
 				GameData.getBlockItemMap().put(block, item);
 			}
 
@@ -327,9 +349,9 @@ public class MalisisRegistry
 		else if (registerable instanceof Item)
 		{
 			Item item = (Item) registerable;
-			GameRegistry.registerItem(item, name);
+			GameRegistry.register(item, res);
 			if (MalisisCore.isClient())
-				registerItemModel(item, name);
+				registerItemModel(item, res);
 		}
 	}
 
@@ -512,13 +534,13 @@ public class MalisisRegistry
 	@SideOnly(Side.CLIENT)
 	public static void registerItemModel(Item item, String name)
 	{
-		registerItemModel(item, Loader.instance().activeModContainer().getModId(), name);
+		registerItemModel(item, getResourceLocation(name));
 	}
 
 	@SideOnly(Side.CLIENT)
-	public static void registerItemModel(Item item, String modid, String name)
+	public static void registerItemModel(Item item, ResourceLocation rl)
 	{
-		DummyModel model = new DummyModel(item, modid + ":" + name);
+		DummyModel model = new DummyModel(item, rl);
 		//ModelLoader.setCustomModelResourceLocation(item, 0, model.getResourceLocation());
 		ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition()
 		{
@@ -577,20 +599,20 @@ public class MalisisRegistry
 	@SideOnly(Side.CLIENT)
 	public static void registerRenderers()
 	{
-		GameData.getBlockRegistry().forEach(instance::registerRenderer);
-		GameData.getItemRegistry().forEach(instance::registerRenderer);
+		Block.blockRegistry.forEach(instance::registerRenderer);
+		Item.itemRegistry.forEach(instance::registerRenderer);
 	}
 
 	@SideOnly(Side.CLIENT)
 	public static void registerIconRegisters()
 	{
-		GameData.getBlockRegistry().forEach(instance::registerIconRegister);
-		GameData.getItemRegistry().forEach(instance::registerIconRegister);
+		Block.blockRegistry.forEach(instance::registerIconRegister);
+		Item.itemRegistry.forEach(instance::registerIconRegister);
 	}
 
 	public static void registerBlockComponents()
 	{
-		StreamSupport.stream(GameData.getBlockRegistry().spliterator(), false).filter(block -> block instanceof IComponentProvider)
+		StreamSupport.stream(Block.blockRegistry.spliterator(), false).filter(block -> block instanceof IComponentProvider)
 				.forEach(block -> ((IComponentProvider) block).getComponents().forEach(comp -> comp.register(block)));
 	}
 
