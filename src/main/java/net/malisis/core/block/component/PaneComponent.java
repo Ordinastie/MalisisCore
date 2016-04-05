@@ -93,6 +93,8 @@ public class PaneComponent implements IBlockComponent, ISmartCull
 		boolean east = state.getValue(EAST);
 		boolean west = state.getValue(WEST);
 
+		System.out.println(state);
+
 		if (world == null)
 		{
 			north = true;
@@ -139,7 +141,8 @@ public class PaneComponent implements IBlockComponent, ISmartCull
 		BlockPos offset = pos.offset(dir);
 		IBlockState state = world.getBlockState(offset);
 		Block connected = state.getBlock();
-		return connected == block || canPaneConnectToBlock(block, state) || connected.isSideSolid(state, world, offset, dir.getOpposite());
+		return connected == block || canPaneConnectToBlock(state.getBlock(), state)
+				|| connected.isSideSolid(state, world, offset, dir.getOpposite());
 	}
 
 	public static boolean isConnected(IBlockState state, PropertyBool property)
