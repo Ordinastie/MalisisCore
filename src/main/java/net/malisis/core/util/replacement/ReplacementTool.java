@@ -25,7 +25,6 @@
 package net.malisis.core.util.replacement;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
@@ -40,11 +39,7 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
-import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
 import net.minecraftforge.fml.common.registry.GameData;
-import net.minecraftforge.fml.common.registry.RegistryDelegate.Delegate;
-
-import com.google.common.collect.BiMap;
 
 /**
  * @author Ordinastie
@@ -59,9 +54,9 @@ public class ReplacementTool
 	/** List of original {@link Item} being replaced. The key is the replacement, the value is the Vanilla {@code Item}. */
 	private HashMap<Item, Item> originalItems = new HashMap<>();
 
-	private Class<?>[] types = { Integer.TYPE, ResourceLocation.class, Object.class };
-	private Method addObjectRaw = AsmUtils.changeMethodAccess(FMLControlledNamespacedRegistry.class, "addObjectRaw", types);
-	private Method setName = AsmUtils.changeMethodAccess(Delegate.class, "setResourceName", ResourceLocation.class);
+	//	private Class<?>[] types = { Integer.TYPE, ResourceLocation.class, Object.class };
+	//	private Method addObjectRaw = AsmUtils.changeMethodAccess(FMLControlledNamespacedRegistry.class, "addObjectRaw", types);
+	//	private Method setName = AsmUtils.changeMethodAccess(Delegate.class, "setResourceName", ResourceLocation.class);
 
 	private ReplacementTool()
 	{
@@ -106,17 +101,17 @@ public class ReplacementTool
 
 		try
 		{
-			//set the delegate name manually
-			setName.invoke(block ? ((Block) replacement).delegate : ((Item) replacement).delegate, rl);
-			//add the replacement into the registry
-			addObjectRaw.invoke(registry, id, rl, replacement);
+			//			//set the delegate name manually
+			//			setName.invoke(block ? ((Block) replacement).delegate : ((Item) replacement).delegate, rl);
+			//			//add the replacement into the registry
+			//			addObjectRaw.invoke(registry, id, rl, replacement);
 			Field f = AsmUtils.changeFieldAccess(clazz, fieldName, srgFieldName);
 			f.set(null, replacement);
 
 			if (ib != null)
 			{
 				AsmUtils.changeFieldAccess(ItemBlock.class, "block", "field_150939_a").set(ib, replacement);
-				((BiMap<Block, Item>) GameData.getBlockItemMap()).forcePut((Block) replacement, ib);
+				GameData.getBlockItemMap().forcePut((Block) replacement, ib);
 			}
 
 			if (block)

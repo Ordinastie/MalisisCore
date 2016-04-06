@@ -24,11 +24,12 @@
 
 package net.malisis.core.util.multiblock;
 
-import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.MBlockState;
 import net.minecraft.block.Block;
+import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -77,9 +78,9 @@ public class AABBMultiBlock extends MultiBlock
 	@Override
 	public void placeBlocks(World world, BlockPos pos, IBlockState state, boolean placeOrigin)
 	{
-		DirectionalComponent dc = IBlockComponent.getComponent(DirectionalComponent.class, state.getBlock());
-		MultiBlockComponent mbc = IBlockComponent.getComponent(MultiBlockComponent.class, state.getBlock());
-		blockState = state.withProperty(mbc.getProperty(), false).withProperty(dc.getProperty(), EnumFacing.SOUTH);
+		MultiBlockComponent mbc = IComponent.getComponent(MultiBlockComponent.class, state.getBlock());
+		PropertyDirection dp = DirectionalComponent.getProperty(state.getBlock());
+		blockState = state.withProperty(mbc.getProperty(), false).withProperty(dp, EnumFacing.SOUTH);
 		buildStates();
 		super.placeBlocks(world, pos, state, placeOrigin);
 	}

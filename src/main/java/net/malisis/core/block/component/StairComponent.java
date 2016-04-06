@@ -29,6 +29,7 @@ import java.util.List;
 
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.block.ISmartCull;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
@@ -64,7 +65,7 @@ public class StairComponent implements IBlockComponent, ISmartCull
 	}
 
 	@Override
-	public List<IBlockComponent> getDependencies()
+	public List<IComponent> getDependencies()
 	{
 		return Lists.newArrayList(new DirectionalComponent());
 	}
@@ -199,7 +200,7 @@ public class StairComponent implements IBlockComponent, ISmartCull
 		if (block instanceof BlockStairs)
 			return true;
 
-		return IBlockComponent.getComponent(StairComponent.class, block) != null;
+		return IComponent.getComponent(StairComponent.class, block) != null;
 
 	}
 
@@ -210,7 +211,7 @@ public class StairComponent implements IBlockComponent, ISmartCull
 
 	public static boolean isTop(IBlockState state)
 	{
-		StairComponent sc = IBlockComponent.getComponent(StairComponent.class, state.getBlock());
+		StairComponent sc = IComponent.getComponent(StairComponent.class, state.getBlock());
 		if (sc == null)
 			return false;
 

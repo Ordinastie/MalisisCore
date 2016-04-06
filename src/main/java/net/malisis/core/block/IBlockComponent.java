@@ -46,15 +46,12 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import com.google.common.collect.ImmutableList;
-
 /**
  * @author Ordinastie
  *
  */
-public interface IBlockComponent
+public interface IBlockComponent extends IComponent
 {
-
 	/**
 	 * Gets the {@link IProperty} used by this {@link IBlockComponent}.<br>
 	 * Only use this if the component only has one property.
@@ -86,26 +83,6 @@ public interface IBlockComponent
 	public default Item getItem(Block block)
 	{
 		return new MalisisItemBlock(block);
-	}
-
-	/**
-	 * Gets the additional components that this {@link IBlockComponent} depends on.
-	 *
-	 * @return the dependencies
-	 */
-	public default List<IBlockComponent> getDependencies()
-	{
-		return ImmutableList.of();
-	}
-
-	/**
-	 * Extra registration process for {@link IBlockComponent}
-	 *
-	 * @param block the block
-	 */
-	public default void register(Block block)
-	{
-
 	}
 
 	/**
@@ -434,33 +411,4 @@ public interface IBlockComponent
 	}
 
 	//#end Other
-
-	/**
-	 * Gets the component of the specify <code>type</code> for the {@link Block}.<br>
-	 * The returned object may <b>not</b> be a component but the block itself if it implements an interface used for a
-	 * {@link IBlockComponent}.
-	 *
-	 * @param <T> the generic type
-	 * @param type the type
-	 * @param block the block
-	 * @return the component
-	 */
-	public static <T> T getComponent(Class<T> type, Block block)
-	{
-		if (block.getClass().isAssignableFrom(type))
-			return type.cast(block);
-
-		if (!(block instanceof IComponentProvider))
-			return null;
-
-		return ((IComponentProvider) block).getComponent(type);
-	}
-
-	public static IProperty<?> getProperty(Class<?> type, Block block)
-	{
-		Object component = getComponent(type, block);
-		if (component instanceof IBlockComponent)
-			return ((IBlockComponent) component).getProperty();
-		return null;
-	}
 }

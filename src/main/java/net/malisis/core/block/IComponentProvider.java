@@ -40,14 +40,14 @@ public interface IComponentProvider
 	 *
 	 * @return the components
 	 */
-	public List<IBlockComponent> getComponents();
+	public List<IComponent> getComponents();
 
 	/**
 	 * Adds the {@link IBlockComponent} to this {@link IComponentProvider}.
 	 *
 	 * @param component the component
 	 */
-	public void addComponent(IBlockComponent component);
+	public void addComponent(IComponent component);
 
 	/**
 	 * Gets the {@link IBlockComponent} of the specified type from this {@link IComponentProvider}.
@@ -57,5 +57,4 @@ public interface IComponentProvider
 	 * @return the component
 	 */
 	public <T> T getComponent(Class<T> type);
-
 }

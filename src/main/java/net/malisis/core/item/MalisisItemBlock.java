@@ -24,7 +24,7 @@
 
 package net.malisis.core.item;
 
-import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IMergedBlock;
 import net.malisis.core.block.IRegisterable;
 import net.malisis.core.block.MalisisBlock;
@@ -138,7 +138,7 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable
 
 	private IMergedBlock getMerged(IBlockState state)
 	{
-		IMergedBlock mergedBlock = IBlockComponent.getComponent(IMergedBlock.class, state.getBlock());
+		IMergedBlock mergedBlock = IComponent.getComponent(IMergedBlock.class, state.getBlock());
 		if (mergedBlock == null)
 			return null;
 

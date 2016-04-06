@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.EnumFacingUtils;
@@ -74,7 +74,7 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 			rotation = 0;
 		else
 		{
-			EnumFacing direction = (EnumFacing) state.getValue(property);
+			EnumFacing direction = state.getValue(property);
 			rotation = EnumFacingUtils.getRotationCount(direction);
 		}
 	}
@@ -217,7 +217,7 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 	public static BlockPos getOrigin(IBlockAccess world, BlockPos pos)
 	{
 		BlockPos origin = BlockDataHandler.getData(ORIGIN_BLOCK_DATA, world, pos);
-		if (origin != null && IBlockComponent.getComponent(MultiBlockComponent.class, world.getBlockState(origin).getBlock()) == null)
+		if (origin != null && IComponent.getComponent(MultiBlockComponent.class, world.getBlockState(origin).getBlock()) == null)
 		{
 			origin = null;
 			BlockDataHandler.removeData(ORIGIN_BLOCK_DATA, world, pos);

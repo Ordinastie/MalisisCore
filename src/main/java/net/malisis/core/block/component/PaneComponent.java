@@ -93,8 +93,6 @@ public class PaneComponent implements IBlockComponent, ISmartCull
 		boolean east = state.getValue(EAST);
 		boolean west = state.getValue(WEST);
 
-		System.out.println(state);
-
 		if (world == null)
 		{
 			north = true;

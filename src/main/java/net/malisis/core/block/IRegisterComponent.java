@@ -24,38 +24,17 @@
 
 package net.malisis.core.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.util.math.AxisAlignedBB;
 
 /**
- * Defines a {@link IBlockComponent} or {@link Block} that should be smartly culled when rendering if {@link #shouldSmartCull()} return
- * <code>true</code>.<br>
- * This means the different {@link AxisAlignedBB} used for render bounds will be independently culled.
- *
  * @author Ordinastie
+ *
  */
-public interface ISmartCull
+public interface IRegisterComponent
 {
 	/**
-	 * Whether this {@link IBlockComponent} or {@link Block} should use smart culling.
+	 * Extra registration process for {@link IComponent}.
 	 *
-	 * @return true, if successful
+	 * @param provider the provider
 	 */
-	public default boolean shouldSmartCull()
-	{
-		return true;
-	}
-
-	/**
-	 * Whether the {@link Block} should use smart culling.
-	 *
-	 * @param block the block
-	 * @return true, if successful
-	 */
-	public static boolean shouldSmartCull(Block block)
-	{
-		ISmartCull sc = IComponent.getComponent(ISmartCull.class, block);
-		return sc != null && sc.shouldSmartCull();
-	}
-
+	public void register(IComponentProvider provider);
 }

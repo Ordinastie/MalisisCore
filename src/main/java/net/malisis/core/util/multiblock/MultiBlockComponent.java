@@ -27,6 +27,7 @@ package net.malisis.core.util.multiblock;
 import java.util.List;
 
 import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.block.component.DirectionalComponent;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyBool;
@@ -84,7 +85,7 @@ public class MultiBlockComponent implements IBlockComponent
 	}
 
 	@Override
-	public List<IBlockComponent> getDependencies()
+	public List<IComponent> getDependencies()
 	{
 		return Lists.newArrayList(new DirectionalComponent());
 	}
@@ -135,7 +136,7 @@ public class MultiBlockComponent implements IBlockComponent
 
 	public static boolean isOrigin(IBlockState state)
 	{
-		MultiBlockComponent mbc = IBlockComponent.getComponent(MultiBlockComponent.class, state.getBlock());
+		MultiBlockComponent mbc = IComponent.getComponent(MultiBlockComponent.class, state.getBlock());
 		if (mbc == null)
 			return false;
 
@@ -143,12 +144,12 @@ public class MultiBlockComponent implements IBlockComponent
 		if (property == null || !state.getProperties().containsKey(property))
 			return false;
 
-		return (boolean) state.getValue(property);
+		return state.getValue(property);
 	}
 
 	public static MultiBlock getMultiBlock(IBlockAccess world, BlockPos pos, IBlockState state, ItemStack itemStack)
 	{
-		MultiBlockComponent mbc = IBlockComponent.getComponent(MultiBlockComponent.class, state.getBlock());
+		MultiBlockComponent mbc = IComponent.getComponent(MultiBlockComponent.class, state.getBlock());
 		if (mbc == null)
 			return null;
 		MultiBlock multiBlock = mbc.getMultiBlock();

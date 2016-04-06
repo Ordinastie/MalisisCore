@@ -28,6 +28,7 @@ import java.util.Random;
 
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IMergedBlock;
 import net.malisis.core.block.ISmartCull;
 import net.malisis.core.block.MalisisBlock;
@@ -200,7 +201,7 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 
 	public static boolean isTop(IBlockState state)
 	{
-		SlabComponent sc = IBlockComponent.getComponent(SlabComponent.class, state.getBlock());
+		SlabComponent sc = IComponent.getComponent(SlabComponent.class, state.getBlock());
 		if (sc == null)
 			return false;
 
@@ -218,7 +219,7 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 
 	public static boolean isDoubleSlab(Block block)
 	{
-		SlabComponent sc = IBlockComponent.getComponent(SlabComponent.class, block);
+		SlabComponent sc = IComponent.getComponent(SlabComponent.class, block);
 		return sc != null && sc.isDouble(block);
 	}
 
@@ -232,6 +233,6 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 		if (block == Blocks.stone_slab || block == Blocks.wooden_slab || block == Blocks.stone_slab2)
 			return true;
 
-		return IBlockComponent.getComponent(SlabComponent.class, block) != null;
+		return IComponent.getComponent(SlabComponent.class, block) != null;
 	}
 }

@@ -30,11 +30,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import net.malisis.core.asm.AsmUtils;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
+import net.malisis.core.block.IRegisterComponent;
 import net.malisis.core.block.IRegisterable;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.IBlockRenderer;
@@ -61,6 +66,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.RegistryNamespaced;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -100,6 +106,11 @@ public class MalisisRegistry
 	}
 
 	private static Method registerSound = AsmUtils.changeMethodAccess(SoundEvent.class, "registerSound", "func_187502_a", String.class);
+
+	private static <T> Stream<T> registryStream(RegistryNamespaced<ResourceLocation, T> registry)
+	{
+		return StreamSupport.stream(registry.spliterator(), false);
+	}
 
 	@SideOnly(Side.CLIENT)
 	private static class ClientRegistry
@@ -166,23 +177,20 @@ public class MalisisRegistry
 		@SubscribeEvent
 		public void onTextureStitchEvent(TextureStitchEvent.Pre event)
 		{
-			for (IIconRegister iconRegister : iconRegisters)
-				iconRegister.registerIcons(event.getMap());
-		}
+			Consumer<IIconRegister> register = (iir) -> iir.registerIcons(event.getMap());
 
-		/**
-		 * Registers the {@link IIconProvider} provided by the object, if it's a {@link IMetaIconProvider}.<br>
-		 * Automatically called for blocks and items in the registries.
-		 *
-		 * @param object the object
-		 */
-		public void registerIconRegister(Object object)
-		{
-			if (object instanceof IMetaIconProvider)
-			{
-				((IMetaIconProvider) object).createIconProvider(null);
-				MalisisRegistry.registerIconRegister(((IMetaIconProvider) object).getIconProvider());
-			}
+			registryStream(Block.blockRegistry).map(block -> IComponent.getComponent(IIconRegister.class, block))
+												.filter(Objects::nonNull)
+												.forEach(register);
+
+			//TODO: move items to IComponentProvider too
+			registryStream(Item.itemRegistry).filter(IMetaIconProvider.class::isInstance)
+												.map(IMetaIconProvider.class::cast)
+												.map(IMetaIconProvider::getIconProvider)
+												.filter(Objects::nonNull)
+												.forEach(register);
+
+			iconRegisters.forEach(register);
 		}
 
 		/**
@@ -199,7 +207,6 @@ public class MalisisRegistry
 			if (rendererClasses == null)
 				return;
 
-			//MalisisCore.log.info("[MalisisRegistry] Found annotation for {}", object.getClass().getSimpleName());
 			//get the block renderer
 			MalisisRenderer<?> renderer = null;
 			try
@@ -208,8 +215,10 @@ public class MalisisRegistry
 			}
 			catch (InstantiationException | IllegalAccessException e)
 			{
-				MalisisCore.log.error("[MalisisRegistry] Failed to load {} renderer for {}", rendererClasses.getLeft().getSimpleName(),
-						object.getClass().getSimpleName(), e);
+				MalisisCore.log.error("[MalisisRegistry] Failed to load {} renderer for {}",
+						rendererClasses.getLeft().getSimpleName(),
+						object.getClass().getSimpleName(),
+						e);
 				return;
 			}
 
@@ -217,8 +226,6 @@ public class MalisisRegistry
 			if (object instanceof Block && renderer != null)
 			{
 				registerBlockRenderer((Block) object, renderer);
-				//MalisisCore.log.info("[MalisisRegistry] Registered block {} for {}", renderer.getClass().getSimpleName(), object.getClass()
-				//		.getSimpleName());
 				object = Item.getItemFromBlock((Block) object);
 			}
 
@@ -229,16 +236,16 @@ public class MalisisRegistry
 			}
 			catch (InstantiationException | IllegalAccessException e)
 			{
-				MalisisCore.log.error("[MalisisRegistry] Failed to load {} renderer for {}", rendererClasses.getLeft().getSimpleName(),
+				MalisisCore.log.error("[MalisisRegistry] Failed to load {} renderer for {}",
+						rendererClasses.getLeft().getSimpleName(),
 						object.getClass().getSimpleName());
 				return;
 			}
+
 			//register the item renderer
 			if (object instanceof Item && renderer != null)
 			{
 				registerItemRenderer((Item) object, renderer);
-				//MalisisCore.log.info("[MalisisRegistry] Registered item {} for {}", renderer.getClass().getSimpleName(), object.getClass()
-				//		.getSimpleName());
 			}
 		}
 
@@ -412,6 +419,11 @@ public class MalisisRegistry
 		return renderer.renderBlock(buffer, world, pos, state);
 	}
 
+	public static boolean hasParticleIcon(IBlockState state)
+	{
+		return IComponent.getComponent(IIconProvider.class, state.getBlock()) != null;
+	}
+
 	/**
 	 * Gets the {@link TextureAtlasSprite} to used for the {@link IBlockState}.
 	 *
@@ -421,16 +433,12 @@ public class MalisisRegistry
 	@SideOnly(Side.CLIENT)
 	public static TextureAtlasSprite getParticleIcon(IBlockState state)
 	{
-		Block block = state.getBlock();
 		MalisisIcon icon = null;
-		if (block instanceof IMetaIconProvider)
-		{
-			IIconProvider provider = ((IMetaIconProvider) block).getIconProvider();
-			if (provider instanceof IBlockIconProvider)
-				icon = ((IBlockIconProvider) provider).getParticleIcon(state);
-			else if (provider != null)
-				icon = provider.getIcon();
-		}
+		IIconProvider provider = IComponent.getComponent(IIconProvider.class, state.getBlock());
+		if (provider instanceof IBlockIconProvider)
+			icon = ((IBlockIconProvider) provider).getParticleIcon(state);
+		else if (provider != null)
+			icon = provider.getIcon();
 
 		return icon != null ? icon : MalisisIcon.missing;
 	}
@@ -596,24 +604,23 @@ public class MalisisRegistry
 		return null;
 	}
 
+	public static void registerBlockComponents()
+	{
+		registryStream(Block.blockRegistry).filter(IComponentProvider.class::isInstance)
+											.map(IComponentProvider.class::cast)
+											.forEach(p -> p.getComponents()
+															.stream()
+															.filter(IRegisterComponent.class::isInstance)
+															.map(IRegisterComponent.class::cast)
+															.forEach(comp -> comp.register(p)));
+
+	}
+
 	@SideOnly(Side.CLIENT)
 	public static void registerRenderers()
 	{
 		Block.blockRegistry.forEach(instance::registerRenderer);
 		Item.itemRegistry.forEach(instance::registerRenderer);
-	}
-
-	@SideOnly(Side.CLIENT)
-	public static void registerIconRegisters()
-	{
-		Block.blockRegistry.forEach(instance::registerIconRegister);
-		Item.itemRegistry.forEach(instance::registerIconRegister);
-	}
-
-	public static void registerBlockComponents()
-	{
-		StreamSupport.stream(Block.blockRegistry.spliterator(), false).filter(block -> block instanceof IComponentProvider)
-				.forEach(block -> ((IComponentProvider) block).getComponents().forEach(comp -> comp.register(block)));
 	}
 
 	@SideOnly(Side.CLIENT)

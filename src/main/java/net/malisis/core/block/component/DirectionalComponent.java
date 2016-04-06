@@ -25,6 +25,7 @@
 package net.malisis.core.block.component;
 
 import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.util.EntityUtils;
 import net.malisis.core.util.EnumFacingUtils;
@@ -225,7 +226,7 @@ public class DirectionalComponent implements IBlockComponent
 	 */
 	public static EnumFacing getDirection(IBlockState state)
 	{
-		DirectionalComponent dc = IBlockComponent.getComponent(DirectionalComponent.class, state.getBlock());
+		DirectionalComponent dc = IComponent.getComponent(DirectionalComponent.class, state.getBlock());
 		if (dc == null)
 			return EnumFacing.SOUTH;
 
@@ -244,7 +245,8 @@ public class DirectionalComponent implements IBlockComponent
 	 */
 	public static PropertyDirection getProperty(Block block)
 	{
-		return (PropertyDirection) IBlockComponent.getProperty(DirectionalComponent.class, block);
+		DirectionalComponent dc = IComponent.getComponent(DirectionalComponent.class, block);
+		return dc != null ? dc.getProperty() : null;
 	}
 
 	/**
@@ -271,11 +273,7 @@ public class DirectionalComponent implements IBlockComponent
 		if (a == 0)
 			return state;
 
-		DirectionalComponent dc = IBlockComponent.getComponent(DirectionalComponent.class, state.getBlock());
-		if (dc == null)
-			return state;
-
-		PropertyDirection property = dc.getProperty();
+		PropertyDirection property = DirectionalComponent.getProperty(state.getBlock());
 		if (property == null || !state.getProperties().containsKey(property))
 			return state;
 
@@ -284,7 +282,7 @@ public class DirectionalComponent implements IBlockComponent
 
 	public static IBlockState getPlacedState(IBlockState state, EnumFacing facing, EntityLivingBase placer)
 	{
-		DirectionalComponent dc = IBlockComponent.getComponent(DirectionalComponent.class, state.getBlock());
+		DirectionalComponent dc = IComponent.getComponent(DirectionalComponent.class, state.getBlock());
 		return dc != null ? dc.placedState(state, facing, placer) : state;
 	}
 

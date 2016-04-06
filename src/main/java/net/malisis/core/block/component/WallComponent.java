@@ -29,6 +29,7 @@ import java.util.Random;
 
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IMergedBlock;
 import net.malisis.core.block.ISmartCull;
 import net.malisis.core.block.MalisisBlock;
@@ -88,7 +89,7 @@ public class WallComponent implements IBlockComponent, IMergedBlock, ISmartCull
 	 * @return the dependencies
 	 */
 	@Override
-	public List<IBlockComponent> getDependencies()
+	public List<IComponent> getDependencies()
 	{
 		return Lists.newArrayList(new DirectionalComponent());
 	}
@@ -273,7 +274,7 @@ public class WallComponent implements IBlockComponent, IMergedBlock, ISmartCull
 	 */
 	public static boolean isCorner(IBlockState state)
 	{
-		WallComponent wc = IBlockComponent.getComponent(WallComponent.class, state.getBlock());
+		WallComponent wc = IComponent.getComponent(WallComponent.class, state.getBlock());
 		if (wc == null)
 			return false;
 

@@ -33,6 +33,7 @@ import net.malisis.core.MalisisRegistry;
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBoundingBox;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.block.ISmartCull;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
@@ -761,7 +762,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (vertexCount != 4 && renderType == RenderType.BLOCK)
 		{
 			MalisisCore.log.error("[MalisisRenderer] Attempting to render a face containing {} vertexes in BLOCK for {}. Ignored",
-					vertexCount, block);
+					vertexCount,
+					block);
 			return;
 		}
 
@@ -780,8 +782,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 		//use normals if available
 		if ((renderType == RenderType.ITEM || params.useNormals.get()) && params.direction.get() != null)
-			buffer.putNormal(params.direction.get().getFrontOffsetX(), params.direction.get().getFrontOffsetY(), params.direction.get()
-					.getFrontOffsetZ());
+			buffer.putNormal(params.direction.get().getFrontOffsetX(),
+					params.direction.get().getFrontOffsetY(),
+					params.direction.get().getFrontOffsetZ());
 
 		//we need to separate each face
 		if (drawMode == GL11.GL_POLYGON || drawMode == GL11.GL_LINE || drawMode == GL11.GL_LINE_STRIP || drawMode == GL11.GL_LINE_LOOP)
@@ -1036,10 +1039,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (item instanceof IMetaIconProvider && ((IMetaIconProvider) item).getIconProvider() != null)
 			return ((IMetaIconProvider) item).getIconProvider();
 
-		if (block instanceof IMetaIconProvider && ((IMetaIconProvider) block).getIconProvider() != null)
-			return ((IMetaIconProvider) block).getIconProvider();
-
-		return null;
+		return IComponent.getComponent(IIconProvider.class, block);
 	}
 
 	protected boolean shouldRotateIcon(RenderParameters params)

@@ -28,6 +28,8 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
@@ -35,8 +37,6 @@ import net.malisis.core.block.component.LadderComponent;
 import net.malisis.core.item.MalisisItemBlock;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.MalisisRendered;
-import net.malisis.core.renderer.icon.IIconProvider;
-import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
@@ -62,6 +62,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.collect.Lists;
 
 /**
@@ -69,16 +71,14 @@ import com.google.common.collect.Lists;
  *
  */
 @MalisisRendered(DefaultRenderer.Block.class)
-public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvider, IRegisterable, IComponentProvider
+public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, IComponentProvider
 {
 	private static Field blockStateField = AsmUtils.changeFieldAccess(Block.class, "blockState", "field_176227_L");
 
 	protected String name;
 	protected AxisAlignedBB boundingBox;
-	protected final List<IBlockComponent> components = Lists.newArrayList();
-
-	@SideOnly(Side.CLIENT)
-	protected IIconProvider iconProvider;
+	protected final List<IBlockComponent> blockComponents = Lists.newArrayList();
+	protected final List<IComponent> components = Lists.newArrayList();
 
 	protected MalisisBlock(Material material)
 	{
@@ -93,7 +93,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	protected void buildBlockState()
 	{
 		List<IProperty<?>> properties = getProperties();
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 			properties.addAll(Arrays.asList(component.getProperties()));
 
 		try
@@ -109,40 +109,48 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	private void buildDefaultState()
 	{
 		IBlockState state = blockState.getBaseState();
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 			state = component.setDefaultState(this, state);
 
 		setDefaultState(state);
 	}
 
-	@Override
-	public List<IBlockComponent> getComponents()
+	public List<IBlockComponent> getBlockComponents()
 	{
-		return components;
+		return blockComponents;
 	}
 
 	@Override
-	public void addComponent(IBlockComponent component)
+	public List<IComponent> getComponents()
 	{
-		components.add(component);
-		for (IBlockComponent dep : component.getDependencies())
-			components.add(dep);
+		return Stream.concat(blockComponents.stream(), components.stream()).collect(Collectors.toList());
+	}
 
-		buildBlockState();
-		buildDefaultState();
+	@Override
+	public void addComponent(IComponent component)
+	{
+		if (component.isClientComponent() && !MalisisCore.isClient())
+			throw new IllegalStateException("Trying to add component " + component.getClass().getSimpleName() + " on server.");
+
+		if (component instanceof IBlockComponent)
+		{
+			blockComponents.add((IBlockComponent) component);
+			for (IComponent dep : ((IBlockComponent) component).getDependencies())
+				addComponent(dep);
+
+			buildBlockState();
+			buildDefaultState();
+		}
+		else
+			components.add(component);
+
 		lightOpacity = getDefaultState().isOpaqueCube() ? 255 : 0;
 	}
 
 	@Override
 	public <T> T getComponent(Class<T> type)
 	{
-		for (IBlockComponent component : components)
-		{
-			if (type.isAssignableFrom(component.getClass()))
-				return type.cast(component);
-		}
-
-		return null;
+		return getComponents().stream().filter(type::isInstance).map(type::cast).findFirst().orElse(null);
 	}
 
 	public Block setName(String name)
@@ -160,7 +168,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 
 	public String getUnlocalizedName(IBlockState state)
 	{
-		for (IBlockComponent component : components)
+		for (IBlockComponent component : blockComponents)
 		{
 			String name = component.getUnlocalizedName(this, state);
 			if (name != null)
@@ -172,7 +180,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public Item getItem(Block block)
 	{
-		for (IBlockComponent component : components)
+		for (IBlockComponent component : blockComponents)
 		{
 			Item item = component.getItem(this);
 			if (item == null || item.getClass() != MalisisItemBlock.class)
@@ -182,19 +190,28 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 		return IRegisterable.super.getItem(this);
 	}
 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void createIconProvider(Object object)
+	public void setTexture(String textureName)
 	{
-		if (object != null)
-			iconProvider = DefaultIconProvider.from(object);
+		if (!StringUtils.isEmpty(textureName) && MalisisCore.isClient())
+			addComponent(DefaultIconProvider.from(textureName));
 	}
 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public IIconProvider getIconProvider()
+	public void setTexture(Item item)
 	{
-		return iconProvider;
+		if (item != null && MalisisCore.isClient())
+			addComponent(DefaultIconProvider.from(item));
+	}
+
+	public void setTexture(Block block)
+	{
+		if (block != null)
+			setTexture(block.getDefaultState());
+	}
+
+	public void setTexture(IBlockState state)
+	{
+		if (state != null && MalisisCore.isClient())
+			addComponent(DefaultIconProvider.from(state));
 	}
 
 	public IBlockState getStateFromItemStack(ItemStack itemStack)
@@ -207,7 +224,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	public IBlockState onBlockPlaced(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
 		IBlockState state = super.onBlockPlaced(world, pos, facing, hitX, hitY, hitZ, meta, placer);
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 			state = component.onBlockPlaced(this, world, pos, state, facing, hitX, hitY, hitZ, meta, placer);
 
 		return state;
@@ -216,7 +233,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 			component.onBlockPlacedBy(this, world, pos, state, placer, stack);
 	}
 
@@ -224,7 +241,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
 		boolean b = false;
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 			b |= component.onBlockActivated(this, world, pos, state, player, hand, side, hitX, hitY, hitZ);
 
 		return b;
@@ -233,14 +250,14 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block neighborBlock)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 			component.onNeighborBlockChange(this, world, pos, state, neighborBlock);
 	}
 
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 			component.breakBlock(this, world, pos, state);
 
 		super.breakBlock(world, pos, state);
@@ -250,7 +267,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public AxisAlignedBB getBoundingBox(IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 		{
 			AxisAlignedBB aabb = component.getBoundingBox(this, world, pos, state, type);
 			if (aabb != null)
@@ -264,7 +281,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	public AxisAlignedBB[] getBoundingBoxes(IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
 		List<AxisAlignedBB> list = Lists.newArrayList();
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 		{
 			AxisAlignedBB[] aabbs = component.getBoundingBoxes(this, world, pos, state, type);
 			if (aabbs != null)
@@ -295,7 +312,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public boolean canPlaceBlockOnSide(World world, BlockPos pos, EnumFacing side)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 			if (!component.canPlaceBlockOnSide(this, world, pos, side))
 				return false;
 
@@ -305,7 +322,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public boolean canPlaceBlockAt(World world, BlockPos pos)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 			if (!component.canPlaceBlockAt(this, world, pos))
 				return false;
 
@@ -316,7 +333,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public int damageDropped(IBlockState state)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 		{
 			int damage = component.damageDropped(this, state);
 			if (damage != 0)
@@ -330,7 +347,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list)
 	{
 		List<ItemStack> l = Lists.newArrayList();
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 			component.getSubBlocks(this, item, tab, l);
 
 		if (l.isEmpty())
@@ -343,7 +360,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public MapColor getMapColor(IBlockState state)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 		{
 			MapColor color = component.getMapColor(this, state);
 			if (color != null)
@@ -357,7 +374,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	public IBlockState getStateFromMeta(int meta)
 	{
 		IBlockState state = getDefaultState();
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 			state = component.getStateFromMeta(this, state, meta);
 
 		return state;
@@ -367,7 +384,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	public int getMetaFromState(IBlockState state)
 	{
 		int meta = 0;
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 			meta += component.getMetaFromState(this, state);
 
 		return meta;
@@ -378,7 +395,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public boolean shouldSideBeRendered(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 		{
 			Boolean render = component.shouldSideBeRendered(this, world, pos, state, side);
 			if (render != null)
@@ -390,7 +407,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public boolean isFullBlock(IBlockState state)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 		{
 			Boolean full = component.isFullBlock(this, state);
 			if (full != null)
@@ -403,7 +420,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public boolean isFullCube(IBlockState state)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 		{
 			Boolean full = component.isFullCube(this, state);
 			if (full != null)
@@ -417,10 +434,10 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	public boolean isOpaqueCube(IBlockState state)
 	{
 		//parent constructor call
-		if (getComponents() == null)
+		if (getBlockComponents() == null)
 			return super.isOpaqueCube(state);
 
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 		{
 			Boolean opaque = component.isOpaqueCube(this, state);
 			if (opaque != null)
@@ -435,7 +452,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@SideOnly(Side.CLIENT)
 	public int getPackedLightmapCoords(IBlockState state, IBlockAccess world, BlockPos pos)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 		{
 			//TODO: use max light value
 			Integer light = component.getPackedLightmapCoords(this, world, pos, state);
@@ -448,7 +465,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public Item getItemDropped(IBlockState state, Random rand, int fortune)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 		{
 			Item item = component.getItemDropped(this, state, rand, fortune);
 			if (item != null)
@@ -462,7 +479,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public int quantityDropped(IBlockState state, int fortune, Random random)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 		{
 			Integer quantity = component.quantityDropped(this, state, fortune, random);
 			if (quantity != null)
@@ -475,7 +492,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public int getLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos)
 	{
-		for (IBlockComponent component : getComponents())
+		for (IBlockComponent component : getBlockComponents())
 		{
 			Integer quantity = component.getLightOpacity(this, world, pos, state);
 			if (quantity != null)
@@ -487,7 +504,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IMetaIconProvid
 	@Override
 	public boolean isLadder(IBlockState state, IBlockAccess world, BlockPos pos, EntityLivingBase entity)
 	{
-		return IBlockComponent.getComponent(LadderComponent.class, this) != null;
+		return IComponent.getComponent(LadderComponent.class, this) != null;
 	}
 
 	@Override

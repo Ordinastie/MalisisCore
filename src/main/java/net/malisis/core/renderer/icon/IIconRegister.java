@@ -25,7 +25,10 @@
 package net.malisis.core.renderer.icon;
 
 import net.malisis.core.MalisisRegistry;
+import net.malisis.core.block.IComponent;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Implementers of this interface can be registered with {@link MalisisRegistry#registerIconRegister(IIconRegister)} so that icons used can
@@ -34,8 +37,16 @@ import net.minecraft.client.renderer.texture.TextureMap;
  * @author Ordinastie
  *
  */
-public interface IIconRegister
+@SideOnly(Side.CLIENT)
+public interface IIconRegister extends IComponent
 {
+
+	@Override
+	public default boolean isClientComponent()
+	{
+		return true;
+	}
+
 	/**
 	 * Registers the icons to the {@link TextureMap}.
 	 *

@@ -25,6 +25,7 @@
 package net.malisis.core.block.component;
 
 import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.IComponent;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
@@ -107,7 +108,7 @@ public class PowerComponent implements IBlockComponent
 
 	public static boolean isPowered(IBlockState state)
 	{
-		PowerComponent pc = IBlockComponent.getComponent(PowerComponent.class, state.getBlock());
+		PowerComponent pc = IComponent.getComponent(PowerComponent.class, state.getBlock());
 		if (pc == null)
 			return false;
 
@@ -137,7 +138,8 @@ public class PowerComponent implements IBlockComponent
 
 	public static PropertyBool getProperty(Block block)
 	{
-		return (PropertyBool) IBlockComponent.getProperty(PowerComponent.class, block);
+		PowerComponent pc = IComponent.getComponent(PowerComponent.class, block);
+		return pc != null ? pc.getProperty() : null;
 	}
 
 }

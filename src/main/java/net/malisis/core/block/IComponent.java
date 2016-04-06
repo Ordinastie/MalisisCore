@@ -24,38 +24,57 @@
 
 package net.malisis.core.block;
 
+import java.util.List;
+
 import net.minecraft.block.Block;
-import net.minecraft.util.math.AxisAlignedBB;
+
+import com.google.common.collect.ImmutableList;
 
 /**
- * Defines a {@link IBlockComponent} or {@link Block} that should be smartly culled when rendering if {@link #shouldSmartCull()} return
- * <code>true</code>.<br>
- * This means the different {@link AxisAlignedBB} used for render bounds will be independently culled.
- *
  * @author Ordinastie
+ *
  */
-public interface ISmartCull
+public interface IComponent
 {
+
 	/**
-	 * Whether this {@link IBlockComponent} or {@link Block} should use smart culling.
+	 * Checks if this component should only be used client side.
 	 *
-	 * @return true, if successful
+	 * @return true, if is client component
 	 */
-	public default boolean shouldSmartCull()
+	public default boolean isClientComponent()
 	{
-		return true;
+		return false;
 	}
 
 	/**
-	 * Whether the {@link Block} should use smart culling.
+	 * Gets the additional components that this {@link IComponent} depends on.
 	 *
+	 * @return the dependencies
+	 */
+	public default List<IComponent> getDependencies()
+	{
+		return ImmutableList.of();
+	}
+
+	/**
+	 * Gets the component of the specify <code>type</code> for the {@link Block}.<br>
+	 * The returned object may <b>not</b> be a component but the block itself if it implements an interface used for a
+	 * {@link IBlockComponent}.
+	 *
+	 * @param <T> the generic type
+	 * @param type the type
 	 * @param block the block
-	 * @return true, if successful
+	 * @return the component
 	 */
-	public static boolean shouldSmartCull(Block block)
+	public static <T> T getComponent(Class<T> type, Block block)
 	{
-		ISmartCull sc = IComponent.getComponent(ISmartCull.class, block);
-		return sc != null && sc.shouldSmartCull();
-	}
+		if (block.getClass().isAssignableFrom(type))
+			return type.cast(block);
 
+		if (!(block instanceof IComponentProvider))
+			return null;
+
+		return ((IComponentProvider) block).getComponent(type);
+	}
 }

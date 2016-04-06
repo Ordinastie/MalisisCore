@@ -28,6 +28,9 @@ import java.util.List;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IBlockComponent;
+import net.malisis.core.block.IComponent;
+import net.malisis.core.block.IComponentProvider;
+import net.malisis.core.block.IRegisterComponent;
 import net.malisis.core.item.MalisisItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockColored;
@@ -50,7 +53,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * @author Ordinastie
  *
  */
-public class ColorComponent implements IBlockComponent, IBlockColor
+public class ColorComponent implements IBlockComponent, IBlockColor, IRegisterComponent
 {
 	public static PropertyEnum<EnumDyeColor> COLOR = BlockColored.COLOR;
 	private boolean useColorMultiplier = true;
@@ -78,10 +81,10 @@ public class ColorComponent implements IBlockComponent, IBlockColor
 	}
 
 	@Override
-	public void register(Block block)
+	public void register(IComponentProvider block)
 	{
-		if (MalisisCore.isClient())
-			Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(this, block);
+		if (MalisisCore.isClient() && block instanceof Block)
+			Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(this, (Block) block);
 	}
 
 	@Override
@@ -190,7 +193,7 @@ public class ColorComponent implements IBlockComponent, IBlockColor
 	 */
 	public static EnumDyeColor getColor(IBlockState state)
 	{
-		ColorComponent cc = IBlockComponent.getComponent(ColorComponent.class, state.getBlock());
+		ColorComponent cc = IComponent.getComponent(ColorComponent.class, state.getBlock());
 		if (cc == null)
 			return EnumDyeColor.WHITE;
 
