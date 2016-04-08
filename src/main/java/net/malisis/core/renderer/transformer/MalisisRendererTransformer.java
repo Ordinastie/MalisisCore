@@ -149,7 +149,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 
 		//		if (IComponent.getComponent(IIconProvider.class, state.getBlock()) != null)
 		//			return MalisisRegistry.getParticleIcon(state);
-		//		LDC Lnet/malisis/core/renderer/icon/IIconProvider;.class
+		//		LDC Lnet/malisis/core/renderer/icon/provider/IIconProvider;.class
 		//		ALOAD 1
 		//	    INVOKEINTERFACE net/minecraft/block/state/IBlockState.getBlock ()Lnet/minecraft/block/Block;
 		//	    INVOKESTATIC net/malisis/core/block/IComponent.getComponent (Ljava/lang/Class;Lnet/minecraft/block/Block;)Ljava/lang/Object;
@@ -163,7 +163,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 
 		LabelNode falseLabel = new LabelNode();
 		InsnList insert = new InsnList();
-		insert.add(new LdcInsnNode(Type.getObjectType("net/malisis/core/renderer/icon/IIconProvider")));
+		insert.add(new LdcInsnNode(Type.getObjectType("net/malisis/core/renderer/icon/provider/IIconProvider")));
 		insert.add(new VarInsnNode(ALOAD, 1));
 		insert.add(getBlock.getInsnNode(INVOKEINTERFACE));
 		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/block/IComponent", "getComponent",
@@ -175,7 +175,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		insert.add(new InsnNode(ARETURN));
 		insert.add(falseLabel);
 
-		ah.insert(insert).debug();
+		ah.insert(insert);
 
 		return ah;
 	}

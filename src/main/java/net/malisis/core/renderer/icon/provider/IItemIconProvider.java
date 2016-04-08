@@ -24,7 +24,6 @@
 
 package net.malisis.core.renderer.icon.provider;
 
-import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.item.ItemStack;
 

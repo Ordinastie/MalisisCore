@@ -22,24 +22,21 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.icon;
+package net.malisis.core.renderer.model;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.malisis.core.block.IComponent;
 
 /**
- * The IIconProvider interface allows to pass {@link MalisisIcon} to the rendering processes.<br>
- *
  * @author Ordinastie
+ *
  */
-@SideOnly(Side.CLIENT)
-public interface IIconProvider extends IIconRegister
+public interface IModelComponent extends IComponent
 {
+	@Override
+	public default boolean isClientComponent()
+	{
+		return true;
+	}
 
-	/**
-	 * Gets the {@link MalisisIcon} to use.
-	 *
-	 * @return the icon
-	 */
-	public MalisisIcon getIcon();
+	//	public Pair<IRenderable, RenderParameters> getRenderable(IRenderContext context);
 }

@@ -37,7 +37,8 @@ import net.malisis.core.block.component.LadderComponent;
 import net.malisis.core.item.MalisisItemBlock;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.MalisisRendered;
-import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
+import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -193,13 +194,19 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	public void setTexture(String textureName)
 	{
 		if (!StringUtils.isEmpty(textureName) && MalisisCore.isClient())
-			addComponent(DefaultIconProvider.from(textureName));
+		{
+			MalisisIcon icon = MalisisIcon.from(textureName);
+			addComponent((IIconProvider) () -> icon);
+		}
 	}
 
 	public void setTexture(Item item)
 	{
 		if (item != null && MalisisCore.isClient())
-			addComponent(DefaultIconProvider.from(item));
+		{
+			MalisisIcon icon = MalisisIcon.from(item);
+			addComponent((IIconProvider) () -> icon);
+		}
 	}
 
 	public void setTexture(Block block)
@@ -211,7 +218,11 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	public void setTexture(IBlockState state)
 	{
 		if (state != null && MalisisCore.isClient())
-			addComponent(DefaultIconProvider.from(state));
+		{
+			//throw new IllegalStateException();
+			MalisisIcon icon = MalisisIcon.from(state);
+			addComponent((IIconProvider) () -> icon);
+		}
 	}
 
 	public IBlockState getStateFromItemStack(ItemStack itemStack)

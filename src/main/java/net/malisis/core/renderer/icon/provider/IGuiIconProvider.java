@@ -25,9 +25,7 @@
 package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
-import net.minecraft.client.renderer.texture.TextureMap;
 
 /**
  * @author Ordinastie
@@ -39,8 +37,4 @@ public interface IGuiIconProvider extends IIconProvider
 	{
 		return getIcon();
 	}
-
-	@Override
-	public default void registerIcons(TextureMap map)
-	{}
 }

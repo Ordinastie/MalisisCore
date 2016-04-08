@@ -28,7 +28,7 @@ import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IMergedBlock;
 import net.malisis.core.block.IRegisterable;
 import net.malisis.core.block.MalisisBlock;
-import net.malisis.core.renderer.icon.IIconProvider;
+import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;

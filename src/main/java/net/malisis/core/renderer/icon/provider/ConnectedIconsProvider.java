@@ -28,7 +28,6 @@ import static net.minecraft.util.EnumFacing.*;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -65,33 +64,16 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 	private boolean initialized = false;
 
 	/**
-	 * Instantiates a new {@link ConnectedIconsProvider} with the given name.
-	 *
-	 * @param name the name
-	 */
-	public ConnectedIconsProvider(String name)
-	{
-		part1 = new MalisisIcon(name);
-		part2 = new MalisisIcon(name + "2");
-	}
-
-	/**
-	 * Instantiates a new {@link ConnectedIconsProvider} using given icons.
+	 * Instantiates a new {@link ConnectedIconsProvider} using given icons.<br>
+	 * For server safe call, use factory {@link ConnectedIconsProvider#from(String)}.
 	 *
 	 * @param part1 the part1
 	 * @param part2 the part2
 	 */
-	public ConnectedIconsProvider(MalisisIcon part1, MalisisIcon part2)
+	public ConnectedIconsProvider(IconProviderBuilder builder)
 	{
-		this.part1 = part1;
-		this.part2 = part2;
-	}
-
-	@Override
-	public void registerIcons(TextureMap map)
-	{
-		part1 = part1.register(map);
-		part2 = part2.register(map);
+		this.part1 = builder.defaultIcon;
+		this.part2 = builder.connectedIcon;
 	}
 
 	/**
@@ -136,6 +118,15 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 	 */
 	@Override
 	public MalisisIcon getIcon()
+	{
+		if (!initialized)
+			initializeIcons();
+
+		return icons[FULL];
+	}
+
+	@Override
+	public MalisisIcon getIcon(IBlockState state, EnumFacing side)
 	{
 		if (!initialized)
 			initializeIcons();

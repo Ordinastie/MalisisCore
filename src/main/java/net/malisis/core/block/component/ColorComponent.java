@@ -53,7 +53,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * @author Ordinastie
  *
  */
-public class ColorComponent implements IBlockComponent, IBlockColor, IRegisterComponent
+public class ColorComponent implements IBlockComponent, IRegisterComponent
 {
 	public static PropertyEnum<EnumDyeColor> COLOR = BlockColored.COLOR;
 	private boolean useColorMultiplier = true;
@@ -84,7 +84,13 @@ public class ColorComponent implements IBlockComponent, IBlockColor, IRegisterCo
 	public void register(IComponentProvider block)
 	{
 		if (MalisisCore.isClient() && block instanceof Block)
-			Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(this, (Block) block);
+			registerColorHandler((Block) block);
+	}
+
+	@SideOnly(Side.CLIENT)
+	private void registerColorHandler(Block block)
+	{
+		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new ColorHandler(), block);
 	}
 
 	@Override
@@ -111,14 +117,6 @@ public class ColorComponent implements IBlockComponent, IBlockColor, IRegisterCo
 	{
 		for (EnumDyeColor color : EnumDyeColor.values())
 			list.add(new ItemStack(item, 1, color.getMetadata()));
-	}
-
-	@Override
-	public int colorMultiplier(IBlockState state, IBlockAccess world, BlockPos pos, int tintIndex)
-	{
-		if (!useColorMultiplier)
-			return 0xFFFFFF;
-		return getRenderColor(state.getBlock(), state);
 	}
 
 	/**
@@ -202,6 +200,19 @@ public class ColorComponent implements IBlockComponent, IBlockColor, IRegisterCo
 			return EnumDyeColor.WHITE;
 
 		return state.getValue(property);
+	}
+
+	@SideOnly(Side.CLIENT)
+	public class ColorHandler implements IBlockColor
+	{
+		@Override
+		public int colorMultiplier(IBlockState state, IBlockAccess world, BlockPos pos, int tintIndex)
+		{
+			if (!useColorMultiplier)
+				return 0xFFFFFF;
+			return getRenderColor(state.getBlock(), state);
+		}
+
 	}
 
 }

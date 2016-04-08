@@ -31,12 +31,12 @@ import net.minecraft.block.Block;
 import com.google.common.collect.ImmutableList;
 
 /**
- * @author Ordinastie
+ * {@link IComponent} are elements handled by {@link IComponentProvider}.
  *
+ * @author Ordinastie
  */
 public interface IComponent
 {
-
 	/**
 	 * Checks if this component should only be used client side.
 	 *
@@ -59,8 +59,7 @@ public interface IComponent
 
 	/**
 	 * Gets the component of the specify <code>type</code> for the {@link Block}.<br>
-	 * The returned object may <b>not</b> be a component but the block itself if it implements an interface used for a
-	 * {@link IBlockComponent}.
+	 * The returned object may <b>not</b> be a component but the block itself if it implements an interface used for a {@link IComponent}.
 	 *
 	 * @param <T> the generic type
 	 * @param type the type

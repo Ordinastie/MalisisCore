@@ -192,11 +192,10 @@ public class MalisisCore implements IMalisisMod
 	@EventHandler
 	public void init(FMLInitializationEvent event)
 	{
-		ClientCommandHandler.instance.registerCommand(new MalisisCommand());
-
 		MalisisRegistry.registerBlockComponents();
 		if (isClient())
 		{
+			ClientCommandHandler.instance.registerCommand(new MalisisCommand());
 			MalisisRegistry.registerRenderers();
 		}
 	}

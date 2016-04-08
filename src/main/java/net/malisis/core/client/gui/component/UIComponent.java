@@ -49,9 +49,9 @@ import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleState
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.icon.GuiIcon;
-import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
+import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.renderer.GlStateManager;
 

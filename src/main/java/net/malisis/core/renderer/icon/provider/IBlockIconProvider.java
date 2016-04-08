@@ -24,7 +24,6 @@
 
 package net.malisis.core.renderer.icon.provider;
 
-import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.util.ItemUtils;
 import net.minecraft.block.state.IBlockState;
@@ -40,16 +39,18 @@ import net.minecraft.world.IBlockAccess;
  */
 public interface IBlockIconProvider extends IIconProvider
 {
-
 	/**
 	 * Gets the {@link MalisisIcon} to use for the specified {@link IBlockState}.
 	 *
 	 * @param state the state
 	 * @return the icon
 	 */
-	public default MalisisIcon getIcon(IBlockState state)
+	public MalisisIcon getIcon(IBlockState state, EnumFacing side);
+
+	@Override
+	public default MalisisIcon getIcon()
 	{
-		return getIcon();
+		return null;
 	}
 
 	/**
@@ -63,7 +64,7 @@ public interface IBlockIconProvider extends IIconProvider
 	 */
 	public default MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
 	{
-		return getIcon(state);
+		return getIcon(state, side);
 	}
 
 	/**
@@ -76,7 +77,7 @@ public interface IBlockIconProvider extends IIconProvider
 	 */
 	public default MalisisIcon getIcon(ItemStack itemStack, EnumFacing side)
 	{
-		return getIcon(ItemUtils.getStateFromItemStack(itemStack));
+		return getIcon(ItemUtils.getStateFromItemStack(itemStack), side);
 	}
 
 	/**
@@ -87,6 +88,41 @@ public interface IBlockIconProvider extends IIconProvider
 	 */
 	public default MalisisIcon getParticleIcon(IBlockState state)
 	{
-		return getIcon(state);
+		return getIcon(state, null);
 	}
+
+	/**
+	 * {@link IIconProvider} that provides {@link MalisisIcon} based on {@link EnumFacing}.
+	 */
+	public static interface ISidesIconProvider extends IBlockIconProvider
+	{
+		@Override
+		public default MalisisIcon getIcon(IBlockState state, EnumFacing side)
+		{
+			return getIcon(side);
+		}
+
+		public MalisisIcon getIcon(EnumFacing side);
+	}
+
+	/**
+	 * {@link IIconProvider} that provides {@link MalisisIcon} based on {@link IBlockState}.
+	 */
+	public static interface IStatesIconProvider extends IBlockIconProvider
+	{
+		@Override
+		public default MalisisIcon getIcon(IBlockState state, EnumFacing side)
+		{
+			return getIcon(state);
+		}
+
+		/**
+		 * Gets the {@link MalisisIcon} to use for the specified {@link IBlockState}.
+		 *
+		 * @param state the state
+		 * @return the icon
+		 */
+		public MalisisIcon getIcon(IBlockState state);
+	}
+
 }

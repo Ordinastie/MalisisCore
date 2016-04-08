@@ -29,8 +29,8 @@ import java.util.List;
 
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 

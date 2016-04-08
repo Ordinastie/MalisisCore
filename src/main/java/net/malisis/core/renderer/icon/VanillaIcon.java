@@ -32,7 +32,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.PngSizeInfo;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.Item;
 
 /**
@@ -89,12 +88,6 @@ public class VanillaIcon extends MalisisIcon
 	@Override
 	public void initSprite(int inX, int inY, int originInX, int originInY, boolean rotatedIn)
 	{}
-
-	@Override
-	public MalisisIcon register(TextureMap textureMap)
-	{
-		return this;
-	}
 
 	@Override
 	public void copyFrom(TextureAtlasSprite atlasSpirit)

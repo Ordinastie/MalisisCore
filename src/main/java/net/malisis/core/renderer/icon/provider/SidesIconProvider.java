@@ -25,11 +25,10 @@
 package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.block.component.DirectionalComponent;
-import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.provider.IBlockIconProvider.ISidesIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -46,7 +45,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author Ordinastie
  *
  */
-public class SidesIconProvider implements IBlockIconProvider
+public class SidesIconProvider implements ISidesIconProvider
 {
 	private MalisisIcon defaultIcon;
 	private MalisisIcon[] sideIcons = new MalisisIcon[6];
@@ -138,25 +137,13 @@ public class SidesIconProvider implements IBlockIconProvider
 		setSideIcon(side, new MalisisIcon(name));
 	}
 
-	@Override
-	public void registerIcons(TextureMap map)
-	{
-		if (defaultIcon != null)
-			defaultIcon = defaultIcon.register(map);
-
-		for (int i = 0; i < sideIcons.length; i++)
-		{
-			if (sideIcons[i] != null)
-				sideIcons[i] = sideIcons[i].register(map);
-		}
-	}
-
 	/**
 	 * Gets the {@link MalisisIcon} associated with a side.
 	 *
 	 * @param side the dir
 	 * @return the icon
 	 */
+	@Override
 	public MalisisIcon getIcon(EnumFacing side)
 	{
 		if (side == null || side.getIndex() > sideIcons.length)

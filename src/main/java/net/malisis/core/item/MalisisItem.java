@@ -27,9 +27,9 @@ package net.malisis.core.item;
 import net.malisis.core.block.IRegisterable;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.MalisisRendered;
-import net.malisis.core.renderer.icon.IIconProvider;
 import net.malisis.core.renderer.icon.IMetaIconProvider;
-import net.malisis.core.renderer.icon.provider.DefaultIconProvider;
+import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -62,7 +62,7 @@ public class MalisisItem extends Item implements IMetaIconProvider, IRegisterabl
 	public void createIconProvider(Object object)
 	{
 		if (object != null)
-			iconProvider = DefaultIconProvider.from(object);
+			iconProvider = (IIconProvider) () -> MalisisIcon.from((Item) object);
 	}
 
 	@Override

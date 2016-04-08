@@ -24,54 +24,52 @@
 
 package net.malisis.core.renderer.icon.provider;
 
-import net.malisis.core.block.component.WallComponent;
+import net.malisis.core.block.IComponent;
+import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.renderer.icon.MalisisIcon;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
- * @author Ordinastie
+ * The IIconProvider interface allows to pass {@link MalisisIcon} to the rendering processes.<br>
+ * The interface extends {@link IComponent} so it can be added to {@link MalisisBlock} components.
  *
+ * @author Ordinastie
  */
-public class WallIconProvider implements IBlockIconProvider
+@SideOnly(Side.CLIENT)
+public interface IIconProvider extends IComponent
 {
-	protected MalisisIcon inside;
-	protected MalisisIcon outside;
-
-	public WallIconProvider(MalisisIcon inside, MalisisIcon outside)
+	@Override
+	public default boolean isClientComponent()
 	{
-		this.inside = inside;
-		this.outside = outside;
+		return true;
 	}
 
-	@Override
-	public void registerIcons(TextureMap map)
+	/**
+	 * Gets the {@link MalisisIcon} to use.
+	 *
+	 * @return the icon
+	 */
+	public MalisisIcon getIcon();
+
+	/**
+	 * Creates a {@link IconProviderBuilder}.
+	 *
+	 * @return the icon provider builder
+	 */
+	public static IconProviderBuilder create(MalisisIcon icon)
 	{
-		inside = inside.register(map);
-		outside = outside.register(map);
+		return new IconProviderBuilder(icon);
 	}
 
-	@Override
-	public MalisisIcon getIcon()
+	/**
+	 * Creates a {@link IconProviderBuilder}.
+	 *
+	 * @param name the name
+	 * @return the icon provider builder
+	 */
+	public static IconProviderBuilder create(String name)
 	{
-		return outside;
-	}
-
-	@Override
-	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
-	{
-		if (side == EnumFacing.SOUTH || (side == EnumFacing.WEST && WallComponent.isCorner(state)))
-			return inside;
-		return outside;
-	}
-
-	@Override
-	public MalisisIcon getIcon(ItemStack itemStack, EnumFacing side)
-	{
-		return side == EnumFacing.SOUTH ? inside : outside;
+		return new IconProviderBuilder(name);
 	}
 }

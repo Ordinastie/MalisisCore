@@ -24,29 +24,37 @@
 
 package net.malisis.core.renderer.icon;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-import net.malisis.core.asm.AsmUtils;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.item.Item;
+import net.minecraftforge.client.event.TextureStitchEvent;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.collect.Maps;
 
 /**
  * Extension of {@link TextureAtlasSprite} to allow common operations like clipping and offset.<br>
- * Allows to have an IIcon that is not registered, but depending on a registered one.
+ * Icons should be acquired by using the {@link #from(String)} method so that multiple call with the same name return the same
+ * {@link MalisisIcon} instance.<br>
+ * For non registered {@link MalisisIcon}, use {@link #MalisisIcon(String, boolean)} constructor.
  *
  * @author Ordinastie
  *
  */
 public class MalisisIcon extends TextureAtlasSprite
 {
-	/** The private field for registered sprites. */
-	private static Field mapRegisteredSprites = AsmUtils.changeFieldAccess(TextureMap.class, "mapRegisteredSprites", "field_110574_e");
-	//TODO: fix missing icon not properly loaded
-	/** Missing texture {@link MalisisIcon} **/
-	public static MalisisIcon missing = new MalisisIcon("missingno");
+	/** Map of all registered {@link MalisisIcon}. These icons will be stitched with the {@link TextureStitchEvent}. */
+	private final static Map<String, MalisisIcon> registeredIcons = Maps.newHashMap();
+
+	/** {@link MalisisIcon} version of the missing texture **/
+	public static MalisisIcon missing = new MalisisIcon("missingno", false);
 
 	/** Width of the block's texture atlas. */
 	public static int BLOCK_TEXTURE_WIDTH = -1;
@@ -70,24 +78,30 @@ public class MalisisIcon extends TextureAtlasSprite
 
 	/**
 	 * Instantiates a new {@link MalisisIcon}.
-	 */
-	public MalisisIcon()
-	{
-		super("");
-		maxU = 1;
-		maxV = 1;
-	}
-
-	/**
-	 * Instantiates a new {@link MalisisIcon}.
 	 *
 	 * @param name the name
 	 */
-	public MalisisIcon(String name)
+	public MalisisIcon(String name, boolean register)
 	{
 		super(name);
 		maxU = 1;
 		maxV = 1;
+
+		if (register && !StringUtils.isEmpty(name))
+			registeredIcons.put(name, this);
+	}
+
+	public MalisisIcon(String name)
+	{
+		this(name, true);
+	}
+
+	/**
+	 * Instantiates a new {@link MalisisIcon}.
+	 */
+	public MalisisIcon()
+	{
+		this("", false);
 	}
 
 	/**
@@ -97,9 +111,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	 */
 	public MalisisIcon(MalisisIcon baseIcon)
 	{
-		super(baseIcon.getIconName());
-		maxU = 1;
-		maxV = 1;
+		this(baseIcon.getIconName(), false);
 		baseIcon.addDependant(this);
 	}
 
@@ -114,7 +126,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	 */
 	public MalisisIcon(String name, float u, float v, float U, float V)
 	{
-		this(name);
+		this(name, true);
 		minU = u;
 		minV = v;
 		maxU = U;
@@ -123,7 +135,7 @@ public class MalisisIcon extends TextureAtlasSprite
 
 	public MalisisIcon(TextureAtlasSprite icon)
 	{
-		this(icon.getIconName());
+		this(icon.getIconName(), false);
 		copyFrom(icon);
 	}
 
@@ -419,45 +431,61 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Attempts to register this {@link MalisisIcon} to the {@link TextureMap}. If a {@link MalisisIcon} is already registered with this
-	 * name, that registered icon will be returned instead.
+	 * Registers all the {@link MalisisIcon} into the {@link TextureMap}.
 	 *
-	 * @param textureMap the TextureMap
-	 * @return this {@link MalisisIcon} if not already registered, otherwise, the MalisisIcon already inside the registry.
+	 * @param map the map
 	 */
-	public MalisisIcon register(TextureMap textureMap)
+	public static void registerIcons(TextureMap map)
 	{
-		TextureAtlasSprite icon = textureMap.getTextureExtry(getIconName());
-		if (icon instanceof MalisisIcon)
-			return (MalisisIcon) icon;
-
-		//make sure to replace only vanilla TextureAtlasSprite
-		if (icon != null && icon.getClass() == TextureAtlasSprite.class)
-			return replaceRegisteredIcon(textureMap);
-
-		textureMap.setTextureEntry(getIconName(), this);
-		return this;
+		registeredIcons.forEach(map::setTextureEntry);
+		//set the missing texture UVs
+		TextureAtlasSprite m = map.getMissingSprite();
+		missing.setUVs(m.getMinU(), m.getMinV(), m.getMaxU(), m.getMaxV());
 	}
 
 	/**
-	 * Forcefully replaces the {@link TextureAtlasSprite} registered, by a {@link MalisisIcon} version of it.
+	 * Gets a {@link MalisisIcon} with the specified name.
 	 *
-	 * @param textureMap the texture map
-	 * @return this {@link MalisisIcon}
+	 * @param name the name
+	 * @return the malisis icon
 	 */
-	private MalisisIcon replaceRegisteredIcon(TextureMap textureMap)
+	public static MalisisIcon from(String name)
 	{
-		try
-		{
-			@SuppressWarnings("unchecked")
-			HashMap<String, TextureAtlasSprite> map = (HashMap<String, TextureAtlasSprite>) mapRegisteredSprites.get(textureMap);
-			map.put(getIconName(), this);
-		}
-		catch (IllegalArgumentException | IllegalAccessException e)
-		{
-			e.printStackTrace();
-		}
+		if (registeredIcons.get(name) != null)
+			return registeredIcons.get(name);
+		return new MalisisIcon(name);
+	}
 
-		return this;
+	/**
+	 * Gets a {@link MalisisIcon} for the texture used for the {@link Block} default {@link IBlockState}.
+	 *
+	 * @param block the block
+	 * @return the malisis icon
+	 */
+	public static MalisisIcon from(Block block)
+	{
+		return from(block.getDefaultState());
+	}
+
+	/**
+	 * Gets a {@link MalisisIcon} for the texture used for the {@link IBlockState}
+	 *
+	 * @param state the state
+	 * @return the malisis icon
+	 */
+	public static MalisisIcon from(IBlockState state)
+	{
+		return new VanillaIcon(state);
+	}
+
+	/**
+	 * Gets a {@link MalisisIcon} for the texture used for the {@link Item}
+	 *
+	 * @param item the item
+	 * @return the malisis icon
+	 */
+	public static MalisisIcon from(Item item)
+	{
+		return new VanillaIcon(item);
 	}
 }

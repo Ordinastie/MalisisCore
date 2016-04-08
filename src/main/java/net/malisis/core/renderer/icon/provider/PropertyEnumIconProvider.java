@@ -25,19 +25,18 @@
 package net.malisis.core.renderer.icon.provider;
 
 import java.util.EnumMap;
-import java.util.Map.Entry;
 
 import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.provider.IBlockIconProvider.IStatesIconProvider;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.IStringSerializable;
 
 /**
  * @author Ordinastie
  *
  */
-public class PropertyEnumIconProvider<T extends Enum<T> & IStringSerializable> implements IBlockIconProvider
+public class PropertyEnumIconProvider<T extends Enum<T> & IStringSerializable> implements IStatesIconProvider
 {
 	private PropertyEnum<T> property;
 	private MalisisIcon defaultIcon;
@@ -70,16 +69,6 @@ public class PropertyEnumIconProvider<T extends Enum<T> & IStringSerializable> i
 	public void setIcon(T enumValue, String iconName)
 	{
 		icons.put(enumValue, new MalisisIcon(iconName));
-	}
-
-	@Override
-	public void registerIcons(TextureMap map)
-	{
-		if (defaultIcon != null)
-			defaultIcon = defaultIcon.register(map);
-
-		for (Entry<T, MalisisIcon> entry : icons.entrySet())
-			entry.setValue(entry.getValue().register(map));
 	}
 
 	@Override

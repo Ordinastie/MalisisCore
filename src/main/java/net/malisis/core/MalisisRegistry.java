@@ -30,9 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -48,11 +46,9 @@ import net.malisis.core.renderer.IItemRenderer.DummyModel;
 import net.malisis.core.renderer.IRenderWorldLast;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.MalisisRenderer;
-import net.malisis.core.renderer.icon.IIconProvider;
-import net.malisis.core.renderer.icon.IIconRegister;
-import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
+import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -122,7 +118,6 @@ public class MalisisRegistry
 		/** List of registered {@link IRenderWorldLast} */
 		private List<IRenderWorldLast> renderWorldLastRenderers = new ArrayList<>();
 		/** List of registered {@link IIconProvider} */
-		private Set<IIconRegister> iconRegisters = new HashSet<>();
 		/** List of {@link DummyModel} for registered items */
 		private Set<DummyModel> itemModels = new HashSet<>();
 		/** List of all registered renderers. */
@@ -177,20 +172,7 @@ public class MalisisRegistry
 		@SubscribeEvent
 		public void onTextureStitchEvent(TextureStitchEvent.Pre event)
 		{
-			Consumer<IIconRegister> register = (iir) -> iir.registerIcons(event.getMap());
-
-			registryStream(Block.blockRegistry).map(block -> IComponent.getComponent(IIconRegister.class, block))
-												.filter(Objects::nonNull)
-												.forEach(register);
-
-			//TODO: move items to IComponentProvider too
-			registryStream(Item.itemRegistry).filter(IMetaIconProvider.class::isInstance)
-												.map(IMetaIconProvider.class::cast)
-												.map(IMetaIconProvider::getIconProvider)
-												.filter(Objects::nonNull)
-												.forEach(register);
-
-			iconRegisters.forEach(register);
+			MalisisIcon.registerIcons(event.getMap());
 		}
 
 		/**
@@ -497,20 +479,6 @@ public class MalisisRegistry
 	//#end IItemRenderer
 
 	/**
-	 * Registers an {@link IIconProvider}.<br>
-	 * When the texture is stitched, {@link IIconProvider#registerIcons(net.minecraft.client.renderer.texture.TextureMap)} will be called
-	 * for all registered providers.
-	 *
-	 * @param iconRegister the icon register
-	 */
-	@SideOnly(Side.CLIENT)
-	public static void registerIconRegister(IIconRegister iconRegister)
-	{
-		if (iconRegister != null)
-			instance.iconRegisters.add(iconRegister);
-	}
-
-	/**
 	 * Registers a {@link IRenderWorldLast}.
 	 *
 	 * @param renderer the renderer
@@ -621,12 +589,6 @@ public class MalisisRegistry
 	{
 		Block.blockRegistry.forEach(instance::registerRenderer);
 		Item.itemRegistry.forEach(instance::registerRenderer);
-	}
-
-	@SideOnly(Side.CLIENT)
-	public static void clearIconRegisters()
-	{
-		instance.iconRegisters.clear();
 	}
 
 	public static SoundEvent registerSound(String modId, String soundId)

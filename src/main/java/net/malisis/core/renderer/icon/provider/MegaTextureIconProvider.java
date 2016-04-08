@@ -125,8 +125,7 @@ public class MegaTextureIconProvider extends SidesIconProvider
 		{
 			lastState = baseState;
 			while (lastState.getBlock() == state.getBlock()
-					&& DirectionalComponent.getDirection(lastState.getBlockState()) == DirectionalComponent.getDirection(state
-							.getBlockState()))
+					&& DirectionalComponent.getDirection(lastState.getBlockState()) == DirectionalComponent.getDirection(state.getBlockState()))
 			{
 				baseState = lastState;
 				try
