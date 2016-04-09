@@ -56,5 +56,8 @@ public interface IComponentProvider
 	 * @param type the type
 	 * @return the component
 	 */
-	public <T> T getComponent(Class<T> type);
+	public default <T> T getComponent(Class<T> type)
+	{
+		return getComponents().stream().filter(type::isInstance).map(type::cast).findFirst().orElse(null);
+	}
 }

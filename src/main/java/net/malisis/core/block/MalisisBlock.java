@@ -148,12 +148,6 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 		lightOpacity = getDefaultState().isOpaqueCube() ? 255 : 0;
 	}
 
-	@Override
-	public <T> T getComponent(Class<T> type)
-	{
-		return getComponents().stream().filter(type::isInstance).map(type::cast).findFirst().orElse(null);
-	}
-
 	public Block setName(String name)
 	{
 		this.name = name;
