@@ -49,7 +49,6 @@ import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleState
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.icon.GuiIcon;
-import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.malisis.core.util.MouseButton;
@@ -69,7 +68,7 @@ import com.google.common.eventbus.EventBus;
  * @param <T> the type of <code>UIComponent</code>
  */
 public abstract class UIComponent<T extends UIComponent<T>> implements ITransformable.Position<T>, ITransformable.Size<T>,
-		ITransformable.Alpha, IKeyListener, IMetaIconProvider
+		ITransformable.Alpha, IKeyListener
 {
 	/** The Constant INHERITED. */
 	public final static int INHERITED = 0;
@@ -620,11 +619,6 @@ public abstract class UIComponent<T extends UIComponent<T>> implements ITransfor
 
 	// #end getters/setters
 
-	@Override
-	public void createIconProvider(Object object)
-	{}
-
-	@Override
 	public IIconProvider getIconProvider()
 	{
 		return iconProvider;

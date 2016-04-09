@@ -152,7 +152,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		//		LDC Lnet/malisis/core/renderer/icon/provider/IIconProvider;.class
 		//		ALOAD 1
 		//	    INVOKEINTERFACE net/minecraft/block/state/IBlockState.getBlock ()Lnet/minecraft/block/Block;
-		//	    INVOKESTATIC net/malisis/core/block/IComponent.getComponent (Ljava/lang/Class;Lnet/minecraft/block/Block;)Ljava/lang/Object;
+		//	    INVOKESTATIC net/malisis/core/block/IComponent.getComponent (Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;
 		//	    IFNULL L6
 		//	    ALOAD 1
 		//	    INVOKESTATIC net/malisis/core/MalisisRegistry.getParticleIcon (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
@@ -167,7 +167,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		insert.add(new VarInsnNode(ALOAD, 1));
 		insert.add(getBlock.getInsnNode(INVOKEINTERFACE));
 		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/block/IComponent", "getComponent",
-				"(Ljava/lang/Class;Lnet/minecraft/block/Block;)Ljava/lang/Object;", false));
+				"(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;", false));
 		insert.add(new JumpInsnNode(IFNULL, falseLabel));
 		insert.add(new VarInsnNode(ALOAD, 1));
 		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/MalisisRegistry", "getParticleIcon",

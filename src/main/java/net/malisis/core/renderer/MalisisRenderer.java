@@ -41,7 +41,6 @@ import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.shape.Cube;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.icon.IMetaIconProvider;
 import net.malisis.core.renderer.icon.MalisisIcon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
@@ -1036,10 +1035,10 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (params.iconProvider.get() != null)
 			return params.iconProvider.get();
 
-		if (item instanceof IMetaIconProvider && ((IMetaIconProvider) item).getIconProvider() != null)
-			return ((IMetaIconProvider) item).getIconProvider();
-
-		return IComponent.getComponent(IIconProvider.class, block);
+		IIconProvider provider = IComponent.getComponent(IIconProvider.class, item);
+		if (provider == null)
+			provider = IComponent.getComponent(IIconProvider.class, block);
+		return provider;
 	}
 
 	protected boolean shouldRotateIcon(RenderParameters params)

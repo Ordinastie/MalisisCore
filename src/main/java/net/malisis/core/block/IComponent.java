@@ -26,8 +26,6 @@ package net.malisis.core.block;
 
 import java.util.List;
 
-import net.minecraft.block.Block;
-
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -58,22 +56,25 @@ public interface IComponent
 	}
 
 	/**
-	 * Gets the component of the specify <code>type</code> for the {@link Block}.<br>
+	 * Gets the component of the specify <code>type</code> for the {@link Object}.<br>
 	 * The returned object may <b>not</b> be a component but the block itself if it implements an interface used for a {@link IComponent}.
 	 *
 	 * @param <T> the generic type
 	 * @param type the type
-	 * @param block the block
+	 * @param object the block
 	 * @return the component
 	 */
-	public static <T> T getComponent(Class<T> type, Block block)
+	public static <T> T getComponent(Class<T> type, Object object)
 	{
-		if (block.getClass().isAssignableFrom(type))
-			return type.cast(block);
-
-		if (!(block instanceof IComponentProvider))
+		if (object == null)
 			return null;
 
-		return ((IComponentProvider) block).getComponent(type);
+		if (type.isAssignableFrom(object.getClass()))
+			return type.cast(object);
+
+		if (!(object instanceof IComponentProvider))
+			return null;
+
+		return ((IComponentProvider) object).getComponent(type);
 	}
 }

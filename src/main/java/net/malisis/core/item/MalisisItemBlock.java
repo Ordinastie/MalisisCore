@@ -24,11 +24,13 @@
 
 package net.malisis.core.item;
 
+import java.util.List;
+
 import net.malisis.core.block.IComponent;
+import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.IMergedBlock;
 import net.malisis.core.block.IRegisterable;
 import net.malisis.core.block.MalisisBlock;
-import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
@@ -42,14 +44,16 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import com.google.common.collect.Lists;
+
 /**
  * @author Ordinastie
  *
  */
-public class MalisisItemBlock extends ItemBlock implements IRegisterable
+public class MalisisItemBlock extends ItemBlock implements IRegisterable, IComponentProvider
 {
 	protected String name;
-	protected IIconProvider iconProvider;
+	protected final List<IComponent> components = Lists.newArrayList();
 
 	public MalisisItemBlock(Block block)
 	{
@@ -67,6 +71,18 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable
 	public String getName()
 	{
 		return name;
+	}
+
+	@Override
+	public void addComponent(IComponent component)
+	{
+		components.add(component);
+	}
+
+	@Override
+	public List<IComponent> getComponents()
+	{
+		return components;
 	}
 
 	@Override
@@ -113,7 +129,11 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable
 		if (world.checkNoEntityCollision(block.getCollisionBoundingBox(placedState, world, p)) && world.setBlockState(p, placedState, 3))
 		{
 			SoundType soundType = block.getSoundType();
-			world.playSound(player, pos, soundType.getPlaceSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F,
+			world.playSound(player,
+					pos,
+					soundType.getPlaceSound(),
+					SoundCategory.BLOCKS,
+					(soundType.getVolume() + 1.0F) / 2.0F,
 					soundType.getPitch() * 0.8F);
 			--itemStack.stackSize;
 		}
