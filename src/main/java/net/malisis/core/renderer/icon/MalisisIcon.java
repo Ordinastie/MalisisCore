@@ -444,7 +444,8 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Gets a {@link MalisisIcon} with the specified name.
+	 * Gets a {@link MalisisIcon} with the specified name.<br>
+	 * This method ensures the same instance is return when called multiple time with the same string.
 	 *
 	 * @param name the name
 	 * @return the malisis icon
