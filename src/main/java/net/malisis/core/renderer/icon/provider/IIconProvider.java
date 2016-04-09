@@ -59,7 +59,20 @@ public interface IIconProvider extends IComponent
 	 */
 	public static IconProviderBuilder create(MalisisIcon icon)
 	{
-		return new IconProviderBuilder(icon);
+		return new IconProviderBuilder("", icon);
+	}
+
+	/**
+	 * Creates a {@link IconProviderBuilder} with a prefix.<br>
+	 * The prefix will be prepend for all string passed to the builder.
+	 *
+	 * @param prefix the prefix
+	 * @param icon the icon
+	 * @return the icon provider builder
+	 */
+	public static IconProviderBuilder create(String prefix, MalisisIcon icon)
+	{
+		return new IconProviderBuilder(prefix, icon);
 	}
 
 	/**
@@ -70,6 +83,19 @@ public interface IIconProvider extends IComponent
 	 */
 	public static IconProviderBuilder create(String name)
 	{
-		return new IconProviderBuilder(name);
+		return new IconProviderBuilder("", name);
+	}
+
+	/**
+	 * Creates a {@link IconProviderBuilder} with a prefix.<br>
+	 * The prefix will be prepend for all string passed to the builder.
+	 *
+	 * @param prefix the prefix
+	 * @param name the name
+	 * @return the icon provider builder
+	 */
+	public static IconProviderBuilder create(String prefix, String name)
+	{
+		return new IconProviderBuilder(prefix, name);
 	}
 }

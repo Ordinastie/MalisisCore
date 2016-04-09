@@ -76,8 +76,9 @@ public class IconProviderBuilder
 	 *
 	 * @param icon the icon
 	 */
-	IconProviderBuilder(MalisisIcon icon)
+	IconProviderBuilder(String prefix, MalisisIcon icon)
 	{
+		this.prefix = prefix;
 		defaultIcon = icon;
 	}
 
@@ -86,9 +87,9 @@ public class IconProviderBuilder
 	 *
 	 * @param name the name
 	 */
-	IconProviderBuilder(String name)
+	IconProviderBuilder(String prefix, String name)
 	{
-		defaultName = name;
+		this.prefix = prefix;
 		defaultIcon = icon(name);
 	}
 
@@ -101,25 +102,6 @@ public class IconProviderBuilder
 	private MalisisIcon icon(String name)
 	{
 		return MalisisIcon.from(prefix + name);
-	}
-
-	/**
-	 * Sets the prefix to use for all the icon passed using the name.
-	 *
-	 * @param prefix the prefix
-	 * @return the icon provider builder
-	 */
-	public IconProviderBuilder prefix(String prefix)
-	{
-		this.prefix = prefix;
-		//defautlIcon was constructed from name, recreate it with the prefix
-		if (defaultName != null)
-		{
-			defaultIcon = icon(defaultName);
-			//assume only first call to prefix actually intends on applying to default icon
-			defaultName = null;
-		}
-		return this;
 	}
 
 	/**
