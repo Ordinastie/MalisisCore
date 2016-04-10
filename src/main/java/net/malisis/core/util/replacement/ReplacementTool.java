@@ -94,10 +94,10 @@ public class ReplacementTool
 	private void replaceVanilla(int id, String registryName, String fieldName, String srgFieldName, Object replacement, Object vanilla)
 	{
 		boolean block = replacement instanceof Block;
-		RegistryNamespaced<ResourceLocation, ?> registry = block ? Block.blockRegistry : Item.itemRegistry;
+		//RegistryNamespaced<ResourceLocation, ?> registry = block ? Block.blockRegistry : Item.itemRegistry;
 		ItemBlock ib = block ? (ItemBlock) Item.getItemFromBlock((Block) vanilla) : null;
 		Class<?> clazz = block ? Blocks.class : Items.class;
-		ResourceLocation rl = new ResourceLocation("minecraft", registryName);
+		//ResourceLocation rl = new ResourceLocation("minecraft", registryName);
 
 		try
 		{

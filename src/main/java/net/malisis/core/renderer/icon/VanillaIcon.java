@@ -65,7 +65,7 @@ public class VanillaIcon extends MalisisIcon
 		this(item, 0);
 	}
 
-	private TextureAtlasSprite getIcon()
+	protected TextureAtlasSprite getIcon()
 	{
 		TextureAtlasSprite icon = item != null ? getItemIcon() : getBlockIcon();
 		return icon == null ? missing : icon;
@@ -211,5 +211,23 @@ public class VanillaIcon extends MalisisIcon
 	public String toString()
 	{
 		return "VanillaIcon [" + getIcon() + "]";
+	}
+
+	public static class MissingIcon extends VanillaIcon
+	{
+		private TextureAtlasSprite missing;
+
+		public MissingIcon()
+		{
+			super((Item) null);
+		}
+
+		@Override
+		protected TextureAtlasSprite getIcon()
+		{
+			if (missing == null)
+				missing = Minecraft.getMinecraft().getTextureMapBlocks().getMissingSprite();
+			return missing;
+		}
 	}
 }

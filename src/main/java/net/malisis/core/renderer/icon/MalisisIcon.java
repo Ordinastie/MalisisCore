@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.malisis.core.renderer.icon.VanillaIcon.MissingIcon;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -54,7 +55,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	private final static Map<String, MalisisIcon> registeredIcons = Maps.newHashMap();
 
 	/** {@link MalisisIcon} version of the missing texture **/
-	public static MalisisIcon missing = new MalisisIcon("missingno", false);
+	public static MalisisIcon missing = new MissingIcon();
 
 	/** Width of the block's texture atlas. */
 	public static int BLOCK_TEXTURE_WIDTH = -1;
@@ -438,9 +439,6 @@ public class MalisisIcon extends TextureAtlasSprite
 	public static void registerIcons(TextureMap map)
 	{
 		registeredIcons.forEach(map::setTextureEntry);
-		//set the missing texture UVs
-		TextureAtlasSprite m = map.getMissingSprite();
-		missing.setUVs(m.getMinU(), m.getMinV(), m.getMaxU(), m.getMaxV());
 	}
 
 	/**
