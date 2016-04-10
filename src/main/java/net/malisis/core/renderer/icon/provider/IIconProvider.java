@@ -36,7 +36,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  * @author Ordinastie
  */
-@SideOnly(Side.CLIENT)
 public interface IIconProvider extends IComponent
 {
 	@Override
@@ -50,6 +49,7 @@ public interface IIconProvider extends IComponent
 	 *
 	 * @return the icon
 	 */
+	@SideOnly(Side.CLIENT)
 	public MalisisIcon getIcon();
 
 	/**
@@ -57,6 +57,7 @@ public interface IIconProvider extends IComponent
 	 *
 	 * @return the icon provider builder
 	 */
+	@SideOnly(Side.CLIENT)
 	public static IconProviderBuilder create(MalisisIcon icon)
 	{
 		return new IconProviderBuilder("", icon);
@@ -70,6 +71,7 @@ public interface IIconProvider extends IComponent
 	 * @param icon the icon
 	 * @return the icon provider builder
 	 */
+	@SideOnly(Side.CLIENT)
 	public static IconProviderBuilder create(String prefix, MalisisIcon icon)
 	{
 		return new IconProviderBuilder(prefix, icon);
@@ -81,6 +83,7 @@ public interface IIconProvider extends IComponent
 	 * @param name the name
 	 * @return the icon provider builder
 	 */
+	@SideOnly(Side.CLIENT)
 	public static IconProviderBuilder create(String name)
 	{
 		return new IconProviderBuilder("", name);
@@ -94,6 +97,7 @@ public interface IIconProvider extends IComponent
 	 * @param name the name
 	 * @return the icon provider builder
 	 */
+	@SideOnly(Side.CLIENT)
 	public static IconProviderBuilder create(String prefix, String name)
 	{
 		return new IconProviderBuilder(prefix, name);
