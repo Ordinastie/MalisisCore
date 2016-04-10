@@ -980,10 +980,13 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		MalisisIcon icon = getIcon(face, params);
 		if (icon == null)
 			icon = MalisisIcon.missing;
-		if (shouldRotateIcon(params) && params.textureSide.get() != null && params.textureSide.get().getAxis() == Axis.Y)
-			icon.setRotation(EnumFacingUtils.getRotationCount(blockState));
-		else
-			icon.setRotation(0);
+		if (shouldRotateIcon(params))
+		{
+			if (params.textureSide.get() != null && params.textureSide.get().getAxis() == Axis.Y)
+				icon.setRotation(EnumFacingUtils.getRotationCount(blockState));
+			else
+				icon.setRotation(0);
+		}
 
 		boolean flipU = params.flipU.get();
 		if (params.direction.get() == EnumFacing.NORTH || params.direction.get() == EnumFacing.EAST)
