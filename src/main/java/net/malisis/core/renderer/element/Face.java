@@ -185,14 +185,14 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 
 	public Face setTexture(MalisisIcon icon, boolean flippedU, boolean flippedV, boolean interpolate)
 	{
+		int[] cos = { 1, 0, -1, 0 };
+		int[] sin = { 0, 1, 0, -1 };
+
 		float u = 0;
 		float v = 0;
 		float U = 1;
 		float V = 1;
 		int rotation = 0;
-		double factorU, factorV;
-		float uvs[][] = new float[vertexes.length][2];
-
 		if (icon != null)
 		{
 			u = icon.getMinU();
@@ -202,63 +202,49 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 			rotation = icon.getRotation();
 		}
 
-		switch (rotation)
+		int a = -rotation & 3;
+		int s = sin[a];
+		int c = cos[a];
+
+		for (Vertex vertex : vertexes)
 		{
-			case 1:
-				flippedU = !flippedU;
-				break;
-			case 2:
-				flippedU = !flippedU;
-				flippedV = !flippedV;
-				break;
-			case 3:
-				flippedV = !flippedV;
-				break;
+			double factorU = interpolate ? getFactorU(vertex) : vertex.getU();
+			double factorV = interpolate ? getFactorV(vertex) : vertex.getV();
+			double newU = c * (factorU - .5F) - s * (factorV - .5F) + .5F;
+			double newV = s * (factorU - .5F) + c * (factorV - .5F) + .5F;
+			newU = interpolate(u, U, newU, flippedU);
+			newV = interpolate(v, V, newV, flippedV);
+			vertex.setUV(newU, newV);
 		}
-
-		for (int i = 0; i < vertexes.length; i++)
-		{
-			Vertex vertex = vertexes[i];
-
-			factorU = interpolate ? getFactorU(vertex, rotation) : vertex.getU();
-			factorV = interpolate ? getFactorV(vertex, rotation) : vertex.getV();
-
-			uvs[i] = new float[] { interpolate(u, U, factorU, flippedU), interpolate(v, V, factorV, flippedV) };
-		}
-
-		for (int i = 0; i < vertexes.length; i++)
-			vertexes[i].setUV(uvs[i][0], uvs[i][1]);
 
 		return this;
 	}
 
-	private double getFactorU(Vertex vertex, int rotation)
+	private double getFactorU(Vertex vertex)
 	{
 		if (params.direction.get() == null)
 			return vertex.getU();
 
-		boolean isEven = (rotation % 2) == 0;
 		switch (params.direction.get())
 		{
 			case EAST:
 			case WEST:
-				return isEven ? vertex.getZ() : vertex.getX();
+				return vertex.getZ();
 			case NORTH:
 			case SOUTH:
 			case UP:
 			case DOWN:
-				return isEven ? vertex.getX() : vertex.getZ();
+				return vertex.getX();
 			default:
 				return 0;
 		}
 	}
 
-	private double getFactorV(Vertex vertex, int rotation)
+	private double getFactorV(Vertex vertex)
 	{
 		if (params.direction.get() == null)
 			return vertex.getV();
 
-		boolean isEven = (rotation % 2) == 0;
 		switch (params.direction.get())
 		{
 			case EAST:
@@ -268,7 +254,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 				return 1 - vertex.getY();
 			case UP:
 			case DOWN:
-				return isEven ? vertex.getZ() : vertex.getX();
+				return vertex.getZ();
 			default:
 				return 0;
 		}
