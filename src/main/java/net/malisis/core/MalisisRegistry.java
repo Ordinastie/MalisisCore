@@ -401,11 +401,6 @@ public class MalisisRegistry
 		return renderer.renderBlock(buffer, world, pos, state);
 	}
 
-	public static boolean hasParticleIcon(IBlockState state)
-	{
-		return IComponent.getComponent(IIconProvider.class, state.getBlock()) != null;
-	}
-
 	/**
 	 * Gets the {@link TextureAtlasSprite} to used for the {@link IBlockState}.
 	 *
