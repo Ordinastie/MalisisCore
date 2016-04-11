@@ -29,7 +29,7 @@ import java.util.List;
 
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.util.Vector;
 import net.minecraft.util.EnumFacing;
 
@@ -164,7 +164,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 	}
 
 	//#region Textures manipaluation
-	public Face setTexture(MalisisIcon icon)
+	public Face setTexture(Icon icon)
 	{
 		return setTexture(icon, params.flipU.get(), params.flipV.get(), false);
 	}
@@ -183,7 +183,7 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		return setTexture(null, false, false, true);
 	}
 
-	public Face setTexture(MalisisIcon icon, boolean flippedU, boolean flippedV, boolean interpolate)
+	public Face setTexture(Icon icon, boolean flippedU, boolean flippedV, boolean interpolate)
 	{
 		int[] cos = { 1, 0, -1, 0 };
 		int[] sin = { 0, 1, 0, -1 };

@@ -40,7 +40,7 @@ import net.malisis.core.renderer.element.face.NorthFace;
 import net.malisis.core.renderer.element.face.SouthFace;
 import net.malisis.core.renderer.element.face.TopFace;
 import net.malisis.core.renderer.element.face.WestFace;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.model.IModelLoader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
@@ -94,11 +94,11 @@ public class TextureModelLoader implements IModelLoader
 		Face front = new SouthFace();
 		front.scale(width, height, 1);
 		front.translate(0, 0, width / 16F - 1);
-		front.setTexture(new MalisisIcon(sprite));
+		front.setTexture(new Icon(sprite));
 
 		Face back = new NorthFace();
 		back.scale(width, height, 1);
-		back.setTexture(new MalisisIcon(sprite), true, false, false);
+		back.setTexture(new Icon(sprite), true, false, false);
 
 		faces.add(front);
 		faces.add(back);
@@ -170,7 +170,7 @@ public class TextureModelLoader implements IModelLoader
 		float v = sprite.getInterpolatedV(((float) y / height) * 16F - 0.01F);
 		float U = sprite.getInterpolatedU(((float) x / width) * 16 + 0.01F);
 		float V = sprite.getInterpolatedV(((float) y / height) * 16 - 0.01F);
-		face.setTexture(new MalisisIcon("", u, v, U, V));
+		face.setTexture(new Icon("", u, v, U, V));
 	}
 
 	private int getPixel(int x, int y)

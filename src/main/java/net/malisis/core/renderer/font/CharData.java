@@ -24,7 +24,7 @@
 
 package net.malisis.core.renderer.font;
 
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 
 /**
  * @author Ordinastie
@@ -120,8 +120,8 @@ public class CharData
 		V = (y + height + options.py) / size;
 	}
 
-	public MalisisIcon getIcon()
+	public Icon getIcon()
 	{
-		return new MalisisIcon("" + getChar(), u(), v(), U(), V());
+		return new Icon("" + getChar(), u(), v(), U(), V());
 	}
 }

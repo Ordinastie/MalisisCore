@@ -31,7 +31,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import net.malisis.core.renderer.icon.GuiIcon;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.util.ResourceLocation;
@@ -41,7 +41,7 @@ import net.minecraft.util.ResourceLocation;
  * The textures can used from a {@link ResourceLocation} if the resource is inside the project, from a {@link File} or directly from a
  * {@link BufferedImage}.<br>
  * In case of {@code ResourceLocation}, the original dimension should be specified if parts of the texture is to be retrieved as
- * {@link MalisisIcon}.
+ * {@link Icon}.
  *
  * @author Ordinastie
  */
@@ -133,17 +133,17 @@ public class GuiTexture
 	}
 
 	/**
-	 * Creates the {@link MalisisIcon} and initializes it.
+	 * Creates the {@link Icon} and initializes it.
 	 *
 	 * @param x the x
 	 * @param y the y
 	 * @param width the width
 	 * @param height the height
-	 * @return the {@link MalisisIcon}
+	 * @return the {@link Icon}
 	 */
-	public MalisisIcon createIcon(int x, int y, int width, int height)
+	public Icon createIcon(int x, int y, int width, int height)
 	{
-		MalisisIcon icon = new MalisisIcon();
+		Icon icon = new Icon();
 		icon.setSize(width, height);
 		icon.initSprite(this.width, this.height, x, y, false);
 
@@ -183,7 +183,7 @@ public class GuiTexture
 		int h = height - corner * 2;
 
 		//@formatter:off
-		MalisisIcon[] icons = new MalisisIcon[] {
+		Icon[] icons = new Icon[] {
 				createIcon(x, 					y, 					corner, 	corner),
 				createIcon(x + corner, 		y, 					w, 			corner),
 				createIcon(x + corner + w, 	y, 					corner, 	corner),
@@ -219,7 +219,7 @@ public class GuiTexture
 		int h = height;
 
 		//@formatter:off
-		MalisisIcon[] icons = new MalisisIcon[] {
+		Icon[] icons = new Icon[] {
 				createIcon(x, 				y, 		side, 	h),
 				createIcon(x + side, 		y, 		w, 		h),
 				createIcon(x + side + w, 	y, 		side, 	h),

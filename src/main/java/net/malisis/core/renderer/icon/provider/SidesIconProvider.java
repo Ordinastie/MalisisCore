@@ -25,7 +25,7 @@
 package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.block.component.DirectionalComponent;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider.ISidesIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -47,8 +47,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class SidesIconProvider implements ISidesIconProvider
 {
-	private MalisisIcon defaultIcon;
-	private MalisisIcon[] sideIcons = new MalisisIcon[6];
+	private Icon defaultIcon;
+	private Icon[] sideIcons = new Icon[6];
 
 	public SidesIconProvider(String defaultName, String[] sideNames)
 	{
@@ -61,39 +61,39 @@ public class SidesIconProvider implements ISidesIconProvider
 		setDefaultIcon(defaultName);
 	}
 
-	public SidesIconProvider(MalisisIcon defaultIcon, MalisisIcon[] sideIcons)
+	public SidesIconProvider(Icon defaultIcon, Icon[] sideIcons)
 	{
 		setDefaultIcon(defaultIcon);
 		setSideIcons(sideIcons);
 	}
 
-	public SidesIconProvider(MalisisIcon defaultIcon)
+	public SidesIconProvider(Icon defaultIcon)
 	{
 		setDefaultIcon(defaultIcon);
 	}
 
 	/**
-	 * Sets the default {@link MalisisIcon} to use if no icon is set for a face.
+	 * Sets the default {@link Icon} to use if no icon is set for a face.
 	 *
 	 * @param name the new default icon
 	 */
 	public void setDefaultIcon(String name)
 	{
-		defaultIcon = new MalisisIcon(name);
+		defaultIcon = new Icon(name);
 	}
 
 	/**
-	 * Sets the default {@link MalisisIcon} to use if no icon is set for a side of the block.
+	 * Sets the default {@link Icon} to use if no icon is set for a side of the block.
 	 *
 	 * @param icon the new default icon
 	 */
-	public void setDefaultIcon(MalisisIcon icon)
+	public void setDefaultIcon(Icon icon)
 	{
 		this.defaultIcon = icon;
 	}
 
 	/**
-	 * Sets the {@link MalisisIcon} to use for each side of the block.<br>
+	 * Sets the {@link Icon} to use for each side of the block.<br>
 	 * The index of the array is the {@link EnumFacing#getIndex()} value.<br>
 	 * If no icon is set for a side, {@link #defaultIcon} will be used instead.
 	 *
@@ -104,18 +104,18 @@ public class SidesIconProvider implements ISidesIconProvider
 		for (int i = 0; i < names.length; i++)
 		{
 			if (!StringUtils.isEmpty(names[i]))
-				setSideIcon(EnumFacing.getFront(i), new MalisisIcon(names[i]));
+				setSideIcon(EnumFacing.getFront(i), new Icon(names[i]));
 		}
 	}
 
 	/**
-	 * Sets the {@link MalisisIcon} to use for each side of the block.<br>
+	 * Sets the {@link Icon} to use for each side of the block.<br>
 	 * The index of the array is the {@link EnumFacing#getIndex()} value.<br>
 	 * If no icon is set for a side, {@link #defaultIcon} will be used instead.
 	 *
 	 * @param icons the new side icons
 	 */
-	public void setSideIcons(MalisisIcon[] icons)
+	public void setSideIcons(Icon[] icons)
 	{
 		for (int i = 0; i < icons.length; i++)
 		{
@@ -124,7 +124,7 @@ public class SidesIconProvider implements ISidesIconProvider
 		}
 	}
 
-	public void setSideIcon(EnumFacing side, MalisisIcon icon)
+	public void setSideIcon(EnumFacing side, Icon icon)
 	{
 		//set default icon too to get at least an icon for particles
 		if (defaultIcon == null)
@@ -134,17 +134,17 @@ public class SidesIconProvider implements ISidesIconProvider
 
 	public void setSideIcon(EnumFacing side, String name)
 	{
-		setSideIcon(side, new MalisisIcon(name));
+		setSideIcon(side, new Icon(name));
 	}
 
 	/**
-	 * Gets the {@link MalisisIcon} associated with a side.
+	 * Gets the {@link Icon} associated with a side.
 	 *
 	 * @param side the dir
 	 * @return the icon
 	 */
 	@Override
-	public MalisisIcon getIcon(EnumFacing side)
+	public Icon getIcon(EnumFacing side)
 	{
 		if (side == null || side.getIndex() > sideIcons.length)
 			return defaultIcon;
@@ -153,7 +153,7 @@ public class SidesIconProvider implements ISidesIconProvider
 	}
 
 	/**
-	 * Gets the {@link MalisisIcon} for the side for the block in world.<br>
+	 * Gets the {@link Icon} for the side for the block in world.<br>
 	 * Takes in account the facing of the block.<br>
 	 * If no icon was set for the side, {@link #defaultIcon} is used.
 	 *
@@ -164,13 +164,13 @@ public class SidesIconProvider implements ISidesIconProvider
 	 * @return the icon
 	 */
 	@Override
-	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
+	public Icon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
 	{
 		return getIcon(side);
 	}
 
 	/**
-	 * Gets the {@link MalisisIcon} for the side for the block in inventory.<br>
+	 * Gets the {@link Icon} for the side for the block in inventory.<br>
 	 * If no icon was set for the side, {@link #defaultIcon} is used.
 	 *
 	 * @param itemStack the item stack
@@ -178,13 +178,13 @@ public class SidesIconProvider implements ISidesIconProvider
 	 * @return the icon
 	 */
 	@Override
-	public MalisisIcon getIcon(ItemStack itemStack, EnumFacing side)
+	public Icon getIcon(ItemStack itemStack, EnumFacing side)
 	{
 		return getIcon(side);
 	}
 
 	@Override
-	public MalisisIcon getIcon()
+	public Icon getIcon()
 	{
 		return defaultIcon;
 	}

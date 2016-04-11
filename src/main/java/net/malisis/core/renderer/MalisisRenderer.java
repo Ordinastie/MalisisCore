@@ -41,7 +41,7 @@ import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.shape.Cube;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.malisis.core.renderer.icon.provider.IItemIconProvider;
@@ -140,7 +140,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	/** Base brightness of the block. */
 	protected int baseBrightness;
 	/** An override texture set by the renderer. */
-	protected MalisisIcon overrideTexture;
+	protected Icon overrideTexture;
 
 	/** Whether the damage for the blocks should be handled by this {@link MalisisRenderer} (for TESR). */
 	protected boolean getBlockDamage = false;
@@ -977,9 +977,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	public void applyTexture(Face face, RenderParameters params)
 	{
-		MalisisIcon icon = getIcon(face, params);
+		Icon icon = getIcon(face, params);
 		if (icon == null)
-			icon = MalisisIcon.missing;
+			icon = Icon.missing;
 		if (shouldRotateIcon(params))
 		{
 			if (params.textureSide.get() != null && params.textureSide.get().getAxis() == Axis.Y)
@@ -995,7 +995,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	}
 
 	/**
-	 * Gets the {@link MalisisIcon} corresponding to the specified {@link RenderParameters}.<br>
+	 * Gets the {@link Icon} corresponding to the specified {@link RenderParameters}.<br>
 	 * If {@link #block} or {@link #item} is an {@link IIconProvider} and give the right provider for the current context, gets the icon
 	 * from that provider.
 	 *
@@ -1003,7 +1003,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 * @param params the params
 	 * @return the icon
 	 */
-	protected MalisisIcon getIcon(Face face, RenderParameters params)
+	protected Icon getIcon(Face face, RenderParameters params)
 	{
 		if (params.icon.get() != null)
 			return params.icon.get();
@@ -1025,7 +1025,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 				return iblockp.getIcon(itemStack, side);
 		}
 
-		return iconProvider != null ? iconProvider.getIcon() : MalisisIcon.missing;
+		return iconProvider != null ? iconProvider.getIcon() : Icon.missing;
 	}
 
 	/**

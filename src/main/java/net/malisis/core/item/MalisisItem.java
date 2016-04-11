@@ -32,7 +32,7 @@ import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.IRegisterable;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.MalisisRendered;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -80,13 +80,13 @@ public class MalisisItem extends Item implements IComponentProvider, IRegisterab
 	public void setTexture(String textureName)
 	{
 		if (!StringUtils.isEmpty(textureName) && MalisisCore.isClient())
-			addComponent((IIconProvider) () -> MalisisIcon.from(textureName));
+			addComponent((IIconProvider) () -> Icon.from(textureName));
 	}
 
 	public void setTexture(Item item)
 	{
 		if (item != null && MalisisCore.isClient())
-			addComponent((IIconProvider) () -> MalisisIcon.from(item));
+			addComponent((IIconProvider) () -> Icon.from(item));
 	}
 
 	public void setTexture(Block block)
@@ -98,6 +98,6 @@ public class MalisisItem extends Item implements IComponentProvider, IRegisterab
 	public void setTexture(IBlockState state)
 	{
 		if (state != null && MalisisCore.isClient())
-			addComponent((IIconProvider) () -> MalisisIcon.from(state));
+			addComponent((IIconProvider) () -> Icon.from(state));
 	}
 }

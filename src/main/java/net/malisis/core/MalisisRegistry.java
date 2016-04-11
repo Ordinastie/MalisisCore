@@ -46,7 +46,7 @@ import net.malisis.core.renderer.IItemRenderer.DummyModel;
 import net.malisis.core.renderer.IRenderWorldLast;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.MalisisRenderer;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
@@ -172,7 +172,7 @@ public class MalisisRegistry
 		@SubscribeEvent
 		public void onTextureStitchEvent(TextureStitchEvent.Pre event)
 		{
-			MalisisIcon.registerIcons(event.getMap());
+			Icon.registerIcons(event.getMap());
 		}
 
 		/**
@@ -410,14 +410,14 @@ public class MalisisRegistry
 	@SideOnly(Side.CLIENT)
 	public static TextureAtlasSprite getParticleIcon(IBlockState state)
 	{
-		MalisisIcon icon = null;
+		Icon icon = null;
 		IIconProvider provider = IComponent.getComponent(IIconProvider.class, state.getBlock());
 		if (provider instanceof IBlockIconProvider)
 			icon = ((IBlockIconProvider) provider).getParticleIcon(state);
 		else if (provider != null)
 			icon = provider.getIcon();
 
-		return icon != null ? icon : MalisisIcon.missing;
+		return icon != null ? icon : Icon.missing;
 	}
 
 	//#end IBlockRenderer

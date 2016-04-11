@@ -25,7 +25,7 @@
 package net.malisis.core.renderer.icon.provider;
 
 import static net.minecraft.util.EnumFacing.*;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -55,11 +55,11 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 	//@formatter:on
 
 	/** First texture to use for connections. */
-	private MalisisIcon part1;
+	private Icon part1;
 	/** Second texture to use for connections. */
-	private MalisisIcon part2;
+	private Icon part2;
 	/** Array of all possible icons */
-	private MalisisIcon[] icons = new MalisisIcon[16];
+	private Icon[] icons = new Icon[16];
 	/** Whether the icons have been initialized */
 	private boolean initialized = false;
 
@@ -112,12 +112,12 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 	}
 
 	/**
-	 * Gets the {@link MalisisIcon} with no connection on any side.
+	 * Gets the {@link Icon} with no connection on any side.
 	 *
 	 * @return the full icon
 	 */
 	@Override
-	public MalisisIcon getIcon()
+	public Icon getIcon()
 	{
 		if (!initialized)
 			initializeIcons();
@@ -126,7 +126,7 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 	}
 
 	@Override
-	public MalisisIcon getIcon(IBlockState state, EnumFacing side)
+	public Icon getIcon(IBlockState state, EnumFacing side)
 	{
 		if (!initialized)
 			initializeIcons();
@@ -135,7 +135,7 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 	}
 
 	/**
-	 * Gets the corresponding {@link MalisisIcon} based on the connections available.
+	 * Gets the corresponding {@link Icon} based on the connections available.
 	 *
 	 * @param world the world
 	 * @param pos the pos
@@ -144,7 +144,7 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 	 * @return the icon
 	 */
 	@Override
-	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
+	public Icon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing facing)
 	{
 		if (!initialized)
 			initializeIcons();

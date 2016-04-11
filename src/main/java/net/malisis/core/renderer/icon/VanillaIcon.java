@@ -38,7 +38,7 @@ import net.minecraft.item.Item;
  * @author Ordinastie
  *
  */
-public class VanillaIcon extends MalisisIcon
+public class VanillaIcon extends Icon
 {
 	protected Item item;
 	protected IBlockState blockState;

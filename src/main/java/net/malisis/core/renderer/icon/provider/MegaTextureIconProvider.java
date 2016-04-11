@@ -30,7 +30,7 @@ import java.util.HashMap;
 
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.component.DirectionalComponent;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.util.MBlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -56,24 +56,24 @@ public class MegaTextureIconProvider extends SidesIconProvider
 
 	private int[] numBlocks = new int[6];
 
-	public MegaTextureIconProvider(MalisisIcon defaultIcon)
+	public MegaTextureIconProvider(Icon defaultIcon)
 	{
 		super(defaultIcon);
 	}
 
-	public void setMegaTexture(EnumFacing side, MalisisIcon icon)
+	public void setMegaTexture(EnumFacing side, Icon icon)
 	{
 		setMegaTexture(side, icon, -1);
 	}
 
-	public void setMegaTexture(EnumFacing side, MalisisIcon icon, int numBlocks)
+	public void setMegaTexture(EnumFacing side, Icon icon, int numBlocks)
 	{
 		setSideIcon(side, icon);
 		this.numBlocks[side.getIndex()] = numBlocks;
 	}
 
 	@Override
-	public void setSideIcon(EnumFacing side, MalisisIcon icon)
+	public void setSideIcon(EnumFacing side, Icon icon)
 	{
 		super.setSideIcon(side, icon);
 		numBlocks[side.getIndex()] = 0;
@@ -84,7 +84,7 @@ public class MegaTextureIconProvider extends SidesIconProvider
 		return numBlocks[side.getIndex()] != 0;
 	}
 
-	private int getNumBlocks(MalisisIcon icon, EnumFacing side)
+	private int getNumBlocks(Icon icon, EnumFacing side)
 	{
 		if (this.numBlocks[side.getIndex()] == -1)
 		{
@@ -96,9 +96,9 @@ public class MegaTextureIconProvider extends SidesIconProvider
 	}
 
 	@Override
-	public MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
+	public Icon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
 	{
-		MalisisIcon icon = super.getIcon(world, pos, state, side);
+		Icon icon = super.getIcon(world, pos, state, side);
 		EnumFacing blockDir = side;
 		if (IComponent.getComponent(DirectionalComponent.class, state.getBlock()) != null)
 			blockDir = DirectionalComponent.getDirection(state);
@@ -142,7 +142,7 @@ public class MegaTextureIconProvider extends SidesIconProvider
 		return baseState;
 	}
 
-	private MalisisIcon getIconPart(MalisisIcon icon, BlockPos pos, MBlockState state, EnumFacing side, int numBlocks)
+	private Icon getIconPart(Icon icon, BlockPos pos, MBlockState state, EnumFacing side, int numBlocks)
 	{
 		int u = 0;
 		int v = ((pos.getY() - state.getY()) % numBlocks) + 1;
@@ -157,7 +157,7 @@ public class MegaTextureIconProvider extends SidesIconProvider
 		}
 
 		float factor = 1.0F / numBlocks;
-		MalisisIcon copy = new MalisisIcon();
+		Icon copy = new Icon();
 		copy.copyFrom(icon);
 		copy.clip(u * factor, 1 - v * factor, factor, factor);
 		return copy;

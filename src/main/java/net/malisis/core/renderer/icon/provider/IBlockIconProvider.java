@@ -24,7 +24,7 @@
 
 package net.malisis.core.renderer.icon.provider;
 
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.util.ItemUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -33,28 +33,28 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
 /**
- * This interface allows implementers to provide {@link MalisisIcon icons} when rendering Blocks.
+ * This interface allows implementers to provide {@link Icon icons} when rendering Blocks.
  *
  * @author Ordinastie
  */
 public interface IBlockIconProvider extends IIconProvider
 {
 	/**
-	 * Gets the {@link MalisisIcon} to use for the specified {@link IBlockState}.
+	 * Gets the {@link Icon} to use for the specified {@link IBlockState}.
 	 *
 	 * @param state the state
 	 * @return the icon
 	 */
-	public MalisisIcon getIcon(IBlockState state, EnumFacing side);
+	public Icon getIcon(IBlockState state, EnumFacing side);
 
 	@Override
-	public default MalisisIcon getIcon()
+	public default Icon getIcon()
 	{
 		return null;
 	}
 
 	/**
-	 * Gets the {@link MalisisIcon} to use.
+	 * Gets the {@link Icon} to use.
 	 *
 	 * @param world the world
 	 * @param pos the pos
@@ -62,67 +62,67 @@ public interface IBlockIconProvider extends IIconProvider
 	 * @param side the side
 	 * @return the icon
 	 */
-	public default MalisisIcon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
+	public default Icon getIcon(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing side)
 	{
 		return getIcon(state, side);
 	}
 
 	/**
-	 * Gets the {@link MalisisIcon} to use for the item. (Only used if the item associated with the block isn't already a
+	 * Gets the {@link Icon} to use for the item. (Only used if the item associated with the block isn't already a
 	 * {@link IItemIconProvider}).
 	 *
 	 * @param itemStack the item stack
 	 * @param side the side
 	 * @return the icon
 	 */
-	public default MalisisIcon getIcon(ItemStack itemStack, EnumFacing side)
+	public default Icon getIcon(ItemStack itemStack, EnumFacing side)
 	{
 		return getIcon(ItemUtils.getStateFromItemStack(itemStack), side);
 	}
 
 	/**
-	 * Gets the particle {@link MalisisIcon} to use for the {@link IBlockState}.
+	 * Gets the particle {@link Icon} to use for the {@link IBlockState}.
 	 *
 	 * @param state the state
 	 * @return the particle icon
 	 */
-	public default MalisisIcon getParticleIcon(IBlockState state)
+	public default Icon getParticleIcon(IBlockState state)
 	{
 		return getIcon(state, null);
 	}
 
 	/**
-	 * {@link IIconProvider} that provides {@link MalisisIcon} based on {@link EnumFacing}.
+	 * {@link IIconProvider} that provides {@link Icon} based on {@link EnumFacing}.
 	 */
 	public static interface ISidesIconProvider extends IBlockIconProvider
 	{
 		@Override
-		public default MalisisIcon getIcon(IBlockState state, EnumFacing side)
+		public default Icon getIcon(IBlockState state, EnumFacing side)
 		{
 			return getIcon(side);
 		}
 
-		public MalisisIcon getIcon(EnumFacing side);
+		public Icon getIcon(EnumFacing side);
 	}
 
 	/**
-	 * {@link IIconProvider} that provides {@link MalisisIcon} based on {@link IBlockState}.
+	 * {@link IIconProvider} that provides {@link Icon} based on {@link IBlockState}.
 	 */
 	public static interface IStatesIconProvider extends IBlockIconProvider
 	{
 		@Override
-		public default MalisisIcon getIcon(IBlockState state, EnumFacing side)
+		public default Icon getIcon(IBlockState state, EnumFacing side)
 		{
 			return getIcon(state);
 		}
 
 		/**
-		 * Gets the {@link MalisisIcon} to use for the specified {@link IBlockState}.
+		 * Gets the {@link Icon} to use for the specified {@link IBlockState}.
 		 *
 		 * @param state the state
 		 * @return the icon
 		 */
-		public MalisisIcon getIcon(IBlockState state);
+		public Icon getIcon(IBlockState state);
 	}
 
 }

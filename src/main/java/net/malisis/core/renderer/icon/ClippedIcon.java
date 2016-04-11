@@ -27,20 +27,20 @@ package net.malisis.core.renderer.icon;
 import net.minecraft.client.renderer.texture.TextureMap;
 
 /**
- * Clipped icons are icons designed to represent a part of a {@link MalisisIcon} registered and stiched into a {@link TextureMap}. The
+ * Clipped icons are icons designed to represent a part of a {@link Icon} registered and stiched into a {@link TextureMap}. The
  * clipping will occur when the icon its based of is stiched.
  *
  * @author Ordinastie
  *
  */
-public class ClippedIcon extends MalisisIcon
+public class ClippedIcon extends Icon
 {
 	protected float clipX;
 	protected float clipY;
 	protected float clipWidth;
 	protected float clipHeight;
 
-	public ClippedIcon(MalisisIcon parent, float clipX, float clipY, float clipWidth, float clipHeight)
+	public ClippedIcon(Icon parent, float clipX, float clipY, float clipWidth, float clipHeight)
 	{
 		super(parent);
 		setClipping(clipX, clipY, clipWidth, clipHeight);
@@ -73,7 +73,7 @@ public class ClippedIcon extends MalisisIcon
 	 * @param rotated the rotated
 	 */
 	@Override
-	protected void initIcon(MalisisIcon baseIcon, int width, int height, int x, int y, boolean rotated)
+	protected void initIcon(Icon baseIcon, int width, int height, int x, int y, boolean rotated)
 	{
 		super.initIcon(baseIcon, width, height, x, y, rotated);
 		clip(clipX, clipY, clipWidth, clipHeight);

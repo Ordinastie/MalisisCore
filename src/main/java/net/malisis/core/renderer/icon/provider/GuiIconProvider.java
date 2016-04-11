@@ -26,7 +26,7 @@ package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.renderer.icon.GuiIcon;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 
 /**
  * @author Ordinastie
@@ -34,45 +34,45 @@ import net.malisis.core.renderer.icon.MalisisIcon;
  */
 public class GuiIconProvider implements IGuiIconProvider
 {
-	protected MalisisIcon icon;
-	protected MalisisIcon hoveredIcon;
-	protected MalisisIcon disabledIcon;
+	protected Icon icon;
+	protected Icon hoveredIcon;
+	protected Icon disabledIcon;
 
 	public GuiIconProvider(GuiIcon icon)
 	{
 		setIcon(icon);
 	}
 
-	public GuiIconProvider(MalisisIcon icon, MalisisIcon hoveredIcon, MalisisIcon disabledIcon)
+	public GuiIconProvider(Icon icon, Icon hoveredIcon, Icon disabledIcon)
 	{
 		setIcon(icon);
 		setHoveredIcon(hoveredIcon);
 		setDisabledIcon(disabledIcon);
 	}
 
-	public void setIcon(MalisisIcon icon)
+	public void setIcon(Icon icon)
 	{
 		this.icon = icon;
 	}
 
-	public void setHoveredIcon(MalisisIcon icon)
+	public void setHoveredIcon(Icon icon)
 	{
 		this.hoveredIcon = icon;
 	}
 
-	public void setDisabledIcon(MalisisIcon icon)
+	public void setDisabledIcon(Icon icon)
 	{
 		this.disabledIcon = icon;
 	}
 
 	@Override
-	public MalisisIcon getIcon()
+	public Icon getIcon()
 	{
 		return icon;
 	}
 
 	@Override
-	public MalisisIcon getIcon(UIComponent<?> component)
+	public Icon getIcon(UIComponent<?> component)
 	{
 		if (component.isDisabled())
 			return disabledIcon != null ? disabledIcon : icon;

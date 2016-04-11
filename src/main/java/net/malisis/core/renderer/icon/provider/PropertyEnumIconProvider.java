@@ -26,7 +26,7 @@ package net.malisis.core.renderer.icon.provider;
 
 import java.util.EnumMap;
 
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider.IStatesIconProvider;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
@@ -39,17 +39,17 @@ import net.minecraft.util.IStringSerializable;
 public class PropertyEnumIconProvider<T extends Enum<T> & IStringSerializable> implements IStatesIconProvider
 {
 	private PropertyEnum<T> property;
-	private MalisisIcon defaultIcon;
-	private EnumMap<T, MalisisIcon> icons;
+	private Icon defaultIcon;
+	private EnumMap<T, Icon> icons;
 
 	public PropertyEnumIconProvider(PropertyEnum<T> property, Class<T> enumClass, String defaultName)
 	{
 		this.property = property;
 		this.icons = new EnumMap<>(enumClass);
-		this.defaultIcon = new MalisisIcon(defaultName);
+		this.defaultIcon = new Icon(defaultName);
 	}
 
-	public PropertyEnumIconProvider(PropertyEnum<T> property, Class<T> enumClass, MalisisIcon defaultIcon)
+	public PropertyEnumIconProvider(PropertyEnum<T> property, Class<T> enumClass, Icon defaultIcon)
 	{
 		this.property = property;
 		this.icons = new EnumMap<>(enumClass);
@@ -58,32 +58,32 @@ public class PropertyEnumIconProvider<T extends Enum<T> & IStringSerializable> i
 
 	public PropertyEnumIconProvider(PropertyEnum<T> property, Class<T> enumClass)
 	{
-		this(property, enumClass, (MalisisIcon) null);
+		this(property, enumClass, (Icon) null);
 	}
 
-	public void setIcon(T enumValue, MalisisIcon icon)
+	public void setIcon(T enumValue, Icon icon)
 	{
 		icons.put(enumValue, icon);
 	}
 
 	public void setIcon(T enumValue, String iconName)
 	{
-		icons.put(enumValue, new MalisisIcon(iconName));
+		icons.put(enumValue, new Icon(iconName));
 	}
 
 	@Override
-	public MalisisIcon getIcon()
+	public Icon getIcon()
 	{
 		return defaultIcon;
 	}
 
-	public MalisisIcon getIcon(T value)
+	public Icon getIcon(T value)
 	{
 		return icons.getOrDefault(value, getIcon());
 	}
 
 	@Override
-	public MalisisIcon getIcon(IBlockState state)
+	public Icon getIcon(IBlockState state)
 	{
 		return state != null ? getIcon(state.getValue(property)) : getIcon();
 	}

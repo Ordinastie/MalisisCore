@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import net.malisis.core.block.component.WallComponent;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider.ISidesIconProvider;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider.IStatesIconProvider;
 import net.minecraft.block.properties.IProperty;
@@ -56,34 +56,34 @@ public class IconProviderBuilder
 	String defaultName;
 
 	//IDefaultIconProvider
-	MalisisIcon defaultIcon;
+	Icon defaultIcon;
 
 	//ConnectedIconProvider
-	MalisisIcon connectedIcon;
+	Icon connectedIcon;
 
 	//ISidesIconProvider
-	Map<EnumFacing, MalisisIcon> sidesIcons = Maps.newHashMap();
+	Map<EnumFacing, Icon> sidesIcons = Maps.newHashMap();
 
 	//IStateIconProvider
-	Table<IProperty<?>, Object, MalisisIcon> stateIcons;
+	Table<IProperty<?>, Object, Icon> stateIcons;
 	IProperty<?> currentProperty;
 
 	//WALL
-	MalisisIcon insideIcon;
+	Icon insideIcon;
 
 	/**
-	 * Instantiates a new {@link IconProviderBuilder} with default {@link MalisisIcon}.
+	 * Instantiates a new {@link IconProviderBuilder} with default {@link Icon}.
 	 *
 	 * @param icon the icon
 	 */
-	IconProviderBuilder(String prefix, MalisisIcon icon)
+	IconProviderBuilder(String prefix, Icon icon)
 	{
 		this.prefix = prefix;
 		defaultIcon = icon;
 	}
 
 	/**
-	 * Instantiates a new {@link IconProviderBuilder} with default {@link MalisisIcon}.
+	 * Instantiates a new {@link IconProviderBuilder} with default {@link Icon}.
 	 *
 	 * @param name the name
 	 */
@@ -94,24 +94,24 @@ public class IconProviderBuilder
 	}
 
 	/**
-	 * Gets a {@link MalisisIcon} from the name after prepending the set prefix.
+	 * Gets a {@link Icon} from the name after prepending the set prefix.
 	 *
 	 * @param name the name
 	 * @return the malisis icon
 	 */
-	private MalisisIcon icon(String name)
+	private Icon icon(String name)
 	{
-		return MalisisIcon.from(prefix + name);
+		return Icon.from(prefix + name);
 	}
 
 	/**
-	 * Sets the {@link MalisisIcon} to use for specific side.
+	 * Sets the {@link Icon} to use for specific side.
 	 *
 	 * @param side the side
 	 * @param icon the icon
 	 * @return the icon provider builder
 	 */
-	public IconProviderBuilder withSide(EnumFacing side, MalisisIcon icon)
+	public IconProviderBuilder withSide(EnumFacing side, Icon icon)
 	{
 		type = Type.SIDES;
 		sidesIcons.put(Objects.requireNonNull(side), icon);
@@ -119,7 +119,7 @@ public class IconProviderBuilder
 	}
 
 	/**
-	 * Sets the {@link MalisisIcon} to use for specific side.
+	 * Sets the {@link Icon} to use for specific side.
 	 *
 	 * @param side the side
 	 * @param iconName the name
@@ -138,16 +138,16 @@ public class IconProviderBuilder
 	 */
 	public IconProviderBuilder connected()
 	{
-		return connectedWith(MalisisIcon.from(defaultIcon.getIconName() + "2"));
+		return connectedWith(Icon.from(defaultIcon.getIconName() + "2"));
 	}
 
 	/**
-	 * Sets the second {@link MalisisIcon} for connected textures.
+	 * Sets the second {@link Icon} for connected textures.
 	 *
 	 * @param icon the icon
 	 * @return the icon provider builder
 	 */
-	public IconProviderBuilder connectedWith(MalisisIcon icon)
+	public IconProviderBuilder connectedWith(Icon icon)
 	{
 		type = Type.CONNECTED;
 		connectedIcon = Objects.requireNonNull(icon);
@@ -155,7 +155,7 @@ public class IconProviderBuilder
 	}
 
 	/**
-	 * Sets the second {@link MalisisIcon} for connected textures.
+	 * Sets the second {@link Icon} for connected textures.
 	 *
 	 * @param iconName the name
 	 * @return the icon provider builder
@@ -166,7 +166,7 @@ public class IconProviderBuilder
 	}
 
 	/**
-	 * Sets the {@link IProperty} to check against for values passed with {@link #withValue(Object, MalisisIcon)}.
+	 * Sets the {@link IProperty} to check against for values passed with {@link #withValue(Object, Icon)}.
 	 *
 	 * @param property the property
 	 * @return the icon provider builder
@@ -179,14 +179,14 @@ public class IconProviderBuilder
 	}
 
 	/**
-	 * Sets the {@link MalisisIcon} to use for the state value.<br>
+	 * Sets the {@link Icon} to use for the state value.<br>
 	 * {@link #forProperty(IProperty)} must be called before with the corresponding {@link IProperty}.
 	 *
 	 * @param value the value
 	 * @param icon the icon
 	 * @return the icon provider builder
 	 */
-	public IconProviderBuilder withValue(Object value, MalisisIcon icon)
+	public IconProviderBuilder withValue(Object value, Icon icon)
 	{
 		if (currentProperty == null)
 			throw new IllegalStateException("You must set the property first.");
@@ -205,7 +205,7 @@ public class IconProviderBuilder
 	 * @param insideIcon the inside icon
 	 * @return the icon provider builder
 	 */
-	public IconProviderBuilder wall(MalisisIcon insideIcon)
+	public IconProviderBuilder wall(Icon insideIcon)
 	{
 		type = Type.WALL;
 		this.insideIcon = insideIcon;

@@ -26,12 +26,12 @@ package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.MalisisBlock;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
- * The IIconProvider interface allows to pass {@link MalisisIcon} to the rendering processes.<br>
+ * The IIconProvider interface allows to pass {@link Icon} to the rendering processes.<br>
  * The interface extends {@link IComponent} so it can be added to {@link MalisisBlock} components.
  *
  * @author Ordinastie
@@ -45,12 +45,12 @@ public interface IIconProvider extends IComponent
 	}
 
 	/**
-	 * Gets the {@link MalisisIcon} to use.
+	 * Gets the {@link Icon} to use.
 	 *
 	 * @return the icon
 	 */
 	@SideOnly(Side.CLIENT)
-	public MalisisIcon getIcon();
+	public Icon getIcon();
 
 	/**
 	 * Creates a {@link IconProviderBuilder}.
@@ -58,7 +58,7 @@ public interface IIconProvider extends IComponent
 	 * @return the icon provider builder
 	 */
 	@SideOnly(Side.CLIENT)
-	public static IconProviderBuilder create(MalisisIcon icon)
+	public static IconProviderBuilder create(Icon icon)
 	{
 		return new IconProviderBuilder("", icon);
 	}
@@ -72,7 +72,7 @@ public interface IIconProvider extends IComponent
 	 * @return the icon provider builder
 	 */
 	@SideOnly(Side.CLIENT)
-	public static IconProviderBuilder create(String prefix, MalisisIcon icon)
+	public static IconProviderBuilder create(String prefix, Icon icon)
 	{
 		return new IconProviderBuilder(prefix, icon);
 	}

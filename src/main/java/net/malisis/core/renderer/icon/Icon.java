@@ -43,19 +43,19 @@ import com.google.common.collect.Maps;
 /**
  * Extension of {@link TextureAtlasSprite} to allow common operations like clipping and offset.<br>
  * Icons should be acquired by using the {@link #from(String)} method so that multiple call with the same name return the same
- * {@link MalisisIcon} instance.<br>
- * For non registered {@link MalisisIcon}, use {@link #MalisisIcon(String, boolean)} constructor.
+ * {@link Icon} instance.<br>
+ * For non registered {@link Icon}, use {@link #MalisisIcon(String, boolean)} constructor.
  *
  * @author Ordinastie
  *
  */
-public class MalisisIcon extends TextureAtlasSprite
+public class Icon extends TextureAtlasSprite
 {
-	/** Map of all registered {@link MalisisIcon}. These icons will be stitched with the {@link TextureStitchEvent}. */
-	private final static Map<String, MalisisIcon> registeredIcons = Maps.newHashMap();
+	/** Map of all registered {@link Icon}. These icons will be stitched with the {@link TextureStitchEvent}. */
+	private final static Map<String, Icon> registeredIcons = Maps.newHashMap();
 
-	/** {@link MalisisIcon} version of the missing texture **/
-	public static MalisisIcon missing = new MissingIcon();
+	/** {@link Icon} version of the missing texture **/
+	public static Icon missing = new MissingIcon();
 
 	/** Width of the block's texture atlas. */
 	public static int BLOCK_TEXTURE_WIDTH = -1;
@@ -75,14 +75,14 @@ public class MalisisIcon extends TextureAtlasSprite
 	protected int rotation = 0;
 
 	/** Lists of MalisisIcon depending on this one. */
-	protected Set<MalisisIcon> dependants = new HashSet<>();
+	protected Set<Icon> dependants = new HashSet<>();
 
 	/**
-	 * Instantiates a new {@link MalisisIcon}.
+	 * Instantiates a new {@link Icon}.
 	 *
 	 * @param name the name
 	 */
-	public MalisisIcon(String name, boolean register)
+	public Icon(String name, boolean register)
 	{
 		super(name);
 		maxU = 1;
@@ -92,32 +92,32 @@ public class MalisisIcon extends TextureAtlasSprite
 			registeredIcons.put(name, this);
 	}
 
-	public MalisisIcon(String name)
+	public Icon(String name)
 	{
 		this(name, true);
 	}
 
 	/**
-	 * Instantiates a new {@link MalisisIcon}.
+	 * Instantiates a new {@link Icon}.
 	 */
-	public MalisisIcon()
+	public Icon()
 	{
 		this("", false);
 	}
 
 	/**
-	 * Instantiates a new {@link MalisisIcon}.
+	 * Instantiates a new {@link Icon}.
 	 *
 	 * @param baseIcon the base icon
 	 */
-	public MalisisIcon(MalisisIcon baseIcon)
+	public Icon(Icon baseIcon)
 	{
 		this(baseIcon.getIconName(), false);
 		baseIcon.addDependant(this);
 	}
 
 	/**
-	 * Instantiates a new {@link MalisisIcon}.
+	 * Instantiates a new {@link Icon}.
 	 *
 	 * @param name the name
 	 * @param u the u
@@ -125,7 +125,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	 * @param U the u
 	 * @param V the v
 	 */
-	public MalisisIcon(String name, float u, float v, float U, float V)
+	public Icon(String name, float u, float v, float U, float V)
 	{
 		this(name, true);
 		minU = u;
@@ -134,26 +134,26 @@ public class MalisisIcon extends TextureAtlasSprite
 		maxV = V;
 	}
 
-	public MalisisIcon(TextureAtlasSprite icon)
+	public Icon(TextureAtlasSprite icon)
 	{
 		this(icon.getIconName(), false);
 		copyFrom(icon);
 	}
 
 	/**
-	 * Adds a {@link MalisisIcon} to be dependant on this one. Will call {@link #initIcon(MalisisIcon, int, int, int, int, boolean)} when
+	 * Adds a {@link Icon} to be dependant on this one. Will call {@link #initIcon(Icon, int, int, int, int, boolean)} when
 	 * stiched to the sheet.
 	 *
 	 * @param icon the icon
 	 */
-	public void addDependant(MalisisIcon icon)
+	public void addDependant(Icon icon)
 	{
 		dependants.add(icon);
 	}
 
 	//#region getters/setters
 	/**
-	 * Sets the size in pixel of this {@link MalisisIcon}.
+	 * Sets the size in pixel of this {@link Icon}.
 	 *
 	 * @param width the width
 	 * @param height the height
@@ -225,13 +225,13 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Sets this {@link MalisisIcon} to be flipped.
+	 * Sets this {@link Icon} to be flipped.
 	 *
 	 * @param horizontal whether to flip horizontally
 	 * @param vertical whether to flip vertically
-	 * @return this {@link MalisisIcon}
+	 * @return this {@link Icon}
 	 */
-	public MalisisIcon flip(boolean horizontal, boolean vertical)
+	public Icon flip(boolean horizontal, boolean vertical)
 	{
 		flippedU = horizontal;
 		flippedV = vertical;
@@ -241,7 +241,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	/**
 	 * Checks if is flipped u.
 	 *
-	 * @return true if this {@link MalisisIcon} is flipped horizontally.
+	 * @return true if this {@link Icon} is flipped horizontally.
 	 */
 	public boolean isFlippedU()
 	{
@@ -251,7 +251,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	/**
 	 * Checks if is flipped v.
 	 *
-	 * @return true if this {@link MalisisIcon} is flipped vertically.
+	 * @return true if this {@link Icon} is flipped vertically.
 	 */
 	public boolean isFlippedV()
 	{
@@ -261,7 +261,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	/**
 	 * Checks if is rotated.
 	 *
-	 * @return true fi this {@link MalisisIcon} is rotated.
+	 * @return true fi this {@link Icon} is rotated.
 	 */
 	public boolean isRotated()
 	{
@@ -269,7 +269,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Sets the rotation for this {@link MalisisIcon}. The icon will be rotated <b>rotation</b> x 90 degrees clockwise.
+	 * Sets the rotation for this {@link Icon}. The icon will be rotated <b>rotation</b> x 90 degrees clockwise.
 	 *
 	 * @param rotation the rotation
 	 */
@@ -281,7 +281,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	/**
 	 * Gets the rotation.
 	 *
-	 * @return the rotation for this {@link MalisisIcon}.
+	 * @return the rotation for this {@link Icon}.
 	 */
 	public int getRotation()
 	{
@@ -291,7 +291,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	//#end getters/setters
 
 	/**
-	 * Initializes this {@link MalisisIcon}. Called from the icon this one depends on, copying the <b>baseIcon</b> values.
+	 * Initializes this {@link Icon}. Called from the icon this one depends on, copying the <b>baseIcon</b> values.
 	 *
 	 * @param baseIcon the base icon
 	 * @param width the width
@@ -300,34 +300,34 @@ public class MalisisIcon extends TextureAtlasSprite
 	 * @param y the y
 	 * @param rotated the rotated
 	 */
-	protected void initIcon(MalisisIcon baseIcon, int width, int height, int x, int y, boolean rotated)
+	protected void initIcon(Icon baseIcon, int width, int height, int x, int y, boolean rotated)
 	{
 		copyFrom(baseIcon);
 	}
 
 	/**
-	 * Offsets this {@link MalisisIcon} by a specified amount. <b>offsetX</b> and <b>offsetY</b> are specified in pixels.
+	 * Offsets this {@link Icon} by a specified amount. <b>offsetX</b> and <b>offsetY</b> are specified in pixels.
 	 *
 	 * @param offsetX the x offset
 	 * @param offsetY the y offset
-	 * @return this {@link MalisisIcon}
+	 * @return this {@link Icon}
 	 */
-	public MalisisIcon offset(int offsetX, int offsetY)
+	public Icon offset(int offsetX, int offsetY)
 	{
 		initSprite(sheetWidth, sheetHeight, getOriginX() + offsetX, getOriginY() + offsetY, isRotated());
 		return this;
 	}
 
 	/**
-	 * Clips this {@link MalisisIcon}. <b>offsetX</b>, <b>offsetY</b>, <b>width</b> and <b>height</b> are specified in pixels.
+	 * Clips this {@link Icon}. <b>offsetX</b>, <b>offsetY</b>, <b>width</b> and <b>height</b> are specified in pixels.
 	 *
 	 * @param offsetX the x offset
 	 * @param offsetY the y offset
 	 * @param width the width
 	 * @param height the height
-	 * @return this {@link MalisisIcon}
+	 * @return this {@link Icon}
 	 */
-	public MalisisIcon clip(int offsetX, int offsetY, int width, int height)
+	public Icon clip(int offsetX, int offsetY, int width, int height)
 	{
 		this.width = width;
 		this.height = height;
@@ -337,16 +337,16 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Clips this {@link MalisisIcon}. <b>offsetXFactor</b>, <b>offsetYFactor</b>, <b>widthFactor</b> and <b>heightFactor</b> are values
+	 * Clips this {@link Icon}. <b>offsetXFactor</b>, <b>offsetYFactor</b>, <b>widthFactor</b> and <b>heightFactor</b> are values
 	 * from zero to one.
 	 *
 	 * @param offsetXFactor the x factor for offset
 	 * @param offsetYFactor the y factor for offset
 	 * @param widthFactor the width factor
 	 * @param heightFactor the height factor
-	 * @return this {@link MalisisIcon}
+	 * @return this {@link Icon}
 	 */
-	public MalisisIcon clip(float offsetXFactor, float offsetYFactor, float widthFactor, float heightFactor)
+	public Icon clip(float offsetXFactor, float offsetYFactor, float widthFactor, float heightFactor)
 	{
 		int offsetX = Math.round(width * offsetXFactor);
 		int offsetY = Math.round(height * offsetYFactor);
@@ -360,7 +360,7 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Called when the part represented by this {@link MalisisIcon} is stiched to the texture. Sets most of the icon fields.
+	 * Called when the part represented by this {@link Icon} is stiched to the texture. Sets most of the icon fields.
 	 *
 	 * @param width the width
 	 * @param height the height
@@ -382,15 +382,15 @@ public class MalisisIcon extends TextureAtlasSprite
 		super.initSprite(width, height, x, y, rotated);
 		for (TextureAtlasSprite dep : dependants)
 		{
-			if (dep instanceof MalisisIcon)
-				((MalisisIcon) dep).initIcon(this, width, height, x, y, rotated);
+			if (dep instanceof Icon)
+				((Icon) dep).initIcon(this, width, height, x, y, rotated);
 			else
 				dep.copyFrom(this);
 		}
 	}
 
 	/**
-	 * Copies the values from {@link MalisisIcon base} to this {@link MalisisIcon}.
+	 * Copies the values from {@link Icon base} to this {@link Icon}.
 	 *
 	 * @param base the icon to copy from
 	 */
@@ -409,9 +409,9 @@ public class MalisisIcon extends TextureAtlasSprite
 		for (int i = 0; i < base.getFrameCount(); i++)
 			this.framesTextureData.add(base.getFrameTextureData(i));
 
-		if (base instanceof MalisisIcon)
+		if (base instanceof Icon)
 		{
-			MalisisIcon mbase = (MalisisIcon) base;
+			Icon mbase = (Icon) base;
 			this.sheetWidth = mbase.sheetWidth;
 			this.sheetHeight = mbase.sheetHeight;
 			this.flippedU = mbase.flippedU;
@@ -420,19 +420,19 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Creates a new {@link MalisisIcon} from this <code>MalisisIcon</code>.
+	 * Creates a new {@link Icon} from this <code>MalisisIcon</code>.
 	 *
-	 * @return the new {@link MalisisIcon}
+	 * @return the new {@link Icon}
 	 */
-	public MalisisIcon copy()
+	public Icon copy()
 	{
-		MalisisIcon icon = new MalisisIcon();
+		Icon icon = new Icon();
 		icon.copyFrom(this);
 		return icon;
 	}
 
 	/**
-	 * Registers all the {@link MalisisIcon} into the {@link TextureMap}.
+	 * Registers all the {@link Icon} into the {@link TextureMap}.
 	 *
 	 * @param map the map
 	 */
@@ -442,48 +442,48 @@ public class MalisisIcon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Gets a {@link MalisisIcon} with the specified name.<br>
+	 * Gets a {@link Icon} with the specified name.<br>
 	 * This method ensures the same instance is return when called multiple time with the same string.
 	 *
 	 * @param name the name
 	 * @return the malisis icon
 	 */
-	public static MalisisIcon from(String name)
+	public static Icon from(String name)
 	{
 		if (registeredIcons.get(name) != null)
 			return registeredIcons.get(name);
-		return new MalisisIcon(name);
+		return new Icon(name);
 	}
 
 	/**
-	 * Gets a {@link MalisisIcon} for the texture used for the {@link Block} default {@link IBlockState}.
+	 * Gets a {@link Icon} for the texture used for the {@link Block} default {@link IBlockState}.
 	 *
 	 * @param block the block
 	 * @return the malisis icon
 	 */
-	public static MalisisIcon from(Block block)
+	public static Icon from(Block block)
 	{
 		return from(block.getDefaultState());
 	}
 
 	/**
-	 * Gets a {@link MalisisIcon} for the texture used for the {@link IBlockState}
+	 * Gets a {@link Icon} for the texture used for the {@link IBlockState}
 	 *
 	 * @param state the state
 	 * @return the malisis icon
 	 */
-	public static MalisisIcon from(IBlockState state)
+	public static Icon from(IBlockState state)
 	{
 		return new VanillaIcon(state);
 	}
 
 	/**
-	 * Gets a {@link MalisisIcon} for the texture used for the {@link Item}
+	 * Gets a {@link Icon} for the texture used for the {@link Item}
 	 *
 	 * @param item the item
 	 * @return the malisis icon
 	 */
-	public static MalisisIcon from(Item item)
+	public static Icon from(Item item)
 	{
 		return new VanillaIcon(item);
 	}

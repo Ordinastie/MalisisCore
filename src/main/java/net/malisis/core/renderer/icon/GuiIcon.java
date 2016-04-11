@@ -30,21 +30,21 @@ import java.util.Arrays;
  * @author Ordinastie
  *
  */
-public class GuiIcon extends MalisisIcon
+public class GuiIcon extends Icon
 {
-	protected MalisisIcon[] icons;
+	protected Icon[] icons;
 
-	public GuiIcon(MalisisIcon icon)
+	public GuiIcon(Icon icon)
 	{
-		this.icons = new MalisisIcon[] { icon };
+		this.icons = new Icon[] { icon };
 	}
 
-	public GuiIcon(MalisisIcon[] icons)
+	public GuiIcon(Icon[] icons)
 	{
 		this.icons = icons;
 	}
 
-	public MalisisIcon getIcon(int index)
+	public Icon getIcon(int index)
 	{
 		if (icons == null || icons.length == 0)
 			return null;
@@ -71,9 +71,9 @@ public class GuiIcon extends MalisisIcon
 	}
 
 	@Override
-	public MalisisIcon flip(boolean horizontal, boolean vertical)
+	public Icon flip(boolean horizontal, boolean vertical)
 	{
-		for (MalisisIcon icon : icons)
+		for (Icon icon : icons)
 			icon.flip(horizontal, vertical);
 		return super.flip(horizontal, vertical);
 	}
@@ -81,23 +81,23 @@ public class GuiIcon extends MalisisIcon
 	@Override
 	public void setRotation(int rotation)
 	{
-		for (MalisisIcon icon : icons)
+		for (Icon icon : icons)
 			icon.setRotation(rotation);
 		super.setRotation(rotation);
 	}
 
 	@Override
-	public MalisisIcon clip(float offsetXFactor, float offsetYFactor, float widthFactor, float heightFactor)
+	public Icon clip(float offsetXFactor, float offsetYFactor, float widthFactor, float heightFactor)
 	{
-		for (MalisisIcon icon : icons)
+		for (Icon icon : icons)
 			icon.clip(offsetXFactor, offsetYFactor, widthFactor, heightFactor);
 		return super.clip(offsetXFactor, offsetYFactor, widthFactor, heightFactor);
 	}
 
 	@Override
-	public MalisisIcon clip(int offsetX, int offsetY, int width, int height)
+	public Icon clip(int offsetX, int offsetY, int width, int height)
 	{
-		for (MalisisIcon icon : icons)
+		for (Icon icon : icons)
 			icon.clip(offsetX, offsetY, width, height);
 		return super.clip(offsetX, offsetY, width, height);
 	}

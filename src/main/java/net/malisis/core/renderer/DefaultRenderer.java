@@ -34,7 +34,7 @@ import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.face.SouthFace;
 import net.malisis.core.renderer.element.shape.Cube;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.malisis.core.renderer.model.loader.TextureModelLoader;
 import net.malisis.core.util.AABBUtils;
@@ -197,7 +197,7 @@ public class DefaultRenderer
 		private Matrix4f thirdPersonRightHand = new TransformBuilder().translate(0, 0.3F, 0.02F).scale(0.85F).rotate(0, -90, 55).get();
 		private Matrix4f thirdPersonLeftHand = new TransformBuilder().translate(0, 0.3F, 0.02F).scale(0.85F).rotate(0, 90, -55).get();
 		private Shape gui;
-		private Map<MalisisIcon, MalisisModel> itemModels = new HashMap<>();
+		private Map<Icon, MalisisModel> itemModels = new HashMap<>();
 
 		@Override
 		public void initialize()
@@ -250,7 +250,7 @@ public class DefaultRenderer
 
 		protected Shape getModelShape()
 		{
-			MalisisIcon icon = getIcon(null, new RenderParameters());
+			Icon icon = getIcon(null, new RenderParameters());
 			MalisisModel model = itemModels.get(icon);
 			if (model == null)
 			{

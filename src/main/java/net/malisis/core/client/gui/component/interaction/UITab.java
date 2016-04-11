@@ -39,7 +39,7 @@ import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateC
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
@@ -383,11 +383,11 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	}
 
 	/**
-	 * Gets the {@link MalisisIcon} to use for this {@link UITab}.
+	 * Gets the {@link Icon} to use for this {@link UITab}.
 	 *
 	 * @return the icons to render.
 	 */
-	private MalisisIcon getIcon()
+	private Icon getIcon()
 	{
 		if (parent == null)
 			return null;

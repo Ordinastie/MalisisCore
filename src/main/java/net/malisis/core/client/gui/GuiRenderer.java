@@ -37,7 +37,7 @@ import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.GuiIcon;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.client.Minecraft;
@@ -239,7 +239,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	@Override
 	public void applyTexture(Shape shape, RenderParameters params)
 	{
-		MalisisIcon icon = params.icon.get();
+		Icon icon = params.icon.get();
 
 		if (icon == null)
 		{

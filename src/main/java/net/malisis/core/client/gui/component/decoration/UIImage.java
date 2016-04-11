@@ -29,7 +29,7 @@ import net.malisis.core.client.gui.GuiTexture;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.minecraft.item.ItemStack;
 
@@ -42,8 +42,8 @@ public class UIImage extends UIComponent<UIImage>
 {
 	/** {@link GuiTexture} to use for the icon. */
 	private GuiTexture texture;
-	/** {@link MalisisIcon} to use for the texture. */
-	private MalisisIcon icon = null;
+	/** {@link Icon} to use for the texture. */
+	private Icon icon = null;
 	/** {@link ItemStack} to render. */
 	private ItemStack itemStack;
 
@@ -54,7 +54,7 @@ public class UIImage extends UIComponent<UIImage>
 	 * @param texture the texture
 	 * @param icon the icon
 	 */
-	public UIImage(MalisisGui gui, GuiTexture texture, MalisisIcon icon)
+	public UIImage(MalisisGui gui, GuiTexture texture, Icon icon)
 	{
 		super(gui);
 
@@ -91,10 +91,10 @@ public class UIImage extends UIComponent<UIImage>
 	 * @param icon the icon
 	 * @return this UIImage
 	 */
-	public UIImage setIcon(MalisisIcon icon)
+	public UIImage setIcon(Icon icon)
 	{
 		this.itemStack = null;
-		this.icon = icon != null ? icon : new MalisisIcon();
+		this.icon = icon != null ? icon : new Icon();
 		return this;
 	}
 
@@ -105,10 +105,10 @@ public class UIImage extends UIComponent<UIImage>
 	 * @param icon the icon
 	 * @return this UIImage
 	 */
-	public UIImage setIcon(GuiTexture texture, MalisisIcon icon)
+	public UIImage setIcon(GuiTexture texture, Icon icon)
 	{
 		this.itemStack = null;
-		this.icon = icon != null ? icon : new MalisisIcon();
+		this.icon = icon != null ? icon : new Icon();
 		this.texture = texture;
 		return this;
 	}
@@ -129,11 +129,11 @@ public class UIImage extends UIComponent<UIImage>
 	}
 
 	/**
-	 * Gets the {@link MalisisIcon} for this {@link UIImage}.
+	 * Gets the {@link Icon} for this {@link UIImage}.
 	 *
 	 * @return the icon
 	 */
-	public MalisisIcon getIcon()
+	public Icon getIcon()
 	{
 		return iconProvider.getIcon();
 	}

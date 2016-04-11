@@ -29,7 +29,7 @@ import java.util.List;
 
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -61,8 +61,8 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	/** Defines an {@link IIconProvider} to be used to get the icon for the faces. (Block Level) */
 	public Parameter<IIconProvider> iconProvider = new Parameter<>(null);
 
-	/** Defines a {@link MalisisIcon} to be used for the rendering. */
-	public Parameter<MalisisIcon> icon = new Parameter<>(null);
+	/** Defines a {@link Icon} to be used for the rendering. */
+	public Parameter<Icon> icon = new Parameter<>(null);
 
 	/** Defines whether to use block.getIcon(world, x, y, z, side) instead of block.getIcon(side, metadata) to get the IIcon */
 	public Parameter<Boolean> useWorldSensitiveIcon = new Parameter<>(true);

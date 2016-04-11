@@ -25,7 +25,7 @@
 package net.malisis.core.renderer.icon.provider;
 
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 
 /**
  * @author Ordinastie
@@ -33,7 +33,7 @@ import net.malisis.core.renderer.icon.MalisisIcon;
  */
 public interface IGuiIconProvider extends IIconProvider
 {
-	public default MalisisIcon getIcon(UIComponent<?> component)
+	public default Icon getIcon(UIComponent<?> component)
 	{
 		return getIcon();
 	}

@@ -29,7 +29,7 @@ import net.malisis.core.client.gui.GuiTexture;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.renderer.icon.MalisisIcon;
+import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.VanillaIcon;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
@@ -44,8 +44,8 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	protected boolean vertical = false;
 
 	protected GuiTexture texture;
-	protected MalisisIcon backgroundIcon;
-	protected MalisisIcon filledIcon;
+	protected Icon backgroundIcon;
+	protected Icon filledIcon;
 
 	//by default, use furnace arrows
 	public UIProgressBar(MalisisGui gui)
@@ -59,7 +59,7 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 		filledIcon = texture.createIcon(246, 16, 22, 16);
 	}
 
-	public UIProgressBar(MalisisGui gui, int width, int height, GuiTexture texture, MalisisIcon backgroundIcon, MalisisIcon filledIcon)
+	public UIProgressBar(MalisisGui gui, int width, int height, GuiTexture texture, Icon backgroundIcon, Icon filledIcon)
 	{
 		super(gui);
 		setSize(width, height);
@@ -112,9 +112,9 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	{
 		renderer.bindTexture(texture);
 		int length = (int) ((vertical ? height : width) * progress);
-		MalisisIcon icon = filledIcon;
+		Icon icon = filledIcon;
 		if (icon instanceof VanillaIcon)
-			icon = new MalisisIcon((TextureAtlasSprite) icon);
+			icon = new Icon((TextureAtlasSprite) icon);
 		if (vertical)
 			icon = icon.clip(0, icon.getIconHeight() - length, icon.getIconWidth(), length);
 		else
