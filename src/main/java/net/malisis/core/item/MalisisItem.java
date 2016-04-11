@@ -80,13 +80,19 @@ public class MalisisItem extends Item implements IComponentProvider, IRegisterab
 	public void setTexture(String textureName)
 	{
 		if (!StringUtils.isEmpty(textureName) && MalisisCore.isClient())
-			addComponent((IIconProvider) () -> Icon.from(textureName));
+		{
+			Icon icon = Icon.from(textureName);
+			addComponent((IIconProvider) () -> icon);
+		}
 	}
 
 	public void setTexture(Item item)
 	{
 		if (item != null && MalisisCore.isClient())
-			addComponent((IIconProvider) () -> Icon.from(item));
+		{
+			Icon icon = Icon.from(item);
+			addComponent((IIconProvider) () -> icon);
+		}
 	}
 
 	public void setTexture(Block block)
@@ -98,6 +104,9 @@ public class MalisisItem extends Item implements IComponentProvider, IRegisterab
 	public void setTexture(IBlockState state)
 	{
 		if (state != null && MalisisCore.isClient())
-			addComponent((IIconProvider) () -> Icon.from(state));
+		{
+			Icon icon = Icon.from(state);
+			addComponent((IIconProvider) () -> icon);
+		}
 	}
 }
