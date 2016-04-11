@@ -77,9 +77,9 @@ public class PaneComponent implements IBlockComponent, ISmartCull
 		if (state.getBlock() != block)
 			return block.getDefaultState();
 		return state.withProperty(NORTH, canPaneConnectTo(block, world, pos, EnumFacing.NORTH))
-				.withProperty(SOUTH, canPaneConnectTo(block, world, pos, EnumFacing.SOUTH))
-				.withProperty(WEST, canPaneConnectTo(block, world, pos, EnumFacing.WEST))
-				.withProperty(EAST, canPaneConnectTo(block, world, pos, EnumFacing.EAST));
+					.withProperty(SOUTH, canPaneConnectTo(block, world, pos, EnumFacing.SOUTH))
+					.withProperty(WEST, canPaneConnectTo(block, world, pos, EnumFacing.WEST))
+					.withProperty(EAST, canPaneConnectTo(block, world, pos, EnumFacing.EAST));
 	}
 
 	@Override
@@ -130,7 +130,7 @@ public class PaneComponent implements IBlockComponent, ISmartCull
 
 	public final boolean canPaneConnectToBlock(Block block, IBlockState state)
 	{
-		return block.isFullBlock(state) || block == Blocks.glass || block == Blocks.stained_glass || block == Blocks.stained_glass_pane
+		return block.isFullBlock(state) || block == Blocks.GLASS || block == Blocks.STAINED_GLASS || block == Blocks.STAINED_GLASS_PANE
 				|| block instanceof BlockPane;
 	}
 

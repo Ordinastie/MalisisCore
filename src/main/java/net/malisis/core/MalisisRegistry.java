@@ -569,21 +569,21 @@ public class MalisisRegistry
 
 	public static void registerBlockComponents()
 	{
-		registryStream(Block.blockRegistry).filter(IComponentProvider.class::isInstance)
-											.map(IComponentProvider.class::cast)
-											.forEach(p -> p.getComponents()
-															.stream()
-															.filter(IRegisterComponent.class::isInstance)
-															.map(IRegisterComponent.class::cast)
-															.forEach(comp -> comp.register(p)));
+		registryStream(Block.REGISTRY).filter(IComponentProvider.class::isInstance)
+										.map(IComponentProvider.class::cast)
+										.forEach(p -> p.getComponents()
+														.stream()
+														.filter(IRegisterComponent.class::isInstance)
+														.map(IRegisterComponent.class::cast)
+														.forEach(comp -> comp.register(p)));
 
 	}
 
 	@SideOnly(Side.CLIENT)
 	public static void registerRenderers()
 	{
-		Block.blockRegistry.forEach(instance::registerRenderer);
-		Item.itemRegistry.forEach(instance::registerRenderer);
+		Block.REGISTRY.forEach(instance::registerRenderer);
+		Item.REGISTRY.forEach(instance::registerRenderer);
 	}
 
 	public static SoundEvent registerSound(String modId, String soundId)
@@ -592,7 +592,7 @@ public class MalisisRegistry
 		try
 		{
 			registerSound.invoke(null, rl.toString());
-			return SoundEvent.soundEventRegistry.getObject(rl);
+			return SoundEvent.REGISTRY.getObject(rl);
 		}
 		catch (ReflectiveOperationException e)
 		{

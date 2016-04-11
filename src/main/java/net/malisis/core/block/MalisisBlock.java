@@ -213,7 +213,6 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	{
 		if (state != null && MalisisCore.isClient())
 		{
-			//throw new IllegalStateException();
 			Icon icon = Icon.from(state);
 			addComponent((IIconProvider) () -> icon);
 		}

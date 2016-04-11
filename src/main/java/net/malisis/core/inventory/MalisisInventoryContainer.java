@@ -471,7 +471,7 @@ public class MalisisInventoryContainer extends Container
 		ItemUtils.ItemStackSplitter iss = new ItemUtils.ItemStackSplitter(pickedItemStack);
 		iss.split(fullStack ? ItemUtils.FULL_STACK : 1);
 
-		owner.dropPlayerItemWithRandomChoice(iss.split, true);
+		owner.dropItem(iss.split, true);
 		setPickedItemStack(iss.source);
 
 		return iss.source;
@@ -625,7 +625,7 @@ public class MalisisInventoryContainer extends Container
 		slot.setItemStack(iss.source);
 		//if (slot.hasChanged())
 		slot.onSlotChanged();
-		owner.dropPlayerItemWithRandomChoice(iss.split, true);
+		owner.dropItem(iss.split, true);
 
 		if (iss.amount != 0)
 			slot.onPickupFromSlot(owner, iss.split);

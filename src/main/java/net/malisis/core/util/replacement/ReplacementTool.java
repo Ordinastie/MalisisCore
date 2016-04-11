@@ -120,7 +120,7 @@ public class ReplacementTool
 				originalItems.put((Item) replacement, (Item) vanilla);
 
 			replaceIn(CraftingManager.getInstance().getRecipeList(), vanilla, replacement);
-			replaceIn(StatList.allStats, vanilla, replacement);
+			replaceIn(StatList.ALL_STATS, vanilla, replacement);
 
 			//ReplacementTool.doubleCheck(registry, replacement, vanilla);
 		}

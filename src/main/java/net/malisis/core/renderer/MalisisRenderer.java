@@ -329,7 +329,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	@Override
 	public synchronized void renderTileEntityAt(T te, double x, double y, double z, float partialTick, int destroyStage)
 	{
-		if (te.getWorld().getBlockState(te.getPos()).getBlock() == Blocks.air)
+		if (te.getWorld().getBlockState(te.getPos()).getBlock() == Blocks.AIR)
 			return;
 		this.buffer = Tessellator.getInstance().getBuffer();
 		set(te, partialTick);
@@ -427,7 +427,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 			GlStateManager.translate(data[0], data[1], data[2]);
 
-			bindTexture(TextureMap.locationBlocksTexture);
+			bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
 			startDrawing();
 		}
@@ -438,7 +438,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 			GlStateManager.translate(data[0], data[1], data[2]);
 
-			bindTexture(TextureMap.locationBlocksTexture);
+			bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
 			startDrawing();
 		}

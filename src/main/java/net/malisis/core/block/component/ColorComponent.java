@@ -128,7 +128,7 @@ public class ColorComponent implements IBlockComponent, IRegisterComponent
 	 */
 	public int getRenderColor(Block block, IBlockState state)
 	{
-		return ItemDye.dyeColors[getColor(state).getDyeDamage()];
+		return ItemDye.DYE_COLORS[getColor(state).getDyeDamage()];
 	}
 
 	/**

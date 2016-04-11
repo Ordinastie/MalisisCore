@@ -230,7 +230,7 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 
 	public static boolean isSlab(Block block)
 	{
-		if (block == Blocks.stone_slab || block == Blocks.wooden_slab || block == Blocks.stone_slab2)
+		if (block == Blocks.STONE_SLAB || block == Blocks.STONE_SLAB2 || block == Blocks.WOODEN_SLAB)
 			return true;
 
 		return IComponent.getComponent(SlabComponent.class, block) != null;

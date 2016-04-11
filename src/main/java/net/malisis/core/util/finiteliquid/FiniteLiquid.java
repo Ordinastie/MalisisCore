@@ -115,7 +115,7 @@ public abstract class FiniteLiquid extends MalisisBlock
 
 	public int getAmount(MBlockState state)
 	{
-		if (state.getBlock() == Blocks.air)
+		if (state.getBlock() == Blocks.AIR)
 			return 0;
 		else if (state.getBlock() != this)
 			return -1;
@@ -222,7 +222,7 @@ public abstract class FiniteLiquid extends MalisisBlock
 				return false;
 
 			MBlockState state = new MBlockState(world, pos);
-			return state.getBlock() == fl || state.getBlock() == Blocks.air;
+			return state.getBlock() == fl || state.getBlock() == Blocks.AIR;
 		}
 
 		public void parse()

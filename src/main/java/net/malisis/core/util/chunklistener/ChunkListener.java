@@ -81,7 +81,7 @@ public class ChunkListener implements IChunkBlockHandler
 
 			if (!state.getPos().equals(newState.getPos()))
 			{
-				if (newState.getBlock() == Blocks.air)
+				if (newState.getBlock() == Blocks.AIR)
 					cancel |= !block.onBlockRemoved(world, state.getPos(), newState.getPos());
 				else
 					cancel |= !block.onBlockSet(world, state.getPos(), newState);

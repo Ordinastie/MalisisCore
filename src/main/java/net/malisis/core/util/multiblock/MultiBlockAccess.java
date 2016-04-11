@@ -74,7 +74,7 @@ public class MultiBlockAccess implements IBlockAccess
 		if (state != null)
 			return state.getBlockState();
 
-		return world != null ? world.getBlockState(pos) : Blocks.air.getDefaultState();
+		return world != null ? world.getBlockState(pos) : Blocks.AIR.getDefaultState();
 	}
 
 	@Override

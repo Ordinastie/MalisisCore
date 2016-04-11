@@ -73,7 +73,7 @@ import org.lwjgl.opengl.GL11;
  */
 public abstract class MalisisGui extends GuiScreen
 {
-	public static GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.locationBlocksTexture);
+	public static GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
 	/** Whether or not to cancel the next gui close event. */
 	public static boolean cancelClose = false;

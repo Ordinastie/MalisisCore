@@ -132,7 +132,7 @@ public class MBlockState
 
 	public boolean isAir()
 	{
-		return getBlockState().getMaterial() == Material.air;
+		return getBlockState().getMaterial() == Material.AIR;
 	}
 
 	public MBlockState offset(BlockPos pos)
@@ -167,7 +167,7 @@ public class MBlockState
 
 	public void breakBlock(World world, int flag)
 	{
-		world.setBlockState(pos, Blocks.air.getDefaultState(), flag);
+		world.setBlockState(pos, Blocks.AIR.getDefaultState(), flag);
 	}
 
 	public boolean matchesWorld(IBlockAccess world)
@@ -235,7 +235,7 @@ public class MBlockState
 		if (state == null)
 			return nbt;
 
-		nbt.setString(blockName, Block.blockRegistry.getNameForObject(state.getBlock()).toString());
+		nbt.setString(blockName, Block.REGISTRY.getNameForObject(state.getBlock()).toString());
 		nbt.setInteger(metadataName, state.getBlock().getMetaFromState(state));
 		return nbt;
 	}
@@ -273,7 +273,7 @@ public class MBlockState
 		public boolean apply(MBlockState state)
 		{
 			if (block == null)
-				return state.getBlock() != Blocks.air;
+				return state.getBlock() != Blocks.AIR;
 			else
 				return state.getBlock() == block;
 		}
