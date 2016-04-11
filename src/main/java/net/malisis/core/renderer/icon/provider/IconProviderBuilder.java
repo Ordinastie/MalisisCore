@@ -36,6 +36,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 
@@ -65,7 +66,7 @@ public class IconProviderBuilder
 	Map<EnumFacing, Icon> sidesIcons = Maps.newHashMap();
 
 	//IStateIconProvider
-	Table<IProperty<?>, Object, Icon> stateIcons;
+	Table<IProperty<?>, Object, Icon> stateIcons = HashBasedTable.create();
 	IProperty<?> currentProperty;
 
 	//WALL
@@ -198,6 +199,11 @@ public class IconProviderBuilder
 		return this;
 	}
 
+	public IconProviderBuilder withValue(Object value, String iconName)
+	{
+		return withValue(value, icon(iconName));
+	}
+
 	/**
 	 * Sets the icon to use for WALL type blocks (with {@link WallComponent}) for the inside.<br>
 	 * The defaultIcon is used for the outside.
@@ -225,7 +231,13 @@ public class IconProviderBuilder
 	private IStatesIconProvider getStateIconProvider()
 	{
 		return state -> {
-			return state.getProperties().keySet().stream().map(prop -> stateIcons.get(prop, state.getValue(prop))).findFirst().orElse(null);
+			return state.getProperties()
+						.keySet()
+						.stream()
+						.map(prop -> stateIcons.get(prop, state.getValue(prop)))
+						.filter(Objects::nonNull)
+						.findFirst()
+						.orElse(defaultIcon);
 		};
 	}
 
