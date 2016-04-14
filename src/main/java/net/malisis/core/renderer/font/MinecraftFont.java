@@ -78,7 +78,7 @@ public class MinecraftFont extends MalisisFont
 			charWidthField = AsmUtils.changeFieldAccess(FontRenderer.class, "charWidth", srg, true);
 		}
 		Field glyphWidthField = AsmUtils.changeFieldAccess(FontRenderer.class, "glyphWidth", "field_78287_e");
-		Field unicodePagesField = AsmUtils.changeFieldAccess(FontRenderer.class, "unicodePageLocations", "field_111274_c");
+		Field unicodePagesField = AsmUtils.changeFieldAccess(FontRenderer.class, "UNICODE_PAGE_LOCATIONS", "field_111274_c");
 
 		try
 		{
