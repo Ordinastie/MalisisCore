@@ -39,7 +39,6 @@ import net.malisis.core.renderer.model.MalisisModel;
 import net.malisis.core.renderer.model.loader.TextureModelLoader;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.TransformBuilder;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -114,7 +113,7 @@ public class DefaultRenderer
 		}
 
 		@Override
-		public Matrix4f getTransform(ItemCameraTransforms.TransformType tranformType)
+		public Matrix4f getTransform(net.minecraft.item.Item item, TransformType tranformType)
 		{
 			switch (tranformType)
 			{
@@ -212,7 +211,7 @@ public class DefaultRenderer
 		}
 
 		@Override
-		public Matrix4f getTransform(ItemCameraTransforms.TransformType tranformType)
+		public Matrix4f getTransform(net.minecraft.item.Item item, TransformType tranformType)
 		{
 
 			Matrix4f ground = new TransformBuilder().scale(0.5F).get();

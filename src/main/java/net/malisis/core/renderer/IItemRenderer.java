@@ -57,7 +57,7 @@ public interface IItemRenderer
 
 	public void setTransformType(TransformType transformType);
 
-	public Matrix4f getTransform(TransformType tranformType);
+	public Matrix4f getTransform(Item item, TransformType tranformType);
 
 	public boolean isGui3d();
 
@@ -85,7 +85,7 @@ public interface IItemRenderer
 				return Pair.of(this, null);
 
 			itemRenderer.setTransformType(transformType);
-			return Pair.of(this, itemRenderer.getTransform(transformType));
+			return Pair.of(this, itemRenderer.getTransform(item, transformType));
 		}
 
 		@Override

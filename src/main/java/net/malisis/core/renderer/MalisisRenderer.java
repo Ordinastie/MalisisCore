@@ -308,7 +308,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	}
 
 	@Override
-	public Matrix4f getTransform(TransformType tranformType)
+	public Matrix4f getTransform(Item item, TransformType tranformType)
 	{
 		this.tranformType = tranformType;
 		return null;
