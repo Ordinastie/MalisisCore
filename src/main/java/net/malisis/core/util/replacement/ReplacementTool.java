@@ -25,6 +25,7 @@
 package net.malisis.core.util.replacement;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,9 +38,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.IntIdentityHashBiMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
+import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
 import net.minecraftforge.fml.common.registry.GameData;
+import net.minecraftforge.fml.common.registry.IForgeRegistryEntry;
+import net.minecraftforge.fml.common.registry.RegistryDelegate.Delegate;
 
 /**
  * @author Ordinastie
@@ -54,9 +59,11 @@ public class ReplacementTool
 	/** List of original {@link Item} being replaced. The key is the replacement, the value is the Vanilla {@code Item}. */
 	private HashMap<Item, Item> originalItems = new HashMap<>();
 
-	//	private Class<?>[] types = { Integer.TYPE, ResourceLocation.class, Object.class };
-	//	private Method addObjectRaw = AsmUtils.changeMethodAccess(FMLControlledNamespacedRegistry.class, "addObjectRaw", types);
-	//	private Method setName = AsmUtils.changeMethodAccess(Delegate.class, "setResourceName", ResourceLocation.class);
+	private Class<?>[] types = { Integer.TYPE, ResourceLocation.class, IForgeRegistryEntry.class };
+	private Method addObjectRaw = AsmUtils.changeMethodAccess(FMLControlledNamespacedRegistry.class, "addObjectRaw", types);
+	private Method setName = AsmUtils.changeMethodAccess(Delegate.class, "setName", ResourceLocation.class);
+	private Field underlyingMap = AsmUtils.changeFieldAccess(RegistryNamespaced.class, "underlyingIntegerMap", "field_148759_a");
+	private Field objectArray = AsmUtils.changeFieldAccess(IntIdentityHashBiMap.class, "objectArray", "????");
 
 	private ReplacementTool()
 	{
@@ -94,17 +101,24 @@ public class ReplacementTool
 	private void replaceVanilla(int id, String registryName, String fieldName, String srgFieldName, Object replacement, Object vanilla)
 	{
 		boolean block = replacement instanceof Block;
-		//RegistryNamespaced<ResourceLocation, ?> registry = block ? Block.blockRegistry : Item.itemRegistry;
+		RegistryNamespaced<ResourceLocation, ?> registry = block ? Block.REGISTRY : Item.REGISTRY;
 		ItemBlock ib = block ? (ItemBlock) Item.getItemFromBlock((Block) vanilla) : null;
 		Class<?> clazz = block ? Blocks.class : Items.class;
-		//ResourceLocation rl = new ResourceLocation("minecraft", registryName);
+		ResourceLocation rl = new ResourceLocation("minecraft", registryName);
 
 		try
 		{
-			//			//set the delegate name manually
-			//			setName.invoke(block ? ((Block) replacement).delegate : ((Item) replacement).delegate, rl);
-			//			//add the replacement into the registry
-			//			addObjectRaw.invoke(registry, id, rl, replacement);
+			//set the delegate name manually
+			setName.invoke(block ? ((Block) replacement).delegate : ((Item) replacement).delegate, rl);
+			//add the replacement into the registry
+			addObjectRaw.invoke(registry, id, rl, replacement);
+
+			//remove the vanilla object from the underlying map, or it will take its place back when the capacity changes and is rehashed.
+			Object[] objArray = (Object[]) objectArray.get(underlyingMap.get(registry));
+			for (int i = 0; i < objArray.length; i++)
+				if (objArray[i] == vanilla)
+					objArray[i] = null;
+
 			Field f = AsmUtils.changeFieldAccess(clazz, fieldName, srgFieldName);
 			f.set(null, replacement);
 
