@@ -42,8 +42,8 @@ import com.google.common.collect.Maps;
 
 /**
  * Extension of {@link TextureAtlasSprite} to allow common operations like clipping and offset.<br>
- * Icons should be acquired by using the {@link #from(String)} method so that multiple call with the same name return the same
- * {@link Icon} instance.<br>
+ * Icons should be acquired by using the {@link #from(String)} method so that multiple call with the same name return the same {@link Icon}
+ * instance.<br>
  * For non registered {@link Icon}, use {@link #MalisisIcon(String, boolean)} constructor.
  *
  * @author Ordinastie
@@ -88,7 +88,7 @@ public class Icon extends TextureAtlasSprite
 		maxU = 1;
 		maxV = 1;
 
-		if (register && !StringUtils.isEmpty(name))
+		if (register && !StringUtils.isEmpty(name) && !registeredIcons.containsKey(name))
 			registeredIcons.put(name, this);
 	}
 
@@ -141,8 +141,8 @@ public class Icon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Adds a {@link Icon} to be dependant on this one. Will call {@link #initIcon(Icon, int, int, int, int, boolean)} when
-	 * stiched to the sheet.
+	 * Adds a {@link Icon} to be dependant on this one. Will call {@link #initIcon(Icon, int, int, int, int, boolean)} when stiched to the
+	 * sheet.
 	 *
 	 * @param icon the icon
 	 */
@@ -337,8 +337,8 @@ public class Icon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Clips this {@link Icon}. <b>offsetXFactor</b>, <b>offsetYFactor</b>, <b>widthFactor</b> and <b>heightFactor</b> are values
-	 * from zero to one.
+	 * Clips this {@link Icon}. <b>offsetXFactor</b>, <b>offsetYFactor</b>, <b>widthFactor</b> and <b>heightFactor</b> are values from zero
+	 * to one.
 	 *
 	 * @param offsetXFactor the x factor for offset
 	 * @param offsetYFactor the y factor for offset
@@ -450,6 +450,9 @@ public class Icon extends TextureAtlasSprite
 	 */
 	public static Icon from(String name)
 	{
+		if (name.indexOf("minecraft:") == 0)
+			return new VanillaIcon(name);
+
 		if (registeredIcons.get(name) != null)
 			return registeredIcons.get(name);
 		return new Icon(name);
@@ -486,5 +489,16 @@ public class Icon extends TextureAtlasSprite
 	public static Icon from(Item item)
 	{
 		return new VanillaIcon(item);
+	}
+
+	/**
+	 * Gets the {@link Icon} registered with specified name.
+	 *
+	 * @param name the name
+	 * @return the registered
+	 */
+	public static Icon getRegistered(String name)
+	{
+		return registeredIcons.get(name);
 	}
 }

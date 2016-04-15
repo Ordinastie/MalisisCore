@@ -43,6 +43,12 @@ public class VanillaIcon extends Icon
 	protected Item item;
 	protected IBlockState blockState;
 	protected int metadata;
+	protected String name;
+
+	public VanillaIcon(String name)
+	{
+		this.name = name;
+	}
 
 	public VanillaIcon(Block block)
 	{
@@ -67,7 +73,14 @@ public class VanillaIcon extends Icon
 
 	protected TextureAtlasSprite getIcon()
 	{
-		TextureAtlasSprite icon = item != null ? getItemIcon() : getBlockIcon();
+		TextureAtlasSprite icon = null;
+		if (name != null)
+			icon = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(name);
+		else if (item != null)
+			icon = getItemIcon();
+		else if (blockState != null)
+			icon = getBlockIcon();
+
 		return icon == null ? missing : icon;
 	}
 
@@ -90,7 +103,7 @@ public class VanillaIcon extends Icon
 	{}
 
 	@Override
-	public void copyFrom(TextureAtlasSprite atlasSpirit)
+	public void copyFrom(TextureAtlasSprite atlasSprite)
 	{}
 
 	@Override
