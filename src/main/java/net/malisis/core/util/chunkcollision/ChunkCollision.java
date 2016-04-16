@@ -69,14 +69,14 @@ public class ChunkCollision
 	//#region getCollisionBoundinBoxes
 	/**
 	 * Gets the collision bounding boxes for the intersecting chunks.<br>
-	 * Called via ASM from {@link World#getCollidingBoundingBoxes(Entity, AxisAlignedBB)}
+	 * Called via ASM from {@link World#getCollisionBoxes(Entity, AxisAlignedBB)}
 	 *
 	 * @param world the world
 	 * @param mask the mask
 	 * @param list the list
 	 * @param entity the entity
 	 */
-	public void getCollisionBoundingBoxes(World world, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity entity)
+	public void getCollisionBoxes(World world, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity entity)
 	{
 		CollisionProcedure procedure = new CollisionProcedure(mask, list);
 
@@ -89,7 +89,7 @@ public class ChunkCollision
 	//#region getRayTraceResult
 	/**
 	 * Sets the ray trace infos.<br>
-	 * Called via ASM at the beginning of {@link World#rayTraceBlocks(Vec3, Vec3, boolean, boolean, boolean)}
+	 * Called via ASM at the beginning of {@link World#rayTraceBlocks(Vec3d, Vec3d, boolean, boolean, boolean)}
 	 *
 	 * @param src the src
 	 * @param dest the dest
@@ -115,7 +115,7 @@ public class ChunkCollision
 
 	/**
 	 * Gets the ray trace result.<br>
-	 * Called via ASM from {@link World#rayTraceBlocks(Vec3, Vec3, boolean, boolean, boolean)} before each return.
+	 * Called via ASM from {@link World#rayTraceBlocks(Vec3d, Vec3d, boolean, boolean, boolean)} before each return.
 	 *
 	 * @param world the world
 	 * @param mop the mop
@@ -165,8 +165,8 @@ public class ChunkCollision
 	//#region canPlaceBlockAt
 	/**
 	 * Checks whether the block can be placed at the position.<br>
-	 * Called via ASM from {@link ItemBlock#onItemUse(ItemStack, EntityPlayer, World, BlockPos, EnumFacing, float, float, float)} at the
-	 * beginning.<br>
+	 * Called via ASM from {@link ItemBlock#onItemUse(ItemStack, EntityPlayer, World, BlockPos, EnumHand, EnumFacing, float, float, float)}
+	 * at the beginning.<br>
 	 * Tests the block bounding box (boxes if {@link IChunkCollidable}) against the occupied blocks position, then against all the bounding
 	 * boxes of the {@link IChunkCollidable} available for those chunks.
 	 *
@@ -293,7 +293,8 @@ public class ChunkCollision
 
 			if (state.getBlock() instanceof IChunkCollidable)
 			{
-				AxisAlignedBB[] aabbs = ((IChunkCollidable) state.getBlock()).getCollisionBoundingBoxes(world, state.getPos(),
+				AxisAlignedBB[] aabbs = ((IChunkCollidable) state.getBlock()).getCollisionBoundingBoxes(world,
+						state.getPos(),
 						state.getBlockState());
 				for (AxisAlignedBB aabb : aabbs)
 				{

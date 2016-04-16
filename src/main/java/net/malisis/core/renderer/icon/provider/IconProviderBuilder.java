@@ -134,7 +134,6 @@ public class IconProviderBuilder
 	/**
 	 * Sets the {@link IIconProvider} to use connected textures based on the defaultIcon.
 	 *
-	 * @param icon the icon
 	 * @return the icon provider builder
 	 */
 	public IconProviderBuilder connected()

@@ -63,7 +63,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 
 		AsmHook ah = new AsmHook(getCubes);
 
-		//   public static getCollisionBoundingBoxes(Lnet/minecraft/world/World;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;)V
+		//   public static getCollisionBoxes(Lnet/minecraft/world/World;Lnet/minecraft/util/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;)V
 		//ALOAD 0 this,
 		//ALOAD 2 param2 (AABB)
 		//ALOAD 3
@@ -75,7 +75,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		insert.add(new VarInsnNode(ALOAD, 2));
 		insert.add(new VarInsnNode(ALOAD, 3));
 		insert.add(new VarInsnNode(ALOAD, 1));
-		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "getCollisionBoundingBoxes",
+		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "getCollisionBoxes",
 				"(Lnet/minecraft/world/World;Lnet/minecraft/util/math/AxisAlignedBB;Ljava/util/List;Lnet/minecraft/entity/Entity;)V"));
 
 		//ALOAD 0

@@ -1288,7 +1288,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	}
 
 	/**
-	 * Gets the current {@link EnumWorldBlockLayer}.
+	 * Gets the current {@link BlockRenderLayer}.
 	 *
 	 * @return the render layer
 	 */

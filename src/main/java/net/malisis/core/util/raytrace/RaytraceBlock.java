@@ -125,7 +125,7 @@ public class RaytraceBlock extends Raytrace
 	/**
 	 * Does the raytracing.
 	 *
-	 * @return {@link MovingObjectPosition} with <code>typeOfHit</code> <b>BLOCK</b> if a ray hits a block in the way, or <b>MISS</b> if it
+	 * @return {@link RayTraceResult} with <code>typeOfHit</code> <b>BLOCK</b> if a ray hits a block in the way, or <b>MISS</b> if it
 	 *         reaches <code>dest</code> without any hit
 	 */
 	public RayTraceResult trace()

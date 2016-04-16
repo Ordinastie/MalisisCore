@@ -325,7 +325,7 @@ public class RaytraceWorld
 
 	/**
 	 * Raytraces inside an actual block area. Calls
-	 * {@link Block#collisionRayTrace(World, BlockPos, net.minecraft.util.Vec3, net.minecraft.util.Vec3)}
+	 * {@link Block#collisionRayTrace(IBlockState, World, BlockPos, net.minecraft.util.math.Vec3d, net.minecraft.util.math.Vec3d)}
 	 *
 	 * @param pos the pos
 	 * @param exit the exit

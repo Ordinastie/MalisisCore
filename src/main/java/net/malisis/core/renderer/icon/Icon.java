@@ -44,7 +44,7 @@ import com.google.common.collect.Maps;
  * Extension of {@link TextureAtlasSprite} to allow common operations like clipping and offset.<br>
  * Icons should be acquired by using the {@link #from(String)} method so that multiple call with the same name return the same {@link Icon}
  * instance.<br>
- * For non registered {@link Icon}, use {@link #MalisisIcon(String, boolean)} constructor.
+ * For non registered {@link Icon}, use {@link #Icon(String, boolean)} constructor.
  *
  * @author Ordinastie
  *
@@ -74,7 +74,7 @@ public class Icon extends TextureAtlasSprite
 	/** Rotation value (clockwise). */
 	protected int rotation = 0;
 
-	/** Lists of MalisisIcon depending on this one. */
+	/** Lists of Icon depending on this one. */
 	protected Set<Icon> dependants = new HashSet<>();
 
 	/**
@@ -420,7 +420,7 @@ public class Icon extends TextureAtlasSprite
 	}
 
 	/**
-	 * Creates a new {@link Icon} from this <code>MalisisIcon</code>.
+	 * Creates a new {@link Icon} from this <code>Icon</code>.
 	 *
 	 * @return the new {@link Icon}
 	 */

@@ -64,11 +64,9 @@ public class ConnectedIconsProvider implements IBlockIconProvider
 	private boolean initialized = false;
 
 	/**
-	 * Instantiates a new {@link ConnectedIconsProvider} using given icons.<br>
-	 * For server safe call, use factory {@link ConnectedIconsProvider#from(String)}.
+	 * Instantiates a new {@link ConnectedIconsProvider} using the {@link IconProviderBuilder}.
 	 *
-	 * @param part1 the part1
-	 * @param part2 the part2
+	 * @param builder the builder
 	 */
 	public ConnectedIconsProvider(IconProviderBuilder builder)
 	{
