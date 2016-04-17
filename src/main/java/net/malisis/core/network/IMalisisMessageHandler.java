@@ -25,10 +25,13 @@
 package net.malisis.core.network;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * @author Ordinastie
@@ -58,5 +61,21 @@ public interface IMalisisMessageHandler<REQ extends IMessage, REPLY extends IMes
 	public default boolean useTask()
 	{
 		return true;
+	}
+
+	public static World getWorld(MessageContext ctx)
+	{
+		if (ctx.side == Side.SERVER)
+			return ctx.getServerHandler().playerEntity.worldObj;
+		else
+			return Minecraft.getMinecraft().theWorld;
+	}
+
+	public static EntityPlayer getPlayer(MessageContext ctx)
+	{
+		if (ctx.side == Side.SERVER)
+			return ctx.getServerHandler().playerEntity;
+		else
+			return Minecraft.getMinecraft().thePlayer;
 	}
 }
