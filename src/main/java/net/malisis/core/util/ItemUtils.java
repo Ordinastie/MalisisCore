@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import net.malisis.core.block.MalisisBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
@@ -245,6 +246,10 @@ public class ItemUtils
 
 		if (block instanceof MalisisBlock)
 			return ((MalisisBlock) block).getStateFromItemStack(itemStack);
+
+		//special case for pistons, because Mojang.
+		if (block == Blocks.PISTON)
+			return block.getDefaultState();
 
 		return block.getStateFromMeta(itemStack.getItem().getMetadata(itemStack.getMetadata()));
 	}
