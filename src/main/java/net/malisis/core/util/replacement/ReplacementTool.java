@@ -117,7 +117,7 @@ public class ReplacementTool
 			Object[] objArray = (Object[]) objectArray.get(underlyingMap.get(registry));
 			for (int i = 0; i < objArray.length; i++)
 				if (objArray[i] == vanilla)
-					objArray[i] = null;
+					objArray[i] = replacement;
 
 			Field f = AsmUtils.changeFieldAccess(clazz, fieldName, srgFieldName);
 			f.set(null, replacement);
