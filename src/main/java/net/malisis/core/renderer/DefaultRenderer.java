@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.vecmath.Matrix4f;
 
 import net.malisis.core.block.IBoundingBox;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.face.SouthFace;
@@ -138,6 +139,13 @@ public class DefaultRenderer
 		@Override
 		public void render()
 		{
+			IRenderComponent rc = IComponent.getComponent(IRenderComponent.class, block);
+			if (rc != null)
+			{
+				rc.render(block, this);
+				return;
+			}
+
 			AxisAlignedBB[] aabbs;
 			if (block instanceof IBoundingBox)
 			{
