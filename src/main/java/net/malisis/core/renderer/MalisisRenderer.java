@@ -66,6 +66,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -92,7 +93,6 @@ import com.google.common.collect.Sets;
  * @author Ordinastie
  *
  */
-@SuppressWarnings("deprecation")
 public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRenderer<T> implements IBlockRenderer, IRenderWorldLast
 {
 	/** Reference to Tessellator.isDrawing field **/
@@ -283,7 +283,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	public void set(T te, float partialTick)
 	{
-		set(super.getWorld(), te.getBlockType(), te.getPos(), te.getWorld().getBlockState(te.getPos()));
+		set(te.getWorld(), te.getBlockType(), te.getPos(), te.getWorld().getBlockState(te.getPos()));
 		this.partialTick = partialTick;
 		this.tileEntity = te;
 	}
@@ -391,13 +391,13 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	@Override
 	public synchronized void renderTileEntityAt(T te, double x, double y, double z, float partialTick, int destroyStage)
 	{
-		//		if (te.getWorld().getBlockState(te.getPos()).getBlock() == Blocks.AIR)
-		//			return;
+		if (te.getWorld().getBlockState(te.getPos()).getBlock() == Blocks.AIR)
+			return;
 		this.buffer = Tessellator.getInstance().getBuffer();
 		set(te, partialTick);
 		prepare(RenderType.TILE_ENTITY, x, y, z);
-		//if (checkBlock())
-		render();
+		if (checkBlock())
+			render();
 		//TODO
 		//		if (getBlockDamage)
 		//		{
@@ -1175,6 +1175,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 * @param params the params
 	 * @return the base brightness
 	 */
+	@SuppressWarnings("deprecation")
 	protected int getBaseBrightness(RenderParameters params)
 	{
 		if (!params.useEnvironmentBrightness.get())
