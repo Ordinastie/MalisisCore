@@ -32,6 +32,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
@@ -67,8 +68,7 @@ public interface IMalisisMessageHandler<REQ extends IMessage, REPLY extends IMes
 	{
 		if (ctx.side == Side.SERVER)
 			return ctx.getServerHandler().playerEntity.worldObj;
-		else
-			return Minecraft.getMinecraft().theWorld;
+		return getClientWorld();
 	}
 
 	public static EntityPlayer getPlayer(MessageContext ctx)
@@ -76,6 +76,18 @@ public interface IMalisisMessageHandler<REQ extends IMessage, REPLY extends IMes
 		if (ctx.side == Side.SERVER)
 			return ctx.getServerHandler().playerEntity;
 		else
-			return Minecraft.getMinecraft().thePlayer;
+			return getClientPlayer();
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static EntityPlayer getClientPlayer()
+	{
+		return Minecraft.getMinecraft().thePlayer;
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static World getClientWorld()
+	{
+		return Minecraft.getMinecraft().theWorld;
 	}
 }
