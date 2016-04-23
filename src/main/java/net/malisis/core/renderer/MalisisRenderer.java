@@ -25,6 +25,8 @@
 package net.malisis.core.renderer;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Set;
 
 import javax.vecmath.Matrix4f;
 
@@ -81,6 +83,8 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 import org.lwjgl.opengl.GL11;
+
+import com.google.common.collect.Sets;
 
 /**
  * Base class for rendering. Handles the rendering. Provides easy registration of the renderer, and automatically sets up the context for
@@ -141,6 +145,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	protected int baseBrightness;
 	/** An override texture set by the renderer. */
 	protected MalisisIcon overrideTexture;
+
+	/** List of classes the Block is allowed to be. */
+	private Set<Class<?>> ensureBlocks = Sets.newHashSet();
 
 	/** Whether the damage for the blocks should be handled by this {@link MalisisRenderer} (for TESR). */
 	protected boolean getBlockDamage = false;
@@ -266,6 +273,30 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 			this.set(state);
 	}
 
+	/**
+	 * Limits the classes the block can be for this {@link MalisisRenderer}.
+	 *
+	 * @param blockClasses the block classes
+	 */
+	protected void ensureBlock(Class<?>... blockClasses)
+	{
+		ensureBlocks.clear();
+		ensureBlocks.addAll(Arrays.asList(blockClasses));
+	}
+
+	/**
+	 * Check if the current block is allowed. If not, no rendering will be done.
+	 *
+	 * @return true, if successful
+	 */
+	private boolean checkBlock()
+	{
+		if (block == null || ensureBlocks.size() == 0)
+			return true;
+
+		return ensureBlocks.contains(block.getClass());
+	}
+
 	// #end
 
 	//#region IBlockRenderer
@@ -275,7 +306,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		this.wr = wr;
 		set(world, state.getBlock(), pos, state);
 		prepare(RenderType.BLOCK);
-		render();
+		if (checkBlock())
+			render();
 		clean();
 
 		return vertexDrawn;
@@ -290,7 +322,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		this.wr = Tessellator.getInstance().getWorldRenderer();
 		set(itemStack);
 		prepare(RenderType.ITEM);
-		render();
+		if (checkBlock())
+			render();
 		clean();
 		return true;
 	}
@@ -334,7 +367,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		this.wr = Tessellator.getInstance().getWorldRenderer();
 		set(te, partialTick);
 		prepare(RenderType.TILE_ENTITY, x, y, z);
-		render();
+		if (checkBlock())
+			render();
 		//TODO
 		//		if (getBlockDamage)
 		//		{
@@ -761,7 +795,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (vertexCount != 4 && renderType == RenderType.BLOCK)
 		{
 			MalisisCore.log.error("[MalisisRenderer] Attempting to render a face containing {} vertexes in BLOCK for {}. Ignored",
-					vertexCount, block);
+					vertexCount,
+					block);
 			return;
 		}
 
@@ -780,8 +815,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 		//use normals if available
 		if ((renderType == RenderType.ITEM || params.useNormals.get()) && params.direction.get() != null)
-			wr.putNormal(params.direction.get().getFrontOffsetX(), params.direction.get().getFrontOffsetY(), params.direction.get()
-					.getFrontOffsetZ());
+			wr.putNormal(params.direction.get().getFrontOffsetX(),
+					params.direction.get().getFrontOffsetY(),
+					params.direction.get().getFrontOffsetZ());
 
 		//we need to separate each face
 		if (drawMode == GL11.GL_POLYGON || drawMode == GL11.GL_LINE || drawMode == GL11.GL_LINE_STRIP || drawMode == GL11.GL_LINE_LOOP)
