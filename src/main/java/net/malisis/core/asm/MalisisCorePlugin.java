@@ -65,7 +65,7 @@ public class MalisisCorePlugin implements IFMLLoadingPlugin
 	@Override
 	public String getAccessTransformerClass()
 	{
-		return "net.malisis.core.asm.MalisisCoreAccessTransformer";
+		return null;
 	}
 
 }
