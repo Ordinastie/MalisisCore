@@ -181,9 +181,11 @@ public class ChunkCollision
 	public boolean canPlaceBlockAt(ItemStack itemStack, EntityPlayer player, World world, Block block, BlockPos pos, EnumHand hand, EnumFacing side)
 	{
 		AxisAlignedBB[] aabbs;
-		IBlockState state = DirectionalComponent.getPlacedState(ItemUtils.getStateFromItemStack(itemStack), side, player);
 		if (block instanceof IChunkCollidable)
+		{
+			IBlockState state = DirectionalComponent.getPlacedState(ItemUtils.getStateFromItemStack(itemStack), side, player);
 			aabbs = ((IChunkCollidable) block).getPlacedBoundingBox(world, pos, state, hand, side, player, itemStack);
+		}
 		else
 			aabbs = AABBUtils.getCollisionBoundingBoxes(world, block, pos);
 
