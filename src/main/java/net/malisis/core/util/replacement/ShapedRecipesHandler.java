@@ -52,16 +52,17 @@ public class ShapedRecipesHandler extends ReplacementHandler<ShapedRecipes>
 		{
 			if (isMatched(recipe.getRecipeOutput(), vanilla))
 			{
-				outputField.set(recipe, getItemStack(replacement));
+
+				outputField.set(recipe, getItemStack(replacement, recipe.getRecipeOutput()));
 				replaced = true;
 			}
 
 			ItemStack[] input = recipe.recipeItems;
 			for (int i = 0; i < input.length; i++)
 			{
-				if (input[i] instanceof ItemStack && isMatched(input[i], vanilla))
+				if (isMatched(input[i], vanilla))
 				{
-					input[i] = getItemStack(replacement);
+					input[i] = getItemStack(replacement, input[i]);
 					replaced = true;
 				}
 			}

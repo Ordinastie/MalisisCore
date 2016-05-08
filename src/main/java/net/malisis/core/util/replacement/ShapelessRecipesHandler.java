@@ -53,16 +53,16 @@ public class ShapelessRecipesHandler extends ReplacementHandler<ShapelessRecipes
 		{
 			if (isMatched(recipe.getRecipeOutput(), vanilla))
 			{
-				outputField.set(recipe, getItemStack(replacement));
+				outputField.set(recipe, getItemStack(replacement, recipe.getRecipeOutput()));
 				replaced = true;
 			}
 
 			List<ItemStack> input = recipe.recipeItems;
 			for (int i = 0; i < input.size(); i++)
 			{
-				if (input.get(i) instanceof ItemStack && isMatched(input.get(i), vanilla))
+				if (isMatched(input.get(i), vanilla))
 				{
-					input.set(i, getItemStack(replacement));
+					input.set(i, getItemStack(replacement, input.get(i)));
 					replaced = true;
 				}
 			}

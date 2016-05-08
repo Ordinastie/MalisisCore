@@ -53,12 +53,12 @@ public abstract class ReplacementHandler<T>
 	 * @param obj the replacement
 	 * @return the item stack
 	 */
-	protected ItemStack getItemStack(Object obj)
+	protected ItemStack getItemStack(Object obj, ItemStack original)
 	{
 		if (obj instanceof Item)
-			return new ItemStack((Item) obj);
+			return new ItemStack((Item) obj, original.stackSize, original.getItemDamage());
 		if (obj instanceof Block)
-			return new ItemStack((Block) obj);
+			return new ItemStack((Block) obj, original.stackSize, original.getItemDamage());
 
 		return null;
 	}

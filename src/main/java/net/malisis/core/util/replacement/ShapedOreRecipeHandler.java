@@ -54,7 +54,7 @@ public class ShapedOreRecipeHandler extends ReplacementHandler<ShapedOreRecipe>
 		{
 			if (isMatched(recipe.getRecipeOutput(), vanilla))
 			{
-				outputField.set(recipe, getItemStack(replacement));
+				outputField.set(recipe, getItemStack(replacement, recipe.getRecipeOutput()));
 				replaced = true;
 			}
 
@@ -64,7 +64,7 @@ public class ShapedOreRecipeHandler extends ReplacementHandler<ShapedOreRecipe>
 			{
 				if (input[i] instanceof ItemStack && isMatched((ItemStack) input[i], vanilla))
 				{
-					input[i] = getItemStack(replacement);
+					input[i] = getItemStack(replacement, (ItemStack) input[i]);
 					replaced = true;
 				}
 			}

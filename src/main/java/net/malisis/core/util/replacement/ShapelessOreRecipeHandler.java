@@ -55,7 +55,7 @@ public class ShapelessOreRecipeHandler extends ReplacementHandler<ShapelessOreRe
 		{
 			if (isMatched(recipe.getRecipeOutput(), vanilla))
 			{
-				outputField.set(recipe, getItemStack(replacement));
+				outputField.set(recipe, getItemStack(replacement, recipe.getRecipeOutput()));
 				replaced = true;
 			}
 
@@ -65,7 +65,7 @@ public class ShapelessOreRecipeHandler extends ReplacementHandler<ShapelessOreRe
 			{
 				if (input.get(i) instanceof ItemStack && isMatched((ItemStack) input.get(i), vanilla))
 				{
-					input.set(i, getItemStack(replacement));
+					input.set(i, getItemStack(replacement, (ItemStack) input.get(i)));
 					replaced = true;
 				}
 			}
