@@ -40,7 +40,7 @@ public class StatCraftingHandler extends ReplacementHandler<StatCrafting>
 	public StatCraftingHandler()
 	{
 		super(StatCrafting.class);
-		itemField = AsmUtils.changeFieldAccess(StatCrafting.class, "field_150960_a");
+		itemField = AsmUtils.changeFieldAccess(StatCrafting.class, "item", "field_150960_a");
 	}
 
 	@Override
