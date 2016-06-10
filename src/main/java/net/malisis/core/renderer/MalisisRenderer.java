@@ -165,7 +165,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	//#region Getters
 	public RenderType getRenderType()
 	{
-		return getRenderType();
+		return renderType;
 	}
 
 	public IBlockAccess getWorldAccess()
