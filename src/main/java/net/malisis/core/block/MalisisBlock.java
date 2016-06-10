@@ -418,7 +418,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 				return full;
 		}
 
-		return super.isFullCube(state);
+		return super.isFullBlock(state);
 	}
 
 	@Override
