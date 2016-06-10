@@ -435,4 +435,39 @@ public class AABBUtils
 
 		return aabbs;
 	}
+
+	public static AxisAlignedBB[] slice(int slices, float fx[][], float fy[][], float fz[][], boolean vertical)
+	{
+		float delta = 1 / (float) slices;
+		final int START = 0;
+		final int MIN = 0;
+		final int END = 1;
+		final int MAX = 1;
+
+		AxisAlignedBB[] aabb = new AxisAlignedBB[slices];
+		for (int i = 0; i < slices; i++)
+		{
+			float bx = fx[START][MIN] + (fx[END][MIN] - fx[START][MIN]) * i * delta;
+			float bX = fx[START][MAX] + (fx[END][MAX] - fx[START][MAX]) * i * delta;
+			float by = fy[START][MIN] + (fy[END][MIN] - fy[START][MIN]) * i * delta;
+			float bY = fy[START][MAX] + (fy[END][MAX] - fy[START][MAX]) * i * delta;
+			float bz = fz[START][MIN] + (fz[END][MIN] - fz[START][MIN]) * i * delta;
+			float bZ = fz[START][MAX] + (fz[END][MAX] - fz[START][MAX]) * i * delta;
+
+			if (vertical)
+			{
+				by = i * delta;
+				bY = by + delta;
+			}
+			else
+			{
+				bx = i * delta;
+				bX = bx + delta;
+			}
+
+			aabb[i] = new AxisAlignedBB(bx, by, bz, bX, bY, bZ);
+		}
+
+		return aabb;
+	}
 }
