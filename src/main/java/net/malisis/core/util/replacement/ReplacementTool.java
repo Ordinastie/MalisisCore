@@ -24,11 +24,6 @@
 
 package net.malisis.core.util.replacement;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.minecraft.block.Block;
@@ -45,6 +40,11 @@ import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
 import net.minecraftforge.fml.common.registry.GameData;
 import net.minecraftforge.fml.common.registry.IForgeRegistryEntry;
 import net.minecraftforge.fml.common.registry.RegistryDelegate.Delegate;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Ordinastie
@@ -63,7 +63,7 @@ public class ReplacementTool
 	private Method addObjectRaw = AsmUtils.changeMethodAccess(FMLControlledNamespacedRegistry.class, "addObjectRaw", types);
 	private Method setName = AsmUtils.changeMethodAccess(Delegate.class, "setName", ResourceLocation.class);
 	private Field underlyingMap = AsmUtils.changeFieldAccess(RegistryNamespaced.class, "underlyingIntegerMap", "field_148759_a");
-	private Field objectArray = AsmUtils.changeFieldAccess(IntIdentityHashBiMap.class, "keys", "field_186818_b");
+	private Field objectArray = AsmUtils.changeFieldAccess(IntIdentityHashBiMap.class, "values", "field_186818_b");
 
 	private ReplacementTool()
 	{
