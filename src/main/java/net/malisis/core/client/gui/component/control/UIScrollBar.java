@@ -142,13 +142,21 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		scrollShape.storeState();
 
 		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(215, 0, 15, 15, 1), null, gui.getGuiTexture()
-				.getXYResizableIcon(215, 15, 15, 15, 1));
+																												.getXYResizableIcon(215,
+																														15,
+																														15,
+																														15,
+																														1));
 
-		verticalIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(230, 0, 8, 15), null, gui.getGuiTexture().getIcon(238, 0, 8,
+		verticalIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(230, 0, 8, 15), null, gui.getGuiTexture().getIcon(238,
+				0,
+				8,
 				15));
 
 		horizontalIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(230, 15, 15, 8), null, gui.getGuiTexture().getIcon(230,
-				23, 15, 8));
+				23,
+				15,
+				8));
 	}
 
 	/**
