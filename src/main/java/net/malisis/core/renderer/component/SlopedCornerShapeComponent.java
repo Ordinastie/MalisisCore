@@ -24,11 +24,13 @@
 
 package net.malisis.core.renderer.component;
 
-import net.malisis.core.block.component.SlopeComponent;
+import net.malisis.core.block.component.SlopedCornerComponent;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.element.shape.DownSlope;
-import net.malisis.core.renderer.element.shape.Slope;
+import net.malisis.core.renderer.element.shape.DownSlopedCorner;
+import net.malisis.core.renderer.element.shape.InvertedDownSlopedCorner;
+import net.malisis.core.renderer.element.shape.InvertedSlopedCorner;
+import net.malisis.core.renderer.element.shape.SlopedCorner;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 
@@ -36,22 +38,32 @@ import net.minecraft.tileentity.TileEntity;
  * @author Ordinastie
  *
  */
-public class SlopeShapeComponent extends ShapeComponent
+public class SlopedCornerShapeComponent extends ShapeComponent
 {
-	Shape slope;
-	Shape downSlope = new DownSlope();
+	Shape slopedCorner = new SlopedCorner();
+	Shape downSlopedCorner = new DownSlopedCorner();
+	Shape invSlopedCorner = new InvertedSlopedCorner();
+	Shape invDownSlopedCorner = new InvertedDownSlopedCorner();
 
-	public SlopeShapeComponent()
+	public SlopedCornerShapeComponent()
 	{
-		super(new Slope());
-		slope = shape;
+		super(null); //this.shape set at render time
 	}
 
 	@Override
 	public void render(Block block, MalisisRenderer<TileEntity> renderer)
 	{
-		boolean down = SlopeComponent.isDown(renderer.getBlockState());
-		shape = down ? downSlope : slope;
+		boolean inverted = SlopedCornerComponent.isInverted(renderer.getBlockState());
+		boolean isDown = SlopedCornerComponent.isDown(renderer.getBlockState());
+		if (inverted)
+		{
+			shape = isDown ? invDownSlopedCorner : invSlopedCorner;
+		}
+		else
+		{
+			shape = isDown ? downSlopedCorner : slopedCorner;
+		}
+
 		super.render(block, renderer);
 	}
 }

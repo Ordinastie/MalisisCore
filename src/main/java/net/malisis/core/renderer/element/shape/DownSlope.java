@@ -35,9 +35,9 @@ import net.malisis.core.renderer.element.face.TriangleWestBottomSouthFace;
  * @author Ordinastie
  *
  */
-public class InvSlope extends Shape
+public class DownSlope extends Shape
 {
-	public InvSlope()
+	public DownSlope()
 	{
 		super(new BottomSouthFace(), new TriangleEastBottomSouthFace(), new TriangleWestBottomSouthFace(), new TopFace(), new NorthFace());
 		//super(new TopSouthFace());

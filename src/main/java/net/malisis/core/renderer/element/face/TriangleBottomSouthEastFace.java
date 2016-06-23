@@ -22,36 +22,28 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.component;
+package net.malisis.core.renderer.element.face;
 
-import net.malisis.core.block.component.SlopeComponent;
-import net.malisis.core.renderer.MalisisRenderer;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.element.shape.DownSlope;
-import net.malisis.core.renderer.element.shape.Slope;
-import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
+import static net.minecraft.util.EnumFacing.*;
+import net.malisis.core.renderer.element.Face;
+import net.malisis.core.renderer.element.vertex.BottomNorthEast;
+import net.malisis.core.renderer.element.vertex.BottomNorthWest;
+import net.malisis.core.renderer.element.vertex.BottomSouthWest;
 
 /**
  * @author Ordinastie
  *
  */
-public class SlopeShapeComponent extends ShapeComponent
+public class TriangleBottomSouthEastFace extends Face
 {
-	Shape slope;
-	Shape downSlope = new DownSlope();
-
-	public SlopeShapeComponent()
+	public TriangleBottomSouthEastFace()
 	{
-		super(new Slope());
-		slope = shape;
-	}
+		super(new BottomSouthWest(), new BottomNorthWest(), new BottomNorthEast(), new BottomNorthEast());
 
-	@Override
-	public void render(Block block, MalisisRenderer<TileEntity> renderer)
-	{
-		boolean down = SlopeComponent.isDown(renderer.getBlockState());
-		shape = down ? downSlope : slope;
-		super.render(block, renderer);
+		params.direction.set(DOWN);
+		params.textureSide.set(DOWN);
+		params.colorFactor.set(0.5F);
+		params.aoMatrix.set(calculateAoMatrix(params.direction.get()));
+		setStandardUV();
 	}
 }

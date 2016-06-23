@@ -26,25 +26,33 @@ package net.malisis.core.renderer.element.face;
 
 import static net.minecraft.util.EnumFacing.*;
 import net.malisis.core.renderer.element.Face;
+import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.vertex.BottomNorthEast;
+import net.malisis.core.renderer.element.vertex.BottomSouthWest;
 import net.malisis.core.renderer.element.vertex.TopNorthEast;
-import net.malisis.core.renderer.element.vertex.TopSouthEast;
-import net.minecraft.util.EnumFacing;
+import net.malisis.core.renderer.element.vertex.TopSouthWest;
 
 /**
  * @author Ordinastie
  *
  */
-public class TriangleEastBottomSouthFace extends Face
+public class SouthEastFace extends Face
 {
-	public TriangleEastBottomSouthFace()
-	{
-		super(new BottomNorthEast(), new TopNorthEast(), new TopSouthEast(), new TopSouthEast());
 
-		params.textureSide.set(EAST);
-		params.direction.set(EAST);
-		params.colorFactor.set(0.6F);
-		params.aoMatrix.set(calculateAoMatrix(EnumFacing.EAST));
+	public SouthEastFace()
+	{
+		super(new Vertex[] { new TopSouthWest(), new BottomSouthWest(), new BottomNorthEast(), new TopNorthEast() });
+
+		params.direction.set(SOUTH);
+		params.textureSide.set(SOUTH);
+		params.colorFactor.set(0.7F);
+		//		params.aoMatrix.set(new int[][][] {
+		//				{ FacePresets.aom("Top"), FacePresets.aom("TopWest"), FacePresets.aom("TopSouthWest"), FacePresets.aom("SouthWest") },
+		//				{ FacePresets.aom("Bottom"), FacePresets.aom("BottomWest"), FacePresets.aom("BottomSouthWest"),
+		//						FacePresets.aom("SouthWest") },
+		//				{ FacePresets.aom("Bottom"), FacePresets.aom("BottomNorth"), FacePresets.aom("BottomNorthEast"),
+		//						FacePresets.aom("NorthEast") },
+		//				{ FacePresets.aom("Top"), FacePresets.aom("TopNorth"), FacePresets.aom("TopNortEastWest"), FacePresets.aom("NorthEast") } });
 		setStandardUV();
 	}
 }

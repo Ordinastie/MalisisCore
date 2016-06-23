@@ -22,36 +22,32 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.component;
+package net.malisis.core.renderer.element.face;
 
-import net.malisis.core.block.component.SlopeComponent;
-import net.malisis.core.renderer.MalisisRenderer;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.element.shape.DownSlope;
-import net.malisis.core.renderer.element.shape.Slope;
-import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
+import static net.minecraft.util.EnumFacing.*;
+import net.malisis.core.renderer.element.Face;
+import net.malisis.core.renderer.element.vertex.BottomNorthEast;
+import net.malisis.core.renderer.element.vertex.BottomSouthWest;
+import net.malisis.core.renderer.element.vertex.TopSouthEast;
 
 /**
  * @author Ordinastie
  *
  */
-public class SlopeShapeComponent extends ShapeComponent
+public class InvertedBottomSouthEastFace extends Face
 {
-	Shape slope;
-	Shape downSlope = new DownSlope();
-
-	public SlopeShapeComponent()
+	public InvertedBottomSouthEastFace()
 	{
-		super(new Slope());
-		slope = shape;
-	}
+		super(new TopSouthEast(), new BottomSouthWest(), new BottomNorthEast(), new BottomNorthEast());
 
-	@Override
-	public void render(Block block, MalisisRenderer<TileEntity> renderer)
-	{
-		boolean down = SlopeComponent.isDown(renderer.getBlockState());
-		shape = down ? downSlope : slope;
-		super.render(block, renderer);
+		params.direction.set(DOWN);
+		params.textureSide.set(DOWN);
+		params.colorFactor.set(0.6F);
+		//		params.aoMatrix.set(new int[][][] {
+		//				{ FacePresets.aom("TopWest"), FacePresets.aom("TopSouthWest"), FacePresets.aom("TopSouth"), FacePresets.aom("South") },
+		//				{ FacePresets.aom("BottomSouth"), FacePresets.aom("SouthEast"), FacePresets.aom("BottomEast") },
+		//				{ FacePresets.aom("BottomSouth"), FacePresets.aom("SouthEast"), FacePresets.aom("BottomEast") },
+		//				{ FacePresets.aom("TopNorth"), FacePresets.aom("TopNorthEast"), FacePresets.aom("TopEast"), FacePresets.aom("East") } });
+		setStandardUV();
 	}
 }

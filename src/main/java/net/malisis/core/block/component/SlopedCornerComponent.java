@@ -30,12 +30,16 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IComponent;
-import net.malisis.core.renderer.component.SlopeShapeComponent;
+import net.malisis.core.renderer.component.SlopedCornerShapeComponent;
 import net.malisis.core.util.AABBUtils;
 import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -48,11 +52,12 @@ import com.google.common.collect.Lists;
  * @author Ordinastie
  *
  */
-public class SlopeComponent implements IBlockComponent
+public class SlopedCornerComponent implements IBlockComponent
 {
+	public static PropertyBool INVERTED = PropertyBool.create("inverted");
 	public static PropertyBool DOWN = PropertyBool.create("down");
 
-	public SlopeComponent()
+	public SlopedCornerComponent()
 	{
 
 	}
@@ -60,13 +65,19 @@ public class SlopeComponent implements IBlockComponent
 	@Override
 	public PropertyBool getProperty()
 	{
-		return DOWN;
+		return null;
+	}
+
+	@Override
+	public IProperty<?>[] getProperties()
+	{
+		return new IProperty<?>[] { INVERTED, DOWN };
 	}
 
 	@Override
 	public IBlockState setDefaultState(Block block, IBlockState state)
 	{
-		return state.withProperty(getProperty(), false);
+		return state.withProperty(INVERTED, false).withProperty(DOWN, false);
 	}
 
 	@Override
@@ -75,7 +86,7 @@ public class SlopeComponent implements IBlockComponent
 		List<IComponent> deps = Lists.newArrayList(new DirectionalComponent());
 
 		if (MalisisCore.isClient())
-			deps.add(new SlopeShapeComponent());
+			deps.add(new SlopedCornerShapeComponent());
 
 		return deps;
 	}
@@ -83,33 +94,68 @@ public class SlopeComponent implements IBlockComponent
 	@Override
 	public IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
+		//boolean inverted = meta == 4;
 		boolean down = facing == EnumFacing.DOWN || (facing != EnumFacing.UP && hitY > 0.5F);
-		return state.withProperty(getProperty(), down);
+		return state.withProperty(DOWN, down);//.withProperty(INVERTED, inverted);
 	}
 
 	@Override
 	public AxisAlignedBB[] getBoundingBoxes(Block block, IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
+		boolean inverted = isInverted(state);
 		boolean down = isDown(state);
-		float[][] fx = { { 0, 1 }, { 0, 1 } };
+		float[][] fx = { { 0, 1 }, { 0, 0 } };
 		float[][] fy = { { 0, 1 }, { 0, 1 } };
 		float[][] fz = { { 0, 1 }, { 0, 0 } };
-		if (down)
-			fz = new float[][] { { 0, 1 / 8F }, { 0, 9 / 8F } };
+		if (inverted)
+		{
+			if (down)
+			{
+				fx = new float[][] { { 0, .25F }, { 0, 1F } };
+				fz = new float[][] { { 0, .25F }, { 0, 1F } };
+			}
+			else
+			{
+				fx = new float[][] { { 0, 1 }, { 0, .25F } };
+				fz = new float[][] { { 0, 1 }, { 0, .25F } };
+			}
+
+		}
+		else
+		{
+			if (down)
+			{
+				fx = new float[][] { { 0, 1 / 8F }, { 0, 9 / 8F } };
+				fz = new float[][] { { 0, 1 / 8F }, { 0, 9 / 8F } };
+			}
+		}
 
 		return AABBUtils.slice(8, fx, fy, fz, true);
 	}
 
 	@Override
+	public void getSubBlocks(Block block, Item item, CreativeTabs tab, List<ItemStack> list)
+	{
+		list.add(new ItemStack(item, 1, 0));
+		list.add(new ItemStack(item, 1, 4)); //inverted : use 4 as metadata so it maps to the right state with getStateFromMeta
+	}
+
+	@Override
+	public int damageDropped(Block block, IBlockState state)
+	{
+		return isInverted(state) ? 1 : 0;
+	}
+
+	@Override
 	public int getMetaFromState(Block block, IBlockState state)
 	{
-		return isDown(state) ? 8 : 0;
+		return (isInverted(state) ? 4 : 0) + (isDown(state) ? 8 : 0);
 	}
 
 	@Override
 	public IBlockState getStateFromMeta(Block block, IBlockState state, int meta)
 	{
-		return state.withProperty(getProperty(), (meta & 8) != 0);
+		return state.withProperty(DOWN, (meta & 8) != 0).withProperty(INVERTED, (meta & 4) != 0);
 	}
 
 	@Override
@@ -132,20 +178,36 @@ public class SlopeComponent implements IBlockComponent
 
 	public static boolean isDown(IBlockAccess world, BlockPos pos)
 	{
-		return world != null && pos != null ? isDown(world.getBlockState(pos)) : false;
+		return world != null && pos != null ? isInverted(world.getBlockState(pos)) : false;
 	}
 
 	public static boolean isDown(IBlockState state)
 	{
-		SlopeComponent sc = IComponent.getComponent(SlopeComponent.class, state.getBlock());
+		SlopedCornerComponent sc = IComponent.getComponent(SlopedCornerComponent.class, state.getBlock());
 		if (sc == null)
 			return false;
 
-		PropertyBool property = sc.getProperty();
-		if (property == null || !state.getProperties().containsKey(property))
+		if (!state.getProperties().containsKey(DOWN))
 			return false;
 
-		return state.getValue(property);
+		return state.getValue(DOWN);
+	}
+
+	public static boolean isInverted(IBlockAccess world, BlockPos pos)
+	{
+		return world != null && pos != null ? isInverted(world.getBlockState(pos)) : false;
+	}
+
+	public static boolean isInverted(IBlockState state)
+	{
+		SlopedCornerComponent sc = IComponent.getComponent(SlopedCornerComponent.class, state.getBlock());
+		if (sc == null)
+			return false;
+
+		if (!state.getProperties().containsKey(INVERTED))
+			return false;
+
+		return state.getValue(INVERTED);
 	}
 
 }

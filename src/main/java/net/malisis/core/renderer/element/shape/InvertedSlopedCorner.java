@@ -22,36 +22,27 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.component;
+package net.malisis.core.renderer.element.shape;
 
-import net.malisis.core.block.component.SlopeComponent;
-import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.element.shape.DownSlope;
-import net.malisis.core.renderer.element.shape.Slope;
-import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
+import net.malisis.core.renderer.element.face.BottomFace;
+import net.malisis.core.renderer.element.face.InvertedTopSouthEastFace;
+import net.malisis.core.renderer.element.face.NorthFace;
+import net.malisis.core.renderer.element.face.TriangleEastTopSouthFace;
+import net.malisis.core.renderer.element.face.TriangleSouthTopEastFace;
+import net.malisis.core.renderer.element.face.TriangleTopSouthEastFace;
+import net.malisis.core.renderer.element.face.WestFace;
 
 /**
  * @author Ordinastie
  *
  */
-public class SlopeShapeComponent extends ShapeComponent
+public class InvertedSlopedCorner extends Shape
 {
-	Shape slope;
-	Shape downSlope = new DownSlope();
-
-	public SlopeShapeComponent()
+	public InvertedSlopedCorner()
 	{
-		super(new Slope());
-		slope = shape;
-	}
-
-	@Override
-	public void render(Block block, MalisisRenderer<TileEntity> renderer)
-	{
-		boolean down = SlopeComponent.isDown(renderer.getBlockState());
-		shape = down ? downSlope : slope;
-		super.render(block, renderer);
+		super(new InvertedTopSouthEastFace(), new TriangleSouthTopEastFace(), new TriangleEastTopSouthFace(),
+				new TriangleTopSouthEastFace(), new WestFace(), new NorthFace(), new BottomFace());
+		storeState();
 	}
 }
