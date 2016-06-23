@@ -32,6 +32,8 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
+import net.malisis.core.client.gui.component.control.UIScrollBar;
+import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
 import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
@@ -361,7 +363,13 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		lines.clear();
 
 		if (!StringUtils.isEmpty(text))
-			lines = font.wrapText(text, getWidth(), fro);
+		{
+			UIScrollBar sc = UIScrollBar.getScrollbar(this, Type.VERTICAL);
+			int width = getWidth();
+			if (sc != null && sc.isVisible())
+				width -= sc.getWidth();
+			lines = font.wrapText(text, width, fro);
+		}
 
 		fireEvent(new ContentUpdateEvent<>(this));
 	}
@@ -373,6 +381,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	{
 		if (multiLine)
 			return;
+
 		this.textWidth = (int) font.getStringWidth(text, fro);
 		this.textHeight = (int) font.getStringHeight(fro);
 		setSize(textWidth, textHeight);
