@@ -88,7 +88,6 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	public GuiRenderer()
 	{
 		defaultGuiTexture = new GuiTexture(new ResourceLocation("malisiscore", "textures/gui/gui.png"), 300, 100);
-
 	}
 
 	/**
@@ -580,8 +579,12 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 		itemRenderer.zLevel = 100;
 		prepare(RenderType.GUI);
 		startDrawing();
-		drawItemStack(itemStack, mouseX - 8, mouseY - 8, null,
-				itemStack.stackSize == 0 ? new Style().setColor(TextFormatting.YELLOW) : null, false);
+		drawItemStack(itemStack,
+				mouseX - 8,
+				mouseY - 8,
+				null,
+				itemStack.stackSize == 0 ? new Style().setColor(TextFormatting.YELLOW) : null,
+				false);
 		draw();
 		itemRenderer.zLevel = 0;
 		clean();
