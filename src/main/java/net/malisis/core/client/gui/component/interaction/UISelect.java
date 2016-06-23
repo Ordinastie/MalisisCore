@@ -24,10 +24,11 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Objects;
-
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
@@ -46,15 +47,12 @@ import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.renderer.font.FontRenderOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
-
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * The Class UISelect.
@@ -421,7 +419,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public Option<T> getOption(T obj)
 	{
 		for (Option<T> opt : this)
-			if (obj == opt.getKey())
+			if (obj.equals(opt.getKey()))
 				return opt;
 		return null;
 	}
