@@ -43,6 +43,7 @@ import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
 import net.malisis.core.inventory.message.InventoryActionMessage;
+import net.malisis.core.renderer.RenderType;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.AnimationRenderer;
 import net.malisis.core.renderer.font.FontRenderOptions;
@@ -558,6 +559,9 @@ public abstract class MalisisGui extends GuiScreen
 
 		if (debug)
 		{
+			renderer.set(mouseX, mouseY, partialTicks);
+			renderer.prepare(RenderType.GUI);
+
 			int dy = 0, oy = 5;
 			FontRenderOptions fro = new FontRenderOptions();
 			fro.color = 0xFFFFFF;
@@ -579,6 +583,8 @@ public abstract class MalisisGui extends GuiScreen
 					renderer.drawText(null, entry.getKey() + " : " + e.getMessage(), 5, dy++ * 10 + oy, 0, fro, false);
 				}
 			}
+
+			renderer.clean();
 		}
 
 		if (inventoryContainer != null)
