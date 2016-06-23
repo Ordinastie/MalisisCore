@@ -275,6 +275,8 @@ public class MalisisFont
 		{
 			CharData cd = getCharData(walker.getChar());
 			drawChar(cd, x, 0, fro);
+			if (fro.bold)
+				drawChar(cd, x + fro.fontScale, 0, fro);
 			x += walker.getWidth();
 		}
 	}
@@ -644,7 +646,7 @@ public class MalisisFont
 		//FontRenderOptions fro = new FontRenderOptions();
 
 		maxWidth -= 4;
-		maxWidth /= (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
+		//maxWidth /= (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
 		float lineWidth = 0;
 		float wordWidth = 0;
 
@@ -652,7 +654,7 @@ public class MalisisFont
 
 		StringWalker walker = new StringWalker(str, this, fro);
 		walker.skipChars(false);
-		walker.applyStyles(false);
+		walker.applyStyles(true);
 		while (walker.walk())
 		{
 			char c = walker.getChar();

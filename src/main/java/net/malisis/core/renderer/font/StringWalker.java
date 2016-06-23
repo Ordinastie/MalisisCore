@@ -223,6 +223,8 @@ public class StringWalker
 
 		c = str.charAt(index);
 		width = font.getCharWidth(c, fro);
+		if (fro != null && fro.bold)
+			width += fro.fontScale;
 
 		if (!litteral && !skipChars && (format != null || (link != null && !isText)))
 			width = 0;
