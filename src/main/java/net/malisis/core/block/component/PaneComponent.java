@@ -130,7 +130,7 @@ public class PaneComponent implements IBlockComponent, ISmartCull
 
 	public final boolean canPaneConnectToBlock(Block block, IBlockState state)
 	{
-		return block.isFullBlock(state) || block == Blocks.GLASS || block == Blocks.STAINED_GLASS || block == Blocks.STAINED_GLASS_PANE
+		return state.isFullBlock() || block == Blocks.GLASS || block == Blocks.STAINED_GLASS || block == Blocks.STAINED_GLASS_PANE
 				|| block instanceof BlockPane;
 	}
 

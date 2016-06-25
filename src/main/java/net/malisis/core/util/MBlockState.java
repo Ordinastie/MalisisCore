@@ -87,7 +87,7 @@ public class MBlockState
 		this.pos = pos;
 		this.state = world.getBlockState(pos);
 		this.block = state.getBlock();
-		this.state = block.getActualState(state, world, pos);
+		this.state = state.getActualState(world, pos);
 	}
 
 	public MBlockState(IBlockAccess world, long coord)
@@ -207,6 +207,7 @@ public class MBlockState
 		return fromNBT(nbt, "block", "metadata");
 	}
 
+	@SuppressWarnings("deprecation")
 	public static IBlockState fromNBT(NBTTagCompound nbt, String blockName, String metadataName)
 	{
 		if (nbt == null)

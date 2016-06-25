@@ -235,6 +235,7 @@ public class ItemUtils
 	 * @param itemStack the item stack
 	 * @return the state from item stack
 	 */
+	@SuppressWarnings("deprecation")
 	public static IBlockState getStateFromItemStack(ItemStack itemStack)
 	{
 		if (itemStack == null)

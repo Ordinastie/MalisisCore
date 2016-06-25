@@ -26,7 +26,7 @@ package net.malisis.core.configuration.setting;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.client.resources.I18n;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.relauncher.Side;
@@ -112,7 +112,7 @@ public abstract class Setting<T>
 	{
 		String comment = null;
 		for (String c : comments)
-			comment += I18n.translateToLocal(c) + " ";
+			comment += I18n.format(c) + " ";
 		property = config.get(category, key, writeValue(defaultValue), comment, type);
 		value = readValue(property.getString());
 		if (value == null)

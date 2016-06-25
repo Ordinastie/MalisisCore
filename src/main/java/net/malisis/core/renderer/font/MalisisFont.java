@@ -54,9 +54,9 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
@@ -408,13 +408,13 @@ public class MalisisFont
 	private String translate(String str)
 	{
 		if (str.indexOf('{') == -1 || str.indexOf('{') >= str.indexOf('}'))
-			return I18n.translateToLocal(str);
+			return I18n.format(str);
 
 		StringBuffer output = new StringBuffer();
 		Matcher matcher = pattern.matcher(str);
 
 		while (matcher.find())
-			matcher.appendReplacement(output, I18n.translateToLocal(matcher.group(1)));
+			matcher.appendReplacement(output, I18n.format(matcher.group(1)));
 
 		matcher.appendTail(output);
 		return output.toString();

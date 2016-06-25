@@ -35,16 +35,15 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.particle.EffectRenderer;
-import net.minecraft.client.particle.EntityDiggingFX;
-import net.minecraft.client.particle.EntityDiggingFX.Factory;
+import net.minecraft.client.particle.ParticleDigging;
+import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.management.PlayerManager;
+import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -78,13 +77,13 @@ public class EntityUtils
 	{
 		try
 		{
-			getPlayerInstance = AsmUtils.changeMethodAccess(PlayerManager.class, "getEntry", "func_187301_b", "II");
-			Class<?> clazz = Class.forName("net.minecraft.server.management.PlayerManager$PlayerInstance");
+			getPlayerInstance = AsmUtils.changeMethodAccess(PlayerChunkMap.class, "getEntry", "func_187301_b", "II");
+			Class<?> clazz = Class.forName("net.minecraft.server.management.PlayerChunkMapEntry");
 			playersWatchingChunk = AsmUtils.changeFieldAccess(clazz, "players", "field_187283_c");
 		}
 		catch (ClassNotFoundException e)
 		{
-			MalisisCore.log.error("Failed to get PlayerInstance class.", e);
+			MalisisCore.log.error("Failed to get PlayerChunkMap class.", e);
 		}
 
 	}
@@ -257,17 +256,17 @@ public class EntityUtils
 	 *
 	 * @param world the world
 	 * @param pos the pos
-	 * @param effectRenderer the effect renderer
+	 * @param particleManager the effect renderer
 	 * @param states the states
 	 */
 	@SideOnly(Side.CLIENT)
-	public static void addDestroyEffects(World world, BlockPos pos, EffectRenderer effectRenderer, IBlockState... states)
+	public static void addDestroyEffects(World world, BlockPos pos, ParticleManager particleManager, IBlockState... states)
 	{
 		if (ArrayUtils.isEmpty(states))
 			states = new IBlockState[] { world.getBlockState(pos) };
 
 		byte nb = 4;
-		Factory factory = new EntityDiggingFX.Factory();
+		ParticleDigging.Factory factory = new ParticleDigging.Factory();
 
 		for (int i = 0; i < nb; ++i)
 		{
@@ -281,9 +280,16 @@ public class EntityUtils
 
 					int id = Block.getStateId(states[world.rand.nextInt(states.length)]);
 
-					EntityDiggingFX fx = (EntityDiggingFX) factory.getEntityFX(0, world, fxX, fxY, fxZ, fxX - pos.getX() - 0.5D,
-							fxY - pos.getY() - 0.5D, fxZ - pos.getZ() - 0.5D, id);
-					effectRenderer.addEffect(fx);
+					ParticleDigging fx = (ParticleDigging) factory.getEntityFX(0,
+							world,
+							fxX,
+							fxY,
+							fxZ,
+							fxX - pos.getX() - 0.5D,
+							fxY - pos.getY() - 0.5D,
+							fxZ - pos.getZ() - 0.5D,
+							id);
+					particleManager.addEffect(fx);
 				}
 			}
 		}
@@ -294,11 +300,11 @@ public class EntityUtils
 	 *
 	 * @param world the world
 	 * @param target the target
-	 * @param effectRenderer the effect renderer
+	 * @param particleManager the effect renderer
 	 * @param states the states
 	 */
 	@SideOnly(Side.CLIENT)
-	public static void addHitEffects(World world, RayTraceResult target, EffectRenderer effectRenderer, IBlockState... states)
+	public static void addHitEffects(World world, RayTraceResult target, ParticleManager particleManager, IBlockState... states)
 	{
 		BlockPos pos = target.getBlockPos();
 		if (ArrayUtils.isEmpty(states))
@@ -339,9 +345,9 @@ public class EntityUtils
 
 		int id = Block.getStateId(states[world.rand.nextInt(states.length)]);
 
-		Factory factory = new EntityDiggingFX.Factory();
-		EntityDiggingFX fx = (EntityDiggingFX) factory.getEntityFX(0, world, fxX, fxY, fxZ, 0, 0, 0, id);
+		ParticleDigging.Factory factory = new ParticleDigging.Factory();
+		ParticleDigging fx = (ParticleDigging) factory.getEntityFX(0, world, fxX, fxY, fxZ, 0, 0, 0, id);
 		fx.multiplyVelocity(0.2F).multipleParticleScaleBy(0.6F);
-		effectRenderer.addEffect(fx);
+		particleManager.addEffect(fx);
 	}
 }

@@ -131,7 +131,7 @@ public class RaytraceBlock extends Raytrace
 	public RayTraceResult trace()
 	{
 		if (!(state.getBlock() instanceof IBoundingBox))
-			return state.getBlock().collisionRayTrace(state, world(), pos, ray.origin.toVec3d(), dest.toVec3d());
+			return state.collisionRayTrace(world(), pos, ray.origin.toVec3d(), dest.toVec3d());
 
 		IBoundingBox block = (IBoundingBox) state.getBlock();
 		AxisAlignedBB[] aabbs = block.getRayTraceBoundingBox(world(), pos, world().getBlockState(pos));

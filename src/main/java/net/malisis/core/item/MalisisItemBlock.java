@@ -126,7 +126,7 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 			return super.onItemUse(itemStack, player, world, pos, hand, side, hitX, hitY, hitZ);
 
 		Block block = placedState.getBlock();
-		if (world.checkNoEntityCollision(block.getCollisionBoundingBox(placedState, world, p)) && world.setBlockState(p, placedState, 3))
+		if (world.checkNoEntityCollision(placedState.getCollisionBoundingBox(world, p)) && world.setBlockState(p, placedState, 3))
 		{
 			SoundType soundType = block.getSoundType();
 			world.playSound(player,

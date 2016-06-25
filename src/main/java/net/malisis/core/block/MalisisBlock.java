@@ -72,6 +72,7 @@ import com.google.common.collect.Lists;
  *
  */
 @MalisisRendered(DefaultRenderer.Block.class)
+@SuppressWarnings("deprecation")
 public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, IComponentProvider
 {
 	private static Field blockStateField = AsmUtils.changeFieldAccess(Block.class, "blockState", "field_176227_L");
@@ -252,7 +253,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	}
 
 	@Override
-	public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block neighborBlock)
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block neighborBlock)
 	{
 		for (IBlockComponent component : getBlockComponents())
 			component.onNeighborBlockChange(this, world, pos, state, neighborBlock);
