@@ -279,7 +279,7 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 	{
 		if (elements == null || elements.size() == 0)
 		{
-			drawEmtpy(renderer, mouseX, mouseY, partialTick);
+			drawEmpty(renderer, mouseX, mouseY, partialTick);
 			return;
 		}
 
@@ -298,7 +298,7 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 
 	}
 
-	public void drawEmtpy(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	public void drawEmpty(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		renderer.drawText("No element");
 	}
