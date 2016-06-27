@@ -63,7 +63,7 @@ public class ReplacementTool
 	private Method addObjectRaw = AsmUtils.changeMethodAccess(FMLControlledNamespacedRegistry.class, "addObjectRaw", types);
 	private Method setName = AsmUtils.changeMethodAccess(Delegate.class, "setName", ResourceLocation.class);
 	private Field underlyingMap = AsmUtils.changeFieldAccess(RegistryNamespaced.class, "underlyingIntegerMap", "field_148759_a");
-	private Field objectArray = AsmUtils.changeFieldAccess(IntIdentityHashBiMap.class, "keys", "field_186818_b");
+	private Field objectArray = AsmUtils.changeFieldAccess(IntIdentityHashBiMap.class, "values", "field_186818_b");
 
 	private ReplacementTool()
 	{
