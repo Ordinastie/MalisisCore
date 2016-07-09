@@ -104,9 +104,9 @@ public class SlopedCornerComponent implements IBlockComponent
 	{
 		boolean inverted = isInverted(state);
 		boolean down = isDown(state);
-		float[][] fx = { { 0, 1 }, { 0, 0 } };
+		float[][] fx;
 		float[][] fy = { { 0, 1 }, { 0, 1 } };
-		float[][] fz = { { 0, 1 }, { 0, 0 } };
+		float[][] fz;
 		if (inverted)
 		{
 			if (down)
@@ -127,6 +127,11 @@ public class SlopedCornerComponent implements IBlockComponent
 			{
 				fx = new float[][] { { 0, 1 / 8F }, { 0, 9 / 8F } };
 				fz = new float[][] { { 0, 1 / 8F }, { 0, 9 / 8F } };
+			}
+			else
+			{
+				fx = new float[][] { { 0, .5F }, { 0, 0 } };
+				fz = new float[][] { { 0, .5F }, { 0, 0 } };
 			}
 		}
 
