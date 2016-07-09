@@ -260,7 +260,7 @@ public class MBlockPos
 
 	public BlockPos toBlockPos()
 	{
-		return new BlockPos(chunkX(), y, chunkZ());
+		return new BlockPos(x, y, z);
 	}
 
 	/**
