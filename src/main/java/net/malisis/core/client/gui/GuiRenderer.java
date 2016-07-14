@@ -238,7 +238,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	@Override
 	public void applyTexture(Shape shape, RenderParameters params)
 	{
-		Icon icon = params.icon.get();
+		Icon icon = params != null ? params.icon.get() : null;
 
 		if (icon == null)
 		{
@@ -261,7 +261,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	@Override
 	protected IIconProvider getIconProvider(RenderParameters params)
 	{
-		if (params.iconProvider.get() != null)
+		if (params != null && params.iconProvider.get() != null)
 			return params.iconProvider.get();
 
 		if (currentComponent.getIconProvider() != null)
@@ -295,6 +295,12 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 		container.draw(this, mouseX, mouseY, partialTick);
 
 		clean();
+	}
+
+	@Override
+	public void drawShape(Shape shape)
+	{
+		drawShape(shape, null);
 	}
 
 	/**
