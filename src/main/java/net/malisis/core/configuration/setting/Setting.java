@@ -24,6 +24,7 @@
 
 package net.malisis.core.configuration.setting;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.minecraft.client.resources.I18n;
@@ -110,9 +111,15 @@ public abstract class Setting<T>
 	 */
 	public void load(Configuration config)
 	{
-		String comment = null;
+		String comment = "";
 		for (String c : comments)
-			comment += I18n.format(c) + " ";
+		{
+			if (MalisisCore.isClient())
+				comment += I18n.format(c) + " ";
+			else
+				comment += c + " ";
+		}
+
 		property = config.get(category, key, writeValue(defaultValue), comment, type);
 		value = readValue(property.getString());
 		if (value == null)
