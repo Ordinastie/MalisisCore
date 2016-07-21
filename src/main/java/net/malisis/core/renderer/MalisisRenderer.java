@@ -1068,7 +1068,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	protected Icon getIcon(Face face, RenderParameters params)
 	{
-		if (params.icon.get() != null)
+		if (params != null && params.icon.get() != null)
 			return params.icon.get();
 
 		IIconProvider iconProvider = getIconProvider(params);
@@ -1098,7 +1098,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	protected IIconProvider getIconProvider(RenderParameters params)
 	{
-		if (params.iconProvider.get() != null)
+		if (params != null && params.iconProvider.get() != null)
 			return params.iconProvider.get();
 
 		IIconProvider provider = IComponent.getComponent(IIconProvider.class, item);

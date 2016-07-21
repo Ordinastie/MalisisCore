@@ -206,10 +206,13 @@ public class DefaultRenderer
 		private Shape gui;
 		private Map<Icon, MalisisModel> itemModels = new HashMap<>();
 
+		private RenderParameters rp = new RenderParameters();
+
 		@Override
 		public void initialize()
 		{
 			gui = new Shape(new SouthFace());
+			rp.applyTexture.set(false);
 		}
 
 		@Override
@@ -244,8 +247,6 @@ public class DefaultRenderer
 		@Override
 		public void render()
 		{
-			RenderParameters rp = new RenderParameters();
-			rp.applyTexture.set(false);
 			if (tranformType == TransformType.GUI)
 				drawShape(gui);
 			else
@@ -257,7 +258,7 @@ public class DefaultRenderer
 
 		protected Shape getModelShape()
 		{
-			Icon icon = getIcon(null, new RenderParameters());
+			Icon icon = getIcon(null, null);
 			MalisisModel model = itemModels.get(icon);
 			if (model == null)
 			{

@@ -42,6 +42,7 @@ import net.minecraft.util.EnumFacing;
 public class ShapeComponent implements IRenderComponent
 {
 	protected Shape shape;
+	RenderParameters rp = new RenderParameters();
 
 	public ShapeComponent(Shape shape)
 	{
@@ -51,7 +52,6 @@ public class ShapeComponent implements IRenderComponent
 	@Override
 	public void render(Block block, MalisisRenderer<TileEntity> renderer)
 	{
-		RenderParameters rp = new RenderParameters();
 		rp.interpolateUV.set(false);
 		shape.resetState();
 		if (renderer.getRenderType() == RenderType.BLOCK)
