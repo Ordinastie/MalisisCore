@@ -36,9 +36,16 @@ import java.lang.annotation.Target;
  */
 
 @Documented
-@Target(ElementType.FIELD)
+@Target({ ElementType.FIELD, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Sync
 {
 	public String value();
+
+	public Type type() default Type.AUTO;
+
+	public enum Type
+	{
+		AUTO, GETTER, SETTER;
+	}
 }

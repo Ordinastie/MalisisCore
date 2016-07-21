@@ -34,9 +34,9 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
-import net.malisis.core.util.syncer.FieldData;
 import net.malisis.core.util.syncer.ISyncHandler;
 import net.malisis.core.util.syncer.ISyncableData;
+import net.malisis.core.util.syncer.ObjectData;
 import net.malisis.core.util.syncer.Syncer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -78,13 +78,14 @@ public class SyncerMessage implements IMalisisMessageHandler<SyncerMessage.Packe
 
 	public <T, S extends ISyncableData> void doProcess(Packet<T, S> message, MessageContext ctx)
 	{
-		T receiver = message.handler.getReceiver(ctx, message.data);
-		Syncer.get().updateValues(receiver, message.handler, message.values);
+		ISyncHandler<T, S> handler = message.getHandler();
+		T receiver = handler.getReceiver(ctx, message.data);
+		Syncer.get().updateValues(receiver, handler, message.values);
 	}
 
 	public static class Packet<T, S extends ISyncableData> implements IMessage
 	{
-		private ISyncHandler<T, S> handler;
+		private int handlerId;
 		private S data;
 		private int indexes;
 		private Map<String, Object> values;
@@ -92,20 +93,26 @@ public class SyncerMessage implements IMalisisMessageHandler<SyncerMessage.Packe
 		public Packet()
 		{}
 
-		public Packet(ISyncHandler<T, S> handler, S data, int fieldIndexes, Map<String, Object> fieldValues)
+		public Packet(int handlerId, S data, int fieldIndexes, Map<String, Object> fieldValues)
 		{
-			this.handler = handler;
+			this.handlerId = handlerId;
 			this.data = data;
 			this.indexes = fieldIndexes;
 			this.values = fieldValues;
 		}
 
 		@SuppressWarnings("unchecked")
+		private ISyncHandler<T, S> getHandler()
+		{
+			return (ISyncHandler<T, S>) Syncer.get().getHandlerFromId(handlerId);
+		}
+
 		@Override
 		public void fromBytes(ByteBuf buf)
 		{
+			handlerId = buf.readInt();
 			//handler
-			handler = (ISyncHandler<T, S>) Syncer.get().getHandlerFromId(buf.readInt());
+			ISyncHandler<T, S> handler = getHandler();
 			if (handler == null)
 				return;
 
@@ -127,8 +134,8 @@ public class SyncerMessage implements IMalisisMessageHandler<SyncerMessage.Packe
 				if ((indexes & 1) != 0)
 				{
 					data = null;
-					FieldData fd = handler.getFieldData(index);
-					clazz = fd.getField().getType();
+					ObjectData od = handler.getObjectData(index);
+					clazz = od.getType();
 
 					if (ISyncableData.class.isAssignableFrom(clazz))
 					{
@@ -144,6 +151,10 @@ public class SyncerMessage implements IMalisisMessageHandler<SyncerMessage.Packe
 								e.printStackTrace();
 							}
 						}
+					}
+					else if (clazz.isEnum())
+					{
+						data = clazz.getEnumConstants()[buf.readInt()];
 					}
 					else if (clazz == String.class)
 					{
@@ -167,7 +178,7 @@ public class SyncerMessage implements IMalisisMessageHandler<SyncerMessage.Packe
 					else if (clazz == double.class)
 						data = buf.readDouble();
 
-					values.put(fd.getName(), data);
+					values.put(od.getName(), data);
 				}
 
 				indexes = indexes >> 1;
@@ -179,7 +190,7 @@ public class SyncerMessage implements IMalisisMessageHandler<SyncerMessage.Packe
 		public void toBytes(ByteBuf buf)
 		{
 			//handler
-			buf.writeInt(Syncer.get().getHandlerId(handler));
+			buf.writeInt(handlerId);
 			//data
 			data.toBytes(buf);
 			//indexes
@@ -196,6 +207,10 @@ public class SyncerMessage implements IMalisisMessageHandler<SyncerMessage.Packe
 				{
 					buf.writeBoolean(true);
 					((ISyncableData) obj).toBytes(buf);
+				}
+				else if (obj instanceof Enum)
+				{
+					buf.writeInt(((Enum<?>) obj).ordinal());
 				}
 				else if (obj instanceof String)
 				{

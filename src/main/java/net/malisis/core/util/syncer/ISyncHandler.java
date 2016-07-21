@@ -68,7 +68,7 @@ public interface ISyncHandler<T, S extends ISyncableData>
 	 *
 	 * @param fieldData the field data
 	 */
-	public void addFieldData(FieldData fieldData);
+	public void addObjectData(ObjectData fieldData);
 
 	/**
 	 * Gets the {@link FieldData} for the specified index (called from the the SyncerMessage.Packet).
@@ -76,7 +76,7 @@ public interface ISyncHandler<T, S extends ISyncableData>
 	 * @param index the index
 	 * @return the field data
 	 */
-	public FieldData getFieldData(int index);
+	public ObjectData getObjectData(int index);
 
 	/**
 	 * Gets the {@link FieldData} from its name.
@@ -84,7 +84,7 @@ public interface ISyncHandler<T, S extends ISyncableData>
 	 * @param name the name
 	 * @return the field data
 	 */
-	public FieldData getFieldData(String name);
+	public ObjectData getObjectData(String name);
 
 	/**
 	 * Sends the syncing packet.

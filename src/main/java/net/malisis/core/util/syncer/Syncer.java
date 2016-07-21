@@ -25,18 +25,26 @@
 package net.malisis.core.util.syncer;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.util.DoubleKeyMap;
+import net.malisis.core.util.Silenced;
+import net.malisis.core.util.syncer.Sync.Type;
 import net.malisis.core.util.syncer.handlers.TileEntitySyncHandler;
 import net.malisis.core.util.syncer.message.SyncerMessage;
 import net.malisis.core.util.syncer.message.SyncerMessage.Packet;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
+
+import com.google.common.base.Supplier;
+import com.google.common.collect.Maps;
 
 /**
  * This class handles the synchronization between server and client objects. Objects to be synchronized need to have the {@link Syncable}
@@ -49,9 +57,11 @@ import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
 public class Syncer
 {
 	/** Map of the {@link ISyncHandler} registered. */
-	private DoubleKeyMap<String, ISyncHandler<?, ? extends ISyncableData>> handlers = new DoubleKeyMap<>();
+	private DoubleKeyMap<Class<?>, ISyncHandler<?, ? extends ISyncableData>> handlers = new DoubleKeyMap<>();
 	/** Map of {@link ISyncHandler} registered, accessible by the classes annotated by {@link Syncable} */
-	private Map<Class<?>, ISyncHandler<?, ? extends ISyncableData>> classToHandler = new HashMap<>();
+	//private Map<Class<?>, ISyncHandler<?, ? extends ISyncableData>> classToHandler = new HashMap<>();
+
+	private Map<String, Supplier<ISyncHandler<?, ? extends ISyncableData>>> factories = new HashMap<>();
 
 	private Map<Object, HashMap<String, Object>> syncCache = new HashMap<>();
 
@@ -60,28 +70,33 @@ public class Syncer
 
 	private Syncer()
 	{
-		registerSyncHandler(new TileEntitySyncHandler());
+		registerFacotory("TileEntity", TileEntitySyncHandler::new);
 	}
 
-	/**
-	 * Registers a {@link ISyncHandler}.
-	 *
-	 * @param handler the handler
-	 */
-	private void registerSyncHandler(ISyncHandler<?, ? extends ISyncableData> handler)
+	private void registerFacotory(String name, Supplier<ISyncHandler<?, ? extends ISyncableData>> supplier)
 	{
-		handlers.put(handler.getName(), handler);
+		factories.put(name, supplier);
 	}
 
+	//	/**
+	//	 * Registers a {@link ISyncHandler}.
+	//	 *
+	//	 * @param handler the handler
+	//	 */
+	//	private void registerSyncHandler(ISyncHandler<?, ? extends ISyncableData> handler)
+	//	{
+	//		handlers.put(handler.getName(), handler);
+	//	}
+	//
 	/**
 	 * Gets the handler id for the specified {@link ISyncHandler}.
 	 *
 	 * @param handler the handler
 	 * @return the handler id
 	 */
-	public int getHandlerId(ISyncHandler<?, ? extends ISyncableData> handler)
+	public int getHandlerId(Class<?> clazz)
 	{
-		return handlers.getIndex(handler.getName());
+		return handlers.getIndex(clazz);
 	}
 
 	/**
@@ -105,8 +120,7 @@ public class Syncer
 	public <T> ISyncHandler<? super T, ? extends ISyncableData> getHandler(T caller)
 	{
 		@SuppressWarnings("unchecked")
-		ISyncHandler<? super T, ? extends ISyncableData> handler = (ISyncHandler<? super T, ? extends ISyncableData>) classToHandler
-				.get(caller.getClass());
+		ISyncHandler<? super T, ? extends ISyncableData> handler = (ISyncHandler<? super T, ? extends ISyncableData>) handlers.get(caller.getClass());
 		if (handler == null)
 		{
 			MalisisCore.log.error("No ISyncHandler registered for type '{}'", caller.getClass());
@@ -130,14 +144,45 @@ public class Syncer
 			{
 				Class<?> clazz = Class.forName(data.getClassName());
 				Syncable anno = clazz.getAnnotation(Syncable.class);
-				ISyncHandler<?, ? extends ISyncableData> handler = handlers.get(anno.value());
-				classToHandler.put(clazz, handler);
+				ISyncHandler<?, ? extends ISyncableData> handler = factories.get(anno.value()).get();
+				handlers.put(clazz, handler);
 
 				for (Field f : clazz.getFields())
 				{
 					Sync syncAnno = f.getAnnotation(Sync.class);
 					if (syncAnno != null)
-						handler.addFieldData(new FieldData(0, syncAnno.value(), f));
+						handler.addObjectData(getObjectData(syncAnno.value(), f));
+				}
+
+				Map<String, Method> gets = Maps.newHashMap();
+				Map<String, Method> sets = Maps.newHashMap();
+				for (Method m : clazz.getMethods())
+				{
+					Sync syncAnno = m.getAnnotation(Sync.class);
+					if (syncAnno != null)
+					{
+						Type type = getMethodType(syncAnno, m);
+						if (type == null)
+						{
+							MalisisCore.log.error("Could not determine the type of the method {} (GETTER or SETTER).", m.getName());
+							break;
+						}
+
+						if (type == Type.GETTER)
+							gets.put(syncAnno.value(), m);
+						else if (type == Type.SETTER)
+							sets.put(syncAnno.value(), m);
+
+						Method setter = sets.get(syncAnno.value());
+						Method getter = gets.get(syncAnno.value());
+						if (getter != null && setter != null)
+						{
+							ObjectData od = getObjectData(syncAnno.value(), getter, setter);
+							if (od != null)
+								handler.addObjectData(od);
+						}
+					}
+
 				}
 			}
 			catch (Exception e)
@@ -145,6 +190,33 @@ public class Syncer
 				MalisisCore.log.error("Could not process {} syncable.", data.getClassName(), e);
 			}
 		}
+	}
+
+	private Type getMethodType(Sync syncAnno, Method m)
+	{
+		if (syncAnno.type() != Type.AUTO)
+			return syncAnno.type();
+		int c = m.getParameterCount();
+		return c == 1 ? Type.SETTER : (c == 0 ? Type.GETTER : null);
+	}
+
+	private ObjectData getObjectData(String name, Field field)
+	{
+		Function<Object, Object> getter = (holder) -> Silenced.apply(field::get, holder);
+		BiConsumer<Object, Object> setter = (holder, value) -> Silenced.accept(field::set, holder, value);
+
+		return new ObjectData(name, field.getType(), getter, setter);
+	}
+
+	private ObjectData getObjectData(String name, Method get, Method set)
+	{
+		Function<Object, Object> getter = (holder) -> Silenced.apply(get::invoke, holder);
+		BiConsumer<Object, Object> setter = (holder, value) -> Silenced.accept(set::invoke, holder, value);
+
+		if (set.getParameterTypes()[0] != get.getReturnType())
+			return null;
+
+		return new ObjectData(name, get.getReturnType(), getter, setter);
 	}
 
 	/**
@@ -159,9 +231,9 @@ public class Syncer
 		int indexes = 0;
 		for (String str : syncNames)
 		{
-			FieldData fd = handler.getFieldData(str);
-			if (fd != null)
-				indexes |= 1 << fd.getIndex();
+			ObjectData od = handler.getObjectData(str);
+			if (od != null)
+				indexes |= 1 << od.getIndex();
 		}
 		return indexes;
 	}
@@ -177,18 +249,11 @@ public class Syncer
 	private Map<String, Object> getFieldValues(Object caller, ISyncHandler<?, ? extends ISyncableData> handler, String... syncNames)
 	{
 		Map<String, Object> values = new LinkedHashMap<>();
-		try
+		for (String str : syncNames)
 		{
-			for (String str : syncNames)
-			{
-				FieldData fd = handler.getFieldData(str);
-				if (fd != null)
-					values.put(str, fd.getField().get(caller));
-			}
-		}
-		catch (IllegalArgumentException | IllegalAccessException e)
-		{
-			e.printStackTrace();
+			ObjectData od = handler.getObjectData(str);
+			if (od != null)
+				values.put(str, od.get(caller));
 		}
 
 		return values;
@@ -212,7 +277,7 @@ public class Syncer
 		int indexes = getFieldIndexes(handler, syncNames);
 		Map<String, Object> values = getFieldValues(caller, handler, syncNames);
 
-		SyncerMessage.Packet<T, S> packet = new Packet<>(handler, data, indexes, values);
+		SyncerMessage.Packet<T, S> packet = new Packet<>(getHandlerId(caller.getClass()), data, indexes, values);
 
 		handler.send(caller, packet);
 	}
@@ -239,16 +304,9 @@ public class Syncer
 
 		for (Entry<String, Object> entry : values.entrySet())
 		{
-			try
-			{
-				FieldData fd = handler.getFieldData(entry.getKey());
-				if (fd != null)
-					fd.getField().set(receiver, entry.getValue());
-			}
-			catch (IllegalArgumentException | IllegalAccessException e)
-			{
-				MalisisCore.log.error("Failed to update {} field for {}.", entry.getKey(), receiver.getClass().getSimpleName(), e);
-			}
+			ObjectData od = handler.getObjectData(entry.getKey());
+			if (od != null)
+				od.set(receiver, entry.getValue());
 		}
 	}
 
@@ -269,9 +327,9 @@ public class Syncer
 	 *
 	 * @param handler the handler
 	 */
-	public static void registerHandler(ISyncHandler<?, ? extends ISyncableData> handler)
+	public static void registerHandlerFactory(String name, Supplier<ISyncHandler<?, ? extends ISyncableData>> supplier)
 	{
-		get().registerSyncHandler(handler);
+		get().registerFacotory(name, supplier);
 	}
 
 	/**

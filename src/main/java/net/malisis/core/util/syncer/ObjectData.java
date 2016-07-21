@@ -24,23 +24,32 @@
 
 package net.malisis.core.util.syncer;
 
-import java.lang.reflect.Field;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 /**
  * @author Ordinastie
  *
  */
-public class FieldData
+public class ObjectData
 {
-	private final int index;
+	private int index;
 	private final String name;
-	private final Field field;
+	private final Class<?> type;
+	private final Function<Object, Object> getter;
+	private final BiConsumer<Object, Object> setter;
 
-	public FieldData(int index, String name, Field field)
+	public ObjectData(String name, Class<?> type, Function<Object, Object> getter, BiConsumer<Object, Object> setter)
+	{
+		this.name = name;
+		this.type = type;
+		this.getter = getter;
+		this.setter = setter;
+	}
+
+	public void setIndex(int index)
 	{
 		this.index = index;
-		this.name = name;
-		this.field = field;
 	}
 
 	public int getIndex()
@@ -53,8 +62,18 @@ public class FieldData
 		return name;
 	}
 
-	public Field getField()
+	public Class<?> getType()
 	{
-		return field;
+		return type;
+	}
+
+	public void set(Object holder, Object value)
+	{
+		setter.accept(holder, value);
+	}
+
+	public Object get(Object holder)
+	{
+		return getter.apply(holder);
 	}
 }

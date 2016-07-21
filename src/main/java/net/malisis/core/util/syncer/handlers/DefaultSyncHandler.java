@@ -24,13 +24,10 @@
 
 package net.malisis.core.util.syncer.handlers;
 
-import java.lang.reflect.Field;
-
 import net.malisis.core.util.DoubleKeyMap;
-import net.malisis.core.util.DoubleKeyMap.DoubleKeyEntry;
-import net.malisis.core.util.syncer.FieldData;
 import net.malisis.core.util.syncer.ISyncHandler;
 import net.malisis.core.util.syncer.ISyncableData;
+import net.malisis.core.util.syncer.ObjectData;
 
 /**
  * @author Ordinastie
@@ -38,31 +35,26 @@ import net.malisis.core.util.syncer.ISyncableData;
  */
 public abstract class DefaultSyncHandler<T, S extends ISyncableData> implements ISyncHandler<T, S>
 {
-	private DoubleKeyMap<String, Field> fields = new DoubleKeyMap<>();
+	private DoubleKeyMap<String, ObjectData> objectDatas = new DoubleKeyMap<>();
 
 	@Override
-	public void addFieldData(FieldData fieldData)
+	public void addObjectData(ObjectData objectData)
 	{
-		if (fields.get(fieldData.getName()) != null)
-			throw new RuntimeException(fieldData.getName() + " is already registered");
+		if (objectDatas.get(objectData.getName()) != null)
+			throw new RuntimeException(objectData.getName() + " is already registered");
 
-		fields.put(fieldData.getName(), fieldData.getField());
-	}
-
-	private FieldData getFieldData(DoubleKeyEntry<String, Field> entry)
-	{
-		return entry != null ? new FieldData(entry.getIndex(), entry.getKey(), entry.getValue()) : null;
+		objectData.setIndex(objectDatas.put(objectData.getName(), objectData));
 	}
 
 	@Override
-	public FieldData getFieldData(int index)
+	public ObjectData getObjectData(int index)
 	{
-		return getFieldData(fields.getEntry(index));
+		return objectDatas.get(index);
 	}
 
 	@Override
-	public FieldData getFieldData(String name)
+	public ObjectData getObjectData(String name)
 	{
-		return getFieldData(fields.getEntry(name));
+		return objectDatas.get(name);
 	}
 }
