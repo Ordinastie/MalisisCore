@@ -49,6 +49,7 @@ import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
+import net.malisis.core.util.clientnotif.ClientNotificationManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -334,6 +335,8 @@ public class MalisisRegistry
 				if (item != null)
 					registerItemModel(item, name);
 			}
+
+			ClientNotificationManager.get().discover(block);
 		}
 		else if (registerable instanceof Item)
 		{
