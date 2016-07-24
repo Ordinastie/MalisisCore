@@ -108,7 +108,10 @@ public class ModMessageManager
 	{
 		Collection<Pair<Object, Method>> messageList = messages.get(modid + ":" + messageName);
 		if (messageList.size() == 0)
+		{
+			MalisisCore.log.warn("No message handler matching the parameters passed for {}", modid + ":" + messageName);
 			return;
+		}
 
 		for (Pair<Object, Method> message : messageList)
 		{
@@ -125,7 +128,6 @@ public class ModMessageManager
 			}
 		}
 
-		MalisisCore.log.warn("No message handler matching the parameters passed for {}", modid + ":" + messageName);
 	}
 
 	/**
