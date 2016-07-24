@@ -91,7 +91,7 @@ public class Syncer
 	/**
 	 * Gets the handler id for the specified {@link ISyncHandler}.
 	 *
-	 * @param handler the handler
+	 * @param clazz the clazz
 	 * @return the handler id
 	 */
 	public int getHandlerId(Class<?> clazz)
@@ -325,7 +325,8 @@ public class Syncer
 	/**
 	 * Registers a {@link ISyncHandler} to the {@link Syncer}.
 	 *
-	 * @param handler the handler
+	 * @param name the name
+	 * @param supplier the supplier
 	 */
 	public static void registerHandlerFactory(String name, Supplier<ISyncHandler<?, ? extends ISyncableData>> supplier)
 	{

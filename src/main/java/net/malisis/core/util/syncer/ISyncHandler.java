@@ -29,7 +29,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * {@link ISyncHandler} are used to define handlers for the {@link Syncer}.<br>
- * They're registered with {@link Syncer#registerSyncHandler(ISyncHandler)}.
+ * Handlers are created by factories registered through {@link Syncer#registerHandlerFactory(String, com.google.common.base.Supplier)}.
  *
  * @author Ordinastie
  * @param <T> the generic type
@@ -64,14 +64,14 @@ public interface ISyncHandler<T, S extends ISyncableData>
 	public S getSyncData(T caller);
 
 	/**
-	 * Adds a {@link FieldData} to be handled by this {@link ISyncHandler}.
+	 * Adds a {@link ObjectData} to be handled by this {@link ISyncHandler}.
 	 *
-	 * @param fieldData the field data
+	 * @param objectData the field data
 	 */
-	public void addObjectData(ObjectData fieldData);
+	public void addObjectData(ObjectData objectData);
 
 	/**
-	 * Gets the {@link FieldData} for the specified index (called from the the SyncerMessage.Packet).
+	 * Gets the {@link ObjectData} for the specified index (called from the the SyncerMessage.Packet).
 	 *
 	 * @param index the index
 	 * @return the field data
@@ -79,7 +79,7 @@ public interface ISyncHandler<T, S extends ISyncableData>
 	public ObjectData getObjectData(int index);
 
 	/**
-	 * Gets the {@link FieldData} from its name.
+	 * Gets the {@link ObjectData} from its name.
 	 *
 	 * @param name the name
 	 * @return the field data
