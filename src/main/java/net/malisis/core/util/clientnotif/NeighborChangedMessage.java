@@ -37,6 +37,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
@@ -52,6 +53,12 @@ public class NeighborChangedMessage implements IMalisisMessageHandler<Packet, IM
 
 	@Override
 	public void process(Packet message, MessageContext ctx)
+	{
+		doProcess(message, ctx);
+	}
+
+	@SideOnly(Side.CLIENT)
+	private void doProcess(Packet message, MessageContext ctx)
 	{
 		IBlockState state = Minecraft.getMinecraft().theWorld.getBlockState(message.pos);
 		state.neighborChanged(Minecraft.getMinecraft().theWorld, message.pos, message.neighbor);
