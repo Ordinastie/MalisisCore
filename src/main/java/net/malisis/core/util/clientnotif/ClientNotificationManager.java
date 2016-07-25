@@ -77,7 +77,7 @@ public class ClientNotificationManager
 		try
 		{
 			Class<? extends Block> clazz = block.getClass();
-			Method m = clazz.getMethod(MalisisCore.isObfEnv ? "func_189546_a" : "neighborChanged",
+			Method m = clazz.getMethod(MalisisCore.isObfEnv ? "func_189540_a" : "neighborChanged",
 					IBlockState.class,
 					World.class,
 					BlockPos.class,
