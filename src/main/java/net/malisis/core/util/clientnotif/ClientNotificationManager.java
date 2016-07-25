@@ -88,7 +88,7 @@ public class ClientNotificationManager
 		}
 		catch (ReflectiveOperationException e)
 		{
-			MalisisCore.log.error("Failed to find @ClientNotification annotation for {}", block);
+			MalisisCore.log.error("Failed to find @ClientNotification annotation for {} : ", block, e);
 		}
 
 	}
