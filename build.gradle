@@ -242,7 +242,9 @@ if (project.hasProperty('curseapi')) {
 			
 			addArtifact deobfJar
 			addArtifact sourcesJar
-			addArtifact javadocJar			   		
+			addArtifact javadocJar
+			
+			addGameVersion '1.10.2'			   		
 		}
 	}
 }
