@@ -30,14 +30,11 @@ import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
 import net.malisis.core.util.clientnotif.NeighborChangedMessage.Packet;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
@@ -54,14 +51,8 @@ public class NeighborChangedMessage implements IMalisisMessageHandler<Packet, IM
 	@Override
 	public void process(Packet message, MessageContext ctx)
 	{
-		doProcess(message, ctx);
-	}
-
-	@SideOnly(Side.CLIENT)
-	private void doProcess(Packet message, MessageContext ctx)
-	{
-		IBlockState state = Minecraft.getMinecraft().theWorld.getBlockState(message.pos);
-		state.neighborChanged(Minecraft.getMinecraft().theWorld, message.pos, message.neighbor);
+		World world = IMalisisMessageHandler.getWorld(ctx);
+		world.getBlockState(message.pos).neighborChanged(world, message.pos, message.neighbor);
 	}
 
 	public static void send(World world, BlockPos pos, Block neighbor)
