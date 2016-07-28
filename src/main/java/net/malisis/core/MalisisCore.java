@@ -261,10 +261,7 @@ public class MalisisCore implements IMalisisMod
 	 */
 	public static void message(Object text, Object... data)
 	{
-		if (text == null)
-			return;
-
-		String txt = text.toString();
+		String txt = text != null ? text.toString() : "null";
 		if (text instanceof Object[])
 			txt = Arrays.deepToString((Object[]) text);
 		TextComponentString msg = new TextComponentString(I18n.format(txt, data));
