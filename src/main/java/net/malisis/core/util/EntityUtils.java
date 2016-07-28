@@ -25,8 +25,6 @@
 package net.malisis.core.util;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -43,7 +41,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.management.PlayerChunkMap;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -59,6 +57,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.google.common.collect.Lists;
+
 /**
  * Utility class for Entities.
  *
@@ -71,13 +71,11 @@ public class EntityUtils
 	private static EnumFacing[] facings = new EnumFacing[] { EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST,
 			EnumFacing.UP, EnumFacing.DOWN };
 
-	private static Method getPlayerInstance;
 	private static Field playersWatchingChunk;
 	static
 	{
 		try
 		{
-			getPlayerInstance = AsmUtils.changeMethodAccess(PlayerChunkMap.class, "getEntry", "func_187301_b", "II");
 			Class<?> clazz = Class.forName("net.minecraft.server.management.PlayerChunkMapEntry");
 			playersWatchingChunk = AsmUtils.changeFieldAccess(clazz, "players", "field_187283_c");
 		}
@@ -239,12 +237,12 @@ public class EntityUtils
 
 		try
 		{
-			Object playerInstance = getPlayerInstance.invoke(world.getPlayerChunkMap(), x, z);
-			if (playerInstance == null)
-				return new ArrayList<>();
-			return (List<EntityPlayerMP>) playersWatchingChunk.get(playerInstance);
+			PlayerChunkMapEntry entry = world.getPlayerChunkMap().getEntry(x, z);
+			if (entry == null)
+				return Lists.newArrayList();
+			return (List<EntityPlayerMP>) playersWatchingChunk.get(entry);
 		}
-		catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+		catch (ReflectiveOperationException e)
 		{
 			MalisisCore.log.info("Failed to get players watching chunk :", e);
 			return new ArrayList<>();
