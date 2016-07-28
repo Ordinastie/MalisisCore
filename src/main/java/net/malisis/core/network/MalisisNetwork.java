@@ -30,7 +30,6 @@ import net.malisis.core.IMalisisMod;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.message.OpenInventoryMessage;
 import net.malisis.core.util.EntityUtils;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
@@ -89,8 +88,7 @@ public class MalisisNetwork extends SimpleNetworkWrapper
 	 */
 	public void sendToPlayersWatchingChunk(IMessage message, Chunk chunk)
 	{
-		for (EntityPlayerMP player : EntityUtils.getPlayersWatchingChunk(chunk))
-			sendTo(message, player);
+		EntityUtils.getPlayersWatchingChunk(chunk).forEach(p -> sendTo(message, p));
 	}
 
 	/**
