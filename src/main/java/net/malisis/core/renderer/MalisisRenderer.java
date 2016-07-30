@@ -73,6 +73,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -348,9 +349,17 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	@Override
 	public synchronized boolean renderItem(ItemStack itemStack, float partialTick)
 	{
+		if (tranformType == TransformType.FIRST_PERSON_RIGHT_HAND || tranformType == TransformType.FIRST_PERSON_LEFT_HAND)
+		{
+			ItemStack stackInv = Minecraft.getMinecraft().thePlayer.getHeldItem(tranformType == TransformType.FIRST_PERSON_RIGHT_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
+			if (itemStack != stackInv && stackInv != null && stackInv.getItem() == itemStack.getItem())
+				itemStack = stackInv;
+		}
+
 		this.buffer = Tessellator.getInstance().getBuffer();
 		set(itemStack);
 		prepare(RenderType.ITEM);
+
 		if (checkBlock())
 			render();
 		clean();
