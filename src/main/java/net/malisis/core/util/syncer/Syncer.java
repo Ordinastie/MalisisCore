@@ -28,6 +28,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
@@ -45,6 +46,7 @@ import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 
 /**
  * This class handles the synchronization between server and client objects. Objects to be synchronized need to have the {@link Syncable}
@@ -138,7 +140,11 @@ public class Syncer
 	 */
 	public void discover(ASMDataTable asmDataTable)
 	{
-		for (ASMData data : asmDataTable.getAll(Syncable.class.getName()))
+		List<ASMData> classes = Ordering.natural()
+										.onResultOf(ASMData::getClassName)
+										.sortedCopy(asmDataTable.getAll(Syncable.class.getName()));
+
+		for (ASMData data : classes)
 		{
 			try
 			{

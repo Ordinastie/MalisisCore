@@ -38,7 +38,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Ordering;
 
 /**
@@ -140,14 +139,9 @@ public class MalisisNetwork extends SimpleNetworkWrapper
 	 */
 	public static void createMessages(ASMDataTable asmDataTable)
 	{
-		List<ASMData> classes = Ordering.natural().onResultOf(new Function<ASMData, String>()
-		{
-			@Override
-			public String apply(ASMData data)
-			{
-				return data.getClassName();
-			}
-		}).sortedCopy(asmDataTable.getAll(MalisisMessage.class.getName()));
+		List<ASMData> classes = Ordering.natural()
+										.onResultOf(ASMData::getClassName)
+										.sortedCopy(asmDataTable.getAll(MalisisMessage.class.getName()));
 
 		for (ASMData data : classes)
 		{
