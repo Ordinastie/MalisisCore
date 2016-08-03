@@ -61,6 +61,8 @@ public class TileEntitySyncHandler extends DefaultSyncHandler<TileEntity, TESync
 	@Override
 	public void send(TileEntity caller, Packet<TileEntity, TESyncData> packet)
 	{
+		if (caller.getWorld().isRemote)
+			return;
 		MalisisCore.network.sendToPlayersWatchingChunk(packet,
 				caller.getWorld().getChunkFromChunkCoords(caller.getPos().getX() >> 4, caller.getPos().getZ() >> 4));
 	}
