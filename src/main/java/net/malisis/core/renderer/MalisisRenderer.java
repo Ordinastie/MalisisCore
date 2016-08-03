@@ -96,9 +96,6 @@ import com.google.common.collect.Sets;
  */
 public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRenderer<T> implements IBlockRenderer, IRenderWorldLast
 {
-	/** Reference to Tessellator.isDrawing field **/
-	private static Field isDrawingField;
-
 	public static VertexFormat malisisVertexFormat = new VertexFormat()
 	{
 		{
@@ -596,20 +593,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	public boolean isDrawing()
 	{
-		if (isDrawingField == null)
-			isDrawingField = AsmUtils.changeFieldAccess(VertexBuffer.class, "isDrawing", "field_179010_r");
-
-		try
-		{
-			if (buffer == null)
-				throw new NullPointerException("[MalisisRenderer] WorldRenderer not set for " + renderType);
-			return isDrawingField.getBoolean(buffer);
-		}
-		catch (IllegalArgumentException | IllegalAccessException e)
-		{
-			MalisisCore.log.error("[MalisisRenderer] Failed to get Tessellator.isDrawing value", e);
-			return false;
-		}
+		if (buffer == null)
+			throw new NullPointerException("[MalisisRenderer] WorldRenderer not set for " + renderType);
+		return buffer.isDrawing;
 	}
 
 	/**

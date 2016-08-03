@@ -44,6 +44,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import com.google.common.base.Function;
@@ -57,7 +58,8 @@ import com.google.common.collect.Table;
 public class BlockDataHandler
 {
 	private static BlockDataHandler instance = new BlockDataHandler();
-	private static Field worldField = AsmUtils.changeFieldAccess(ChunkCache.class, "worldObj", "field_72815_e");
+	private static Field chunkCacheField = FMLClientHandler.instance().hasOptifine() ? AsmUtils.changeFieldAccess(Silenced.get(() -> Class.forName("ChunkCacheOF")),
+			"chunkCache") : null;
 
 	private Map<String, HandlerInfo<?>> handlerInfos = new HashMap<>();
 	private Table<String, Chunk, ChunkData<?>> serverDatas = HashBasedTable.create();
@@ -78,13 +80,17 @@ public class BlockDataHandler
 		if (world instanceof World)
 			return (World) world;
 		else if (world instanceof ChunkCache)
-			return Silenced.get(() -> ((World) worldField.get(world)));
+			return ((ChunkCache) world).worldObj;
+
+		if (FMLClientHandler.instance().hasOptifine() && chunkCacheField != null)
+			return world(Silenced.get(() -> ((ChunkCache) chunkCacheField.get(world))));
+
 		return null;
 	}
 
 	private <T> ChunkData<T> chunkData(String identifier, World world, BlockPos pos)
 	{
-		return chunkData(identifier, world, world.getChunkFromBlockCoords(pos));
+		return world != null ? chunkData(identifier, world, world.getChunkFromBlockCoords(pos)) : null;
 	}
 
 	@SuppressWarnings("unchecked")
