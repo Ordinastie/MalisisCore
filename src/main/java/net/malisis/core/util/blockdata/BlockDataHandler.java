@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.util.Silenced;
 import net.minecraft.client.Minecraft;
@@ -58,7 +59,7 @@ import com.google.common.collect.Table;
 public class BlockDataHandler
 {
 	private static BlockDataHandler instance = new BlockDataHandler();
-	private static Field chunkCacheField = FMLClientHandler.instance().hasOptifine() ? AsmUtils.changeFieldAccess(Silenced.get(() -> Class.forName("ChunkCacheOF")),
+	private static Field chunkCacheField = MalisisCore.isClient() && FMLClientHandler.instance().hasOptifine() ? AsmUtils.changeFieldAccess(Silenced.get(() -> Class.forName("ChunkCacheOF")),
 			"chunkCache") : null;
 
 	private Map<String, HandlerInfo<?>> handlerInfos = new HashMap<>();
