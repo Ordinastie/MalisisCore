@@ -1072,8 +1072,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 		if (iconProvider instanceof IBlockIconProvider && block != null)
 		{
-			EnumFacing side = params.textureSide.get();
-			if (shouldRotateIcon(params))
+			EnumFacing side = params != null ? params.textureSide.get() : EnumFacing.SOUTH;
+			if (params != null && shouldRotateIcon(params))
 				side = EnumFacingUtils.getRealSide(blockState, side);
 
 			IBlockIconProvider iblockp = (IBlockIconProvider) iconProvider;
