@@ -3,8 +3,8 @@ language: java
 jdk: oraclejdk8
 
 # Compile and package JAR and set build properties
-install: gradlew setupCIWorkspace
-script: gradlew build -PbuildNumber=$TRAVIS_BUILD_NUMBER -PciSystem=travis -Pcommit=${TRAVIS_COMMIT:0:7}
+install: ./gradlew setupCIWorkspace
+script: ./gradlew build -PbuildNumber=$TRAVIS_BUILD_NUMBER -PciSystem=travis -Pcommit=${TRAVIS_COMMIT:0:7}
 
 # Perform steps after compilation/test success
 after_success:
