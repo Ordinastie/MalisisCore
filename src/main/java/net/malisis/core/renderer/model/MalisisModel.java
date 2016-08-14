@@ -24,18 +24,28 @@
 
 package net.malisis.core.renderer.model;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.element.Shape;
+import net.malisis.core.renderer.model.loader.AnimationImporter;
 import net.malisis.core.renderer.model.loader.ObjFileImporter;
 import net.malisis.core.renderer.model.loader.TextureModelLoader;
+import net.malisis.core.util.Timer;
 import net.minecraft.util.ResourceLocation;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 /**
  * This class is a holder for multiple shapes.<br>
@@ -47,7 +57,9 @@ import net.minecraft.util.ResourceLocation;
 public class MalisisModel implements ITransformable.Translate, ITransformable.Rotate, ITransformable.Scale, Iterable<Shape>
 {
 	/** Shapes building this {@link MalisisModel}. */
-	protected Map<String, Shape> shapes = new HashMap<>();
+	protected Map<String, Shape> shapes = Maps.newHashMap();
+	/** Animations for the Shapes in this {@link MalisisModel} */
+	protected Multimap<String, Animation<Shape>> animations = ArrayListMultimap.create();
 
 	/**
 	 * Instantiates a new empty {@link MalisisModel}.<br>
@@ -76,6 +88,12 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 		load(loader);
 	}
 
+	public MalisisModel(IModelLoader loader, IAnimationLoader animLoader)
+	{
+		load(loader);
+		load(animLoader);
+	}
+
 	/**
 	 * Instantiates a new {@link MalisisModel}. The loader will be determined by the model file extension.
 	 *
@@ -87,8 +105,12 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 			return;
 
 		IModelLoader loader = null;
+		IAnimationLoader animLoader = null;
 		if (resource.getResourcePath().endsWith(".obj"))
+		{
 			loader = new ObjFileImporter(resource);
+			animLoader = new AnimationImporter(new ResourceLocation(resource.toString() + ".anim"));
+		}
 		if (resource.getResourcePath().endsWith(".png"))
 			loader = new TextureModelLoader(resource);
 
@@ -96,6 +118,9 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 			load(loader);
 		else
 			MalisisCore.log.error("[MalisisModel] No loader determined for {}.", resource.getResourcePath());
+
+		if (animLoader != null)
+			load(animLoader);
 	}
 
 	/**
@@ -110,6 +135,23 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 
 		shapes = loader.getShapes();
 		storeState();
+	}
+
+	/**
+	 * Load the animations from the specified {@link IAnimationLoader}.
+	 *
+	 * @param loader the loader
+	 */
+	protected void load(IAnimationLoader loader)
+	{
+		try
+		{
+			animations = loader.getAnimations(shapes);
+		}
+		catch (Exception e)
+		{
+			MalisisCore.log.error("Failed to get the animations for the model :", e);
+		}
 	}
 
 	/**
@@ -130,7 +172,7 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	 */
 	public void addShape(Shape shape)
 	{
-		addShape("Shape_" + (shapes.size() + 1), shape);
+		addShape("shape_" + (shapes.size() + 1), shape);
 	}
 
 	/**
@@ -156,6 +198,83 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	public Shape getShape(String name)
 	{
 		return shapes.get(name.toLowerCase());
+	}
+
+	/**
+	 * Gets the list of shape names in this {@link MalisisModel}.
+	 *
+	 * @return the shape list
+	 */
+	public Set<String> getShapeList()
+	{
+		return shapes.keySet();
+	}
+
+	/**
+	 * Adds the {@link Animation} to this {@link MalisisModel} with default names.
+	 *
+	 * @param animations the animations
+	 */
+	public void addAnimations(@SuppressWarnings("unchecked") Animation<Shape>... animations)
+	{
+		for (Animation<Shape> anim : animations)
+			addAnimation(anim);
+	}
+
+	/**
+	 * Adds an {@link Animation} to this {@link MalisisModel} with a default name.
+	 *
+	 * @param animation the animation
+	 */
+	public void addAnimation(Animation<Shape> animation)
+	{
+		addAnimation("animation_" + (animations.size() + 1), animation);
+	}
+
+	/**
+	 * Adds an {@link Animation} to this {@link MalisisModel} with the specified name.
+	 *
+	 * @param name the name
+	 * @param animation the animation
+	 */
+	public void addAnimation(String name, Animation<Shape> animation)
+	{
+		animations.put(name, animation);
+	}
+
+	/**
+	 * Gets the {@link Animation} with the specified name.
+	 *
+	 * @param name the name
+	 * @return the animation
+	 */
+	public Collection<Animation<Shape>> getAnimation(String name)
+	{
+		return animations.get(name);
+	}
+
+	public Set<String> getAnimatedShapes()
+	{
+		Set<String> animatedShapes = Sets.newHashSet();
+		for (Animation<Shape> anim : animations.values())
+		{
+			for (Entry<String, Shape> entry : shapes.entrySet())
+			{
+				if (entry.getValue() == anim.getTransformable())
+					animatedShapes.add(entry.getKey());
+			}
+		}
+		return animatedShapes;
+	}
+
+	/**
+	 * Gets the list of animation names in this {@link MalisisModel}.
+	 *
+	 * @return the animations list
+	 */
+	public Set<String> getAnimationsList()
+	{
+		return animations.keySet();
 	}
 
 	/**
@@ -202,9 +321,37 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	 */
 	public void render(MalisisRenderer<?> renderer, String name, RenderParameters rp)
 	{
-		Shape shape = shapes.get(name);
+		Shape shape = getShape(name);
 		if (shape != null)
 			renderer.drawShape(shape, rp);
+	}
+
+	/**
+	 * Animates all the animations of this model with the specified name based on the {@link Timer}
+	 *
+	 * @param name the name
+	 * @param timer the timer
+	 * @return true, if successful
+	 */
+	public boolean animate(String name, Timer timer)
+	{
+		boolean finished = true;
+		for (Animation<Shape> anim : getAnimation(name))
+			finished &= animate(anim, timer) && !anim.persistance();
+		return finished;
+	}
+
+	/**
+	 * Animates the specific {@link Animation} based on the specified {@link Timer}
+	 *
+	 * @param animation the animation
+	 * @param timer the timer
+	 * @return true, if successful
+	 */
+	public boolean animate(Animation<Shape> animation, Timer timer)
+	{
+		animation.animate(timer);
+		return animation.isFinished();
 	}
 
 	/**
