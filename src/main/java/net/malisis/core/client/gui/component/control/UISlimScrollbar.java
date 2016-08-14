@@ -159,7 +159,7 @@ public class UISlimScrollbar extends UIScrollBar
 	}
 
 	@Subscribe
-	public void onMouseOver(HoveredStateChange<UIScrollBar> event)
+	public void onMouseOver(HoveredStateChange<?> event)
 	{
 		if (!fade)
 			return;
