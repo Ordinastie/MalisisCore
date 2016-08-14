@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -47,6 +46,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+
+import com.google.common.collect.Maps;
 
 /**
  * Model loader for OBJ files (Wavefront).
@@ -86,7 +87,7 @@ public class ObjFileImporter implements IModelLoader
 	protected List<Face> faces = new ArrayList<>();
 
 	/** Map of the {@link Shape shapes} used for the {@link MalisisModel}. */
-	protected Map<String, Shape> shapes = new HashMap<>();
+	protected Map<String, Shape> shapes = Maps.newHashMap();
 
 	/**
 	 * Instantiates a new {@link ObjFileImporter} from a {@link ResourceLocation}.
@@ -234,7 +235,9 @@ public class ObjFileImporter implements IModelLoader
 		float v = 0;
 		if (coords.length != 2)
 		{
-			MalisisCore.log.error("[ObjFileImporter] Wrong UV coordinates number {} at line {} : {}", coords.length, lineNumber,
+			MalisisCore.log.error("[ObjFileImporter] Wrong UV coordinates number {} at line {} : {}",
+					coords.length,
+					lineNumber,
 					currentLine);
 		}
 		else
@@ -259,7 +262,9 @@ public class ObjFileImporter implements IModelLoader
 		float z = 0;
 		if (coords.length != 3)
 		{
-			MalisisCore.log.error("[ObjFileImporter] Wrong Normal coordinates number {} at line {} : {}", coords.length, lineNumber,
+			MalisisCore.log.error("[ObjFileImporter] Wrong Normal coordinates number {} at line {} : {}",
+					coords.length,
+					lineNumber,
 					currentLine);
 		}
 		else
@@ -356,8 +361,8 @@ public class ObjFileImporter implements IModelLoader
 			faces.clear();
 		}
 
-		if (data != "" && data.indexOf('_') != -1)
-			currentShape = data.substring(0, data.indexOf('_'));
+		if (data != "")
+			currentShape = data.indexOf('_') != -1 ? data.substring(0, data.indexOf('_')) : data;
 	}
 
 	/**
