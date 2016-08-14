@@ -58,7 +58,10 @@ public interface IBlockComponent extends IComponent
 	 *
 	 * @return the property
 	 */
-	public IProperty<?> getProperty();
+	public default IProperty<?> getProperty()
+	{
+		return null;
+	}
 
 	/**
 	 * Gets the all the {@link IProperty properties} used by this {@link IBlockComponent}.
@@ -78,7 +81,10 @@ public interface IBlockComponent extends IComponent
 	 * @param block the block
 	 * @param state the state
 	 */
-	public IBlockState setDefaultState(Block block, IBlockState state);
+	public default IBlockState setDefaultState(Block block, IBlockState state)
+	{
+		return state;
+	}
 
 	public default Item getItem(Block block)
 	{
@@ -98,6 +104,17 @@ public interface IBlockComponent extends IComponent
 	}
 
 	//#region Events
+	/**
+	 * Called when the block is added to the {@link World}
+	 *
+	 * @param block the block
+	 * @param world the world
+	 * @param pos the pos
+	 * @param state the state
+	 */
+	public default void onBlockAdded(Block block, World world, BlockPos pos, IBlockState state)
+	{}
+
 	/**
 	 * Called when the {@link Block} is placed in the {@link World}.
 	 *

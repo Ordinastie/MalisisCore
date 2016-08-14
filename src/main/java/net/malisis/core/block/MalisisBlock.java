@@ -226,6 +226,12 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 
 	//EVENTS
 	@Override
+	public void onBlockAdded(World world, BlockPos pos, IBlockState state)
+	{
+		getBlockComponents().forEach(c -> c.onBlockAdded(this, world, pos, state));
+	}
+
+	@Override
 	public IBlockState onBlockPlaced(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
 		IBlockState state = super.onBlockPlaced(world, pos, facing, hitX, hitY, hitZ, meta, placer);
@@ -238,8 +244,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
 	{
-		for (IBlockComponent component : getBlockComponents())
-			component.onBlockPlacedBy(this, world, pos, state, placer, stack);
+		getBlockComponents().forEach(c -> c.onBlockPlacedBy(this, world, pos, state, placer, stack));
 	}
 
 	@Override
@@ -255,15 +260,13 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	@Override
 	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block neighborBlock)
 	{
-		for (IBlockComponent component : getBlockComponents())
-			component.onNeighborBlockChange(this, world, pos, state, neighborBlock);
+		getBlockComponents().forEach(c -> c.onNeighborBlockChange(this, world, pos, state, neighborBlock));
 	}
 
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state)
 	{
-		for (IBlockComponent component : getBlockComponents())
-			component.breakBlock(this, world, pos, state);
+		getBlockComponents().forEach(c -> c.breakBlock(this, world, pos, state));
 
 		super.breakBlock(world, pos, state);
 	}
