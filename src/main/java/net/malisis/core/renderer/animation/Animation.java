@@ -49,6 +49,16 @@ public class Animation<S extends ITransformable>
 		this.transform = transform;
 	}
 
+	public S getTransformable()
+	{
+		return transformable;
+	}
+
+	public Transformation<?, S> getTransformation()
+	{
+		return transform;
+	}
+
 	public void setRender(boolean before, boolean after)
 	{
 		renderBefore = before;
@@ -70,12 +80,17 @@ public class Animation<S extends ITransformable>
 		this.delay = delay;
 	}
 
-	public S animate(long elapsedTime)
+	public boolean persistance()
+	{
+		return renderAfter;
+	}
+
+	public S animate(Timer timer)
 	{
 		if (transform == null || transformable == null)
 			return transformable;
 
-		long elapsed = elapsedTime - Timer.tickToTime(delay);
+		long elapsed = timer.elapsedTime() - Timer.tickToTime(delay);
 		started = elapsed > transform.getDelay();
 		finished = elapsed > transform.totalDuration() && transform.getLoops() != -1;
 

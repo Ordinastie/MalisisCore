@@ -30,6 +30,7 @@ import java.util.List;
 
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.animation.transformation.Transformation;
+import net.malisis.core.util.Timer;
 import net.minecraft.client.Minecraft;
 
 /**
@@ -38,7 +39,7 @@ import net.minecraft.client.Minecraft;
  */
 public class AnimationRenderer
 {
-	private long startTime = -1;
+	private Timer timer = new Timer();
 	private boolean clearFinished = false;
 	private LinkedList<Animation<?>> animations = new LinkedList<>();
 	private List<ITransformable> tranformables = new ArrayList<>();
@@ -46,17 +47,17 @@ public class AnimationRenderer
 
 	public AnimationRenderer()
 	{
-		setStartTime();
+		timer.start();
 	}
 
 	public void setStartTime(long start)
 	{
-		this.startTime = start;
+		timer.setStart(start);
 	}
 
 	public void setStartTime()
 	{
-		setStartTime(System.currentTimeMillis());
+		timer.start();
 	}
 
 	public void setStartTick(long start)
@@ -76,12 +77,12 @@ public class AnimationRenderer
 
 	public long getElapsedTime()
 	{
-		return System.currentTimeMillis() - startTime;
+		return timer.elapsedTime();
 	}
 
 	public float getElapsedTicks()
 	{
-		return (float) (((double) getElapsedTime() / 1000) * 20);
+		return timer.elapsedTick();
 	}
 
 	public void addAnimation(Animation<?> animation)
@@ -106,6 +107,11 @@ public class AnimationRenderer
 
 	public List<ITransformable> animate(Animation<?>... animations)
 	{
+		return animate(timer, animations);
+	}
+
+	public List<ITransformable> animate(Timer timer, Animation<?>... animations)
+	{
 		tranformables.clear();
 		toClear.clear();
 
@@ -113,11 +119,10 @@ public class AnimationRenderer
 			return tranformables;
 
 		ITransformable tr = null;
-		long elapsedTime = getElapsedTime();
 
 		for (Animation<?> animation : animations)
 		{
-			tr = animation.animate(elapsedTime);
+			tr = animation.animate(timer);
 			if (tr != null)
 				tranformables.add(tr);
 
