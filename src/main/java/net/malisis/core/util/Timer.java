@@ -33,7 +33,9 @@ public class Timer
 	private long start;
 
 	public Timer()
-	{}
+	{
+		start();
+	}
 
 	public Timer(long start)
 	{
@@ -47,7 +49,10 @@ public class Timer
 
 	public void setStart(long start)
 	{
-		this.start = start;
+		if (start < 0)
+			setRelativeStart(start);
+		else
+			this.start = start;
 	}
 
 	public void setRelativeStart(long start)
