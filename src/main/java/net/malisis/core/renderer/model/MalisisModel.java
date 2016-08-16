@@ -42,7 +42,9 @@ import net.malisis.core.renderer.model.loader.TextureModelLoader;
 import net.malisis.core.util.Timer;
 import net.minecraft.util.ResourceLocation;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -201,11 +203,11 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	}
 
 	/**
-	 * Gets the list of shape names in this {@link MalisisModel}.
+	 * Gets the list of {@link Shape} names in this {@link MalisisModel}.
 	 *
 	 * @return the shape list
 	 */
-	public Set<String> getShapeList()
+	public Set<String> getShapeNames()
 	{
 		return shapes.keySet();
 	}
@@ -250,7 +252,7 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	 */
 	public Collection<Animation<Shape>> getAnimation(String name)
 	{
-		return animations.get(name);
+		return Objects.firstNonNull(animations.get(name), ImmutableList.<Animation<Shape>> of());
 	}
 
 	public Set<String> getAnimatedShapes()
@@ -331,7 +333,7 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	 *
 	 * @param name the name
 	 * @param timer the timer
-	 * @return true, if successful
+	 * @return true if the animation is finished and doesn't have persistance
 	 */
 	public boolean animate(String name, Timer timer)
 	{

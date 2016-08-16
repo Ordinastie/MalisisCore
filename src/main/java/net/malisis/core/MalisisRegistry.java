@@ -377,6 +377,8 @@ public class MalisisRegistry
 
 	public static boolean shouldRenderBlock(IBlockAccess world, BlockPos pos, IBlockState state)
 	{
+		DefaultRenderer.animated.checkAnimatedModel(world, new BlockPos(pos), state);
+
 		IBlockRenderer renderer = getBlockRendererOverride(world, pos, state);
 		if (renderer == null)
 			renderer = getBlockRenderer(state.getBlock());

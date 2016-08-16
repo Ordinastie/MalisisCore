@@ -25,13 +25,15 @@
 package net.malisis.core.renderer;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.vecmath.Matrix4f;
 
 import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.block.IComponent;
-import net.malisis.core.block.MalisisBlock;
+import net.malisis.core.renderer.component.AnimatedModelComponent;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.face.SouthFace;
 import net.malisis.core.renderer.element.shape.Cube;
@@ -40,9 +42,18 @@ import net.malisis.core.renderer.model.MalisisModel;
 import net.malisis.core.renderer.model.loader.TextureModelLoader;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.TransformBuilder;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ChunkProviderClient;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
+
+import com.google.common.collect.Maps;
 
 /**
  * @author Ordinastie
@@ -50,9 +61,28 @@ import net.minecraft.util.math.AxisAlignedBB;
  */
 public class DefaultRenderer
 {
+	/** Dummy renderer to use as value for {@link MalisisRendered} annotation. This renderer doesn't render anything. */
 	public static MalisisRenderer<?> nullRender = new Null();
+
+	/**
+	 * Default renderer for blocks.<br>
+	 * The renderer will first check for a {@link IRenderComponent}.<br>
+	 * If none is found for the current block, it will use the {@link AxisAlignedBB} from
+	 * {@link IBoundingBox#getRenderBoundingBox(IBlockAccess, BlockPos, IBlockState)}.<br>
+	 * If the block doesn't implement {@link IBoundingBox}, a regular 1x1x1 cube is drawn instead.
+	 */
 	public static Block block = new Block();
+
+	/**
+	 * Default renderer for items.<br>
+	 * A 3D model will be created and cached based on the {@link Icon} used for the current {@link ItemStack}
+	 */
 	public static Item item = new Item();
+
+	/**
+	 * Renderer used to render animated parts of {@link AnimatedModelComponent}.<br>
+	 */
+	public static Animated animated = new Animated();
 
 	public static class Null extends MalisisRenderer<TileEntity>
 	{
@@ -149,7 +179,7 @@ public class DefaultRenderer
 			AxisAlignedBB[] aabbs;
 			if (block instanceof IBoundingBox)
 			{
-				aabbs = ((MalisisBlock) block).getRenderBoundingBox(world, pos, blockState);
+				aabbs = ((IBoundingBox) block).getRenderBoundingBox(world, pos, blockState);
 				rp.useBlockBounds.set(false);
 			}
 			else
@@ -256,6 +286,11 @@ public class DefaultRenderer
 			}
 		}
 
+		/**
+		 * Gets the {@link Shape} to render..
+		 *
+		 * @return the model shape
+		 */
 		protected Shape getModelShape()
 		{
 			Icon icon = getIcon(null, null);
@@ -273,6 +308,77 @@ public class DefaultRenderer
 		{
 			itemModels.clear();
 		}
+	}
 
-	};
+	public static class Animated extends MalisisRenderer<TileEntity>
+	{
+		private Map<BlockPos, AnimatedModelComponent> positions = Maps.newHashMap();
+
+		public Animated()
+		{
+			registerForRenderWorldLast();
+		}
+
+		/**
+		 * Checks whether an {@link AnimatedModelComponent} is present at the {@link BlockPos}.<br>
+		 * If the position wasn't registered yet to be rendered,
+		 * {@link AnimatedModelComponent#checkState(IBlockAccess, BlockPos, IBlockState)} is called.
+		 *
+		 * @param world the world
+		 * @param pos the pos
+		 * @param state the state
+		 */
+		public void checkAnimatedModel(IBlockAccess world, BlockPos pos, IBlockState state)
+		{
+			AnimatedModelComponent amc = IComponent.getComponent(AnimatedModelComponent.class, state.getBlock());
+			if (amc != null)
+			{
+				if (positions.put(pos, amc) == null)
+					amc.checkState(world, pos, state);
+			}
+		}
+
+		/**
+		 * Checks if position is still valid for animated rendering.
+		 *
+		 * @param amc the amc
+		 * @return true, if is position still valid
+		 */
+		private boolean isPositionStillValid(AnimatedModelComponent amc)
+		{
+			ChunkProviderClient cp = Minecraft.getMinecraft().theWorld.getChunkProvider();
+			if (cp == null || cp.getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4) == null)
+				return false;
+
+			AnimatedModelComponent blockComponent = IComponent.getComponent(AnimatedModelComponent.class, block);
+			return amc == blockComponent;
+		}
+
+		@Override
+		public void render()
+		{
+			for (Iterator<Entry<BlockPos, AnimatedModelComponent>> it = positions.entrySet().iterator(); it.hasNext();)
+			{
+				Entry<BlockPos, AnimatedModelComponent> entry = it.next();
+				set(entry.getKey());
+				set(world.getBlockState(entry.getKey()));
+				AnimatedModelComponent amc = entry.getValue();
+				if (!isPositionStillValid(amc))
+				{
+					it.remove();
+					amc.removeTimers(pos);
+					break;
+				}
+
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(pos.getX(), pos.getY(), pos.getZ());
+				startDrawing();
+				amc.renderAnimated(block, this);
+				draw();
+				GlStateManager.popMatrix();
+			}
+
+		}
+	}
+
 }

@@ -28,68 +28,127 @@ import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.animation.transformation.Transformation;
 import net.malisis.core.util.Timer;
 
+import com.google.common.base.Preconditions;
+
 /**
- * @author Ordinastie
+ * The {@link Animation} class represent a element to animate ({@link ITransformable}) with its {@link Transformation}.
  *
+ * @author Ordinastie
+ * @param <S> the generic type
  */
 public class Animation<S extends ITransformable>
 {
+	/** Element to animate. */
 	private S transformable;
+	/** {@link Transformation} to use for the animation. */
 	private Transformation<?, S> transform;
+	/** Delay before animated. */
 	private int delay;
+	/** Whether the animation has already start. */
 	private boolean started = false;
+	/** Whether the animation has already finished. */
 	private boolean finished = false;
 
+	/** Whether the {@link ITransformable} should be rendered before the animation has started. */
 	private boolean renderBefore = true;
+	/** Whether the {@link ITransformable} should be rendered before the animation has finished. */
 	private boolean renderAfter = true;
 
+	/**
+	 * Instantiates a new {@link Animation}.
+	 *
+	 * @param transformable the transformable
+	 * @param transform the transform
+	 */
 	public Animation(S transformable, Transformation<?, S> transform)
 	{
+		Preconditions.checkNotNull(transformable);
+		Preconditions.checkNotNull(transform);
 		this.transformable = transformable;
 		this.transform = transform;
 	}
 
+	/**
+	 * Gets the {@link ITransformable} for this {@link Animation}.
+	 *
+	 * @return the transformable
+	 */
 	public S getTransformable()
 	{
 		return transformable;
 	}
 
+	/**
+	 * Gets the {@link Transformation} for this {@link Animation}.
+	 *
+	 * @return the transformation
+	 */
 	public Transformation<?, S> getTransformation()
 	{
 		return transform;
 	}
 
+	/**
+	 * Sets whether to render the {@link ITransformable} before and after the animation.
+	 *
+	 * @param before the before
+	 * @param after the after
+	 */
 	public void setRender(boolean before, boolean after)
 	{
 		renderBefore = before;
 		renderAfter = after;
 	}
 
+	/**
+	 * Checks if this {@link Animation} is started.
+	 *
+	 * @return true, if is started
+	 */
 	public boolean isStarted()
 	{
 		return started;
 	}
 
+	/**
+	 * Checks if this {@link Animation} is finished.
+	 *
+	 * @return true, if is finished
+	 */
 	public boolean isFinished()
 	{
 		return finished;
 	}
 
+	/**
+	 * Sets the delay for the animation.
+	 *
+	 * @param delay the new delay
+	 */
 	public void setDelay(int delay)
 	{
 		this.delay = delay;
 	}
 
+	/**
+	 * Checks if the animation should persist once the animation is finished.
+	 *
+	 * @return true, if successful
+	 */
 	public boolean persistance()
 	{
 		return renderAfter;
 	}
 
+	/**
+	 * Animates this {@link Animation}.<br>
+	 * Sets the {@link #started} and {@link #finished} status.
+	 *
+	 * @param timer the timer
+	 * @return the s
+	 */
 	public S animate(Timer timer)
 	{
-		if (transform == null || transformable == null)
-			return transformable;
-
 		long elapsed = timer.elapsedTime() - Timer.tickToTime(delay);
 		started = elapsed > transform.getDelay();
 		finished = elapsed > transform.totalDuration() && transform.getLoops() != -1;
