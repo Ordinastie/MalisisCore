@@ -68,6 +68,14 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 		setSize(width, height);
 	}
 
+	@Override
+	public T setSize(int width, int height)
+	{
+		super.setSize(width, height);
+		scrollbar.updateScrollbar();
+		return self();
+	}
+
 	public void setElements(Collection<S> elements)
 	{
 		this.elements = elements;
