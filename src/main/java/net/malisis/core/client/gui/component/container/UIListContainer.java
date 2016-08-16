@@ -198,8 +198,7 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
-		float newOffset = (getContentHeight() - getHeight() + delta) * offsetY;
-		this.yOffset = (int) (yOffset - newOffset > 0 ? Math.floor(newOffset) : Math.ceil(newOffset));
+		yOffset = (int) ((getContentHeight() - getHeight() + delta) * offsetY);
 	}
 
 	@Override
@@ -270,7 +269,6 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 		}
 
 		super.draw(renderer, mouseX, mouseY, partialTick);
-		getGui().addDebug("Pos", relativeX(mouseX), relativeY(mouseY));
 	}
 
 	@Override
