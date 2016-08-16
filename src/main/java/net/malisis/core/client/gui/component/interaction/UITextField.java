@@ -150,7 +150,11 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		selectShape = new SimpleGuiShape();
 
 		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1), null, gui.getGuiTexture()
-				.getXYResizableIcon(200, 42, 9, 12, 1));
+																												.getXYResizableIcon(200,
+																														42,
+																														9,
+																														12,
+																														1));
 
 		if (multiLine)
 			scrollBar = new UISlimScrollbar(gui, this, Type.VERTICAL);
@@ -367,7 +371,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public UITextField setSize(int width, int height)
 	{
-		return super.setSize(width, multiLine ? height : 12);
+		super.setSize(width, multiLine ? height : 12);
+		buildLines();
+		return this;
 	}
 
 	/**
@@ -1171,8 +1177,14 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (cursorPosition.line < lineOffset || cursorPosition.line >= lineOffset + getVisibleLines())
 			return;
 
-		renderer.drawRectangle(cursorPosition.getXOffset() + 1, cursorPosition.getYOffset() + 1, getZIndex(), 1, getLineHeight(),
-				cursorColor, 255, true);
+		renderer.drawRectangle(cursorPosition.getXOffset() + 1,
+				cursorPosition.getYOffset() + 1,
+				getZIndex(),
+				1,
+				getLineHeight(),
+				cursorColor,
+				255,
+				true);
 	}
 
 	/**
