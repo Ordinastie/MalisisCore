@@ -53,7 +53,8 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 {
 	public enum Type
 	{
-		HORIZONTAL, VERTICAL
+		HORIZONTAL,
+		VERTICAL
 	}
 
 	private static Map<UIComponent<?>, Map<Type, UIScrollBar>> scrollbars = new WeakHashMap<>();
@@ -296,17 +297,25 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		IScrollable scrollable = getScrollable();
 		int delta = hasVisibleOtherScrollbar() ? scrollThickness : 0;
 		boolean hide = false;
+		float offset;
 		if (isHorizontal())
 		{
+			offset = scrollable.getOffsetX();
 			if (scrollable.getContentWidth() <= component.getWidth() - delta)
 				hide = true;
 
 		}
-		else if (scrollable.getContentHeight() <= component.getHeight() - delta)
-			hide = true;
+		else
+		{
+			offset = scrollable.getOffsetY();
+			if (scrollable.getContentHeight() <= component.getHeight() - delta)
+				hide = true;
+		}
 
-		if (hide != isDisabled())
+		if (hide != isDisabled() || offset < 0)
 			scrollTo(0);
+		if (offset > 1)
+			scrollTo(1);
 		setDisabled(hide);
 		if (autoHide)
 			setVisible(!hide);
