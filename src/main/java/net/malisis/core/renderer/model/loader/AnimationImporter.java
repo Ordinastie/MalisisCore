@@ -34,7 +34,11 @@ import java.util.Map.Entry;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.renderer.animation.Animation;
+import net.malisis.core.renderer.animation.transformation.AlphaTransform;
+import net.malisis.core.renderer.animation.transformation.BrightnessTransform;
 import net.malisis.core.renderer.animation.transformation.ChainedTransformation;
+import net.malisis.core.renderer.animation.transformation.ColorTransform;
+import net.malisis.core.renderer.animation.transformation.ParallelTransformation;
 import net.malisis.core.renderer.animation.transformation.Rotation;
 import net.malisis.core.renderer.animation.transformation.Scale;
 import net.malisis.core.renderer.animation.transformation.Transformation;
@@ -45,6 +49,7 @@ import net.malisis.core.util.Silenced;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
@@ -63,21 +68,36 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 
 /**
- * @author Ordinastie
+ * This class imports animations from a JSON file.<br>
+ * See <a href="https://gist.github.com/Ordinastie/8e554458be39684451fdf7f15cc7a8c5">grammar definition</a> of the JSON.
  *
+ * @author Ordinastie
  */
 public class AnimationImporter implements IAnimationLoader
 {
+	/** List of {@link Transform} defined in the JSON. */
 	private Map<String, Transform> transforms = Maps.newHashMap();
+	/** List of {@link Anim} defined in the JSON. */
 	private Multimap<String, Anim> anims = ArrayListMultimap.create();
-
+	/** List of {@link Animation} built from the JSON. */
 	private Multimap<String, Animation<Shape>> animations = ArrayListMultimap.create();
 
+	/**
+	 * Instantiates a new {@link AnimationImporter}.
+	 *
+	 * @param resourceLocation the resource location
+	 */
 	public AnimationImporter(ResourceLocation resourceLocation)
 	{
 		load(resourceLocation);
 	}
 
+	/**
+	 * Build and return the {@link Animation Animations}.
+	 *
+	 * @param shapes the shapes
+	 * @return the animations
+	 */
 	@Override
 	public Multimap<String, Animation<Shape>> getAnimations(Map<String, Shape> shapes)
 	{
@@ -98,6 +118,11 @@ public class AnimationImporter implements IAnimationLoader
 		return animations;
 	}
 
+	/**
+	 * Loads and reads the JSON.
+	 *
+	 * @param resourceLocation the resource location
+	 */
 	public void load(ResourceLocation resourceLocation)
 	{
 		IResource res = Silenced.get(() -> Minecraft.getMinecraft().getResourceManager().getResource(resourceLocation));
@@ -105,7 +130,9 @@ public class AnimationImporter implements IAnimationLoader
 			return;
 
 		GsonBuilder gsonBuilder = new GsonBuilder();
+		//we don't want GSON to create a new AnimationImporte but use this current one
 		gsonBuilder.registerTypeAdapter(AnimationImporter.class, (InstanceCreator<AnimationImporter>) type -> this);
+		//no builtin way to dezerialize multimaps
 		gsonBuilder.registerTypeAdapter(Multimap.class, (JsonDeserializer<Multimap<String, Anim>>) this::deserializeAnim);
 		Gson gson = gsonBuilder.create();
 
@@ -121,11 +148,29 @@ public class AnimationImporter implements IAnimationLoader
 		}
 	}
 
+	/**
+	 * Gets the {@link Transformation} from its name.
+	 *
+	 * @param name the name
+	 * @return the transform
+	 */
 	public Transformation<?, Shape> getTransform(String name)
 	{
-		return transforms.get(name).getTransformation(this);
+		Transform t = transforms.get(name);
+		if (t == null)
+			return null;
+		return t.getTransformation(this);
 	}
 
+	/**
+	 * Deserialize "anims" multimap.
+	 *
+	 * @param json the json
+	 * @param typeOfT the type of t
+	 * @param context the context
+	 * @return the multimap
+	 * @throws JsonParseException the json parse exception
+	 */
 	public Multimap<String, Anim> deserializeAnim(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
 	{
 		Multimap<String, Anim> anims = ArrayListMultimap.create();
@@ -149,24 +194,30 @@ public class AnimationImporter implements IAnimationLoader
 		@SerializedName("scale")
 		SCALE,
 		@SerializedName("chained")
-		CHAINED
+		CHAINED,
+		@SerializedName("parallel")
+		PARALLEL,
+		@SerializedName("color")
+		COLOR,
+		@SerializedName("alpha")
+		ALPHA,
+		@SerializedName("brightness")
+		BRIGHTNESS,
 	}
 
 	private static class Transform
 	{
 		private TransformType type;
-
 		private Object from = null;
 		private Object to = null;
-
-		//rotate/alpha
+		//rotatation/alpha/brightness
 		private float fromA = 0;
 		private float toA = 0;
-		//rotate
+		//rotation
 		private String axis = "Y";
-		//rotate/scale
+		//rotation/scale
 		private double[] offset = { 0, 0, 0 };
-		//translate/scale
+		//translation/scale
 		private double[] fromXYZ = { 0, 0, 0 };
 		private double[] toXYZ = { 0, 0, 0 };
 		//chained/parallel
@@ -176,6 +227,12 @@ public class AnimationImporter implements IAnimationLoader
 		private int delay = 0;
 		private int loops = 1;
 
+		/**
+		 * Builds a new {@link Transformation} from this {@link Transform}
+		 *
+		 * @param importer the importer
+		 * @return the transformation
+		 */
 		private Transformation<?, ?> build(AnimationImporter importer)
 		{
 			if (type == null)
@@ -192,10 +249,22 @@ public class AnimationImporter implements IAnimationLoader
 					return buildScale();
 				case CHAINED:
 					return buildChained(importer);
+				case PARALLEL:
+					return buildParallel(importer);
+				case COLOR:
+					return buildColor();
+				case ALPHA:
+					return buildAlpha();
+				case BRIGHTNESS:
+					return buildBrightness();
 			}
 			return null;
 		}
 
+		/**
+		 * Sets from and to based on type.<br>
+		 * Both float and array are possible for "from" and "to" depending on the type
+		 */
 		@SuppressWarnings("unchecked")
 		private void setFromTo()
 		{
@@ -215,12 +284,23 @@ public class AnimationImporter implements IAnimationLoader
 				toA = (float) to;
 		}
 
+		/**
+		 * Gets a new {@link Transformation} from this {@link Transform}
+		 *
+		 * @param importer the importer
+		 * @return the transformation
+		 */
 		@SuppressWarnings("unchecked")
 		public Transformation<?, Shape> getTransformation(AnimationImporter importer)
 		{
 			return (Transformation<?, Shape>) build(importer);
 		}
 
+		/**
+		 * Builds the {@link Translation}.
+		 *
+		 * @return the translation
+		 */
 		public Translation buildTranslation()
 		{
 			Translation t = new Translation((float) fromXYZ[0], (float) fromXYZ[1], (float) fromXYZ[2], (float) toXYZ[0], (float) toXYZ[1],
@@ -230,6 +310,11 @@ public class AnimationImporter implements IAnimationLoader
 			return t;
 		}
 
+		/**
+		 * Builds the {@link Rotation}.
+		 *
+		 * @return the rotation
+		 */
 		public Rotation buildRotation()
 		{
 			Rotation r = new Rotation(fromA, toA);
@@ -241,6 +326,11 @@ public class AnimationImporter implements IAnimationLoader
 			return r;
 		}
 
+		/**
+		 * Builds the {@link Scale}.
+		 *
+		 * @return the scale
+		 */
 		public Scale buildScale()
 		{
 			Scale s = new Scale((float) fromXYZ[0], (float) fromXYZ[1], (float) fromXYZ[2], (float) toXYZ[0], (float) toXYZ[1],
@@ -251,22 +341,107 @@ public class AnimationImporter implements IAnimationLoader
 			return s;
 		}
 
+		/**
+		 * Builds the {@link ChainedTransformation}.
+		 *
+		 * @param importer the importer
+		 * @return the chained transformation
+		 */
 		public ChainedTransformation buildChained(AnimationImporter importer)
 		{
-			Transformation<?, ?>[] transformations = Lists.newArrayList(transforms)
-															.stream()
-															.map(importer::getTransform)
-															.toArray(Transformation<?, ?>[]::new);
-			ChainedTransformation c = new ChainedTransformation(transformations);
-			return c;
+			Transformation<?, ?>[] transfos = Lists.newArrayList(transforms)
+													.stream()
+													.map(importer::getTransform)
+													.toArray(Transformation<?, ?>[]::new);
+			return new ChainedTransformation(transfos);
+		}
+
+		/**
+		 * Builds the {@link ParallelTransformation}.
+		 *
+		 * @param importer the importer
+		 * @return the parallel transformation
+		 */
+		public ParallelTransformation buildParallel(AnimationImporter importer)
+		{
+			Transformation<?, ?>[] transfos = Lists.newArrayList(transforms)
+													.stream()
+													.map(importer::getTransform)
+													.toArray(Transformation<?, ?>[]::new);
+
+			return new ParallelTransformation(transfos);
+		}
+
+		/**
+		 * Builds the {@link ColorTransform}.
+		 *
+		 * @return the color transform
+		 */
+		public ColorTransform buildColor()
+		{
+			//make sure default is white
+			if (from == null)
+				fromXYZ = new double[] { 1, 1, 1 };
+			if (to == null)
+				toXYZ = new double[] { 1, 1, 1 };
+
+			ColorTransform ct = new ColorTransform(getColor(fromXYZ), getColor(toXYZ));
+			ct.forTicks(ticks, delay);
+			ct.loop(loops);
+			return ct;
+		}
+
+		/**
+		 * Builds the {@link AlphaTransform}.
+		 *
+		 * @return the alpha transform
+		 */
+		public AlphaTransform buildAlpha()
+		{
+			AlphaTransform at = new AlphaTransform((int) (fromA * 255), (int) (toA * 255));
+			at.forTicks(ticks, delay);
+			at.loop(loops);
+			return at;
+		}
+
+		/**
+		 * Builds the {@link BrightnessTransform}.
+		 *
+		 * @return the brightness transform
+		 */
+		public BrightnessTransform buildBrightness()
+		{
+			BrightnessTransform bt = new BrightnessTransform((int) (fromA * 14), (int) (toA * 14));
+			bt.forTicks(ticks, delay);
+			bt.loop(loops);
+			return bt;
+		}
+
+		/**
+		 * Gets the color form the array.
+		 *
+		 * @param xyz the xyz
+		 * @return the color
+		 */
+		private int getColor(double[] xyz)
+		{
+			int r = (int) (MathHelper.clamp_double(xyz[0], 0, 1) * 255);
+			int g = (int) (MathHelper.clamp_double(xyz[0], 0, 1) * 255);
+			int b = (int) (MathHelper.clamp_double(xyz[0], 0, 1) * 255);
+
+			return (r << 16) | (g << 8) | b;
 		}
 	}
 
 	private static class Anim
 	{
+		/** Group/shape name the {@link Transformation} is applied to. */
 		private String group;
+		/** The {@link Transform} name. */
 		private String transform;
+		/** Whether the transformation should still be applied after the animation is finished. */
 		private boolean persist = true;
+		/** Whether the transform should be animated backwards. */
 		private boolean reversed = false;
 	}
 
