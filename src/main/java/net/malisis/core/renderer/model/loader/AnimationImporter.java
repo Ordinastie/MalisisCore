@@ -51,6 +51,8 @@ import net.minecraft.client.resources.IResource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -106,6 +108,12 @@ public class AnimationImporter implements IAnimationLoader
 			Anim anim = entry.getValue();
 			Shape s = shapes.get(anim.group);
 			Transformation<?, Shape> t = getTransform(anim.transform);
+
+			if (s == null)
+				MalisisCore.log.error("Could not find shape {} in the model. Ignoring this animation.", anim.group);
+			if (t == null)
+				MalisisCore.log.error("Could not find a tranform with name {} in the JSON. Ignoring this animation.");
+
 			if (s != null && t != null)
 			{
 				t.reversed(anim.reversed);
@@ -159,7 +167,7 @@ public class AnimationImporter implements IAnimationLoader
 		Transform t = transforms.get(name);
 		if (t == null)
 			return null;
-		return t.getTransformation(this);
+		return t.getTransformation(name, this);
 	}
 
 	/**
@@ -207,6 +215,7 @@ public class AnimationImporter implements IAnimationLoader
 
 	private static class Transform
 	{
+		private String name;
 		private TransformType type;
 		private Object from = null;
 		private Object to = null;
@@ -236,9 +245,15 @@ public class AnimationImporter implements IAnimationLoader
 		private Transformation<?, ?> build(AnimationImporter importer)
 		{
 			if (type == null)
+			{
+				MalisisCore.log.error("No type specified for {}. Ignoring transformation.", name);
 				return null;
+			}
 
 			setFromTo();
+			if (!checkValues())
+				return null;
+
 			switch (type)
 			{
 				case TRANSLATION:
@@ -285,14 +300,50 @@ public class AnimationImporter implements IAnimationLoader
 		}
 
 		/**
+		 * Check if supplied values are valid.
+		 *
+		 * @return true, if values are valid
+		 */
+		private boolean checkValues()
+		{
+			boolean sameValues = false;
+			switch (type)
+			{
+				case TRANSLATION:
+				case SCALE:
+				case COLOR:
+					sameValues = fromXYZ[0] == toXYZ[0] && fromXYZ[1] == toXYZ[1] && fromXYZ[2] == toXYZ[2];
+					break;
+				case ROTATION:
+				case ALPHA:
+				case BRIGHTNESS:
+					sameValues = fromA == toA;
+					break;
+				case PARALLEL:
+				case CHAINED:
+					if (ArrayUtils.isEmpty(transforms))
+					{
+						MalisisCore.log.error("No transforms specified for {}. Ignoring transformation.", name);
+						return false;
+					}
+					return true;
+			}
+
+			if (sameValues)
+				MalisisCore.log.error("From and To are the same for {}. Ignoring transformation.", name);
+			return !sameValues;
+		}
+
+		/**
 		 * Gets a new {@link Transformation} from this {@link Transform}
 		 *
 		 * @param importer the importer
 		 * @return the transformation
 		 */
 		@SuppressWarnings("unchecked")
-		public Transformation<?, Shape> getTransformation(AnimationImporter importer)
+		public Transformation<?, Shape> getTransformation(String name, AnimationImporter importer)
 		{
+			this.name = name; //sets the name for better error reporting
 			return (Transformation<?, Shape>) build(importer);
 		}
 
@@ -349,11 +400,24 @@ public class AnimationImporter implements IAnimationLoader
 		 */
 		public ChainedTransformation buildChained(AnimationImporter importer)
 		{
-			Transformation<?, ?>[] transfos = Lists.newArrayList(transforms)
-													.stream()
-													.map(importer::getTransform)
-													.toArray(Transformation<?, ?>[]::new);
-			return new ChainedTransformation(transfos);
+			List<Transformation<?, Shape>> transfos = Lists.newArrayList();
+			for (String name : transforms)
+			{
+				Transformation<?, Shape> t = importer.getTransform(name);
+				if (t != null)
+					transfos.add(t);
+				else
+					MalisisCore.log.error("Could not find a tranform with name {} in the JSON. Can't add it to chained transformation.",
+							name);
+			}
+
+			if (transfos.size() == 0)
+			{
+				MalisisCore.log.error("No valid transformation found for chained transformation {}. Ignoring transformation.", name);
+				return null;
+			}
+
+			return new ChainedTransformation(transfos.toArray(new Transformation[0]));
 		}
 
 		/**
@@ -364,12 +428,24 @@ public class AnimationImporter implements IAnimationLoader
 		 */
 		public ParallelTransformation buildParallel(AnimationImporter importer)
 		{
-			Transformation<?, ?>[] transfos = Lists.newArrayList(transforms)
-													.stream()
-													.map(importer::getTransform)
-													.toArray(Transformation<?, ?>[]::new);
+			List<Transformation<?, Shape>> transfos = Lists.newArrayList();
+			for (String name : transforms)
+			{
+				Transformation<?, Shape> t = importer.getTransform(name);
+				if (t != null)
+					transfos.add(t);
+				else
+					MalisisCore.log.error("Could not find a tranform with name {} in the JSON. Can't add it to parallel transformation.",
+							name);
+			}
 
-			return new ParallelTransformation(transfos);
+			if (transfos.size() == 0)
+			{
+				MalisisCore.log.error("No valid transformation found for parallel transformation {}. Ignoring transformation.", name);
+				return null;
+			}
+
+			return new ParallelTransformation(transfos.toArray(new Transformation[0]));
 		}
 
 		/**
