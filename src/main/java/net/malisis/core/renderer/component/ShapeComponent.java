@@ -30,10 +30,8 @@ import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.RenderType;
 import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.util.EnumFacingUtils;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 
 /**
  * @author Ordinastie
@@ -56,8 +54,7 @@ public class ShapeComponent implements IRenderComponent
 		shape.resetState();
 		if (renderer.getRenderType() == RenderType.BLOCK)
 		{
-			EnumFacing direction = DirectionalComponent.getDirection(renderer.getBlockState());
-			shape.rotate(90 * EnumFacingUtils.getRotationCount(direction), 0, 1, 0);
+			shape.rotate(DirectionalComponent.getDirection(renderer.getBlockState()));
 			shape.applyMatrix();
 			shape.deductParameters();
 		}
