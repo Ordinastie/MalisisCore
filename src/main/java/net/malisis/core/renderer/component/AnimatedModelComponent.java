@@ -28,10 +28,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.MalisisBlock;
+import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.MalisisRenderer;
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.RenderType;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.element.Shape;
@@ -91,10 +94,14 @@ public class AnimatedModelComponent extends ModelComponent
 	private void autoDetectAnimatedGroups()
 	{
 		Set<String> animList = model.getAnimatedShapes();
-		animatedShapes.addAll(animList);
+		animatedShapes = Sets.newHashSet(animList);
 
 		Set<String> staticList = model.getShapeNames().stream().filter(s -> !animList.contains(s)).collect(Collectors.toSet());
-		staticShapes.addAll(staticList);
+		staticShapes = Sets.newHashSet(staticList);
+
+		//		staticShapes.clear();
+		//		animatedShapes.clear();
+		//		animatedShapes.addAll(model.getShapeNames());
 	}
 
 	/**
@@ -249,8 +256,14 @@ public class AnimatedModelComponent extends ModelComponent
 	@Override
 	public void render(Block block, MalisisRenderer<TileEntity> renderer)
 	{
-		loadModel();
-		autoDetectAnimatedGroups();
+		if (renderer.getRenderType() == RenderType.BLOCK && !MalisisCore.isObfEnv)
+		{
+			loadModel();
+			autoDetectAnimatedGroups();
+		}
+
+		RenderParameters rp = new RenderParameters();
+		rp.rotateIcon.set(false);
 
 		//no groups defined, render whole model static
 		if (staticShapes.isEmpty() && animatedShapes.isEmpty())
@@ -260,9 +273,13 @@ public class AnimatedModelComponent extends ModelComponent
 		}
 
 		model.resetState();
+
+		if (renderer.getRenderType() == RenderType.BLOCK)
+			model.rotate(DirectionalComponent.getDirection(renderer.getBlockState()));
+
 		staticShapes.forEach(name -> model.render(renderer, name));
 		if (renderer.getRenderType() == RenderType.ITEM)
-			animatedShapes.forEach(name -> model.render(renderer, name));
+			animatedShapes.forEach(name -> model.render(renderer, name, rp));
 	}
 
 	/**
@@ -273,17 +290,32 @@ public class AnimatedModelComponent extends ModelComponent
 	 */
 	public void renderAnimated(Block block, MalisisRenderer<TileEntity> renderer)
 	{
+		//no shapes to animated
+		if (animatedShapes.size() == 0)
+			return;
+
 		model.resetState();
-		//need copy to prevent CME
-		ImmutableSet<Entry<String, Timer>> set = ImmutableSet.copyOf(timers.row(renderer.getPos()).entrySet());
-		for (Entry<String, Timer> entry : set)
+		//only animate for WORLD_LAST (not ITEM)
+		if (renderer.getRenderType() == RenderType.WORLD_LAST)
 		{
-			//animation is done and doesn't persist
-			if (model.animate(entry.getKey(), entry.getValue()))
-				timers.remove(renderer.getPos(), entry.getKey());
+			model.rotate(DirectionalComponent.getDirection(renderer.getBlockState()));
+
+			//need copy to prevent CME
+			ImmutableSet<Entry<String, Timer>> set = ImmutableSet.copyOf(timers.row(renderer.getPos()).entrySet());
+			for (Entry<String, Timer> entry : set)
+			{
+				//animation is done and doesn't persist
+				if (model.animate(entry.getKey(), entry.getValue()))
+					timers.remove(renderer.getPos(), entry.getKey());
+			}
 		}
+
+		RenderParameters rp = new RenderParameters();
+		rp.rotateIcon.set(false);
+
 		//render the shapes
-		animatedShapes.forEach(name -> model.render(renderer, name));
+		renderer.enableBlending();
+		animatedShapes.forEach(name -> model.render(renderer, name, rp));
 	}
 
 	/**
