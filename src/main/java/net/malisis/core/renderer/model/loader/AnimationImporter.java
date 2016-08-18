@@ -112,7 +112,7 @@ public class AnimationImporter implements IAnimationLoader
 			if (s == null)
 				MalisisCore.log.error("Could not find shape {} in the model. Ignoring this animation.", anim.group);
 			if (t == null)
-				MalisisCore.log.error("Could not find a tranform with name {} in the JSON. Ignoring this animation.");
+				MalisisCore.log.error("Could not find a tranform with name {} in the JSON. Ignoring this animation.", anim.transform);
 
 			if (s != null && t != null)
 			{
@@ -293,10 +293,10 @@ public class AnimationImporter implements IAnimationLoader
 				List<Double> t = (List<Double>) to;
 				toXYZ = new double[] { t.get(0), t.get(1), t.get(2) };
 			}
-			if (from instanceof Number)
-				fromA = (float) from;
-			if (to instanceof Number)
-				toA = (float) to;
+			if (from instanceof Double)
+				fromA = (float) ((double) from);
+			if (to instanceof Double)
+				toA = (float) ((double) to);
 		}
 
 		/**
