@@ -24,6 +24,9 @@
 
 package net.malisis.core.renderer.animation.transformation;
 
+import net.malisis.core.util.EnumFacingUtils;
+import net.minecraft.util.EnumFacing;
+
 /**
  * @author Ordinastie
  *
@@ -38,6 +41,13 @@ public interface ITransformable
 	public static interface Rotate extends ITransformable
 	{
 		public void rotate(float angle, float x, float y, float z, float offsetX, float offsetY, float offsetZ);
+
+		public default void rotate(EnumFacing direction)
+		{
+			if (direction == EnumFacing.SOUTH)
+				return;
+			rotate(90 * EnumFacingUtils.getRotationCount(direction), 0, 1, 0, 0, 0, 0);
+		}
 	}
 
 	public static interface Scale extends ITransformable
