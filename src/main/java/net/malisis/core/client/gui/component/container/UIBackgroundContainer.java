@@ -27,9 +27,10 @@ package net.malisis.core.client.gui.component.container;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-
-import org.lwjgl.opengl.GL11;
+import net.malisis.core.renderer.element.Face;
 
 /**
  * @author Ordinastie
@@ -53,6 +54,10 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	protected int bottomLeftAlpha = 255;
 	/** Bottom right corner alpha */
 	protected int bottomRightAlpha = 255;
+	/** Border size **/
+	protected int borderSize = 0;
+	/** Border color **/
+	protected int borderColor = 0;
 
 	/**
 	 * Default constructor, creates the components list.
@@ -104,6 +109,22 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 		this(gui);
 		setTitle(title);
 		setSize(width, height);
+	}
+
+	/**
+	 * Sets the border size and color for this {@link UIBackgroundContainer}.
+	 *
+	 * @param color the color
+	 * @param size the size
+	 */
+	public void setBorder(int color, int size)
+	{
+		borderColor = color;
+		borderSize = size;
+		if (size >= 0)
+			shape = new XYResizableGuiShape(size);
+		else
+			shape = new SimpleGuiShape();
 	}
 
 	/**
@@ -401,19 +422,28 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 			return;
 
 		renderer.enableBlending();
-		rp.usePerVertexColor.set(true);
-		rp.usePerVertexAlpha.set(true);
-		shape.getVertexes("TopLeft").get(0).setColor(topLeftColor).setAlpha(topLeftAlpha);
-		shape.getVertexes("TopRight").get(0).setColor(topRightColor).setAlpha(topRightAlpha);
-		shape.getVertexes("BottomLeft").get(0).setColor(bottomLeftColor).setAlpha(bottomLeftAlpha);
-		shape.getVertexes("BottomRight").get(0).setColor(bottomRightColor).setAlpha(bottomRightAlpha);
+
+		Face f = shape.getFaces()[0];
+		if (borderSize != 0)
+		{
+			f = shape.getFaces()[4];
+			rp.colorMultiplier.set(borderColor);
+		}
+
+		RenderParameters frp = f.getParameters();
+		frp.usePerVertexColor.set(true);
+		frp.usePerVertexAlpha.set(true);
+		f.getVertexes("TopLeft").get(0).setColor(topLeftColor).setAlpha(topLeftAlpha);
+		f.getVertexes("TopRight").get(0).setColor(topRightColor).setAlpha(topRightAlpha);
+		f.getVertexes("BottomLeft").get(0).setColor(bottomLeftColor).setAlpha(bottomLeftAlpha);
+		f.getVertexes("BottomRight").get(0).setColor(bottomRightColor).setAlpha(bottomRightAlpha);
 
 		renderer.disableTextures();
 
 		renderer.drawShape(shape, rp);
 		renderer.next();
 
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		renderer.enableTextures();
 	}
 
 }
