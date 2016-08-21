@@ -24,6 +24,7 @@
 
 package net.malisis.core.renderer.element;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,10 +36,19 @@ import net.minecraft.util.EnumFacing;
 
 public class Face implements ITransformable.Translate, ITransformable.Rotate
 {
+	/** Name of this {@link Face}. */
 	protected String name;
+	/** List of {@link Vertex Vertexes} of this {@link Face}. */
 	protected Vertex[] vertexes;
+	/** {@link RenderParameters} for this {@link Face}. */
 	protected RenderParameters params;
 
+	/**
+	 * Instantiates a new {@link Face}.
+	 *
+	 * @param vertexes the vertexes
+	 * @param params the params
+	 */
 	public Face(Vertex[] vertexes, RenderParameters params)
 	{
 		this.vertexes = vertexes;
@@ -46,21 +56,42 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		this.setName(null);
 	}
 
+	/**
+	 * Instantiates a new {@link Face}.
+	 *
+	 * @param vertexes the vertexes
+	 */
 	public Face(Vertex... vertexes)
 	{
 		this(vertexes, null);
 	}
 
+	/**
+	 * Instantiates a new {@link Face}.
+	 *
+	 * @param vertexes the vertexes
+	 */
 	public Face(List<Vertex> vertexes)
 	{
 		this(vertexes.toArray(new Vertex[0]), null);
 	}
 
+	/**
+	 * Instantiates a new {@link Face}.
+	 *
+	 * @param face the face
+	 */
 	public Face(Face face)
 	{
 		this(face, new RenderParameters(face.params));
 	}
 
+	/**
+	 * Instantiates a new {@link Face}.
+	 *
+	 * @param face the face
+	 * @param params the params
+	 */
 	public Face(Face face, RenderParameters params)
 	{
 		Vertex[] faceVertexes = face.getVertexes();
@@ -121,6 +152,23 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 	}
 
 	/**
+	 * Gets a list of {@link Vertex} with a base name containing <b>name</b>.
+	 *
+	 * @param name the name
+	 * @return the vertexes
+	 */
+	public List<Vertex> getVertexes(String name)
+	{
+		List<Vertex> vertexes = new ArrayList<>();
+		for (Vertex v : getVertexes())
+		{
+			if (v.baseName().toLowerCase().contains(name.toLowerCase()))
+				vertexes.add(v);
+		}
+		return vertexes;
+	}
+
+	/**
 	 * Sets the {@link RenderParameters} for this {@link Face}.
 	 *
 	 * @param params the parameters. If {@code null}, sets default parameters
@@ -142,6 +190,12 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		return params;
 	}
 
+	/**
+	 * Sets the color for this {@link Face}.
+	 *
+	 * @param color the color
+	 * @return the face
+	 */
 	public Face setColor(int color)
 	{
 		for (Vertex v : vertexes)
@@ -149,6 +203,12 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		return this;
 	}
 
+	/**
+	 * Sets the alpha for this {@link Face}.
+	 *
+	 * @param alpha the alpha
+	 * @return the face
+	 */
 	public Face setAlpha(int alpha)
 	{
 		for (Vertex v : vertexes)
@@ -156,6 +216,12 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		return this;
 	}
 
+	/**
+	 * Sets the brightness for this {@link Face}.
+	 *
+	 * @param brightness the brightness
+	 * @return the face
+	 */
 	public Face setBrightness(int brightness)
 	{
 		for (Vertex v : vertexes)
@@ -164,13 +230,15 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 	}
 
 	//#region Textures manipaluation
-	public Face setTexture(Icon icon)
-	{
-		return setTexture(icon, params.flipU.get(), params.flipV.get(), false);
-	}
-
+	/**
+	 * Sets standard UVs for this {@link Face}. Sets UVs from 0 to 1 if this face has 4 vertexes.
+	 *
+	 * @return the face
+	 */
 	public Face setStandardUV()
 	{
+		if (vertexes.length != 4)
+			return this;
 		vertexes[0].setUV(0, 0);
 		vertexes[1].setUV(0, 1);
 		vertexes[2].setUV(1, 1);
@@ -178,11 +246,35 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		return this;
 	}
 
+	/**
+	 * Interpolate UVs according to the {@link Face} position in the block space.
+	 *
+	 * @return the face
+	 */
 	public Face interpolateUV()
 	{
 		return setTexture(null, false, false, true);
 	}
 
+	/**
+	 * Sets the {@link Icon} to use for this {@link Face}.
+	 *
+	 * @return the face
+	 */
+	public Face setTexture(Icon icon)
+	{
+		return setTexture(icon, params.flipU.get(), params.flipV.get(), false);
+	}
+
+	/**
+	 * Sets the {@link Icon} to use for this {@link Face}.
+	 *
+	 * @param icon the icon
+	 * @param flippedU whether to mirror the texture horizontally
+	 * @param flippedV whether to mirror the texture vertically
+	 * @param interpolate whether to interpolate the UVs based on the face position in the block space.
+	 * @return the face
+	 */
 	public Face setTexture(Icon icon, boolean flippedU, boolean flippedV, boolean interpolate)
 	{
 		int[] cos = { 1, 0, -1, 0 };
@@ -220,6 +312,12 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		return this;
 	}
 
+	/**
+	 * Gets the factor of U based on the vertex position and the direction of this {@link Face}.
+	 *
+	 * @param vertex the vertex
+	 * @return the factor u
+	 */
 	private double getFactorU(Vertex vertex)
 	{
 		if (params.direction.get() == null)
@@ -240,6 +338,12 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		}
 	}
 
+	/**
+	 * Gets the factor of V based on the vertex position and the direction of this {@link Face}.
+	 *
+	 * @param vertex the vertex
+	 * @return the factor v
+	 */
 	private double getFactorV(Vertex vertex)
 	{
 		if (params.direction.get() == null)
@@ -260,6 +364,15 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 		}
 	}
 
+	/**
+	 * Interpolates the factor value between min and max
+	 *
+	 * @param min the min
+	 * @param max the max
+	 * @param factor the factor
+	 * @param flipped the flipped
+	 * @return the float
+	 */
 	private float interpolate(float min, float max, double factor, boolean flipped)
 	{
 		if (factor > 1)
