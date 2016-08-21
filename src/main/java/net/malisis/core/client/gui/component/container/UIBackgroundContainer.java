@@ -58,6 +58,8 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	protected int borderSize = 0;
 	/** Border color **/
 	protected int borderColor = 0;
+	/** Border alpha **/
+	protected int borderAlpha = 0;
 
 	/**
 	 * Default constructor, creates the components list.
@@ -117,14 +119,16 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 * @param color the color
 	 * @param size the size
 	 */
-	public void setBorder(int color, int size)
+	public UIBackgroundContainer setBorder(int color, int size, int alpha)
 	{
 		borderColor = color;
 		borderSize = size;
+		borderAlpha = alpha;
 		if (size >= 0)
 			shape = new XYResizableGuiShape(size);
 		else
 			shape = new SimpleGuiShape();
+		return self();
 	}
 
 	/**
@@ -428,6 +432,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 		{
 			f = shape.getFaces()[4];
 			rp.colorMultiplier.set(borderColor);
+			rp.alpha.set(alpha);
 		}
 
 		RenderParameters frp = f.getParameters();
