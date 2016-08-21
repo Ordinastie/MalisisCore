@@ -432,7 +432,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 		{
 			f = shape.getFaces()[4];
 			rp.colorMultiplier.set(borderColor);
-			rp.alpha.set(alpha);
+			rp.alpha.set(borderAlpha);
 		}
 
 		RenderParameters frp = f.getParameters();
