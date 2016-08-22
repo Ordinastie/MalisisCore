@@ -46,6 +46,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
@@ -561,7 +562,10 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 		RenderHelper.disableStandardItemLighting();
 		RenderHelper.enableGUIStandardItemLighting();
 
-		itemRenderer.renderItemIntoGUI(itemStack, x, y);
+		IBakedModel model = itemRenderer.getItemModelWithOverrides(itemStack,
+				Minecraft.getMinecraft().theWorld,
+				Minecraft.getMinecraft().thePlayer);
+		itemRenderer.renderItemModelIntoGUI(itemStack, x, y, model);
 		itemRenderer.renderItemOverlayIntoGUI(fontRenderer, itemStack, x, y, label);
 
 		RenderHelper.enableStandardItemLighting();
