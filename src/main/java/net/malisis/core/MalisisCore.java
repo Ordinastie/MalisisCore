@@ -32,6 +32,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.configuration.ConfigurationGui;
 import net.malisis.core.configuration.Settings;
 import net.malisis.core.network.MalisisNetwork;
+import net.malisis.core.renderer.ISortedRenderable.SortedRenderableManager;
 import net.malisis.core.util.blockdata.BlockDataHandler;
 import net.malisis.core.util.chunkblock.ChunkBlockHandler;
 import net.malisis.core.util.multiblock.MultiBlock;
@@ -174,6 +175,7 @@ public class MalisisCore implements IMalisisMod
 		MinecraftForge.EVENT_BUS.register(ReplacementTool.instance());
 		MinecraftForge.EVENT_BUS.register(ChunkBlockHandler.get());
 		MinecraftForge.EVENT_BUS.register(BlockDataHandler.get());
+		MinecraftForge.EVENT_BUS.register(SortedRenderableManager.get());
 
 		//FMLCommonHandler.instance().bus().register(this);
 		//MinecraftForge.EVENT_BUS.register(ChunkCollision.client);

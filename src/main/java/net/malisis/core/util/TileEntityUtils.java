@@ -24,17 +24,39 @@
 
 package net.malisis.core.util;
 
+import static org.objectweb.asm.Opcodes.*;
+
+import java.util.List;
+import java.util.stream.Stream;
+
+import net.malisis.core.asm.AsmHook;
+import net.malisis.core.asm.MalisisCoreTransformer;
+import net.malisis.core.asm.mappings.McpFieldMapping;
+import net.malisis.core.asm.mappings.McpMethodMapping;
 import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.renderer.ISortedRenderable;
+import net.malisis.core.renderer.ISortedRenderable.SortedRenderableManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.chunk.RenderChunk;
+import net.minecraft.client.renderer.culling.ICamera;
+import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Utility class for {@link TileEntity}.
@@ -121,4 +143,83 @@ public class TileEntityUtils
 		IBlockState state = te.getWorld().getBlockState(te.getPos());
 		te.getWorld().notifyBlockUpdate(te.getPos(), state, state, 3);
 	}
+
+	//fix for TESR sorting
+	@SideOnly(Side.CLIENT)
+	public static List<TileEntity> renderSortedTileEntities(RenderChunk renderChunk, List<TileEntity> list, ICamera camera, float partialTick)
+	{
+		boolean b = false;
+		if (b)
+			return list;
+
+		Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
+		World world = entity.worldObj;
+		Chunk chunk = world.getChunkFromBlockCoords(renderChunk.getPosition());
+
+		double x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTick;
+		double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTick;
+		double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTick;
+
+		Stream.concat(list.stream().map(ISortedRenderable.TE::new), SortedRenderableManager.getRenderables(chunk))
+				.filter(r -> r.inFrustrum(camera))
+				.sorted((r1, r2) -> r1.getPos().distanceSqToCenter(x, y, z) > r2.getPos().distanceSqToCenter(x, y, z) ? -1 : 1)
+				.forEach(r -> r.render(partialTick));
+
+		return ImmutableList.of();
+	}
+
+	public static class SortingTileEntitiesTransformer extends MalisisCoreTransformer
+	{
+		@Override
+		@SuppressWarnings("deprecation")
+		public void registerHooks()
+		{
+			AsmHook hook = new AsmHook(new McpMethodMapping("renderEntities", "func_180446_a",
+					"net/minecraft/client/renderer/RenderGlobal",
+					"(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ICamera;F)V"));
+
+			//List<TileEntity> list3 = renderglobal$containerlocalrenderinformation1.renderChunk.getCompiledChunk().getTileEntities();
+			//			ALOAD 23
+			//		    GETFIELD net/minecraft/client/renderer/RenderGlobal$ContainerLocalRenderInformation.renderChunk : Lnet/minecraft/client/renderer/chunk/RenderChunk;
+			//		    INVOKEVIRTUAL net/minecraft/client/renderer/chunk/RenderChunk.getCompiledChunk ()Lnet/minecraft/client/renderer/chunk/CompiledChunk;
+			//		    INVOKEVIRTUAL net/minecraft/client/renderer/chunk/CompiledChunk.getTileEntities ()Ljava/util/List;
+			//		    ASTORE 24
+			McpFieldMapping renderChunk = new McpFieldMapping("renderChunk", "field_178036_a",
+					"net/minecraft/client/renderer/RenderGlobal$ContainerLocalRenderInformation",
+					"Lnet/minecraft/client/renderer/chunk/RenderChunk;");
+			McpMethodMapping getCompiledChunk = new McpMethodMapping("getCompiledChunk", "func_178571_g",
+					"net/minecraft/client/renderer/chunk/RenderChunk", "()Lnet/minecraft/client/renderer/chunk/CompiledChunk;");
+			McpMethodMapping getTileEntities = new McpMethodMapping("getTileEntities", "func_178485_b",
+					"net/minecraft/client/renderer/chunk/CompiledChunk", "()Ljava/util/List;");
+			InsnList match = new InsnList();
+			match.add(new VarInsnNode(ALOAD, 23));
+			match.add(renderChunk.getInsnNode(GETFIELD));
+			match.add(getCompiledChunk.getInsnNode(INVOKEVIRTUAL));
+			match.add(getTileEntities.getInsnNode(INVOKEVIRTUAL));
+			match.add(new VarInsnNode(ASTORE, 24));
+
+			//list3 = TileEntityUtils.renderSortedTileEntities(renderglobal$containerlocalrenderinformation.renderChunk, list3, camera, partialTicks);
+			//		    ALOAD 23
+			//			GETFIELD net/minecraft/client/renderer/RenderGlobal$ContainerLocalRenderInformation.renderChunk : Lnet/minecraft/client/renderer/chunk/RenderChunk;
+			//			ALOAD 24
+			//		    ALOAD 1
+			//		    FLOAD 3
+			//		    INVOKESTATIC net/malisis/core/util/TileEntityUtils.renderSortedTileEntities (Lnet/minecraft/client/renderer/chunk/RenderChunk;Ljava/util/List;Lnet/minecraft/client/renderer/culling/ICamera;F)Ljava/util/List;
+			//		    ASTORE 2
+
+			InsnList insert = new InsnList();
+			insert.add(new VarInsnNode(ALOAD, 23));
+			insert.add(renderChunk.getInsnNode(GETFIELD));
+			insert.add(new VarInsnNode(ALOAD, 24));
+			insert.add(new VarInsnNode(ALOAD, 2));
+			insert.add(new VarInsnNode(FLOAD, 3));
+			insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/TileEntityUtils", "renderSortedTileEntities",
+					"(Lnet/minecraft/client/renderer/chunk/RenderChunk;Ljava/util/List;Lnet/minecraft/client/renderer/culling/ICamera;F)Ljava/util/List;"));
+			insert.add(new VarInsnNode(ASTORE, 24));
+
+			hook.jumpAfter(match).insert(insert);
+			register(hook);
+		}
+	}
+
 }

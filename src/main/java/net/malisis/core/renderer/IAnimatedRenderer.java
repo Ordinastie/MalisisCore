@@ -24,24 +24,14 @@
 
 package net.malisis.core.renderer;
 
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+
 /**
  * @author Ordinastie
  *
  */
-public enum RenderType
+public interface IAnimatedRenderer
 {
-	/** Defines a not set render type (currently not in rendering loop). */
-	UNSET,
-	/** Defines rendering for world. */
-	BLOCK,
-	/** Defines rendering for inventory with IItemRenderer. */
-	ITEM,
-	/** Defines rendering for TESR. */
-	TILE_ENTITY,
-	/** Defines rendering for IRWL. */
-	WORLD_LAST,
-	/** Defines rendering inside a GUI. */
-	GUI,
-	/** Defines rendering for AnimatedModelComponent. */
-	ANIMATED;
+	public void renderAnimated(World world, BlockPos pos, IAnimatedRenderable renderable, double x, double y, double z, float partialTicks);
 }

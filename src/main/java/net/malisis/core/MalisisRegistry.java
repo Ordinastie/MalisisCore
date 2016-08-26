@@ -44,6 +44,7 @@ import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
 import net.malisis.core.renderer.IItemRenderer.DummyModel;
 import net.malisis.core.renderer.IRenderWorldLast;
+import net.malisis.core.renderer.ISortedRenderable.SortedRenderableManager;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.icon.Icon;
@@ -377,7 +378,7 @@ public class MalisisRegistry
 
 	public static boolean shouldRenderBlock(IBlockAccess world, BlockPos pos, IBlockState state)
 	{
-		DefaultRenderer.animated.checkAnimatedModel(world, new BlockPos(pos), state);
+		SortedRenderableManager.checkRenderable(world, new BlockPos(pos), state);
 
 		IBlockRenderer renderer = getBlockRendererOverride(world, pos, state);
 		if (renderer == null)
@@ -593,6 +594,7 @@ public class MalisisRegistry
 
 	public static SoundEvent registerSound(String modId, String soundId)
 	{
+		//TODO: fix with GameRegistry
 		ResourceLocation rl = new ResourceLocation(modId, soundId);
 		try
 		{

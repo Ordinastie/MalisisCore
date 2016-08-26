@@ -231,6 +231,13 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		this.tileEntity = (T) world.getTileEntity(pos);
 	}
 
+	public void set(IBlockAccess world, BlockPos pos)
+	{
+		this.world = world;
+		this.pos = pos;
+		set(world.getBlockState(pos));
+	}
+
 	/**
 	 * Sets informations for this {@link MalisisRenderer}.
 	 *
@@ -511,6 +518,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 			startDrawing();
 		}
+		else
+			throw new IllegalArgumentException("Unknow renderType to handle for " + getClass().getSimpleName() + " : " + renderType);
 	}
 
 	/**
@@ -833,6 +842,10 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 			applyTexture(face, params);
 
 		baseBrightness = getBaseBrightness(params);
+
+		//debug
+		//		if (vertexCount != 4)
+		//			params.colorMultiplier.set(0xFF0000);
 
 		for (int i = 0; i < face.getVertexes().length; i++)
 			drawVertex(face.getVertexes()[i], i, params);

@@ -24,24 +24,21 @@
 
 package net.malisis.core.renderer;
 
+import net.malisis.core.util.Timer;
+import net.minecraft.block.Block;
+
 /**
  * @author Ordinastie
  *
  */
-public enum RenderType
+public interface IAnimatedRenderable
 {
-	/** Defines a not set render type (currently not in rendering loop). */
-	UNSET,
-	/** Defines rendering for world. */
-	BLOCK,
-	/** Defines rendering for inventory with IItemRenderer. */
-	ITEM,
-	/** Defines rendering for TESR. */
-	TILE_ENTITY,
-	/** Defines rendering for IRWL. */
-	WORLD_LAST,
-	/** Defines rendering inside a GUI. */
-	GUI,
-	/** Defines rendering for AnimatedModelComponent. */
-	ANIMATED;
+	public Timer addTimer(String animation, Timer timer);
+
+	public Timer removeTimer(String animation);
+
+	public Timer getTimer(String animation);
+
+	public void renderAnimated(Block block, AnimatedRenderer renderer);
+
 }

@@ -24,7 +24,9 @@
 
 package net.malisis.core.renderer.component;
 
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,9 @@ import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.block.component.DirectionalComponent;
+import net.malisis.core.renderer.AnimatedRenderer;
+import net.malisis.core.renderer.ISortedRenderable.AMC;
+import net.malisis.core.renderer.ISortedRenderable.SortedRenderableManager;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.RenderType;
@@ -48,11 +53,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
 
 /**
  * The {@link AnimatedModelComponent} allows animated parts to be rendered for a {@link MalisisBlock} without the need for a
@@ -71,10 +73,10 @@ public class AnimatedModelComponent extends ModelComponent
 	private Set<String> staticShapes = Sets.newHashSet();
 	/** Animated {@link Shape Shapes}. */
 	private Set<String> animatedShapes = Sets.newHashSet();
-	/** List of {@link Timer Timers} for each position and animation. */
-	private Table<BlockPos, String, Timer> timers = HashBasedTable.create();
 	/** Callback for the checks to make when rendering for the first time. */
 	private IStateCheck stateCheck = null;
+
+	RenderParameters rp = new RenderParameters();
 
 	/**
 	 * Instantiates a new {@link AnimatedModelComponent}.
@@ -84,6 +86,8 @@ public class AnimatedModelComponent extends ModelComponent
 	public AnimatedModelComponent(String modelName)
 	{
 		super(modelName);
+		rp.rotateIcon.set(false);
+
 		autoDetectAnimatedGroups();
 	}
 
@@ -98,20 +102,26 @@ public class AnimatedModelComponent extends ModelComponent
 
 		Set<String> staticList = model.getShapeNames().stream().filter(s -> !animList.contains(s)).collect(Collectors.toSet());
 		staticShapes = Sets.newHashSet(staticList);
-
-		//		staticShapes.clear();
-		//		animatedShapes.clear();
-		//		animatedShapes.addAll(model.getShapeNames());
 	}
 
-	/**
-	 * Removes the {@link Timer Timers} for the specified {@link BlockPos}.
-	 *
-	 * @param pos the pos
-	 */
-	public void removeTimers(BlockPos pos)
+	private Optional<AMC> get(BlockPos pos)
 	{
-		timers.row(pos).clear();
+		return SortedRenderableManager.getSortedRenderable(pos);
+	}
+
+	private Timer addTimer(BlockPos pos, String animation, Timer timer)
+	{
+		return get(pos).map(amc -> amc.addTimer(animation, timer)).orElse(null);
+	}
+
+	private Timer removeTimer(BlockPos pos, String animation)
+	{
+		return get(pos).map(amc -> amc.removeTimer(animation)).orElse(null);
+	}
+
+	private Timer getTimer(BlockPos pos, String animation)
+	{
+		return get(pos).map(amc -> amc.getTimer(animation)).orElse(null);
 	}
 
 	/**
@@ -163,8 +173,8 @@ public class AnimatedModelComponent extends ModelComponent
 	public Timer start(BlockPos pos, String animation, Timer timer)
 	{
 		if (!isAnimating(pos, animation))
-			timers.put(pos, animation, timer);
-		return timers.get(pos, animation);
+			addTimer(pos, animation, timer);
+		return getTimer(pos, animation);
 	}
 
 	/**
@@ -192,7 +202,7 @@ public class AnimatedModelComponent extends ModelComponent
 	public Timer forceStart(BlockPos pos, String animation, Timer timer)
 	{
 		stop(pos, animation);
-		return timers.put(pos, animation, timer);
+		return addTimer(pos, animation, timer);
 	}
 
 	/**
@@ -204,7 +214,7 @@ public class AnimatedModelComponent extends ModelComponent
 	 */
 	public Timer stop(BlockPos pos, String animation)
 	{
-		return timers.remove(pos, animation);
+		return removeTimer(pos, animation);
 	}
 
 	/**
@@ -236,7 +246,7 @@ public class AnimatedModelComponent extends ModelComponent
 			return start(pos, start);
 
 		t.setRelativeStart(t.elapsedTime() - duration);
-		timers.put(pos, start, t);
+		addTimer(pos, start, t);
 		return t;
 	}
 
@@ -250,12 +260,13 @@ public class AnimatedModelComponent extends ModelComponent
 	 */
 	public boolean isAnimating(BlockPos pos, String animation)
 	{
-		return timers.get(pos, animation) != null;
+		return getTimer(pos, animation) != null;
 	}
 
 	@Override
 	public void render(Block block, MalisisRenderer<TileEntity> renderer)
 	{
+		//TODO: remove when debug is done
 		if (renderer.getRenderType() == RenderType.BLOCK && !MalisisCore.isObfEnv)
 		{
 			loadModel();
@@ -288,30 +299,27 @@ public class AnimatedModelComponent extends ModelComponent
 	 * @param block the block
 	 * @param renderer the renderer
 	 */
-	public void renderAnimated(Block block, MalisisRenderer<TileEntity> renderer)
+	public void renderAnimated(Block block, AMC amc, AnimatedRenderer renderer)
 	{
 		//no shapes to animated
 		if (animatedShapes.size() == 0)
 			return;
 
 		model.resetState();
-		//only animate for WORLD_LAST (not ITEM)
-		if (renderer.getRenderType() == RenderType.WORLD_LAST)
+		//only animate for ANIMATED (not ITEM)
+		if (renderer.getRenderType() == RenderType.ANIMATED)
 		{
 			model.rotate(DirectionalComponent.getDirection(renderer.getBlockState()));
 
 			//need copy to prevent CME
-			ImmutableSet<Entry<String, Timer>> set = ImmutableSet.copyOf(timers.row(renderer.getPos()).entrySet());
-			for (Entry<String, Timer> entry : set)
+			Map<String, Timer> timers = amc.getTimers();
+			for (Entry<String, Timer> entry : timers.entrySet())
 			{
 				//animation is done and doesn't persist
 				if (model.animate(entry.getKey(), entry.getValue()))
 					timers.remove(renderer.getPos(), entry.getKey());
 			}
 		}
-
-		RenderParameters rp = new RenderParameters();
-		rp.rotateIcon.set(false);
 
 		//render the shapes
 		renderer.enableBlending();
