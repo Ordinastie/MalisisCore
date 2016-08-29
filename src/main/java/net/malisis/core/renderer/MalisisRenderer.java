@@ -31,12 +31,12 @@ import java.util.Set;
 import javax.vecmath.Matrix4f;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.MalisisRegistry;
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.ISmartCull;
+import net.malisis.core.registry.MalisisRegistry;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;

@@ -24,8 +24,8 @@
 
 package net.malisis.core.block;
 
-import net.malisis.core.MalisisRegistry;
 import net.malisis.core.item.MalisisItemBlock;
+import net.malisis.core.registry.MalisisRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 

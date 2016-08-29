@@ -28,7 +28,7 @@ import java.util.List;
 
 import javax.vecmath.Matrix4f;
 
-import net.malisis.core.MalisisRegistry;
+import net.malisis.core.registry.MalisisRegistry;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;

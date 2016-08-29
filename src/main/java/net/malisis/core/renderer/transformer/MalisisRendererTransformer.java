@@ -78,19 +78,19 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		//		ALOAD 6
 		//		ALOAD 7
 		//		ALOAD 8
-		//		INVOKESTATIC net/malisis/core/MalisisRegistry.shouldRenderBlock (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z
+		//		INVOKESTATIC net/malisis/core/registry/MalisisRegistry.shouldRenderBlock (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z
 		//		IFEQ L20
 		//		ALOAD 6
 		//	    ALOAD 7
 		//	    ALOAD 8
 		//	    ALOAD 9
-		//	    INVOKESTATIC net/malisis/core/renderer/BlockRendererRegistry.render (Lnet/minecraft/client/renderer/BlockModelRenderer;Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z
+		//	    INVOKESTATIC net/malisis/core/registry/MalisisRegistry.renderBlock (Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z
 		LabelNode falseLabel = new LabelNode();
 		InsnList insert = new InsnList();
 		insert.add(new VarInsnNode(ALOAD, 3));
 		insert.add(new VarInsnNode(ALOAD, 2));
 		insert.add(new VarInsnNode(ALOAD, 1));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/MalisisRegistry", "shouldRenderBlock",
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/registry/MalisisRegistry", "shouldRenderBlock",
 				"(Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z", false));
 		insert.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert.add(new VarInsnNode(ALOAD, 4));
@@ -99,7 +99,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		insert.add(new VarInsnNode(ALOAD, 1));
 		insert.add(new MethodInsnNode(
 				INVOKESTATIC,
-				"net/malisis/core/MalisisRegistry",
+				"net/malisis/core/registry/MalisisRegistry",
 				"renderBlock",
 				"(Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z",
 				false));
@@ -120,7 +120,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		//			return;
 
 		//		ALOAD 3
-		//	    INVOKESTATIC net/malisis/core/MalisisRegistry.renderItem (Lnet/minecraft/item/ItemStack;)Z
+		//	    INVOKESTATIC net/malisis/core/registry/MalisisRegistry.renderItem (Lnet/minecraft/item/ItemStack;)Z
 		//	    IFEQ L6
 		//	   L7
 		//	    LINENUMBER 119 L7
@@ -131,8 +131,8 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		LabelNode falseLabel = new LabelNode();
 		InsnList insert = new InsnList();
 		insert.add(new VarInsnNode(ALOAD, 3));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/MalisisRegistry", "renderItem", "(Lnet/minecraft/item/ItemStack;)Z",
-				false));
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/registry/MalisisRegistry", "renderItem",
+				"(Lnet/minecraft/item/ItemStack;)Z", false));
 		insert.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert.add(new InsnNode(RETURN));
 		insert.add(falseLabel);
@@ -155,7 +155,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		//	    INVOKESTATIC net/malisis/core/block/IComponent.getComponent (Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;
 		//	    IFNULL L6
 		//	    ALOAD 1
-		//	    INVOKESTATIC net/malisis/core/MalisisRegistry.getParticleIcon (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
+		//	    INVOKESTATIC net/malisis/core/registry/MalisisRegistry.getParticleIcon (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
 		//		ARETURN
 
 		McpMethodMapping getBlock = new McpMethodMapping("getBlock", "func_177230_c", "net/minecraft/block/state/IBlockState",
@@ -170,7 +170,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 				"(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;", false));
 		insert.add(new JumpInsnNode(IFNULL, falseLabel));
 		insert.add(new VarInsnNode(ALOAD, 1));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/MalisisRegistry", "getParticleIcon",
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/registry/MalisisRegistry", "getParticleIcon",
 				"(Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;", false));
 		insert.add(new InsnNode(ARETURN));
 		insert.add(falseLabel);
