@@ -29,9 +29,12 @@ import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -88,6 +91,34 @@ public class Utils
 	public static EntityPlayerSP getClientPlayer()
 	{
 		return Minecraft.getMinecraft().thePlayer;
+	}
+
+	/**
+	 * Creates a {@link ResourceLocation} from the specified name.<br>
+	 * The name is split on ':' to find the modid.<br>
+	 * If the modid is not specified, the current active mod container is used, or "minecraft" if none is found.
+	 *
+	 * @param name the name
+	 * @return the resource location
+	 */
+	public static ResourceLocation getResourceLocation(String name)
+	{
+		int index = name.lastIndexOf(':');
+		String res = null;
+		String modid = null;
+		if (index == -1)
+		{
+			ModContainer container = Loader.instance().activeModContainer();
+			modid = container != null ? container.getModId() : "minecraft";
+			res = name;
+		}
+		else
+		{
+			modid = name.substring(0, index);
+			res = name.substring(index + 1);
+		}
+
+		return new ResourceLocation(modid, res);
 	}
 
 }
