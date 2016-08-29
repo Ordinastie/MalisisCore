@@ -29,12 +29,14 @@ import java.util.List;
 import java.util.Set;
 
 import net.malisis.core.configuration.Settings;
+import net.malisis.core.registry.AutoLoad;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -44,6 +46,7 @@ import net.minecraftforge.fml.relauncher.Side;
  * @author Ordinastie
  *
  */
+@AutoLoad
 public class MalisisCommand extends CommandBase
 {
 	/** List of parameters available for this {@link MalisisCommand}. */
@@ -54,6 +57,7 @@ public class MalisisCommand extends CommandBase
 	 */
 	public MalisisCommand()
 	{
+		ClientCommandHandler.instance.registerCommand(this);
 		parameters.add("config");
 		parameters.add("version");
 	}

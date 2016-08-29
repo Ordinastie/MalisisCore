@@ -27,6 +27,7 @@ package net.malisis.core.util.replacement;
 import java.lang.reflect.Field;
 
 import net.malisis.core.asm.AsmUtils;
+import net.malisis.core.registry.AutoLoad;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
@@ -34,6 +35,7 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
  * @author Ordinastie
  *
  */
+@AutoLoad(true)
 public class ShapedOreRecipeHandler extends ReplacementHandler<ShapedOreRecipe>
 {
 	private Field inputField;

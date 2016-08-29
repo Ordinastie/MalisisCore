@@ -22,44 +22,22 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.util.replacement;
+package net.malisis.core.registry;
 
-import java.lang.reflect.Field;
-
-import net.malisis.core.asm.AsmUtils;
-import net.malisis.core.registry.AutoLoad;
-import net.minecraft.stats.StatCrafting;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Ordinastie
  *
  */
-@AutoLoad(true)
-public class StatCraftingHandler extends ReplacementHandler<StatCrafting>
+@Documented
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AutoLoad
 {
-	private Field itemField;
-
-	public StatCraftingHandler()
-	{
-		super(StatCrafting.class);
-		itemField = AsmUtils.changeFieldAccess(StatCrafting.class, "item", "field_150960_a");
-	}
-
-	@Override
-	public boolean replace(StatCrafting stat, Object vanilla, Object replacement)
-	{
-		try
-		{
-			if (itemField.get(stat) == vanilla)
-			{
-				itemField.set(stat, replacement);
-				return true;
-			}
-		}
-		catch (IllegalArgumentException | IllegalAccessException e)
-		{
-			e.printStackTrace();
-		}
-		return false;
-	}
+	boolean value() default false;
 }

@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.util.MBlockPos;
 import net.malisis.core.util.MBlockState;
 import net.malisis.core.util.chunklistener.ChunkListener;
@@ -46,6 +47,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -57,6 +59,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  * @author Ordinastie
  *
  */
+@AutoLoad
 public class ChunkBlockHandler implements IChunkBlockHandler
 {
 	private static ChunkBlockHandler instance = new ChunkBlockHandler();
@@ -67,6 +70,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 
 	public ChunkBlockHandler()
 	{
+		MinecraftForge.EVENT_BUS.register(this);
 		handlers.add(new ChunkListener());
 	}
 
@@ -387,7 +391,10 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 			if (!(state.getBlock() instanceof IChunkBlock))
 			{
 				MalisisCore.log.info("[ChunkNotificationHandler]  Removing invalid {} coordinate : {} in chunk {},{}",
-						world.isRemote ? "client" : "server", state, chunk.xPosition, chunk.zPosition);
+						world.isRemote ? "client" : "server",
+						state,
+						chunk.xPosition,
+						chunk.zPosition);
 				get().removeCoord(chunk, state.getPos());
 				return false;
 			}

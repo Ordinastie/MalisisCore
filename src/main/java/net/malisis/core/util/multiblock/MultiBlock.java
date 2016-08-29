@@ -31,6 +31,7 @@ import java.util.Map;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.component.DirectionalComponent;
+import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.EnumFacingUtils;
 import net.malisis.core.util.MBlockState;
@@ -46,9 +47,15 @@ import net.minecraft.world.World;
  * @author Ordinastie
  *
  */
+@AutoLoad
 public abstract class MultiBlock implements Iterable<MBlockState>
 {
 	public static String ORIGIN_BLOCK_DATA = MalisisCore.modid + ":multiBlockOrigin";
+
+	static
+	{
+		BlockDataHandler.registerBlockData(ORIGIN_BLOCK_DATA, BlockPosUtils::fromBytes, BlockPosUtils::toBytes);
+	}
 
 	protected Map<BlockPos, MBlockState> states = new HashMap<>();
 	protected BlockPos offset = BlockPos.ORIGIN;
@@ -211,7 +218,7 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 
 	public static void registerBlockData()
 	{
-		BlockDataHandler.registerBlockData(ORIGIN_BLOCK_DATA, BlockPosUtils::fromBytes, BlockPosUtils::toBytes);
+
 	}
 
 	public static BlockPos getOrigin(IBlockAccess world, BlockPos pos)

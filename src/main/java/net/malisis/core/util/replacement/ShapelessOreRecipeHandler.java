@@ -28,6 +28,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import net.malisis.core.asm.AsmUtils;
+import net.malisis.core.registry.AutoLoad;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
@@ -35,6 +36,7 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
  * @author Ordinastie
  *
  */
+@AutoLoad(true)
 public class ShapelessOreRecipeHandler extends ReplacementHandler<ShapelessOreRecipe>
 {
 	private Field inputField;

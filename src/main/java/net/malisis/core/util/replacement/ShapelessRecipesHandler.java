@@ -28,6 +28,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import net.malisis.core.asm.AsmUtils;
+import net.malisis.core.registry.AutoLoad;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.ShapelessRecipes;
 
@@ -35,6 +36,7 @@ import net.minecraft.item.crafting.ShapelessRecipes;
  * @author Ordinastie
  *
  */
+@AutoLoad(true)
 public class ShapelessRecipesHandler extends ReplacementHandler<ShapelessRecipes>
 {
 	private Field outputField;

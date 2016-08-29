@@ -30,6 +30,7 @@ import java.util.WeakHashMap;
 import java.util.stream.Stream;
 
 import net.malisis.core.block.IComponent;
+import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.renderer.component.AnimatedModelComponent;
 import net.malisis.core.util.Timer;
 import net.malisis.core.util.Utils;
@@ -65,14 +66,10 @@ public interface ISortedRenderable
 
 	public void render(float partialTick);
 
+	@AutoLoad
 	public static class SortedRenderableManager
 	{
 		private static SortedRenderableManager instance = new SortedRenderableManager();
-
-		public static SortedRenderableManager get()
-		{
-			return instance;
-		}
 
 		private SortedRenderableManager()
 		{
@@ -169,6 +166,11 @@ public interface ISortedRenderable
 				amcs.put(pos, amc);
 			}
 			//else amc already in map, nothing more needed
+		}
+
+		public static SortedRenderableManager get()
+		{
+			return instance;
 		}
 
 	}

@@ -31,6 +31,7 @@ import java.util.List;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
+import net.malisis.core.registry.AutoLoad;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -50,6 +51,7 @@ import net.minecraftforge.fml.common.registry.RegistryDelegate.Delegate;
  * @author Ordinastie
  *
  */
+@AutoLoad
 public class ReplacementTool
 {
 	private static ReplacementTool instance = new ReplacementTool();
@@ -66,23 +68,7 @@ public class ReplacementTool
 	private Field objectArray = AsmUtils.changeFieldAccess(IntIdentityHashBiMap.class, "values", "field_186818_b");
 
 	private ReplacementTool()
-	{
-		new ShapedOreRecipeHandler();
-		new ShapedRecipesHandler();
-		new ShapelessRecipesHandler();
-		new ShapelessOreRecipeHandler();
-		new StatCraftingHandler();
-	}
-
-	/**
-	 * Get the {@link ReplacementTool} instance
-	 *
-	 * @return the replacement tool
-	 */
-	public static ReplacementTool instance()
-	{
-		return instance;
-	}
+	{}
 
 	/**
 	 * Replaces a vanilla {@link Block} or {@link Item} with a new one.<br>
@@ -182,7 +168,7 @@ public class ReplacementTool
 	 */
 	public static void replaceVanillaBlock(int id, String registryName, String fieldName, String srgFieldName, Block replacement, Block vanilla)
 	{
-		instance().replaceVanilla(id, registryName, fieldName, srgFieldName, replacement, vanilla);
+		instance.replaceVanilla(id, registryName, fieldName, srgFieldName, replacement, vanilla);
 	}
 
 	/**
@@ -198,7 +184,7 @@ public class ReplacementTool
 	 */
 	public static void replaceVanillaItem(int id, String registryName, String fieldName, String srgFieldName, Item replacement, Item vanilla)
 	{
-		instance().replaceVanilla(id, registryName, fieldName, srgFieldName, replacement, vanilla);
+		instance.replaceVanilla(id, registryName, fieldName, srgFieldName, replacement, vanilla);
 	}
 
 	/**

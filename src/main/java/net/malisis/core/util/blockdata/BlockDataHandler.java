@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
+import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.util.Silenced;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
@@ -42,6 +43,7 @@ import net.minecraft.world.ChunkCache;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
@@ -56,6 +58,7 @@ import com.google.common.collect.Table;
  * @author Ordinastie
  *
  */
+@AutoLoad
 public class BlockDataHandler
 {
 	private static BlockDataHandler instance = new BlockDataHandler();
@@ -66,9 +69,9 @@ public class BlockDataHandler
 	private Table<String, Chunk, ChunkData<?>> serverDatas = HashBasedTable.create();
 	private Table<String, Chunk, ChunkData<?>> clientDatas = HashBasedTable.create();
 
-	public BlockDataHandler()
+	private BlockDataHandler()
 	{
-
+		MinecraftForge.EVENT_BUS.register(this);
 	}
 
 	private Table<String, Chunk, ChunkData<?>> data(World world)
