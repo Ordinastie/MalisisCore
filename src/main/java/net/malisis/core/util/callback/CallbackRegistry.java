@@ -27,100 +27,73 @@ package net.malisis.core.util.callback;
 import java.util.List;
 
 import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
-import net.malisis.core.util.callback.ICallback.Priority;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 
 /**
- * @author Ordinastie
- * @param <V>
+ * A {@link CallbackRegistry} allows the registration and processing of {@link ICallback ICallbacks}.<br>
+ * Users are encouraged to have a custom implementation that will expose a more specialized registration and process for the
+ * {@code ICallback}.
  *
+ * @author Ordinastie
+ * @param <C> the type of {@link ICallback}
+ * @param <P> the type of {@link ICallbackPredicate}
+ * @param <V> the type of the return value for the {@code ICallback}
  */
 public class CallbackRegistry<C extends ICallback<V>, P extends ICallbackPredicate, V>
 {
-	private List<Pair<C, P>> callbacks = Lists.newArrayList();
+	/** List of registered {@link ICallback}. */
+	protected List<Pair<C, P>> callbacks = Lists.newArrayList();
 
-	public CallbackRegistry()
-	{}
-
+	/**
+	 * Registers a {@link ICallback}.
+	 *
+	 * @param callback the callback
+	 */
 	@SuppressWarnings("unchecked")
 	public void registerCallback(C callback)
 	{
 		registerCallback(callback, (P) (ICallbackPredicate) params -> true);
 	}
 
+	/**
+	 * Registers a {@link ICallback} to be call when the {@link ICallbackPredicate} returns true.
+	 *
+	 * @param callback the callback
+	 * @param predicate the predicate
+	 */
 	public void registerCallback(C callback, P predicate)
 	{
 		callbacks.add(Pair.of(callback, predicate));
 		callbacks = Ordering.natural().onResultOf(Pair<C, P>::getLeft).sortedCopy(callbacks);
 	}
 
-	public CallbackResult<V> processCallbacks(Object... params)
+	/**
+	 * Processes the registered {@link ICallback ICallbacks} according to their priority, and returns the first non null return value
+	 * encountered.<br>
+	 * Classes extending {@link CallbackRegistry} should expose a more specialized version of this method, with specific arguments.
+	 *
+	 * @param params the params
+	 * @return the v
+	 */
+	public V processCallbacks(Object... params)
 	{
-		CallbackResult<V> result = null;
-		Priority currentPriority = Priority.HIGHEST;
-		boolean isCancelled = false;
+		if (callbacks.size() == 0)
+			return null;
+
+		V result = null;
 		for (Pair<C, P> pair : callbacks)
 		{
-			C callback = pair.getLeft();
-			if (callback.getPriority() != currentPriority && isCancelled)
-				break;
-
+			V tempRes = null;
 			if (pair.getRight().apply(params))
-				callback.callback(params);
-			isCancelled |= callback.isCancelled();
-			currentPriority = callback.getPriority();
-			if (result == null && callback.shouldReturn())
-				result = CallbackResult.of(callback.shouldReturn(), callback.returnValue());
+				tempRes = pair.getLeft().call(params);
+			if (result == null && tempRes != null)
+				result = tempRes;
 		}
 
-		return Objects.firstNonNull(result, CallbackResult.<V> noReturn());
+		return result;
 	}
-
-	public static class CallbackResult<U>
-	{
-		private static CallbackResult<?> NO_RETURN = new CallbackResult<>(false, null);
-		private static CallbackResult<?> NULL_RETURN = new CallbackResult<>(true, null);
-
-		private boolean shouldReturn = false;
-		private U returnValue;
-
-		private CallbackResult(boolean shouldReturn, U returnValue)
-		{
-			this.shouldReturn = shouldReturn;
-			this.returnValue = returnValue;
-		}
-
-		public boolean shouldReturn()
-		{
-			return shouldReturn;
-		}
-
-		public U getValue()
-		{
-			return returnValue;
-		}
-
-		public static <U> CallbackResult<U> of(boolean shouldReturn, U returnValue)
-		{
-			return new CallbackResult<>(shouldReturn, returnValue);
-		}
-
-		@SuppressWarnings("unchecked")
-		public static <U> CallbackResult<U> noReturn()
-		{
-			return (CallbackResult<U>) NO_RETURN;
-		}
-
-		@SuppressWarnings("unchecked")
-		public static <U> CallbackResult<U> nullReturn()
-		{
-			return (CallbackResult<U>) NULL_RETURN;
-		}
-	}
-
 }
