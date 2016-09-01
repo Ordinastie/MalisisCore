@@ -31,12 +31,15 @@ import java.util.stream.Stream;
 
 import net.malisis.core.block.IComponent;
 import net.malisis.core.registry.AutoLoad;
+import net.malisis.core.registry.MalisisRegistry;
 import net.malisis.core.renderer.component.AnimatedModelComponent;
 import net.malisis.core.util.Timer;
 import net.malisis.core.util.Utils;
+import net.malisis.core.util.callback.ASMCallbackRegistry.CallbackResult;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.tileentity.TileEntity;
@@ -74,6 +77,7 @@ public interface ISortedRenderable
 		private SortedRenderableManager()
 		{
 			MinecraftForge.EVENT_BUS.register(this);
+			MalisisRegistry.onRenderBlock(this::checkRenderable);
 		}
 
 		private Map<Chunk, Map<BlockPos, ISortedRenderable>> sortedRenderable = new WeakHashMap<>();
@@ -135,7 +139,7 @@ public interface ISortedRenderable
 		 * @param pos the pos
 		 * @param state the state
 		 */
-		public static void checkRenderable(IBlockAccess world, BlockPos pos, IBlockState state)
+		public CallbackResult<Boolean> checkRenderable(VertexBuffer buffer, IBlockAccess world, BlockPos pos, IBlockState state)
 		{
 			AnimatedModelComponent comp = IComponent.getComponent(AnimatedModelComponent.class, state.getBlock());
 
@@ -150,7 +154,7 @@ public interface ISortedRenderable
 				instance.sortedRenderable.put(chunk.get(), renderables.get());
 				//no comp to add, return early
 				if (comp == null)
-					return;
+					return null;
 			}
 
 			//TODO: FIX WITH CALLBACKS ?
@@ -166,6 +170,8 @@ public interface ISortedRenderable
 				amcs.put(pos, amc);
 			}
 			//else amc already in map, nothing more needed
+
+			return null;
 		}
 
 		public static SortedRenderableManager get()

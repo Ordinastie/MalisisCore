@@ -24,13 +24,14 @@
 
 package net.malisis.core.registry;
 
-import static com.google.common.base.Preconditions.*;
+import static net.malisis.core.registry.Registries.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
@@ -39,10 +40,15 @@ import net.malisis.core.renderer.IRenderWorldLast;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.icon.Icon;
+import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
+import net.malisis.core.util.Utils;
+import net.malisis.core.util.callback.ASMCallbackRegistry.CallbackResult;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockModelShapes;
+import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -51,7 +57,6 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -67,16 +72,9 @@ import com.google.common.collect.Sets;
  *
  */
 @SideOnly(Side.CLIENT)
+@AutoLoad
 public class ClientRegistry
 {
-	static ClientRegistry instance = new ClientRegistry();
-
-	public ClientRegistry()
-	{
-		MinecraftForge.EVENT_BUS.register(this);
-		MalisisRegistry.onInit(this::registerRenderers);
-	}
-
 	/** List of registered {@link IBlockRenderer}. */
 	Map<Block, IBlockRenderer> blockRenderers = Maps.newHashMap();
 	/** List of registered {@link IItemRenderer} */
@@ -93,6 +91,16 @@ public class ClientRegistry
 	/** List of {@link ItemRendererOverride}. */
 	List<ItemRendererOverride> itemRendererOverrides = Lists.newArrayList();
 
+	ClientRegistry()
+	{
+		MinecraftForge.EVENT_BUS.register(this);
+		MalisisRegistry.onInit(e -> {
+			Block.REGISTRY.forEach(this::registerRenderer);
+			Item.REGISTRY.forEach(this::registerRenderer);
+		});
+		MalisisRegistry.onRenderBlock(this::renderBlock);
+	}
+
 	/**
 	 * Calls the {@link IRenderWorldLast} registered to render.<br>
 	 *
@@ -103,8 +111,8 @@ public class ClientRegistry
 	{
 		for (IRenderWorldLast renderer : renderWorldLastRenderers)
 		{
-			if (renderer.shouldRender(event, Minecraft.getMinecraft().theWorld))
-				renderer.renderWorldLastEvent(event, Minecraft.getMinecraft().theWorld);
+			if (renderer.shouldRender(event, Utils.getClientWorld()))
+				renderer.renderWorldLastEvent(event, Utils.getClientWorld());
 		}
 	}
 
@@ -128,7 +136,6 @@ public class ClientRegistry
 	 *
 	 * @param event the event
 	 */
-	@SideOnly(Side.CLIENT)
 	@SubscribeEvent
 	public void onTextureStitchEvent(TextureStitchEvent.Pre event)
 	{
@@ -142,7 +149,7 @@ public class ClientRegistry
 	 *
 	 * @param object the object
 	 */
-	void registerRenderer(Object object)
+	private void registerRenderer(Object object)
 	{
 		//get the classes to use to render
 		Pair<Class<? extends MalisisRenderer<?>>, Class<? extends MalisisRenderer<?>>> rendererClasses = getRendererClasses(object);
@@ -167,7 +174,7 @@ public class ClientRegistry
 		//register the block renderer
 		if (object instanceof Block && renderer != null)
 		{
-			registerBlockRenderer((Block) object, renderer);
+			blockRenderers.put((Block) object, renderer);
 			object = Item.getItemFromBlock((Block) object);
 		}
 
@@ -239,45 +246,113 @@ public class ClientRegistry
 	}
 
 	/**
-	 * Registers a {@link IBlockRenderer} for the {@link Block}.
+	 * Renders a {@link IBlockState} with a registered {@link IBlockRenderer}.
 	 *
-	 * @param block the block
-	 * @param renderer the renderer
+	 * @param buffer the wr
+	 * @param world the world
+	 * @param pos the pos
+	 * @param state the state
+	 * @return true, if successful
 	 */
-	public void registerBlockRenderer(Block block, IBlockRenderer renderer)
+	private CallbackResult<Boolean> renderBlock(VertexBuffer buffer, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
-		blockRenderers.put(checkNotNull(block), checkNotNull(renderer));
+		IBlockRenderer renderer = getBlockRendererOverride(world, pos, state);
+		if (renderer == null)
+			renderer = blockRenderers.get(state.getBlock());
+		if (renderer == null)
+			return CallbackResult.noReturn();
+
+		//convert pos to immutable one
+		return CallbackResult.of(true, renderer.renderBlock(buffer, world, new BlockPos(pos), state));
 	}
 
 	/**
-	 * Registers a {@link IItemRenderer} for the {@link Item}.
+	 * Gets the {@link BlockRendererOverride} for the {@link IBlockState} at the {@link BlockPos}.
+	 *
+	 * @param world the world
+	 * @param pos the pos
+	 * @param state the state
+	 * @return the block renderer override
+	 */
+	private IBlockRenderer getBlockRendererOverride(IBlockAccess world, BlockPos pos, IBlockState state)
+	{
+		for (BlockRendererOverride overrides : blockRendererOverrides)
+		{
+			IBlockRenderer renderer = overrides.get(world, pos, state);
+			if (renderer != null)
+				return renderer;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Renders the {@link ItemStack} with a registered {@link IItemRenderer}.
+	 *
+	 * @param itemStack the item stack
+	 * @return true, if successful
+	 */
+	boolean renderItem(ItemStack itemStack)
+	{
+		if (itemStack == null)
+			return false;
+
+		IItemRenderer renderer = getItemRendererOverride(itemStack);
+		if (renderer == null)
+			renderer = itemRenderers.get(itemStack.getItem());
+		if (renderer == null)
+			return false;
+
+		renderer.renderItem(itemStack, MalisisRenderer.getPartialTick());
+		return true;
+	}
+
+	/**
+	 * Gets the {@link ItemRendererOverride} for the {@link ItemStack}.
+	 *
+	 * @param itemStack the item stack
+	 * @return the item renderer override
+	 */
+	private IItemRenderer getItemRendererOverride(ItemStack itemStack)
+	{
+		for (ItemRendererOverride overrides : itemRendererOverrides)
+		{
+			IItemRenderer renderer = overrides.get(itemStack);
+			if (renderer != null)
+				return renderer;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Gets the {@link TextureAtlasSprite} to used for the {@link IBlockState}.<br>
+	 * Called via ASM from {@link BlockModelShapes#getTexture(IBlockState)}
+	 *
+	 * @param state the state
+	 * @return the particle icon
+	 */
+	static TextureAtlasSprite getParticleIcon(IBlockState state)
+	{
+		Icon icon = null;
+		IIconProvider provider = IComponent.getComponent(IIconProvider.class, state.getBlock());
+		if (provider instanceof IBlockIconProvider)
+			icon = ((IBlockIconProvider) provider).getParticleIcon(state);
+		else if (provider != null)
+			icon = provider.getIcon();
+
+		return icon != null ? icon : Icon.missing;
+	}
+
+	/**
+	 * Gets the {@link IItemRenderer} registered for the {@link Item}.
 	 *
 	 * @param item the item
-	 * @param renderer the renderer
+	 * @return the item renderer
 	 */
-	public void registerItemRenderer(Item item, IItemRenderer renderer)
+	public static IItemRenderer getItemRenderer(Item item)
 	{
-		itemRenderers.put(checkNotNull(item), checkNotNull(renderer));
-	}
-
-	/**
-	 * Gets the {@link IBlockRenderer} registered for the {@link Block}.
-	 *
-	 * @param block the block
-	 * @return the block renderer
-	 */
-	public IBlockRenderer getBlockRenderer(Block block)
-	{
-		return blockRenderers.get(block);
-	}
-
-	/**
-	 * Registers the renderers for registered {@link Block Blocks} and {@link Item Items}.
-	 */
-	public void registerRenderers(FMLInitializationEvent event)
-	{
-		Block.REGISTRY.forEach(this::registerRenderer);
-		Item.REGISTRY.forEach(this::registerRenderer);
+		return clientRegistry.itemRenderers.get(item);
 	}
 
 	public interface BlockRendererOverride

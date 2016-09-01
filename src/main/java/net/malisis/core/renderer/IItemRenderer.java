@@ -28,7 +28,7 @@ import java.util.List;
 
 import javax.vecmath.Matrix4f;
 
-import net.malisis.core.registry.MalisisRegistry;
+import net.malisis.core.registry.ClientRegistry;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -80,7 +80,7 @@ public interface IItemRenderer
 		@Override
 		public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType transformType)
 		{
-			IItemRenderer itemRenderer = MalisisRegistry.getItemRenderer(item);
+			IItemRenderer itemRenderer = ClientRegistry.getItemRenderer(item);
 			if (itemRenderer == null)
 				return Pair.of(this, null);
 
@@ -91,7 +91,7 @@ public interface IItemRenderer
 		@Override
 		public boolean isGui3d()
 		{
-			IItemRenderer itemRenderer = MalisisRegistry.getItemRenderer(item);
+			IItemRenderer itemRenderer = ClientRegistry.getItemRenderer(item);
 			return itemRenderer != null && itemRenderer.isGui3d();
 		}
 

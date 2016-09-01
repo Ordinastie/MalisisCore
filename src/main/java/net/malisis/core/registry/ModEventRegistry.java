@@ -38,25 +38,55 @@ import net.minecraftforge.fml.common.event.FMLEvent;
 @SuppressWarnings("unchecked")
 public class ModEventRegistry extends CallbackRegistry<IFMLEventCallback<?>, FMLEventPredicate<?>, Void>
 {
-	public <T extends FMLEvent> void registerCallback(Class<T> clazz, IFMLEventCallback<T> consumer)
+	/**
+	 * Use {@link #registerCallback(Class, IFMLEventCallback)} instead.
+	 *
+	 * @param callback the callback
+	 */
+	@Override
+	@Deprecated
+	public void registerCallback(IFMLEventCallback<?> callback)
 	{
-		registerCallback(consumer, (FMLEventPredicate<T>) clazz::isInstance);
+		throw new IllegalAccessError("Do not use this method, use registerCallback(Class, IFMLEventCallback) instead.");
 	}
 
-	public CallbackResult<Void> processCallbacks(FMLEvent event)
+	/**
+	 * Use {@link #registerCallback(Class, IFMLEventCallback)} instead.
+	 *
+	 * @param callback the callback
+	 */
+	@Override
+	@Deprecated
+	public void registerCallback(IFMLEventCallback<?> callback, FMLEventPredicate<?> predicate)
 	{
-		return super.processCallbacks(event);
+		throw new IllegalAccessError("Do not use this method, use registerCallback(Class, IFMLEventCallback) instead.");
+	}
+
+	public <T extends FMLEvent> void registerCallback(Class<T> clazz, IFMLEventCallback<T> consumer)
+	{
+		super.registerCallback(consumer, (FMLEventPredicate<T>) clazz::isInstance);
+	}
+
+	/**
+	 * Process the {@link IFMLEventCallback} registered for the specified {@link FMLEvent}.
+	 *
+	 * @param event the event
+	 */
+	public void processCallbacks(FMLEvent event)
+	{
+		super.processCallbacks(event);
 	}
 
 	public static interface IFMLEventCallback<T extends FMLEvent> extends ICallback<Void>
 	{
 		@Override
-		public default void callback(Object... params)
+		public default Void call(Object... params)
 		{
-			callback((T) params[0]);
+			call((T) params[0]);
+			return null;
 		}
 
-		public void callback(T event);
+		public void call(T event);
 	}
 
 	public static interface FMLEventPredicate<T extends FMLEvent> extends ICallbackPredicate

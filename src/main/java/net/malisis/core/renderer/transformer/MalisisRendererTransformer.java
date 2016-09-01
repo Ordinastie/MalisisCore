@@ -27,6 +27,7 @@ package net.malisis.core.renderer.transformer;
 import static org.objectweb.asm.Opcodes.*;
 import net.malisis.core.asm.AsmHook;
 import net.malisis.core.asm.MalisisClassTransformer;
+import net.malisis.core.asm.mappings.McpFieldMapping;
 import net.malisis.core.asm.mappings.McpMethodMapping;
 
 import org.objectweb.asm.Type;
@@ -36,6 +37,7 @@ import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 /**
@@ -50,6 +52,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		register(blockHook());
 		register(itemHook());
 		register(particleHook());
+		register(tileEntityHook());
 	}
 
 	private AsmHook blockHook()
@@ -73,36 +76,50 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		match.add(getRenderType.getInsnNode(INVOKEINTERFACE));
 		match.add(new VarInsnNode(ASTORE, 5));
 
-		//if (MalisisRegistry.shouldRenderBlock(world, pos, state))
-		//	return MalisisRegistry.render(wr, world, pos, state);
-		//		ALOAD 6
-		//		ALOAD 7
+		//		CallbackResult<Boolean> cb = Registries.processRenderBlockCallbacks(worldRendererIn, blockAccess, pos, state);
+		//		if (cb.shouldReturn())
+		//			return cb.getValue();
+		//		ALOAD 4
+		//	    ALOAD 3
+		//	    ALOAD 2
+		//	    ALOAD 1
+		//		INVOKESTATIC net/malisis/core/registry/Registries.processRenderBlockCallbacks (Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult;
+		//		ASTORE 8
+		//		L2
+		//		LINENUMBER 69 L2
 		//		ALOAD 8
-		//		INVOKESTATIC net/malisis/core/registry/MalisisRegistry.shouldRenderBlock (Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z
-		//		IFEQ L20
-		//		ALOAD 6
-		//	    ALOAD 7
-		//	    ALOAD 8
-		//	    ALOAD 9
-		//	    INVOKESTATIC net/malisis/core/registry/MalisisRegistry.renderBlock (Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z
+		//		INVOKEVIRTUAL net/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult.shouldReturn ()Z
+		//		IFEQ L3
+		//		L4
+		//		LINENUMBER 70 L4
+		//		ALOAD 8
+		//		INVOKEVIRTUAL net/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult.getValue ()Ljava/lang/Object;
+		//		CHECKCAST java/lang/Boolean
+		//		INVOKEVIRTUAL java/lang/Boolean.booleanValue ()Z
+		//		IRETURN
+
 		LabelNode falseLabel = new LabelNode();
 		InsnList insert = new InsnList();
-		insert.add(new VarInsnNode(ALOAD, 3));
-		insert.add(new VarInsnNode(ALOAD, 2));
-		insert.add(new VarInsnNode(ALOAD, 1));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/registry/MalisisRegistry", "shouldRenderBlock",
-				"(Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z", false));
-		insert.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert.add(new VarInsnNode(ALOAD, 4));
 		insert.add(new VarInsnNode(ALOAD, 3));
 		insert.add(new VarInsnNode(ALOAD, 2));
 		insert.add(new VarInsnNode(ALOAD, 1));
 		insert.add(new MethodInsnNode(
 				INVOKESTATIC,
-				"net/malisis/core/registry/MalisisRegistry",
-				"renderBlock",
-				"(Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z",
+				"net/malisis/core/registry/Registries",
+				"processRenderBlockCallbacks",
+				"(Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult;",
 				false));
+		insert.add(new VarInsnNode(ASTORE, 8));
+		insert.add(new VarInsnNode(ALOAD, 8));
+		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult", "shouldReturn",
+				"()Z", false));
+		insert.add(new JumpInsnNode(IFEQ, falseLabel));
+		insert.add(new VarInsnNode(ALOAD, 8));
+		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult", "getValue",
+				"()Ljava/lang/Object;", false));
+		insert.add(new TypeInsnNode(CHECKCAST, "java/lang/Boolean"));
+		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false));
 		insert.add(new InsnNode(IRETURN));
 		insert.add(falseLabel);
 
@@ -116,11 +133,11 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 				"(Lnet/minecraft/client/renderer/block/model/IBakedModel;ILnet/minecraft/item/ItemStack;)V");
 		AsmHook ah = new AsmHook(renderModel);
 
-		//		if (MalisisRegistry.renderItem(itemStack))
+		//		if (Registries.renderItem(itemStack))
 		//			return;
 
 		//		ALOAD 3
-		//	    INVOKESTATIC net/malisis/core/registry/MalisisRegistry.renderItem (Lnet/minecraft/item/ItemStack;)Z
+		//	    INVOKESTATIC net/malisis/core/registry/Registries.renderItem (Lnet/minecraft/item/ItemStack;)Z
 		//	    IFEQ L6
 		//	   L7
 		//	    LINENUMBER 119 L7
@@ -131,7 +148,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		LabelNode falseLabel = new LabelNode();
 		InsnList insert = new InsnList();
 		insert.add(new VarInsnNode(ALOAD, 3));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/registry/MalisisRegistry", "renderItem",
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/registry/Registries", "renderItem",
 				"(Lnet/minecraft/item/ItemStack;)Z", false));
 		insert.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert.add(new InsnNode(RETURN));
@@ -155,7 +172,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		//	    INVOKESTATIC net/malisis/core/block/IComponent.getComponent (Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;
 		//	    IFNULL L6
 		//	    ALOAD 1
-		//	    INVOKESTATIC net/malisis/core/registry/MalisisRegistry.getParticleIcon (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
+		//	    INVOKESTATIC net/malisis/core/registry/Registries.getParticleIcon (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
 		//		ARETURN
 
 		McpMethodMapping getBlock = new McpMethodMapping("getBlock", "func_177230_c", "net/minecraft/block/state/IBlockState",
@@ -170,12 +187,63 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 				"(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;", false));
 		insert.add(new JumpInsnNode(IFNULL, falseLabel));
 		insert.add(new VarInsnNode(ALOAD, 1));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/registry/MalisisRegistry", "getParticleIcon",
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/registry/Registries", "getParticleIcon",
 				"(Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;", false));
 		insert.add(new InsnNode(ARETURN));
 		insert.add(falseLabel);
 
 		ah.insert(insert);
+
+		return ah;
+	}
+
+	@SuppressWarnings("deprecation")
+	public AsmHook tileEntityHook()
+	{
+		AsmHook ah = new AsmHook(new McpMethodMapping("renderEntities", "func_180446_a", "net/minecraft/client/renderer/RenderGlobal",
+				"(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ICamera;F)V"));
+
+		//List<TileEntity> list3 = renderglobal$containerlocalrenderinformation1.renderChunk.getCompiledChunk().getTileEntities();
+		//			ALOAD 23
+		//		    GETFIELD net/minecraft/client/renderer/RenderGlobal$ContainerLocalRenderInformation.renderChunk : Lnet/minecraft/client/renderer/chunk/RenderChunk;
+		//		    INVOKEVIRTUAL net/minecraft/client/renderer/chunk/RenderChunk.getCompiledChunk ()Lnet/minecraft/client/renderer/chunk/CompiledChunk;
+		//		    INVOKEVIRTUAL net/minecraft/client/renderer/chunk/CompiledChunk.getTileEntities ()Ljava/util/List;
+		//		    ASTORE 24
+		McpFieldMapping renderChunk = new McpFieldMapping("renderChunk", "field_178036_a",
+				"net/minecraft/client/renderer/RenderGlobal$ContainerLocalRenderInformation",
+				"Lnet/minecraft/client/renderer/chunk/RenderChunk;");
+		McpMethodMapping getCompiledChunk = new McpMethodMapping("getCompiledChunk", "func_178571_g",
+				"net/minecraft/client/renderer/chunk/RenderChunk", "()Lnet/minecraft/client/renderer/chunk/CompiledChunk;");
+		McpMethodMapping getTileEntities = new McpMethodMapping("getTileEntities", "func_178485_b",
+				"net/minecraft/client/renderer/chunk/CompiledChunk", "()Ljava/util/List;");
+		InsnList match = new InsnList();
+		match.add(new VarInsnNode(ALOAD, 23));
+		match.add(renderChunk.getInsnNode(GETFIELD));
+		match.add(getCompiledChunk.getInsnNode(INVOKEVIRTUAL));
+		match.add(getTileEntities.getInsnNode(INVOKEVIRTUAL));
+		match.add(new VarInsnNode(ASTORE, 24));
+
+		//list3 = TileEntityUtils.renderSortedTileEntities(renderglobal$containerlocalrenderinformation.renderChunk, list3, camera, partialTicks);
+		//		    ALOAD 23
+		//			GETFIELD net/minecraft/client/renderer/RenderGlobal$ContainerLocalRenderInformation.renderChunk : Lnet/minecraft/client/renderer/chunk/RenderChunk;
+		//			ALOAD 24
+		//		    ALOAD 1
+		//		    FLOAD 3
+		//		    INVOKESTATIC net/malisis/core/util/TileEntityUtils.renderSortedTileEntities (Lnet/minecraft/client/renderer/chunk/RenderChunk;Ljava/util/List;Lnet/minecraft/client/renderer/culling/ICamera;F)Ljava/util/List;
+		//		    ASTORE 2
+
+		InsnList insert = new InsnList();
+		insert.add(new VarInsnNode(ALOAD, 23));
+		insert.add(renderChunk.getInsnNode(GETFIELD));
+		insert.add(new VarInsnNode(ALOAD, 24));
+		insert.add(new VarInsnNode(ALOAD, 2));
+		insert.add(new VarInsnNode(FLOAD, 3));
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/TileEntityUtils", "renderSortedTileEntities",
+				"(Lnet/minecraft/client/renderer/chunk/RenderChunk;Ljava/util/List;Lnet/minecraft/client/renderer/culling/ICamera;F)Ljava/util/List;"));
+		insert.add(new VarInsnNode(ASTORE, 24));
+
+		ah.jumpAfter(match).insert(insert);
+		register(ah);
 
 		return ah;
 	}

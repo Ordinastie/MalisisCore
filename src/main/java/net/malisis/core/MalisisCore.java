@@ -34,7 +34,7 @@ import net.malisis.core.configuration.ConfigurationGui;
 import net.malisis.core.configuration.Settings;
 import net.malisis.core.network.MalisisNetwork;
 import net.malisis.core.registry.AutoLoad;
-import net.malisis.core.registry.MalisisRegistry;
+import net.malisis.core.registry.Registries;
 import net.malisis.core.util.remapping.RemappingTool;
 import net.malisis.core.util.syncer.Syncer;
 import net.minecraft.client.Minecraft;
@@ -211,7 +211,7 @@ public class MalisisCore implements IMalisisMod
 		MalisisNetwork.createMessages(event.getAsmData());
 		Syncer.get().discover(event.getAsmData());
 
-		MalisisRegistry.processCallbacks(event);
+		Registries.processFMLStateEvent(event);
 	}
 
 	/**
@@ -227,19 +227,19 @@ public class MalisisCore implements IMalisisMod
 			ClientCommandHandler.instance.registerCommand(new MalisisCommand());
 		}
 
-		MalisisRegistry.processCallbacks(event);
+		Registries.processFMLStateEvent(event);
 	}
 
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event)
 	{
-		MalisisRegistry.processCallbacks(event);
+		Registries.processFMLStateEvent(event);
 	}
 
 	@EventHandler
 	public void postInit(FMLLoadCompleteEvent event)
 	{
-		MalisisRegistry.processCallbacks(event);
+		Registries.processFMLStateEvent(event);
 	}
 
 	@EventHandler

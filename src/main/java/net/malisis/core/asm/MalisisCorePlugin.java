@@ -43,8 +43,7 @@ public class MalisisCorePlugin implements IFMLLoadingPlugin
 		return new String[] { /*MalisisCoreTransformer.class.getName(),*/
 		"net.malisis.core.util.chunkcollision.ChunkCollisionTransformer", "net.malisis.core.util.chunkblock.ChunkBlockTransformer",
 				"net.malisis.core.renderer.transformer.MalisisRendererTransformer",
-				"net.malisis.core.renderer.icon.asm.TextureMapTransformer", "net.malisis.core.util.clientnotif.ClientNotifTransformer",
-				"net.malisis.core.util.TileEntityUtils$SortingTileEntitiesTransformer" };
+				"net.malisis.core.renderer.icon.asm.TextureMapTransformer", "net.malisis.core.util.clientnotif.ClientNotifTransformer" };
 	}
 
 	@Override
