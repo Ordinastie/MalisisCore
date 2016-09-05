@@ -26,7 +26,6 @@ package net.malisis.core;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 
 import net.malisis.core.client.gui.MalisisGui;
@@ -52,6 +51,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
+import net.minecraftforge.fml.common.discovery.asm.ModAnnotation;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
@@ -64,6 +64,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Ordering;
 
 /**
@@ -172,26 +173,54 @@ public class MalisisCore implements IMalisisMod
 		return FMLCommonHandler.instance().getSide().isClient();
 	}
 
+	/**
+	 * Automatically loads (and eventually instanciate) classes with the {@link AutoLoad} annotation.
+	 *
+	 * @param asmDataTable the asm data table
+	 */
 	private void autoLoadClasses(ASMDataTable asmDataTable)
 	{
-		List<ASMData> classes = Ordering.natural()
-										.onResultOf(ASMData::getClassName)
-										.sortedCopy(asmDataTable.getAll(AutoLoad.class.getName()));
+		Set<ASMData> classes = ImmutableSortedSet.copyOf(Ordering.natural().onResultOf(ASMData::getClassName),
+				asmDataTable.getAll(AutoLoad.class.getName()));
+
+		Set<ASMData> clientClasses = asmDataTable.getAll(SideOnly.class.getName());
 
 		for (ASMData data : classes)
 		{
 			try
 			{
-				Class<?> clazz = Class.forName(data.getClassName());
-				AutoLoad anno = clazz.getAnnotation(AutoLoad.class);
-				if (anno.value())
-					clazz.newInstance();
+				//don't load client classes on server.
+				if (isClient() || !isClientClass(data.getClassName(), clientClasses))
+				{
+					Class<?> clazz = Class.forName(data.getClassName());
+					AutoLoad anno = clazz.getAnnotation(AutoLoad.class);
+					if (anno.value())
+						clazz.newInstance();
+				}
 			}
 			catch (Exception e)
 			{
 				MalisisCore.log.error("Could not autoload {}.", data.getClassName(), e);
 			}
 		}
+	}
+
+	/**
+	 * Checks if is the specified class has a @SideOnly(Side.CLIENT) annotation.
+	 *
+	 * @param className the class name
+	 * @param clientClasses the client classes
+	 * @return true, if is client class
+	 */
+	private boolean isClientClass(String className, Set<ASMData> clientClasses)
+	{
+		for (ASMData data : clientClasses)
+		{
+			if (data.getClassName().equals(className) && data.getObjectName().equals(data.getClassName())
+					&& ((ModAnnotation.EnumHolder) data.getAnnotationInfo().get("value")).getValue().equals("CLIENT"))
+				return true;
+		}
+		return false;
 	}
 
 	/**
