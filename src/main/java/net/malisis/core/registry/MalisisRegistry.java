@@ -32,12 +32,13 @@ import net.malisis.core.registry.ClientRegistry.BlockRendererOverride;
 import net.malisis.core.registry.ClientRegistry.ItemRendererOverride;
 import net.malisis.core.registry.ModEventRegistry.IFMLEventCallback;
 import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallback;
-import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallbackPredicate;
+import net.malisis.core.registry.SetBlockCallbackRegistry.ISetBlockCallback;
 import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
 import net.malisis.core.renderer.IItemRenderer.DummyModel;
 import net.malisis.core.renderer.IRenderWorldLast;
 import net.malisis.core.util.Utils;
+import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.malisis.core.util.clientnotif.ClientNotificationManager;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -151,26 +152,39 @@ public class MalisisRegistry
 	}
 
 	/**
-	 * Registers a {@link IRenderBlockCallback} to be called when rendering blocks.
+	 * Registers a {@link IRenderBlockCallback} with the specified {@link CallbackOption} to be called when rendering blocks.
 	 *
 	 * @param callback the callback
+	 * @param option the option
 	 */
 	@SideOnly(Side.CLIENT)
-	public static void onRenderBlock(IRenderBlockCallback callback)
+	public static void onRenderBlock(IRenderBlockCallback callback, CallbackOption option)
 	{
-		renderBlockRegistry.registerCallback(callback);
+		renderBlockRegistry.registerCallback(callback, option);
 	}
 
 	/**
-	 * Registers a {@link IRenderBlockCallback} with the specified {@link IRenderBlockCallbackPredicate} to be called when rendering blocks.
+	 * Registers a {@link ISetBlockCallback} with the specified {@link CallbackOption} to be called after a {@link Block} is placed in the
+	 * world.
 	 *
 	 * @param callback the callback
-	 * @param predicate the predicate
+	 * @param option the option
 	 */
-	@SideOnly(Side.CLIENT)
-	public static void onRenderBlock(IRenderBlockCallback callback, IRenderBlockCallbackPredicate predicate)
+	public static void onPreSetBlock(ISetBlockCallback callback, CallbackOption option)
 	{
-		renderBlockRegistry.registerCallback(callback, predicate);
+		preSetBlockRegistry.registerCallback(callback, option);
+	}
+
+	/**
+	 * Registers a {@link ISetBlockCallback} with the specified {@link CallbackOption} to be called before a {@link Block} is placed in the
+	 * world.
+	 *
+	 * @param callback the callback
+	 * @param option the option
+	 */
+	public static void onPostSetBlock(ISetBlockCallback callback, CallbackOption option)
+	{
+		postSetBlockRegistry.registerCallback(callback, option);
 	}
 
 	/**

@@ -24,6 +24,8 @@
 
 package net.malisis.core.util.callback;
 
+import static com.google.common.base.Preconditions.*;
+
 /**
  * {@link ICallback ICallbacks} is a flexible interface to be used for {@link CallbackRegistry CallbackRegistries}.<br>
  * Users are encouraged to extend the {@code ICallback} with default implementation for {@link #call(Object...)} that should redirect to a
@@ -33,7 +35,7 @@ package net.malisis.core.util.callback;
  * @author Ordinastie
  *
  */
-public interface ICallback<T> extends Comparable<ICallback<T>>
+public interface ICallback<T>
 {
 	public static enum Priority
 	{
@@ -45,16 +47,6 @@ public interface ICallback<T> extends Comparable<ICallback<T>>
 	}
 
 	/**
-	 * Gets the priority for this {@link ICallback}
-	 *
-	 * @return the priority
-	 */
-	public default Priority getPriority()
-	{
-		return Priority.NORMAL;
-	}
-
-	/**
 	 * Process this {@link ICallback}
 	 *
 	 * @param params the params
@@ -63,23 +55,15 @@ public interface ICallback<T> extends Comparable<ICallback<T>>
 	public T call(Object... params);
 
 	/**
-	 * Sets the {@link ICallback} ordering based on its priority.
-	 *
-	 * @param callback the callback
-	 * @return the int
-	 */
-	@Override
-	public default int compareTo(ICallback<T> callback)
-	{
-		return callback.getPriority().ordinal() - getPriority().ordinal();
-	}
-
-	/**
 	 * {@link ICallbackPredicate} are used for registering {@link ICallback} in {@link CallbackRegistry} to determine in which circumstances
 	 * the {@code ICallback} should be called.
 	 */
 	public static interface ICallbackPredicate
 	{
+		/** Always true predicate. */
+		static ICallbackPredicate ALWAYS_TRUE = params -> true;
+		/** Always false predicate. */
+		static ICallbackPredicate ALWAYS_FALSE = params -> false;
 
 		/**
 		 * Returns whether the associated {@link ICallback} should be called or not.
@@ -88,5 +72,143 @@ public interface ICallback<T> extends Comparable<ICallback<T>>
 		 * @return true, if successful
 		 */
 		public boolean apply(Object... params);
+
+		/**
+		 * Returns a predicates that is the logical AND composition of this {@link ICallbackPredicate} and the passed one.
+		 *
+		 * @param predicate the predicate
+		 * @return the i callback predicate
+		 */
+		public default ICallbackPredicate and(ICallbackPredicate predicate)
+		{
+			checkNotNull(predicate);
+			return (params) -> apply(params) && predicate.apply(params);
+		}
+
+		/**
+		 * Returns a new {@link ICallback} that is the negation of the one passed.
+		 *
+		 * @return the i callback predicate
+		 */
+		public default ICallbackPredicate negate()
+		{
+			return (params) -> !apply(params);
+		}
+
+		/**
+		 * Returns a predicates that is the logical OR composition of this {@link ICallbackPredicate} and the passed one.
+		 *
+		 * @param predicate the predicate
+		 * @return the i callback predicate
+		 */
+		public default ICallbackPredicate or(ICallbackPredicate predicate)
+		{
+			checkNotNull(predicate);
+			return (params) -> apply(params) || predicate.apply(params);
+		}
+
+		/**
+		 * Return a predicate that always returns true.
+		 *
+		 * @return the i callback predicate
+		 */
+		public static ICallbackPredicate alwaysTrue()
+		{
+			return ALWAYS_TRUE;
+		}
+
+		/**
+		 * Returns a predicate that always returns false.
+		 *
+		 * @return the i callback predicate
+		 */
+		public static ICallbackPredicate alwaysFalse()
+		{
+			return ALWAYS_FALSE;
+		}
+	}
+
+	/**
+	 * The {@link CallbackOption} holds the {@link ICallbackPredicate} and {@link Priority} necessary for the associated {@link ICallback}
+	 * to be executed.
+	 */
+	public static class CallbackOption
+	{
+		private static final CallbackOption NONE = new CallbackOption(ICallbackPredicate.alwaysTrue(), Priority.NORMAL);
+		private ICallbackPredicate predicate = (params) -> true;
+		private Priority priority;
+
+		private CallbackOption(ICallbackPredicate predicate, Priority priority)
+		{
+			this.predicate = predicate;
+			this.priority = priority;
+		}
+
+		/**
+		 * Gets the {@link Priority} of this {@link CallbackOption}
+		 *
+		 * @return the priority
+		 */
+		public Priority getPriority()
+		{
+			return priority;
+		}
+
+		/**
+		 * Returns the result of the {@link ICallbackPredicate} held by this {@link CallbackOption}.
+		 *
+		 * @param params the params
+		 * @return true, if successful
+		 */
+		public boolean apply(Object... params)
+		{
+			return predicate.apply(params);
+		}
+
+		/**
+		 * Constructs an empty {@link CallbackOption}, with predicate {@link ICallbackPredicate#alwaysTrue()} and {@link Priority#NORMAL}
+		 * priority.
+		 *
+		 * @param predicate the predicate
+		 * @return the callback option
+		 */
+		public static CallbackOption of()
+		{
+			return NONE;
+		}
+
+		/**
+		 * Constructs an empty {@link CallbackOption}, with {@link Priority#NORMAL} priority and the specified {@link ICallbackPredicate}.
+		 *
+		 * @param predicate the predicate
+		 * @return the callback option
+		 */
+		public static CallbackOption of(ICallbackPredicate predicate)
+		{
+			return new CallbackOption(checkNotNull(predicate), Priority.NORMAL);
+		}
+
+		/**
+		 * Constructs a {@link CallbackOption} with predicate {@link ICallbackPredicate#alwaysTrue()} and the specified {@link Priority}
+		 *
+		 * @param priority the priority
+		 * @return the callback option
+		 */
+		public static CallbackOption of(Priority priority)
+		{
+			return new CallbackOption(ICallbackPredicate.alwaysTrue(), priority);
+		}
+
+		/**
+		 * Constructs an empty {@link CallbackOption}, with specified {@link ICallbackPredicate} and {@link Priority}
+		 *
+		 * @param predicate the predicate
+		 * @param priority the priority
+		 * @return the callback option
+		 */
+		public static CallbackOption of(ICallbackPredicate predicate, Priority priority)
+		{
+			return new CallbackOption(checkNotNull(predicate), priority);
+		}
 	}
 }

@@ -44,6 +44,7 @@ import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.malisis.core.util.Utils;
 import net.malisis.core.util.callback.ASMCallbackRegistry.CallbackResult;
+import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BlockModelShapes;
@@ -98,7 +99,7 @@ public class ClientRegistry
 			Block.REGISTRY.forEach(this::registerRenderer);
 			Item.REGISTRY.forEach(this::registerRenderer);
 		});
-		MalisisRegistry.onRenderBlock(this::renderBlock);
+		MalisisRegistry.onRenderBlock(this::renderBlock, CallbackOption.of());
 	}
 
 	/**

@@ -26,7 +26,9 @@ package net.malisis.core.util.callback;
 
 import java.util.List;
 
+import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
+import net.malisis.core.util.callback.ICallback.Priority;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -46,18 +48,7 @@ import com.google.common.collect.Ordering;
 public class CallbackRegistry<C extends ICallback<V>, P extends ICallbackPredicate, V>
 {
 	/** List of registered {@link ICallback}. */
-	protected List<Pair<C, P>> callbacks = Lists.newArrayList();
-
-	/**
-	 * Registers a {@link ICallback}.
-	 *
-	 * @param callback the callback
-	 */
-	@SuppressWarnings("unchecked")
-	public void registerCallback(C callback)
-	{
-		registerCallback(callback, (P) (ICallbackPredicate) params -> true);
-	}
+	protected List<Pair<C, CallbackOption>> callbacks = Lists.newArrayList();
 
 	/**
 	 * Registers a {@link ICallback} to be call when the {@link ICallbackPredicate} returns true.
@@ -65,10 +56,15 @@ public class CallbackRegistry<C extends ICallback<V>, P extends ICallbackPredica
 	 * @param callback the callback
 	 * @param predicate the predicate
 	 */
-	public void registerCallback(C callback, P predicate)
+	public void registerCallback(C callback, CallbackOption option)
 	{
-		callbacks.add(Pair.of(callback, predicate));
-		callbacks = Ordering.natural().onResultOf(Pair<C, P>::getLeft).sortedCopy(callbacks);
+		callbacks.add(Pair.of(callback, option));
+		callbacks = Ordering.natural()
+							.reverse()
+							.onResultOf(Priority::ordinal)
+							.onResultOf(CallbackOption::getPriority)
+							.onResultOf(Pair<C, CallbackOption>::getRight)
+							.sortedCopy(callbacks);
 	}
 
 	/**
@@ -85,7 +81,7 @@ public class CallbackRegistry<C extends ICallback<V>, P extends ICallbackPredica
 			return null;
 
 		V result = null;
-		for (Pair<C, P> pair : callbacks)
+		for (Pair<C, CallbackOption> pair : callbacks)
 		{
 			V tempRes = null;
 			if (pair.getRight().apply(params))

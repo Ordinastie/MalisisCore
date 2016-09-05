@@ -28,6 +28,7 @@ import net.malisis.core.registry.ModEventRegistry.FMLEventPredicate;
 import net.malisis.core.registry.ModEventRegistry.IFMLEventCallback;
 import net.malisis.core.util.callback.CallbackRegistry;
 import net.malisis.core.util.callback.ICallback;
+import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
 import net.minecraftforge.fml.common.event.FMLEvent;
 
@@ -45,26 +46,22 @@ public class ModEventRegistry extends CallbackRegistry<IFMLEventCallback<?>, FML
 	 */
 	@Override
 	@Deprecated
-	public void registerCallback(IFMLEventCallback<?> callback)
+	public void registerCallback(IFMLEventCallback<?> callback, CallbackOption option)
 	{
 		throw new IllegalAccessError("Do not use this method, use registerCallback(Class, IFMLEventCallback) instead.");
 	}
 
 	/**
-	 * Use {@link #registerCallback(Class, IFMLEventCallback)} instead.
+	 * Registers a {@link IFMLEventCallback} that will be called when MalisisCore will reach the specified {@link FMLEvent}.<br>
+	 * Note that the callbacks are propcessed during MalisisCore events and not the child mods.
 	 *
-	 * @param callback the callback
+	 * @param <T> the generic type
+	 * @param clazz the clazz
+	 * @param consumer the consumer
 	 */
-	@Override
-	@Deprecated
-	public void registerCallback(IFMLEventCallback<?> callback, FMLEventPredicate<?> predicate)
-	{
-		throw new IllegalAccessError("Do not use this method, use registerCallback(Class, IFMLEventCallback) instead.");
-	}
-
 	public <T extends FMLEvent> void registerCallback(Class<T> clazz, IFMLEventCallback<T> consumer)
 	{
-		super.registerCallback(consumer, (FMLEventPredicate<T>) clazz::isInstance);
+		super.registerCallback(consumer, CallbackOption.of((FMLEventPredicate<T>) clazz::isInstance));
 	}
 
 	/**
@@ -77,6 +74,11 @@ public class ModEventRegistry extends CallbackRegistry<IFMLEventCallback<?>, FML
 		super.processCallbacks(event);
 	}
 
+	/**
+	 * Specialized {@link ICallback} for {@link FMLEvent FMLEvents}.
+	 *
+	 * @param <T> the generic type
+	 */
 	public static interface IFMLEventCallback<T extends FMLEvent> extends ICallback<Void>
 	{
 		@Override
@@ -89,6 +91,11 @@ public class ModEventRegistry extends CallbackRegistry<IFMLEventCallback<?>, FML
 		public void call(T event);
 	}
 
+	/**
+	 * Specialized {@link ICallbackPredicate} for {@link FMLEvent FMLEvents}
+	 *
+	 * @param <T> the generic type
+	 */
 	public static interface FMLEventPredicate<T extends FMLEvent> extends ICallbackPredicate
 	{
 		@Override
