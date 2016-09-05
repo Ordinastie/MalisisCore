@@ -28,6 +28,11 @@ import static org.objectweb.asm.Opcodes.*;
 import net.malisis.core.asm.AsmHook;
 import net.malisis.core.asm.MalisisClassTransformer;
 import net.malisis.core.asm.mappings.McpMethodMapping;
+import net.malisis.core.registry.Registries;
+import net.malisis.core.util.callback.ASMCallbackRegistry.CallbackResult;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.Chunk;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -49,7 +54,6 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 		register(updateCoordsHook());
 	}
 
-	@SuppressWarnings("deprecation")
 	private AsmHook updateCoordsHook()
 	{
 		McpMethodMapping setBlockState = new McpMethodMapping("setBlockState", "func_177436_a", "net.minecraft.world.chunk.Chunk",
@@ -89,29 +93,77 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 		match.add(new VarInsnNode(ALOAD, 2));
 		match.add(set.getInsnNode(INVOKEVIRTUAL));
 
-		//		if (!ChunkBlockHandler.get().updateCoordinates(this, pos, blockState1, blockState))
-		//			return false;
+		//		CallbackResult<Boolean> cb = Registries.processPreSetBlock(this, pos, iblockstate, state);
+		//		if (cb.shouldReturn())
+		//			return null;
+		//		ALOAD 0
+		//	    ALOAD 1
+		//	    ALOAD 8
+		//	    ALOAD 2
+		//		INVOKESTATIC net/malisis/core/registry/Registries.processRenderBlockCallbacks (Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult;
+		//		ASTORE 8
+		//		L2
+		//		LINENUMBER 69 L2
+		//		ALOAD 8
+		//		INVOKEVIRTUAL net/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult.shouldReturn ()Z
+		//		IFEQ L3
+		//		L4
+		//		LINENUMBER 70 L4
+		//		ACONST_NULL
+		//		ARETURN
 
 		LabelNode falseLabel = new LabelNode();
 		InsnList insert = new InsnList();
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkblock/ChunkBlockHandler", "get",
-				"()Lnet/malisis/core/util/chunkblock/ChunkBlockHandler;"));
 		insert.add(new VarInsnNode(ALOAD, 0));
 		insert.add(new VarInsnNode(ALOAD, 1));
 		insert.add(new VarInsnNode(ALOAD, 8));
 		insert.add(new VarInsnNode(ALOAD, 2));
 		insert.add(new MethodInsnNode(
-				INVOKEVIRTUAL,
-				"net/malisis/core/util/chunkblock/ChunkBlockHandler",
-				"updateCoordinates",
-				"(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)Z"));
-		insert.add(new JumpInsnNode(IFNE, falseLabel));
+				INVOKESTATIC,
+				"net/malisis/core/registry/Registries",
+				"processPreSetBlock",
+				"(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult;",
+				false));
+		//		insert.add(new VarInsnNode(ASTORE, 15));
+		//		insert.add(new VarInsnNode(ALOAD, 15));
+		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult", "shouldReturn",
+				"()Z", false));
+		insert.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert.add(new InsnNode(ACONST_NULL));
 		insert.add(new InsnNode(ARETURN));
 		insert.add(falseLabel);
 
-		ah.jumpTo(match).insert(insert);
+		//		if (!ChunkBlockHandler.get().updateCoordinates(this, pos, blockState1, blockState))
+		//			return null;
+
+		//		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkblock/ChunkBlockHandler", "get",
+		//				"()Lnet/malisis/core/util/chunkblock/ChunkBlockHandler;"));
+		//		insert.add(new VarInsnNode(ALOAD, 0));
+		//		insert.add(new VarInsnNode(ALOAD, 1));
+		//		insert.add(new VarInsnNode(ALOAD, 8));
+		//		insert.add(new VarInsnNode(ALOAD, 2));
+		//		insert.add(new MethodInsnNode(
+		//				INVOKEVIRTUAL,
+		//				"net/malisis/core/util/chunkblock/ChunkBlockHandler",
+		//				"updateCoordinates",
+		//				"(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)Z"));
+		//		insert.add(new JumpInsnNode(IFNE, falseLabel));
+		//		insert.add(new InsnNode(ACONST_NULL));
+		//		insert.add(new InsnNode(ARETURN));
+		//		insert.add(falseLabel);
+
+		ah.jumpTo(match).insert(insert).debug();
 
 		return ah;
+	}
+
+	private IBlockState test(BlockPos pos, IBlockState state)
+	{
+		IBlockState oldState = null;
+		Chunk chunk = null;
+		CallbackResult<Boolean> cb = Registries.processPreSetBlock(chunk, pos, oldState, state);
+		if (cb.shouldReturn())
+			return null;
+		return null;
 	}
 }

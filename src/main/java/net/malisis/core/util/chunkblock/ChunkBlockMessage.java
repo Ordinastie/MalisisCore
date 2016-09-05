@@ -25,14 +25,20 @@
 package net.malisis.core.util.chunkblock;
 
 import io.netty.buffer.ByteBuf;
+
+import java.util.List;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+
+import com.google.common.collect.Lists;
 
 /**
  * @author Ordinastie
@@ -52,7 +58,7 @@ public class ChunkBlockMessage implements IMalisisMessageHandler<ChunkBlockMessa
 		ChunkBlockHandler.get().setCoords(message.x, message.z, message.coords);
 	}
 
-	public static void sendCoords(Chunk chunk, long[] coords, EntityPlayerMP player)
+	public static void sendCoords(Chunk chunk, List<BlockPos> coords, EntityPlayerMP player)
 	{
 		MalisisCore.network.sendTo(new Packet(chunk, coords), player);
 	}
@@ -61,12 +67,12 @@ public class ChunkBlockMessage implements IMalisisMessageHandler<ChunkBlockMessa
 	{
 		private int x;
 		private int z;
-		private long[] coords;
+		private List<BlockPos> coords;
 
 		public Packet()
 		{}
 
-		public Packet(Chunk chunk, long[] coords)
+		public Packet(Chunk chunk, List<BlockPos> coords)
 		{
 			this.x = chunk.xPosition;
 			this.z = chunk.zPosition;
@@ -78,9 +84,10 @@ public class ChunkBlockMessage implements IMalisisMessageHandler<ChunkBlockMessa
 		{
 			x = buf.readInt();
 			z = buf.readInt();
-			coords = new long[buf.readInt()];
-			for (int i = 0; i < coords.length; i++)
-				coords[i] = buf.readLong();
+			coords = Lists.newArrayList();
+			int count = buf.readInt();
+			for (int i = 0; i < count; i++)
+				coords.add(BlockPos.fromLong(buf.readLong()));
 		}
 
 		@Override
@@ -88,9 +95,8 @@ public class ChunkBlockMessage implements IMalisisMessageHandler<ChunkBlockMessa
 		{
 			buf.writeInt(x);
 			buf.writeInt(z);
-			buf.writeInt(coords.length);
-			for (long c : coords)
-				buf.writeLong(c);
+			buf.writeInt(coords.size());
+			coords.forEach(p -> buf.writeLong(p.toLong()));
 		}
 	}
 }

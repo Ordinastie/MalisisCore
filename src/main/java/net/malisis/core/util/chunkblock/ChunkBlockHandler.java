@@ -25,21 +25,24 @@
 package net.malisis.core.util.chunkblock;
 
 import gnu.trove.procedure.TLongProcedure;
-import gnu.trove.set.hash.TLongHashSet;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.WeakHashMap;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.block.IComponent;
 import net.malisis.core.registry.AutoLoad;
+import net.malisis.core.registry.MalisisRegistry;
 import net.malisis.core.util.MBlockPos;
 import net.malisis.core.util.MBlockState;
-import net.malisis.core.util.chunklistener.ChunkListener;
-import net.malisis.core.util.chunklistener.IBlockListener;
+import net.malisis.core.util.callback.ASMCallbackRegistry.CallbackResult;
+import net.malisis.core.util.callback.ICallback.CallbackOption;
+import net.malisis.core.util.callback.ICallback.Priority;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
@@ -52,6 +55,11 @@ import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import org.apache.commons.lang3.ArrayUtils;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+
 /**
  * This class is the entry point for blocks that need to stored inside a chunk for later processing.<br>
  * The static methods are called via ASM which then call the process for the corresponding server or client instance.
@@ -60,18 +68,34 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  *
  */
 @AutoLoad
-public class ChunkBlockHandler implements IChunkBlockHandler
+public class ChunkBlockHandler
 {
 	private static ChunkBlockHandler instance = new ChunkBlockHandler();
 
-	private Map<Chunk, TLongHashSet> serverChunks = new WeakHashMap<>();
-	private Map<Chunk, TLongHashSet> clientChunks = new WeakHashMap<>();
-	private List<IChunkBlockHandler> handlers = new ArrayList<>();
+	private Map<Chunk, List<BlockPos>> serverChunks = new WeakHashMap<>();
+	private Map<Chunk, List<BlockPos>> clientChunks = new WeakHashMap<>();
 
 	public ChunkBlockHandler()
 	{
 		MinecraftForge.EVENT_BUS.register(this);
-		handlers.add(new ChunkListener());
+		MalisisRegistry.onPreSetBlock(this::handleChunkBlock, CallbackOption.of(Priority.LOWEST));
+	}
+
+	/**
+	 * Gets all the coordinates stored in the chunk.<br>
+	 * If no coordinates are stored for the chunk, saves the newList for it.
+	 *
+	 * @param chunk the chunk
+	 * @return the coords
+	 */
+	private Optional<List<BlockPos>> getCoords(Chunk chunk, List<BlockPos> newList)
+	{
+		Optional<List<BlockPos>> o = getCoords(chunk);
+		if (o.isPresent())
+			return o;
+
+		(chunk.getWorld().isRemote ? clientChunks : serverChunks).put(chunk, newList);
+		return Optional.of(newList);
 	}
 
 	/**
@@ -80,75 +104,36 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 * @param chunk the chunk
 	 * @return the coords
 	 */
-	private TLongHashSet getCoords(Chunk chunk)
+	public Optional<List<BlockPos>> getCoords(Chunk chunk)
 	{
-		Map<Chunk, TLongHashSet> chunks = chunk.getWorld().isRemote ? clientChunks : serverChunks;
-		TLongHashSet coords = chunks.get(chunk);
-		if (coords == null)
-		{
-			coords = new TLongHashSet();
-			chunks.put(chunk, coords);
-		}
-		return coords;
+		Map<Chunk, List<BlockPos>> chunks = chunk.getWorld().isRemote ? clientChunks : serverChunks;
+		return Optional.ofNullable(chunks.get(chunk));
 	}
 
 	/**
-	 * Calls a {@link ChunkProcedure} for the specified {@link Chunk}.
-	 *
-	 * @param chunk the chunk
-	 * @param procedure the procedure
-	 */
-	public void callProcedure(Chunk chunk, ChunkProcedure procedure)
-	{
-		procedure.set(chunk);
-		TLongHashSet coords = getCoords(chunk);
-		if (coords != null)
-			coords.forEach(procedure);
-	}
-
-	/**
-	 * Adds a {@link IChunkBlockHandler} to be managed by this {@link ChunkBlockHandler}.
-	 *
-	 * @param handler the handler
-	 */
-	public void addHandler(IChunkBlockHandler handler)
-	{
-		handlers.add(handler);
-	}
-
-	//#region updateCoordinates
-	/**
-	 * Updates chunk coordinates.<br>
-	 * Called via ASM from {@link Chunk#setBlockState(BlockPos, IBlockState)}.<br>
-	 * Notifies all {@link IBlockListener} for that chunk.<br>
+	 * Stores the coordinate in the chunk data if newState blocks has a {@link IChunkBlock} component.<br>
+	 * Removes the stored coordinate from the chunk data if oldState has {@link IChunkBlock} component.
 	 *
 	 * @param chunk the chunk
 	 * @param pos the pos
 	 * @param oldState the old state
 	 * @param newState the new state
-	 * @return true, if block can be placed, false if canceled
+	 * @return the callback result
 	 */
-	@Override
-	public boolean updateCoordinates(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
+	private CallbackResult<Boolean> handleChunkBlock(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
 	{
-		boolean canceled = false;
-		for (IChunkBlockHandler handler : handlers)
-			canceled |= handler.updateCoordinates(chunk, pos, oldState, newState);
-
-		//*this* handler needs to be canceled, so it's called last
-		if (!canceled)
-		{
-			if (oldState.getBlock() instanceof IChunkBlock)
-				removeCoord(chunk.getWorld(), pos, ((IChunkBlock) oldState.getBlock()).blockRange());
-			if (newState.getBlock() instanceof IChunkBlock)
-				addCoord(chunk.getWorld(), pos, ((IChunkBlock) newState.getBlock()).blockRange());
-		}
-
-		return !canceled;
+		IChunkBlock cb = IComponent.getComponent(IChunkBlock.class, oldState.getBlock());
+		if (cb != null)
+			removeCoord(chunk.getWorld(), pos, cb.blockRange());
+		//TODO: use post ?
+		cb = IComponent.getComponent(IChunkBlock.class, newState.getBlock());
+		if (cb != null)
+			addCoord(chunk.getWorld(), pos, cb.blockRange());
+		return CallbackResult.noReturn();
 	}
 
 	/**
-	 * Adds a coordinate for the {@link Chunk}s around {@link MBlockPos}.
+	 * Adds a coordinate for the {@link Chunk Chunks} around {@link BlockPos}.
 	 *
 	 * @param world the world
 	 * @param pos the pos
@@ -156,9 +141,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 */
 	private void addCoord(World world, BlockPos pos, int size)
 	{
-		List<Chunk> affectedChunks = getAffectedChunks(world, pos.getX(), pos.getZ(), size);
-		for (Chunk chunk : affectedChunks)
-			addCoord(chunk, pos);
+		getAffectedChunks(world, pos.getX(), pos.getZ(), size).forEach(c -> addCoord(c, pos));
 	}
 
 	/**
@@ -169,8 +152,8 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 */
 	private void addCoord(Chunk chunk, BlockPos pos)
 	{
-		//MalisisCore.message("Added " + pos + " to " + chunk.xPosition + ", " + chunk.zPosition);
-		getCoords(chunk).add(pos.toLong());
+		MalisisCore.message("Added " + pos + " to " + chunk.xPosition + ", " + chunk.zPosition);
+		getCoords(chunk, Lists.newArrayList()).ifPresent(l -> l.add(pos));
 	}
 
 	/**
@@ -182,9 +165,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 */
 	private void removeCoord(World world, BlockPos pos, int size)
 	{
-		List<Chunk> affectedChunks = getAffectedChunks(world, pos.getX(), pos.getZ(), size);
-		for (Chunk chunk : affectedChunks)
-			removeCoord(chunk, pos);
+		getAffectedChunks(world, pos.getX(), pos.getZ(), size).forEach(c -> removeCoord(c, pos));
 	}
 
 	/**
@@ -195,10 +176,8 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 */
 	private void removeCoord(Chunk chunk, BlockPos pos)
 	{
-		if (!getCoords(chunk).remove(pos.toLong()))
-			MalisisCore.log.error("Failed to remove : {} ({})", pos, pos.toLong());
-		//else
-		//	MalisisCore.message("Removed " + pos + " from " + chunk.xPosition + ", " + chunk.zPosition);
+		MalisisCore.message("Removed " + pos + " from " + chunk.xPosition + ", " + chunk.zPosition);
+		getCoords(chunk).ifPresent(l -> l.remove(pos));
 	}
 
 	//#end updateCoordinates
@@ -213,13 +192,8 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	@SubscribeEvent
 	public void onDataLoad(ChunkDataEvent.Load event)
 	{
-		NBTTagCompound nbt = event.getData();
-		if (!nbt.hasKey("chunkNotifier"))
-			return;
-
-		long[] coords = readLongArray(nbt);
-		Map<Chunk, TLongHashSet> chunks = event.getChunk().getWorld().isRemote ? clientChunks : serverChunks;
-		chunks.put(event.getChunk(), new TLongHashSet(coords));
+		if (event.getData().hasKey("chunkNotifier"))
+			getCoords(event.getChunk(), readLongArray(event.getData()));
 	}
 
 	/**
@@ -231,12 +205,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	@SubscribeEvent
 	public void onDataSave(ChunkDataEvent.Save event)
 	{
-		TLongHashSet coords = getCoords(event.getChunk());
-		if (coords == null || coords.size() == 0)
-			return;
-
-		NBTTagCompound nbt = event.getData();
-		writeLongArray(nbt, coords.toArray());
+		getCoords(event.getChunk()).ifPresent(l -> writeLongArray(event.getData(), l));
 	}
 
 	/**
@@ -247,13 +216,13 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 * @param compound the compound
 	 * @return the long[]
 	 */
-	private long[] readLongArray(NBTTagCompound compound)
+	private List<BlockPos> readLongArray(NBTTagCompound compound)
 	{
 		ByteBuf bytes = Unpooled.copiedBuffer(compound.getByteArray("chunkNotifier"));
-		long[] longs = new long[bytes.capacity() / 8];
-		for (int i = 0; i < longs.length; i++)
-			longs[i] = bytes.readLong();
-		return longs;
+		List<BlockPos> list = Lists.newArrayList();
+		for (int i = 0; i < bytes.capacity() / 8; i++)
+			list.add(BlockPos.fromLong(bytes.readLong()));
+		return list;
 	}
 
 	/**
@@ -264,11 +233,10 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 * @param compound the compound
 	 * @param longs the longs
 	 */
-	private void writeLongArray(NBTTagCompound compound, long[] longs)
+	private void writeLongArray(NBTTagCompound compound, List<BlockPos> list)
 	{
-		ByteBuf bytes = Unpooled.buffer(longs.length * 8);
-		for (long aLong : longs)
-			bytes.writeLong(aLong);
+		ByteBuf bytes = Unpooled.buffer(list.size() * 8);
+		list.forEach(p -> bytes.writeLong(p.toLong()));
 		compound.setByteArray("chunkNotifier", bytes.array());
 	}
 
@@ -282,11 +250,7 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	public void onChunkWatched(ChunkWatchEvent.Watch event)
 	{
 		Chunk chunk = event.getPlayer().worldObj.getChunkFromChunkCoords(event.getChunk().chunkXPos, event.getChunk().chunkZPos);
-		TLongHashSet coords = getCoords(chunk);
-		if (coords == null || coords.size() == 0)
-			return;
-
-		ChunkBlockMessage.sendCoords(chunk, coords.toArray(), event.getPlayer());
+		getCoords(chunk).ifPresent(l -> ChunkBlockMessage.sendCoords(chunk, l, event.getPlayer()));
 	}
 
 	/**
@@ -297,11 +261,10 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 * @param chunkZ the chunk z
 	 * @param coords the coords
 	 */
-	public void setCoords(int chunkX, int chunkZ, long[] coords)
+	public void setCoords(int chunkX, int chunkZ, List<BlockPos> coords)
 	{
 		Chunk chunk = Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(chunkX, chunkZ);
-		Map<Chunk, TLongHashSet> chunks = chunk.getWorld().isRemote ? clientChunks : serverChunks;
-		chunks.put(chunk, new TLongHashSet(coords));
+		getCoords(chunk, coords);
 	}
 
 	//#end Events
@@ -330,6 +293,9 @@ public class ChunkBlockHandler implements IChunkBlockHandler
 	 */
 	public static List<Chunk> getAffectedChunks(World world, AxisAlignedBB... aabbs)
 	{
+		if (ArrayUtils.isEmpty(aabbs))
+			return ImmutableList.of();
+
 		List<Chunk> chunks = new ArrayList<>();
 		for (AxisAlignedBB aabb : aabbs)
 		{

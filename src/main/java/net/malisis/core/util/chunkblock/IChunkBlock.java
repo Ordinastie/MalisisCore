@@ -24,6 +24,8 @@
 
 package net.malisis.core.util.chunkblock;
 
+import net.minecraft.util.math.BlockPos;
+
 /**
  * The IChunkBlock defines a block that will be store in chunks data directly.
  *
@@ -38,4 +40,16 @@ public interface IChunkBlock
 	 * @return the int
 	 */
 	public int blockRange();
+
+	/**
+	 * Checks if {@link BlockPos} {@code to} is within range of {@code from}.
+	 *
+	 * @param from the from
+	 * @param to the to
+	 * @return true, if is in range
+	 */
+	public default boolean isInRange(BlockPos from, BlockPos to)
+	{
+		return from.distanceSq(to) <= blockRange() * blockRange();
+	}
 }
