@@ -31,17 +31,20 @@ import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.IRegisterComponent;
 import net.malisis.core.registry.ModEventRegistry.IFMLEventCallback;
 import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallback;
+import net.malisis.core.registry.SetBlockCallbackRegistry.ISetBlockCallback;
 import net.malisis.core.renderer.IItemRenderer;
 import net.malisis.core.util.callback.ASMCallbackRegistry.CallbackResult;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BlockModelShapes;
+import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.event.FMLStateEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -55,11 +58,13 @@ public class Registries
 	@SideOnly(Side.CLIENT)
 	/** {@link ClientRegistry} instance. */
 	static ClientRegistry clientRegistry;
-
 	/** {@link ModEventRegistry} instance. */
 	static ModEventRegistry modEventRegistry = new ModEventRegistry();
-
+	/** The {@link RenderBlockRegistry} instance. */
 	static RenderBlockRegistry renderBlockRegistry = new RenderBlockRegistry();
+
+	static SetBlockCallbackRegistry preSetBlockRegistry = new SetBlockCallbackRegistry();
+	static SetBlockCallbackRegistry postSetBlockRegistry = new SetBlockCallbackRegistry();
 
 	static
 	{
@@ -89,7 +94,8 @@ public class Registries
 	}
 
 	/**
-	 * Processes {@link IRenderBlockCallback IRenderBlockCallbacks}.
+	 * Processes {@link IRenderBlockCallback IRenderBlockCallbacks}.<br>
+	 * Called by ASM from {@link BlockRendererDispatcher#renderBlock(IBlockState, BlockPos, IBlockAccess, VertexBuffer)}
 	 *
 	 * @param buffer the buffer
 	 * @param world the world
@@ -100,8 +106,38 @@ public class Registries
 	@SideOnly(Side.CLIENT)
 	public static CallbackResult<Boolean> processRenderBlockCallbacks(VertexBuffer buffer, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
-		//warning mutable blockpos received
+		//warning mutable BlockPos received
 		return renderBlockRegistry.processCallbacks(buffer, world, pos, state);
+	}
+
+	/**
+	 * Processes {@link ISetBlockCallback ISetBlockCallbacks}.<br>
+	 * Called by ASM from {@link Chunk#setBlockState(BlockPos, IBlockState)}.
+	 *
+	 * @param chunk the chunk
+	 * @param pos the pos
+	 * @param oldState the old state
+	 * @param newState the new state
+	 * @return the callback result
+	 */
+	public static CallbackResult<Boolean> processPreSetBlock(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
+	{
+		return preSetBlockRegistry.processCallbacks(chunk, pos, oldState, newState);
+	}
+
+	/**
+	 * Processes {@link ISetBlockCallback ISetBlockCallbacks}.<br>
+	 * Called by ASM from {@link Chunk#setBlockState(BlockPos, IBlockState)}.
+	 *
+	 * @param chunk the chunk
+	 * @param pos the pos
+	 * @param oldState the old state
+	 * @param newState the new state
+	 * @return the callback result
+	 */
+	public static CallbackResult<Boolean> processPostSetBlock(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
+	{
+		return postSetBlockRegistry.processCallbacks(chunk, pos, oldState, newState);
 	}
 
 	/**
