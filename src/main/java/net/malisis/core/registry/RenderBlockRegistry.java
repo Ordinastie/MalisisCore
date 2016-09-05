@@ -24,7 +24,11 @@
 
 package net.malisis.core.registry;
 
+import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallback;
+import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallbackPredicate;
 import net.malisis.core.util.callback.ASMCallbackRegistry;
+import net.malisis.core.util.callback.ASMCallbackRegistry.IASMCallback;
+import net.malisis.core.util.callback.ICallback;
 import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.VertexBuffer;
@@ -35,8 +39,12 @@ import net.minecraft.world.IBlockAccess;
  * @author Ordinastie
  *
  */
-public class RenderBlockRegistry extends ASMCallbackRegistry<Boolean>
+public class RenderBlockRegistry extends ASMCallbackRegistry<IRenderBlockCallback, IRenderBlockCallbackPredicate, Boolean>
 {
+
+	/**
+	 * Specialized {@link ICallback} called when a block is rendered.
+	 */
 	public interface IRenderBlockCallback extends IASMCallback<Boolean>
 	{
 		@Override
@@ -48,6 +56,9 @@ public class RenderBlockRegistry extends ASMCallbackRegistry<Boolean>
 		public CallbackResult<Boolean> callback(VertexBuffer buffer, IBlockAccess world, BlockPos pos, IBlockState state);
 	}
 
+	/**
+	 * Specialized {@link ICallbackPredicate} for {@link IRenderBlockCallback IRenderBlockCallbacks}
+	 */
 	public interface IRenderBlockCallbackPredicate extends ICallbackPredicate
 	{
 		@Override
