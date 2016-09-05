@@ -24,78 +24,105 @@
 
 package net.malisis.core.util.chunklistener;
 
-import net.malisis.core.util.MBlockState;
-import net.malisis.core.util.chunkblock.ChunkBlockHandler;
-import net.malisis.core.util.chunkblock.ChunkBlockHandler.ChunkProcedure;
-import net.malisis.core.util.chunkblock.IChunkBlockHandler;
+import net.malisis.core.block.IComponent;
+import net.malisis.core.registry.AutoLoad;
+import net.malisis.core.registry.MalisisRegistry;
+import net.malisis.core.util.callback.ICallback.CallbackOption;
+import net.malisis.core.util.chunkblock.ChunkCallbackRegistry;
+import net.malisis.core.util.chunkblock.ChunkCallbackRegistry.IChunkCallbackPredicate;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 
 /**
- * @author Ordinastie
+ * This {@link ChunkListener} class handles the {@link IBlockListener} components for blocks.
  *
+ * @author Ordinastie
  */
-public class ChunkListener implements IChunkBlockHandler
+@AutoLoad(true)
+public class ChunkListener
 {
-	@Override
-	public boolean updateCoordinates(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
+	private static ChunkCallbackRegistry preRegistry = new ChunkCallbackRegistry();
+	private static ChunkCallbackRegistry postRegistry = new ChunkCallbackRegistry();
+
+	public ChunkListener()
 	{
-		BlockNotifierProcedure procedure = new BlockNotifierProcedure(new MBlockState(pos, newState));
+		MalisisRegistry.onPreSetBlock(preRegistry::processCallbacks, CallbackOption.of());
+		MalisisRegistry.onPreSetBlock(postRegistry::processCallbacks, CallbackOption.of());
+		preRegistry.registerCallback(this::callPreListener, CallbackOption.of((IChunkCallbackPredicate) this::isValidPreListener));
+		postRegistry.registerCallback(this::callPostListener, CallbackOption.of((IChunkCallbackPredicate) this::isValidPostListener));
+	}
 
-		ChunkBlockHandler.get().callProcedure(chunk, procedure);
+	/**
+	 * Calls {@link IBlockListener.Pre#onBlockSet(net.minecraft.world.World, BlockPos, BlockPos, IBlockState, IBlockState)} for the listener
+	 * {@link BlockPos}.
+	 *
+	 * @param chunk the chunk
+	 * @param listener the listener
+	 * @param modified the modified
+	 * @param oldState the old state
+	 * @param newState the new state
+	 * @return true, if successful
+	 */
+	public boolean callPreListener(Chunk chunk, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState)
+	{
+		IBlockListener.Pre bl = IComponent.getComponent(IBlockListener.Pre.class, chunk.getWorld().getBlockState(listener).getBlock());
+		return bl.onBlockSet(chunk.getWorld(), listener, modified, oldState, newState);
+	}
 
-		if (procedure.isCanceled())
+	/**
+	 * Checks if the listener {@link BlockPos} has a {@link IBlockListener.Pre} component and if the modified {@code BlockPos} is in range.
+	 *
+	 * @param chunk the chunk
+	 * @param listener the listener
+	 * @param modified the modified
+	 * @param oldState the old state
+	 * @param newState the new state
+	 * @return true, if is valid pre listener
+	 */
+	public boolean isValidPreListener(Chunk chunk, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState)
+	{
+		IBlockListener.Pre bl = IComponent.getComponent(IBlockListener.Pre.class, chunk.getWorld().getBlockState(listener).getBlock());
+		if (bl != null && bl.isInRange(listener, modified))
 			return true;
+
 		return false;
 	}
 
-	private static class BlockNotifierProcedure extends ChunkProcedure
+	/**
+	 * Calls {@link IBlockListener.Pre#onBlockSet(net.minecraft.world.World, BlockPos, BlockPos, IBlockState, IBlockState)} for the listener
+	 * {@link BlockPos}.
+	 *
+	 * @param chunk the chunk
+	 * @param listener the listener
+	 * @param modified the modified
+	 * @param oldState the old state
+	 * @param newState the new state
+	 * @return true, if successful
+	 */
+	public boolean callPostListener(Chunk chunk, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState)
 	{
-		private boolean cancel = false;
-		private MBlockState newState;
+		IBlockListener.Post bl = IComponent.getComponent(IBlockListener.Post.class, chunk.getWorld().getBlockState(listener).getBlock());
+		bl.onBlockSet(chunk.getWorld(), listener, modified, oldState, newState);
+		return true;
+	}
 
-		public BlockNotifierProcedure(MBlockState newState)
-		{
-			this.newState = newState;
-		}
+	/**
+	 * Checks if the listener {@link BlockPos} has a {@link IBlockListener.Pre} component and if the modified {@code BlockPos} is in range.
+	 *
+	 * @param chunk the chunk
+	 * @param listener the listener
+	 * @param modified the modified
+	 * @param oldState the old state
+	 * @param newState the new state
+	 * @return true, if is valid post listener
+	 */
+	public boolean isValidPostListener(Chunk chunk, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState)
+	{
+		IBlockListener.Post bl = IComponent.getComponent(IBlockListener.Post.class, chunk.getWorld().getBlockState(listener).getBlock());
+		if (bl != null && bl.isInRange(listener, modified))
+			return true;
 
-		public boolean isCanceled()
-		{
-			return cancel;
-		}
-
-		@Override
-		public boolean execute(long coord)
-		{
-			if (!check(coord))
-				return true;
-
-			if (!(state.getBlock() instanceof IBlockListener))
-				return true;
-
-			IBlockListener block = (IBlockListener) state.getBlock();
-			if (state.getPos().distanceSq(newState.getPos()) > block.blockRange() * block.blockRange())
-				return true;
-
-			if (!state.getPos().equals(newState.getPos()))
-			{
-				if (newState.getBlock() == Blocks.AIR)
-					cancel |= !block.onBlockRemoved(world, state.getPos(), newState.getPos());
-				else
-					cancel |= !block.onBlockSet(world, state.getPos(), newState);
-			}
-
-			return !cancel;
-		}
-
-		@Override
-		protected void clean()
-		{
-			super.clean();
-			cancel = false;
-			newState = null;
-		}
+		return false;
 	}
 }

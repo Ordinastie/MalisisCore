@@ -24,8 +24,8 @@
 
 package net.malisis.core.util.chunklistener;
 
-import net.malisis.core.util.MBlockState;
 import net.malisis.core.util.chunkblock.IChunkBlock;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -35,28 +35,38 @@ import net.minecraft.world.World;
  * @author Ordinastie
  *
  */
-public interface IBlockListener extends IChunkBlock
+public final class IBlockListener
 {
+	private IBlockListener()
+	{}
 
-	/**
-	 * Called when a block is placed around this {@link IBlockListener} block.<br>
-	 * The return value defines whether the block placement should be canceled.
-	 *
-	 * @param world the world
-	 * @param pos the pos
-	 * @param blockSet the block set
-	 * @return true, if the block is allowed to be placed, false to cancel block placement
-	 */
-	public boolean onBlockSet(World world, BlockPos pos, MBlockState blockSet);
+	public static interface Pre extends IChunkBlock
+	{
+		/**
+		 * Called when a block is placed around this {@link IBlockListener} block.<br>
+		 * The return value defines whether the block placement should be canceled.
+		 *
+		 * @param world the world
+		 * @param listener the listener
+		 * @param modified the modified
+		 * @param oldState the old state
+		 * @param newState the new state
+		 * @return true, if the block is allowed to be placed, false to cancel block placement
+		 */
+		public boolean onBlockSet(World world, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState);
+	}
 
-	/**
-	 * Called when a block is removed around this {@link IBlockListener} block.<br>
-	 * The return value defines whether the block placement should be canceled.
-	 *
-	 * @param world the world
-	 * @param pos the pos
-	 * @param blockRemoved the block removed
-	 * @return true, if the block is allowed to be placed, false to cancel block placement
-	 */
-	public boolean onBlockRemoved(World world, BlockPos pos, BlockPos blockRemoved);
+	public static interface Post extends IChunkBlock
+	{
+		/**
+		 * Called after a block is placed around this {@link IBlockListener} block.
+		 *
+		 * @param world the world
+		 * @param listener the listener
+		 * @param modified the modified
+		 * @param oldState the old state
+		 * @param newState the new state
+		 */
+		public void onBlockSet(World world, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState);
+	}
 }
