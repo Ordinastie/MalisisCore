@@ -35,11 +35,9 @@ import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
  * @author Ordinastie
  * @param <V> the value type
  */
-public class ASMCallbackRegistry<V> extends CallbackRegistry<IASMCallback<V>, ICallbackPredicate, CallbackResult<V>>
+public class ASMCallbackRegistry<C extends IASMCallback<V>, P extends ICallbackPredicate, V> extends
+		CallbackRegistry<C, P, CallbackResult<V>>
 {
-	public ASMCallbackRegistry()
-	{}
-
 	public static interface IASMCallback<T> extends ICallback<CallbackResult<T>>
 	{
 	}
