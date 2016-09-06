@@ -28,11 +28,6 @@ import static org.objectweb.asm.Opcodes.*;
 import net.malisis.core.asm.AsmHook;
 import net.malisis.core.asm.MalisisClassTransformer;
 import net.malisis.core.asm.mappings.McpMethodMapping;
-import net.malisis.core.registry.Registries;
-import net.malisis.core.util.callback.ASMCallbackRegistry.CallbackResult;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -133,37 +128,22 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 		insert.add(new InsnNode(ARETURN));
 		insert.add(falseLabel);
 
-		//		if (!ChunkBlockHandler.get().updateCoordinates(this, pos, blockState1, blockState))
-		//			return null;
+		//  INVOKESTATIC net/malisis/core/registry/Registries.processPostSetBlock (Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)V
+		InsnList insert2 = new InsnList();
+		insert2.add(new VarInsnNode(ALOAD, 0));
+		insert2.add(new VarInsnNode(ALOAD, 1));
+		insert2.add(new VarInsnNode(ALOAD, 8));
+		insert2.add(new VarInsnNode(ALOAD, 2));
+		insert2.add(new MethodInsnNode(
+				INVOKESTATIC,
+				"net/malisis/core/registry/Registries",
+				"processPostSetBlock",
+				"(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)V",
+				false));
+		insert2.add(new InsnNode(POP));
 
-		//		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkblock/ChunkBlockHandler", "get",
-		//				"()Lnet/malisis/core/util/chunkblock/ChunkBlockHandler;"));
-		//		insert.add(new VarInsnNode(ALOAD, 0));
-		//		insert.add(new VarInsnNode(ALOAD, 1));
-		//		insert.add(new VarInsnNode(ALOAD, 8));
-		//		insert.add(new VarInsnNode(ALOAD, 2));
-		//		insert.add(new MethodInsnNode(
-		//				INVOKEVIRTUAL,
-		//				"net/malisis/core/util/chunkblock/ChunkBlockHandler",
-		//				"updateCoordinates",
-		//				"(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)Z"));
-		//		insert.add(new JumpInsnNode(IFNE, falseLabel));
-		//		insert.add(new InsnNode(ACONST_NULL));
-		//		insert.add(new InsnNode(ARETURN));
-		//		insert.add(falseLabel);
-
-		ah.jumpTo(match).insert(insert).debug();
+		ah.jumpTo(match).insert(insert).jumpAfter(match).insert(insert2);
 
 		return ah;
-	}
-
-	private IBlockState test(BlockPos pos, IBlockState state)
-	{
-		IBlockState oldState = null;
-		Chunk chunk = null;
-		CallbackResult<Boolean> cb = Registries.processPreSetBlock(chunk, pos, oldState, state);
-		if (cb.shouldReturn())
-			return null;
-		return null;
 	}
 }
