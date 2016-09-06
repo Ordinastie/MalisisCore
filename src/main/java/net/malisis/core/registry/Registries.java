@@ -135,9 +135,9 @@ public class Registries
 	 * @param newState the new state
 	 * @return the callback result
 	 */
-	public static CallbackResult<Boolean> processPostSetBlock(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
+	public static void processPostSetBlock(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
 	{
-		return postSetBlockRegistry.processCallbacks(chunk, pos, oldState, newState);
+		postSetBlockRegistry.processCallbacks(chunk, pos, oldState, newState);
 	}
 
 	/**
