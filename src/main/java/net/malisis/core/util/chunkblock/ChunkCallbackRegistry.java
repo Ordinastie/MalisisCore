@@ -34,7 +34,6 @@ import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
 import net.malisis.core.util.callback.ICallback.Priority;
 import net.malisis.core.util.chunkblock.ChunkCallbackRegistry.IChunkCallback;
 import net.malisis.core.util.chunkblock.ChunkCallbackRegistry.IChunkCallbackPredicate;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 
@@ -46,7 +45,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @author Ordinastie
  */
-public class ChunkCallbackRegistry extends CallbackRegistry<IChunkCallback, IChunkCallbackPredicate, Boolean>
+public class ChunkCallbackRegistry<C extends IChunkCallback, P extends IChunkCallbackPredicate> extends CallbackRegistry<C, P, Boolean>
 {
 	/**
 	 * Processes the {@link IChunkCallback IChunkCallbacks} registered.
@@ -57,15 +56,11 @@ public class ChunkCallbackRegistry extends CallbackRegistry<IChunkCallback, IChu
 	 * @param newState the new state
 	 * @return the callback result
 	 */
-	public CallbackResult<Boolean> processCallbacks(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
+	public CallbackResult<Boolean> processCallbacks(Chunk chunk, Object... params)
 	{
-		//no change, no callback
-		if (oldState == newState)
-			return CallbackResult.noReturn();
-
 		Optional<Boolean> ret = ChunkBlockHandler.get().getCoords(chunk).map(list -> {
 			for (BlockPos listener : list)
-				if (processCallbacksForPosition(chunk, listener, pos, oldState, newState)) //should we stop process positions if one cancels ?
+				if (processCallbacksForPosition(chunk, listener, params)) //should we stop process positions if one cancels ?
 					return true;
 			return false;
 		});
@@ -79,21 +74,21 @@ public class ChunkCallbackRegistry extends CallbackRegistry<IChunkCallback, IChu
 	 * @param params the params
 	 * @return true, if successful
 	 */
-	private boolean processCallbacksForPosition(Chunk chunk, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState)
+	private boolean processCallbacksForPosition(Chunk chunk, BlockPos listner, Object... params)
 	{
 		if (callbacks.size() == 0)
 			return false;
 
 		boolean cancel = false;
 		Priority currentPriority = Priority.HIGHEST;
-		for (Pair<IChunkCallback, CallbackOption> pair : callbacks)
+		for (Pair<C, CallbackOption<P>> pair : callbacks)
 		{
 			//don't process lower priority if cancelled
 			if (cancel && pair.getRight().getPriority() != currentPriority)
 				break;
 			currentPriority = pair.getRight().getPriority();
-			if (pair.getRight().apply(chunk, listener, modified, oldState, newState))
-				cancel |= pair.getLeft().call(chunk, listener, modified, oldState, newState);
+			if (pair.getRight().apply(chunk, listner, params))
+				cancel |= pair.getLeft().call(chunk, listner, params);
 		}
 
 		return cancel;
@@ -107,10 +102,12 @@ public class ChunkCallbackRegistry extends CallbackRegistry<IChunkCallback, IChu
 		@Override
 		public default Boolean call(Object... params)
 		{
-			return call((Chunk) params[0], (BlockPos) params[1], (BlockPos) params[2], (IBlockState) params[3], (IBlockState) params[4]);
+			//should never be called
+			throw new IllegalStateException();
+			//return call((Chunk) params[0], (BlockPos) params[1], (BlockPos) params[2], (IBlockState) params[3], (IBlockState) params[4]);
 		}
 
-		public boolean call(Chunk chunk, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState);
+		public boolean call(Chunk chunk, BlockPos listener, Object... params);
 	}
 
 	/**
@@ -121,9 +118,11 @@ public class ChunkCallbackRegistry extends CallbackRegistry<IChunkCallback, IChu
 		@Override
 		public default boolean apply(Object... params)
 		{
-			return apply((Chunk) params[0], (BlockPos) params[1], (BlockPos) params[2], (IBlockState) params[3], (IBlockState) params[4]);
+			//should never be called
+			throw new IllegalStateException();
+			//return apply((Chunk) params[0], (BlockPos) params[1], (BlockPos) params[2], (IBlockState) params[3], (IBlockState) params[4]);
 		}
 
-		public boolean apply(Chunk chunk, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState);
+		public boolean apply(Chunk chunk, BlockPos listener, Object... params);
 	}
 }

@@ -48,7 +48,7 @@ import com.google.common.collect.Ordering;
 public class CallbackRegistry<C extends ICallback<V>, P extends ICallbackPredicate, V>
 {
 	/** List of registered {@link ICallback}. */
-	protected List<Pair<C, CallbackOption>> callbacks = Lists.newArrayList();
+	protected List<Pair<C, CallbackOption<P>>> callbacks = Lists.newArrayList();
 
 	/**
 	 * Registers a {@link ICallback} to be call when the {@link ICallbackPredicate} returns true.
@@ -56,14 +56,14 @@ public class CallbackRegistry<C extends ICallback<V>, P extends ICallbackPredica
 	 * @param callback the callback
 	 * @param predicate the predicate
 	 */
-	public void registerCallback(C callback, CallbackOption option)
+	public void registerCallback(C callback, CallbackOption<P> option)
 	{
 		callbacks.add(Pair.of(callback, option));
 		callbacks = Ordering.natural()
 							.reverse()
 							.onResultOf(Priority::ordinal)
-							.onResultOf(CallbackOption::getPriority)
-							.onResultOf(Pair<C, CallbackOption>::getRight)
+							.onResultOf(CallbackOption<P>::getPriority)
+							.onResultOf(Pair<C, CallbackOption<P>>::getRight)
 							.sortedCopy(callbacks);
 	}
 
@@ -81,7 +81,7 @@ public class CallbackRegistry<C extends ICallback<V>, P extends ICallbackPredica
 			return null;
 
 		V result = null;
-		for (Pair<C, CallbackOption> pair : callbacks)
+		for (Pair<C, CallbackOption<P>> pair : callbacks)
 		{
 			V tempRes = null;
 			if (pair.getRight().apply(params))

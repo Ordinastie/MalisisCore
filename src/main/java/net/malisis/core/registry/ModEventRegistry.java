@@ -46,7 +46,7 @@ public class ModEventRegistry extends CallbackRegistry<IFMLEventCallback<?>, FML
 	 */
 	@Override
 	@Deprecated
-	public void registerCallback(IFMLEventCallback<?> callback, CallbackOption option)
+	public void registerCallback(IFMLEventCallback<?> callback, CallbackOption<FMLEventPredicate<?>> option)
 	{
 		throw new IllegalAccessError("Do not use this method, use registerCallback(Class, IFMLEventCallback) instead.");
 	}

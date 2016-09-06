@@ -132,13 +132,14 @@ public interface ICallback<T>
 	 * The {@link CallbackOption} holds the {@link ICallbackPredicate} and {@link Priority} necessary for the associated {@link ICallback}
 	 * to be executed.
 	 */
-	public static class CallbackOption
+	public static class CallbackOption<P extends ICallbackPredicate>
 	{
-		private static final CallbackOption NONE = new CallbackOption(ICallbackPredicate.alwaysTrue(), Priority.NORMAL);
-		private ICallbackPredicate predicate = (params) -> true;
+		private static final CallbackOption<ICallbackPredicate> DEFAULT = new CallbackOption<>(null, Priority.NORMAL);
+		@SuppressWarnings("unchecked")
+		private P predicate = (P) (ICallbackPredicate) (params) -> true;
 		private Priority priority;
 
-		private CallbackOption(ICallbackPredicate predicate, Priority priority)
+		private CallbackOption(P predicate, Priority priority)
 		{
 			this.predicate = predicate;
 			this.priority = priority;
@@ -162,7 +163,7 @@ public interface ICallback<T>
 		 */
 		public boolean apply(Object... params)
 		{
-			return predicate.apply(params);
+			return predicate != null ? predicate.apply(params) : true;
 		}
 
 		/**
@@ -172,9 +173,11 @@ public interface ICallback<T>
 		 * @param predicate the predicate
 		 * @return the callback option
 		 */
-		public static CallbackOption of()
+		@SuppressWarnings("unchecked")
+		public static <P extends ICallbackPredicate> CallbackOption<P> of()
 		{
-			return NONE;
+			//safe cast because DEFAULT.predicate will always be null.
+			return (CallbackOption<P>) DEFAULT;
 		}
 
 		/**
@@ -183,9 +186,9 @@ public interface ICallback<T>
 		 * @param predicate the predicate
 		 * @return the callback option
 		 */
-		public static CallbackOption of(ICallbackPredicate predicate)
+		public static <P extends ICallbackPredicate> CallbackOption<P> of(P predicate)
 		{
-			return new CallbackOption(checkNotNull(predicate), Priority.NORMAL);
+			return new CallbackOption<>(checkNotNull(predicate), Priority.NORMAL);
 		}
 
 		/**
@@ -194,9 +197,9 @@ public interface ICallback<T>
 		 * @param priority the priority
 		 * @return the callback option
 		 */
-		public static CallbackOption of(Priority priority)
+		public static <P extends ICallbackPredicate> CallbackOption<P> of(Priority priority)
 		{
-			return new CallbackOption(ICallbackPredicate.alwaysTrue(), priority);
+			return new CallbackOption<>(null, priority);
 		}
 
 		/**
@@ -206,9 +209,9 @@ public interface ICallback<T>
 		 * @param priority the priority
 		 * @return the callback option
 		 */
-		public static CallbackOption of(ICallbackPredicate predicate, Priority priority)
+		public static <P extends ICallbackPredicate> CallbackOption<P> of(P predicate, Priority priority)
 		{
-			return new CallbackOption(checkNotNull(predicate), priority);
+			return new CallbackOption<>(checkNotNull(predicate), priority);
 		}
 	}
 }
