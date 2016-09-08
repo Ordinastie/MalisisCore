@@ -26,14 +26,21 @@ package net.malisis.core.util.chunkcollision;
 
 import java.util.List;
 
+import net.malisis.core.block.IComponent;
 import net.malisis.core.block.component.DirectionalComponent;
+import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.ItemUtils;
 import net.malisis.core.util.MBlockState;
 import net.malisis.core.util.Point;
+import net.malisis.core.util.callback.CallbackResult;
+import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.malisis.core.util.chunkblock.ChunkBlockHandler;
-import net.malisis.core.util.chunkblock.ChunkBlockHandler.ChunkProcedure;
+import net.malisis.core.util.chunkblock.ChunkCallbackRegistry;
+import net.malisis.core.util.chunkblock.ChunkCallbackRegistry.IChunkCallback;
+import net.malisis.core.util.chunkblock.ChunkCallbackRegistry.IChunkCallbackPredicate;
+import net.malisis.core.util.raytrace.Raytrace;
 import net.malisis.core.util.raytrace.RaytraceBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -46,6 +53,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -59,12 +67,27 @@ import org.apache.commons.lang3.ArrayUtils;
  * @author Ordinastie
  *
  */
+@AutoLoad
 public class ChunkCollision
 {
 	private static ChunkCollision instance = new ChunkCollision();
 
-	private Point src;
-	private Point dest;
+	private ChunkCallbackRegistry<IChunkCallback<Void>, IChunkCallbackPredicate, Void> collisionRegistry = new ChunkCallbackRegistry<>();
+	private ChunkCallbackRegistry<IChunkCallback<RayTraceResult>, IChunkCallbackPredicate, RayTraceResult> rayTraceRegistry = new ChunkCallbackRegistry<>();
+	private ChunkCallbackRegistry<IChunkCallback<Boolean>, IChunkCallbackPredicate, Boolean> placeAtRegistry = new ChunkCallbackRegistry<>();
+
+	public ChunkCollision()
+	{
+		collisionRegistry.registerCallback(this::collisionBoxesCallback,
+				CallbackOption.of((IChunkCallbackPredicate) this::isChunkCollidable));
+		rayTraceRegistry.registerCallback(this::rayTraceCallback, CallbackOption.of((IChunkCallbackPredicate) this::isChunkCollidable));
+		placeAtRegistry.registerCallback(this::placeAtCallback, CallbackOption.of((IChunkCallbackPredicate) this::isChunkCollidable));
+	}
+
+	public boolean isChunkCollidable(Chunk chunk, BlockPos listener, Object... params)
+	{
+		return IComponent.getComponent(IChunkCollidable.class, chunk.getWorld().getBlockState(listener).getBlock()) != null;
+	}
 
 	//#region getCollisionBoundinBoxes
 	/**
@@ -78,15 +101,44 @@ public class ChunkCollision
 	 */
 	public void getCollisionBoxes(World world, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity entity)
 	{
-		CollisionProcedure procedure = new CollisionProcedure(mask, list);
+		//no mask, no need to check for collision
+		if (mask == null)
+			return;
 
 		for (Chunk chunk : ChunkBlockHandler.getAffectedChunks(world, mask))
-			ChunkBlockHandler.get().callProcedure(chunk, procedure);
+			collisionRegistry.processCallbacks(chunk, mask, list);
+	}
+
+	private CallbackResult<Void> collisionBoxesCallback(Chunk chunk, BlockPos listener, Object... params)
+	{
+
+		IBlockState state = chunk.getBlockState(listener);
+		IChunkCollidable cc = IComponent.getComponent(IChunkCollidable.class, state.getBlock());
+		AxisAlignedBB mask = (AxisAlignedBB) params[0];
+		@SuppressWarnings("unchecked")
+		List<AxisAlignedBB> list = (List<AxisAlignedBB>) params[1];
+
+		AxisAlignedBB[] aabbs = cc.getCollisionBoundingBoxes(chunk.getWorld(), listener, state);
+		for (AxisAlignedBB aabb : aabbs)
+		{
+			if (aabb != null)
+			{
+				aabb = AABBUtils.offset(listener, aabb);
+				if (mask.intersectsWith(aabb))
+					list.add(aabb);
+			}
+		}
+
+		return CallbackResult.noResult();
 	}
 
 	//#end getCollisionBoundinBoxes
 
 	//#region getRayTraceResult
+
+	private Point src;
+	private Point dest;
+
 	/**
 	 * Sets the ray trace infos.<br>
 	 * Called via ASM at the beginning of {@link World#rayTraceBlocks(Vec3d, Vec3d, boolean, boolean, boolean)}
@@ -118,46 +170,31 @@ public class ChunkCollision
 	 * Called via ASM from {@link World#rayTraceBlocks(Vec3d, Vec3d, boolean, boolean, boolean)} before each return.
 	 *
 	 * @param world the world
-	 * @param mop the mop
+	 * @param result the mop
 	 * @return the ray trace result
 	 */
-	public RayTraceResult getRayTraceResult(World world, RayTraceResult mop)
+	public RayTraceResult getRayTraceResult(World world, RayTraceResult result)
 	{
 		if (src == null || dest == null)
-			return mop;
+			return result;
 
+		//TODO: use chunks actually traversed by the  raytrace vector
 		AxisAlignedBB aabb = new AxisAlignedBB(src.x, src.y, src.z, dest.x, dest.y, dest.z);
-
-		RayTraceProcedure procedure = new RayTraceProcedure(src, dest, mop);
 		for (Chunk chunk : ChunkBlockHandler.getAffectedChunks(world, aabb))
-			ChunkBlockHandler.get().callProcedure(chunk, procedure);
+		{
+			CallbackResult<RayTraceResult> tmp = rayTraceRegistry.processCallbacks(chunk);
+			result = Raytrace.getClosestHit(Type.BLOCK, src, result, tmp.getValue());
+		}
 
-		return procedure.mop;
+		src = null;
+		dest = null;
+		return result;
 	}
 
-	/**
-	 * Gets the closest {@link RayTraceResult} to the source.
-	 *
-	 * @param src the src
-	 * @param mop1 the mop1
-	 * @param mop2 the mop2
-	 * @return the closest
-	 */
-	private RayTraceResult getClosest(Point src, RayTraceResult mop1, RayTraceResult mop2)
+	private CallbackResult<RayTraceResult> rayTraceCallback(Chunk chunk, BlockPos listener, Object... params)
 	{
-		if (mop1 == null)
-			return mop2;
-		if (mop2 == null)
-			return mop1;
-
-		if (mop1.typeOfHit == RayTraceResult.Type.MISS && mop2.typeOfHit != RayTraceResult.Type.MISS)
-			return mop2;
-		if (mop1.typeOfHit != RayTraceResult.Type.MISS && mop2.typeOfHit == RayTraceResult.Type.MISS)
-			return mop1;
-
-		if (Point.distanceSquared(src, new Point(mop1.hitVec)) > Point.distanceSquared(src, new Point(mop2.hitVec)))
-			return mop2;
-		return mop1;
+		RaytraceBlock rt = new RaytraceBlock(chunk.getWorld(), src, dest, listener);
+		return CallbackResult.of(rt.trace());
 	}
 
 	//#end getRayTraceResult
@@ -213,11 +250,21 @@ public class ChunkCollision
 			}
 		}
 
-		CheckCollisionProcedure procedure = new CheckCollisionProcedure(aabbs);
 		for (Chunk chunk : ChunkBlockHandler.getAffectedChunks(world, aabbs))
-			ChunkBlockHandler.get().callProcedure(chunk, procedure);
+		{
+			CallbackResult<Boolean> result = placeAtRegistry.processCallbacks(chunk, (Object[]) aabbs);
+			if (result.getValue() != null && !result.getValue())
+				return false;
+		}
+		return true;
+	}
 
-		return !procedure.collide;
+	private CallbackResult<Boolean> placeAtCallback(Chunk chunk, BlockPos listener, Object... params)
+	{
+		MBlockState state = new MBlockState(chunk.getWorld(), listener);
+		AxisAlignedBB[] blockBounds = AABBUtils.getCollisionBoundingBoxes(chunk.getWorld(), state, true);
+
+		return CallbackResult.of(!AABBUtils.isColliding((AxisAlignedBB[]) params, blockBounds));
 	}
 
 	//#end canPlaceBlockAt
@@ -271,129 +318,5 @@ public class ChunkCollision
 	public static ChunkCollision get()
 	{
 		return instance;
-	}
-
-	/**
-	 * The procedure used to check the collision for a {@link IChunkCollidable} coordinate.<br>
-	 */
-	private static class CollisionProcedure extends ChunkProcedure
-	{
-		private AxisAlignedBB mask;
-		private List<AxisAlignedBB> list;
-
-		public CollisionProcedure(AxisAlignedBB mask, List<AxisAlignedBB> list)
-		{
-			this.mask = mask;
-			this.list = list;
-		}
-
-		@Override
-		public boolean execute(long coord)
-		{
-			if (!check(coord))
-				return true;
-
-			if (state.getBlock() instanceof IChunkCollidable)
-			{
-				AxisAlignedBB[] aabbs = ((IChunkCollidable) state.getBlock()).getCollisionBoundingBoxes(world,
-						state.getPos(),
-						state.getBlockState());
-				for (AxisAlignedBB aabb : aabbs)
-				{
-					if (mask != null && aabb != null)
-					{
-						aabb = AABBUtils.offset(state.getPos(), aabb);
-						if (mask.intersectsWith(aabb))
-							list.add(aabb);
-					}
-
-				}
-			}
-			return true;
-		}
-
-		@Override
-		protected void clean()
-		{
-			super.clean();
-			mask = null;
-			list = null;
-		}
-	}
-
-	/**
-	 * The procedure used to check ray tracing for a {@link IChunkCollidable} coordinate.
-	 */
-	private static class RayTraceProcedure extends ChunkProcedure
-	{
-		private Point src;
-		private Point dest;
-		private RayTraceResult mop;
-
-		public RayTraceProcedure(Point src, Point dest, RayTraceResult mop)
-		{
-			this.src = src;
-			this.dest = dest;
-			this.mop = mop;
-		}
-
-		@Override
-		public boolean execute(long coord)
-		{
-			if (!check(coord))
-				return true;
-
-			RaytraceBlock rt = new RaytraceBlock(world, src, dest, state.getPos());
-			mop = get().getClosest(src, rt.trace(), mop);
-
-			return true;
-		}
-
-		@Override
-		protected void clean()
-		{
-			super.clean();
-			src = null;
-			dest = null;
-			mop = null;
-		}
-	}
-
-	/**
-	 * The procedure used to check intersection from {@link IChunkCollidable} coordinates with {@link AxisAlignedBB} array.
-	 */
-	private static class CheckCollisionProcedure extends ChunkProcedure
-	{
-		private AxisAlignedBB[] aabbs;
-		private boolean collide = false;
-
-		public CheckCollisionProcedure(AxisAlignedBB[] aabbs)
-		{
-			this.aabbs = aabbs;
-		}
-
-		@Override
-		public boolean execute(long coord)
-		{
-			if (!check(coord))
-				return true;
-
-			AxisAlignedBB[] blockBounds = AABBUtils.getCollisionBoundingBoxes(world, state);
-			AABBUtils.offset(state.getX(), state.getY(), state.getZ(), blockBounds);
-
-			collide = AABBUtils.isColliding(aabbs, blockBounds);
-			if (collide)
-				return false;
-			return true;
-		}
-
-		@Override
-		protected void clean()
-		{
-			super.clean();
-			aabbs = null;
-			collide = false;
-		}
-
 	}
 }
