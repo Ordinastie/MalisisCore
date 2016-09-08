@@ -26,8 +26,8 @@ package net.malisis.core.registry;
 
 import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallback;
 import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallbackPredicate;
-import net.malisis.core.util.callback.ASMCallbackRegistry;
-import net.malisis.core.util.callback.ASMCallbackRegistry.IASMCallback;
+import net.malisis.core.util.callback.CallbackRegistry;
+import net.malisis.core.util.callback.CallbackResult;
 import net.malisis.core.util.callback.ICallback;
 import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
 import net.minecraft.block.state.IBlockState;
@@ -39,13 +39,12 @@ import net.minecraft.world.IBlockAccess;
  * @author Ordinastie
  *
  */
-public class RenderBlockRegistry extends ASMCallbackRegistry<IRenderBlockCallback, IRenderBlockCallbackPredicate, Boolean>
+public class RenderBlockRegistry extends CallbackRegistry<IRenderBlockCallback, IRenderBlockCallbackPredicate, Boolean>
 {
-
 	/**
 	 * Specialized {@link ICallback} called when a block is rendered.
 	 */
-	public interface IRenderBlockCallback extends IASMCallback<Boolean>
+	public interface IRenderBlockCallback extends ICallback<Boolean>
 	{
 		@Override
 		public default CallbackResult<Boolean> call(Object... params)

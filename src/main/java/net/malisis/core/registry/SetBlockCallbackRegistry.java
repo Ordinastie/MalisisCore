@@ -26,7 +26,9 @@ package net.malisis.core.registry;
 
 import net.malisis.core.registry.SetBlockCallbackRegistry.ISetBlockCallback;
 import net.malisis.core.registry.SetBlockCallbackRegistry.ISetBlockCallbackPredicate;
-import net.malisis.core.util.callback.ASMCallbackRegistry;
+import net.malisis.core.util.callback.CallbackRegistry;
+import net.malisis.core.util.callback.CallbackResult;
+import net.malisis.core.util.callback.ICallback;
 import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -36,17 +38,17 @@ import net.minecraft.world.chunk.Chunk;
  * @author Ordinastie
  *
  */
-public class SetBlockCallbackRegistry extends ASMCallbackRegistry<ISetBlockCallback, ISetBlockCallbackPredicate, Boolean>
+public class SetBlockCallbackRegistry extends CallbackRegistry<ISetBlockCallback, ISetBlockCallbackPredicate, Void>
 {
-	public static interface ISetBlockCallback extends net.malisis.core.util.callback.ASMCallbackRegistry.IASMCallback<Boolean>
+	public static interface ISetBlockCallback extends ICallback<Void>
 	{
 		@Override
-		public default CallbackResult<Boolean> call(Object... params)
+		public default CallbackResult<Void> call(Object... params)
 		{
 			return call((Chunk) params[0], (BlockPos) params[1], (IBlockState) params[2], (IBlockState) params[3]);
 		}
 
-		public CallbackResult<Boolean> call(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState);
+		public CallbackResult<Void> call(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState);
 	}
 
 	public static interface ISetBlockCallbackPredicate extends ICallbackPredicate

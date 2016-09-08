@@ -33,7 +33,7 @@ import net.malisis.core.registry.ModEventRegistry.IFMLEventCallback;
 import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallback;
 import net.malisis.core.registry.SetBlockCallbackRegistry.ISetBlockCallback;
 import net.malisis.core.renderer.IItemRenderer;
-import net.malisis.core.util.callback.ASMCallbackRegistry.CallbackResult;
+import net.malisis.core.util.callback.CallbackResult;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BlockModelShapes;
@@ -120,9 +120,10 @@ public class Registries
 	 * @param newState the new state
 	 * @return the callback result
 	 */
-	public static CallbackResult<Boolean> processPreSetBlock(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
+	public static CallbackResult<Void> processPreSetBlock(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
 	{
-		return preSetBlockRegistry.processCallbacks(chunk, pos, oldState, newState);
+		CallbackResult<Void> ret = preSetBlockRegistry.processCallbacks(chunk, pos, oldState, newState);
+		return ret;
 	}
 
 	/**

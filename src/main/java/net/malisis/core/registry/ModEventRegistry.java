@@ -27,6 +27,7 @@ package net.malisis.core.registry;
 import net.malisis.core.registry.ModEventRegistry.FMLEventPredicate;
 import net.malisis.core.registry.ModEventRegistry.IFMLEventCallback;
 import net.malisis.core.util.callback.CallbackRegistry;
+import net.malisis.core.util.callback.CallbackResult;
 import net.malisis.core.util.callback.ICallback;
 import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
@@ -82,10 +83,10 @@ public class ModEventRegistry extends CallbackRegistry<IFMLEventCallback<?>, FML
 	public static interface IFMLEventCallback<T extends FMLEvent> extends ICallback<Void>
 	{
 		@Override
-		public default Void call(Object... params)
+		public default CallbackResult<Void> call(Object... params)
 		{
 			call((T) params[0]);
-			return null;
+			return CallbackResult.noResult();
 		}
 
 		public void call(T event);

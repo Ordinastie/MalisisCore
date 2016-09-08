@@ -32,7 +32,9 @@ import net.malisis.core.registry.ClientRegistry.BlockRendererOverride;
 import net.malisis.core.registry.ClientRegistry.ItemRendererOverride;
 import net.malisis.core.registry.ModEventRegistry.IFMLEventCallback;
 import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallback;
+import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallbackPredicate;
 import net.malisis.core.registry.SetBlockCallbackRegistry.ISetBlockCallback;
+import net.malisis.core.registry.SetBlockCallbackRegistry.ISetBlockCallbackPredicate;
 import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
 import net.malisis.core.renderer.IItemRenderer.DummyModel;
@@ -158,7 +160,7 @@ public class MalisisRegistry
 	 * @param option the option
 	 */
 	@SideOnly(Side.CLIENT)
-	public static void onRenderBlock(IRenderBlockCallback callback, CallbackOption option)
+	public static void onRenderBlock(IRenderBlockCallback callback, CallbackOption<IRenderBlockCallbackPredicate> option)
 	{
 		renderBlockRegistry.registerCallback(callback, option);
 	}
@@ -170,7 +172,7 @@ public class MalisisRegistry
 	 * @param callback the callback
 	 * @param option the option
 	 */
-	public static void onPreSetBlock(ISetBlockCallback callback, CallbackOption option)
+	public static void onPreSetBlock(ISetBlockCallback callback, CallbackOption<ISetBlockCallbackPredicate> option)
 	{
 		preSetBlockRegistry.registerCallback(callback, option);
 	}
@@ -182,7 +184,7 @@ public class MalisisRegistry
 	 * @param callback the callback
 	 * @param option the option
 	 */
-	public static void onPostSetBlock(ISetBlockCallback callback, CallbackOption option)
+	public static void onPostSetBlock(ISetBlockCallback callback, CallbackOption<ISetBlockCallbackPredicate> option)
 	{
 		postSetBlockRegistry.registerCallback(callback, option);
 	}

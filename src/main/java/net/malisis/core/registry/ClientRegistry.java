@@ -43,7 +43,7 @@ import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.malisis.core.util.Utils;
-import net.malisis.core.util.callback.ASMCallbackRegistry.CallbackResult;
+import net.malisis.core.util.callback.CallbackResult;
 import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -261,10 +261,13 @@ public class ClientRegistry
 		if (renderer == null)
 			renderer = blockRenderers.get(state.getBlock());
 		if (renderer == null)
-			return CallbackResult.noReturn();
+			return CallbackResult.noResult();
 
 		//convert pos to immutable one
-		return CallbackResult.of(true, renderer.renderBlock(buffer, world, new BlockPos(pos), state));
+		return CallbackResult.<Boolean> builder()
+								.value(renderer.renderBlock(buffer, world, new BlockPos(pos), state))
+								.withReturn(true)
+								.result();
 	}
 
 	/**
