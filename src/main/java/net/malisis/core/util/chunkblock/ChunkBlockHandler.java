@@ -40,7 +40,7 @@ import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.registry.MalisisRegistry;
 import net.malisis.core.util.MBlockPos;
 import net.malisis.core.util.MBlockState;
-import net.malisis.core.util.callback.ASMCallbackRegistry.CallbackResult;
+import net.malisis.core.util.callback.CallbackResult;
 import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.malisis.core.util.callback.ICallback.Priority;
 import net.minecraft.block.state.IBlockState;
@@ -120,7 +120,7 @@ public class ChunkBlockHandler
 	 * @param newState the new state
 	 * @return the callback result
 	 */
-	private CallbackResult<Boolean> handleChunkBlock(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
+	private CallbackResult<Void> handleChunkBlock(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
 	{
 		IChunkBlock cb = IComponent.getComponent(IChunkBlock.class, oldState.getBlock());
 		if (cb != null)
@@ -129,7 +129,7 @@ public class ChunkBlockHandler
 		cb = IComponent.getComponent(IChunkBlock.class, newState.getBlock());
 		if (cb != null)
 			addCoord(chunk.getWorld(), pos, cb.blockRange());
-		return CallbackResult.noReturn();
+		return CallbackResult.noResult();
 	}
 
 	/**
@@ -152,7 +152,6 @@ public class ChunkBlockHandler
 	 */
 	private void addCoord(Chunk chunk, BlockPos pos)
 	{
-		MalisisCore.message("Added " + pos + " to " + chunk.xPosition + ", " + chunk.zPosition);
 		getCoords(chunk, Lists.newArrayList()).ifPresent(l -> l.add(pos));
 	}
 
@@ -176,7 +175,6 @@ public class ChunkBlockHandler
 	 */
 	private void removeCoord(Chunk chunk, BlockPos pos)
 	{
-		MalisisCore.message("Removed " + pos + " from " + chunk.xPosition + ", " + chunk.zPosition);
 		getCoords(chunk).ifPresent(l -> l.remove(pos));
 	}
 
@@ -278,19 +276,21 @@ public class ChunkBlockHandler
 	 * @param distance the size
 	 * @return the chunks
 	 */
-	public List<Chunk> getAffectedChunks(World world, int x, int z, int distance)
+	//TODO: move into Utils
+	public static List<Chunk> getAffectedChunks(World world, int x, int z, int distance)
 	{
 		AxisAlignedBB aabb = new AxisAlignedBB(x - distance, 0, z - distance, x + distance + 1, 1, z + distance + 1);
 		return getAffectedChunks(world, aabb);
 	}
 
 	/**
-	 * Gets the chunks colliding with the specified {@link AxisAlignedBB}.
+	 * Gets the chunks colliding with the specified {@link AxisAlignedBB}. q
 	 *
 	 * @param world the world
 	 * @param aabbs the aabbs
 	 * @return the affected chunks
 	 */
+	//TODO: move into Utils
 	public static List<Chunk> getAffectedChunks(World world, AxisAlignedBB... aabbs)
 	{
 		if (ArrayUtils.isEmpty(aabbs))

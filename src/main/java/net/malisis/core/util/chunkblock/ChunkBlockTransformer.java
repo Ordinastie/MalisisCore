@@ -28,6 +28,10 @@ import static org.objectweb.asm.Opcodes.*;
 import net.malisis.core.asm.AsmHook;
 import net.malisis.core.asm.MalisisClassTransformer;
 import net.malisis.core.asm.mappings.McpMethodMapping;
+import net.malisis.core.registry.Registries;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.Chunk;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -95,12 +99,12 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 		//	    ALOAD 1
 		//	    ALOAD 8
 		//	    ALOAD 2
-		//		INVOKESTATIC net/malisis/core/registry/Registries.processRenderBlockCallbacks (Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult;
+		//		INVOKESTATIC net/malisis/core/registry/Registries.processPreSetBlock (Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/CallbackResult;
 		//		ASTORE 8
 		//		L2
 		//		LINENUMBER 69 L2
 		//		ALOAD 8
-		//		INVOKEVIRTUAL net/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult.shouldReturn ()Z
+		//		INVOKEVIRTUAL net/malisis/core/util/callback/CallbackResult.shouldReturn ()Z
 		//		IFEQ L3
 		//		L4
 		//		LINENUMBER 70 L4
@@ -117,12 +121,9 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 				INVOKESTATIC,
 				"net/malisis/core/registry/Registries",
 				"processPreSetBlock",
-				"(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult;",
+				"(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/CallbackResult;",
 				false));
-		//		insert.add(new VarInsnNode(ASTORE, 15));
-		//		insert.add(new VarInsnNode(ALOAD, 15));
-		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult", "shouldReturn",
-				"()Z", false));
+		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/callback/CallbackResult", "shouldReturn", "()Z", false));
 		insert.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert.add(new InsnNode(ACONST_NULL));
 		insert.add(new InsnNode(ARETURN));
@@ -140,10 +141,24 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 				"processPostSetBlock",
 				"(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)V",
 				false));
-		insert2.add(new InsnNode(POP));
 
-		ah.jumpTo(match).insert(insert).jumpAfter(match).insert(insert2);
+		ah.jumpTo(match).insert(insert).jumpAfter(match).insert(insert2).debug();
 
 		return ah;
+	}
+
+	public IBlockState test()
+	{
+		Chunk chunk = null;
+		BlockPos pos = null;
+		IBlockState state = null;
+		IBlockState iblockstate = null;
+
+		if (Registries.processPreSetBlock(chunk, pos, iblockstate, state).shouldReturn())
+			return null;
+
+		Registries.processPostSetBlock(chunk, pos, iblockstate, state);
+
+		return null;
 	}
 }

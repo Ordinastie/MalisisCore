@@ -24,20 +24,16 @@
 
 package net.malisis.core.util.chunkblock;
 
-import java.util.Optional;
+import java.util.List;
 
-import net.malisis.core.util.callback.ASMCallbackRegistry.CallbackResult;
 import net.malisis.core.util.callback.CallbackRegistry;
+import net.malisis.core.util.callback.CallbackResult;
 import net.malisis.core.util.callback.ICallback;
-import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
-import net.malisis.core.util.callback.ICallback.Priority;
 import net.malisis.core.util.chunkblock.ChunkCallbackRegistry.IChunkCallback;
 import net.malisis.core.util.chunkblock.ChunkCallbackRegistry.IChunkCallbackPredicate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * The {@link ChunkCallbackRegistry} handles {@link IChunkCallback IChunkCallbacks}.<br>
@@ -45,8 +41,9 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @author Ordinastie
  */
-public class ChunkCallbackRegistry<C extends IChunkCallback, P extends IChunkCallbackPredicate> extends CallbackRegistry<C, P, Boolean>
+public class ChunkCallbackRegistry<C extends IChunkCallback<V>, P extends IChunkCallbackPredicate, V> extends CallbackRegistry<C, P, V>
 {
+
 	/**
 	 * Processes the {@link IChunkCallback IChunkCallbacks} registered.
 	 *
@@ -56,71 +53,64 @@ public class ChunkCallbackRegistry<C extends IChunkCallback, P extends IChunkCal
 	 * @param newState the new state
 	 * @return the callback result
 	 */
-	public CallbackResult<Boolean> processCallbacks(Chunk chunk, Object... params)
+	public CallbackResult<V> processCallbacks(Chunk chunk, Object... params)
 	{
-		Optional<Boolean> ret = ChunkBlockHandler.get().getCoords(chunk).map(list -> {
-			for (BlockPos listener : list)
-				if (processCallbacksForPosition(chunk, listener, params)) //should we stop process positions if one cancels ?
-					return true;
-			return false;
-		});
+		//true = cancel => return
+		return ChunkBlockHandler.get()
+								.getCoords(chunk)
+								.map(list -> processListeners(list, chunk, params))
+								.orElse(CallbackResult.noResult());
 
-		return CallbackResult.of(ret.orElse(true), false);
 	}
 
 	/**
-	 * Process the {@link IChunkCallback} registered the specified position.
+	 * Processes the {@link IChunkCallback IChunkCallbacks} registered for the list of {@link BlockPos}.
 	 *
+	 * @param list the list
+	 * @param chunk the chunk
 	 * @param params the params
-	 * @return true, if successful
+	 * @return the callback result
 	 */
-	private boolean processCallbacksForPosition(Chunk chunk, BlockPos listner, Object... params)
+	private CallbackResult<V> processListeners(List<BlockPos> list, Chunk chunk, Object... params)
 	{
-		if (callbacks.size() == 0)
-			return false;
-
-		boolean cancel = false;
-		Priority currentPriority = Priority.HIGHEST;
-		for (Pair<C, CallbackOption<P>> pair : callbacks)
+		CallbackResult<V> result = CallbackResult.noResult();
+		for (BlockPos listener : list)
 		{
-			//don't process lower priority if cancelled
-			if (cancel && pair.getRight().getPriority() != currentPriority)
-				break;
-			currentPriority = pair.getRight().getPriority();
-			if (pair.getRight().apply(chunk, listner, params))
-				cancel |= pair.getLeft().call(chunk, listner, params);
+			CallbackResult<V> tmp = super.processCallbacks(chunk, listener, params);
+			result = reduce.apply(result, tmp);
+			if (result.isForcedCancelled())
+				return result;
 		}
 
-		return cancel;
+		return result;
+
 	}
 
 	/**
-	 * Specialized {@link ICallback} for {@link ChunkCallbackRegistry}.
+	 * Specialized {@link ICallback} for {@link ChunkCallbackRegistry}.<br>
+	 * If the {@link CallbackResult#isForcedCancelled()} is {@code true}, the next listener positions won't be processed.
 	 */
-	public interface IChunkCallback extends ICallback<Boolean>
+	public interface IChunkCallback<V> extends ICallback<V>
 	{
 		@Override
-		public default Boolean call(Object... params)
+		public default CallbackResult<V> call(Object... params)
 		{
-			//should never be called
-			throw new IllegalStateException();
-			//return call((Chunk) params[0], (BlockPos) params[1], (BlockPos) params[2], (IBlockState) params[3], (IBlockState) params[4]);
+			return call((Chunk) params[0], (BlockPos) params[1], (Object[]) params[2]);
 		}
 
-		public boolean call(Chunk chunk, BlockPos listener, Object... params);
+		public CallbackResult<V> call(Chunk chunk, BlockPos listener, Object... params);
 	}
 
 	/**
 	 * Specialized {@link IChunkCallbackPredicate} for {@link IChunkCallback}.
 	 */
+	@FunctionalInterface
 	public interface IChunkCallbackPredicate extends ICallbackPredicate
 	{
 		@Override
 		public default boolean apply(Object... params)
 		{
-			//should never be called
-			throw new IllegalStateException();
-			//return apply((Chunk) params[0], (BlockPos) params[1], (BlockPos) params[2], (IBlockState) params[3], (IBlockState) params[4]);
+			return apply((Chunk) params[0], (BlockPos) params[1], (Object[]) params[2]);
 		}
 
 		public boolean apply(Chunk chunk, BlockPos listener, Object... params);
