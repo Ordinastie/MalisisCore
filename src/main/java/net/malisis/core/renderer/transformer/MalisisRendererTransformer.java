@@ -83,17 +83,17 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		//	    ALOAD 3
 		//	    ALOAD 2
 		//	    ALOAD 1
-		//		INVOKESTATIC net/malisis/core/registry/Registries.processRenderBlockCallbacks (Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult;
+		//		INVOKESTATIC net/malisis/core/registry/Registries.processRenderBlockCallbacks (Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/CallbackResult;
 		//		ASTORE 8
 		//		L2
 		//		LINENUMBER 69 L2
 		//		ALOAD 8
-		//		INVOKEVIRTUAL net/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult.shouldReturn ()Z
+		//		INVOKEVIRTUAL net/malisis/core/util/callback/CallbackResult.shouldReturn ()Z
 		//		IFEQ L3
 		//		L4
 		//		LINENUMBER 70 L4
 		//		ALOAD 8
-		//		INVOKEVIRTUAL net/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult.getValue ()Ljava/lang/Object;
+		//		INVOKEVIRTUAL net/malisis/core/util/callback/CallbackResult.getValue ()Ljava/lang/Object;
 		//		CHECKCAST java/lang/Boolean
 		//		INVOKEVIRTUAL java/lang/Boolean.booleanValue ()Z
 		//		IRETURN
@@ -108,16 +108,15 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 				INVOKESTATIC,
 				"net/malisis/core/registry/Registries",
 				"processRenderBlockCallbacks",
-				"(Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult;",
+				"(Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/CallbackResult;",
 				false));
 		insert.add(new VarInsnNode(ASTORE, 8));
 		insert.add(new VarInsnNode(ALOAD, 8));
-		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult", "shouldReturn",
-				"()Z", false));
+		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/callback/CallbackResult", "shouldReturn", "()Z", false));
 		insert.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert.add(new VarInsnNode(ALOAD, 8));
-		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/callback/ASMCallbackRegistry$CallbackResult", "getValue",
-				"()Ljava/lang/Object;", false));
+		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/callback/CallbackResult", "getValue", "()Ljava/lang/Object;",
+				false));
 		insert.add(new TypeInsnNode(CHECKCAST, "java/lang/Boolean"));
 		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false));
 		insert.add(new InsnNode(IRETURN));
