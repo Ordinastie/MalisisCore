@@ -27,8 +27,11 @@ package net.malisis.core.util.chunklistener;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.registry.MalisisRegistry;
+import net.malisis.core.util.callback.CallbackResult;
+import net.malisis.core.util.callback.ICallback;
 import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.malisis.core.util.chunkblock.ChunkCallbackRegistry;
+import net.malisis.core.util.chunkblock.ChunkCallbackRegistry.IChunkCallback;
 import net.malisis.core.util.chunkblock.ChunkCallbackRegistry.IChunkCallbackPredicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -42,15 +45,16 @@ import net.minecraft.world.chunk.Chunk;
 @AutoLoad(true)
 public class ChunkListener
 {
-	private static ChunkCallbackRegistry preRegistry = new ChunkCallbackRegistry();
-	private static ChunkCallbackRegistry postRegistry = new ChunkCallbackRegistry();
+	private static final CallbackResult<Void> CANCELLED = CallbackResult.<Void> builder().forceCancel(true).withReturn(true).result();
+	private static ChunkCallbackRegistry<IBlockListenerCallback, IBlockListenerPredicate, Void> preRegistry = new ChunkCallbackRegistry<>();
+	private static ChunkCallbackRegistry<IBlockListenerCallback, IBlockListenerPredicate, Void> postRegistry = new ChunkCallbackRegistry<>();
 
 	public ChunkListener()
 	{
 		MalisisRegistry.onPreSetBlock(preRegistry::processCallbacks, CallbackOption.of());
 		MalisisRegistry.onPreSetBlock(postRegistry::processCallbacks, CallbackOption.of());
-		preRegistry.registerCallback(this::callPreListener, CallbackOption.of((IChunkCallbackPredicate) this::isValidPreListener));
-		postRegistry.registerCallback(this::callPostListener, CallbackOption.of((IChunkCallbackPredicate) this::isValidPostListener));
+		preRegistry.registerCallback(this::callPreListener, CallbackOption.of(this::isValidPreListener));
+		postRegistry.registerCallback(this::callPostListener, CallbackOption.of(this::isValidPostListener));
 	}
 
 	/**
@@ -124,5 +128,45 @@ public class ChunkListener
 			return true;
 
 		return false;
+	}
+
+	/**
+	 * Specialized {@link ICallback} for {@link ChunkCallbackRegistry}.
+	 */
+	public interface IBlockListenerCallback extends IChunkCallback<Void>
+	{
+		@Override
+		public default CallbackResult<Void> call(Chunk chunk, BlockPos listener, Object... params)
+		{
+			return call(chunk, listener, (BlockPos) params[0], (IBlockState) params[1], (IBlockState) params[2]) ? CallbackResult.noResult() : CANCELLED;
+		}
+
+		/**
+		 * If this {@link IBlockListenerCallback} was registered with
+		 * {@link MalisisRegistry#onPreSetBlock(net.malisis.core.registry.SetBlockCallbackRegistry.ISetBlockCallback, CallbackOption)},
+		 * returns whether to cancel the block placement or not.
+		 *
+		 * @param chunk the chunk
+		 * @param listener the listener
+		 * @param modified the modified
+		 * @param oldState the old state
+		 * @param newState the new state
+		 * @return true, if the block should be cancelled
+		 */
+		public boolean call(Chunk chunk, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState);
+	}
+
+	/**
+	 * Specialized {@link IChunkCallbackPredicate} for {@link IBlockListenerCallback}.
+	 */
+	public interface IBlockListenerPredicate extends IChunkCallbackPredicate
+	{
+		@Override
+		public default boolean apply(Chunk chunk, BlockPos listener, Object... params)
+		{
+			return apply(chunk, listener, (BlockPos) params[0], (IBlockState) params[1], (IBlockState) params[2]);
+		}
+
+		public boolean apply(Chunk chunk, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState);
 	}
 }

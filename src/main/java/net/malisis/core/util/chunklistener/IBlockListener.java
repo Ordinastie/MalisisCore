@@ -44,7 +44,7 @@ public final class IBlockListener
 	{
 		/**
 		 * Called when a block is placed around this {@link IBlockListener} block.<br>
-		 * The return value defines whether the block placement should be canceled.
+		 * The return value defines whether the block placement should be allowed to be placed.
 		 *
 		 * @param world the world
 		 * @param listener the listener
