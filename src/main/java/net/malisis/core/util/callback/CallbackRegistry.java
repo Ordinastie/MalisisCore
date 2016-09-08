@@ -24,7 +24,10 @@
 
 package net.malisis.core.util.callback;
 
+import static com.google.common.base.Preconditions.*;
+
 import java.util.List;
+import java.util.function.BiFunction;
 
 import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
@@ -50,6 +53,20 @@ public class CallbackRegistry<C extends ICallback<V>, P extends ICallbackPredica
 	/** List of registered {@link ICallback}. */
 	protected List<Pair<C, CallbackOption<P>>> callbacks = Lists.newArrayList();
 
+	protected BiFunction<CallbackResult<V>, CallbackResult<V>, CallbackResult<V>> reduce = this::doReduce;
+
+	private CallbackResult<V> doReduce(CallbackResult<V> r1, CallbackResult<V> r2)
+	{
+		if (r1 == CallbackResult.noResult())
+			return r2 != null ? r2 : CallbackResult.noResult();
+		return r1 != null ? r1 : CallbackResult.noResult();
+	}
+
+	public void reduce(BiFunction<CallbackResult<V>, CallbackResult<V>, CallbackResult<V>> reduce)
+	{
+		this.reduce = checkNotNull(reduce);
+	}
+
 	/**
 	 * Registers a {@link ICallback} to be call when the {@link ICallbackPredicate} returns true.
 	 *
@@ -68,26 +85,32 @@ public class CallbackRegistry<C extends ICallback<V>, P extends ICallbackPredica
 	}
 
 	/**
-	 * Processes the registered {@link ICallback ICallbacks} according to their priority, and returns the first non null return value
-	 * encountered.<br>
-	 * Classes extending {@link CallbackRegistry} should expose a more specialized version of this method, with specific arguments.
+	 * Processes the registered {@link ICallback ICallbacks} according to their priority.
 	 *
 	 * @param params the params
 	 * @return the v
 	 */
-	public V processCallbacks(Object... params)
+	public CallbackResult<V> processCallbacks(Object... params)
 	{
 		if (callbacks.size() == 0)
 			return null;
 
-		V result = null;
+		CallbackResult<V> result = CallbackResult.noResult();
+		Priority lastPriority = Priority.HIGHEST;
 		for (Pair<C, CallbackOption<P>> pair : callbacks)
 		{
-			V tempRes = null;
+			if (result.isCancelled() && pair.getRight().getPriority() != lastPriority)
+				return result;
+
 			if (pair.getRight().apply(params))
-				tempRes = pair.getLeft().call(params);
-			if (result == null && tempRes != null)
-				result = tempRes;
+			{
+				CallbackResult<V> tmp = pair.getLeft().call(params);
+				result = reduce.apply(result, tmp);
+				if (result.isForcedCancelled())
+					return result;
+
+				lastPriority = pair.getRight().getPriority();
+			}
 		}
 
 		return result;

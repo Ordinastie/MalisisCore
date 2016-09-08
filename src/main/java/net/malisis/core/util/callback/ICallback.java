@@ -52,7 +52,7 @@ public interface ICallback<T>
 	 * @param params the params
 	 * @return the t
 	 */
-	public T call(Object... params);
+	public CallbackResult<T> call(Object... params);
 
 	/**
 	 * {@link ICallbackPredicate} are used for registering {@link ICallback} in {@link CallbackRegistry} to determine in which circumstances
