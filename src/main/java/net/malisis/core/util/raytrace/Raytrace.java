@@ -32,6 +32,7 @@ import net.malisis.core.util.Ray;
 import net.malisis.core.util.Vector;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -86,6 +87,26 @@ public class Raytrace
 	}
 
 	/**
+	 * Gets the source of this {@link Raytrace}
+	 *
+	 * @return the source
+	 */
+	public Point getSource()
+	{
+		return src;
+	}
+
+	/**
+	 * Gets the destination of this {@link Raytrace}.
+	 *
+	 * @return the destination
+	 */
+	public Point getDestination()
+	{
+		return dest;
+	}
+
+	/**
 	 * Gets the direction vector of the ray.
 	 *
 	 * @return the direction
@@ -103,6 +124,16 @@ public class Raytrace
 	public double distance()
 	{
 		return ray.direction.length();
+	}
+
+	/**
+	 * Sets the length of this {@link Raytrace}.
+	 *
+	 * @param length the new length
+	 */
+	public void setLength(double length)
+	{
+		dest = ray.getPointAt(length);
 	}
 
 	public Pair<EnumFacing, Point> trace(AxisAlignedBB... aabbs)
@@ -151,5 +182,30 @@ public class Raytrace
 		}
 
 		return ret;
+	}
+
+	/**
+	 * Gets the closest {@link RayTraceResult} to the source.
+	 *
+	 * @param src the src
+	 * @param result1 the mop1
+	 * @param result2 the mop2
+	 * @return the closest
+	 */
+	public static RayTraceResult getClosestHit(RayTraceResult.Type hitType, Point src, RayTraceResult result1, RayTraceResult result2)
+	{
+		if (result1 == null)
+			return result2;
+		if (result2 == null)
+			return result1;
+
+		if (result1.typeOfHit == RayTraceResult.Type.MISS && result2.typeOfHit == hitType)
+			return result2;
+		if (result1.typeOfHit == hitType && result2.typeOfHit == RayTraceResult.Type.MISS)
+			return result1;
+
+		if (Point.distanceSquared(src, new Point(result1.hitVec)) > Point.distanceSquared(src, new Point(result2.hitVec)))
+			return result2;
+		return result1;
 	}
 }

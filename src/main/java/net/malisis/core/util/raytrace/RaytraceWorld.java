@@ -33,7 +33,6 @@ import net.malisis.core.util.Vector;
 import net.malisis.core.util.chunkcollision.ChunkCollision;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
@@ -44,36 +43,19 @@ import net.minecraft.world.World;
  * @author Ordinastie
  *
  */
-public class RaytraceWorld
+public class RaytraceWorld extends Raytrace
 {
 	/** Number of blocks before we consider ray trace failed. */
-	private static int MAX_BLOCKS = 200;
+	private static final int MAX_BLOCKS = 200;
 	/** World object (needed for ray tracing inside each block). */
 	private World world;
-	/** Source of the ray trace. */
-	private Point src;
-	/** Destination of the ray trace. */
-	private Point dest;
-	/** Ray describing the ray trace. */
-	private Ray ray;
 	/** Vector describing the direction of steps to take when reaching limits of a block. */
 	private Vector step;
 	/** The block coordinates of the source. */
 	private BlockPos blockSrc;
 	/** The block coordinates of the destination. */
 	private BlockPos blockDest;
-	/** Current X coordinate of the block being ray traced. */
-	private int currentX;
-	/** Current Y coordinate of the block being ray traced. */
-	private int currentY;
-	/** Current Z coordinate of the block being ray traced. */
-	private int currentZ;
 
-	/**
-	 * The first block to be hit. If ray trace reaches <code>dest</code> without any hit, <code>firstHit</code> will have
-	 * <code>typeOfHit</code> = <b>MISS</b>
-	 */
-	public RayTraceResult firstHit;
 	/** List of blocks passed by the ray trace. Only set if options <code>LOG_BLOCK_PASSED</code> is set */
 	public HashMap<BlockPos, RayTraceResult> blockPassed;
 	/** Options for the ray tracing. */
@@ -85,11 +67,10 @@ public class RaytraceWorld
 	 * @param ray the ray
 	 * @param options the options
 	 */
-	public RaytraceWorld(Ray ray, int options)
+	public RaytraceWorld(World world, Ray ray, int options)
 	{
-		this.world = Minecraft.getMinecraft().theWorld;
-		this.src = ray.origin;
-		this.ray = ray;
+		super(ray);
+		this.world = world;
 		this.options = options;
 
 		blockSrc = new BlockPos(src.toVec3d());
@@ -113,9 +94,9 @@ public class RaytraceWorld
 	 *
 	 * @param ray the ray
 	 */
-	public RaytraceWorld(Ray ray)
+	public RaytraceWorld(World world, Ray ray)
 	{
-		this(ray, 0);
+		this(world, ray, 0);
 	}
 
 	/**
@@ -125,9 +106,9 @@ public class RaytraceWorld
 	 * @param v the v
 	 * @param options the options
 	 */
-	public RaytraceWorld(Point src, Vector v, int options)
+	public RaytraceWorld(World world, Point src, Vector v, int options)
 	{
-		this(new Ray(src, v), options);
+		this(world, new Ray(src, v), options);
 	}
 
 	/**
@@ -136,9 +117,9 @@ public class RaytraceWorld
 	 * @param src the src
 	 * @param v the v
 	 */
-	public RaytraceWorld(Point src, Vector v)
+	public RaytraceWorld(World world, Point src, Vector v)
 	{
-		this(new Ray(src, v), 0);
+		this(world, new Ray(src, v), 0);
 	}
 
 	/**
@@ -148,9 +129,9 @@ public class RaytraceWorld
 	 * @param dest the dest
 	 * @param options the options
 	 */
-	public RaytraceWorld(Point src, Point dest, int options)
+	public RaytraceWorld(World world, Point src, Point dest, int options)
 	{
-		this(new Ray(src, new Vector(src, dest)), options);
+		this(world, new Ray(src, new Vector(src, dest)), options);
 		this.dest = dest;
 		blockDest = new BlockPos(dest.toVec3d());
 	}
@@ -161,51 +142,11 @@ public class RaytraceWorld
 	 * @param src the src
 	 * @param dest the dest
 	 */
-	public RaytraceWorld(Point src, Point dest)
+	public RaytraceWorld(World world, Point src, Point dest)
 	{
-		this(new Ray(src, new Vector(src, dest)), 0);
+		this(world, new Ray(src, new Vector(src, dest)), 0);
 		this.dest = dest;
 		blockDest = new BlockPos(dest.toVec3d());
-	}
-
-	/**
-	 * Gets the source of this {@link RaytraceWorld}
-	 *
-	 * @return the source
-	 */
-	public Point getSource()
-	{
-		return src;
-	}
-
-	/**
-	 * Gets the destination of this {@link RaytraceWorld}.
-	 *
-	 * @return the destination
-	 */
-	public Point getDestination()
-	{
-		return dest;
-	}
-
-	/**
-	 * Gets the direction vector of the ray.
-	 *
-	 * @return the direction
-	 */
-	public Vector direction()
-	{
-		return ray.direction;
-	}
-
-	/**
-	 * Gets the length of the ray.
-	 *
-	 * @return the distance
-	 */
-	public double distance()
-	{
-		return ray.direction.length();
 	}
 
 	/**
@@ -213,9 +154,10 @@ public class RaytraceWorld
 	 *
 	 * @param length the new length
 	 */
+	@Override
 	public void setLength(double length)
 	{
-		dest = ray.getPointAt(length);
+		super.setLength(length);
 		blockDest = new BlockPos(dest.toVec3d());
 	}
 
@@ -238,15 +180,14 @@ public class RaytraceWorld
 	 */
 	public RayTraceResult trace()
 	{
-		RayTraceResult mop = null;
+		RayTraceResult mop = null, firstHit = null;
 		double tX, tY, tZ, min;
 		int count = 0;
 		boolean ret = false;
 
-		firstHit = null;
-		currentX = blockSrc.getX();
-		currentY = blockSrc.getY();
-		currentZ = blockSrc.getZ();
+		int currentX = blockSrc.getX();
+		int currentY = blockSrc.getY();
+		int currentZ = blockSrc.getZ();
 
 		while (!ret && count++ <= MAX_BLOCKS)
 		{
@@ -299,7 +240,7 @@ public class RaytraceWorld
 	 * @param x the x
 	 * @param y the y
 	 * @param z the z
-	 * @return <code>Double.NaN</code> if <code>x</code>, <code>y</code> and <code>z</code> are all three are <code>Double.NaN</code>
+	 * @return <code>Double.NaN</code> if <code>x</code>, <code>y</code> and <code>z</code> are all three <code>Double.NaN</code>
 	 */
 	public double getMin(double x, double y, double z)
 	{

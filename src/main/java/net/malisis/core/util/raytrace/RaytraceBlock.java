@@ -24,8 +24,6 @@
 
 package net.malisis.core.util.raytrace;
 
-import java.lang.ref.WeakReference;
-
 import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.Point;
@@ -50,7 +48,7 @@ import org.apache.commons.lang3.tuple.Pair;
 public class RaytraceBlock extends Raytrace
 {
 	/** World reference **/
-	private WeakReference<World> world;
+	private World world;
 	/** Position of the block being ray traced **/
 	private BlockPos pos;
 	/** Block being ray traced. */
@@ -66,9 +64,9 @@ public class RaytraceBlock extends Raytrace
 	public RaytraceBlock(World world, Ray ray, BlockPos pos)
 	{
 		super(ray);
-		this.world = new WeakReference<>(world);
+		this.world = world;
 		this.pos = pos;
-		this.state = world().getBlockState(pos);
+		this.state = world.getBlockState(pos);
 	}
 
 	/**
@@ -113,16 +111,6 @@ public class RaytraceBlock extends Raytrace
 	}
 
 	/**
-	 * Get the world used by this {@link RaytraceBlock}.
-	 *
-	 * @return the world
-	 */
-	public World world()
-	{
-		return world.get();
-	}
-
-	/**
 	 * Does the raytracing.
 	 *
 	 * @return {@link RayTraceResult} with <code>typeOfHit</code> <b>BLOCK</b> if a ray hits a block in the way, or <b>MISS</b> if it
@@ -131,10 +119,10 @@ public class RaytraceBlock extends Raytrace
 	public RayTraceResult trace()
 	{
 		if (!(state.getBlock() instanceof IBoundingBox))
-			return state.collisionRayTrace(world(), pos, ray.origin.toVec3d(), dest.toVec3d());
+			return state.collisionRayTrace(world, pos, ray.origin.toVec3d(), dest.toVec3d());
 
 		IBoundingBox block = (IBoundingBox) state.getBlock();
-		AxisAlignedBB[] aabbs = block.getRayTraceBoundingBox(world(), pos, world().getBlockState(pos));
+		AxisAlignedBB[] aabbs = block.getRayTraceBoundingBox(world, pos, world.getBlockState(pos));
 		Pair<EnumFacing, Point> closest = super.trace(AABBUtils.offset(pos, aabbs));
 		if (closest == null)
 			return null;

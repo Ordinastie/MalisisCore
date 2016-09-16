@@ -42,6 +42,7 @@ import net.malisis.core.util.chunkblock.ChunkCallbackRegistry.IChunkCallback;
 import net.malisis.core.util.chunkblock.ChunkCallbackRegistry.IChunkCallbackPredicate;
 import net.malisis.core.util.raytrace.Raytrace;
 import net.malisis.core.util.raytrace.RaytraceBlock;
+import net.malisis.core.util.raytrace.RaytraceChunk;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -178,23 +179,23 @@ public class ChunkCollision
 		if (src == null || dest == null)
 			return result;
 
-		//TODO: use chunks actually traversed by the  raytrace vector
-		AxisAlignedBB aabb = new AxisAlignedBB(src.x, src.y, src.z, dest.x, dest.y, dest.z);
-		for (Chunk chunk : ChunkBlockHandler.getAffectedChunks(world, aabb))
-		{
-			CallbackResult<RayTraceResult> tmp = rayTraceRegistry.processCallbacks(chunk);
-			result = Raytrace.getClosestHit(Type.BLOCK, src, result, tmp.getValue());
-		}
+		RayTraceResult tmp = new RaytraceChunk(world, src, dest).trace();
+		result = Raytrace.getClosestHit(Type.BLOCK, src, result, tmp);
 
 		src = null;
 		dest = null;
 		return result;
 	}
 
+	public RayTraceResult processCallbacks(Chunk chunk)
+	{
+		return rayTraceRegistry.processCallbacks(chunk).getValue();
+	}
+
 	private CallbackResult<RayTraceResult> rayTraceCallback(Chunk chunk, BlockPos listener, Object... params)
 	{
-		RaytraceBlock rt = new RaytraceBlock(chunk.getWorld(), src, dest, listener);
-		return CallbackResult.of(rt.trace());
+		RayTraceResult result = new RaytraceBlock(chunk.getWorld(), src, dest, listener).trace();
+		return result != null ? CallbackResult.of(result) : CallbackResult.noResult();
 	}
 
 	//#end getRayTraceResult
