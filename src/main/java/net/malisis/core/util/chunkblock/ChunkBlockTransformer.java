@@ -142,7 +142,7 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 				"(Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;)V",
 				false));
 
-		ah.jumpTo(match).insert(insert).jumpAfter(match).insert(insert2).debug();
+		ah.jumpTo(match).insert(insert).jumpAfter(match).insert(insert2);
 
 		return ah;
 	}
