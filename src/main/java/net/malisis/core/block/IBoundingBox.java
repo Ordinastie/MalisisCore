@@ -83,6 +83,7 @@ public interface IBoundingBox
 		}
 	}
 
+	//TODO : implement multi AABB selection box
 	public default AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos)
 	{
 		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, state, BoundingBoxType.SELECTION);
@@ -112,6 +113,24 @@ public interface IBoundingBox
 
 	public default RayTraceResult collisionRayTrace(IBlockState state, World world, BlockPos pos, Vec3d src, Vec3d dest)
 	{
+		//TODO: remove RayTraceBlock entirely and call regular RayTrace on getRayTraceBoundingBox()
 		return new RaytraceBlock(world, src, dest, pos).trace();
+	}
+
+	/**
+	 * Gets the rendering bounds for the Block at the specified {@link BlockPos}.
+	 *
+	 * @param world the world
+	 * @param pos the pos
+	 * @return the rendering bounds
+	 */
+	public static AxisAlignedBB getRenderingBounds(World world, BlockPos pos)
+	{
+		IBlockState state = world.getBlockState(pos);
+		IBoundingBox ibb = IComponent.getComponent(IBoundingBox.class, state.getBlock());
+		if (ibb == null)
+			return AABBUtils.identity(pos);
+
+		return AABBUtils.offset(pos, AABBUtils.combine(ibb.getRenderBoundingBox(world, pos, state)));
 	}
 }
