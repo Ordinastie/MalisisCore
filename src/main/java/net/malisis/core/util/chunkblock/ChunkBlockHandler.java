@@ -30,9 +30,7 @@ import io.netty.buffer.Unpooled;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.WeakHashMap;
+import java.util.Set;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IComponent;
@@ -40,6 +38,7 @@ import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.registry.MalisisRegistry;
 import net.malisis.core.util.MBlockPos;
 import net.malisis.core.util.MBlockState;
+import net.malisis.core.util.WeakNested;
 import net.malisis.core.util.callback.CallbackResult;
 import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.malisis.core.util.callback.ICallback.Priority;
@@ -58,7 +57,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * This class is the entry point for blocks that need to stored inside a chunk for later processing.<br>
@@ -72,13 +71,21 @@ public class ChunkBlockHandler
 {
 	private static ChunkBlockHandler instance = new ChunkBlockHandler();
 
-	private Map<Chunk, List<BlockPos>> serverChunks = new WeakHashMap<>();
-	private Map<Chunk, List<BlockPos>> clientChunks = new WeakHashMap<>();
+	private WeakNested.Set<Chunk, BlockPos> serverChunks = new WeakNested.Set<>(Sets::newHashSet);
+	private WeakNested.Set<Chunk, BlockPos> clientChunks = new WeakNested.Set<>(Sets::newHashSet);
+
+	//	private Map<Chunk, List<BlockPos>> serverChunks = new WeakHashMap<>();
+	//	private Map<Chunk, List<BlockPos>> clientChunks = new WeakHashMap<>();
 
 	public ChunkBlockHandler()
 	{
 		MinecraftForge.EVENT_BUS.register(this);
 		MalisisRegistry.onPreSetBlock(this::handleChunkBlock, CallbackOption.of(Priority.LOWEST));
+	}
+
+	public WeakNested.Set<Chunk, BlockPos> chunks(Chunk chunk)
+	{
+		return chunk.getWorld().isRemote ? clientChunks : serverChunks;
 	}
 
 	/**
@@ -88,15 +95,15 @@ public class ChunkBlockHandler
 	 * @param chunk the chunk
 	 * @return the coords
 	 */
-	private Optional<List<BlockPos>> getCoords(Chunk chunk, List<BlockPos> newList)
-	{
-		Optional<List<BlockPos>> o = getCoords(chunk);
-		if (o.isPresent())
-			return o;
-
-		(chunk.getWorld().isRemote ? clientChunks : serverChunks).put(chunk, newList);
-		return Optional.of(newList);
-	}
+	//	private Optional<List<BlockPos>> getCoords(Chunk chunk, List<BlockPos> newList)
+	//	{
+	//		Optional<List<BlockPos>> o = getCoords(chunk);
+	//		if (o.isPresent())
+	//			return o;
+	//
+	//		(chunk.getWorld().isRemote ? clientChunks : serverChunks).put(chunk, newList);
+	//		return Optional.of(newList);
+	//	}
 
 	/**
 	 * Gets all the coordinates stored in the chunk.
@@ -104,11 +111,11 @@ public class ChunkBlockHandler
 	 * @param chunk the chunk
 	 * @return the coords
 	 */
-	public Optional<List<BlockPos>> getCoords(Chunk chunk)
-	{
-		Map<Chunk, List<BlockPos>> chunks = chunk.getWorld().isRemote ? clientChunks : serverChunks;
-		return Optional.ofNullable(chunks.get(chunk));
-	}
+	//	public Optional<List<BlockPos>> getCoords(Chunk chunk)
+	//	{
+	//		Map<Chunk, List<BlockPos>> chunks = chunk.getWorld().isRemote ? clientChunks : serverChunks;
+	//		return Optional.ofNullable(chunks.get(chunk));
+	//	}
 
 	/**
 	 * Stores the coordinate in the chunk data if newState blocks has a {@link IChunkBlock} component.<br>
@@ -152,7 +159,7 @@ public class ChunkBlockHandler
 	 */
 	private void addCoord(Chunk chunk, BlockPos pos)
 	{
-		getCoords(chunk, Lists.newArrayList()).ifPresent(l -> l.add(pos));
+		chunks(chunk).add(chunk, pos);
 	}
 
 	/**
@@ -175,7 +182,7 @@ public class ChunkBlockHandler
 	 */
 	private void removeCoord(Chunk chunk, BlockPos pos)
 	{
-		getCoords(chunk).ifPresent(l -> l.remove(pos));
+		chunks(chunk).remove(chunk, pos);
 	}
 
 	//#end updateCoordinates
@@ -191,7 +198,7 @@ public class ChunkBlockHandler
 	public void onDataLoad(ChunkDataEvent.Load event)
 	{
 		if (event.getData().hasKey("chunkNotifier"))
-			getCoords(event.getChunk(), readLongArray(event.getData()));
+			chunks(event.getChunk()).addAll(event.getChunk(), readLongArray(event.getData()));
 	}
 
 	/**
@@ -203,7 +210,9 @@ public class ChunkBlockHandler
 	@SubscribeEvent
 	public void onDataSave(ChunkDataEvent.Save event)
 	{
-		getCoords(event.getChunk()).ifPresent(l -> writeLongArray(event.getData(), l));
+		Set<BlockPos> coords = chunks(event.getChunk()).get(event.getChunk());
+		if (!coords.isEmpty())
+			writeLongArray(event.getData(), coords);
 	}
 
 	/**
@@ -214,13 +223,13 @@ public class ChunkBlockHandler
 	 * @param compound the compound
 	 * @return the long[]
 	 */
-	private List<BlockPos> readLongArray(NBTTagCompound compound)
+	private Set<BlockPos> readLongArray(NBTTagCompound compound)
 	{
 		ByteBuf bytes = Unpooled.copiedBuffer(compound.getByteArray("chunkNotifier"));
-		List<BlockPos> list = Lists.newArrayList();
+		Set<BlockPos> set = Sets.newHashSet();
 		for (int i = 0; i < bytes.capacity() / 8; i++)
-			list.add(BlockPos.fromLong(bytes.readLong()));
-		return list;
+			set.add(BlockPos.fromLong(bytes.readLong()));
+		return set;
 	}
 
 	/**
@@ -231,10 +240,10 @@ public class ChunkBlockHandler
 	 * @param compound the compound
 	 * @param longs the longs
 	 */
-	private void writeLongArray(NBTTagCompound compound, List<BlockPos> list)
+	private void writeLongArray(NBTTagCompound compound, Set<BlockPos> set)
 	{
-		ByteBuf bytes = Unpooled.buffer(list.size() * 8);
-		list.forEach(p -> bytes.writeLong(p.toLong()));
+		ByteBuf bytes = Unpooled.buffer(set.size() * 8);
+		set.forEach(p -> bytes.writeLong(p.toLong()));
 		compound.setByteArray("chunkNotifier", bytes.array());
 	}
 
@@ -248,7 +257,9 @@ public class ChunkBlockHandler
 	public void onChunkWatched(ChunkWatchEvent.Watch event)
 	{
 		Chunk chunk = event.getPlayer().worldObj.getChunkFromChunkCoords(event.getChunk().chunkXPos, event.getChunk().chunkZPos);
-		getCoords(chunk).ifPresent(l -> ChunkBlockMessage.sendCoords(chunk, l, event.getPlayer()));
+		Set<BlockPos> coords = chunks(chunk).get(chunk);
+		if (!coords.isEmpty())
+			ChunkBlockMessage.sendCoords(chunk, coords, event.getPlayer());
 	}
 
 	/**
@@ -259,10 +270,10 @@ public class ChunkBlockHandler
 	 * @param chunkZ the chunk z
 	 * @param coords the coords
 	 */
-	public void setCoords(int chunkX, int chunkZ, List<BlockPos> coords)
+	public void setCoords(int chunkX, int chunkZ, Set<BlockPos> coords)
 	{
 		Chunk chunk = Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(chunkX, chunkZ);
-		getCoords(chunk, coords);
+		chunks(chunk).addAll(chunk, coords);
 	}
 
 	//#end Events

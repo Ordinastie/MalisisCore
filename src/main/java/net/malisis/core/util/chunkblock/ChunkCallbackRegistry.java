@@ -24,7 +24,7 @@
 
 package net.malisis.core.util.chunkblock;
 
-import java.util.List;
+import java.util.Set;
 
 import net.malisis.core.util.callback.CallbackRegistry;
 import net.malisis.core.util.callback.CallbackResult;
@@ -56,11 +56,8 @@ public class ChunkCallbackRegistry<C extends IChunkCallback<V>, P extends IChunk
 	public CallbackResult<V> processCallbacks(Chunk chunk, Object... params)
 	{
 		//true = cancel => return
-		return ChunkBlockHandler.get()
-								.getCoords(chunk)
-								.map(list -> processListeners(list, chunk, params))
-								.orElse(CallbackResult.noResult());
-
+		Set<BlockPos> coords = ChunkBlockHandler.get().chunks(chunk).get(chunk);
+		return processListeners(coords, chunk, params);
 	}
 
 	/**
@@ -71,7 +68,7 @@ public class ChunkCallbackRegistry<C extends IChunkCallback<V>, P extends IChunk
 	 * @param params the params
 	 * @return the callback result
 	 */
-	private CallbackResult<V> processListeners(List<BlockPos> list, Chunk chunk, Object... params)
+	private CallbackResult<V> processListeners(Set<BlockPos> list, Chunk chunk, Object... params)
 	{
 		CallbackResult<V> result = CallbackResult.noResult();
 		for (BlockPos listener : list)
@@ -81,9 +78,7 @@ public class ChunkCallbackRegistry<C extends IChunkCallback<V>, P extends IChunk
 			if (result.isForcedCancelled())
 				return result;
 		}
-
 		return result;
-
 	}
 
 	/**

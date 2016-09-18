@@ -26,7 +26,7 @@ package net.malisis.core.util.chunkblock;
 
 import io.netty.buffer.ByteBuf;
 
-import java.util.List;
+import java.util.Set;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.network.IMalisisMessageHandler;
@@ -38,7 +38,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * @author Ordinastie
@@ -58,7 +58,7 @@ public class ChunkBlockMessage implements IMalisisMessageHandler<ChunkBlockMessa
 		ChunkBlockHandler.get().setCoords(message.x, message.z, message.coords);
 	}
 
-	public static void sendCoords(Chunk chunk, List<BlockPos> coords, EntityPlayerMP player)
+	public static void sendCoords(Chunk chunk, Set<BlockPos> coords, EntityPlayerMP player)
 	{
 		MalisisCore.network.sendTo(new Packet(chunk, coords), player);
 	}
@@ -67,12 +67,12 @@ public class ChunkBlockMessage implements IMalisisMessageHandler<ChunkBlockMessa
 	{
 		private int x;
 		private int z;
-		private List<BlockPos> coords;
+		private Set<BlockPos> coords;
 
 		public Packet()
 		{}
 
-		public Packet(Chunk chunk, List<BlockPos> coords)
+		public Packet(Chunk chunk, Set<BlockPos> coords)
 		{
 			this.x = chunk.xPosition;
 			this.z = chunk.zPosition;
@@ -84,7 +84,7 @@ public class ChunkBlockMessage implements IMalisisMessageHandler<ChunkBlockMessa
 		{
 			x = buf.readInt();
 			z = buf.readInt();
-			coords = Lists.newArrayList();
+			coords = Sets.newHashSet();
 			int count = buf.readInt();
 			for (int i = 0; i < count; i++)
 				coords.add(BlockPos.fromLong(buf.readLong()));
