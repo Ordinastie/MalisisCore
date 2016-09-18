@@ -30,7 +30,10 @@ import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.asm.MalisisClassTransformer;
 import net.malisis.core.asm.mappings.McpFieldMapping;
 import net.malisis.core.asm.mappings.McpMethodMapping;
+import net.malisis.core.util.Point;
+import net.minecraft.util.math.RayTraceResult;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
@@ -94,6 +97,13 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		return ah;
 	}
 
+	void test()
+	{
+		Pair<Point, Point> pair = ChunkCollision.get().setRayTraceInfos(null, null);
+		RayTraceResult res = null;
+		res = ChunkCollision.get().getRayTraceResult(null, pair, res);
+	}
+
 	@SuppressWarnings("deprecation")
 	private AsmHook rayTraceHook()
 	{
@@ -109,7 +119,8 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		setRayTraceInfos.add(new VarInsnNode(ALOAD, 1));
 		setRayTraceInfos.add(new VarInsnNode(ALOAD, 2));
 		setRayTraceInfos.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "setRayTraceInfos",
-				"(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;)V"));
+				"(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;)Lorg/apache/commons/lang3/tuple/Pair;"));
+		setRayTraceInfos.add(new VarInsnNode(ASTORE, 42));
 
 		//L966 return movingobjectposition;
 		//ALOAD 15
@@ -124,9 +135,13 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		insertMop.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "get",
 				"()Lnet/malisis/core/util/chunkcollision/ChunkCollision;"));
 		insertMop.add(new VarInsnNode(ALOAD, 0));
+		insertMop.add(new VarInsnNode(ALOAD, 42));
 		insertMop.add(new VarInsnNode(ALOAD, 15));
-		insertMop.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "getRayTraceResult",
-				"(Lnet/minecraft/world/World;Lnet/minecraft/util/math/RayTraceResult;)Lnet/minecraft/util/math/RayTraceResult;"));
+		insertMop.add(new MethodInsnNode(
+				INVOKEVIRTUAL,
+				"net/malisis/core/util/chunkcollision/ChunkCollision",
+				"getRayTraceResult",
+				"(Lnet/minecraft/world/World;Lorg/apache/commons/lang3/tuple/Pair;Lnet/minecraft/util/math/RayTraceResult;)Lnet/minecraft/util/math/RayTraceResult;"));
 		insertMop.add(new VarInsnNode(ASTORE, 15));
 
 		//L982 return returnLastUncollidableBlock ? movingobjectposition2 : null;
@@ -158,9 +173,13 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		insertMop1.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/chunkcollision/ChunkCollision", "get",
 				"()Lnet/malisis/core/util/chunkcollision/ChunkCollision;"));
 		insertMop1.add(new VarInsnNode(ALOAD, 0));
+		insertMop1.add(new VarInsnNode(ALOAD, 42));
 		insertMop1.add(new VarInsnNode(ALOAD, 41));
-		insertMop1.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/chunkcollision/ChunkCollision", "getRayTraceResult",
-				"(Lnet/minecraft/world/World;Lnet/minecraft/util/math/RayTraceResult;)Lnet/minecraft/util/math/RayTraceResult;"));
+		insertMop1.add(new MethodInsnNode(
+				INVOKEVIRTUAL,
+				"net/malisis/core/util/chunkcollision/ChunkCollision",
+				"getRayTraceResult",
+				"(Lnet/minecraft/world/World;Lorg/apache/commons/lang3/tuple/Pair;Lnet/minecraft/util/math/RayTraceResult;)Lnet/minecraft/util/math/RayTraceResult;"));
 		insertMop1.add(new VarInsnNode(ASTORE, 41));
 
 		//L1111 return returnLastUncollidableBlock ? movingobjectposition2 : null;
@@ -241,7 +260,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		insert.add(new InsnNode(ARETURN));
 		insert.add(label);
 
-		ah.jumpTo(match).insert(insert);
+		ah.jumpTo(match).insert(insert).debug();
 
 		return ah;
 	}

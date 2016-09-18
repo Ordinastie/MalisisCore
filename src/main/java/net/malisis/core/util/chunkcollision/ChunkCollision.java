@@ -60,6 +60,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * This class is the entry point for all the chunk collision related calculation.<br>
@@ -112,8 +113,8 @@ public class ChunkCollision
 
 	private CallbackResult<Void> collisionBoxesCallback(Chunk chunk, BlockPos listener, Object... params)
 	{
-
-		IBlockState state = chunk.getBlockState(listener);
+		//make sure to get the state from world, because listener may not be inside the passed chunk
+		IBlockState state = chunk.getWorld().getBlockState(listener);
 		IChunkCollidable cc = IComponent.getComponent(IChunkCollidable.class, state.getBlock());
 		AxisAlignedBB mask = (AxisAlignedBB) params[0];
 		@SuppressWarnings("unchecked")
@@ -136,10 +137,6 @@ public class ChunkCollision
 	//#end getCollisionBoundinBoxes
 
 	//#region getRayTraceResult
-
-	private Point src;
-	private Point dest;
-
 	/**
 	 * Sets the ray trace infos.<br>
 	 * Called via ASM at the beginning of {@link World#rayTraceBlocks(Vec3d, Vec3d, boolean, boolean, boolean)}
@@ -147,23 +144,11 @@ public class ChunkCollision
 	 * @param src the src
 	 * @param dest the dest
 	 */
-	public void setRayTraceInfos(Vec3d src, Vec3d dest)
+	public Pair<Point, Point> setRayTraceInfos(Vec3d src, Vec3d dest)
 	{
 		if (src == null || dest == null)
-			return;
-		setRayTraceInfos(new Point(src), new Point(dest));
-	}
-
-	/**
-	 * Sets the ray trace infos.
-	 *
-	 * @param src the src
-	 * @param dest the dest
-	 */
-	public void setRayTraceInfos(Point src, Point dest)
-	{
-		this.src = src;
-		this.dest = dest;
+			return null;
+		return Pair.of(new Point(src), new Point(dest));
 	}
 
 	/**
@@ -174,27 +159,23 @@ public class ChunkCollision
 	 * @param result the mop
 	 * @return the ray trace result
 	 */
-	public RayTraceResult getRayTraceResult(World world, RayTraceResult result)
+	public RayTraceResult getRayTraceResult(World world, Pair<Point, Point> infos, RayTraceResult result)
 	{
-		if (src == null || dest == null)
+		if (infos == null)
 			return result;
 
-		RayTraceResult tmp = new RaytraceChunk(world, src, dest).trace();
-		result = Raytrace.getClosestHit(Type.BLOCK, src, result, tmp);
-
-		src = null;
-		dest = null;
-		return result;
+		RayTraceResult tmp = new RaytraceChunk(world, infos.getLeft(), infos.getRight()).trace();
+		return Raytrace.getClosestHit(Type.BLOCK, infos.getLeft(), result, tmp);
 	}
 
-	public RayTraceResult processCallbacks(Chunk chunk)
+	public RayTraceResult processCallbacks(Chunk chunk, Point src, Point dest)
 	{
-		return rayTraceRegistry.processCallbacks(chunk).getValue();
+		return rayTraceRegistry.processCallbacks(chunk, src, dest).getValue();
 	}
 
 	private CallbackResult<RayTraceResult> rayTraceCallback(Chunk chunk, BlockPos listener, Object... params)
 	{
-		RayTraceResult result = new RaytraceBlock(chunk.getWorld(), src, dest, listener).trace();
+		RayTraceResult result = new RaytraceBlock(chunk.getWorld(), (Point) params[0], (Point) params[1], listener).trace();
 		return result != null ? CallbackResult.of(result) : CallbackResult.noResult();
 	}
 

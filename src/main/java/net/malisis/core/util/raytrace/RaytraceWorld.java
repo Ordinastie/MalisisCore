@@ -37,6 +37,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 /**
  * RayTrace class that offers more control to handle raytracing.
  *
@@ -226,8 +228,7 @@ public class RaytraceWorld extends Raytrace
 		if (firstHit == null && dest != null)
 			firstHit = new RayTraceResult(RayTraceResult.Type.MISS, dest.toVec3d(), null, new BlockPos(currentX, currentY, currentZ));
 
-		ChunkCollision.get().setRayTraceInfos(src, dest);
-		firstHit = ChunkCollision.get().getRayTraceResult(world, firstHit);
+		firstHit = ChunkCollision.get().getRayTraceResult(world, Pair.of(src, dest), firstHit);
 
 		if (!ret)
 			MalisisCore.message("Trace fail : " + MAX_BLOCKS + " blocks passed (" + currentX + "," + currentY + "," + currentZ + ")");
