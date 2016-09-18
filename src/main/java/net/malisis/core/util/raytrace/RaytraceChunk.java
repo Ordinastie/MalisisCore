@@ -66,9 +66,9 @@ public class RaytraceChunk extends Raytrace
 		super(ray);
 		this.world = world;
 
-		int stepX = 1, stepZ = 1;
+		int stepX = 16, stepZ = 16;
 		if (ray.direction.x < 0)
-			stepX = -1;
+			stepX = -16;
 		if (ray.direction.z < 0)
 			stepZ = -1;
 
@@ -113,26 +113,26 @@ public class RaytraceChunk extends Raytrace
 		int count = 0;
 		boolean ret = false;
 
-		int currentX = ((int) src.x) >> 4;
-		int currentZ = ((int) src.y) >> 4;
+		int currentX = (int) src.x;
+		int currentZ = (int) src.z;
 
 		while (!ret && count++ <= MAX_CHUNKS)
 		{
-			tX = ray.intersectX(currentX + (ray.direction.x > 0 ? 1 : 0));
-			tZ = ray.intersectZ(currentZ + (ray.direction.z > 0 ? 1 : 0));
+			tX = ray.intersectX(currentX + (ray.direction.x > 0 ? 16 : 0));
+			tZ = ray.intersectZ(currentZ + (ray.direction.z > 0 ? 16 : 0));
 
 			min = getMin(tX, tZ);
 			Point exit = ray.getPointAt(min);
 			if (exit == null || exit.y <= 0 || exit.y >= 256)
 				ret = true;
 
-			if (dest != null && Point.distanceSquared(src, dest) < Point.distanceSquared(src, exit))
+			if (dest != null && exit != null && Point.distanceSquared(src, dest) < Point.distanceSquared(src, exit))
 				ret = true;
 
-			Optional<Chunk> chunk = Utils.getLoadedChunk(world, new BlockPos(currentX << 4, 0, currentZ << 4));
+			Optional<Chunk> chunk = Utils.getLoadedChunk(world, new BlockPos(currentX, 0, currentZ));
 			if (chunk.isPresent())
 			{
-				mop = ChunkCollision.get().processCallbacks(chunk.get());
+				mop = ChunkCollision.get().processCallbacks(chunk.get(), src, dest);
 				chunks.add(chunk.get());
 			}
 			else
@@ -140,7 +140,7 @@ public class RaytraceChunk extends Raytrace
 
 			firstHit = Raytrace.getClosestHit(Type.BLOCK, src, firstHit, mop);
 
-			if (dest != null && currentX == ((int) dest.x) << 4 && currentZ == ((int) dest.y) << 4)
+			if (dest != null && currentX == (int) dest.x && currentZ == (int) dest.y)
 				ret = true;
 
 			if (!ret)
