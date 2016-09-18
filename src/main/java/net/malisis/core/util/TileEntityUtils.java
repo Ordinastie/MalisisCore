@@ -24,29 +24,13 @@
 
 package net.malisis.core.util;
 
-import java.util.List;
-import java.util.stream.Stream;
-
-import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.renderer.ISortedRenderable;
-import net.malisis.core.renderer.ISortedRenderable.SortedRenderableManager;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.chunk.RenderChunk;
-import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Utility class for {@link TileEntity}.
@@ -111,21 +95,6 @@ public class TileEntityUtils
 		currenGui.updateGui();
 	}
 
-	public static AxisAlignedBB getRenderingBounds(TileEntity tileEntity)
-	{
-		Block block = tileEntity.getBlockType();
-		BlockPos pos = tileEntity.getPos();
-		World world = tileEntity.getWorld();
-		AxisAlignedBB aabb = null;
-		if (block instanceof IBoundingBox)
-		{
-			aabb = AABBUtils.combine(((IBoundingBox) block).getRenderBoundingBox(world, pos, world.getBlockState(pos)));
-			aabb = AABBUtils.offset(pos, aabb);
-		}
-
-		return aabb != null ? aabb : AABBUtils.identity(pos);
-	}
-
 	public static void notifyUpdate(TileEntity te)
 	{
 		if (te.getWorld() == null)
@@ -133,29 +102,4 @@ public class TileEntityUtils
 		IBlockState state = te.getWorld().getBlockState(te.getPos());
 		te.getWorld().notifyBlockUpdate(te.getPos(), state, state, 3);
 	}
-
-	//fix for TESR sorting
-	@SideOnly(Side.CLIENT)
-	public static List<TileEntity> renderSortedTileEntities(RenderChunk renderChunk, List<TileEntity> list, ICamera camera, float partialTick)
-	{
-		boolean b = false;
-		if (b)
-			return list;
-
-		Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
-		World world = entity.worldObj;
-		Chunk chunk = world.getChunkFromBlockCoords(renderChunk.getPosition());
-
-		double x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTick;
-		double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTick;
-		double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTick;
-
-		Stream.concat(list.stream().map(ISortedRenderable.TE::new), SortedRenderableManager.getRenderables(chunk))
-				.filter(r -> r.inFrustrum(camera))
-				.sorted((r1, r2) -> r1.getPos().distanceSqToCenter(x, y, z) > r2.getPos().distanceSqToCenter(x, y, z) ? -1 : 1)
-				.forEach(r -> r.render(partialTick));
-
-		return ImmutableList.of();
-	}
-
 }
