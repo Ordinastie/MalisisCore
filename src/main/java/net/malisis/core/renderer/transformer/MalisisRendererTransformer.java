@@ -197,7 +197,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 	}
 
 	@SuppressWarnings("deprecation")
-	public AsmHook tileEntityHook()
+	private AsmHook tileEntityHook()
 	{
 		AsmHook ah = new AsmHook(new McpMethodMapping("renderEntities", "func_180446_a", "net/minecraft/client/renderer/RenderGlobal",
 				"(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ICamera;F)V"));
@@ -222,7 +222,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		match.add(getTileEntities.getInsnNode(INVOKEVIRTUAL));
 		match.add(new VarInsnNode(ASTORE, 24));
 
-		//list3 = TileEntityUtils.renderSortedTileEntities(renderglobal$containerlocalrenderinformation.renderChunk, list3, camera, partialTicks);
+		//list3 = AnimatedRenderer.renderSortedTileEntities(renderglobal$containerlocalrenderinformation.renderChunk, list3, camera, partialTicks);
 		//		    ALOAD 23
 		//			GETFIELD net/minecraft/client/renderer/RenderGlobal$ContainerLocalRenderInformation.renderChunk : Lnet/minecraft/client/renderer/chunk/RenderChunk;
 		//			ALOAD 24
@@ -237,7 +237,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		insert.add(new VarInsnNode(ALOAD, 24));
 		insert.add(new VarInsnNode(ALOAD, 2));
 		insert.add(new VarInsnNode(FLOAD, 3));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/TileEntityUtils", "renderSortedTileEntities",
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/renderer/AnimatedRenderer", "renderSortedTileEntities",
 				"(Lnet/minecraft/client/renderer/chunk/RenderChunk;Ljava/util/List;Lnet/minecraft/client/renderer/culling/ICamera;F)Ljava/util/List;"));
 		insert.add(new VarInsnNode(ASTORE, 24));
 

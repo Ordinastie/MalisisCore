@@ -40,5 +40,4 @@ public interface IAnimatedRenderable
 	public Timer getTimer(String animation);
 
 	public void renderAnimated(Block block, AnimatedRenderer renderer);
-
 }

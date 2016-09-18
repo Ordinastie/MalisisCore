@@ -31,13 +31,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.AnimatedRenderer;
-import net.malisis.core.renderer.ISortedRenderable.AMC;
-import net.malisis.core.renderer.ISortedRenderable.SortedRenderableManager;
+import net.malisis.core.renderer.DefaultRenderer;
+import net.malisis.core.renderer.IAnimatedRenderable;
+import net.malisis.core.renderer.ISortedRenderable;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.RenderType;
@@ -47,13 +49,20 @@ import net.malisis.core.renderer.model.IAnimationLoader;
 import net.malisis.core.util.Timer;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.culling.ICamera;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
@@ -106,7 +115,7 @@ public class AnimatedModelComponent extends ModelComponent
 
 	private Optional<AMC> get(BlockPos pos)
 	{
-		return SortedRenderableManager.getSortedRenderable(pos);
+		return AnimatedRenderer.getRenderable(pos);
 	}
 
 	private Timer addTimer(BlockPos pos, String animation, Timer timer)
@@ -263,6 +272,12 @@ public class AnimatedModelComponent extends ModelComponent
 		return getTimer(pos, animation) != null;
 	}
 
+	private void onRender(IBlockAccess world, BlockPos pos, IBlockState state)
+	{
+		checkState(world, pos, state);
+		AnimatedRenderer.registerRenderable(pos, this);
+	}
+
 	@Override
 	public void render(Block block, MalisisRenderer<TileEntity> renderer)
 	{
@@ -272,6 +287,9 @@ public class AnimatedModelComponent extends ModelComponent
 			loadModel();
 			autoDetectAnimatedGroups();
 		}
+
+		if (renderer.getRenderType() == RenderType.BLOCK)
+			onRender(renderer.getWorldAccess(), renderer.getPos(), renderer.getBlockState());
 
 		RenderParameters rp = new RenderParameters();
 		rp.rotateIcon.set(false);
@@ -326,6 +344,11 @@ public class AnimatedModelComponent extends ModelComponent
 		animatedShapes.forEach(name -> model.render(renderer, name, rp));
 	}
 
+	public AMC createRenderable(World world, BlockPos pos)
+	{
+		return new AMC(world, pos, this);
+	}
+
 	/**
 	 * Gets the {@link AnimatedModelComponent} associated to the {@link IComponentProvider}.
 	 *
@@ -344,5 +367,86 @@ public class AnimatedModelComponent extends ModelComponent
 	public interface IStateCheck
 	{
 		public void accept(IBlockAccess world, BlockPos pos, IBlockState state, AnimatedModelComponent amc);
+	}
+
+	public static class AMC implements ISortedRenderable, IAnimatedRenderable
+	{
+		private World world;
+		private BlockPos pos;
+		private AnimatedModelComponent amc;
+		private Map<String, Timer> timers = Maps.newHashMap();
+
+		public AMC(World world, BlockPos pos, AnimatedModelComponent amc)
+		{
+			this.world = world;
+			this.pos = pos;
+			this.amc = amc;
+		}
+
+		@Override
+		public BlockPos getPos()
+		{
+			return pos;
+		}
+
+		public AnimatedModelComponent getComponent()
+		{
+			return amc;
+		}
+
+		@Override
+		public Timer addTimer(String animation, Timer timer)
+		{
+			return timers.put(animation, Preconditions.checkNotNull(timer));
+		}
+
+		@Override
+		public Timer removeTimer(String animation)
+		{
+			return timers.remove(animation);
+		}
+
+		@Override
+		public Timer getTimer(String animation)
+		{
+			return timers.get(animation);
+		}
+
+		public Map<String, Timer> getTimers()
+		{
+			return ImmutableMap.copyOf(timers);
+		}
+
+		@Override
+		public boolean inFrustrum(ICamera camera)
+		{
+			return camera.isBoundingBoxInFrustum(IBoundingBox.getRenderingBounds(world, pos));
+		}
+
+		@Override
+		public boolean isPositionStillValid()
+		{
+			IBlockState state = Minecraft.getMinecraft().theWorld.getBlockState(getPos());
+			AnimatedModelComponent blockComponent = IComponent.getComponent(AnimatedModelComponent.class, state.getBlock());
+			if (getComponent() == blockComponent)
+				MalisisCore.message("POS NOT VALID ANYMORE : " + pos);
+			return getComponent() == blockComponent;
+		}
+
+		@Override
+		public void render(float partialTick)
+		{
+			double x = pos.getX() - TileEntityRendererDispatcher.staticPlayerX;
+			double y = pos.getY() - TileEntityRendererDispatcher.staticPlayerY;
+			double z = pos.getZ() - TileEntityRendererDispatcher.staticPlayerZ;
+			DefaultRenderer.animated.renderAnimated(TileEntityRendererDispatcher.instance.worldObj, pos, this, x, y, z, partialTick);
+		}
+
+		@Override
+		public void renderAnimated(Block block, AnimatedRenderer renderer)
+		{
+			amc.renderAnimated(block, this, renderer);
+		}
+
 	}
 }
