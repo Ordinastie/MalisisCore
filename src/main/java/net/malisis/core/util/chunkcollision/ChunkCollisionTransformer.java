@@ -30,10 +30,7 @@ import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.asm.MalisisClassTransformer;
 import net.malisis.core.asm.mappings.McpFieldMapping;
 import net.malisis.core.asm.mappings.McpMethodMapping;
-import net.malisis.core.util.Point;
-import net.minecraft.util.math.RayTraceResult;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
@@ -97,20 +94,18 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		return ah;
 	}
 
-	void test()
-	{
-		Pair<Point, Point> pair = ChunkCollision.get().setRayTraceInfos(null, null);
-		RayTraceResult res = null;
-		res = ChunkCollision.get().getRayTraceResult(null, pair, res);
-	}
-
 	@SuppressWarnings("deprecation")
 	private AsmHook rayTraceHook()
 	{
-		McpMethodMapping func_147447_a = new McpMethodMapping("rayTraceBlocks", "func_147447_a", "net.minecraft.world.World",
+		McpMethodMapping rayTraceBlocks = new McpMethodMapping("rayTraceBlocks", "func_147447_a", "net.minecraft.world.World",
 				"(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;ZZZ)Lnet/minecraft/util/math/RayTraceResult;");
+		McpMethodMapping getRayTraceResult = new McpMethodMapping(
+				"getRayTraceResult",
+				"getRayTraceResult",
+				"net/malisis/core/util/chunkcollision/ChunkCollision",
+				"(Lnet/minecraft/world/World;Lorg/apache/commons/lang3/tuple/Pair;Lnet/minecraft/util/math/RayTraceResult;ZZZ)Lnet/minecraft/util/math/RayTraceResult;");
 
-		AsmHook ah = new AsmHook(func_147447_a);
+		AsmHook ah = new AsmHook(rayTraceBlocks);
 
 		//setRayTraceInfos(Lnet/minecraft/world/World;Lnet/minecraft/util/Vec3d;Lnet/minecraft/util/Vec3;)V
 		InsnList setRayTraceInfos = new InsnList();
@@ -137,12 +132,11 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		insertMop.add(new VarInsnNode(ALOAD, 0));
 		insertMop.add(new VarInsnNode(ALOAD, 42));
 		insertMop.add(new VarInsnNode(ALOAD, 15));
-		insertMop.add(new MethodInsnNode(
-				INVOKEVIRTUAL,
-				"net/malisis/core/util/chunkcollision/ChunkCollision",
-				"getRayTraceResult",
-				"(Lnet/minecraft/world/World;Lorg/apache/commons/lang3/tuple/Pair;Lnet/minecraft/util/math/RayTraceResult;)Lnet/minecraft/util/math/RayTraceResult;"));
-		insertMop.add(new VarInsnNode(ASTORE, 15));
+		insertMop.add(new VarInsnNode(ILOAD, 3));
+		insertMop.add(new VarInsnNode(ILOAD, 4));
+		insertMop.add(new VarInsnNode(ILOAD, 5));
+		insertMop.add(getRayTraceResult.getInsnNode(INVOKEVIRTUAL));
+		insertMop.add(new InsnNode(ARETURN));
 
 		//L982 return returnLastUncollidableBlock ? movingobjectposition2 : null;
 		//ILOAD 5
@@ -175,12 +169,11 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		insertMop1.add(new VarInsnNode(ALOAD, 0));
 		insertMop1.add(new VarInsnNode(ALOAD, 42));
 		insertMop1.add(new VarInsnNode(ALOAD, 41));
-		insertMop1.add(new MethodInsnNode(
-				INVOKEVIRTUAL,
-				"net/malisis/core/util/chunkcollision/ChunkCollision",
-				"getRayTraceResult",
-				"(Lnet/minecraft/world/World;Lorg/apache/commons/lang3/tuple/Pair;Lnet/minecraft/util/math/RayTraceResult;)Lnet/minecraft/util/math/RayTraceResult;"));
-		insertMop1.add(new VarInsnNode(ASTORE, 41));
+		insertMop1.add(new VarInsnNode(ILOAD, 3));
+		insertMop1.add(new VarInsnNode(ILOAD, 4));
+		insertMop1.add(new VarInsnNode(ILOAD, 5));
+		insertMop1.add(getRayTraceResult.getInsnNode(INVOKEVIRTUAL));
+		insertMop1.add(new InsnNode(ARETURN));
 
 		//L1111 return returnLastUncollidableBlock ? movingobjectposition2 : null;
 		//returnMop2OrNull
@@ -190,13 +183,19 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		//insertMop_3 = insertMop
 		InsnList insertMop_3 = AsmUtils.cloneList(insertMop);
 
-		//@formatter:off
 		ah.insert(setRayTraceInfos)
-			.jumpTo(returnMop).insert(insertMop) //L966
-			.jumpTo(returnMop2OrNull).insert(insertMop_2) //L982
-			.jumpTo(returnMop1).insert(insertMop1) //L1101
-			.jumpTo(returnMop2OrNull).insert(insertMop_3); //L1111
-		//@formatter:on
+		//L966
+			.jumpTo(returnMop)
+			.insert(insertMop)
+			//L982
+			.jumpTo(returnMop2OrNull)
+			.insert(insertMop_2)
+			//L1101
+			.jumpTo(returnMop1)
+			.insert(insertMop1)
+			//L1111
+			.jumpTo(returnMop2OrNull)
+			.insert(insertMop_3);
 
 		return ah;
 	}

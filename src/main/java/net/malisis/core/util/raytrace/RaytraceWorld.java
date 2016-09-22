@@ -228,7 +228,12 @@ public class RaytraceWorld extends Raytrace
 		if (firstHit == null && dest != null)
 			firstHit = new RayTraceResult(RayTraceResult.Type.MISS, dest.toVec3d(), null, new BlockPos(currentX, currentY, currentZ));
 
-		firstHit = ChunkCollision.get().getRayTraceResult(world, Pair.of(src, dest), firstHit);
+		firstHit = ChunkCollision.get().getRayTraceResult(world,
+				Pair.of(src, dest),
+				firstHit,
+				hasOption(Options.HIT_LIQUIDS),
+				hasOption(Options.CHECK_COLLISION),
+				true);
 
 		if (!ret)
 			MalisisCore.message("Trace fail : " + MAX_BLOCKS + " blocks passed (" + currentX + "," + currentY + "," + currentZ + ")");

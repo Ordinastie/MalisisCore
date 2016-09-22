@@ -159,13 +159,14 @@ public class ChunkCollision
 	 * @param result the mop
 	 * @return the ray trace result
 	 */
-	public RayTraceResult getRayTraceResult(World world, Pair<Point, Point> infos, RayTraceResult result)
+	public RayTraceResult getRayTraceResult(World world, Pair<Point, Point> infos, RayTraceResult result, boolean stopOnLiquid, boolean ignoreBlockWithoutBoundingBox, boolean returnLastUncollidableBlock)
 	{
 		if (infos == null)
 			return result;
 
 		RayTraceResult tmp = new RaytraceChunk(world, infos.getLeft(), infos.getRight()).trace();
-		return Raytrace.getClosestHit(Type.BLOCK, infos.getLeft(), result, tmp);
+		result = Raytrace.getClosestHit(Type.BLOCK, infos.getLeft(), result, tmp);
+		return returnLastUncollidableBlock || result == null || result.typeOfHit == Type.BLOCK ? result : null;
 	}
 
 	public RayTraceResult processCallbacks(Chunk chunk, Point src, Point dest)
