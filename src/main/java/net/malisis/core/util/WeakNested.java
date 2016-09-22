@@ -124,7 +124,7 @@ public abstract class WeakNested<K, V>
 
 		public void remove(K key, V value)
 		{
-			java.util.Collection<V> l = get(key);
+			java.util.Collection<V> l = internalMap.get(key);
 			if (l == null)
 				return;
 
