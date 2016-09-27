@@ -400,8 +400,9 @@ public class MalisisFont
 	 */
 	public String processString(String str, FontRenderOptions fro)
 	{
+		str = str.replaceAll("\r?\n", "");
 		str = translate(str);
-		//str = str.replaceAll("\r?\n", "").replaceAll("\t", "    ");
+		//.replaceAll("\t", "    ");
 		return str;
 	}
 
@@ -651,6 +652,13 @@ public class MalisisFont
 		float wordWidth = 0;
 
 		str = processString(str, fro);
+		texts = str.split("\\\\r?\\\\n");
+		if (texts.length > 1)
+		{
+			for (String t : texts)
+				lines.addAll(wrapText(t, maxWidth, fro));
+			return lines;
+		}
 
 		StringWalker walker = new StringWalker(str, this, fro);
 		walker.skipChars(false);
