@@ -39,7 +39,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-// TODO: Auto-generated Javadoc
 /**
  * Base class for anything drawn with a {@link MalisisRenderer}. Supports basic transformations like scaling, translation and rotations.
  *

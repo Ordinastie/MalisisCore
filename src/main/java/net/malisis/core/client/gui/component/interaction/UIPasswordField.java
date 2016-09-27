@@ -6,7 +6,6 @@ import net.minecraft.client.gui.GuiScreen;
 
 import org.lwjgl.input.Keyboard;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class UIPasswordField.
  */
