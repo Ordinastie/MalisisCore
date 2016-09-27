@@ -111,6 +111,10 @@ public class AnimatedModelComponent extends ModelComponent
 
 		Set<String> staticList = model.getShapeNames().stream().filter(s -> !animList.contains(s)).collect(Collectors.toSet());
 		staticShapes = Sets.newHashSet(staticList);
+
+		//Debug: all animated
+		//		animatedShapes.addAll(staticShapes);
+		//		staticShapes.clear();
 	}
 
 	private Optional<AMC> get(BlockPos pos)
@@ -288,7 +292,7 @@ public class AnimatedModelComponent extends ModelComponent
 			autoDetectAnimatedGroups();
 		}
 
-		if (renderer.getRenderType() == RenderType.BLOCK)
+		if (renderer.getRenderType() == RenderType.BLOCK && animatedShapes.size() != 0)
 			onRender(renderer.getWorldAccess(), renderer.getPos(), renderer.getBlockState());
 
 		RenderParameters rp = new RenderParameters();
@@ -340,7 +344,6 @@ public class AnimatedModelComponent extends ModelComponent
 		}
 
 		//render the shapes
-		renderer.enableBlending();
 		animatedShapes.forEach(name -> model.render(renderer, name, rp));
 	}
 

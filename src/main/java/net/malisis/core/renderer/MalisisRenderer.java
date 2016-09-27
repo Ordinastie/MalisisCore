@@ -51,6 +51,7 @@ import net.malisis.core.renderer.model.MalisisModel;
 import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.EnumFacingUtils;
 import net.malisis.core.util.ItemUtils;
+import net.malisis.core.util.Silenced;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -62,6 +63,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -78,6 +80,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -96,6 +99,11 @@ import com.google.common.collect.Sets;
  */
 public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRenderer<T> implements IBlockRenderer, IRenderWorldLast
 {
+	/** Batched buffer reference. */
+	protected static final VertexBuffer batchedBuffer = ((Tessellator) Silenced.get(() -> AsmUtils.changeFieldAccess(TileEntityRendererDispatcher.class,
+			"batchBuffer")
+																									.get(TileEntityRendererDispatcher.instance))).getBuffer();
+
 	public static VertexFormat malisisVertexFormat = new VertexFormat()
 	{
 		{
@@ -110,8 +118,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 	/** Whether this {@link MalisisRenderer} initialized. (initialize() already called) */
 	private boolean initialized = false;
-	/** Tessellator reference. */
-	protected VertexBuffer buffer = Tessellator.getInstance().getBuffer();
+	/** Currently used buffer. */
+	protected VertexBuffer buffer = null;
 	/** Current used vertex format. */
 	protected VertexFormat vertexFormat = malisisVertexFormat;
 	/** Current world reference (BLOCK/TESR/IRWL). */
@@ -140,6 +148,10 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	protected int drawMode = GL11.GL_QUADS;
 	/** Base brightness of the block. */
 	protected int baseBrightness;
+	/** Whether the rendering is batched (TESR/ANIMATED). **/
+	protected boolean isBatched = false;
+	/** Vertex positions offset. **/
+	protected Vec3d posOffset = null;
 
 	/** List of classes the Block is allowed to be. */
 	private Set<Class<?>> ensureBlocks = Sets.newHashSet();
@@ -211,6 +223,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		this.itemStack = null;
 		this.destroyBlockProgress = null;
 		this.tranformType = null;
+		this.posOffset = null;
 	}
 
 	/**
@@ -331,6 +344,11 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		return ensureBlocks.contains(block.getClass());
 	}
 
+	protected void setBatched()
+	{
+		this.isBatched = true;
+	}
+
 	// #end
 
 	//#region IBlockRenderer
@@ -406,7 +424,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	{
 		if (te.getWorld().getBlockState(te.getPos()).getBlock() == Blocks.AIR)
 			return;
-		this.buffer = Tessellator.getInstance().getBuffer();
+		this.buffer = isBatched ? batchedBuffer : Tessellator.getInstance().getBuffer();
 		set(te, partialTick);
 		prepare(RenderType.TILE_ENTITY, x, y, z);
 		if (checkBlock())
@@ -490,6 +508,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (renderType == RenderType.BLOCK)
 		{
 			vertexFormat = DefaultVertexFormats.BLOCK;
+			//when drawing a block, the position to draw is relative to current chunk
+			BlockPos chunkPos = BlockPosUtils.chunkPosition(pos);
+			posOffset = new Vec3d(chunkPos.getX(), chunkPos.getY(), chunkPos.getZ());
 		}
 		else if (renderType == RenderType.ITEM)
 		{
@@ -497,15 +518,20 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		}
 		else if (renderType == RenderType.TILE_ENTITY)
 		{
-			GlStateManager.pushAttrib();
-			GlStateManager.pushMatrix();
-			GlStateManager.disableLighting();
+			if (isBatched)
+				posOffset = new Vec3d(data[0], data[1], data[2]);
+			else
+			{
+				GlStateManager.pushAttrib();
+				GlStateManager.pushMatrix();
+				GlStateManager.disableLighting();
 
-			GlStateManager.translate(data[0], data[1], data[2]);
+				GlStateManager.translate(data[0], data[1], data[2]);
 
-			bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+				bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
-			startDrawing();
+				startDrawing();
+			}
 		}
 		else if (renderType == RenderType.WORLD_LAST)
 		{
@@ -536,11 +562,16 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		}
 		else if (renderType == RenderType.TILE_ENTITY)
 		{
-			draw();
-			disableBlending();
-			GlStateManager.enableLighting();
-			GlStateManager.popMatrix();
-			GlStateManager.popAttrib();
+			if (isBatched)
+				buffer.setTranslation(0, 0, 0);
+			else
+			{
+				draw();
+				disableBlending();
+				GlStateManager.enableLighting();
+				GlStateManager.popMatrix();
+				GlStateManager.popAttrib();
+			}
 		}
 		else if (renderType == RenderType.WORLD_LAST)
 		{
@@ -899,19 +930,18 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 * @param vertex the vertex
 	 * @return the vertex data
 	 */
+	//TODO: move into Vertex (v.getData(format, offset))?
 	private int[] getVertexData(Vertex vertex)
 	{
 		float x = (float) vertex.getX();
 		float y = (float) vertex.getY();
 		float z = (float) vertex.getZ();
 
-		if (renderType == RenderType.BLOCK)
+		if (posOffset != null)
 		{
-			//when drawing a block, the position to draw is relative to current chunk
-			BlockPos chunkPos = BlockPosUtils.chunkPosition(pos);
-			x += chunkPos.getX();
-			y += chunkPos.getY();
-			z += chunkPos.getZ();
+			x += posOffset.xCoord;
+			y += posOffset.yCoord;
+			z += posOffset.zCoord;
 		}
 
 		int[] data = new int[vertexFormat.getIntegerSize()];
@@ -933,7 +963,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (vertexFormat.hasUvOffset(1)) //brightness UVs
 			data[index++] = vertex.getBrightness();
 		if (vertexFormat.hasNormal())
-			data[7] = vertex.getNormal();
+			data[index++] = vertex.getNormal();
 
 		return data;
 	}

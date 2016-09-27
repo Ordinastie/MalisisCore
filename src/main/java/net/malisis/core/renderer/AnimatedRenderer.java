@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import net.malisis.core.MalisisCoreSettings;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.registry.MalisisRegistry;
 import net.malisis.core.renderer.component.AnimatedModelComponent;
@@ -46,8 +47,10 @@ import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.client.MinecraftForgeClient;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -73,8 +76,10 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 	@Override
 	public void renderAnimated(World world, BlockPos pos, IAnimatedRenderable renderable, double x, double y, double z, float partialTicks)
 	{
+		isBatched = true;
+
 		set(world, pos);
-		buffer = Tessellator.getInstance().getBuffer();
+		buffer = isBatched ? batchedBuffer : Tessellator.getInstance().getBuffer();
 		this.renderable = renderable;
 
 		prepare(RenderType.ANIMATED, x, y, z);
@@ -90,6 +95,11 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 		if (renderType != RenderType.ANIMATED)
 			throw new IllegalArgumentException("Wrong renderType set for the AnimatedRenderer : " + renderType);
 		this.renderType = renderType;
+		if (isBatched)
+		{
+			posOffset = new Vec3d(data[0], data[1], data[2]);
+			return;
+		}
 
 		GlStateManager.pushAttrib();
 		GlStateManager.pushMatrix();
@@ -105,11 +115,15 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 	@Override
 	public void clean()
 	{
-		draw();
-		disableBlending();
-		GlStateManager.enableLighting();
-		GlStateManager.popMatrix();
-		GlStateManager.popAttrib();
+		if (!isBatched)
+		{
+			draw();
+			disableBlending();
+			GlStateManager.enableLighting();
+			GlStateManager.popMatrix();
+			GlStateManager.popAttrib();
+		}
+		reset();
 	}
 
 	@Override
@@ -207,18 +221,18 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 	 * @param sr the amc
 	 * @return true, if is position still valid
 	 */
-	private boolean isPositionStillValid(ISortedRenderable sr)
-	{
-		Optional<Chunk> chunk = Utils.getLoadedChunk(Utils.getClientWorld(), sr.getPos());
-		if (!chunk.isPresent())
-			return false; //should never happen,
-
-		if (sr.isPositionStillValid())
-			return true;
-
-		sortedRenderables.get(chunk.get()).remove(sr.getPos());
-		return false;
-	}
+	//	private boolean isPositionStillValid(ISortedRenderable sr)
+	//	{
+	//		Optional<Chunk> chunk = Utils.getLoadedChunk(Utils.getClientWorld(), sr.getPos());
+	//		if (!chunk.isPresent())
+	//			return false; //should never happen,
+	//
+	//		if (sr.isPositionStillValid())
+	//			return true;
+	//
+	//		sortedRenderables.get(chunk.get()).remove(sr.getPos());
+	//		return false;
+	//	}
 
 	/**
 	 * Render {@link TileEntity TileEntities} and {@link ISortedRenderable} to fix the transparency sorting.
@@ -231,9 +245,10 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 	 */
 	public static List<TileEntity> renderSortedTileEntities(RenderChunk renderChunk, List<TileEntity> list, ICamera camera, float partialTick)
 	{
-		boolean b = false;
-		if (b)
+		if (MinecraftForgeClient.getRenderPass() == 1)
 			return list;
+
+		boolean sorting = MalisisCoreSettings.tileEntitySorting.get();
 
 		Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
 		World world = entity.worldObj;
@@ -243,10 +258,11 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 		double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTick;
 		double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTick;
 
-		Stream.concat(list.stream().map(ISortedRenderable.TE::new), AnimatedRenderer.getRenderables(chunk))
-				.filter(r -> r.inFrustrum(camera))
-				.sorted((r1, r2) -> r1.getPos().distanceSqToCenter(x, y, z) > r2.getPos().distanceSqToCenter(x, y, z) ? -1 : 1)
-				.forEach(r -> r.render(partialTick));
+		Stream<ISortedRenderable> stream = Stream.concat(list.stream().map(ISortedRenderable.TE::new),
+				AnimatedRenderer.getRenderables(chunk)).filter(r -> r.inFrustrum(camera));
+		if (sorting)
+			stream = stream.sorted((r1, r2) -> r1.getPos().distanceSqToCenter(x, y, z) > r2.getPos().distanceSqToCenter(x, y, z) ? -1 : 1);
+		stream.forEach(r -> r.render(partialTick));
 
 		return ImmutableList.of();
 	}
