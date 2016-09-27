@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import net.malisis.core.IMalisisMod;
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -50,6 +51,7 @@ import com.google.common.eventbus.Subscribe;
  */
 public class ConfigurationGui extends MalisisGui
 {
+	private IMalisisMod mod;
 	private Settings settings;
 	protected ArrayList<UIPanel> pannels = new ArrayList<>();
 	protected HashMap<UIComponent<?>, Setting<?>> componentSettings = new HashMap<>();
@@ -61,7 +63,7 @@ public class ConfigurationGui extends MalisisGui
 	protected UIButton btnCancel;
 	protected UIButton btnSave;
 
-	public ConfigurationGui(Settings settings)
+	public ConfigurationGui(IMalisisMod mod, Settings settings)
 	{
 		this.settings = settings;
 	}
@@ -69,7 +71,6 @@ public class ConfigurationGui extends MalisisGui
 	@Override
 	public void construct()
 	{
-
 		Set<String> categories = settings.getCategories();
 
 		if (categories.size() > 1)
@@ -77,7 +78,7 @@ public class ConfigurationGui extends MalisisGui
 			//TODO: build tabs
 		}
 
-		UIWindow window = new UIWindow(this, "config.title", windowWidth, windowHeight);
+		UIWindow window = new UIWindow(this, mod.getName() + " {malisiscore.config.title}", 400, UIComponent.INHERITED);
 
 		for (String category : categories)
 		{
@@ -85,12 +86,12 @@ public class ConfigurationGui extends MalisisGui
 			window.add(createSettingContainer(category));
 		}
 
-		window.setSize(windowWidth, windowHeight);
+		//window.setSize(windowWidth, windowHeight);
 
 		comment = new UILabel(this, true);
 		comment.getFontRenderOptions().color = 0xFFFFFF;
 		comment.getFontRenderOptions().shadow = true;
-		UIPanel panelComment = new UIPanel(this, 140, windowHeight - 35).setPosition(0, 0, Anchor.RIGHT);
+		UIPanel panelComment = new UIPanel(this, 140, -35).setPosition(0, 0, Anchor.RIGHT);
 		panelComment.setBackgroundColor(0xCCCCCC);
 		panelComment.add(comment);
 
@@ -132,7 +133,7 @@ public class ConfigurationGui extends MalisisGui
 			Setting<?> setting = componentSettings.get(event.getComponent());
 			if (setting != null)
 			{
-				String str = StringUtils.join(setting.getComments(), "\r");
+				String str = StringUtils.join(setting.getComments(), "\r\n\r\n");
 				comment.setText(str);
 			}
 		}
