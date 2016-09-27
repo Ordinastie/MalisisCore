@@ -34,7 +34,6 @@ import net.malisis.core.configuration.Settings;
 import net.malisis.core.network.MalisisNetwork;
 import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.registry.Registries;
-import net.malisis.core.util.remapping.RemappingTool;
 import net.malisis.core.util.syncer.Syncer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -89,6 +88,9 @@ public class MalisisCore implements IMalisisMod
 	/** Network for the mod */
 	public static MalisisNetwork network;
 
+	/** Configs for MalisisCore. **/
+	private MalisisCoreSettings settings;
+
 	/** List of {@link IMalisisMod} registered. */
 	private HashMap<String, IMalisisMod> registeredMods = new HashMap<>();
 
@@ -103,6 +105,7 @@ public class MalisisCore implements IMalisisMod
 		instance = this;
 		network = new MalisisNetwork(this);
 		isObfEnv = !(boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
+		registerMod(this);
 	}
 
 	//#region IMalisisMod
@@ -127,7 +130,7 @@ public class MalisisCore implements IMalisisMod
 	@Override
 	public Settings getSettings()
 	{
-		return null;
+		return settings;
 	}
 
 	//#end IMalisisMod
@@ -240,6 +243,8 @@ public class MalisisCore implements IMalisisMod
 		MalisisNetwork.createMessages(event.getAsmData());
 		Syncer.get().discover(event.getAsmData());
 
+		settings = new MalisisCoreSettings(event.getSuggestedConfigurationFile());
+
 		Registries.processFMLStateEvent(event);
 	}
 
@@ -274,7 +279,7 @@ public class MalisisCore implements IMalisisMod
 	@EventHandler
 	public void missingMapping(FMLMissingMappingsEvent event)
 	{
-		RemappingTool.processMissingMappings(event);
+		//RemappingTool.processMissingMappings(event);
 	}
 
 	/**
@@ -307,7 +312,7 @@ public class MalisisCore implements IMalisisMod
 		if (settings == null)
 			return false;
 
-		new ConfigurationGui(settings).display(true);
+		new ConfigurationGui(mod, settings).display(true);
 
 		return true;
 	}
