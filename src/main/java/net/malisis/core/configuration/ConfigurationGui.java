@@ -65,6 +65,7 @@ public class ConfigurationGui extends MalisisGui
 
 	public ConfigurationGui(IMalisisMod mod, Settings settings)
 	{
+		this.mod = mod;
 		this.settings = settings;
 	}
 
