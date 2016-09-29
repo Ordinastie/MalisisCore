@@ -61,8 +61,8 @@ ext.commit = project.hasProperty("commit") ? commit : 'unknown'
 
 // MinecraftForge version
 minecraft {
-    version = "1.9.4-12.17.0.1987"
-    mappings = "snapshot_20160625"
+    version = "1.10.2-12.18.1.2094"
+    mappings = "snapshot_20160929"
 	
 	if(file("../../run").exists()) 
 		runDir = "../../run/assets"

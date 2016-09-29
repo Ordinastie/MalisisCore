@@ -278,15 +278,8 @@ public class EntityUtils
 
 					int id = Block.getStateId(states[world.rand.nextInt(states.length)]);
 
-					ParticleDigging fx = (ParticleDigging) factory.getEntityFX(0,
-							world,
-							fxX,
-							fxY,
-							fxZ,
-							fxX - pos.getX() - 0.5D,
-							fxY - pos.getY() - 0.5D,
-							fxZ - pos.getZ() - 0.5D,
-							id);
+					ParticleDigging fx = (ParticleDigging) factory.createParticle(0, world, fxX, fxY, fxZ, fxX - pos.getX() - 0.5D, fxY
+							- pos.getY() - 0.5D, fxZ - pos.getZ() - 0.5D, id);
 					particleManager.addEffect(fx);
 				}
 			}
@@ -344,7 +337,7 @@ public class EntityUtils
 		int id = Block.getStateId(states[world.rand.nextInt(states.length)]);
 
 		ParticleDigging.Factory factory = new ParticleDigging.Factory();
-		ParticleDigging fx = (ParticleDigging) factory.getEntityFX(0, world, fxX, fxY, fxZ, 0, 0, 0, id);
+		ParticleDigging fx = (ParticleDigging) factory.createParticle(0, world, fxX, fxY, fxZ, 0, 0, 0, id);
 		fx.multiplyVelocity(0.2F).multipleParticleScaleBy(0.6F);
 		particleManager.addEffect(fx);
 	}
