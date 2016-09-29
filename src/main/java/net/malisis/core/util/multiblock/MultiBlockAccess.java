@@ -90,7 +90,8 @@ public class MultiBlockAccess implements IBlockAccess
 		return null;
 	}
 
-	@Override
+	/** @Override **/
+	//override only for 1.9.4
 	public boolean extendedLevelsInChunkCache()
 	{
 		return false;
