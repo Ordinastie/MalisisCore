@@ -171,6 +171,7 @@ public class ChunkCollision
 
 	public RayTraceResult processCallbacks(Chunk chunk, Point src, Point dest)
 	{
+		rayTraceRegistry.reduce((c1, c2) -> CallbackResult.of(Raytrace.getClosestHit(Type.BLOCK, src, c1.getValue(), c2.getValue())));
 		return rayTraceRegistry.processCallbacks(chunk, src, dest).getValue();
 	}
 
