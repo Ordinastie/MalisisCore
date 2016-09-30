@@ -53,11 +53,13 @@ import com.google.common.collect.Lists;
 public class MalisisItemBlock extends ItemBlock implements IRegisterable, IComponentProvider
 {
 	protected String name;
-	protected final List<IComponent> components = Lists.newArrayList();
+	protected List<IComponent> components;
 
 	public MalisisItemBlock(Block block)
 	{
 		super(block);
+		if (block instanceof IComponentProvider)
+			components = Lists.newArrayList();
 	}
 
 	public MalisisItemBlock setName(String name)
@@ -76,13 +78,13 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 	@Override
 	public void addComponent(IComponent component)
 	{
-		components.add(component);
+		getComponents().add(component);
 	}
 
 	@Override
 	public List<IComponent> getComponents()
 	{
-		return components;
+		return block instanceof IComponentProvider ? ((IComponentProvider) block).getComponents() : components;
 	}
 
 	@Override
@@ -128,7 +130,7 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 		Block block = placedState.getBlock();
 		if (world.checkNoEntityCollision(placedState.getCollisionBoundingBox(world, p)) && world.setBlockState(p, placedState, 3))
 		{
-			SoundType soundType = block.getSoundType();
+			SoundType soundType = block.getSoundType(placedState, world, pos, player);
 			world.playSound(player,
 					pos,
 					soundType.getPlaceSound(),
