@@ -25,10 +25,15 @@
 package net.malisis.core.renderer.transformer;
 
 import static org.objectweb.asm.Opcodes.*;
+
+import java.util.List;
+
 import net.malisis.core.asm.AsmHook;
 import net.malisis.core.asm.MalisisClassTransformer;
 import net.malisis.core.asm.mappings.McpFieldMapping;
 import net.malisis.core.asm.mappings.McpMethodMapping;
+import net.malisis.core.renderer.AnimatedRenderer;
+import net.minecraft.client.renderer.RenderGlobal.ContainerLocalRenderInformation;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
@@ -52,7 +57,8 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		register(blockHook());
 		register(itemHook());
 		register(particleHook());
-		register(tileEntityHook());
+		register(sortRenderInfosHook());
+		register(sortTileEntitiesHook());
 	}
 
 	private AsmHook blockHook()
@@ -196,8 +202,38 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		return ah;
 	}
 
-	@SuppressWarnings("deprecation")
-	private AsmHook tileEntityHook()
+	private AsmHook sortRenderInfosHook()
+	{
+		AsmHook ah = new AsmHook(new McpMethodMapping("renderEntities", "func_180446_a", "net/minecraft/client/renderer/RenderGlobal",
+				"(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ICamera;F)V"));
+
+		McpFieldMapping renderInfos = new McpFieldMapping("renderInfos", "field_72755_R", "net/minecraft/client/renderer/RenderGlobal",
+				"Ljava/util/List;");
+
+		//	    ALOAD 0
+		//	    ALOAD 0
+		//	    GETFIELD net/malisis/core/renderer/transformer/MalisisRendererTransformer.renderInfos : Ljava/util/List;
+		//	    INVOKESTATIC net/malisis/core/renderer/AnimatedRenderer.sortRenderInfos (Ljava/util/List;)Ljava/util/List;
+		//	    PUTFIELD net/malisis/core/renderer/transformer/MalisisRendererTransformer.renderInfos : Ljava/util/List;
+		InsnList insert = new InsnList();
+		insert.add(new VarInsnNode(ALOAD, 0));
+		insert.add(new VarInsnNode(ALOAD, 0));
+		insert.add(renderInfos.getInsnNode(GETFIELD));
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/renderer/AnimatedRenderer", "sortRenderInfos",
+				"(Ljava/util/List;)Ljava/util/List;", false));
+		insert.add(renderInfos.getInsnNode(PUTFIELD));
+
+		return ah.insert(insert).debug();
+	}
+
+	List<ContainerLocalRenderInformation> renderInfos = null;
+
+	public void test()
+	{
+		renderInfos = AnimatedRenderer.sortRenderInfos(renderInfos);
+	}
+
+	private AsmHook sortTileEntitiesHook()
 	{
 		AsmHook ah = new AsmHook(new McpMethodMapping("renderEntities", "func_180446_a", "net/minecraft/client/renderer/RenderGlobal",
 				"(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ICamera;F)V"));
@@ -237,8 +273,12 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		insert.add(new VarInsnNode(ALOAD, 24));
 		insert.add(new VarInsnNode(ALOAD, 2));
 		insert.add(new VarInsnNode(FLOAD, 3));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/renderer/AnimatedRenderer", "renderSortedTileEntities",
-				"(Lnet/minecraft/client/renderer/chunk/RenderChunk;Ljava/util/List;Lnet/minecraft/client/renderer/culling/ICamera;F)Ljava/util/List;"));
+		insert.add(new MethodInsnNode(
+				INVOKESTATIC,
+				"net/malisis/core/renderer/AnimatedRenderer",
+				"renderSortedTileEntities",
+				"(Lnet/minecraft/client/renderer/chunk/RenderChunk;Ljava/util/List;Lnet/minecraft/client/renderer/culling/ICamera;F)Ljava/util/List;",
+				false));
 		insert.add(new VarInsnNode(ASTORE, 24));
 
 		ah.jumpAfter(match).insert(insert);
@@ -246,4 +286,5 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 
 		return ah;
 	}
+
 }

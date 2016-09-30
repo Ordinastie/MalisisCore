@@ -27,23 +27,25 @@ package net.malisis.core.renderer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import net.malisis.core.MalisisCoreSettings;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.registry.MalisisRegistry;
 import net.malisis.core.renderer.component.AnimatedModelComponent;
+import net.malisis.core.util.BlockPosUtils;
+import net.malisis.core.util.Point;
 import net.malisis.core.util.Utils;
 import net.malisis.core.util.WeakNested;
 import net.malisis.core.util.callback.CallbackResult;
 import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.client.renderer.RenderGlobal.ContainerLocalRenderInformation;
 import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -63,6 +65,11 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 {
 	IAnimatedRenderable renderable;
 
+	public AnimatedRenderer()
+	{
+		isBatched = true;
+	}
+
 	/**
 	 * Gets the currently drawn {@link IAnimatedRenderable}.
 	 *
@@ -76,60 +83,15 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 	@Override
 	public void renderAnimated(World world, BlockPos pos, IAnimatedRenderable renderable, double x, double y, double z, float partialTicks)
 	{
-		isBatched = true;
-
 		set(world, pos);
-		buffer = isBatched ? batchedBuffer : Tessellator.getInstance().getBuffer();
+		this.renderType = RenderType.ANIMATED;
+		this.buffer = batchedBuffer;
 		this.renderable = renderable;
-
-		prepare(RenderType.ANIMATED, x, y, z);
+		this.posOffset = new Vec3d(x, y, z);
 
 		render();
 
-		clean();
-	}
-
-	@Override
-	public void prepare(RenderType renderType, double... data)
-	{
-		if (renderType != RenderType.ANIMATED)
-			throw new IllegalArgumentException("Wrong renderType set for the AnimatedRenderer : " + renderType);
-		this.renderType = renderType;
-		if (isBatched)
-		{
-			posOffset = new Vec3d(data[0], data[1], data[2]);
-			return;
-		}
-
-		GlStateManager.pushAttrib();
-		GlStateManager.pushMatrix();
-		GlStateManager.disableLighting();
-
-		GlStateManager.translate(data[0], data[1], data[2]);
-
-		bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-
-		startDrawing();
-	}
-
-	@Override
-	public void clean()
-	{
-		if (!isBatched)
-		{
-			draw();
-			disableBlending();
-			GlStateManager.enableLighting();
-			GlStateManager.popMatrix();
-			GlStateManager.popAttrib();
-		}
 		reset();
-	}
-
-	@Override
-	public void reset()
-	{
-		super.reset();
 		renderable = null;
 	}
 
@@ -234,8 +196,38 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 	//		return false;
 	//	}
 
+	private static Point getRenderViewOffset(float partialTick)
+	{
+		Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
+		if (partialTick == 0)
+			return new Point(entity.posX, entity.posY, entity.posZ);
+
+		double x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTick;
+		double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTick;
+		double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTick;
+		return new Point(x, y, z);
+	}
+
+	public static List<RenderGlobal.ContainerLocalRenderInformation> sortRenderInfos(List<RenderGlobal.ContainerLocalRenderInformation> renderInfos)
+	{
+		if (MinecraftForgeClient.getRenderPass() != 0 || !MalisisCoreSettings.tileEntitySorting.get())
+			return renderInfos;
+
+		Point viewOffset = getRenderViewOffset(0).add(-8, -8, -8);
+		return renderInfos.stream().sorted((r1, r2) -> compareRenderInfos(viewOffset, r1, r2)).collect(Collectors.toList());
+	}
+
+	public static int compareRenderInfos(Point viewOffset, ContainerLocalRenderInformation r1, ContainerLocalRenderInformation r2)
+	{
+		BlockPos p1 = r1.renderChunk.getPosition();
+		BlockPos p2 = r2.renderChunk.getPosition();
+
+		return -BlockPosUtils.compare(viewOffset, p1, p2);
+	}
+
 	/**
-	 * Render {@link TileEntity TileEntities} and {@link ISortedRenderable} to fix the transparency sorting.
+	 * Render {@link TileEntity TileEntities} and {@link ISortedRenderable} to fix the transparency sorting.<br>
+	 * Called from ASM from {@link RenderGlobal#renderEntities(Entity, ICamera, float)}
 	 *
 	 * @param renderChunk the render chunk
 	 * @param list the list
@@ -253,15 +245,12 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 		Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
 		World world = entity.worldObj;
 		Chunk chunk = world.getChunkFromBlockCoords(renderChunk.getPosition());
-
-		double x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTick;
-		double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTick;
-		double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTick;
+		Point viewOffset = getRenderViewOffset(partialTick);
 
 		Stream<ISortedRenderable> stream = Stream.concat(list.stream().map(ISortedRenderable.TE::new),
 				AnimatedRenderer.getRenderables(chunk)).filter(r -> r.inFrustrum(camera));
 		if (sorting)
-			stream = stream.sorted((r1, r2) -> r1.getPos().distanceSqToCenter(x, y, z) > r2.getPos().distanceSqToCenter(x, y, z) ? -1 : 1);
+			stream = stream.sorted((r1, r2) -> -BlockPosUtils.compare(viewOffset, r1.getPos(), r2.getPos()));
 		stream.forEach(r -> r.render(partialTick));
 
 		return ImmutableList.of();
