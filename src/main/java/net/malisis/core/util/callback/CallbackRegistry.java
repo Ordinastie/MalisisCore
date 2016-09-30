@@ -71,7 +71,7 @@ public class CallbackRegistry<C extends ICallback<V>, P extends ICallbackPredica
 	 * Registers a {@link ICallback} to be call when the {@link ICallbackPredicate} returns true.
 	 *
 	 * @param callback the callback
-	 * @param predicate the predicate
+	 * @param option the option
 	 */
 	public void registerCallback(C callback, CallbackOption<P> option)
 	{

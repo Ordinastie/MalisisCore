@@ -94,8 +94,7 @@ public class ChunkListener
 	}
 
 	/**
-	 * Calls {@link IBlockListener.Pre#onBlockSet(net.minecraft.world.World, BlockPos, BlockPos, IBlockState, IBlockState)} for the listener
-	 * {@link BlockPos}.
+	 * Calls IBlockListener.Pre#onBlockSet(World, BlockPos, BlockPos, IBlockState, IBlockState) for the listener {@link BlockPos}.
 	 *
 	 * @param chunk the chunk
 	 * @param listener the listener

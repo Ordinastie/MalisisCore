@@ -25,7 +25,6 @@
 package net.malisis.core.util.raytrace;
 
 import java.util.Optional;
-import java.util.Set;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.util.Point;
@@ -39,8 +38,6 @@ import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
-import com.google.common.collect.Sets;
-
 /**
  * @author Ordinastie
  *
@@ -53,13 +50,11 @@ public class RaytraceChunk extends Raytrace
 	/** Vector describing the direction of steps to take when reaching limits of a block. */
 	private Vector step;
 
-	private Set<Chunk> chunks = Sets.newHashSet();
-
 	/**
 	 * Instantiates a new {@link RaytraceChunk}.
 	 *
+	 * @param world the world
 	 * @param ray the ray
-	 * @param options the options
 	 */
 	public RaytraceChunk(World world, Ray ray)
 	{
@@ -78,9 +73,9 @@ public class RaytraceChunk extends Raytrace
 	/**
 	 * Instantiates a new {@link RaytraceChunk}.
 	 *
+	 * @param world the world
 	 * @param src the src
 	 * @param v the v
-	 * @param options the options
 	 */
 	public RaytraceChunk(World world, Point src, Vector v)
 	{
@@ -90,9 +85,9 @@ public class RaytraceChunk extends Raytrace
 	/**
 	 * Instantiates a new {@link RaytraceChunk}.
 	 *
+	 * @param world the world
 	 * @param src the src
 	 * @param dest the dest
-	 * @param options the options
 	 */
 	public RaytraceChunk(World world, Point src, Point dest)
 	{
@@ -131,10 +126,7 @@ public class RaytraceChunk extends Raytrace
 
 			Optional<Chunk> chunk = Utils.getLoadedChunk(world, new BlockPos(currentX, 0, currentZ));
 			if (chunk.isPresent())
-			{
 				mop = ChunkCollision.get().processCallbacks(chunk.get(), src, dest);
-				chunks.add(chunk.get());
-			}
 			else
 				ret = true;
 
@@ -168,7 +160,6 @@ public class RaytraceChunk extends Raytrace
 	 * Gets the minimum value of <code>x</code>, <code>z</code>.
 	 *
 	 * @param x the x
-	 * @param y the y
 	 * @param z the z
 	 * @return <code>Double.NaN</code> if <code>x</code> and <code>z</code> are all three <code>Double.NaN</code>
 	 */

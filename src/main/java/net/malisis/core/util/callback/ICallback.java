@@ -170,7 +170,7 @@ public interface ICallback<T>
 		 * Constructs an empty {@link CallbackOption}, with predicate {@link ICallbackPredicate#alwaysTrue()} and {@link Priority#NORMAL}
 		 * priority.
 		 *
-		 * @param predicate the predicate
+		 * @param <P> the generic type
 		 * @return the callback option
 		 */
 		@SuppressWarnings("unchecked")
@@ -183,6 +183,7 @@ public interface ICallback<T>
 		/**
 		 * Constructs an empty {@link CallbackOption}, with {@link Priority#NORMAL} priority and the specified {@link ICallbackPredicate}.
 		 *
+		 * @param <P> the generic type
 		 * @param predicate the predicate
 		 * @return the callback option
 		 */
@@ -192,8 +193,9 @@ public interface ICallback<T>
 		}
 
 		/**
-		 * Constructs a {@link CallbackOption} with predicate {@link ICallbackPredicate#alwaysTrue()} and the specified {@link Priority}
+		 * Constructs a {@link CallbackOption} with predicate {@link ICallbackPredicate#alwaysTrue()} and the specified {@link Priority}.
 		 *
+		 * @param <P> the generic type
 		 * @param priority the priority
 		 * @return the callback option
 		 */
@@ -203,8 +205,9 @@ public interface ICallback<T>
 		}
 
 		/**
-		 * Constructs an empty {@link CallbackOption}, with specified {@link ICallbackPredicate} and {@link Priority}
+		 * Constructs an empty {@link CallbackOption}, with specified {@link ICallbackPredicate} and {@link Priority}.
 		 *
+		 * @param <P> the generic type
 		 * @param predicate the predicate
 		 * @param priority the priority
 		 * @return the callback option

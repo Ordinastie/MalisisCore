@@ -132,8 +132,7 @@ public class ClientRegistry
 	}
 
 	/**
-	 * Calls {@link IIconProvider#registerIcons(net.minecraft.client.renderer.texture.TextureMap)} for every registered
-	 * {@link IIconProvider}.
+	 * Stitches all the registered {@link Icon Icons}.
 	 *
 	 * @param event the event
 	 */

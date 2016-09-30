@@ -40,9 +40,10 @@ import com.google.common.collect.Multimap;
 public interface IAnimationLoader
 {
 	/**
-	 * Gets the list of {@link Animation} for the model
+	 * Gets the list of {@link Animation} for the model.
 	 *
-	 * @return
+	 * @param shapes the shapes
+	 * @return the animations
 	 */
 	public Multimap<String, Animation<Shape>> getAnimations(Map<String, Shape> shapes);
 }

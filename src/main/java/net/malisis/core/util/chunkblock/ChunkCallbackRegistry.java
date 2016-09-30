@@ -48,9 +48,7 @@ public class ChunkCallbackRegistry<C extends IChunkCallback<V>, P extends IChunk
 	 * Processes the {@link IChunkCallback IChunkCallbacks} registered.
 	 *
 	 * @param chunk the chunk
-	 * @param pos the pos
-	 * @param oldState the old state
-	 * @param newState the new state
+	 * @param params the params
 	 * @return the callback result
 	 */
 	public CallbackResult<V> processCallbacks(Chunk chunk, Object... params)

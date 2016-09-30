@@ -134,7 +134,6 @@ public class Registries
 	 * @param pos the pos
 	 * @param oldState the old state
 	 * @param newState the new state
-	 * @return the callback result
 	 */
 	public static void processPostSetBlock(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
 	{
