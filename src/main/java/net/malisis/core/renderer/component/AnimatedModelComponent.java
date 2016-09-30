@@ -285,13 +285,6 @@ public class AnimatedModelComponent extends ModelComponent
 	@Override
 	public void render(Block block, MalisisRenderer<TileEntity> renderer)
 	{
-		//TODO: remove when debug is done
-		if (renderer.getRenderType() == RenderType.BLOCK && !MalisisCore.isObfEnv)
-		{
-			loadModel();
-			autoDetectAnimatedGroups();
-		}
-
 		if (renderer.getRenderType() == RenderType.BLOCK && animatedShapes.size() != 0)
 			onRender(renderer.getWorldAccess(), renderer.getPos(), renderer.getBlockState());
 
