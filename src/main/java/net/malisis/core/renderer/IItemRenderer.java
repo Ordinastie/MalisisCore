@@ -28,6 +28,8 @@ import java.util.List;
 
 import javax.vecmath.Matrix4f;
 
+import net.malisis.core.block.IComponent;
+import net.malisis.core.block.component.ItemTransformComponent;
 import net.malisis.core.registry.ClientRegistry;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -80,6 +82,10 @@ public interface IItemRenderer
 		@Override
 		public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType transformType)
 		{
+			ItemTransformComponent itc = IComponent.getComponent(ItemTransformComponent.class, item);
+			if (itc != null)
+				return Pair.of(this, itc.getTransform(item, transformType));
+
 			IItemRenderer itemRenderer = ClientRegistry.getItemRenderer(item);
 			if (itemRenderer == null)
 				return Pair.of(this, null);
