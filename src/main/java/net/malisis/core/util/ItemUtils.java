@@ -252,7 +252,14 @@ public class ItemUtils
 		if (block instanceof BlockPistonBase)
 			return block.getDefaultState();
 
-		return block.getStateFromMeta(itemStack.getItem().getMetadata(itemStack.getMetadata()));
+		try
+		{
+			return block.getStateFromMeta(itemStack.getItem().getMetadata(itemStack.getMetadata()));
+		}
+		catch (Exception e)
+		{
+			return block.getDefaultState();
+		}
 	}
 
 	/**
