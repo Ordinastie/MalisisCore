@@ -117,7 +117,7 @@ public class BlockPosUtils
 		if (pos1.equals(pos2))
 			return 0;
 
-		return (int) (pos1.distanceSq(offset.x, offset.y, offset.z) - pos2.distanceSq(offset.x, offset.y, offset.z));
+		return Double.compare(pos1.distanceSq(offset.x, offset.y, offset.z), pos2.distanceSq(offset.x, offset.y, offset.z));
 	}
 
 }
