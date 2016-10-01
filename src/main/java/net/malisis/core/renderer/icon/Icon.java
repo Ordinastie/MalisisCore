@@ -436,9 +436,10 @@ public class Icon extends TextureAtlasSprite
 	 *
 	 * @param map the map
 	 */
+	@SuppressWarnings("deprecation")
 	public static void registerIcons(TextureMap map)
 	{
-		registeredIcons.values().forEach(map::setTextureEntry);
+		registeredIcons.forEach(map::setTextureEntry);
 	}
 
 	/**
