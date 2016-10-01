@@ -65,7 +65,7 @@ public class RaytraceChunk extends Raytrace
 		if (ray.direction.x < 0)
 			stepX = -16;
 		if (ray.direction.z < 0)
-			stepZ = -1;
+			stepZ = -16;
 
 		step = new Vector(stepX, 0, stepZ);
 	}
