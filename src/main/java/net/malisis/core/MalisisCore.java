@@ -340,6 +340,14 @@ public class MalisisCore implements IMalisisMod
 		String txt = text != null ? text.toString() : "null";
 		if (text instanceof Object[])
 			txt = Arrays.deepToString((Object[]) text);
+
+		//on server simply log messages
+		if (!MalisisCore.isClient())
+		{
+			log.info(String.format(txt, data));
+			return;
+		}
+
 		TextComponentString msg = new TextComponentString(I18n.format(txt, data));
 		if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
 		{
