@@ -25,15 +25,10 @@
 package net.malisis.core.renderer.transformer;
 
 import static org.objectweb.asm.Opcodes.*;
-
-import java.util.List;
-
 import net.malisis.core.asm.AsmHook;
 import net.malisis.core.asm.MalisisClassTransformer;
 import net.malisis.core.asm.mappings.McpFieldMapping;
 import net.malisis.core.asm.mappings.McpMethodMapping;
-import net.malisis.core.renderer.AnimatedRenderer;
-import net.minecraft.client.renderer.RenderGlobal.ContainerLocalRenderInformation;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
@@ -57,7 +52,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		register(blockHook());
 		register(itemHook());
 		register(particleHook());
-		register(sortRenderInfosHook());
+		//register(sortRenderInfosHook());
 		register(sortTileEntitiesHook());
 	}
 
@@ -209,28 +204,28 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 
 		McpFieldMapping renderInfos = new McpFieldMapping("renderInfos", "field_72755_R", "net/minecraft/client/renderer/RenderGlobal",
 				"Ljava/util/List;");
+		McpMethodMapping iterator = new McpMethodMapping("iterator", "iterator", "java/util/List", "()Ljava/util/Iterator;");
 
+		//		for (RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation1 : this.renderInfos)
+		//=>
+		//		for (RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation1 : AnimatedRenderer.sortRenderInfos(this.renderInfos))
+		//
 		//	    ALOAD 0
-		//	    ALOAD 0
-		//	    GETFIELD net/malisis/core/renderer/transformer/MalisisRendererTransformer.renderInfos : Ljava/util/List;
+		//	    GETFIELD net/minecraft/client/renderer/RenderGlobal.renderInfos : Ljava/util/List;
+		//	    INVOKEINTERFACE java/util/List.iterator ()Ljava/util/Iterator;
+		//	    ASTORE 22
+		InsnList match = new InsnList();
+		match.add(new VarInsnNode(ALOAD, 0));
+		match.add(renderInfos.getInsnNode(GETFIELD));
+		match.add(iterator.getInsnNode(INVOKEINTERFACE));
+		match.add(new VarInsnNode(ASTORE, 22));
+
 		//	    INVOKESTATIC net/malisis/core/renderer/AnimatedRenderer.sortRenderInfos (Ljava/util/List;)Ljava/util/List;
-		//	    PUTFIELD net/malisis/core/renderer/transformer/MalisisRendererTransformer.renderInfos : Ljava/util/List;
 		InsnList insert = new InsnList();
-		insert.add(new VarInsnNode(ALOAD, 0));
-		insert.add(new VarInsnNode(ALOAD, 0));
-		insert.add(renderInfos.getInsnNode(GETFIELD));
 		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/renderer/AnimatedRenderer", "sortRenderInfos",
 				"(Ljava/util/List;)Ljava/util/List;", false));
-		insert.add(renderInfos.getInsnNode(PUTFIELD));
 
-		return ah.insert(insert).debug();
-	}
-
-	List<ContainerLocalRenderInformation> renderInfos = null;
-
-	public void test()
-	{
-		renderInfos = AnimatedRenderer.sortRenderInfos(renderInfos);
+		return ah.jumpAfter(match).jump(-2).insert(insert);
 	}
 
 	private AsmHook sortTileEntitiesHook()
@@ -282,9 +277,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		insert.add(new VarInsnNode(ASTORE, 24));
 
 		ah.jumpAfter(match).insert(insert);
-		register(ah);
 
 		return ah;
 	}
-
 }
