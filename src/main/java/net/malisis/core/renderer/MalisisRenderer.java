@@ -618,8 +618,10 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	public void startDrawing(int drawMode, VertexFormat vertexFormat)
 	{
-		if (isDrawing())
-			draw();
+		if (!canDraw())
+			return;
+
+		draw();
 
 		buffer.begin(drawMode, vertexFormat);
 		this.drawMode = drawMode;
@@ -684,8 +686,17 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	public void draw()
 	{
-		if (isDrawing())
+		if (canDraw() && isDrawing())
 			Tessellator.getInstance().draw();
+	}
+
+	private boolean canDraw()
+	{
+		if (renderType == RenderType.BLOCK || renderType == RenderType.ANIMATED)
+			return false;
+		if (renderType == RenderType.TILE_ENTITY && isBatched)
+			return false;
+		return true;
 	}
 
 	/**
