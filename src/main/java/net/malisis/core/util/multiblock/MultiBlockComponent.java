@@ -106,7 +106,10 @@ public class MultiBlockComponent implements IBlockComponent
 		if (multiBlock.canPlaceBlockAt(world, pos, state, false))
 			multiBlock.placeBlocks(world, pos, state, false);
 		else
+		{
 			world.setBlockToAir(pos);
+			stack.stackSize++;
+		}
 	}
 
 	@Override
