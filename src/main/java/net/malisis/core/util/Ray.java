@@ -172,4 +172,10 @@ public class Ray
 		return list;
 	}
 
+	@Override
+	public String toString()
+	{
+		return "O:" + origin + " / D:" + direction;
+	}
+
 }
