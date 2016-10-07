@@ -26,6 +26,8 @@ package net.malisis.core.util.raytrace;
 
 import java.util.Optional;
 
+import net.malisis.core.MalisisCore;
+import net.malisis.core.MalisisCoreSettings;
 import net.malisis.core.util.Point;
 import net.malisis.core.util.Ray;
 import net.malisis.core.util.Utils;
@@ -150,8 +152,13 @@ public class RaytraceChunk extends Raytrace
 		if (firstHit == null && dest != null)
 			firstHit = new RayTraceResult(RayTraceResult.Type.MISS, dest.toVec3d(), null, new BlockPos(currentX, 0, currentZ));
 
-		//		if (!ret)
-		//			MalisisCore.message("Trace fail : " + MAX_CHUNKS + " chunks passed (" + currentX + "," + currentZ + ")");
+		if (!ret && MalisisCoreSettings.debugTraceFail.get())
+		{
+			String str = "Trace fail : " + MAX_CHUNKS + " chunks passed (" + currentX + "," + currentZ + ")\r\n";
+			str += "src=" + src + " / dest=" + dest + " / ray=" + ray + " (step " + step + ")";
+			MalisisCore.log.error(str);
+		}
+
 		return firstHit;
 	}
 

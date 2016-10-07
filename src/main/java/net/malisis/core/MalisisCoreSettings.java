@@ -36,6 +36,9 @@ public class MalisisCoreSettings extends Settings
 	@ConfigurationSetting
 	public static Setting<Boolean> tileEntitySorting = new BooleanSetting("malisiscore.config.sortTileEntities", true);
 
+	@ConfigurationSetting
+	public static Setting<Boolean> debugTraceFail = new BooleanSetting("malisiscore.config.debugTraceFail", false);
+
 	public MalisisCoreSettings(File file)
 	{
 		super(file);
