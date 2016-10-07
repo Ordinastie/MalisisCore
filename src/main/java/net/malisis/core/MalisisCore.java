@@ -69,10 +69,9 @@ import com.google.common.collect.Ordering;
 /**
  * The Class MalisisCore.
  */
-@Mod(modid = MalisisCore.modid, name = MalisisCore.modname, version = MalisisCore.version)
+@Mod(modid = MalisisCore.modid, name = MalisisCore.modname, version = MalisisCore.version, acceptedMinecraftVersions = "[1.9.4,1.10.2]")
 public class MalisisCore implements IMalisisMod
 {
-	public static final int malisisRenderType = 4;
 	/** Mod ID. */
 	public static final String modid = "malisiscore";
 	/** Mod name. */
