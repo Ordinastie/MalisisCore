@@ -84,6 +84,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 import org.lwjgl.opengl.GL11;
@@ -149,7 +150,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	/** Base brightness of the block. */
 	protected int baseBrightness;
 	/** Whether the rendering is batched (TESR/ANIMATED). **/
-	protected boolean isBatched = false;
+	private boolean isBatched = false;
 	/** Vertex positions offset. **/
 	protected Vec3d posOffset = null;
 
@@ -163,6 +164,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 	/** Whether at least one vertex has been drawn. */
 	protected boolean vertexDrawn = false;
+
+	private int tempBufferSize = 7;
+	private int[] tempBuffer = new int[4 * tempBufferSize];
 
 	/**
 	 * Instantiates a new {@link MalisisRenderer}.
@@ -346,7 +350,13 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 	protected void setBatched()
 	{
-		this.isBatched = true;
+		if (!FMLClientHandler.instance().hasOptifine())
+			this.isBatched = true;
+	}
+
+	protected boolean isBatched()
+	{
+		return isBatched;
 	}
 
 	// #end
@@ -424,7 +434,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	{
 		if (te.getWorld().getBlockState(te.getPos()).getBlock() == Blocks.AIR)
 			return;
-		this.buffer = isBatched ? batchedBuffer : Tessellator.getInstance().getBuffer();
+		this.buffer = isBatched() ? batchedBuffer : Tessellator.getInstance().getBuffer();
 		set(te, partialTick);
 		prepare(RenderType.TILE_ENTITY, x, y, z);
 		if (checkBlock())
@@ -893,10 +903,10 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 			drawVertex(face.getVertexes()[i], i, params);
 
 		//use normals if available
-		if ((renderType == RenderType.ITEM || params.useNormals.get()) && params.direction.get() != null)
-			buffer.putNormal(params.direction.get().getFrontOffsetX(),
-					params.direction.get().getFrontOffsetY(),
-					params.direction.get().getFrontOffsetZ());
+		//		if ((renderType == RenderType.ITEM || params.useNormals.get()) && params.direction.get() != null)
+		//			buffer.putNormal(params.direction.get().getFrontOffsetX(),
+		//					params.direction.get().getFrontOffsetY(),
+		//					params.direction.get().getFrontOffsetZ());
 
 		//we need to separate each face
 		if (drawMode == GL11.GL_POLYGON || drawMode == GL11.GL_LINE || drawMode == GL11.GL_LINE_STRIP || drawMode == GL11.GL_LINE_LOOP)
@@ -930,53 +940,25 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (params != null && renderType == RenderType.ITEM)
 			vertex.setNormal(params.direction.get());
 
-		buffer.addVertexData(getVertexData(vertex));
+		if (!FMLClientHandler.instance().hasOptifine())
+			buffer.addVertexData(vertex.getVertexData(malisisVertexFormat, posOffset));
+		else
+		{
+			if (!isBatched || renderType == RenderType.ITEM)
+				buffer.addVertexData(vertex.getVertexData(malisisVertexFormat, posOffset));
+			else
+			{
+				System.arraycopy(vertex.getVertexData(malisisVertexFormat, posOffset),
+						0,
+						tempBuffer,
+						tempBufferSize * number,
+						tempBufferSize);
+				if (number == 3)
+					buffer.addVertexData(tempBuffer);
+			}
+		}
 
 		vertexDrawn = true;
-	}
-
-	/**
-	 * Gets the vertex data.
-	 *
-	 * @param vertex the vertex
-	 * @return the vertex data
-	 */
-	//TODO: move into Vertex (v.getData(format, offset))?
-	private int[] getVertexData(Vertex vertex)
-	{
-		float x = (float) vertex.getX();
-		float y = (float) vertex.getY();
-		float z = (float) vertex.getZ();
-
-		if (posOffset != null)
-		{
-			x += posOffset.xCoord;
-			y += posOffset.yCoord;
-			z += posOffset.zCoord;
-		}
-
-		int[] data = new int[vertexFormat.getIntegerSize()];
-		int index = 0;
-		//private
-		//if(vertexFormat.hasPosition())
-		{
-			data[index++] = Float.floatToRawIntBits(x);
-			data[index++] = Float.floatToRawIntBits(y);
-			data[index++] = Float.floatToRawIntBits(z);
-		}
-		if (vertexFormat.hasColor())
-			data[index++] = vertex.getRGBA();
-		if (vertexFormat.hasUvOffset(0)) //normal UVs
-		{
-			data[index++] = Float.floatToRawIntBits((float) vertex.getU());
-			data[index++] = Float.floatToRawIntBits((float) vertex.getV());
-		}
-		if (vertexFormat.hasUvOffset(1)) //brightness UVs
-			data[index++] = vertex.getBrightness();
-		if (vertexFormat.hasNormal())
-			data[index++] = vertex.getNormal();
-
-		return data;
 	}
 
 	/**

@@ -42,10 +42,13 @@ import net.malisis.core.util.callback.CallbackResult;
 import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.RenderGlobal.ContainerLocalRenderInformation;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.client.renderer.culling.ICamera;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -67,7 +70,7 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 
 	public AnimatedRenderer()
 	{
-		isBatched = true;
+		setBatched();
 	}
 
 	/**
@@ -84,12 +87,48 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 	public void renderAnimated(World world, BlockPos pos, IAnimatedRenderable renderable, double x, double y, double z, float partialTicks)
 	{
 		set(world, pos);
-		this.renderType = RenderType.ANIMATED;
-		this.buffer = batchedBuffer;
+		prepare(RenderType.ANIMATED, x, y, z);
+		this.buffer = isBatched() ? batchedBuffer : Tessellator.getInstance().getBuffer();
 		this.renderable = renderable;
-		this.posOffset = new Vec3d(x, y, z);
 
 		render();
+
+		clean();
+	}
+
+	@Override
+	public void prepare(RenderType renderType, double... data)
+	{
+		this.renderType = renderType;
+		if (isBatched())
+			posOffset = new Vec3d(data[0], data[1], data[2]);
+		else
+		{
+			GlStateManager.pushAttrib();
+			GlStateManager.pushMatrix();
+			GlStateManager.disableLighting();
+
+			GlStateManager.translate(data[0], data[1], data[2]);
+
+			bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+
+			startDrawing();
+		}
+	}
+
+	@Override
+	public void clean()
+	{
+		if (isBatched())
+			buffer.setTranslation(0, 0, 0);
+		else
+		{
+			draw();
+			disableBlending();
+			GlStateManager.enableLighting();
+			GlStateManager.popMatrix();
+			GlStateManager.popAttrib();
+		}
 
 		reset();
 		renderable = null;
