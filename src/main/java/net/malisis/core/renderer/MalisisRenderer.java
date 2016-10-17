@@ -524,12 +524,15 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		}
 		else if (renderType == RenderType.ITEM)
 		{
-			startDrawing();
+			startDrawing(malisisVertexFormat);
 		}
 		else if (renderType == RenderType.TILE_ENTITY)
 		{
 			if (isBatched)
+			{
 				posOffset = new Vec3d(data[0], data[1], data[2]);
+				vertexFormat = FMLClientHandler.instance().hasOptifine() ? DefaultVertexFormats.BLOCK : malisisVertexFormat;
+			}
 			else
 			{
 				GlStateManager.pushAttrib();
@@ -540,7 +543,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 				bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
-				startDrawing();
+				startDrawing(FMLClientHandler.instance().hasOptifine() ? DefaultVertexFormats.BLOCK : malisisVertexFormat);
 			}
 		}
 		else if (renderType == RenderType.WORLD_LAST)
@@ -552,7 +555,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 			bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
-			startDrawing();
+			startDrawing(malisisVertexFormat);
 		}
 		else
 			throw new IllegalArgumentException("Unknow renderType to handle for " + getClass().getSimpleName() + " : " + renderType);
@@ -597,7 +600,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	public void startDrawing()
 	{
-		startDrawing(GL11.GL_QUADS, malisisVertexFormat);
+		startDrawing(GL11.GL_QUADS, vertexFormat);
 	}
 
 	/**
@@ -607,7 +610,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	public void startDrawing(int drawMode)
 	{
-		startDrawing(drawMode, malisisVertexFormat);
+		startDrawing(drawMode, vertexFormat);
 	}
 
 	/**
@@ -941,18 +944,14 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 			vertex.setNormal(params.direction.get());
 
 		if (!FMLClientHandler.instance().hasOptifine())
-			buffer.addVertexData(vertex.getVertexData(malisisVertexFormat, posOffset));
+			buffer.addVertexData(vertex.getVertexData(vertexFormat, posOffset));
 		else
 		{
 			if (!isBatched || renderType == RenderType.ITEM)
-				buffer.addVertexData(vertex.getVertexData(malisisVertexFormat, posOffset));
+				buffer.addVertexData(vertex.getVertexData(vertexFormat, posOffset));
 			else
 			{
-				System.arraycopy(vertex.getVertexData(malisisVertexFormat, posOffset),
-						0,
-						tempBuffer,
-						tempBufferSize * number,
-						tempBufferSize);
+				System.arraycopy(vertex.getVertexData(vertexFormat, posOffset), 0, tempBuffer, tempBufferSize * number, tempBufferSize);
 				if (number == 3)
 					buffer.addVertexData(tempBuffer);
 			}

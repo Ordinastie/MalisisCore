@@ -49,6 +49,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -101,7 +102,10 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity> implements IAn
 	{
 		this.renderType = renderType;
 		if (isBatched())
+		{
 			posOffset = new Vec3d(data[0], data[1], data[2]);
+			vertexFormat = DefaultVertexFormats.BLOCK;
+		}
 		else
 		{
 			GlStateManager.pushAttrib();
