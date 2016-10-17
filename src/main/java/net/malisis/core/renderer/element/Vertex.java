@@ -25,7 +25,9 @@
 package net.malisis.core.renderer.element;
 
 import net.malisis.core.util.Point;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.Vec3d;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector4f;
@@ -444,20 +446,48 @@ public class Vertex
 		z = vec.z;
 	}
 
-	public int[] toVertexData()
+	/**
+	 * Gets the vertex data for this {@link Vertex}.
+	 *
+	 * @param vertexFormat the vertex format
+	 * @param offset the offset
+	 * @return the vertex data
+	 */
+	public int[] getVertexData(VertexFormat vertexFormat, Vec3d offset)
 	{
-		//@formatter:off
-		return new int[] {
-				Float.floatToRawIntBits((float) x),
-				Float.floatToRawIntBits((float) y),
-				Float.floatToRawIntBits((float) z),
-				getRGBA(),
-				Float.floatToRawIntBits((float) u),
-				Float.floatToRawIntBits((float) v),
-				getBrightness(),
-				normal,
-		};
-		//@formatter:on
+		float x = (float) getX();
+		float y = (float) getY();
+		float z = (float) getZ();
+
+		if (offset != null)
+		{
+			x += offset.xCoord;
+			y += offset.yCoord;
+			z += offset.zCoord;
+		}
+
+		int[] data = new int[vertexFormat.getIntegerSize()];
+		int index = 0;
+		//private
+		//if(vertexFormat.hasPosition())
+		{
+			data[index++] = Float.floatToRawIntBits(x);
+			data[index++] = Float.floatToRawIntBits(y);
+			data[index++] = Float.floatToRawIntBits(z);
+		}
+		if (vertexFormat.hasColor())
+			data[index++] = getRGBA();
+		if (vertexFormat.hasUvOffset(0)) //normal UVs
+		{
+			data[index++] = Float.floatToRawIntBits((float) getU());
+			data[index++] = Float.floatToRawIntBits((float) getV());
+		}
+		if (vertexFormat.hasUvOffset(1)) //brightness UVs
+			data[index++] = getBrightness();
+		if (vertexFormat.hasNormal())
+			data[index++] = getNormal();
+
+		return data;
 	}
 
 	private void setState(Vertex vertex)
