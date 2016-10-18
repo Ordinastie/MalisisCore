@@ -33,6 +33,7 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleDigging;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.entity.Entity;
@@ -247,6 +248,24 @@ public class EntityUtils
 			MalisisCore.log.info("Failed to get players watching chunk :", e);
 			return new ArrayList<>();
 		}
+	}
+
+	/**
+	 * Gets the render view offset for the current view entity.
+	 *
+	 * @param partialTick the partial tick
+	 * @return the render view offset
+	 */
+	public static Point getRenderViewOffset(float partialTick)
+	{
+		Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
+		if (partialTick == 0)
+			return new Point(entity.posX, entity.posY, entity.posZ);
+
+		double x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTick;
+		double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTick;
+		double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTick;
+		return new Point(x, y, z);
 	}
 
 	/**
