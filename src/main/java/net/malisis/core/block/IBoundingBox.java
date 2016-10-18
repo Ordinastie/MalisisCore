@@ -124,7 +124,7 @@ public interface IBoundingBox
 	 * @param pos the pos
 	 * @return the rendering bounds
 	 */
-	public static AxisAlignedBB getRenderingBounds(World world, BlockPos pos)
+	public static AxisAlignedBB getRenderingBounds(IBlockAccess world, BlockPos pos)
 	{
 		IBlockState state = world.getBlockState(pos);
 		IBoundingBox ibb = IComponent.getComponent(IBoundingBox.class, state.getBlock());
