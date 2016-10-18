@@ -114,8 +114,8 @@ public class RaytraceChunk extends Raytrace
 
 		while (!ret && count++ <= MAX_CHUNKS)
 		{
-			tX = ray.intersectX(currentX + (ray.direction.x > 0 ? 16 : 0));
-			tZ = ray.intersectZ(currentZ + (ray.direction.z > 0 ? 16 : 0));
+			tX = ray.intersectX((currentX / 16) * 16 + (ray.direction.x > 0 ? 16 : 0));
+			tZ = ray.intersectZ((currentZ / 16) * 16 + (ray.direction.z > 0 ? 16 : 0));
 
 			min = getMin(tX, tZ);
 			Point exit = ray.getPointAt(min);
