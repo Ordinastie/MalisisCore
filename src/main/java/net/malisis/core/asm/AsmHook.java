@@ -37,7 +37,16 @@ public class AsmHook
 {
 	private enum HookStep
 	{
-		FIND, INSERT, JUMP,
+		FIND,
+		INSERT,
+		JUMP,
+	}
+
+	public enum HookState
+	{
+		UNPROCESSED,
+		SUCCESS,
+		FAILED
 	}
 
 	private static int END = Short.MIN_VALUE;
@@ -50,6 +59,7 @@ public class AsmHook
 	private ArrayList<InsnList> matches = new ArrayList<>();
 	private ArrayList<Integer> jumps = new ArrayList<>();
 	private ArrayList<HookStep> steps = new ArrayList<>();
+	private HookState currentState = HookState.UNPROCESSED;
 
 	public AsmHook(McpMethodMapping mapping)
 	{
@@ -137,7 +147,10 @@ public class AsmHook
 					InsnList match = matches.get(matchesIndex++);
 					AbstractInsnNode node = AsmUtils.findInstruction(methodNode, match, index);
 					if (node == null)
+					{
+						currentState = HookState.FAILED;
 						return false;
+					}
 					else
 						index = methodNode.instructions.indexOf(node);
 					break;
@@ -157,6 +170,7 @@ public class AsmHook
 			}
 		}
 
+		currentState = HookState.SUCCESS;
 		return true;
 	}
 
@@ -189,4 +203,8 @@ public class AsmHook
 		return debug;
 	}
 
+	public HookState getState()
+	{
+		return currentState;
+	}
 }
