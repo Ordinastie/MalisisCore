@@ -165,9 +165,6 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	/** Whether at least one vertex has been drawn. */
 	protected boolean vertexDrawn = false;
 
-	private int tempBufferSize = 7;
-	private int[] tempBuffer = new int[4 * tempBufferSize];
-
 	/**
 	 * Instantiates a new {@link MalisisRenderer}.
 	 */
@@ -528,7 +525,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		}
 		else if (renderType == RenderType.TILE_ENTITY)
 		{
-			if (isBatched)
+			if (isBatched())
 			{
 				posOffset = new Vec3d(data[0], data[1], data[2]);
 				vertexFormat = FMLClientHandler.instance().hasOptifine() ? DefaultVertexFormats.BLOCK : malisisVertexFormat;
@@ -542,8 +539,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 				GlStateManager.translate(data[0], data[1], data[2]);
 
 				bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-
 				startDrawing(FMLClientHandler.instance().hasOptifine() ? DefaultVertexFormats.BLOCK : malisisVertexFormat);
+				enableBlending();
 			}
 		}
 		else if (renderType == RenderType.WORLD_LAST)
@@ -556,6 +553,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 			bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 
 			startDrawing(malisisVertexFormat);
+			enableBlending();
 		}
 		else
 			throw new IllegalArgumentException("Unknow renderType to handle for " + getClass().getSimpleName() + " : " + renderType);
@@ -575,7 +573,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		}
 		else if (renderType == RenderType.TILE_ENTITY)
 		{
-			if (isBatched)
+			if (isBatched())
 				buffer.setTranslation(0, 0, 0);
 			else
 			{
@@ -589,6 +587,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		else if (renderType == RenderType.WORLD_LAST)
 		{
 			draw();
+			disableBlending();
 			GlStateManager.popMatrix();
 			GlStateManager.popAttrib();
 		}
@@ -707,7 +706,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	{
 		if (renderType == RenderType.BLOCK || renderType == RenderType.ANIMATED)
 			return false;
-		if (renderType == RenderType.TILE_ENTITY && isBatched)
+		if (renderType == RenderType.TILE_ENTITY && isBatched())
 			return false;
 		return true;
 	}
@@ -738,7 +737,6 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		GlStateManager.disableColorMaterial();
 		GlStateManager.shadeModel(GL11.GL_FLAT);
 		GlStateManager.disableBlend();
-
 	}
 
 	/**
@@ -943,19 +941,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		if (params != null && renderType == RenderType.ITEM)
 			vertex.setNormal(params.direction.get());
 
-		if (!FMLClientHandler.instance().hasOptifine())
-			buffer.addVertexData(vertex.getVertexData(vertexFormat, posOffset));
-		else
-		{
-			if (!isBatched || renderType == RenderType.ITEM)
-				buffer.addVertexData(vertex.getVertexData(vertexFormat, posOffset));
-			else
-			{
-				System.arraycopy(vertex.getVertexData(vertexFormat, posOffset), 0, tempBuffer, tempBufferSize * number, tempBufferSize);
-				if (number == 3)
-					buffer.addVertexData(tempBuffer);
-			}
-		}
+		buffer.addVertexData(vertex.getVertexData(vertexFormat, posOffset));
 
 		vertexDrawn = true;
 	}

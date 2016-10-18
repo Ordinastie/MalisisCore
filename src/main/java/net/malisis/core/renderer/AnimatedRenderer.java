@@ -56,19 +56,19 @@ import com.google.common.collect.Maps;
  */
 public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 {
-	/** Map of {@link ISortedRenderable} per {@link Chunk Chunks}. */
+	/** Map of {@link ISortedRenderable} per {@link BlockPos}. */
 	private static Map<BlockPos, IAnimatedRenderable> animatedRenderables = Maps.newHashMap();
 	static
 	{
+		//check renderable to be removed when a block changes.
 		MalisisRegistry.onPostSetBlock(AnimatedRenderer::removeRenderable, CallbackOption.of());
 	}
 
-	ICamera camera;
+	/** Current {@link IAnimatedRenderable} being rendered. */
 	IAnimatedRenderable renderable;
 
 	public AnimatedRenderer()
 	{
-		setBatched();
 		registerForRenderWorldLast();
 		MinecraftForge.EVENT_BUS.register(this);
 	}
@@ -92,7 +92,6 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 	@Override
 	public void render()
 	{
-		enableBlending();
 		Point viewOffset = EntityUtils.getRenderViewOffset(partialTick);
 		ICamera camera = new Frustum();
 		//camera.setPosition(viewOffset.x, viewOffset.y, viewOffset.z);
@@ -106,6 +105,11 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 		renderType = RenderType.WORLD_LAST;
 	}
 
+	/**
+	 * Renders an {@link IAnimatedRenderable}.
+	 *
+	 * @param renderable the renderable
+	 */
 	private void renderRenderable(IAnimatedRenderable renderable)
 	{
 		this.renderable = renderable;
@@ -115,6 +119,11 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 		renderable.renderAnimated(block, this);
 	}
 
+	/**
+	 * Removes the registered {@link IAnimatedRenderable} for the positions in the unloading chunk.
+	 *
+	 * @param event the event
+	 */
 	@SubscribeEvent
 	public void onChunkUnload(ChunkEvent.Unload event)
 	{
@@ -122,10 +131,8 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 				&& (p.getZ() >> 4) == event.getChunk().zPosition);
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	/**
-	 * Removes the stored {@link ISortedRenderable} in the chunk for the position, if necessary.<br>
+	 * Removes the stored {@link ISortedRenderable} for the position, if necessary.<br>
 	 * Called every time a block is set in the world.
 	 *
 	 * @param chunk the chunk
@@ -148,7 +155,7 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 	}
 
 	/**
-	 * Gets the {@link ISortedRenderable} for the specified {@link BlockPos}, if the chunk is loaded.
+	 * Gets the {@link ISortedRenderable} for the specified {@link BlockPos}.
 	 *
 	 * @param <T> the generic type
 	 * @param pos the pos
