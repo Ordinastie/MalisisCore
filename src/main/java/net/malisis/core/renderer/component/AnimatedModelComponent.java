@@ -30,16 +30,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.AnimatedRenderer;
-import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.IAnimatedRenderable;
-import net.malisis.core.renderer.ISortedRenderable;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.RenderType;
@@ -49,14 +46,11 @@ import net.malisis.core.renderer.model.IAnimationLoader;
 import net.malisis.core.util.Timer;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 
 import com.google.common.base.Preconditions;
@@ -106,18 +100,15 @@ public class AnimatedModelComponent extends ModelComponent
 	 */
 	private void autoDetectAnimatedGroups()
 	{
-		Set<String> animList = model.getAnimatedShapes();
-		animatedShapes = Sets.newHashSet(animList);
-
-		Set<String> staticList = model.getShapeNames().stream().filter(s -> !animList.contains(s)).collect(Collectors.toSet());
-		staticShapes = Sets.newHashSet(staticList);
+		animatedShapes = model.getAnimatedShapes();
+		staticShapes = model.getShapeNames().stream().filter(s -> !animatedShapes.contains(s)).collect(Collectors.toSet());
 
 		//Debug: all animated
 		//		animatedShapes.addAll(staticShapes);
 		//		staticShapes.clear();
 	}
 
-	private Optional<AMC> get(BlockPos pos)
+	private Optional<IAnimatedRenderable> get(BlockPos pos)
 	{
 		return AnimatedRenderer.getRenderable(pos);
 	}
@@ -278,8 +269,8 @@ public class AnimatedModelComponent extends ModelComponent
 
 	private void onRender(IBlockAccess world, BlockPos pos, IBlockState state)
 	{
+		AnimatedRenderer.registerRenderable(world, pos, this);
 		checkState(world, pos, state);
-		AnimatedRenderer.registerRenderable(pos, this);
 	}
 
 	@Override
@@ -308,41 +299,9 @@ public class AnimatedModelComponent extends ModelComponent
 			animatedShapes.forEach(name -> model.render(renderer, name, rp));
 	}
 
-	/**
-	 * Renders the animated {@link Shape Shapes} for this {@link AnimatedModelComponent}.
-	 *
-	 * @param block the block
-	 * @param renderer the renderer
-	 */
-	public void renderAnimated(Block block, AMC amc, AnimatedRenderer renderer)
+	public AMC createRenderable(IBlockAccess world, BlockPos pos)
 	{
-		//no shapes to animated
-		if (animatedShapes.size() == 0)
-			return;
-
-		model.resetState();
-		//only animate for ANIMATED (not ITEM)
-		if (renderer.getRenderType() == RenderType.ANIMATED)
-		{
-			model.rotate(DirectionalComponent.getDirection(renderer.getBlockState()));
-
-			//need copy to prevent CME
-			Map<String, Timer> timers = amc.getTimers();
-			for (Entry<String, Timer> entry : timers.entrySet())
-			{
-				//animation is done and doesn't persist
-				if (model.animate(entry.getKey(), entry.getValue()))
-					timers.remove(renderer.getPos(), entry.getKey());
-			}
-		}
-
-		//render the shapes
-		animatedShapes.forEach(name -> model.render(renderer, name, rp));
-	}
-
-	public AMC createRenderable(World world, BlockPos pos)
-	{
-		return new AMC(world, pos, this);
+		return new AMC(world, pos);
 	}
 
 	/**
@@ -365,18 +324,16 @@ public class AnimatedModelComponent extends ModelComponent
 		public void accept(IBlockAccess world, BlockPos pos, IBlockState state, AnimatedModelComponent amc);
 	}
 
-	public static class AMC implements ISortedRenderable, IAnimatedRenderable
+	public class AMC implements IAnimatedRenderable
 	{
-		private World world;
+		private IBlockAccess world;
 		private BlockPos pos;
-		private AnimatedModelComponent amc;
 		private Map<String, Timer> timers = Maps.newHashMap();
 
-		public AMC(World world, BlockPos pos, AnimatedModelComponent amc)
+		public AMC(IBlockAccess world, BlockPos pos)
 		{
 			this.world = world;
 			this.pos = pos;
-			this.amc = amc;
 		}
 
 		@Override
@@ -385,9 +342,15 @@ public class AnimatedModelComponent extends ModelComponent
 			return pos;
 		}
 
+		@Override
+		public IBlockAccess getWorld()
+		{
+			return world;
+		}
+
 		public AnimatedModelComponent getComponent()
 		{
-			return amc;
+			return AnimatedModelComponent.this;
 		}
 
 		@Override
@@ -419,30 +382,37 @@ public class AnimatedModelComponent extends ModelComponent
 			return camera.isBoundingBoxInFrustum(IBoundingBox.getRenderingBounds(world, pos));
 		}
 
-		@Override
-		public boolean isPositionStillValid()
-		{
-			IBlockState state = Minecraft.getMinecraft().theWorld.getBlockState(getPos());
-			AnimatedModelComponent blockComponent = IComponent.getComponent(AnimatedModelComponent.class, state.getBlock());
-			if (getComponent() == blockComponent)
-				MalisisCore.message("POS NOT VALID ANYMORE : " + pos);
-			return getComponent() == blockComponent;
-		}
-
-		@Override
-		public void render(float partialTick)
-		{
-			double x = pos.getX() - TileEntityRendererDispatcher.staticPlayerX;
-			double y = pos.getY() - TileEntityRendererDispatcher.staticPlayerY;
-			double z = pos.getZ() - TileEntityRendererDispatcher.staticPlayerZ;
-			DefaultRenderer.animated.renderAnimated(TileEntityRendererDispatcher.instance.worldObj, pos, this, x, y, z, partialTick);
-		}
-
+		/**
+		 * Renders the animated {@link Shape Shapes} for this {@link AnimatedModelComponent}.
+		 *
+		 * @param block the block
+		 * @param renderer the renderer
+		 */
 		@Override
 		public void renderAnimated(Block block, AnimatedRenderer renderer)
 		{
-			amc.renderAnimated(block, this, renderer);
-		}
+			//no shapes to animated
+			if (animatedShapes.size() == 0)
+				return;
 
+			model.resetState();
+			//only animate for ANIMATED (not ITEM)
+			if (renderer.getRenderType() == RenderType.ANIMATED)
+			{
+				model.rotate(DirectionalComponent.getDirection(renderer.getBlockState()));
+
+				//need copy to prevent CME
+				Map<String, Timer> timers = getTimers();
+				for (Entry<String, Timer> entry : timers.entrySet())
+				{
+					//animation is done and doesn't persist
+					if (model.animate(entry.getKey(), entry.getValue()))
+						timers.remove(renderer.getPos(), entry.getKey());
+				}
+			}
+
+			//render the shapes
+			animatedShapes.forEach(name -> model.render(renderer, name, rp));
+		}
 	}
 }

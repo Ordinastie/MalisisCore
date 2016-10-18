@@ -26,6 +26,9 @@ package net.malisis.core.renderer;
 
 import net.malisis.core.util.Timer;
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.culling.ICamera;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 
 /**
  * @author Ordinastie
@@ -33,11 +36,17 @@ import net.minecraft.block.Block;
  */
 public interface IAnimatedRenderable
 {
+	public BlockPos getPos();
+
+	public IBlockAccess getWorld();
+
 	public Timer addTimer(String animation, Timer timer);
 
 	public Timer removeTimer(String animation);
 
 	public Timer getTimer(String animation);
+
+	public boolean inFrustrum(ICamera camera);
 
 	public void renderAnimated(Block block, AnimatedRenderer renderer);
 }
