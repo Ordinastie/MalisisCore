@@ -55,8 +55,18 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 /**
- * @author Ordinastie
+ * {@link BlockDataHandler} handles custom data being stored for a specific {@link BlockPos}.
  *
+ * <p>
+ * Custom data is identified by a {@link String} identifier, and a way to convert from and into a {@link ByteBuf} using
+ * {@link #registerBlockData(String, Function, Function)}.
+ *
+ * <p>
+ * Custom data is then stored and retreived using {@link #setData(String, IBlockAccess, BlockPos, Object)},
+ * {@link #getData(String, IBlockAccess, BlockPos)} and {@link #removeData(String, IBlockAccess, BlockPos)} with the corresponding
+ * identifier.
+ *
+ * @author Ordinastie
  */
 @AutoLoad
 public class BlockDataHandler
@@ -74,11 +84,23 @@ public class BlockDataHandler
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
+	/**
+	 * Get the server or client data depending on the passed {@link World}.
+	 *
+	 * @param world the world
+	 * @return the table
+	 */
 	private Table<String, Chunk, ChunkData<?>> data(World world)
 	{
 		return world(world).isRemote ? instance.clientDatas : instance.serverDatas;
 	}
 
+	/**
+	 * Gets the actual world object based on the passed {@link IBlockAccess}.
+	 *
+	 * @param world the world
+	 * @return the world
+	 */
 	private World world(IBlockAccess world)
 	{
 		if (world instanceof World)
@@ -92,11 +114,29 @@ public class BlockDataHandler
 		return null;
 	}
 
+	/**
+	 * Gets the {@link ChunkData} for the specified identifier and {@link BlockPos}
+	 *
+	 * @param <T> the generic type
+	 * @param identifier the identifier
+	 * @param world the world
+	 * @param pos the pos
+	 * @return the chunk data
+	 */
 	private <T> ChunkData<T> chunkData(String identifier, World world, BlockPos pos)
 	{
 		return world != null ? chunkData(identifier, world, world.getChunkFromBlockCoords(pos)) : null;
 	}
 
+	/**
+	 * Gets the {@link ChunkData} for the specified identifier and {@link Chunk}.
+	 *
+	 * @param <T> the generic type
+	 * @param identifier the identifier
+	 * @param world the world
+	 * @param chunk the chunk
+	 * @return the chunk data
+	 */
 	@SuppressWarnings("unchecked")
 	private <T> ChunkData<T> chunkData(String identifier, World world, Chunk chunk)
 	{
@@ -104,6 +144,15 @@ public class BlockDataHandler
 
 	}
 
+	/**
+	 * Creates the {@link ChunkData} for specified identifier for the {@link Chunk} at the {@link BlockPos}.
+	 *
+	 * @param <T> the generic type
+	 * @param identifier the identifier
+	 * @param world the world
+	 * @param pos the pos
+	 * @return the chunk data
+	 */
 	@SuppressWarnings("unchecked")
 	private <T> ChunkData<T> createChunkData(String identifier, World world, BlockPos pos)
 	{
@@ -116,34 +165,10 @@ public class BlockDataHandler
 		return chunkData;
 	}
 
-	public static <T> void registerBlockData(String identifier, Function<ByteBuf, T> from, Function<T, ByteBuf> to)
-	{
-		instance.handlerInfos.put(identifier, new HandlerInfo<>(identifier, from, to));
-	}
-
-	public static <T> T getData(String identifier, IBlockAccess world, BlockPos pos)
-	{
-		ChunkData<T> chunkData = instance.<T> chunkData(identifier, instance.world(world), pos);
-		return chunkData != null ? chunkData.getData(pos) : null;
-	}
-
-	public static <T> void setData(String identifier, IBlockAccess world, BlockPos pos, T data)
-	{
-		ChunkData<T> chunkData = instance.<T> chunkData(identifier, instance.world(world), pos);
-		if (chunkData == null)
-			chunkData = instance.<T> createChunkData(identifier, instance.world(world), pos);
-
-		chunkData.setData(pos, data);
-	}
-
-	public static <T> void removeData(String identifier, IBlockAccess world, BlockPos pos)
-	{
-		setData(identifier, world, pos, null);
-	}
-
 	//#region Events
 	/**
-	 * On data load.
+	 * Saves the data in NBT for the {@link Chunk}.<br>
+	 * Also unloads the data if the <code>Chunk</code> is marked as <i>unloaded</i>.
 	 *
 	 * @param event the event
 	 */
@@ -152,22 +177,33 @@ public class BlockDataHandler
 	{
 		NBTTagCompound nbt = event.getData();
 
+		if (event.getChunk().xPosition == -1 && event.getChunk().zPosition == 0)
+			MalisisCore.message("Chunk");
+
 		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
 		{
 			if (!nbt.hasKey(handlerInfo.identifier))
 				continue;
 
-			//System.out.println("onDataLoad (" + event.getChunk().xPosition + "/" + event.getChunk().zPosition + ") for "
-			//		+ handlerInfo.identifier);
+			//			MalisisCore.message("onDataLoad (" + event.getChunk().xPosition + "/" + event.getChunk().zPosition + ") for "
+			//					+ handlerInfo.identifier);
 			ChunkData<?> chunkData = new ChunkData<>(handlerInfo);
 			chunkData.fromBytes(Unpooled.copiedBuffer(nbt.getByteArray(handlerInfo.identifier)));
 			data(event.getWorld()).put(handlerInfo.identifier, event.getChunk(), chunkData);
 		}
 	}
 
+	/**
+	 * On data save.
+	 *
+	 * @param event the event
+	 */
 	@SubscribeEvent
 	public void onDataSave(ChunkDataEvent.Save event)
 	{
+		if (event.getChunk().xPosition == -1 && event.getChunk().zPosition == 0)
+			MalisisCore.message("Saving -1/0");
+
 		NBTTagCompound nbt = event.getData();
 
 		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
@@ -175,16 +211,33 @@ public class BlockDataHandler
 			ChunkData<?> chunkData = chunkData(handlerInfo.identifier, event.getWorld(), event.getChunk());
 			if (chunkData != null && chunkData.hasData())
 			{
+				//				MalisisCore.message("onDataSave (" + event.getChunk().xPosition + "/" + event.getChunk().zPosition + ") for "
+				//						+ handlerInfo.identifier);
 				ByteBuf buf = Unpooled.buffer();
 				chunkData.toBytes(buf);
 				nbt.setByteArray(handlerInfo.identifier, buf.capacity(buf.writerIndex()).array());
 			}
+
+			//unload data on save because saving is called after unload
+			if (event.getChunk().unloaded)
+				data(event.getWorld()).remove(handlerInfo.identifier, event.getChunk());
+
 		}
 	}
 
+	/**
+	 * Unloads the data for the {@link Chunk}.<br>
+	 * Does the process client side only because unloading happens before saving on the server.
+	 *
+	 * @param event the event
+	 */
 	@SubscribeEvent
 	public void onDataUnload(ChunkEvent.Unload event)
 	{
+		//only unload on client, server unloads on save
+		if (!event.getWorld().isRemote)
+			return;
+
 		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
 		{
 			data(event.getWorld()).remove(handlerInfo.identifier, event.getChunk());
@@ -211,13 +264,72 @@ public class BlockDataHandler
 
 	//#end Events
 
+	/**
+	 * Registers a custom block data with the specified identifier.
+	 *
+	 * @param <T> the generic type
+	 * @param identifier the identifier
+	 * @param from the from
+	 * @param to the to
+	 */
+	public static <T> void registerBlockData(String identifier, Function<ByteBuf, T> from, Function<T, ByteBuf> to)
+	{
+		instance.handlerInfos.put(identifier, new HandlerInfo<>(identifier, from, to));
+	}
+
+	/**
+	 * Gets the custom data stored at the {@link BlockPos} for the specified identifier.
+	 *
+	 * @param <T> the generic type
+	 * @param identifier the identifier
+	 * @param world the world
+	 * @param pos the pos
+	 * @return the data
+	 */
+	public static <T> T getData(String identifier, IBlockAccess world, BlockPos pos)
+	{
+		ChunkData<T> chunkData = instance.<T> chunkData(identifier, instance.world(world), pos);
+		return chunkData != null ? chunkData.getData(pos) : null;
+	}
+
+	/**
+	 * Sets the custom data to be stored at the {@link BlockPos} for the specified identifier.
+	 *
+	 * @param <T> the generic type
+	 * @param identifier the identifier
+	 * @param world the world
+	 * @param pos the pos
+	 * @param data the data
+	 */
+	public static <T> void setData(String identifier, IBlockAccess world, BlockPos pos, T data)
+	{
+		ChunkData<T> chunkData = instance.<T> chunkData(identifier, instance.world(world), pos);
+		if (chunkData == null)
+			chunkData = instance.<T> createChunkData(identifier, instance.world(world), pos);
+
+		chunkData.setData(pos, data);
+	}
+
+	/**
+	 * Removes the custom data stored at the {@link BlockPos} for the specified identifier.
+	 *
+	 * @param <T> the generic type
+	 * @param identifier the identifier
+	 * @param world the world
+	 * @param pos the pos
+	 */
+	public static <T> void removeData(String identifier, IBlockAccess world, BlockPos pos)
+	{
+		setData(identifier, world, pos, null);
+	}
+
 	static void setBlockData(int chunkX, int chunkZ, String identifier, ByteBuf data)
 	{
 		HandlerInfo<?> handlerInfo = instance.handlerInfos.get(identifier);
 		if (handlerInfo == null)
 			return;
 
-		//System.out.println("SetBlockData (" + chunkX + "/" + chunkZ + ") for " + identifier);
+		MalisisCore.message("SetBlockData (" + chunkX + "/" + chunkZ + ") for " + identifier);
 		Chunk chunk = Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(chunkX, chunkZ);
 		ChunkData<?> chunkData = new ChunkData<>(handlerInfo).fromBytes(data);
 		instance.data(chunk.getWorld()).put(handlerInfo.identifier, chunk, chunkData);
@@ -228,6 +340,11 @@ public class BlockDataHandler
 		return instance;
 	}
 
+	/**
+	 * Internal container for custom data identifier and conversion from/to {@link ByteBuf}.
+	 *
+	 * @param <T> the generic type
+	 */
 	static class HandlerInfo<T>
 	{
 		String identifier;
@@ -242,6 +359,11 @@ public class BlockDataHandler
 		}
 	}
 
+	/**
+	 * Internal data storage for a specified {@link HandlerInfo}.
+	 *
+	 * @param <T> the generic type
+	 */
 	static class ChunkData<T>
 	{
 		private HandlerInfo<T> handlerInfos;
