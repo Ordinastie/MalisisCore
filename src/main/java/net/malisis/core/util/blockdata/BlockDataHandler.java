@@ -177,9 +177,6 @@ public class BlockDataHandler
 	{
 		NBTTagCompound nbt = event.getData();
 
-		if (event.getChunk().xPosition == -1 && event.getChunk().zPosition == 0)
-			MalisisCore.message("Chunk");
-
 		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
 		{
 			if (!nbt.hasKey(handlerInfo.identifier))
@@ -201,9 +198,6 @@ public class BlockDataHandler
 	@SubscribeEvent
 	public void onDataSave(ChunkDataEvent.Save event)
 	{
-		if (event.getChunk().xPosition == -1 && event.getChunk().zPosition == 0)
-			MalisisCore.message("Saving -1/0");
-
 		NBTTagCompound nbt = event.getData();
 
 		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
@@ -329,7 +323,7 @@ public class BlockDataHandler
 		if (handlerInfo == null)
 			return;
 
-		MalisisCore.message("SetBlockData (" + chunkX + "/" + chunkZ + ") for " + identifier);
+		//MalisisCore.message("SetBlockData (" + chunkX + "/" + chunkZ + ") for " + identifier);
 		Chunk chunk = Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(chunkX, chunkZ);
 		ChunkData<?> chunkData = new ChunkData<>(handlerInfo).fromBytes(data);
 		instance.data(chunk.getWorld()).put(handlerInfo.identifier, chunk, chunkData);
