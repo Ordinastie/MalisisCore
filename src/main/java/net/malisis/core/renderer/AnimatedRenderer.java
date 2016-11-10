@@ -132,7 +132,7 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 	}
 
 	/**
-	 * Removes the stored {@link ISortedRenderable} for the position, if necessary.<br>
+	 * Removes the stored {@link IAnimatedRenderable} for the position, if necessary.<br>
 	 * Called every time a block is set in the world.
 	 *
 	 * @param chunk the chunk
@@ -155,7 +155,7 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 	}
 
 	/**
-	 * Gets the {@link ISortedRenderable} for the specified {@link BlockPos}.
+	 * Gets the {@link AnimatedModelComponent} for the specified {@link BlockPos}.
 	 *
 	 * @param <T> the generic type
 	 * @param pos the pos
@@ -167,7 +167,7 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 	}
 
 	/**
-	 * Registers the {@link ISortedRenderable} at the specified position if there isn't already one.
+	 * Registers the {@link AnimatedModelComponent} at the specified position if there isn't already one.
 	 *
 	 * @param pos the pos
 	 * @param amc the amc
