@@ -33,6 +33,7 @@ import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
+import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.minecraft.client.gui.GuiScreen;
@@ -164,6 +165,10 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 	@Override
 	public int getContentWidth()
 	{
+		UIScrollBar sb = UIScrollBar.getScrollbar(this, Type.VERTICAL);
+		if (sb != null && sb.isVisible())
+			return getWidth() - sb.getWidth() - 2 - getHorizontalPadding() * 2;
+
 		return getWidth();
 	}
 
@@ -176,6 +181,11 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 		int height = 0;
 		for (S element : elements)
 			height += getElementHeight(element) + elementSpacing;
+
+		UIScrollBar sb = UIScrollBar.getScrollbar(this, Type.HORIZONTAL);
+		if (sb != null && sb.isVisible())
+			return getWidth() - sb.getWidth() - 2 - getHorizontalPadding() * 2;
+
 		return height;
 	}
 
