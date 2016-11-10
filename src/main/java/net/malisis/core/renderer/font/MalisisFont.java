@@ -59,6 +59,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.io.Files;
@@ -401,9 +402,8 @@ public class MalisisFont
 	public String processString(String str, FontRenderOptions fro)
 	{
 		str = str.replaceAll("\r?\n", "");
-		str = translate(str);
-		//.replaceAll("\t", "    ");
-		return str;
+		Pair<String, String> p = FontRenderOptions.getStartFormat(str);
+		return p.getLeft() + translate(p.getRight());
 	}
 
 	private String translate(String str)

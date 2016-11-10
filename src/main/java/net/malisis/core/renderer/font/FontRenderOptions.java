@@ -30,6 +30,7 @@ import java.util.Map;
 import net.minecraft.util.text.TextFormatting;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @author Ordinastie
@@ -297,6 +298,21 @@ public class FontRenderOptions
 		return getFormatting(text, index) != null;
 	}
 
+	/**
+	 * Gets a {@link Pair} separating the {@link TextFormatting} tags at the beginning of a <code>text</code>.
+	 *
+	 * @param text the text
+	 * @return a Pair with the formatting in the left part and the text in the right part.
+	 */
+	public static Pair<String, String> getStartFormat(String text)
+	{
+		int offset = 0;
+		while (getFormatting(text, offset) != null)
+			offset += 2;
+
+		return Pair.of(text.substring(0, offset), text.substring(offset, text.length()));
+	}
+
 	public static Link getLink(String text, int index)
 	{
 		if (StringUtils.isEmpty(text) || index < 0 || index > text.length() - 2)
@@ -311,5 +327,4 @@ public class FontRenderOptions
 		Link link = new Link(index, text.substring(index + 1, i));
 		return link.isValid() ? link : null;
 	}
-
 }
