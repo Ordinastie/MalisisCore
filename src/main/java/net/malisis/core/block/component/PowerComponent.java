@@ -46,7 +46,8 @@ public class PowerComponent implements IBlockComponent
 
 	public static enum Type
 	{
-		RIGHT_CLICK, REDSTONE
+		RIGHT_CLICK,
+		REDSTONE
 	}
 
 	private final Type type;
@@ -87,6 +88,12 @@ public class PowerComponent implements IBlockComponent
 
 		boolean isPowered = isRemotelyPowered(world, pos);
 		world.setBlockState(pos, state.withProperty(getProperty(), isPowered));
+	}
+
+	@Override
+	public boolean canProvidePower(Block block, IBlockState state)
+	{
+		return true;
 	}
 
 	@Override

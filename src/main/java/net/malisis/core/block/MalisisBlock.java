@@ -264,6 +264,16 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	}
 
 	@Override
+	public boolean canProvidePower(IBlockState state)
+	{
+		boolean b = false;
+		for (IBlockComponent component : getBlockComponents())
+			b |= component.canProvidePower(this, state);
+
+		return b;
+	}
+
+	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state)
 	{
 		getBlockComponents().forEach(c -> c.breakBlock(this, world, pos, state));

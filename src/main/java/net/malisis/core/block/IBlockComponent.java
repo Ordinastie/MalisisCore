@@ -178,9 +178,7 @@ public interface IBlockComponent extends IComponent
 	 * @param neighborBlock the neighbor block
 	 */
 	public default void onNeighborBlockChange(Block block, World world, BlockPos pos, IBlockState state, Block neighborBlock)
-	{
-
-	}
+	{}
 
 	/**
 	 * Called when the {@link Block} is broken.
@@ -372,6 +370,11 @@ public interface IBlockComponent extends IComponent
 	//#end Fullness
 
 	//#region Other
+	public default boolean canProvidePower(Block block, IBlockState state)
+	{
+		return false;
+	}
+
 	/**
 	 * Gets the mixed brightness for the {@link Block}.
 	 *
