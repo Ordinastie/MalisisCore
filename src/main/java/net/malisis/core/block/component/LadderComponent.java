@@ -29,7 +29,7 @@ import java.util.List;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IComponent;
-import net.malisis.core.block.component.DirectionalComponent.Placement;
+import net.malisis.core.block.component.DirectionalComponent.IPlacement;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
@@ -62,7 +62,7 @@ public class LadderComponent implements IBlockComponent
 	@Override
 	public List<IComponent> getDependencies()
 	{
-		return Lists.newArrayList(new DirectionalComponent(Placement.BLOCKSIDE));
+		return Lists.newArrayList(new DirectionalComponent(IPlacement.BLOCKSIDE));
 	}
 
 	protected boolean canBlockStay(World world, BlockPos pos, EnumFacing side)

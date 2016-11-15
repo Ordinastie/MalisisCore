@@ -51,35 +51,8 @@ public class DirectionalComponent implements IBlockComponent
 	public static final PropertyDirection HORIZONTAL = PropertyDirection.create("direction", EnumFacing.Plane.HORIZONTAL);
 	public static final PropertyDirection ALL = PropertyDirection.create("direction");
 
-	public enum Placement implements IPlacement
-	{
-		//@formatter:off
-		//direction is determined by the side of the block click
-		BLOCKSIDE((state, side, placer) -> side),
-		//direction is determined by the facing of the entity placing the block
-		PLACER((state, side, placer) ->
-		{
-			EnumFacing facing = EntityUtils.getEntityFacing(placer, DirectionalComponent.getProperty(state.getBlock()) == ALL);
-			return placer.isSneaking() ? facing : facing.getOpposite();
-		});
-		//@formatter:on
-
-		IPlacement placement;
-
-		private Placement(IPlacement placement)
-		{
-			this.placement = placement;
-		}
-
-		@Override
-		public EnumFacing getPlacement(IBlockState state, EnumFacing side, EntityLivingBase placer)
-		{
-			return placement.getPlacement(state, side, placer);
-		};
-	}
-
 	/** The type of placement to use. */
-	private IPlacement placement = Placement.PLACER;
+	private IPlacement placement = IPlacement.PLACER;
 	/** The property used for this {@link DirectionalComponent}. */
 	private PropertyDirection property = HORIZONTAL;
 
@@ -100,7 +73,7 @@ public class DirectionalComponent implements IBlockComponent
 	 */
 	public DirectionalComponent()
 	{
-		this(HORIZONTAL, Placement.PLACER);
+		this(HORIZONTAL, IPlacement.PLACER);
 	}
 
 	/**
@@ -110,7 +83,7 @@ public class DirectionalComponent implements IBlockComponent
 	 */
 	public DirectionalComponent(PropertyDirection property)
 	{
-		this(property, Placement.PLACER);
+		this(property, IPlacement.PLACER);
 	}
 
 	/**
@@ -288,6 +261,14 @@ public class DirectionalComponent implements IBlockComponent
 
 	public static interface IPlacement
 	{
+		/** Direction is determined by the side of the block clicked */
+		public static final IPlacement BLOCKSIDE = (state, side, placer) -> side;
+		/** Direction is determined by the facing of the entity placing the block. */
+		public static final IPlacement PLACER = (state, side, placer) -> {
+			EnumFacing facing = EntityUtils.getEntityFacing(placer, DirectionalComponent.getProperty(state.getBlock()) == ALL);
+			return placer.isSneaking() ? facing : facing.getOpposite();
+		};
+
 		public EnumFacing getPlacement(IBlockState state, EnumFacing side, EntityLivingBase placer);
 	}
 }
