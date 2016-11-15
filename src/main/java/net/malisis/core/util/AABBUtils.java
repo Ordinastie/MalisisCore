@@ -118,7 +118,13 @@ public class AABBUtils
 	 */
 	public static AxisAlignedBB rotate(AxisAlignedBB aabb, EnumFacing dir)
 	{
-		return rotate(aabb, EnumFacingUtils.getRotationCount(dir));
+		if (dir == EnumFacing.SOUTH)
+			return aabb;
+
+		int angle = dir.getAxis() == Axis.Y ? dir.getAxisDirection().getOffset() : EnumFacingUtils.getRotationCount(dir);
+		Axis axis = dir.getAxis() == Axis.Y ? Axis.X : Axis.Y;
+
+		return rotate(aabb, angle, axis);
 	}
 
 	/**
@@ -131,23 +137,14 @@ public class AABBUtils
 	 */
 	public static AxisAlignedBB[] rotate(AxisAlignedBB[] aabbs, EnumFacing dir)
 	{
-		return rotate(aabbs, EnumFacingUtils.getRotationCount(dir));
-	}
-
-	/**
-	 * Rotates an array {@link AxisAlignedBB} around the Y axis based on the specified angle.<br>
-	 *
-	 * @param aabbs the aabbs
-	 * @param angle the angle
-	 * @return the axis aligned b b[]
-	 */
-	public static AxisAlignedBB[] rotate(AxisAlignedBB[] aabbs, int angle)
-	{
-		if (ArrayUtils.isEmpty(aabbs) || angle == 0)
+		if (ArrayUtils.isEmpty(aabbs) || dir == EnumFacing.SOUTH)
 			return aabbs;
 
+		int angle = dir.getAxis() == Axis.Y ? dir.getAxisDirection().getOffset() : EnumFacingUtils.getRotationCount(dir);
+		Axis axis = dir.getAxis() == Axis.Y ? Axis.X : Axis.Y;
+
 		for (int i = 0; i < aabbs.length; i++)
-			aabbs[i] = rotate(aabbs[i], angle);
+			aabbs[i] = rotate(aabbs[i], angle, axis);
 		return aabbs;
 	}
 
@@ -213,42 +210,66 @@ public class AABBUtils
 			maxY = (aabb.maxX * s) + (aabb.maxY * c);
 		}
 
-		aabb = new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
-		aabb = aabb.offset(0.5F, 0.5F, 0.5F);
+		aabb = new AxisAlignedBB(minX + 0.5F, minY + 0.5F, minZ + 0.5F, maxX + 0.5F, maxY + 0.5F, maxZ + 0.5F);
 
 		return aabb;
 	}
 
 	/**
 	 * Reads a {@link AxisAlignedBB} from {@link NBTTagCompound}.<br>
-	 * TODO: allow custom name prefix
 	 *
 	 * @param tag the tag
-	 * @return the axis aligned bb
+	 * @return the axis aligned BB
 	 */
 	public static AxisAlignedBB readFromNBT(NBTTagCompound tag)
 	{
-		return tag != null ? new AxisAlignedBB(tag.getDouble("minX"), tag.getDouble("minY"), tag.getDouble("minZ"), tag.getDouble("maxX"),
-				tag.getDouble("maxY"), tag.getDouble("maxZ")) : null;
+		return readFromNBT(tag, null);
+	}
+
+	/**
+	 * Reads a {@link AxisAlignedBB} from {@link NBTTagCompound} with the specified prefix.<br>
+	 *
+	 * @param tag the tag
+	 * @param prefix the prefix
+	 * @return the axis aligned bb
+	 */
+	public static AxisAlignedBB readFromNBT(NBTTagCompound tag, String prefix)
+	{
+		prefix = prefix == null ? "" : prefix + ".";
+		return tag != null ? new AxisAlignedBB(tag.getDouble(prefix + "minX"), tag.getDouble(prefix + "minY"), tag.getDouble(prefix
+				+ "minZ"), tag.getDouble(prefix + "maxX"), tag.getDouble(prefix + "maxY"), tag.getDouble(prefix + "maxZ")) : null;
 	}
 
 	/**
 	 * Writes a {@link AxisAlignedBB} to a {@link NBTTagCompound}.<br>
-	 * TODO: allow custom name prefix
 	 *
 	 * @param tag the tag
 	 * @param aabb the aabb
 	 */
 	public static void writeToNBT(NBTTagCompound tag, AxisAlignedBB aabb)
 	{
+		writeToNBT(tag, aabb, null);
+	}
+
+	/**
+	 * Writes a {@link AxisAlignedBB} to a {@link NBTTagCompound} with the specified prefix.<br>
+	 *
+	 * @param tag the tag
+	 * @param aabb the aabb
+	 * @param prefix the prefix
+	 */
+	public static void writeToNBT(NBTTagCompound tag, AxisAlignedBB aabb, String prefix)
+	{
 		if (tag == null || aabb == null)
 			return;
-		tag.setDouble("minX", aabb.minX);
-		tag.setDouble("minY", aabb.minY);
-		tag.setDouble("minZ", aabb.minZ);
-		tag.setDouble("maxX", aabb.maxX);
-		tag.setDouble("maxY", aabb.maxY);
-		tag.setDouble("maxZ", aabb.maxZ);
+
+		prefix = prefix == null ? "" : prefix + ".";
+		tag.setDouble(prefix + "minX", aabb.minX);
+		tag.setDouble(prefix + "minY", aabb.minY);
+		tag.setDouble(prefix + "minZ", aabb.minZ);
+		tag.setDouble(prefix + "maxX", aabb.maxX);
+		tag.setDouble(prefix + "maxY", aabb.maxY);
+		tag.setDouble(prefix + "maxZ", aabb.maxZ);
 	}
 
 	/**
