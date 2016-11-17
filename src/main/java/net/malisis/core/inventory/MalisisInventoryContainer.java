@@ -43,6 +43,7 @@ import net.malisis.core.util.ItemUtils.ItemStacksMerger;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
 /**
@@ -904,5 +905,12 @@ public class MalisisInventoryContainer extends Container
 	public boolean canInteractWith(EntityPlayer var1)
 	{
 		return true;
+	}
+
+	@Override
+	public Slot getSlot(int slotId)
+	{
+		//prevents IndexOutOfBoundsException
+		return null;
 	}
 }
