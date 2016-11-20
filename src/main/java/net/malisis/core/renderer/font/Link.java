@@ -78,7 +78,7 @@ public class Link implements GuiYesNoCallback
 		isValid = true;
 	}
 
-	public float getWidth(MalisisFont font, FontRenderOptions fro)
+	public float getWidth(MalisisFont font, FontOptions fro)
 	{
 		return font.getStringWidth(StringUtils.isEmpty(text) ? url : text, fro);
 	}
@@ -143,7 +143,7 @@ public class Link implements GuiYesNoCallback
 		int i = index;
 		while (i > 0)
 		{
-			link = FontRenderOptions.getLink(str, i--);
+			link = FontOptions.getLink(str, i--);
 			if (link != null && index < link.index + link.toString().length())
 				return link;
 		}

@@ -30,7 +30,7 @@ import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -48,8 +48,8 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 {
 	/** The {@link MalisisFont} to use for this {@link UICheckBox}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontRenderOptions} to use for this {@link UICheckBox}. */
-	protected FontRenderOptions fro = new FontRenderOptions();
+	/** The {@link FontOptions} to use for this {@link UICheckBox}. */
+	protected FontOptions fontOptions = FontOptions.builder().color(0x444444).build();
 	/** Text to draw beside the checkbox. **/
 	private String text;
 	/** Whether this {@link UICheckBox} is checked. */
@@ -61,7 +61,6 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	{
 		super(gui);
 		setText(text);
-		fro.color = 0x444444;
 
 		shape = new SimpleGuiShape();
 
@@ -91,15 +90,15 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	}
 
 	@Override
-	public FontRenderOptions getFontRenderOptions()
+	public FontOptions getFontOptions()
 	{
-		return fro;
+		return fontOptions;
 	}
 
 	@Override
-	public UICheckBox setFontRenderOptions(FontRenderOptions fro)
+	public UICheckBox setFontOptions(FontOptions options)
 	{
-		this.fro = fro;
+		this.fontOptions = options;
 		calculateSize();
 		return this;
 	}
@@ -133,7 +132,7 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	 */
 	private void calculateSize()
 	{
-		int w = StringUtils.isEmpty(text) ? 0 : (int) font.getStringWidth(text, fro);
+		int w = StringUtils.isEmpty(text) ? 0 : (int) font.getStringWidth(text, fontOptions);
 		setSize(w + 11, 10);
 	}
 
@@ -218,7 +217,7 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 		}
 
 		if (!StringUtils.isEmpty(text))
-			renderer.drawText(font, text, 14, 2, 0, fro);
+			renderer.drawText(font, text, 14, 2, 0, fontOptions);
 	}
 
 	@Override

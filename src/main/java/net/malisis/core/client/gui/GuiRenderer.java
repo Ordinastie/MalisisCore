@@ -34,7 +34,7 @@ import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.RenderType;
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.GuiIcon;
 import net.malisis.core.renderer.icon.Icon;
@@ -400,7 +400,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	}
 
 	/**
-	 * Draws text with default {@link MalisisFont} and {@link FontRenderOptions}.
+	 * Draws text with default {@link MalisisFont} and {@link FontOptions}.
 	 *
 	 * @param text the text
 	 */
@@ -410,7 +410,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	}
 
 	/**
-	 * Draws text with default {@link MalisisFont} and {@link FontRenderOptions} at the coordinates relative to {@link #currentComponent}.
+	 * Draws text with default {@link MalisisFont} and {@link FontOptions} at the coordinates relative to {@link #currentComponent}.
 	 *
 	 * @param text the text
 	 * @param x the x
@@ -423,19 +423,19 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	}
 
 	/**
-	 * Draw text with specified {@link MalisisFont} with {@link FontRenderOptions}.
+	 * Draw text with specified {@link MalisisFont} with {@link FontOptions}.
 	 *
 	 * @param font the font
 	 * @param text the text
 	 * @param fro the fro
 	 */
-	public void drawText(MalisisFont font, String text, FontRenderOptions fro)
+	public void drawText(MalisisFont font, String text, FontOptions fro)
 	{
 		drawText(font, text, 0, 0, 0, fro, true);
 	}
 
 	/**
-	 * Draws text with specified {@link MalisisFont} with {@link FontRenderOptions} at the coordinates relative to {@link #currentComponent}
+	 * Draws text with specified {@link MalisisFont} with {@link FontOptions} at the coordinates relative to {@link #currentComponent}
 	 *
 	 * @param font the font
 	 * @param text the text
@@ -445,13 +445,13 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	 * @param fro the fro
 	 */
 	@Override
-	public void drawText(MalisisFont font, String text, float x, float y, float z, FontRenderOptions fro)
+	public void drawText(MalisisFont font, String text, float x, float y, float z, FontOptions fro)
 	{
 		drawText(font, text, x, y, z, fro, true);
 	}
 
 	/**
-	 * Draws text with specified {@link MalisisFont} with {@link FontRenderOptions} at the coordinatesp passed.
+	 * Draws text with specified {@link MalisisFont} with {@link FontOptions} at the coordinatesp passed.
 	 *
 	 * @param font the font
 	 * @param text the text
@@ -461,7 +461,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	 * @param fro the fro
 	 * @param relative true if the coordinates are relative to current component
 	 */
-	public void drawText(MalisisFont font, String text, float x, float y, float z, FontRenderOptions fro, boolean relative)
+	public void drawText(MalisisFont font, String text, float x, float y, float z, FontOptions fro, boolean relative)
 	{
 		if (relative && currentComponent != null)
 		{

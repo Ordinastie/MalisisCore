@@ -38,7 +38,7 @@ import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.util.bbcode.BBString;
 import net.malisis.core.util.bbcode.render.BBCodeRenderer;
@@ -58,8 +58,8 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 {
 	/** The {@link MalisisFont} to use for this {@link UILabel}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontRenderOptions} to use for this {@link UILabel}. */
-	protected FontRenderOptions fro = new FontRenderOptions();
+	/** The {@link FontOptions} to use for this {@link UILabel}. */
+	protected FontOptions fontOptions = FontOptions.builder().color(0x444444).build();
 	/** Text of this {@link UILabel}. */
 	protected String text;
 	/** BBCode for this {@link UILabel}. */
@@ -98,7 +98,6 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		super(gui);
 		this.setText(text);
 		this.multiLine = multiLine;
-		this.fro.color = 0x444444;
 	}
 
 	/**
@@ -112,7 +111,6 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		this(gui);
 		this.setText(text);
 		this.multiLine = true;
-		this.fro.color = 0x444444;
 	}
 
 	/**
@@ -201,26 +199,26 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	}
 
 	/**
-	 * Gets the {@link FontRenderOptions} used for this {@link UILabel}.
+	 * Gets the {@link FontOptions} used for this {@link UILabel}.
 	 *
 	 * @return the font renderer options
 	 */
 	@Override
-	public FontRenderOptions getFontRenderOptions()
+	public FontOptions getFontOptions()
 	{
-		return fro;
+		return fontOptions;
 	}
 
 	/**
-	 * Sets the {@link MalisisFont} and {@link FontRenderOptions} to use for this {@link UILabel}.
+	 * Sets the {@link MalisisFont} and {@link FontOptions} to use for this {@link UILabel}.
 	 *
 	 * @param fro the fro
 	 * @return this {@link UILabel}
 	 */
 	@Override
-	public UILabel setFontRenderOptions(FontRenderOptions fro)
+	public UILabel setFontOptions(FontOptions fro)
 	{
-		this.fro = fro;
+		this.fontOptions = fro;
 		calculateSize();
 		return this;
 	}
@@ -233,7 +231,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	@Override
 	public float getFontScale()
 	{
-		return fro.fontScale;
+		return fontOptions.getFontScale();
 	}
 
 	// #end getters/setters
@@ -336,7 +334,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	@Override
 	public int getLineHeight()
 	{
-		return (int) (font.getStringHeight(fro) + lineSpacing);
+		return (int) (font.getStringHeight(fontOptions) + lineSpacing);
 	}
 
 	//#end IBBStringRenderer
@@ -368,7 +366,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 			int width = getWidth();
 			if (sc != null && sc.isVisible())
 				width -= sc.getWidth();
-			lines = font.wrapText(text, width, fro);
+			lines = font.wrapText(text, width, fontOptions);
 		}
 
 		fireEvent(new ContentUpdateEvent<>(this));
@@ -382,8 +380,8 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		if (multiLine)
 			return;
 
-		this.textWidth = (int) font.getStringWidth(text, fro);
-		this.textHeight = (int) font.getStringHeight(fro);
+		this.textWidth = (int) font.getStringWidth(text, fontOptions);
+		this.textHeight = (int) font.getStringHeight(fontOptions);
 		setSize(textWidth, textHeight);
 	}
 
@@ -418,16 +416,16 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 
 		if (multiLine)
 		{
-			fro.resetStyles();//manually reset style because fro.multiline = true
+			fontOptions.resetStyles();//manually reset style because fro.multiline = true
 			for (int i = lineOffset; i < lineOffset + getVisibleLines() && i < lines.size(); i++)
 			{
-				fro.setLineFro(fro);
+				fontOptions.setLineOptions(fontOptions);
 				int h = (i - lineOffset) * getLineHeight();
-				renderer.drawText(font, lines.get(i), 0, h, 0, fro);
+				renderer.drawText(font, lines.get(i), 0, h, 0, fontOptions);
 			}
 		}
 		else
-			renderer.drawText(font, text, fro);
+			renderer.drawText(font, text, fontOptions);
 	}
 
 	@Subscribe

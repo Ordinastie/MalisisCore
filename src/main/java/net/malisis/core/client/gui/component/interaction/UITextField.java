@@ -40,7 +40,7 @@ import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.Link;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.GuiIcon;
@@ -65,10 +65,10 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 {
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontRenderOptions} to use for this {@link UITooltip}. */
-	protected FontRenderOptions fro = new FontRenderOptions();
-	/** The {@link FontRenderOptions} to use for this {@link UITooltip} when disabled. */
-	protected FontRenderOptions disabledFro = new FontRenderOptions();
+	/** The {@link FontOptions} to use for this {@link UITooltip}. */
+	protected FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
+	/** The {@link FontOptions} to use for this {@link UITooltip} when disabled. */
+	protected FontOptions disabledFontOptions = FontOptions.builder().build();
 	/** Current text of this {@link UITextField}. */
 	protected StringBuilder text = new StringBuilder();
 	/** Different lines if {@link #multiLine} is <code>true</code>. */
@@ -142,9 +142,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (text != null)
 			this.setText(text);
 
-		fro.color = 0xFFFFFF;
-		fro.shadow = true;
-
 		shape = new XYResizableGuiShape(1);
 		cursorShape = new SimpleGuiShape();
 		selectShape = new SimpleGuiShape();
@@ -215,38 +212,38 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	@Override
-	public FontRenderOptions getFontRenderOptions()
+	public FontOptions getFontOptions()
 	{
-		return fro;
+		return fontOptions;
 	}
 
 	@Override
-	public UITextField setFontRenderOptions(FontRenderOptions fro)
+	public UITextField setFontOptions(FontOptions options)
 	{
-		this.fro = fro;
+		this.fontOptions = options;
 		buildLines();
 		return this;
 	}
 
 	/**
-	 * Gets the {@link FontRenderOptions} used when disabled.
+	 * Gets the {@link FontOptions} used when disabled.
 	 *
 	 * @return the disabled font renderer options
 	 */
-	public FontRenderOptions getDisabledFontRendererOptions()
+	public FontOptions getDisabledFontOptions()
 	{
-		return disabledFro;
+		return disabledFontOptions;
 	}
 
 	/**
-	 * Sets the {@link FontRenderOptions} to use when disabled.
+	 * Sets the {@link FontOptions} to use when disabled.
 	 *
-	 * @param fro the fro
+	 * @param options the options
 	 * @return this {@link UITextField}
 	 */
-	public UITextField setDisabledFontRendererOptions(FontRenderOptions fro)
+	public UITextField setDisabledFontOptions(FontOptions options)
 	{
-		this.disabledFro = fro;
+		this.disabledFontOptions = options;
 		return this;
 	}
 
@@ -650,7 +647,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 */
 	public int getLineHeight()
 	{
-		return (int) (font.getStringHeight(fro) + lineSpacing);
+		return (int) (font.getStringHeight(fontOptions) + lineSpacing);
 	}
 
 	//#end IBBSRenderer
@@ -667,7 +664,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				lines.add(text.toString());
 			else
 			{
-				lines = font.wrapText(text.toString(), getWidth() - 4, fro);
+				lines = font.wrapText(text.toString(), getWidth() - 4, fontOptions);
 
 				if (text.charAt(text.length() - 1) == '\n')
 					lines.add("");
@@ -812,7 +809,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			else if (text.length() != 0)
 			{
 				//charOffset = 0;
-				while (font.getStringWidth(text.substring(charOffset, cursorPosition.textPosition), fro) >= getWidth() - 4)
+				while (font.getStringWidth(text.substring(charOffset, cursorPosition.textPosition), fontOptions) >= getWidth() - 4)
 					charOffset++;
 			}
 		}
@@ -1140,24 +1137,24 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 */
 	public void drawText(GuiRenderer renderer)
 	{
-		FontRenderOptions fro = isDisabled() ? disabledFro : this.fro;
+		FontOptions options = isDisabled() ? disabledFontOptions : this.fontOptions;
 		if (!multiLine)
 		{
 			int end = text.length();
-			float w = font.getStringWidth(text.substring(charOffset, end), fro);
+			float w = font.getStringWidth(text.substring(charOffset, end), options);
 			while (w > getWidth())
-				w = font.getStringWidth(text.substring(charOffset, end--), fro);
+				w = font.getStringWidth(text.substring(charOffset, end--), options);
 
-			renderer.drawText(font, text.substring(charOffset, end), 2, 2, 0, fro);
+			renderer.drawText(font, text.substring(charOffset, end), 2, 2, 0, options);
 		}
 		else
 		{
-			fro.resetStyles();
+			options.resetStyles();
 			for (int i = lineOffset; i < lineOffset + getVisibleLines() && i < lines.size(); i++)
 			{
-				fro.setLineFro(fro);
+				options.setLineOptions(options);
 				int h = (i - lineOffset) * getLineHeight();
-				renderer.drawText(font, lines.get(i), 2, h + 2, 0, fro);
+				renderer.drawText(font, lines.get(i), 2, h + 2, 0, options);
 
 			}
 		}
@@ -1207,7 +1204,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			{
 				int x = 0;
 				int y = (i - lineOffset) * getLineHeight();
-				int X = (int) font.getStringWidth(lines.get(i), fro);
+				int X = (int) font.getStringWidth(lines.get(i), fontOptions);
 
 				if (i == first.line)
 					x = first.getXOffset();
@@ -1379,7 +1376,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			if (textPosition == 0)
 				return;
 
-			if (FontRenderOptions.isFormatting(text.toString(), textPosition - 2))
+			if (FontOptions.isFormatting(text.toString(), textPosition - 2))
 				jumpBy(-2);
 			else
 				jumpBy(-1);
@@ -1396,7 +1393,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			if (textPosition == text.length())
 				return;
 
-			if (FontRenderOptions.isFormatting(text.toString(), textPosition))
+			if (FontOptions.isFormatting(text.toString(), textPosition))
 				jumpBy(2);
 			else
 				jumpBy(1);
@@ -1436,7 +1433,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			else
 				line = Math.min(line + 1, lines.size() - 1);
 			//character = Math.min(character, currentLineText().length());
-			character = Math.round(font.getCharPosition(currentLineText(), fro, lastOffset, charOffset));
+			character = Math.round(font.getCharPosition(currentLineText(), fontOptions, lastOffset, charOffset));
 			updateTextPosition();
 		}
 
@@ -1501,7 +1498,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		 */
 		private int characterFromX(int x)
 		{
-			return (int) font.getCharPosition(currentLineText(), fro, x, charOffset);
+			return (int) font.getCharPosition(currentLineText(), fontOptions, x, charOffset);
 		}
 
 		/**
@@ -1512,14 +1509,14 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		public int getXOffset()
 		{
 			if (textPosition == text.length() && multiLine)
-				return (int) font.getStringWidth(currentLineText(), fro);
+				return (int) font.getStringWidth(currentLineText(), fontOptions);
 
 			if (currentLineText().length() == 0)
 				return 0;
 			if (charOffset >= character || charOffset >= currentLineText().length())
 				return 0;
 
-			return (int) font.getStringWidth(currentLineText(), fro, charOffset, character);
+			return (int) font.getStringWidth(currentLineText(), fontOptions, charOffset, character);
 		}
 
 		/**

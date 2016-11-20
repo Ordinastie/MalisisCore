@@ -17,7 +17,8 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+M,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
@@ -37,7 +38,7 @@ import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
@@ -50,12 +51,12 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 {
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontRenderOptions} to use for this {@link UITooltip}. */
-	protected FontRenderOptions fro = new FontRenderOptions();
-	/** The {@link FontRenderOptions} to use for this {@link UITooltip} when active. */
-	protected FontRenderOptions activeFro = new FontRenderOptions();
-	/** The {@link FontRenderOptions} to use for this {@link UITooltip} when hovered. */
-	protected FontRenderOptions hoveredFro = new FontRenderOptions();
+	/** The {@link FontOptions} to use for this {@link UITooltip}. */
+	protected FontOptions fontOptions = FontOptions.builder().color(0x444444).build();
+	/** The {@link FontOptions} to use for this {@link UITooltip} when active. */
+	protected FontOptions activeFontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
+	/** The {@link FontOptions} to use for this {@link UITooltip} when hovered. */
+	protected FontOptions hoveredFontOptions = FontOptions.builder().color(0xFFFFA0).build();
 	/** Label for this {@link UITab}. */
 	protected String label;
 	/** Image for this {@link UITab}. */
@@ -81,10 +82,6 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	public UITab(MalisisGui gui, String label)
 	{
 		super(gui);
-		fro.color = 0x444444;
-		activeFro.color = 0xFFFFFF;
-		activeFro.shadow = true;
-		hoveredFro.color = 0xFFFFA0;
 
 		setSize(0, 0);
 		setLabel(label);
@@ -128,15 +125,15 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	}
 
 	@Override
-	public FontRenderOptions getFontRenderOptions()
+	public FontOptions getFontOptions()
 	{
-		return fro;
+		return fontOptions;
 	}
 
 	@Override
-	public UITab setFontRenderOptions(FontRenderOptions fro)
+	public UITab setFontOptions(FontOptions options)
 	{
-		this.fro = fro;
+		this.fontOptions = options;
 		if (autoWidth)
 			width = calcAutoWidth();
 		if (autoHeight)
@@ -145,46 +142,46 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	}
 
 	/**
-	 * Gets the active {@link FontRenderOptions}.
+	 * Gets the active {@link FontOptions}.
 	 *
-	 * @return the activeFro
+	 * @return the activeFontOptions
 	 */
-	public FontRenderOptions getActiveFontRendererOptions()
+	public FontOptions getActiveFontOptions()
 	{
-		return activeFro;
+		return activeFontOptions;
 	}
 
 	/**
-	 * Sets the active {@link FontRenderOptions}.
+	 * Sets the active {@link FontOptions}.
 	 *
-	 * @param fro the fro
+	 * @param options the options
 	 * @return the UI tab
 	 */
-	public UITab setActiveFontRendererOptions(FontRenderOptions fro)
+	public UITab setActiveFontOptions(FontOptions options)
 	{
-		this.activeFro = fro;
+		this.activeFontOptions = options;
 		return this;
 	}
 
 	/**
-	 * Gets the hovered {@link FontRenderOptions}.
+	 * Gets the hovered {@link FontOptions}.
 	 *
-	 * @return the hoveredFro
+	 * @return the hoveredFontOptions
 	 */
-	public FontRenderOptions getHoveredFontRendererOptions()
+	public FontOptions getHoveredFontOptions()
 	{
-		return hoveredFro;
+		return hoveredFontOptions;
 	}
 
 	/**
-	 * Sets the hovered {@link FontRenderOptions}.
+	 * Sets the hovered {@link FontOptions}.
 	 *
-	 * @param fro the fro
+	 * @param options the options
 	 * @return the UI tab
 	 */
-	public UITab setHoveredFontRendererOptions(FontRenderOptions fro)
+	public UITab setHoveredFontOptions(FontOptions options)
 	{
-		this.hoveredFro = fro;
+		this.hoveredFontOptions = options;
 		return this;
 	}
 
@@ -416,7 +413,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	private int calcAutoWidth()
 	{
 		if (label != null)
-			return (int) (font.getStringWidth(label, fro) + (isHorizontal() ? 10 : 8));
+			return (int) (font.getStringWidth(label, fontOptions) + (isHorizontal() ? 10 : 8));
 		else if (image != null)
 			return image.getWidth() + 10;
 		else
@@ -431,7 +428,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	private int calcAutoHeight()
 	{
 		if (label != null)
-			return (int) (font.getStringHeight(fro) + (isHorizontal() ? 8 : 10));
+			return (int) (font.getStringHeight(fontOptions) + (isHorizontal() ? 8 : 10));
 		else if (image != null)
 			return image.getHeight() + 10;
 		else
@@ -462,8 +459,8 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int w = label != null ? (int) font.getStringWidth(label, fro) : image.getWidth();
-		int h = label != null ? (int) font.getStringHeight(fro) : image.getHeight();
+		int w = label != null ? (int) font.getStringWidth(label, fontOptions) : image.getWidth();
+		int h = label != null ? (int) font.getStringHeight(fontOptions) : image.getHeight();
 		int x = (getWidth() - w) / 2;
 		int y = (getHeight() - h) / 2 + 1;
 
@@ -488,8 +485,8 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 
 		if (label != null)
 		{
-			FontRenderOptions fro = isHovered() ? hoveredFro : (active ? activeFro : this.fro);
-			renderer.drawText(font, label, x, y, 1, fro);
+			FontOptions options = isHovered() ? hoveredFontOptions : (active ? activeFontOptions : this.fontOptions);
+			renderer.drawText(font, label, x, y, 1, options);
 		}
 		else if (image != null)
 		{

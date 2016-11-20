@@ -46,7 +46,7 @@ import net.malisis.core.inventory.message.InventoryActionMessage;
 import net.malisis.core.renderer.RenderType;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.AnimationRenderer;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -563,10 +563,7 @@ public abstract class MalisisGui extends GuiScreen
 			renderer.prepare(RenderType.GUI);
 
 			int dy = 0, oy = 5;
-			FontRenderOptions fro = new FontRenderOptions();
-			fro.color = 0xFFFFFF;
-			fro.shadow = true;
-			//fro.fontScale = 1 / renderer.getScaleFactor() * 2;
+			FontOptions fro = FontOptions.builder().color(0xFFFFFF).shadow().build();
 			renderer.drawText(null, "Mouse : " + mouseX + "," + mouseY, 5, dy++ * 10 + oy, 0, fro, false);
 			renderer.drawText(null, "Focus : " + focusedComponent, 5, dy++ * 10 + oy, 0, fro, false);
 			renderer.drawText(null, "Hover : " + hoveredComponent, 5, dy++ * 10 + oy, 0, fro, false);

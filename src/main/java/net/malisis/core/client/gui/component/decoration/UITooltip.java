@@ -35,7 +35,7 @@ import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.AlphaTransform;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
@@ -48,8 +48,8 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 {
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontRenderOptions} to use for this {@link UITooltip}. */
-	protected FontRenderOptions fro = new FontRenderOptions();
+	/** The {@link FontOptions} to use for this {@link UITooltip}. */
+	protected FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
 
 	protected List<String> lines;
 	protected int padding = 4;
@@ -61,8 +61,6 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 		super(gui);
 		setSize(16, 16);
 		zIndex = 300;
-		fro.color = 0xFFFFFF;
-		fro.shadow = true;
 
 		shape = new XYResizableGuiShape();
 		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(227, 31, 15, 15, 5));
@@ -105,15 +103,15 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 	}
 
 	@Override
-	public FontRenderOptions getFontRenderOptions()
+	public FontOptions getFontOptions()
 	{
-		return fro;
+		return fontOptions;
 	}
 
 	@Override
-	public UITooltip setFontRenderOptions(FontRenderOptions fro)
+	public UITooltip setFontOptions(FontOptions fro)
 	{
-		this.fro = fro;
+		this.fontOptions = fro;
 		calculateSize();
 		return this;
 	}
@@ -159,9 +157,9 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 	protected void calculateSize()
 	{
 
-		width = Math.max(16, (int) font.getMaxStringWidth(lines, fro));
+		width = Math.max(16, (int) font.getMaxStringWidth(lines, fontOptions));
 		width += padding * 2;
-		height = (int) (lines.size() > 1 ? font.getStringHeight(fro) * lines.size() : 8);
+		height = (int) (lines.size() > 1 ? font.getStringHeight(fontOptions) * lines.size() : 8);
 		height += padding * 2;
 	}
 
@@ -192,7 +190,7 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 			int sy = y;
 			if (i > 0)
 				sy += 2;
-			renderer.drawText(font, str, x, sy + font.getStringHeight(fro) * i, zIndex + 1, fro, false);
+			renderer.drawText(font, str, x, sy + font.getStringHeight(fontOptions) * i, zIndex + 1, fontOptions, false);
 			i++;
 		}
 	}

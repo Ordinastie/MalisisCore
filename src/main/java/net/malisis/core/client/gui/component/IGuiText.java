@@ -25,7 +25,7 @@
 package net.malisis.core.client.gui.component;
 
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 
 /**
@@ -52,17 +52,17 @@ public interface IGuiText<T>
 	public T setFont(MalisisFont font);
 
 	/**
-	 * Gets the {@link FontRenderOptions}.
+	 * Gets the {@link FontOptions}.
 	 *
-	 * @return the font renderer options
+	 * @return the font options
 	 */
-	public FontRenderOptions getFontRenderOptions();
+	public FontOptions getFontOptions();
 
 	/**
-	 * Sets the {@link FontRenderOptions}.
+	 * Sets the {@link FontOptions}.
 	 *
-	 * @param fro the fro
+	 * @param fontOptions the font options
 	 * @return the t
 	 */
-	public T setFontRenderOptions(FontRenderOptions fro);
+	public T setFontOptions(FontOptions fontOptions);
 }

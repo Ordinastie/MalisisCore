@@ -33,7 +33,7 @@ import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.GuiIcon;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
@@ -49,10 +49,10 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 {
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontRenderOptions} to use for this {@link UITooltip}. */
-	protected FontRenderOptions fro = new FontRenderOptions();
-	/** The {@link FontRenderOptions} to use for this {@link UITooltip} when hovered. */
-	protected FontRenderOptions hoveredFro = new FontRenderOptions();
+	/** The {@link FontOptions} to use for this {@link UITooltip}. */
+	protected FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
+	/** The {@link FontOptions} to use for this {@link UITooltip} when hovered. */
+	protected FontOptions hoveredFontOptions = FontOptions.builder().color(0xFFFFA0).shadow().build();
 	/** Text used for this {@link UIButton}. Exclusive with {@link #image}. */
 	protected String text;
 	/** Image used for this {@link UIButton}. Exclusive with {@link #text}. */
@@ -77,10 +77,6 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	public UIButton(MalisisGui gui)
 	{
 		super(gui);
-		fro.color = 0xFFFFFF;
-		fro.shadow = true;
-		hoveredFro.color = 0xFFFFA0;
-		hoveredFro.shadow = true;
 
 		shape = new XYResizableGuiShape();
 		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5), gui.getGuiTexture()
@@ -134,38 +130,38 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	}
 
 	@Override
-	public FontRenderOptions getFontRenderOptions()
+	public FontOptions getFontOptions()
 	{
-		return fro;
+		return fontOptions;
 	}
 
 	@Override
-	public UIButton setFontRenderOptions(FontRenderOptions fro)
+	public UIButton setFontOptions(FontOptions options)
 	{
-		this.fro = fro;
+		this.fontOptions = options;
 		setSize(width, height);
 		return this;
 	}
 
 	/**
-	 * Gets the {@link FontRenderOptions} used for this {@link UILabel} when hovered.
+	 * Gets the {@link FontOptions} used for this {@link UILabel} when hovered.
 	 *
-	 * @return the hoveredFro
+	 * @return the hovered font options
 	 */
-	public FontRenderOptions getHoveredFontRendererOptions()
+	public FontOptions getHoveredFontOptions()
 	{
-		return hoveredFro;
+		return hoveredFontOptions;
 	}
 
 	/**
-	 * Sets the {@link FontRenderOptions} used for this {@link UILabel} when hovered.
+	 * Sets the {@link FontOptions} used for this {@link UILabel} when hovered.
 	 *
-	 * @param hoveredFro the hoveredFro to set
+	 * @param hoveredOptions the hovered options to set
 	 * @return this {@link UIButton}
 	 */
-	public UIButton setHoveredFontRendererOptions(FontRenderOptions hoveredFro)
+	public UIButton setHoveredFontOptions(FontOptions hoveredOptions)
 	{
-		this.hoveredFro = hoveredFro;
+		this.hoveredFontOptions = hoveredOptions;
 		return this;
 	}
 
@@ -250,8 +246,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 			}
 			else
 			{
-				int w = (int) font.getStringWidth(text, fro);
-				int h = (int) font.getStringHeight(fro);
+				int w = (int) font.getStringWidth(text, fontOptions);
+				int h = (int) font.getStringHeight(fontOptions);
 				width = Math.max(width, w + 6);
 				height = Math.max(height, h + 6);
 			}
@@ -390,8 +386,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 		}
 		else
 		{
-			w = (int) font.getStringWidth(text, fro);
-			h = (int) font.getStringHeight(fro);
+			w = (int) font.getStringWidth(text, fontOptions);
+			h = (int) font.getStringHeight(fontOptions);
 		}
 
 		int x = (width - w) / 2;
@@ -417,7 +413,7 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 		}
 		else
 		{
-			renderer.drawText(font, text, x, y, 0, isHovered() ? hoveredFro : fro);
+			renderer.drawText(font, text, x, y, 0, isHovered() ? hoveredFontOptions : fontOptions);
 		}
 
 	}

@@ -33,15 +33,15 @@ import net.minecraft.util.text.TextFormatting;
 public class StringWalker
 {
 	private MalisisFont font;
-	private FontRenderOptions fro;
+	private FontOptions fontOptions;
 	private String str;
 	private boolean litteral;
 	private boolean skipChars = true;
 	private boolean applyStyles;
 	private boolean isText;
 
-	private int prevColor;
-	private boolean prevUnderline;
+	//	private int prevColor;
+	//	private boolean prevUnderline;
 
 	private int index;
 	private int endIndex;
@@ -50,14 +50,14 @@ public class StringWalker
 	private Link link;
 	private float width;
 
-	public StringWalker(String str, MalisisFont font, FontRenderOptions fro)
+	public StringWalker(String str, MalisisFont font, FontOptions options)
 	{
 		this.str = str;
 		this.font = font;
-		this.fro = fro;
+		this.fontOptions = options;
 		this.index = 0;
 		this.endIndex = str.length();
-		litteral = fro != null && fro.disableECF;
+		this.litteral = options != null && options.isFormattingDisabled();
 	}
 
 	//#region Getters/Setters
@@ -129,45 +129,45 @@ public class StringWalker
 		this.endIndex = index;
 	}
 
-	private void setLinkStyle(FontRenderOptions fro)
+	private void setLinkStyle(FontOptions options)
 	{
-		if (fro == null || litteral || !applyStyles)
+		if (options == null || litteral || !applyStyles)
 			return;
 
-		prevColor = fro.color;
-		prevUnderline = fro.underline;
+		//prevColor = fro.color;
+		//prevUnderline = fro.underline;
 		//		fro.saveDefault();
-		fro.color = 0x6666FF;
-		fro.underline = true;
+		//fro.color = 0x6666FF;
+		//fro.underline = true;
 	}
 
-	private void resetLinkStyle(FontRenderOptions fro)
+	private void resetLinkStyle(FontOptions options)
 	{
-		if (fro == null || litteral || !applyStyles)
+		if (options == null || litteral || !applyStyles)
 			return;
 
-		fro.color = prevColor;
-		fro.underline = prevUnderline;
+		//fro.color = prevColor;
+		//fro.underline = prevUnderline;
 	}
 
 	//#end Getters/Setters
 
-	private void checkEcf()
+	private void checkFormatting()
 	{
-		format = FontRenderOptions.getFormatting(str, index);
+		format = FontOptions.getFormatting(str, index);
 		if (format == null)
-			format = FontRenderOptions.getFormatting(str, index - 1);
+			format = FontOptions.getFormatting(str, index - 1);
 
 		if (format == null)
 			return;
 
-		if (applyStyles && fro != null && !isLink())
-			fro.apply(format);
+		if (applyStyles && fontOptions != null && !isLink())
+			fontOptions.apply(format);
 
 		if (skipChars && !litteral)
 		{
 			index += 2;
-			checkEcf();
+			checkFormatting();
 		}
 	}
 
@@ -179,19 +179,19 @@ public class StringWalker
 
 			if (str.charAt(index) == ']')
 			{
-				resetLinkStyle(fro);
+				resetLinkStyle(fontOptions);
 				if (skipChars && !litteral)
 					index++;
 			}
 		}
 		else
 		{
-			link = FontRenderOptions.getLink(str, index);
+			link = FontOptions.getLink(str, index);
 			if (isLink())
 			{
 				if (skipChars && !litteral)
 					index += link.indexAdvance();
-				setLinkStyle(fro);
+				setLinkStyle(fontOptions);
 			}
 		}
 
@@ -215,16 +215,16 @@ public class StringWalker
 		if (index >= endIndex)
 			return false;
 
-		checkEcf();
+		checkFormatting();
 		//checkLink();
 
 		if (index >= endIndex)
 			return false;
 
 		c = str.charAt(index);
-		width = font.getCharWidth(c, fro);
-		if (fro != null && fro.bold)
-			width += fro.fontScale;
+		width = font.getCharWidth(c, fontOptions);
+		if (fontOptions != null && fontOptions.isBold())
+			width += fontOptions.getFontScale();
 
 		if (!litteral && !skipChars && (format != null || (link != null && !isText)))
 			width = 0;

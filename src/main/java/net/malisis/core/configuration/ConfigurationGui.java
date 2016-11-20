@@ -40,6 +40,7 @@ import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UIButton;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.configuration.setting.Setting;
+import net.malisis.core.renderer.font.FontOptions;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -90,8 +91,7 @@ public class ConfigurationGui extends MalisisGui
 		//window.setSize(windowWidth, windowHeight);
 
 		comment = new UILabel(this, true);
-		comment.getFontRenderOptions().color = 0xFFFFFF;
-		comment.getFontRenderOptions().shadow = true;
+		comment.setFontOptions(FontOptions.builder().color(0xFFFFFF).shadow().build());
 		UIPanel panelComment = new UIPanel(this, 140, -35).setPosition(0, 0, Anchor.RIGHT);
 		panelComment.setBackgroundColor(0xCCCCCC);
 		panelComment.add(comment);

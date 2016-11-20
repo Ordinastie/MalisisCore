@@ -35,7 +35,7 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
@@ -52,8 +52,8 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 
 	/** The {@link MalisisFont} to use for this {@link UIRadioButton}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontRenderOptions} to use for this {@link UIRadioButton}. */
-	protected FontRenderOptions fro = new FontRenderOptions();
+	/** The {@link FontOptions} to use for this {@link UIRadioButton}. */
+	protected FontOptions fontOptions = FontOptions.builder().color(0x444444).build();
 
 	private String name;
 	private String text;
@@ -66,13 +66,12 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 		super(gui);
 		this.name = name;
 		setText(text);
-		fro.color = 0x444444;
 
 		shape = new SimpleGuiShape();
 
 		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(200, 54, 8, 8), null, gui.getGuiTexture().getIcon(200, 62, 8, 8));
-		rbIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(214, 54, 6, 6), gui.getGuiTexture().getIcon(220, 54, 6, 6), gui
-				.getGuiTexture().getIcon(208, 54, 6, 6));
+		rbIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(214, 54, 6, 6), gui.getGuiTexture().getIcon(220, 54, 6, 6),
+				gui.getGuiTexture().getIcon(208, 54, 6, 6));
 
 		addRadioButton(this);
 	}
@@ -98,15 +97,15 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 	}
 
 	@Override
-	public FontRenderOptions getFontRenderOptions()
+	public FontOptions getFontOptions()
 	{
-		return fro;
+		return fontOptions;
 	}
 
 	@Override
-	public UIRadioButton setFontRenderOptions(FontRenderOptions fro)
+	public UIRadioButton setFontOptions(FontOptions options)
 	{
-		this.fro = fro;
+		this.fontOptions = options;
 		calculateSize();
 		return this;
 	}
@@ -165,7 +164,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 	 */
 	private void calculateSize()
 	{
-		int w = StringUtils.isEmpty(text) ? 0 : (int) font.getStringWidth(text, fro);
+		int w = StringUtils.isEmpty(text) ? 0 : (int) font.getStringWidth(text, fontOptions);
 		setSize(w + 11, 10);
 	}
 
@@ -204,7 +203,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 		}
 
 		if (text != null)
-			renderer.drawText(font, text, 12, 0, 0, fro);
+			renderer.drawText(font, text, 12, 0, 0, fontOptions);
 
 	}
 

@@ -59,8 +59,8 @@ public class MinecraftFont extends MalisisFont
 	{
 		super((Font) null);
 
-		this.options = new FontGeneratorOptions();
-		this.options.fontSize = 9F;
+		this.fontGeneratorOptions = new FontGeneratorOptions();
+		this.fontGeneratorOptions.fontSize = 9F;
 		this.textureRl = new ResourceLocation("textures/font/ascii.png");
 		this.size = 256;
 
@@ -120,9 +120,9 @@ public class MinecraftFont extends MalisisFont
 	}
 
 	@Override
-	protected void prepare(MalisisRenderer<?> renderer, float x, float y, float z, FontRenderOptions fro)
+	protected void prepare(MalisisRenderer<?> renderer, float x, float y, float z, FontOptions options)
 	{
-		super.prepare(renderer, x, y, z, fro);
+		super.prepare(renderer, x, y, z, options);
 		this.renderer = renderer;
 	}
 
@@ -143,26 +143,26 @@ public class MinecraftFont extends MalisisFont
 	}
 
 	@Override
-	protected void drawChar(CharData cd, float offsetX, float offsetY, FontRenderOptions fro)
+	protected void drawChar(CharData cd, float offsetX, float offsetY, FontOptions options)
 	{
 		bindFontTexture(cd);
 		if (drawingShadow && cd instanceof UnicodeCharData)
 		{
-			offsetX -= fro.fontScale / 2;
-			offsetY -= fro.fontScale / 2;
+			offsetX -= options.getFontScale() / 2;
+			offsetY -= options.getFontScale() / 2;
 		}
 
-		super.drawChar(cd, offsetX, offsetY, fro);
+		super.drawChar(cd, offsetX, offsetY, options);
 	}
 
 	@Override
-	protected void drawLineChar(CharData cd, float offsetX, float offsetY, FontRenderOptions fro)
+	protected void drawLineChar(CharData cd, float offsetX, float offsetY, FontOptions options)
 	{
 		VertexBuffer buffer = Tessellator.getInstance().getBuffer();
-		float factor = fro.fontScale / options.fontSize * 9;
-		float w = cd.getFullWidth(options) * factor;
-		float h = cd.getFullHeight(options) / 9F * factor;
-		int color = drawingShadow ? fro.getShadowColor() : fro.color;
+		float factor = options.getFontScale() / fontGeneratorOptions.fontSize * 9;
+		float w = cd.getFullWidth(fontGeneratorOptions) * factor;
+		float h = cd.getFullHeight(fontGeneratorOptions) / 9F * factor;
+		int color = drawingShadow ? options.getShadowColor() : options.getColor();
 
 		offsetY -= factor + h;
 		w += 1.01F * factor;
@@ -185,14 +185,14 @@ public class MinecraftFont extends MalisisFont
 	}
 
 	@Override
-	public float getStringWidth(String str, FontRenderOptions fro, int start, int end)
+	public float getStringWidth(String str, FontOptions options, int start, int end)
 	{
 		if (StringUtils.isEmpty(str))
 			return 0;
 
 		str = processString(str, null);
 		float width = 0;
-		StringWalker walker = new StringWalker(str, this, fro);
+		StringWalker walker = new StringWalker(str, this, options);
 		walker.startIndex(start);
 		walker.endIndex(end);
 		while (walker.walk())
@@ -202,9 +202,9 @@ public class MinecraftFont extends MalisisFont
 	}
 
 	@Override
-	public float getStringHeight(FontRenderOptions fro)
+	public float getStringHeight(FontOptions options)
 	{
-		return fontRenderer.FONT_HEIGHT * (fro != null ? fro.fontScale : 1);
+		return fontRenderer.FONT_HEIGHT * (options != null ? options.getFontScale() : 1);
 	}
 
 	public class MCCharData extends CharData

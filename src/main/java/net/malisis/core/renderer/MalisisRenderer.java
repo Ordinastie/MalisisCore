@@ -41,7 +41,7 @@ import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.shape.Cube;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
@@ -956,12 +956,12 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 * @param z the z
 	 * @param fro the fro
 	 */
-	public void drawText(MalisisFont font, String text, float x, float y, float z, FontRenderOptions fro)
+	public void drawText(MalisisFont font, String text, float x, float y, float z, FontOptions fro)
 	{
 		if (font == null)
 			font = MalisisFont.minecraftFont;
 		if (fro == null)
-			fro = new FontRenderOptions();
+			fro = FontOptions.builder().build();
 
 		font.render(this, text, x, y, z, fro);
 	}

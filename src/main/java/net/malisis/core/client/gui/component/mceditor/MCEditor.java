@@ -31,7 +31,7 @@ import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.interaction.UICheckBox;
 import net.malisis.core.client.gui.component.interaction.UISelect;
 import net.malisis.core.client.gui.component.interaction.UITextField;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.minecraft.util.text.TextFormatting;
 
@@ -48,7 +48,7 @@ public class MCEditor extends UIContainer<MCEditor> implements IGuiText<MCEditor
 	private UICheckBox cb;
 
 	private MalisisFont font = MalisisFont.minecraftFont;
-	private FontRenderOptions fro = new FontRenderOptions();
+	private FontOptions fontOptions = FontOptions.builder().build();
 
 	public MCEditor(MalisisGui gui)
 	{
@@ -95,15 +95,15 @@ public class MCEditor extends UIContainer<MCEditor> implements IGuiText<MCEditor
 	}
 
 	@Override
-	public FontRenderOptions getFontRenderOptions()
+	public FontOptions getFontOptions()
 	{
-		return fro;
+		return fontOptions;
 	}
 
 	@Override
-	public MCEditor setFontRenderOptions(FontRenderOptions fro)
+	public MCEditor setFontOptions(FontOptions fro)
 	{
-		this.fro = fro;
+		this.fontOptions = fro;
 		return this;
 	}
 
@@ -112,7 +112,7 @@ public class MCEditor extends UIContainer<MCEditor> implements IGuiText<MCEditor
 	@Subscribe
 	public void onChecked(UICheckBox.CheckEvent event)
 	{
-		tf.getFontRenderOptions().disableECF = event.isChecked();
+		//tf.getFontOptions().disableECF = event.isChecked();
 		tf.buildLines();
 	}
 }

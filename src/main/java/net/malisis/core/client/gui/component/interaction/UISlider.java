@@ -32,7 +32,7 @@ import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
-import net.malisis.core.renderer.font.FontRenderOptions;
+import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
@@ -51,10 +51,10 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 
 	/** The {@link MalisisFont} to use for this {@link UISlider}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontRenderOptions} to use for this {@link UISlider}. */
-	protected FontRenderOptions fro = new FontRenderOptions();
-	/** The {@link FontRenderOptions} to use for this {@link UISlider} when hovered. */
-	protected FontRenderOptions hoveredFro = new FontRenderOptions();
+	/** The {@link FontOptions} to use for this {@link UISlider}. */
+	protected FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
+	/** The {@link FontOptions} to use for this {@link UISlider} when hovered. */
+	protected FontOptions hoveredFontOptions = FontOptions.builder().color(0xFFFFA0).shadow().build();
 
 	private String text;
 	private float minValue;
@@ -73,11 +73,6 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 
 		minValue = min;
 		maxValue = max;
-
-		fro.color = 0xFFFFFF;
-		fro.shadow = true;
-		hoveredFro.color = 0xFFFFA0;
-		hoveredFro.shadow = true;
 
 		shape = new XResizableGuiShape();
 		sliderShape = new SimpleGuiShape();
@@ -109,15 +104,15 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 	}
 
 	@Override
-	public FontRenderOptions getFontRenderOptions()
+	public FontOptions getFontOptions()
 	{
-		return fro;
+		return fontOptions;
 	}
 
 	@Override
-	public UISlider setFontRenderOptions(FontRenderOptions fro)
+	public UISlider setFontOptions(FontOptions fro)
 	{
-		this.fro = fro;
+		this.fontOptions = fro;
 		return this;
 	}
 
@@ -199,10 +194,10 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 		if (!StringUtils.isEmpty(text))
 		{
 			String str = String.format(text, value);
-			int x = (int) ((width - font.getStringWidth(str, fro)) / 2);
+			int x = (int) ((width - font.getStringWidth(str, fontOptions)) / 2);
 			int y = 6;
 
-			renderer.drawText(font, str, x, y, 0, isHovered() ? hoveredFro : fro);
+			renderer.drawText(font, str, x, y, 0, isHovered() ? hoveredFontOptions : fontOptions);
 		}
 	}
 
