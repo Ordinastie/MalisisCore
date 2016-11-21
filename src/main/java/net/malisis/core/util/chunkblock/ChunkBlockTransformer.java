@@ -28,10 +28,6 @@ import static org.objectweb.asm.Opcodes.*;
 import net.malisis.core.asm.AsmHook;
 import net.malisis.core.asm.MalisisClassTransformer;
 import net.malisis.core.asm.mappings.McpMethodMapping;
-import net.malisis.core.registry.Registries;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -145,20 +141,5 @@ public class ChunkBlockTransformer extends MalisisClassTransformer
 		ah.jumpTo(match).insert(insert).jumpAfter(match).insert(insert2);
 
 		return ah;
-	}
-
-	public IBlockState test()
-	{
-		Chunk chunk = null;
-		BlockPos pos = null;
-		IBlockState state = null;
-		IBlockState iblockstate = null;
-
-		if (Registries.processPreSetBlock(chunk, pos, iblockstate, state).shouldReturn())
-			return null;
-
-		Registries.processPostSetBlock(chunk, pos, iblockstate, state);
-
-		return null;
 	}
 }
