@@ -98,6 +98,16 @@ public class BooleanComponent implements IBlockComponent
 		return property;
 	}
 
+	/**
+	 * Sets the metadata offset.
+	 *
+	 * @param metaOffset the metaOffset to set
+	 */
+	public void setMetaOffset(int metaOffset)
+	{
+		this.metaOffset = metaOffset;
+	}
+
 	@Override
 	public IBlockState setDefaultState(Block block, IBlockState state)
 	{
