@@ -86,6 +86,8 @@ public class ChunkListener
 	 */
 	public boolean isValidPreListener(Chunk chunk, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState)
 	{
+		if (listener.equals(modified))
+			return false;
 		IBlockListener.Pre bl = IComponent.getComponent(IBlockListener.Pre.class, chunk.getWorld().getBlockState(listener).getBlock());
 		if (bl != null && bl.isInRange(listener, modified))
 			return true;
@@ -122,6 +124,8 @@ public class ChunkListener
 	 */
 	public boolean isValidPostListener(Chunk chunk, BlockPos listener, BlockPos modified, IBlockState oldState, IBlockState newState)
 	{
+		if (listener.equals(modified))
+			return false;
 		IBlockListener.Post bl = IComponent.getComponent(IBlockListener.Post.class, chunk.getWorld().getBlockState(listener).getBlock());
 		if (bl != null && bl.isInRange(listener, modified))
 			return true;
