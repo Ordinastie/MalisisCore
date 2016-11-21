@@ -40,6 +40,7 @@ import net.malisis.core.renderer.icon.GuiIcon;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
+import net.malisis.core.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -562,9 +563,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 		RenderHelper.disableStandardItemLighting();
 		RenderHelper.enableGUIStandardItemLighting();
 
-		IBakedModel model = itemRenderer.getItemModelWithOverrides(itemStack,
-				Minecraft.getMinecraft().theWorld,
-				Minecraft.getMinecraft().thePlayer);
+		IBakedModel model = itemRenderer.getItemModelWithOverrides(itemStack, Utils.getClientWorld(), Utils.getClientPlayer());
 		itemRenderer.renderItemModelIntoGUI(itemStack, x, y, model);
 		itemRenderer.renderItemOverlayIntoGUI(fontRenderer, itemStack, x, y, label);
 

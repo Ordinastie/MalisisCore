@@ -36,7 +36,7 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.util.Silenced;
-import net.minecraft.client.Minecraft;
+import net.malisis.core.util.Utils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ChunkCache;
@@ -84,6 +84,11 @@ public class BlockDataHandler
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
+	public Map<String, HandlerInfo<?>> getHandlerInfos()
+	{
+		return handlerInfos;
+	}
+
 	/**
 	 * Get the server or client data depending on the passed {@link World}.
 	 *
@@ -106,7 +111,7 @@ public class BlockDataHandler
 		if (world instanceof World)
 			return (World) world;
 		else if (world instanceof ChunkCache)
-			return ((ChunkCache) world).worldObj;
+			return ((ChunkCache) world).world;
 
 		if (FMLClientHandler.instance().hasOptifine() && chunkCacheField != null)
 			return world(Silenced.get(() -> ((ChunkCache) chunkCacheField.get(world))));
@@ -247,7 +252,7 @@ public class BlockDataHandler
 	@SubscribeEvent
 	public void onChunkWatched(ChunkWatchEvent.Watch event)
 	{
-		Chunk chunk = event.getPlayer().worldObj.getChunkFromChunkCoords(event.getChunk().chunkXPos, event.getChunk().chunkZPos);
+		Chunk chunk = event.getPlayer().world.getChunkFromChunkCoords(event.getChunk().chunkXPos, event.getChunk().chunkZPos);
 		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
 		{
 			ChunkData<?> chunkData = instance.chunkData(handlerInfo.identifier, chunk.getWorld(), chunk);
@@ -324,7 +329,7 @@ public class BlockDataHandler
 			return;
 
 		//MalisisCore.message("SetBlockData (" + chunkX + "/" + chunkZ + ") for " + identifier);
-		Chunk chunk = Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(chunkX, chunkZ);
+		Chunk chunk = Utils.getClientWorld().getChunkFromChunkCoords(chunkX, chunkZ);
 		ChunkData<?> chunkData = new ChunkData<>(handlerInfo).fromBytes(data);
 		instance.data(chunk.getWorld()).put(handlerInfo.identifier, chunk, chunkData);
 	}
@@ -339,7 +344,7 @@ public class BlockDataHandler
 	 *
 	 * @param <T> the generic type
 	 */
-	static class HandlerInfo<T>
+	public static class HandlerInfo<T>
 	{
 		String identifier;
 		private Function<ByteBuf, T> from;

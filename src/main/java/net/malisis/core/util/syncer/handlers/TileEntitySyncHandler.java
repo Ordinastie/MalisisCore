@@ -26,10 +26,10 @@ package net.malisis.core.util.syncer.handlers;
 
 import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
+import net.malisis.core.util.Utils;
 import net.malisis.core.util.syncer.ISyncableData;
 import net.malisis.core.util.syncer.handlers.TileEntitySyncHandler.TESyncData;
 import net.malisis.core.util.syncer.message.SyncerMessage.Packet;
-import net.minecraft.client.Minecraft;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -49,7 +49,7 @@ public class TileEntitySyncHandler extends DefaultSyncHandler<TileEntity, TESync
 	@Override
 	public TileEntity getReceiver(MessageContext ctx, TESyncData data)
 	{
-		return Minecraft.getMinecraft().theWorld.getTileEntity(data.pos);
+		return Utils.getClientWorld().getTileEntity(data.pos);
 	}
 
 	@Override

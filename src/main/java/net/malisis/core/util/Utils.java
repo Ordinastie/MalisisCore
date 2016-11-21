@@ -79,7 +79,7 @@ public class Utils
 	@SideOnly(Side.CLIENT)
 	public static WorldClient getClientWorld()
 	{
-		return Minecraft.getMinecraft().theWorld;
+		return Minecraft.getMinecraft() != null ? Minecraft.getMinecraft().world : null;
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class Utils
 	@SideOnly(Side.CLIENT)
 	public static EntityPlayerSP getClientPlayer()
 	{
-		return Minecraft.getMinecraft().thePlayer;
+		return Minecraft.getMinecraft() != null ? Minecraft.getMinecraft().player : null;
 	}
 
 	/**

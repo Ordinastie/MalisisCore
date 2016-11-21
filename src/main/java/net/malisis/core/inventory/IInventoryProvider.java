@@ -197,7 +197,7 @@ public interface IInventoryProvider
 		 * @return true, if is useable by player
 		 */
 		@Override
-		public default boolean isUseableByPlayer(EntityPlayer player)
+		public default boolean isUsableByPlayer(EntityPlayer player)
 		{
 			return true;
 		}

@@ -34,9 +34,10 @@ import net.malisis.core.configuration.Settings;
 import net.malisis.core.network.MalisisNetwork;
 import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.registry.Registries;
+import net.malisis.core.util.Utils;
 import net.malisis.core.util.syncer.Syncer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.Style;
@@ -357,15 +358,15 @@ public class MalisisCore implements IMalisisMod
 		}
 		else
 		{
-			if (Minecraft.getMinecraft() == null || Minecraft.getMinecraft().thePlayer == null)
+			EntityPlayer player = Utils.getClientPlayer();
+			if (player == null)
 				return;
-
 			Style cs = new Style();
 			cs.setItalic(true);
 			cs.setColor(TextFormatting.GRAY);
 			msg.setStyle(cs);
 
-			Minecraft.getMinecraft().thePlayer.addChatMessage(msg);
+			player.sendMessage(msg);
 		}
 	}
 }

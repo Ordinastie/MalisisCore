@@ -33,7 +33,7 @@ import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
 import net.malisis.core.util.TileEntityUtils;
-import net.minecraft.client.Minecraft;
+import net.malisis.core.util.Utils;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -55,7 +55,8 @@ public class OpenInventoryMessage implements IMalisisMessageHandler<OpenInventor
 {
 	public enum ContainerType
 	{
-		TYPE_TILEENTITY, TYPE_ITEM;
+		TYPE_TILEENTITY,
+		TYPE_ITEM;
 	}
 
 	public OpenInventoryMessage()
@@ -73,11 +74,12 @@ public class OpenInventoryMessage implements IMalisisMessageHandler<OpenInventor
 	@Override
 	public void process(Packet message, MessageContext ctx)
 	{
-		EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+		EntityPlayerSP player = Utils.getClientPlayer();
 		if (message.type == ContainerType.TYPE_TILEENTITY)
 		{
 			IDirectInventoryProvider inventoryProvider = TileEntityUtils.getTileEntity(IDirectInventoryProvider.class,
-					Minecraft.getMinecraft().theWorld, message.pos);
+					Utils.getClientWorld(),
+					message.pos);
 			if (inventoryProvider != null)
 				MalisisInventory.open(player, inventoryProvider, message.windowId);
 		}

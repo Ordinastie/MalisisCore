@@ -68,7 +68,7 @@ public class MalisisCommand extends CommandBase
 	 * @return the command name
 	 */
 	@Override
-	public String getCommandName()
+	public String getName()
 	{
 		return "malisis";
 	}
@@ -80,7 +80,7 @@ public class MalisisCommand extends CommandBase
 	 * @return the command usage
 	 */
 	@Override
-	public String getCommandUsage(ICommandSender sender)
+	public String getUsage(ICommandSender sender)
 	{
 		return "malisiscore.commands.usage";
 	}
@@ -133,7 +133,7 @@ public class MalisisCommand extends CommandBase
 	}
 
 	@Override
-	public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] params, BlockPos pos)
+	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] params, BlockPos pos)
 	{
 		if (params.length == 1)
 			return getListOfStringsMatchingLastWord(params, parameters);

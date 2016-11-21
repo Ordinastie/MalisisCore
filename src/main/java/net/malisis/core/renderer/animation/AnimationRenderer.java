@@ -31,7 +31,7 @@ import java.util.List;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.animation.transformation.Transformation;
 import net.malisis.core.util.Timer;
-import net.minecraft.client.Minecraft;
+import net.malisis.core.util.Utils;
 
 /**
  * @author Ordinastie
@@ -69,8 +69,8 @@ public class AnimationRenderer
 
 	public long getWorldTime()
 	{
-		if (Minecraft.getMinecraft().theWorld != null)
-			return Minecraft.getMinecraft().theWorld.getTotalWorldTime();
+		if (Utils.getClientWorld() != null)
+			return Utils.getClientWorld().getTotalWorldTime();
 		else
 			return 0;
 	}

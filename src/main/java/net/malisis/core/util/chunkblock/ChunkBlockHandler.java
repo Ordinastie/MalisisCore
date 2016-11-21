@@ -38,12 +38,12 @@ import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.registry.MalisisRegistry;
 import net.malisis.core.util.MBlockPos;
 import net.malisis.core.util.MBlockState;
+import net.malisis.core.util.Utils;
 import net.malisis.core.util.WeakNested;
 import net.malisis.core.util.callback.CallbackResult;
 import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.malisis.core.util.callback.ICallback.Priority;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -256,7 +256,7 @@ public class ChunkBlockHandler
 	@SubscribeEvent
 	public void onChunkWatched(ChunkWatchEvent.Watch event)
 	{
-		Chunk chunk = event.getPlayer().worldObj.getChunkFromChunkCoords(event.getChunk().chunkXPos, event.getChunk().chunkZPos);
+		Chunk chunk = event.getPlayer().world.getChunkFromChunkCoords(event.getChunk().chunkXPos, event.getChunk().chunkZPos);
 		Set<BlockPos> coords = chunks(chunk).get(chunk);
 		if (!coords.isEmpty())
 			ChunkBlockMessage.sendCoords(chunk, coords, event.getPlayer());
@@ -272,7 +272,7 @@ public class ChunkBlockHandler
 	 */
 	public void setCoords(int chunkX, int chunkZ, Set<BlockPos> coords)
 	{
-		Chunk chunk = Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(chunkX, chunkZ);
+		Chunk chunk = Utils.getClientWorld().getChunkFromChunkCoords(chunkX, chunkZ);
 		chunks(chunk).addAll(chunk, coords);
 	}
 

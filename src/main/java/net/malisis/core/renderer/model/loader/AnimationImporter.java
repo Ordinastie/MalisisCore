@@ -501,9 +501,9 @@ public class AnimationImporter implements IAnimationLoader
 		 */
 		private int getColor(double[] xyz)
 		{
-			int r = (int) (MathHelper.clamp_double(xyz[0], 0, 1) * 255);
-			int g = (int) (MathHelper.clamp_double(xyz[0], 0, 1) * 255);
-			int b = (int) (MathHelper.clamp_double(xyz[0], 0, 1) * 255);
+			int r = (int) (MathHelper.clamp(xyz[0], 0, 1) * 255);
+			int g = (int) (MathHelper.clamp(xyz[0], 0, 1) * 255);
+			int b = (int) (MathHelper.clamp(xyz[0], 0, 1) * 255);
 
 			return (r << 16) | (g << 8) | b;
 		}

@@ -109,7 +109,7 @@ public class EntityUtils
 		entityItem.motionX = world.rand.nextGaussian() * factor;
 		entityItem.motionY = world.rand.nextGaussian() * factor + 0.2F;
 		entityItem.motionZ = world.rand.nextGaussian() * factor;
-		world.spawnEntityInWorld(entityItem);
+		world.spawnEntity(entityItem);
 
 	}
 
@@ -184,7 +184,7 @@ public class EntityUtils
 		if (sixWays && pitch > 45)
 			return 5;
 
-		return (MathHelper.floor_double(entity.rotationYaw * 4.0F / 360.0F + 0.5D) + 2) & 3;
+		return (MathHelper.floor(entity.rotationYaw * 4.0F / 360.0F + 0.5D) + 2) & 3;
 	}
 
 	/**

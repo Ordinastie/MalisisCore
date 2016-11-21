@@ -30,7 +30,7 @@ import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
-import net.minecraft.client.Minecraft;
+import net.malisis.core.util.Utils;
 import net.minecraft.inventory.Container;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -81,7 +81,7 @@ public class InventoryActionMessage implements IMalisisMessageHandler<InventoryA
 	@SideOnly(Side.CLIENT)
 	public static void sendAction(ActionType action, int inventoryId, int slotNumber, int code)
 	{
-		int windowId = Minecraft.getMinecraft().thePlayer.openContainer.windowId;
+		int windowId = Utils.getClientPlayer().openContainer.windowId;
 		Packet packet = new Packet(action, inventoryId, slotNumber, code, windowId);
 		MalisisCore.network.sendToServer(packet);
 	}

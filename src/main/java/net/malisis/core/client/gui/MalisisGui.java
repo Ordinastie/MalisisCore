@@ -338,10 +338,39 @@ public abstract class MalisisGui extends GuiScreen
 	{
 		try
 		{
-			super.handleMouseInput();
-
 			int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
 			int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
+			//if we ignore scaling, use real mouse position on screen
+			if (renderer.isIgnoreScale())
+			{
+				mouseX = Mouse.getX();
+				mouseY = this.height - Mouse.getY() - 1;
+			}
+
+			int button = Mouse.getEventButton();
+
+			if (Mouse.getEventButtonState())
+			{
+				if (this.mc.gameSettings.touchscreen && this.touchValue++ > 0)
+					return;
+
+				this.eventButton = button;
+				this.lastMouseEvent = Minecraft.getSystemTime();
+				this.mouseClicked(mouseX, mouseY, this.eventButton);
+			}
+			else if (button != -1)
+			{
+				if (this.mc.gameSettings.touchscreen && --this.touchValue > 0)
+					return;
+
+				this.eventButton = -1;
+				this.mouseReleased(mouseX, mouseY, button);
+			}
+			else if (this.eventButton != -1 && this.lastMouseEvent > 0L)
+			{
+				long l = Minecraft.getSystemTime() - this.lastMouseEvent;
+				this.mouseClickMove(mouseX, mouseY, this.eventButton, l);
+			}
 
 			if (lastMouseX != mouseX || lastMouseY != mouseY)
 			{
@@ -663,8 +692,8 @@ public abstract class MalisisGui extends GuiScreen
 		setFocusedComponent(null, true);
 		setHoveredComponent(null, true);
 		Keyboard.enableRepeatEvents(false);
-		if (this.mc.thePlayer != null)
-			this.mc.thePlayer.closeScreen();
+		if (this.mc.player != null)
+			this.mc.player.closeScreen();
 		this.mc.displayGuiScreen((GuiScreen) null);
 		this.mc.setIngameFocus();
 		return;
@@ -694,7 +723,7 @@ public abstract class MalisisGui extends GuiScreen
 	public void onGuiClosed()
 	{
 		if (inventoryContainer != null)
-			inventoryContainer.onContainerClosed(this.mc.thePlayer);
+			inventoryContainer.onContainerClosed(this.mc.player);
 	}
 
 	@SubscribeEvent

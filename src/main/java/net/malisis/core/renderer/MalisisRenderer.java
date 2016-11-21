@@ -24,7 +24,6 @@
 
 package net.malisis.core.renderer;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -52,6 +51,7 @@ import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.EnumFacingUtils;
 import net.malisis.core.util.ItemUtils;
 import net.malisis.core.util.Silenced;
+import net.malisis.core.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -77,7 +77,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Timer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -380,7 +379,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	{
 		if (tranformType == TransformType.FIRST_PERSON_RIGHT_HAND || tranformType == TransformType.FIRST_PERSON_LEFT_HAND)
 		{
-			ItemStack stackInv = Minecraft.getMinecraft().thePlayer.getHeldItem(tranformType == TransformType.FIRST_PERSON_RIGHT_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
+			ItemStack stackInv = Utils.getClientPlayer()
+										.getHeldItem(tranformType == TransformType.FIRST_PERSON_RIGHT_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
 			if (itemStack != stackInv && stackInv != null && stackInv.getItem() == itemStack.getItem())
 				itemStack = stackInv;
 		}
@@ -483,7 +483,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		double x = 0, y = 0, z = 0;
 		if (shouldSetViewportPosition())
 		{
-			EntityPlayerSP p = Minecraft.getMinecraft().thePlayer;
+			EntityPlayerSP p = Utils.getClientPlayer();
 			x = -(p.lastTickPosX + (p.posX - p.lastTickPosX) * partialTick);
 			y = -(p.lastTickPosY + (p.posY - p.lastTickPosY) * partialTick);
 			z = -(p.lastTickPosZ + (p.posZ - p.lastTickPosZ) * partialTick);
@@ -771,7 +771,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	public void setBillboard(float x, float y, float z)
 	{
-		EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+		EntityPlayerSP player = Utils.getClientPlayer();
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, z);
 		GlStateManager.rotate(180 - player.rotationYaw, 0, 1, 0);
@@ -1206,7 +1206,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		}
 
 		if (renderType == RenderType.ITEM)
-			return Minecraft.getMinecraft().thePlayer.getBrightnessForRender(getPartialTick());
+			return Utils.getClientPlayer().getBrightnessForRender(getPartialTick());
 
 		//not in world
 		if (world == null || block == null)
@@ -1346,25 +1346,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		return Block.FULL_BLOCK_AABB;
 	}
 
-	private static Timer timer = null;
-
 	public static float getPartialTick()
 	{
-		if (timer == null)
-		{
-			Field f = AsmUtils.changeFieldAccess(Minecraft.class, "timer", "field_71428_T");
-			try
-			{
-				timer = (Timer) f.get(Minecraft.getMinecraft());
-			}
-			catch (IllegalArgumentException | IllegalAccessException e)
-			{
-				MalisisCore.log.info("[MalisisRenderer] Failed to acces Minecraft timer.");
-				timer = new Timer(20F);
-			}
-		}
-
-		return timer.elapsedPartialTicks;
+		return Minecraft.getMinecraft().timer.elapsedPartialTicks;
 	}
 
 	/**

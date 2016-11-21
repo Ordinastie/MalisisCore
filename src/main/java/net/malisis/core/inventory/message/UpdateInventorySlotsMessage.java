@@ -36,7 +36,7 @@ import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisSlot;
 import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
-import net.minecraft.client.Minecraft;
+import net.malisis.core.util.Utils;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -72,7 +72,7 @@ public class UpdateInventorySlotsMessage implements IMalisisMessageHandler<Updat
 	@Override
 	public void process(Packet message, MessageContext ctx)
 	{
-		EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+		EntityPlayerSP player = Utils.getClientPlayer();
 		Container c = player.openContainer;
 		if (message.windowId != c.windowId || !(c instanceof MalisisInventoryContainer))
 			return;

@@ -37,6 +37,7 @@ import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
+import net.malisis.core.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -115,7 +116,7 @@ public class UISlot extends UIComponent<UISlot>
 			return;
 		}
 
-		List<String> lines = slot.getItemStack().getTooltip(Minecraft.getMinecraft().thePlayer,
+		List<String> lines = slot.getItemStack().getTooltip(Utils.getClientPlayer(),
 				Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 
 		lines.set(0, slot.getItemStack().getRarity().rarityColor + lines.get(0));
