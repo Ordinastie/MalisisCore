@@ -60,6 +60,16 @@ public abstract class WeakNested<K, V>
 		return internalMap.remove(key);
 	}
 
+	public java.util.Set<K> keys()
+	{
+		return internalMap.keySet();
+	}
+
+	public void clear()
+	{
+		internalMap.clear();
+	}
+
 	protected V getOrCreate(K key, V defaultValue)
 	{
 		V v = internalMap.get(key);
