@@ -24,7 +24,6 @@
 
 package net.malisis.core.block.component;
 
-import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IComponent;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyBool;
@@ -40,33 +39,21 @@ import net.minecraft.world.World;
  * @author Ordinastie
  *
  */
-public class PowerComponent implements IBlockComponent
+public class PowerComponent extends BooleanComponent
 {
-	public static PropertyBool POWER = PropertyBool.create("power");
-
 	public static enum Type
 	{
 		RIGHT_CLICK,
-		REDSTONE
+		REDSTONE,
+		BOTH
 	}
 
 	private final Type type;
 
 	public PowerComponent(Type type)
 	{
+		super("power", false, 0);
 		this.type = type;
-	}
-
-	@Override
-	public PropertyBool getProperty()
-	{
-		return POWER;
-	}
-
-	@Override
-	public IBlockState setDefaultState(Block block, IBlockState state)
-	{
-		return state.withProperty(getProperty(), false);
 	}
 
 	@Override
@@ -148,5 +135,4 @@ public class PowerComponent implements IBlockComponent
 		PowerComponent pc = IComponent.getComponent(PowerComponent.class, block);
 		return pc != null ? pc.getProperty() : null;
 	}
-
 }
