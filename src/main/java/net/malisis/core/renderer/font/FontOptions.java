@@ -83,8 +83,8 @@ public class FontOptions
 	/** Disable ECF so char are actually drawn **/
 	private boolean formattingDisabled = false;
 
-	private FontOptions defaultFro = new FontOptions();
-	private FontOptions lineOptions = new FontOptions();
+	private FontOptions defaultFro;
+	private FontOptions lineOptions;
 	private boolean defaultSaved = false;
 
 	private FontOptions(float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough)
@@ -95,6 +95,10 @@ public class FontOptions
 		this.italic = italic;
 		this.underline = underline;
 		this.strikethrough = strikethrough;
+
+		defaultFro = new FontOptions();
+		lineOptions = new FontOptions();
+
 		saveDefault();
 		lineOptions.from(this);
 	}
