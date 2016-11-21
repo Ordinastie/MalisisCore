@@ -91,7 +91,7 @@ public class MultiBlockComponent implements IBlockComponent
 	}
 
 	@Override
-	public IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+	public IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, ItemStack itemStack)
 	{
 		return state.withProperty(getProperty(), true);
 	}

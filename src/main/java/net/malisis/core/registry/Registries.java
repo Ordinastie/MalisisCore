@@ -78,7 +78,6 @@ public class Registries
 																		.filter(IRegisterComponent.class::isInstance)
 																		.map(IRegisterComponent.class::cast)
 																		.forEach(comp -> comp.register(p))));
-
 		if (MalisisCore.isClient())
 			clientRegistry = new ClientRegistry();
 	}
@@ -122,8 +121,7 @@ public class Registries
 	 */
 	public static CallbackResult<Void> processPreSetBlock(Chunk chunk, BlockPos pos, IBlockState oldState, IBlockState newState)
 	{
-		CallbackResult<Void> ret = preSetBlockRegistry.processCallbacks(chunk, pos, oldState, newState);
-		return ret;
+		return preSetBlockRegistry.processCallbacks(chunk, pos, oldState, newState);
 	}
 
 	/**

@@ -36,6 +36,7 @@ import net.minecraft.block.BlockStairs;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -71,7 +72,7 @@ public class StairComponent implements IBlockComponent, ISmartCull
 	}
 
 	@Override
-	public IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+	public IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, ItemStack itemStack)
 	{
 		boolean top = facing == EnumFacing.DOWN || (facing != EnumFacing.UP && hitY > 0.5F);
 		return state.withProperty(getProperty(), top);

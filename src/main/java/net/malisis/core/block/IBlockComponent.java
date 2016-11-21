@@ -130,7 +130,7 @@ public interface IBlockComponent extends IComponent
 	 * @param placer the placer
 	 * @return the i block state
 	 */
-	public default IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+	public default IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, ItemStack itemStack)
 	{
 		return state;
 	}

@@ -271,7 +271,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 
 		McpFieldMapping playerEntity = new McpFieldMapping("playerEntity", "field_147369_b", "net/minecraft/network/NetHandlerPlayServer",
 				"Lnet/minecraft/entity/player/EntityPlayerMP;");
-		McpFieldMapping worldObj = new McpFieldMapping("worldObj", "field_70170_p", "net/minecraft/entity/player/EntityPlayerMP",
+		McpFieldMapping world = new McpFieldMapping("world", "field_70170_p", "net/minecraft/entity/player/EntityPlayerMP",
 				"Lnet/minecraft/world/World;");
 		McpMethodMapping getBlockState = new McpMethodMapping("getBlockState", "func_180495_p", "net/minecraft/world/World",
 				"(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;");
@@ -308,7 +308,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 		LabelNode label = new LabelNode();
 		insert.add(new VarInsnNode(ALOAD, 0)); //this.
 		insert.add(playerEntity.getInsnNode(GETFIELD)); //playerEntity.
-		insert.add(worldObj.getInsnNode(GETFIELD)); //worldObj.
+		insert.add(world.getInsnNode(GETFIELD)); //world.
 		insert.add(new VarInsnNode(ALOAD, 3)); //pos
 		insert.add(getBlockState.getInsnNode(INVOKEVIRTUAL));//getBlockState()
 		insert.add(getBlock.getInsnNode(INVOKEINTERFACE));//getBlock()

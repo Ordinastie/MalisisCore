@@ -119,7 +119,7 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 	}
 
 	@Override
-	public IBlockState onBlockPlaced(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+	public IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, ItemStack itemStack)
 	{
 		if (isDouble(block))
 			return state;
