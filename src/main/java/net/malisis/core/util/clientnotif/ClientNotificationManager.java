@@ -25,13 +25,18 @@
 package net.malisis.core.util.clientnotif;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Set;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.util.WeakNested;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Sets;
 
@@ -41,38 +46,20 @@ import com.google.common.collect.Sets;
  */
 public class ClientNotificationManager
 {
-	private Set<Block> clientBlocks = Sets.newHashSet();
+	private static Set<Block> clientBlocks = Sets.newHashSet();
+	private static WeakNested.List<Chunk, Pair<BlockPos, Block>> updatedPos = new WeakNested.List<>(ArrayList::new);
 
-	private static ClientNotificationManager instance;
-
-	private ClientNotificationManager()
-	{
-
-	}
-
-	private void registerBlockNotif(Block block)
+	private static void registerBlockNotif(Block block)
 	{
 		clientBlocks.add(block);
 	}
 
-	private boolean needsNotification(Block block)
+	private static boolean needsNotification(Block block)
 	{
 		return clientBlocks.contains(block);
 	}
 
-	public void notifyClientBlock(World world, BlockPos pos, Block neighbor)
-	{
-		if (world.isRemote)
-			return;
-
-		IBlockState state = world.getBlockState(pos);
-		if (!needsNotification(state.getBlock()))
-			return;
-
-		NeighborChangedMessage.send(world, pos, neighbor);
-	}
-
-	public void discover(Block block)
+	public static void discover(Block block)
 	{
 		try
 		{
@@ -90,19 +77,27 @@ public class ClientNotificationManager
 		{
 			MalisisCore.log.error("Failed to find @ClientNotification annotation for {} : ", block, e);
 		}
-
-	}
-
-	public static ClientNotificationManager get()
-	{
-		if (instance == null)
-			instance = new ClientNotificationManager();
-		return instance;
 	}
 
 	public static void notify(World world, BlockPos pos, Block neighbor)
 	{
-		get().notifyClientBlock(world, pos, neighbor);
+		if (world.isRemote) //should never be true
+			return;
+
+		IBlockState state = world.getBlockState(pos);
+		if (!needsNotification(state.getBlock()))
+			return;
+
+		updatedPos.add(world.getChunkFromBlockCoords(pos), Pair.of(pos, neighbor));
+		//NeighborChangedMessage.send(world, pos, neighbor);
+	}
+
+	public static void sendNeighborNotification(World world)
+	{
+		for (Chunk chunk : updatedPos.keys())
+			NeighborChangedMessage.send(chunk, updatedPos.get(chunk));
+
+		updatedPos.clear();
 	}
 
 }

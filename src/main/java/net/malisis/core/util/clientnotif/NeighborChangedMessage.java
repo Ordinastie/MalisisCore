@@ -25,6 +25,9 @@
 package net.malisis.core.util.clientnotif;
 
 import io.netty.buffer.ByteBuf;
+
+import java.util.List;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
@@ -32,9 +35,14 @@ import net.malisis.core.util.clientnotif.NeighborChangedMessage.Packet;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.Lists;
 
 /**
  * @author Ordinastie
@@ -52,41 +60,45 @@ public class NeighborChangedMessage implements IMalisisMessageHandler<Packet, IM
 	public void process(Packet message, MessageContext ctx)
 	{
 		World world = IMalisisMessageHandler.getWorld(ctx);
-		world.getBlockState(message.pos).neighborChanged(world, message.pos, message.neighbor);
+		for (Pair<BlockPos, Block> p : message.list)
+			world.getBlockState(p.getLeft()).neighborChanged(world, p.getLeft(), p.getRight());
 	}
 
-	public static void send(World world, BlockPos pos, Block neighbor)
+	public static void send(Chunk chunk, List<Pair<BlockPos, Block>> list)
 	{
-		Packet packet = new Packet(pos, neighbor);
-		MalisisCore.network.sendToPlayersWatchingChunk(packet, world.getChunkFromChunkCoords(pos.getX() >> 4, pos.getZ() >> 4));
+		Packet packet = new Packet(list);
+		MalisisCore.network.sendToPlayersWatchingChunk(packet, chunk);
 	}
 
 	public static class Packet implements IMessage
 	{
-		private BlockPos pos;
-		private Block neighbor;
+		private List<Pair<BlockPos, Block>> list = Lists.newArrayList();
 
 		public Packet()
 		{}
 
-		public Packet(BlockPos pos, Block neighbor)
+		public Packet(List<Pair<BlockPos, Block>> list)
 		{
-			this.pos = pos;
-			this.neighbor = neighbor;
+			this.list = list;
 		}
 
 		@Override
 		public void fromBytes(ByteBuf buf)
 		{
-			pos = BlockPos.fromLong(buf.readLong());
-			neighbor = Block.getBlockById(buf.readInt());
+			int size = buf.readInt();
+			for (int i = 0; i < size; i++)
+				list.add(Pair.of(BlockPos.fromLong(buf.readLong()), Block.getBlockById(buf.readInt())));
 		}
 
 		@Override
 		public void toBytes(ByteBuf buf)
 		{
-			buf.writeLong(pos.toLong());
-			buf.writeInt(Block.getIdFromBlock(neighbor));
+			buf.writeInt(list.size());
+			for (Pair<BlockPos, Block> p : list)
+			{
+				buf.writeLong(p.getLeft().toLong());
+				buf.writeInt(Block.getIdFromBlock(p.getRight()));
+			}
 		}
 	}
 }

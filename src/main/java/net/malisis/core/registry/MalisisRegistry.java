@@ -142,7 +142,7 @@ public class MalisisRegistry
 					registerDummyModel(item, name);
 			}
 
-			ClientNotificationManager.get().discover(block);
+			ClientNotificationManager.discover(block);
 		}
 		else if (registerable instanceof Item)
 		{

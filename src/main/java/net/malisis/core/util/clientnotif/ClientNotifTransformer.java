@@ -28,9 +28,6 @@ import static org.objectweb.asm.Opcodes.*;
 import net.malisis.core.asm.AsmHook;
 import net.malisis.core.asm.MalisisClassTransformer;
 import net.malisis.core.asm.mappings.McpMethodMapping;
-import net.minecraft.block.Block;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -46,6 +43,7 @@ public class ClientNotifTransformer extends MalisisClassTransformer
 	public void registerHooks()
 	{
 		register(clientNotifHook());
+		register(worldServerTick());
 	}
 
 	@SuppressWarnings("deprecation")
@@ -73,13 +71,20 @@ public class ClientNotifTransformer extends MalisisClassTransformer
 
 	}
 
-	public void test(BlockPos pos, Block neighbor)
+	@SuppressWarnings("deprecation")
+	private AsmHook worldServerTick()
 	{
-		World world = null;
+		McpMethodMapping tick = new McpMethodMapping("tick", "func_72835_b", "net/minecraft/world/WorldServer", "()V");
 
-		ClientNotificationManager.notify(world, pos, neighbor);
+		AsmHook ah = new AsmHook(tick);
 
-		return;
+		InsnList insert = new InsnList();
 
+		//ClientNotificationManager.sendNeighborNotification(this);
+		insert.add(new VarInsnNode(ALOAD, 0));
+		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/clientnotif/ClientNotificationManager",
+				"sendNeighborNotification", "(Lnet/minecraft/world/World;)V"));
+
+		return ah.jumpToEnd().jump(-2).insert(insert).debug();
 	}
 }

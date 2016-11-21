@@ -35,6 +35,7 @@ import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.util.MBlockState;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
@@ -99,7 +100,7 @@ public abstract class FiniteLiquid extends MalisisBlock
 	}
 
 	@Override
-	public void onNeighborChanged(World world, BlockPos pos, IBlockState state, BlockPos neighborPos, IBlockState oldState, IBlockState newState)
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block neighborBlock)
 	{
 		if (!world.isRemote)
 			world.scheduleBlockUpdate(pos, this, delay, 0);
