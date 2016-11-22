@@ -85,6 +85,6 @@ public class ClientNotifTransformer extends MalisisClassTransformer
 		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/clientnotif/ClientNotificationManager",
 				"sendNeighborNotification", "(Lnet/minecraft/world/World;)V"));
 
-		return ah.jumpToEnd().jump(-2).insert(insert).debug();
+		return ah.jumpToEnd().jump(-2).insert(insert);
 	}
 }
