@@ -56,6 +56,16 @@ public interface IComponent
 	}
 
 	/**
+	 * Called when this {@link IComponent} is added to the {@link IComponentProvider}.
+	 *
+	 * @param provider the provider
+	 */
+	public default void onComponentAdded(IComponentProvider provider)
+	{
+
+	}
+
+	/**
 	 * Gets the component of the specify <code>type</code> for the {@link Object}.<br>
 	 * The returned object may <b>not</b> be a component but the block itself if it implements an interface used for a {@link IComponent}.
 	 *

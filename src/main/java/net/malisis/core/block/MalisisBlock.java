@@ -146,6 +146,8 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 		else
 			components.add(component);
 
+		component.onComponentAdded(this);
+
 		lightOpacity = getDefaultState().isOpaqueCube() ? 255 : 0;
 	}
 
