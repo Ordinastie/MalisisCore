@@ -108,24 +108,24 @@ public class AnimatedModelComponent extends ModelComponent
 		//		staticShapes.clear();
 	}
 
-	private Optional<IAnimatedRenderable> get(BlockPos pos)
+	public Optional<IAnimatedRenderable> getRenderable(BlockPos pos)
 	{
 		return AnimatedRenderer.getRenderable(pos);
 	}
 
 	private Timer addTimer(BlockPos pos, String animation, Timer timer)
 	{
-		return get(pos).map(amc -> amc.addTimer(animation, timer)).orElse(null);
+		return getRenderable(pos).map(amc -> amc.addTimer(animation, timer)).orElse(null);
 	}
 
 	private Timer removeTimer(BlockPos pos, String animation)
 	{
-		return get(pos).map(amc -> amc.removeTimer(animation)).orElse(null);
+		return getRenderable(pos).map(amc -> amc.removeTimer(animation)).orElse(null);
 	}
 
 	private Timer getTimer(BlockPos pos, String animation)
 	{
-		return get(pos).map(amc -> amc.getTimer(animation)).orElse(null);
+		return getRenderable(pos).map(amc -> amc.getTimer(animation)).orElse(null);
 	}
 
 	/**
@@ -310,7 +310,7 @@ public class AnimatedModelComponent extends ModelComponent
 	 * @param block the block
 	 * @return the animated model component
 	 */
-	public static AnimatedModelComponent get(IComponentProvider block)
+	public static AnimatedModelComponent get(Object block)
 	{
 		return IComponent.getComponent(AnimatedModelComponent.class, block);
 	}
@@ -371,6 +371,7 @@ public class AnimatedModelComponent extends ModelComponent
 			return timers.get(animation);
 		}
 
+		@Override
 		public Map<String, Timer> getTimers()
 		{
 			return ImmutableMap.copyOf(timers);

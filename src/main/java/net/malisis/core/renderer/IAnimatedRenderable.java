@@ -24,6 +24,8 @@
 
 package net.malisis.core.renderer;
 
+import java.util.Map;
+
 import net.malisis.core.util.Timer;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.culling.ICamera;
@@ -45,6 +47,8 @@ public interface IAnimatedRenderable
 	public Timer removeTimer(String animation);
 
 	public Timer getTimer(String animation);
+
+	public Map<String, Timer> getTimers();
 
 	public boolean inFrustrum(ICamera camera);
 
