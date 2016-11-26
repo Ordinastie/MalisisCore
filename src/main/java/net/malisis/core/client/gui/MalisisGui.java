@@ -120,6 +120,9 @@ public abstract class MalisisGui extends GuiScreen
 
 	protected MalisisGui()
 	{
+		this.mc = Minecraft.getMinecraft();
+		this.itemRender = mc.getRenderItem();
+		this.fontRendererObj = mc.fontRendererObj;
 		this.renderer = new GuiRenderer();
 		this.screen = new UIContainer<>(this);
 		this.ar = new AnimationRenderer();
@@ -210,7 +213,6 @@ public abstract class MalisisGui extends GuiScreen
 	@Override
 	public final void setWorldAndResolution(Minecraft minecraft, int width, int height)
 	{
-		super.setWorldAndResolution(minecraft, width, height);
 		setResolution();
 	}
 
@@ -701,9 +703,8 @@ public abstract class MalisisGui extends GuiScreen
 
 	public void displayOverlay()
 	{
-		mc = Minecraft.getMinecraft();
 		isOverlay = true;
-		setWorldAndResolution(mc, 0, 0);
+		setResolution();
 
 		if (!doConstruct())
 			return;
