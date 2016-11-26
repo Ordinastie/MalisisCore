@@ -25,6 +25,7 @@
 package net.malisis.core.block.component;
 
 import net.malisis.core.block.IComponent;
+import net.malisis.core.block.IComponentProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
@@ -32,7 +33,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 /**
@@ -41,65 +41,110 @@ import net.minecraft.world.World;
  */
 public class PowerComponent extends BooleanComponent
 {
-	public static enum Type
+	/** InterractionType defines how the {@link PowerComponent} is changed. */
+	public static enum InteractionType
 	{
+		/** The {@link PowerComponent} if affected by right click. */
 		RIGHT_CLICK,
+		/** The {@link PowerComponent} if affected by neighbor redstone power change. */
 		REDSTONE,
+		/** The {@link PowerComponent} if affected by both right click and neighbor redstone power change. */
 		BOTH
 	}
 
-	private final Type type;
-
-	public PowerComponent(Type type)
+	/**
+	 * ComponentType whether the {@link PowerComponent} should receive or provide redstone power.
+	 */
+	public static enum ComponentType
 	{
-		super("power", false, 0);
-		this.type = type;
+		/** The {@link PowerComponent} is a power provider and emits redstone current. */
+		PROVIDER,
+		/** The {@link PowerComponent} is a power receiver and reacts to redstone current. */
+		RECEIVER,
+		/** The {@link PowerComponent} is both a power provider and receiver. */
+		BOTH;
+	}
+
+	/** Type of interraction. */
+	private final InteractionType interractionType;
+	/** Type of component. */
+	private final ComponentType componentType;
+	/** Whether this {@link PowerComponent} {@link IComponentProvider} also has a {@link DirectionalComponent}. */
+	private boolean hasDirectionalComponent = false;
+
+	public PowerComponent(InteractionType interractionType, ComponentType componentType)
+	{
+		//default meta = 8
+		super("power", false, 3);
+		this.interractionType = interractionType;
+		this.componentType = componentType;
+	}
+
+	@Override
+	public void onComponentAdded(IComponentProvider provider)
+	{
+		hasDirectionalComponent = IComponent.getComponent(DirectionalComponent.class, provider) != null;
 	}
 
 	@Override
 	public boolean onBlockActivated(Block block, World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
-		if (type == Type.REDSTONE)
+		if (interractionType == InteractionType.REDSTONE)
 			return false;
 
-		boolean isPowered = isPowered(state);
-		world.setBlockState(pos, state.withProperty(getProperty(), !isPowered));
+		invert(world, pos);
+		if (hasDirectionalComponent)
+			world.notifyNeighborsOfStateChange(pos.offset(DirectionalComponent.getDirection(state).getOpposite()), block);
 		return true;
 	}
 
 	@Override
 	public void onNeighborBlockChange(Block block, World world, BlockPos pos, IBlockState state, Block neighborBlock)
 	{
-		if (type == Type.RIGHT_CLICK)
+		if (interractionType == InteractionType.RIGHT_CLICK || componentType == ComponentType.PROVIDER
+				|| !neighborBlock.getDefaultState().canProvidePower())
 			return;
 
-		boolean isPowered = isRemotelyPowered(world, pos);
-		world.setBlockState(pos, state.withProperty(getProperty(), isPowered));
+		set(world, pos, world.isBlockPowered(pos));
 	}
 
 	@Override
 	public boolean canProvidePower(Block block, IBlockState state)
 	{
-		return true;
+		return componentType != ComponentType.RECEIVER;
 	}
 
 	@Override
-	public IBlockState getStateFromMeta(Block block, IBlockState state, int meta)
+	public void breakBlock(Block block, World world, BlockPos pos, IBlockState state)
 	{
-		return state.withProperty(getProperty(), (meta & 8) != 0);
+		if (componentType == ComponentType.RECEIVER || !isPowered(state))
+			return;
+
+		world.notifyNeighborsOfStateChange(pos, block);
+		//if block has direction, assume it provides power to the adjacent block
+		if (IComponent.getComponent(DirectionalComponent.class, block) != null)
+			world.notifyNeighborsOfStateChange(pos.offset(DirectionalComponent.getDirection(state).getOpposite()), block);
+
 	}
 
-	@Override
-	public int getMetaFromState(Block block, IBlockState state)
+	/**
+	 * Checks whether the block in world is powered.
+	 *
+	 * @param world the world
+	 * @param pos the pos
+	 * @return true, if is powered
+	 */
+	public static boolean isPowered(World world, BlockPos pos)
 	{
-		return isPowered(state) ? 8 : 0;
+		return isPowered(world.getBlockState(pos));
 	}
 
-	public static boolean isPowered(IBlockAccess world, BlockPos pos)
-	{
-		return world != null ? isPowered(world.getBlockState(pos)) : false;
-	}
-
+	/**
+	 * Checks if is powered of this {@link IBlockState}.
+	 *
+	 * @param state the state
+	 * @return true, if is powered
+	 */
 	public static boolean isPowered(IBlockState state)
 	{
 		PowerComponent pc = IComponent.getComponent(PowerComponent.class, state.getBlock());
@@ -111,23 +156,6 @@ public class PowerComponent extends BooleanComponent
 			return false;
 
 		return state.getValue(property);
-	}
-
-	public static boolean isRemotelyPowered(World world, BlockPos pos)
-	{
-		return isRemotelyPowered(world, pos, true);
-	}
-
-	public static boolean isRemotelyPowered(World world, BlockPos pos, boolean strongPower)
-	{
-		boolean powered = world.isBlockIndirectlyGettingPowered(pos) != 0;
-		if (powered || !strongPower)
-			return powered;
-
-		for (EnumFacing side : EnumFacing.VALUES)
-			if (world.isBlockIndirectlyGettingPowered(pos.offset(side)) != 0)
-				return true;
-		return false;
 	}
 
 	public static PropertyBool getProperty(Block block)
