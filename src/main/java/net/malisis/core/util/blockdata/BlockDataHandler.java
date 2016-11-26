@@ -62,7 +62,7 @@ import com.google.common.collect.Table;
  * {@link #registerBlockData(String, Function, Function)}.
  *
  * <p>
- * Custom data is then stored and retreived using {@link #setData(String, IBlockAccess, BlockPos, Object)},
+ * Custom data is then stored and retrieved using {@link #setData(String, IBlockAccess, BlockPos, Object)},
  * {@link #getData(String, IBlockAccess, BlockPos)} and {@link #removeData(String, IBlockAccess, BlockPos)} with the corresponding
  * identifier.
  *
@@ -76,8 +76,7 @@ public class BlockDataHandler
 			"chunkCache") : null;
 
 	private Map<String, HandlerInfo<?>> handlerInfos = new HashMap<>();
-	private Table<String, Chunk, ChunkData<?>> serverDatas = HashBasedTable.create();
-	private Table<String, Chunk, ChunkData<?>> clientDatas = HashBasedTable.create();
+	private static final ThreadLocal<Table<String, Chunk, ChunkData<?>>> datas = ThreadLocal.withInitial(HashBasedTable::create);
 
 	private BlockDataHandler()
 	{
@@ -87,17 +86,6 @@ public class BlockDataHandler
 	public Map<String, HandlerInfo<?>> getHandlerInfos()
 	{
 		return handlerInfos;
-	}
-
-	/**
-	 * Get the server or client data depending on the passed {@link World}.
-	 *
-	 * @param world the world
-	 * @return the table
-	 */
-	private Table<String, Chunk, ChunkData<?>> data(World world)
-	{
-		return world(world).isRemote ? instance.clientDatas : instance.serverDatas;
 	}
 
 	/**
@@ -145,7 +133,8 @@ public class BlockDataHandler
 	@SuppressWarnings("unchecked")
 	private <T> ChunkData<T> chunkData(String identifier, World world, Chunk chunk)
 	{
-		return (ChunkData<T>) instance.data(world).get(identifier, chunk);
+		Table<String, Chunk, ChunkData<?>> data = datas.get();
+		return (ChunkData<T>) data.get(identifier, chunk);
 
 	}
 
@@ -166,7 +155,7 @@ public class BlockDataHandler
 		//System.out.println("createChunkData (" + chunk.xPosition + "/" + chunk.zPosition + ") for " + identifier);
 
 		ChunkData<T> chunkData = new ChunkData<>((HandlerInfo<T>) handlerInfos.get(identifier));
-		instance.data(world).put(identifier, chunk, chunkData);
+		datas.get().put(identifier, chunk, chunkData);
 		return chunkData;
 	}
 
@@ -191,7 +180,7 @@ public class BlockDataHandler
 			//					+ handlerInfo.identifier);
 			ChunkData<?> chunkData = new ChunkData<>(handlerInfo);
 			chunkData.fromBytes(Unpooled.copiedBuffer(nbt.getByteArray(handlerInfo.identifier)));
-			data(event.getWorld()).put(handlerInfo.identifier, event.getChunk(), chunkData);
+			datas.get().put(handlerInfo.identifier, event.getChunk(), chunkData);
 		}
 	}
 
@@ -219,7 +208,7 @@ public class BlockDataHandler
 
 			//unload data on save because saving is called after unload
 			if (event.getChunk().unloaded)
-				data(event.getWorld()).remove(handlerInfo.identifier, event.getChunk());
+				datas.get().remove(handlerInfo.identifier, event.getChunk());
 
 		}
 	}
@@ -239,7 +228,7 @@ public class BlockDataHandler
 
 		for (HandlerInfo<?> handlerInfo : handlerInfos.values())
 		{
-			data(event.getWorld()).remove(handlerInfo.identifier, event.getChunk());
+			datas.get().remove(handlerInfo.identifier, event.getChunk());
 		}
 	}
 
@@ -302,11 +291,34 @@ public class BlockDataHandler
 	 */
 	public static <T> void setData(String identifier, IBlockAccess world, BlockPos pos, T data)
 	{
-		ChunkData<T> chunkData = instance.<T> chunkData(identifier, instance.world(world), pos);
+		setData(identifier, world, pos, data, false);
+	}
+
+	/**
+	 * Sets the custom data to be stored at the {@link BlockPos} for the specified identifier and eventually sends the data to the clients
+	 * watching the chunk.
+	 *
+	 * @param <T> the generic type
+	 * @param identifier the identifier
+	 * @param world the world
+	 * @param pos the pos
+	 * @param data the data
+	 * @param sendToClients the send to clients
+	 */
+	public static <T> void setData(String identifier, IBlockAccess world, BlockPos pos, T data, boolean sendToClients)
+	{
+		World w = instance.world(world);
+		ChunkData<T> chunkData = instance.<T> chunkData(identifier, w, pos);
 		if (chunkData == null)
 			chunkData = instance.<T> createChunkData(identifier, instance.world(world), pos);
 
+		//MalisisCore.message("SetData " + identifier + " for " + pos + " > " + data);
 		chunkData.setData(pos, data);
+		if (sendToClients && !w.isRemote)
+		{
+			ByteBuf buf = chunkData.toBytes(Unpooled.buffer());
+			Utils.getLoadedChunk(w, pos).ifPresent(chunk -> BlockDataMessage.sendBlockData(chunk, identifier, buf));
+		}
 	}
 
 	/**
@@ -317,21 +329,46 @@ public class BlockDataHandler
 	 * @param world the world
 	 * @param pos the pos
 	 */
+
 	public static <T> void removeData(String identifier, IBlockAccess world, BlockPos pos)
 	{
-		setData(identifier, world, pos, null);
+		removeData(identifier, world, pos, false);
 	}
 
+	/**
+	 * Removes the custom data stored at the {@link BlockPos} for the specified identifier and eventually sends it to clients watching the
+	 * chunk.
+	 *
+	 * @param <T> the generic type
+	 * @param identifier the identifier
+	 * @param world the world
+	 * @param pos the pos
+	 * @param sendToClients the send to clients
+	 */
+	public static <T> void removeData(String identifier, IBlockAccess world, BlockPos pos, boolean sendToClients)
+	{
+		setData(identifier, world, pos, null, sendToClients);
+	}
+
+	/**
+	 * Called on the client when receiving the data from the server, either because client started to watch the chunk or server manually
+	 * sent the data.
+	 *
+	 * @param chunkX the chunk X
+	 * @param chunkZ the chunk Z
+	 * @param identifier the identifier
+	 * @param data the data
+	 */
 	static void setBlockData(int chunkX, int chunkZ, String identifier, ByteBuf data)
 	{
 		HandlerInfo<?> handlerInfo = instance.handlerInfos.get(identifier);
 		if (handlerInfo == null)
 			return;
 
-		//MalisisCore.message("SetBlockData (" + chunkX + "/" + chunkZ + ") for " + identifier);
+		//MalisisCore.message("Received blockData (" + chunkX + "/" + chunkZ + ") for " + identifier);
 		Chunk chunk = Utils.getClientWorld().getChunkFromChunkCoords(chunkX, chunkZ);
 		ChunkData<?> chunkData = new ChunkData<>(handlerInfo).fromBytes(data);
-		instance.data(chunk.getWorld()).put(handlerInfo.identifier, chunk, chunkData);
+		datas.get().put(handlerInfo.identifier, chunk, chunkData);
 	}
 
 	public static BlockDataHandler get()

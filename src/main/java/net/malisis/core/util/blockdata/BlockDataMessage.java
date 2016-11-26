@@ -54,9 +54,29 @@ public class BlockDataMessage implements IMalisisMessageHandler<Packet, IMessage
 		BlockDataHandler.setBlockData(message.x, message.z, message.identifier, message.data);
 	}
 
+	/**
+	 * Sends the data to the specified {@link EntityPlayerMP}.
+	 *
+	 * @param chunk the chunk
+	 * @param identifier the identifier
+	 * @param data the data
+	 * @param player the player
+	 */
 	public static void sendBlockData(Chunk chunk, String identifier, ByteBuf data, EntityPlayerMP player)
 	{
 		MalisisCore.network.sendTo(new Packet(chunk, identifier, data), player);
+	}
+
+	/**
+	 * Sends the data to all the players currently watching the specified {@link Chunk}.
+	 *
+	 * @param chunk the chunk
+	 * @param identifer the identifer
+	 * @param data the data
+	 */
+	public static void sendBlockData(Chunk chunk, String identifer, ByteBuf data)
+	{
+		MalisisCore.network.sendToPlayersWatchingChunk(new Packet(chunk, identifer, data), chunk);
 	}
 
 	public static class Packet implements IMessage
