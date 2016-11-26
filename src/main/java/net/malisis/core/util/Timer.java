@@ -85,4 +85,14 @@ public class Timer
 		return ticks * 1000 / 20;
 	}
 
+	@Override
+	public String toString()
+	{
+		int elapsed = (int) (elapsedTime() / 1000);
+		int minutes = (elapsed % 3600) / 60;
+		int seconds = elapsed % 60;
+
+		return String.format("%02d:%02d", minutes, seconds);
+	}
+
 }
