@@ -74,7 +74,7 @@ public class OpenInventoryMessage implements IMalisisMessageHandler<OpenInventor
 	@Override
 	public void process(Packet message, MessageContext ctx)
 	{
-		EntityPlayerSP player = Utils.getClientPlayer();
+		EntityPlayerSP player = (EntityPlayerSP) Utils.getClientPlayer();
 		if (message.type == ContainerType.TYPE_TILEENTITY)
 		{
 			IDirectInventoryProvider inventoryProvider = TileEntityUtils.getTileEntity(IDirectInventoryProvider.class,
@@ -94,7 +94,6 @@ public class OpenInventoryMessage implements IMalisisMessageHandler<OpenInventor
 			@SuppressWarnings("unchecked")
 			IDeferredInventoryProvider<ItemStack> inventoryProvider = (IDeferredInventoryProvider<ItemStack>) itemStack.getItem();
 			MalisisInventory.open(player, inventoryProvider, itemStack, message.windowId);
-
 		}
 	}
 

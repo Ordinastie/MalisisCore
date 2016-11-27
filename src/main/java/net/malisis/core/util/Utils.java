@@ -27,8 +27,7 @@ package net.malisis.core.util;
 import java.util.Optional;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -77,7 +76,7 @@ public class Utils
 	 * @return the client world
 	 */
 	@SideOnly(Side.CLIENT)
-	public static WorldClient getClientWorld()
+	public static World getClientWorld()
 	{
 		return Minecraft.getMinecraft() != null ? Minecraft.getMinecraft().world : null;
 	}
@@ -88,7 +87,7 @@ public class Utils
 	 * @return the client player
 	 */
 	@SideOnly(Side.CLIENT)
-	public static EntityPlayerSP getClientPlayer()
+	public static EntityPlayer getClientPlayer()
 	{
 		return Minecraft.getMinecraft() != null ? Minecraft.getMinecraft().player : null;
 	}

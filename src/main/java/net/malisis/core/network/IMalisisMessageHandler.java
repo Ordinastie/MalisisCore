@@ -35,6 +35,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
+ * Extension of {@link IMessageHandler} to automatically handle the task scheduling to the main thread of receiving side.
+ *
  * @author Ordinastie
  *
  */
@@ -57,6 +59,12 @@ public interface IMalisisMessageHandler<REQ extends IMessage, REPLY extends IMes
 		return null;
 	}
 
+	/**
+	 * Processes the received message. This is executed on the main thread.
+	 *
+	 * @param message the message
+	 * @param ctx the ctx
+	 */
 	public void process(REQ message, MessageContext ctx);
 
 	public default boolean useTask()
@@ -64,13 +72,26 @@ public interface IMalisisMessageHandler<REQ extends IMessage, REPLY extends IMes
 		return true;
 	}
 
+	/**
+	 * Gets the correct client or server {@link World} based on {@link MessageContext}.
+	 *
+	 * @param ctx the ctx
+	 * @return the world
+	 */
 	public static World getWorld(MessageContext ctx)
 	{
 		if (ctx.side == Side.SERVER)
 			return ctx.getServerHandler().playerEntity.world;
-		return Utils.getClientWorld();
+		else
+			return Utils.getClientWorld();
 	}
 
+	/**
+	 * Gets the correct client or server {@link EntityPlayer} based on {@link MessageContext}.
+	 *
+	 * @param ctx the ctx
+	 * @return the player
+	 */
 	public static EntityPlayer getPlayer(MessageContext ctx)
 	{
 		if (ctx.side == Side.SERVER)

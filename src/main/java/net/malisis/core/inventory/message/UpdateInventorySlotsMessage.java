@@ -72,7 +72,7 @@ public class UpdateInventorySlotsMessage implements IMalisisMessageHandler<Updat
 	@Override
 	public void process(Packet message, MessageContext ctx)
 	{
-		EntityPlayerSP player = Utils.getClientPlayer();
+		EntityPlayerSP player = (EntityPlayerSP) Utils.getClientPlayer();
 		Container c = player.openContainer;
 		if (message.windowId != c.windowId || !(c instanceof MalisisInventoryContainer))
 			return;

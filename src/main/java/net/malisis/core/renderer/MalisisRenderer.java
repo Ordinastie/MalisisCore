@@ -55,7 +55,6 @@ import net.malisis.core.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -68,6 +67,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -483,7 +483,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		double x = 0, y = 0, z = 0;
 		if (shouldSetViewportPosition())
 		{
-			EntityPlayerSP p = Utils.getClientPlayer();
+			EntityPlayer p = Utils.getClientPlayer();
 			x = -(p.lastTickPosX + (p.posX - p.lastTickPosX) * partialTick);
 			y = -(p.lastTickPosY + (p.posY - p.lastTickPosY) * partialTick);
 			z = -(p.lastTickPosZ + (p.posZ - p.lastTickPosZ) * partialTick);
@@ -771,7 +771,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	public void setBillboard(float x, float y, float z)
 	{
-		EntityPlayerSP player = Utils.getClientPlayer();
+		EntityPlayer player = Utils.getClientPlayer();
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, z);
 		GlStateManager.rotate(180 - player.rotationYaw, 0, 1, 0);
