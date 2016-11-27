@@ -77,7 +77,7 @@ public class AnimatedModelComponent extends ModelComponent
 	/** Animated {@link Shape Shapes}. */
 	private Set<String> animatedShapes = Sets.newHashSet();
 	/** Callback for the checks to make when rendering for the first time. */
-	private IStateCheck stateCheck = null;
+	private IRenderCallback renderCallback = null;
 
 	RenderParameters rp = new RenderParameters();
 
@@ -129,27 +129,14 @@ public class AnimatedModelComponent extends ModelComponent
 	}
 
 	/**
-	 * Register a callback for when a the block is first rendered.<br>
-	 * The callback is called when the block is placed in world, or when the chunks gets loaded on the client.
+	 * Register a callback for when a the block is rendered.<br>
+	 * Can be used to trigger animations based on the state.
 	 *
-	 * @param stateCheck the state check
+	 * @param renderCallback the state check
 	 */
-	public void onFirstRender(IStateCheck stateCheck)
+	public void onRender(IRenderCallback renderCallback)
 	{
-		this.stateCheck = stateCheck;
-	}
-
-	/**
-	 * Triggers the {@link IStateCheck} callback.
-	 *
-	 * @param world the world
-	 * @param pos the pos
-	 * @param state the state
-	 */
-	public void checkState(IBlockAccess world, BlockPos pos, IBlockState state)
-	{
-		if (stateCheck != null)
-			stateCheck.accept(world, pos, state, this);
+		this.renderCallback = renderCallback;
 	}
 
 	/**
@@ -270,7 +257,8 @@ public class AnimatedModelComponent extends ModelComponent
 	private void onRender(IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		AnimatedRenderer.registerRenderable(world, pos, this);
-		checkState(world, pos, state);
+		if (renderCallback != null)
+			renderCallback.accept(world, pos, state, this);
 	}
 
 	@Override
@@ -316,10 +304,9 @@ public class AnimatedModelComponent extends ModelComponent
 	}
 
 	/**
-	 * The IStateCheck interface is the callback used for {@link AnimatedModelComponent#onFirstRender(IStateCheck)}.<br>
-	 * (See {@link AnimatedModelComponent#checkState(IBlockAccess, BlockPos, IBlockState)})
+	 * The IRenderCallback interface is the callback used for {@link AnimatedModelComponent#onRender(IRenderCallback)}. *
 	 */
-	public interface IStateCheck
+	public interface IRenderCallback
 	{
 		public void accept(IBlockAccess world, BlockPos pos, IBlockState state, AnimatedModelComponent amc);
 	}
