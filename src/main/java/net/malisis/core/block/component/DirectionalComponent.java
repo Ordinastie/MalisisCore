@@ -70,7 +70,7 @@ public class DirectionalComponent implements IBlockComponent
 	}
 
 	/**
-	 * Instantiates a new {@link DirectionalComponent} with {@link #HORIZONTAL} property and {@link Placement#PLACER} by default.
+	 * Instantiates a new {@link DirectionalComponent} with {@link #HORIZONTAL} property and {@link IPlacement#PLACER} by default.
 	 */
 	public DirectionalComponent()
 	{
@@ -78,7 +78,7 @@ public class DirectionalComponent implements IBlockComponent
 	}
 
 	/**
-	 * Instantiates a new {@link DirectionalComponent} with specified property and {@link Placement#PLACER} by default.
+	 * Instantiates a new {@link DirectionalComponent} with specified property and {@link IPlacement#PLACER} by default.
 	 *
 	 * @param property the property
 	 */

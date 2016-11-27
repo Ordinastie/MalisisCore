@@ -157,7 +157,6 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 	/**
 	 * Gets the {@link AnimatedModelComponent} for the specified {@link BlockPos}.
 	 *
-	 * @param <T> the generic type
 	 * @param pos the pos
 	 * @return the renderable
 	 */
