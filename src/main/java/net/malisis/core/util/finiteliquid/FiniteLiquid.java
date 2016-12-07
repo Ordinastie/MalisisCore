@@ -275,19 +275,5 @@ public abstract class FiniteLiquid extends MalisisBlock
 				}
 			parsed.add(state.getPos());
 		}
-
 	}
-
-	public static class SpreadData
-	{
-		BlockPos pos;
-		int amount;
-
-		public SpreadData(BlockPos pos, int amount)
-		{
-			this.pos = pos;
-			this.amount = amount;
-		}
-	}
-
 }
