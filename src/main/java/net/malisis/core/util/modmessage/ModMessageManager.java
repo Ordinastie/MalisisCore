@@ -31,6 +31,7 @@ import java.util.Collection;
 
 import net.malisis.core.IMalisisMod;
 import net.malisis.core.MalisisCore;
+import net.minecraftforge.fml.common.Loader;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -106,6 +107,10 @@ public class ModMessageManager
 	 */
 	public static void message(String modid, String messageName, Object... data)
 	{
+		//do not print warnings if mod is not loaded
+		if (!Loader.isModLoaded(modid))
+			return;
+
 		Collection<Pair<Object, Method>> messageList = messages.get(modid + ":" + messageName);
 		if (messageList.size() == 0)
 		{
@@ -148,10 +153,12 @@ public class ModMessageManager
 		for (int i = 0; i < parameters.length; i++)
 		{
 			Class<?> paramClass = parameters[i].getType();
-			Class<?> dataClass = data[i].getClass();
-
-			if (!ClassUtils.isAssignable(paramClass, dataClass, true))
-				return false;
+			if (data[i] != null)
+			{
+				Class<?> dataClass = data[i].getClass();
+				if (!ClassUtils.isAssignable(dataClass, paramClass, true))
+					return false;
+			}
 		}
 
 		return true;
