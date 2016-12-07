@@ -176,8 +176,8 @@ public abstract class Transformation<T extends Transformation<T, S>, S extends I
 			return self();
 
 		this.loops = loops;
-		this.loopStartDelay = startDelay;
-		this.loopResetDelay = resetDelay;
+		this.loopStartDelay = Timer.tickToTime(startDelay);
+		this.loopResetDelay = Timer.tickToTime(resetDelay);
 		return self();
 	}
 
@@ -239,7 +239,7 @@ public abstract class Transformation<T extends Transformation<T, S>, S extends I
 			elapsedTimeCurrentLoop %= loopDuration;
 			if (elapsedTimeCurrentLoop < loopStartDelay)
 				return 0;
-			if (elapsedTimeCurrentLoop - loopResetDelay > loopDuration)
+			if (elapsedTimeCurrentLoop + loopResetDelay > loopDuration)
 				return 1;
 			elapsedTimeCurrentLoop -= loopStartDelay;
 		}
