@@ -24,6 +24,8 @@
 
 package net.malisis.core.inventory.player;
 
+import static com.google.common.base.Preconditions.*;
+
 import net.malisis.core.inventory.MalisisSlot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -34,15 +36,16 @@ public class PlayerInventorySlot extends MalisisSlot
 
 	public PlayerInventorySlot(PlayerInventory inventory, EntityPlayer p, int index)
 	{
-		super(inventory, p.inventory.getStackInSlot(index), index);
+		super(inventory, p.inventory.getStackInSlot(index));
+		setSlotIndex(index);
 		player = p;
 	}
 
 	@Override
 	public void setItemStack(ItemStack itemStack)
 	{
-		super.setItemStack(itemStack);
-		player.inventory.setInventorySlotContents(slotNumber, itemStack);
+		super.setItemStack(checkNotNull(itemStack));
+		player.inventory.setInventorySlotContents(index, itemStack);
 	}
 
 }

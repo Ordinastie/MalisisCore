@@ -35,10 +35,21 @@ public class PlayerInventory extends MalisisInventory
 	public PlayerInventory(EntityPlayer p)
 	{
 		super(null, 0);
-		this.size = 36;
-		this.slots = new MalisisSlot[size];
-		for (int i = 0; i < size; i++)
-			slots[i] = new PlayerInventorySlot(this, p, i);
+		for (int i = 0; i < 36; i++)
+			slots.add(new PlayerInventorySlot(this, p, i));
+	}
+
+	@Override
+	public void setSlots(MalisisSlot... slots)
+	{
+		throw new IllegalStateException();
+	}
+
+	@Override
+	public void overrideSlot(MalisisSlot slot, int slotIndex)
+	{
+		if (slot instanceof PlayerInventorySlot)
+			super.overrideSlot(slot, slotIndex);
 	}
 
 	@Override
@@ -50,15 +61,22 @@ public class PlayerInventory extends MalisisInventory
 	@Override
 	public ItemStack transferInto(ItemStack itemStack, boolean reversed)
 	{
+		if (itemStack.isEmpty())
+			return ItemStack.EMPTY;
+		//fill existing stacks in the hotbar first
 		itemStack = transferIntoHotbar(itemStack, false, reversed);
-		if (itemStack != null)
-			itemStack = transferIntoInventory(itemStack, false, reversed);
-		if (itemStack != null)
-			itemStack = transferIntoHotbar(itemStack, true, reversed);
-		if (itemStack != null)
-			itemStack = transferIntoInventory(itemStack, true, reversed);
-
-		return itemStack;
+		if (itemStack.isEmpty())
+			return ItemStack.EMPTY;
+		//fill existing stacks in the inventory
+		itemStack = transferIntoInventory(itemStack, false, reversed);
+		if (itemStack.isEmpty())
+			return ItemStack.EMPTY;
+		//fill empty slots in the hotbar
+		itemStack = transferIntoHotbar(itemStack, true, reversed);
+		if (itemStack.isEmpty())
+			return ItemStack.EMPTY;
+		//fill empty slots in the inventory (returns what's left)
+		return transferIntoInventory(itemStack, true, reversed);
 	}
 
 	private ItemStack transferIntoHotbar(ItemStack itemStack, boolean emptySlot, boolean reversed)

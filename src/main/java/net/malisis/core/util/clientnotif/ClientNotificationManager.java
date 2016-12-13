@@ -28,6 +28,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Triple;
+
+import com.google.common.collect.Sets;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.util.WeakNested;
 import net.minecraft.block.Block;
@@ -36,10 +40,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.collect.Sets;
-
 /**
  * @author Ordinastie
  *
@@ -47,7 +47,7 @@ import com.google.common.collect.Sets;
 public class ClientNotificationManager
 {
 	private static Set<Block> clientBlocks = Sets.newHashSet();
-	private static WeakNested.List<Chunk, Pair<BlockPos, Block>> updatedPos = new WeakNested.List<>(ArrayList::new);
+	private static WeakNested.List<Chunk, Triple<BlockPos, Block, BlockPos>> updatedPos = new WeakNested.List<>(ArrayList::new);
 
 	private static void registerBlockNotif(Block block)
 	{
@@ -79,7 +79,7 @@ public class ClientNotificationManager
 		}
 	}
 
-	public static void notify(World world, BlockPos pos, Block neighbor)
+	public static void notify(World world, BlockPos pos, Block neighborBlock, BlockPos neighborPos)
 	{
 		if (world.isRemote) //should never be true
 			return;
@@ -88,7 +88,7 @@ public class ClientNotificationManager
 		if (!needsNotification(state.getBlock()))
 			return;
 
-		updatedPos.add(world.getChunkFromBlockCoords(pos), Pair.of(pos, neighbor));
+		updatedPos.add(world.getChunkFromBlockCoords(pos), Triple.of(pos, neighborBlock, neighborPos));
 		//NeighborChangedMessage.send(world, pos, neighbor);
 	}
 

@@ -94,12 +94,12 @@ public class PowerComponent extends BooleanComponent
 
 		invert(world, pos);
 		if (hasDirectionalComponent)
-			world.notifyNeighborsOfStateChange(pos.offset(DirectionalComponent.getDirection(state).getOpposite()), block);
+			world.notifyNeighborsOfStateChange(pos.offset(DirectionalComponent.getDirection(state).getOpposite()), block, true);
 		return true;
 	}
 
 	@Override
-	public void onNeighborBlockChange(Block block, World world, BlockPos pos, IBlockState state, Block neighborBlock)
+	public void onNeighborBlockChange(Block block, World world, BlockPos pos, IBlockState state, Block neighborBlock, BlockPos neighborPos)
 	{
 		if (interractionType == InteractionType.RIGHT_CLICK || componentType == ComponentType.PROVIDER
 				|| !neighborBlock.getDefaultState().canProvidePower())
@@ -120,10 +120,10 @@ public class PowerComponent extends BooleanComponent
 		if (componentType == ComponentType.RECEIVER || !isPowered(state))
 			return;
 
-		world.notifyNeighborsOfStateChange(pos, block);
+		world.notifyNeighborsOfStateChange(pos, block, true);
 		//if block has direction, assume it provides power to the adjacent block
 		if (IComponent.getComponent(DirectionalComponent.class, block) != null)
-			world.notifyNeighborsOfStateChange(pos.offset(DirectionalComponent.getDirection(state).getOpposite()), block);
+			world.notifyNeighborsOfStateChange(pos.offset(DirectionalComponent.getDirection(state).getOpposite()), block, true);
 
 	}
 

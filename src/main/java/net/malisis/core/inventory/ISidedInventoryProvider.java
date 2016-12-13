@@ -172,8 +172,8 @@ public interface ISidedInventoryProvider extends IDirectInventoryProvider, ISide
 		if (inventory == null)
 			return new int[0];
 
-		int[] a = new int[inventory.getSizeInventory()];
-		for (int i = 0; i < inventory.getSizeInventory(); i++)
+		int[] a = new int[inventory.getSize()];
+		for (int i = 0; i < inventory.getSize(); i++)
 			a[i] = (i << 3) | side.getIndex();
 
 		return a;

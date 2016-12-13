@@ -56,9 +56,9 @@ public abstract class ReplacementHandler<T>
 	protected ItemStack getItemStack(Object obj, ItemStack original)
 	{
 		if (obj instanceof Item)
-			return new ItemStack((Item) obj, original.stackSize, original.getItemDamage());
+			return new ItemStack((Item) obj, original.getCount(), original.getItemDamage());
 		if (obj instanceof Block)
-			return new ItemStack((Block) obj, original.stackSize, original.getItemDamage());
+			return new ItemStack((Block) obj, original.getCount(), original.getItemDamage());
 
 		return null;
 	}

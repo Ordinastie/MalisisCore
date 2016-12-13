@@ -41,6 +41,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -92,7 +93,7 @@ public class SlopedCornerComponent implements IBlockComponent
 	}
 
 	@Override
-	public IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, ItemStack itemStack)
+	public IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
 		//boolean inverted = meta == 4;
 		boolean down = facing == EnumFacing.DOWN || (facing != EnumFacing.UP && hitY > 0.5F);
@@ -139,7 +140,7 @@ public class SlopedCornerComponent implements IBlockComponent
 	}
 
 	@Override
-	public void getSubBlocks(Block block, Item item, CreativeTabs tab, List<ItemStack> list)
+	public void getSubBlocks(Block block, Item item, CreativeTabs tab, NonNullList<ItemStack> list)
 	{
 		list.add(new ItemStack(item, 1, 0));
 		list.add(new ItemStack(item, 1, 4)); //inverted : use 4 as metadata so it maps to the right state with getStateFromMeta

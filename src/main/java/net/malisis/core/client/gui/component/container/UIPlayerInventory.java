@@ -46,7 +46,7 @@ public class UIPlayerInventory extends UIContainer<UIPlayerInventory>
 		super(gui, "container.inventory", INVENTORY_WIDTH, INVENTORY_HEIGHT);
 		this.inventory = inventory;
 
-		for (int i = 0; i < inventory.getSizeInventory(); i++)
+		for (int i = 0; i < inventory.getSize(); i++)
 			addSlot(gui, (PlayerInventorySlot) inventory.getSlot(i), i);
 
 		setPosition(0, 0, Anchor.BOTTOM | Anchor.CENTER);

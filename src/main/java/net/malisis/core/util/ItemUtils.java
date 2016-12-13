@@ -24,6 +24,8 @@
 
 package net.malisis.core.util;
 
+import static com.google.common.base.Preconditions.*;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,7 +57,7 @@ public class ItemUtils
 	/**
 	 * Utility class to help merge {@link ItemStack itemStacks}.<br>
 	 * After calling {@link ItemStacksMerger#merge() merge()}, {@link ItemStacksMerger#merge merge} and {@link ItemStacksMerger#into into}
-	 * will hold the results. An empty itemStack will automatically be converted to <code>null</code>.
+	 * will hold the results.
 	 */
 	public static class ItemStacksMerger
 	{
@@ -76,8 +78,8 @@ public class ItemUtils
 		 */
 		public ItemStacksMerger(ItemStack merge, ItemStack into)
 		{
-			this.merge = merge;
-			this.into = into;
+			this.merge = checkNotNull(merge);
+			this.into = checkNotNull(into);
 		}
 
 		/**
@@ -93,7 +95,7 @@ public class ItemUtils
 		/**
 		 * Merges the specified amount for the {@link ItemStacksMerger#merge merge} {@link ItemStack}.<br>
 		 * Amount will be capped to the {@link ItemStack#getMaxStackSize()} amount, or 64 if both {@link ItemStacksMerger#merge merge} and
-		 * {@link ItemStacksMerger#into into} are <code>null</code>.
+		 * {@link ItemStacksMerger#into into} are empty.
 		 *
 		 * @param amount the amount to be merged
 		 * @return true, if stacks could be merged, false otherwise
@@ -101,9 +103,9 @@ public class ItemUtils
 		public boolean merge(int amount)
 		{
 			int max = 64;
-			if (into != null)
+			if (!into.isEmpty())
 				max = into.getMaxStackSize();
-			else if (merge != null)
+			else if (!merge.isEmpty())
 				max = merge.getMaxStackSize();
 			return merge(amount, max);
 		}
@@ -121,33 +123,33 @@ public class ItemUtils
 			nbMerged = 0;
 			if (!canMerge())
 				return false;
-			if (merge == null)
+			if (merge == ItemStack.EMPTY)
 				return false;
 
 			if (amount == FULL_STACK)
-				amount = merge.stackSize;
-			amount = Math.min(amount, merge.stackSize);
+				amount = merge.getCount();
+			amount = Math.min(amount, merge.getCount());
 
-			if (into == null)
+			if (into == ItemStack.EMPTY)
 			{
 				nbMerged = Math.min(amount, intoMaxStackSize);
 				into = merge.copy();
-				into.stackSize = nbMerged;
-				merge.stackSize -= into.stackSize;
-				if (merge.stackSize <= 0)
-					merge = null;
+				into.setCount(nbMerged);
+				merge.shrink(into.getCount());
+				if (merge.isEmpty())
+					merge = ItemStack.EMPTY;
 				return true;
 			}
 
-			nbMerged = Math.min(intoMaxStackSize, into.getMaxStackSize()) - into.stackSize;
+			nbMerged = Math.min(intoMaxStackSize, into.getMaxStackSize()) - into.getCount();
 			if (nbMerged == 0)
 				return false;
 			nbMerged = Math.min(nbMerged, amount);
 
-			merge.stackSize -= nbMerged;
-			if (merge.stackSize == 0)
-				merge = null;
-			into.stackSize += nbMerged;
+			merge.shrink(nbMerged);
+			if (merge.isEmpty())
+				merge = ItemStack.EMPTY;
+			into.grow(nbMerged);
 
 			return true;
 		}
@@ -157,13 +159,12 @@ public class ItemUtils
 		 */
 		public boolean canMerge()
 		{
-			return merge == null || into == null || areItemStacksStackable(merge, into);
+			return merge.isEmpty() || into.isEmpty() || areItemStacksStackable(merge, into);
 		}
 	}
 
 	/**
-	 * Utility class to help split an {@link ItemStack}.<br>
-	 * An empty itemStack will automatically be converted to <code>null</code>.
+	 * Utility class to help split an {@link ItemStack}.
 	 */
 	public static class ItemStackSplitter
 	{
@@ -183,7 +184,7 @@ public class ItemUtils
 		 */
 		public ItemStackSplitter(ItemStack source)
 		{
-			this.source = source;
+			this.source = checkNotNull(source);
 		}
 
 		/**
@@ -194,21 +195,21 @@ public class ItemUtils
 		 */
 		public ItemStack split(int amount)
 		{
-			if (source == null)
+			if (source.isEmpty())
 			{
-				split = null;
-				return null;
+				split = ItemStack.EMPTY;
+				return split;
 			}
 
 			if (amount == FULL_STACK)
-				amount = source.stackSize;
+				amount = source.getCount();
 			else if (amount == HALF_STACK)
-				amount = (int) Math.ceil((float) source.stackSize / 2);
-			this.amount = Math.min(amount, source.stackSize);
+				amount = (int) Math.ceil((float) source.getCount() / 2);
+			this.amount = Math.min(amount, source.getCount());
 
 			split = source.splitStack(this.amount);
-			if (source.stackSize <= 0)
-				source = null;
+			if (source.isEmpty())
+				source = ItemStack.EMPTY;
 
 			return split;
 		}
@@ -223,7 +224,7 @@ public class ItemUtils
 	 */
 	public static boolean areItemStacksStackable(ItemStack stack1, ItemStack stack2)
 	{
-		return !(stack1 == null || stack2 == null) && stack1.isStackable() && stack1.getItem() == stack2.getItem()
+		return !(stack1.isEmpty() || stack2.isEmpty()) && stack1.isStackable() && stack1.getItem() == stack2.getItem()
 				&& (!stack2.getHasSubtypes() || stack2.getMetadata() == stack1.getMetadata())
 				&& ItemStack.areItemStackTagsEqual(stack2, stack1);
 
@@ -238,7 +239,7 @@ public class ItemUtils
 	@SuppressWarnings("deprecation")
 	public static IBlockState getStateFromItemStack(ItemStack itemStack)
 	{
-		if (itemStack == null)
+		if (itemStack.isEmpty())
 			return null;
 
 		Block block = Block.getBlockFromItem(itemStack.getItem());
@@ -274,12 +275,12 @@ public class ItemUtils
 			return null;
 		Item item = Item.getItemFromBlock(state.getBlock());
 		if (item == null)
-			return null;
+			return ItemStack.EMPTY;
 		return new ItemStack(item, 1, state.getBlock().damageDropped(state));
 	}
 
 	/**
-	 * Construct an {@link ItemStack} from a string in the format modid:itemName@damagexstackSize.
+	 * Constructs an {@link ItemStack} from a string in the format modid:itemName@damagexstackSize.
 	 *
 	 * @param str the str
 	 * @return the item
@@ -288,11 +289,11 @@ public class ItemUtils
 	{
 		Matcher matcher = pattern.matcher(str);
 		if (!matcher.find())
-			return null;
+			return ItemStack.EMPTY;
 
 		String itemString = matcher.group("item");
 		if (itemString == null)
-			return null;
+			return ItemStack.EMPTY;
 
 		String modid = matcher.group("modid");
 		if (modid == null)
@@ -308,7 +309,7 @@ public class ItemUtils
 
 		Item item = Item.getByNameOrId(modid + ":" + itemString);
 		if (item == null)
-			return null;
+			return ItemStack.EMPTY;
 
 		return new ItemStack(item, size, damage);
 	}

@@ -28,6 +28,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Ordering;
+
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.configuration.ConfigurationGui;
 import net.malisis.core.configuration.Settings;
@@ -60,12 +66,6 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Ordering;
 
 /**
  * The Class MalisisCore.
@@ -354,7 +354,7 @@ public class MalisisCore implements IMalisisMod
 			MinecraftServer server = FMLCommonHandler.instance().getSidedDelegate().getServer();
 
 			if (server != null)
-				server.getPlayerList().sendChatMsg(msg);
+				server.getPlayerList().sendMessage(msg);
 		}
 		else
 		{

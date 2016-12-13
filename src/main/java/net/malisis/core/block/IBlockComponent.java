@@ -24,7 +24,6 @@
 
 package net.malisis.core.block;
 
-import java.util.List;
 import java.util.Random;
 
 import net.malisis.core.item.MalisisItemBlock;
@@ -39,6 +38,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -130,7 +130,7 @@ public interface IBlockComponent extends IComponent
 	 * @param placer the placer
 	 * @return the i block state
 	 */
-	public default IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, ItemStack itemStack)
+	public default IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
 		return state;
 	}
@@ -176,8 +176,9 @@ public interface IBlockComponent extends IComponent
 	 * @param pos the pos
 	 * @param state the state
 	 * @param neighborBlock the neighbor block
+	 * @param neighborPos TODO
 	 */
-	public default void onNeighborBlockChange(Block block, World world, BlockPos pos, IBlockState state, Block neighborBlock)
+	public default void onNeighborBlockChange(Block block, World world, BlockPos pos, IBlockState state, Block neighborBlock, BlockPos neighborPos)
 	{}
 
 	/**
@@ -268,7 +269,7 @@ public interface IBlockComponent extends IComponent
 	 * @param list the list
 	 */
 	@SideOnly(Side.CLIENT)
-	public default void getSubBlocks(Block block, Item item, CreativeTabs tab, List<ItemStack> list)
+	public default void getSubBlocks(Block block, Item item, CreativeTabs tab, NonNullList<ItemStack> list)
 	{}
 
 	//#end Sub-blocks

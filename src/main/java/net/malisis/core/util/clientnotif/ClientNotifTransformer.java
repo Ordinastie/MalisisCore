@@ -25,13 +25,14 @@
 package net.malisis.core.util.clientnotif;
 
 import static org.objectweb.asm.Opcodes.*;
-import net.malisis.core.asm.AsmHook;
-import net.malisis.core.asm.MalisisClassTransformer;
-import net.malisis.core.asm.mappings.McpMethodMapping;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
+
+import net.malisis.core.asm.AsmHook;
+import net.malisis.core.asm.MalisisClassTransformer;
+import net.malisis.core.asm.mappings.McpMethodMapping;
 
 /**
  * @author Ordinastie
@@ -49,23 +50,24 @@ public class ClientNotifTransformer extends MalisisClassTransformer
 	@SuppressWarnings("deprecation")
 	private AsmHook clientNotifHook()
 	{
-		McpMethodMapping notifyBlockOfStateChange = new McpMethodMapping("notifyBlockOfStateChange", "func_180496_d",
-				"net/minecraft/world/World", "(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;)V");
+		McpMethodMapping neighborChanged = new McpMethodMapping("neighborChanged", "func_190524_a", "net/minecraft/world/World",
+				"(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;)V");
 
-		AsmHook ah = new AsmHook(notifyBlockOfStateChange);
+		AsmHook ah = new AsmHook(neighborChanged);
 
 		//ALOAD 3
 		//ALOAD 1
 		//ALOAD 2
-		//INVOKESTATIC net/malisis/core/util/clientnotif/ClientNotificationManager.notify (Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;)V
+		//INVOKESTATIC net/malisis/core/util/clientnotif/ClientNotificationManager.notify (Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;)V
 
 		InsnList insert = new InsnList();
 
 		insert.add(new VarInsnNode(ALOAD, 0));
 		insert.add(new VarInsnNode(ALOAD, 1));
 		insert.add(new VarInsnNode(ALOAD, 2));
+		insert.add(new VarInsnNode(ALOAD, 3));
 		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/util/clientnotif/ClientNotificationManager", "notify",
-				"(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;)V"));
+				"(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;)V"));
 
 		return ah.insert(insert);
 

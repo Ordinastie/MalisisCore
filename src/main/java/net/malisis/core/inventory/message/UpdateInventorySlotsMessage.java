@@ -24,12 +24,11 @@
 
 package net.malisis.core.inventory.message;
 
-import io.netty.buffer.ByteBuf;
-
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
+import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisInventoryContainer;
@@ -119,7 +118,7 @@ public class UpdateInventorySlotsMessage implements IMalisisMessageHandler<Updat
 	 * @param player the player
 	 * @param windowId the window id
 	 */
-	public static void updateSlots(int inventoryId, ArrayList<MalisisSlot> slots, EntityPlayerMP player, int windowId)
+	public static void updateSlots(int inventoryId, List<MalisisSlot> slots, EntityPlayerMP player, int windowId)
 	{
 		Packet packet = new Packet(inventoryId, windowId);
 		for (MalisisSlot slot : slots)
@@ -144,7 +143,7 @@ public class UpdateInventorySlotsMessage implements IMalisisMessageHandler<Updat
 
 		public void addSlot(MalisisSlot slot)
 		{
-			slots.put(slot.slotNumber, slot.getItemStack());
+			slots.put(slot.index, slot.getItemStack());
 		}
 
 		public void setSlots(HashMap<Integer, ItemStack> slots)

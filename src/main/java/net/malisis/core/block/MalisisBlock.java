@@ -31,6 +31,10 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.collect.Lists;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.block.component.LadderComponent;
@@ -54,6 +58,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -62,10 +67,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.Lists;
 
 /**
  * @author Ordinastie
@@ -234,11 +235,11 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	}
 
 	@Override
-	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, ItemStack itemStack)
+	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
-		IBlockState state = super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, itemStack);
+		IBlockState state = super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer);
 		for (IBlockComponent component : getBlockComponents())
-			state = component.getStateForPlacement(this, world, pos, state, facing, hitX, hitY, hitZ, meta, placer, itemStack);
+			state = component.getStateForPlacement(this, world, pos, state, facing, hitX, hitY, hitZ, meta, placer);
 
 		return state;
 	}
@@ -250,7 +251,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	}
 
 	@Override
-	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ)
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
 		boolean b = false;
 		for (IBlockComponent component : getBlockComponents())
@@ -260,9 +261,9 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	}
 
 	@Override
-	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block neighborBlock)
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block neighborBlock, BlockPos neighborPos)
 	{
-		getBlockComponents().forEach(c -> c.onNeighborBlockChange(this, world, pos, state, neighborBlock));
+		getBlockComponents().forEach(c -> c.onNeighborBlockChange(this, world, pos, state, neighborBlock, neighborPos));
 	}
 
 	@Override
@@ -364,12 +365,13 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	}
 
 	@Override
-	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list)
+	public void getSubBlocks(Item item, CreativeTabs tab, NonNullList<ItemStack> list)
 	{
-		List<ItemStack> l = Lists.newArrayList();
+		NonNullList<ItemStack> l = NonNullList.<ItemStack> create();
 		for (IBlockComponent component : getBlockComponents())
 			component.getSubBlocks(this, item, tab, l);
 
+		//only add default itemStack if components don't add itemStacks
 		if (l.isEmpty())
 			super.getSubBlocks(item, tab, list);
 		else

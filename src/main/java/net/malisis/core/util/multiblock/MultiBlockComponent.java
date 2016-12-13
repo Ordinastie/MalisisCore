@@ -26,6 +26,8 @@ package net.malisis.core.util.multiblock;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.component.DirectionalComponent;
@@ -38,8 +40,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-
-import com.google.common.collect.Lists;
 
 /**
  * @author Ordinastie
@@ -91,7 +91,7 @@ public class MultiBlockComponent implements IBlockComponent
 	}
 
 	@Override
-	public IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, ItemStack itemStack)
+	public IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
 		return state.withProperty(getProperty(), true);
 	}
@@ -108,7 +108,7 @@ public class MultiBlockComponent implements IBlockComponent
 		else
 		{
 			world.setBlockToAir(pos);
-			stack.stackSize++;
+			stack.grow(1);
 		}
 	}
 

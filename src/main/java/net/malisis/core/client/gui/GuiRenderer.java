@@ -24,6 +24,9 @@
 
 package net.malisis.core.client.gui;
 
+import org.apache.logging.log4j.core.helpers.Strings;
+import org.lwjgl.opengl.GL11;
+
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
@@ -53,9 +56,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
-
-import org.apache.logging.log4j.core.helpers.Strings;
-import org.lwjgl.opengl.GL11;
 
 /**
  * Renderer to use for {@link MalisisGui}.
@@ -551,8 +551,8 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 			fontRenderer = Minecraft.getMinecraft().fontRendererObj;
 
 		String formatStr = format != null ? format.getFormattingCode() : null;
-		if (label == null && (itemStack.stackSize > 1 || !Strings.isEmpty(formatStr)))
-			label = Integer.toString(itemStack.stackSize);
+		if (label == null && (itemStack.getCount() > 1 || !Strings.isEmpty(formatStr)))
+			label = Integer.toString(itemStack.getCount());
 		if (label == null)
 			label = "";
 		if (!Strings.isEmpty(formatStr))
@@ -592,7 +592,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 				mouseX - 8,
 				mouseY - 8,
 				null,
-				itemStack.stackSize == 0 ? new Style().setColor(TextFormatting.YELLOW) : null,
+				itemStack.getCount() == 0 ? new Style().setColor(TextFormatting.YELLOW) : null,
 				false);
 		draw();
 		itemRenderer.zLevel = 0;

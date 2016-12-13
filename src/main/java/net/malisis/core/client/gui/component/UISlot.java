@@ -26,6 +26,10 @@ package net.malisis.core.client.gui.component;
 
 import java.util.List;
 
+import org.lwjgl.input.Keyboard;
+
+import com.google.common.eventbus.Subscribe;
+
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
@@ -44,10 +48,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
-
-import org.lwjgl.input.Keyboard;
-
-import com.google.common.eventbus.Subscribe;
 
 public class UISlot extends UIComponent<UISlot>
 {
@@ -151,8 +151,8 @@ public class UISlot extends UIComponent<UISlot>
 			itemStack = draggedItemStack;
 		else if (draggedItemStack != null)
 		{
-			itemStack.stackSize += draggedItemStack.stackSize;
-			if (itemStack.stackSize == itemStack.getMaxStackSize())
+			itemStack.grow(draggedItemStack.getCount());
+			if (itemStack.getCount() == itemStack.getMaxStackSize())
 				format = TextFormatting.YELLOW;
 		}
 

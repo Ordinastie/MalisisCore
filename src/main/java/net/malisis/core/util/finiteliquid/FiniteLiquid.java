@@ -100,7 +100,7 @@ public abstract class FiniteLiquid extends MalisisBlock
 	}
 
 	@Override
-	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block neighborBlock)
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block neighborBlock, BlockPos neighborPos)
 	{
 		if (!world.isRemote)
 			world.scheduleBlockUpdate(pos, this, delay, 0);
@@ -190,7 +190,7 @@ public abstract class FiniteLiquid extends MalisisBlock
 	}
 
 	@Override
-	public boolean canRenderInLayer(BlockRenderLayer layer)
+	public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
 	{
 		return layer == BlockRenderLayer.TRANSLUCENT;
 	}

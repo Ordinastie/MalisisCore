@@ -42,9 +42,9 @@ public class UIInventory extends UIContainer<UIInventory>
 		this.hasTitle = title != null || inventory.hasCustomName();
 		this.inventory = inventory;
 		this.numCols = numCols;
-		this.width = Math.min(inventory.getSizeInventory() * 18, numCols * 18);
-		this.height = (int) Math.ceil((float) inventory.getSizeInventory() / numCols) * 18 + (hasTitle ? 11 : 0);
-		for (int i = 0; i < inventory.getSizeInventory(); i++)
+		this.width = Math.min(inventory.getSize() * 18, numCols * 18);
+		this.height = (int) Math.ceil((float) inventory.getSize() / numCols) * 18 + (hasTitle ? 11 : 0);
+		for (int i = 0; i < inventory.getSize(); i++)
 			addSlot(gui, inventory.getSlot(i), i);
 	}
 

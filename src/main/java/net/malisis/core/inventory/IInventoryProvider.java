@@ -118,7 +118,7 @@ public interface IInventoryProvider
 		@Override
 		public default int getSizeInventory()
 		{
-			return getInventory() != null ? getInventory().size : 0;
+			return getInventory() != null ? getInventory().getSize() : 0;
 		}
 
 		/**
@@ -130,7 +130,7 @@ public interface IInventoryProvider
 		@Override
 		public default ItemStack getStackInSlot(int index)
 		{
-			return getInventory() != null ? getInventory().getItemStack(index) : null;
+			return getInventory() != null ? getInventory().getItemStack(index) : ItemStack.EMPTY;
 		}
 
 		/**
@@ -143,7 +143,8 @@ public interface IInventoryProvider
 		@Override
 		public default ItemStack decrStackSize(int index, int count)
 		{
-			return getInventory() != null ? (new ItemUtils.ItemStackSplitter(getInventory().getItemStack(index))).split(count) : null;
+			return getInventory() != null ? (new ItemUtils.ItemStackSplitter(getInventory().getItemStack(index))).split(
+					count) : ItemStack.EMPTY;
 		}
 
 		/**
@@ -156,7 +157,10 @@ public interface IInventoryProvider
 		@Override
 		public default ItemStack removeStackFromSlot(int index)
 		{
-			return getStackInSlot(index);
+			if (getInventory() == null || getInventory().getSlot(index) == null)
+				return ItemStack.EMPTY;
+
+			return getInventory().getSlot(index).extract();
 		}
 
 		/**
@@ -299,7 +303,7 @@ public interface IInventoryProvider
 		}
 
 		/**
-		 * Break all the inventories of this {@link IInventoryProvider}.
+		 * Breaks all the inventories of this {@link IInventoryProvider}.
 		 *
 		 * @param data the data
 		 * @param world the world

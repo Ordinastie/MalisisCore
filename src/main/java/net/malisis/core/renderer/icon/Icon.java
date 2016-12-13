@@ -28,6 +28,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.collect.Maps;
+
 import net.malisis.core.renderer.icon.VanillaIcon.MissingIcon;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -35,10 +39,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.TextureStitchEvent;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.Maps;
 
 /**
  * Extension of {@link TextureAtlasSprite} to allow common operations like clipping and offset.<br>
@@ -436,10 +436,9 @@ public class Icon extends TextureAtlasSprite
 	 *
 	 * @param map the map
 	 */
-	@SuppressWarnings("deprecation")
 	public static void registerIcons(TextureMap map)
 	{
-		registeredIcons.forEach(map::setTextureEntry);
+		registeredIcons.values().forEach(map::setTextureEntry);
 	}
 
 	/**

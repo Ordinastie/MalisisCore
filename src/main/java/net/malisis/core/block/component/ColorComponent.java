@@ -24,8 +24,6 @@
 
 package net.malisis.core.block.component;
 
-import java.util.List;
-
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IComponent;
@@ -44,6 +42,7 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.fml.relauncher.Side;
@@ -113,7 +112,7 @@ public class ColorComponent implements IBlockComponent, IRegisterComponent
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Block block, Item item, CreativeTabs tab, List<ItemStack> list)
+	public void getSubBlocks(Block block, Item item, CreativeTabs tab, NonNullList<ItemStack> list)
 	{
 		for (EnumDyeColor color : EnumDyeColor.values())
 			list.add(new ItemStack(item, 1, color.getMetadata()));

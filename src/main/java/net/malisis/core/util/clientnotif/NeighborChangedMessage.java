@@ -24,10 +24,13 @@
 
 package net.malisis.core.util.clientnotif;
 
-import io.netty.buffer.ByteBuf;
-
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Triple;
+
+import com.google.common.collect.Lists;
+
+import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
@@ -39,10 +42,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
-
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.collect.Lists;
 
 /**
  * @author Ordinastie
@@ -60,11 +59,11 @@ public class NeighborChangedMessage implements IMalisisMessageHandler<Packet, IM
 	public void process(Packet message, MessageContext ctx)
 	{
 		World world = IMalisisMessageHandler.getWorld(ctx);
-		for (Pair<BlockPos, Block> p : message.list)
-			world.getBlockState(p.getLeft()).neighborChanged(world, p.getLeft(), p.getRight());
+		for (Triple<BlockPos, Block, BlockPos> t : message.list)
+			world.getBlockState(t.getLeft()).neighborChanged(world, t.getLeft(), t.getMiddle(), t.getRight());
 	}
 
-	public static void send(Chunk chunk, List<Pair<BlockPos, Block>> list)
+	public static void send(Chunk chunk, List<Triple<BlockPos, Block, BlockPos>> list)
 	{
 		Packet packet = new Packet(list);
 		MalisisCore.network.sendToPlayersWatchingChunk(packet, chunk);
@@ -72,12 +71,12 @@ public class NeighborChangedMessage implements IMalisisMessageHandler<Packet, IM
 
 	public static class Packet implements IMessage
 	{
-		private List<Pair<BlockPos, Block>> list = Lists.newArrayList();
+		private List<Triple<BlockPos, Block, BlockPos>> list = Lists.newArrayList();
 
 		public Packet()
 		{}
 
-		public Packet(List<Pair<BlockPos, Block>> list)
+		public Packet(List<Triple<BlockPos, Block, BlockPos>> list)
 		{
 			this.list = list;
 		}
@@ -87,17 +86,19 @@ public class NeighborChangedMessage implements IMalisisMessageHandler<Packet, IM
 		{
 			int size = buf.readInt();
 			for (int i = 0; i < size; i++)
-				list.add(Pair.of(BlockPos.fromLong(buf.readLong()), Block.getBlockById(buf.readInt())));
+				list.add(
+						Triple.of(BlockPos.fromLong(buf.readLong()), Block.getBlockById(buf.readInt()), BlockPos.fromLong(buf.readLong())));
 		}
 
 		@Override
 		public void toBytes(ByteBuf buf)
 		{
 			buf.writeInt(list.size());
-			for (Pair<BlockPos, Block> p : list)
+			for (Triple<BlockPos, Block, BlockPos> t : list)
 			{
-				buf.writeLong(p.getLeft().toLong());
-				buf.writeInt(Block.getIdFromBlock(p.getRight()));
+				buf.writeLong(t.getLeft().toLong());
+				buf.writeInt(Block.getIdFromBlock(t.getMiddle()));
+				buf.writeLong(t.getRight().toLong());
 			}
 		}
 	}

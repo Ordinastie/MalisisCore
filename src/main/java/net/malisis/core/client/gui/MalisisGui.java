@@ -793,7 +793,7 @@ public abstract class MalisisGui extends GuiScreen
 			return;
 
 		int inventoryId = slot != null ? slot.getInventoryId() : 0;
-		int slotNumber = slot != null ? slot.slotNumber : 0;
+		int slotNumber = slot != null ? slot.index : 0;
 
 		currentGui().inventoryContainer.handleAction(action, inventoryId, slotNumber, code);
 		InventoryActionMessage.sendAction(action, inventoryId, slotNumber, code);

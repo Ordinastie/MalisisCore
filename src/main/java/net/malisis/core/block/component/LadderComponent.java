@@ -71,7 +71,7 @@ public class LadderComponent implements IBlockComponent
 	}
 
 	@Override
-	public void onNeighborBlockChange(Block block, World world, BlockPos pos, IBlockState state, Block neighborBlock)
+	public void onNeighborBlockChange(Block block, World world, BlockPos pos, IBlockState state, Block neighborBlock, BlockPos neighborPos)
 	{
 		EnumFacing dir = DirectionalComponent.getDirection(world, pos);
 

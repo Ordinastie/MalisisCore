@@ -26,6 +26,8 @@ package net.malisis.core.item;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.IMergedBlock;
@@ -43,8 +45,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import com.google.common.collect.Lists;
 
 /**
  * @author Ordinastie
@@ -106,9 +106,10 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 	}
 
 	@Override
-	public EnumActionResult onItemUse(ItemStack itemStack, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
+	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
-		if (itemStack.stackSize == 0)
+		ItemStack itemStack = player.getHeldItem(hand);
+		if (itemStack.isEmpty())
 			return EnumActionResult.FAIL;
 		if (!player.canPlayerEdit(pos.offset(side), side, itemStack))
 			return EnumActionResult.FAIL;
@@ -125,7 +126,7 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 		}
 
 		if (placedState == null)
-			return super.onItemUse(itemStack, player, world, pos, hand, side, hitX, hitY, hitZ);
+			return super.onItemUse(player, world, pos, hand, side, hitX, hitY, hitZ);
 
 		Block block = placedState.getBlock();
 		if (world.checkNoEntityCollision(placedState.getCollisionBoundingBox(world, p)) && world.setBlockState(p, placedState, 3))
@@ -137,7 +138,7 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 					SoundCategory.BLOCKS,
 					(soundType.getVolume() + 1.0F) / 2.0F,
 					soundType.getPitch() * 0.8F);
-			--itemStack.stackSize;
+			itemStack.shrink(1);
 		}
 
 		return EnumActionResult.SUCCESS;

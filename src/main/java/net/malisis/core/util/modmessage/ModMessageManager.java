@@ -29,15 +29,16 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Collection;
 
-import net.malisis.core.IMalisisMod;
-import net.malisis.core.MalisisCore;
-import net.minecraftforge.fml.common.Loader;
-
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+
+import net.malisis.core.IMalisisMod;
+import net.malisis.core.MalisisCore;
+import net.minecraftforge.fml.common.Loader;
 
 /**
  * @author Ordinastie
@@ -145,7 +146,7 @@ public class ModMessageManager
 	private static boolean checkParameters(Method method, Object... data)
 	{
 		Parameter[] parameters = method.getParameters();
-		if (data == null && parameters.length != 0)
+		if (ArrayUtils.isEmpty(data) && parameters.length != 0)
 			return false;
 		if (parameters.length != data.length)
 			return false;

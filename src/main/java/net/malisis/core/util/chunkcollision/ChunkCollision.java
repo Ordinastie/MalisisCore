@@ -26,6 +26,9 @@ package net.malisis.core.util.chunkcollision;
 
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.registry.AutoLoad;
@@ -58,9 +61,6 @@ import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * This class is the entry point for all the chunk collision related calculation.<br>
@@ -290,7 +290,7 @@ public class ChunkCollision
 				continue;
 
 			for (BlockPos pos : BlockPosUtils.getAllInBox(aabb))
-				world.notifyBlockOfStateChange(pos, state.getBlock());
+				world.neighborChanged(pos, state.getBlock(), state.getPos());
 		}
 	}
 

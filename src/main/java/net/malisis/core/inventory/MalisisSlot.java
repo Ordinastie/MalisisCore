@@ -24,6 +24,8 @@
 
 package net.malisis.core.inventory;
 
+import static com.google.common.base.Preconditions.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +46,7 @@ public class MalisisSlot
 	/** Inventory containing this {@link MalisisSlot}. */
 	private MalisisInventory inventory;
 	/** ItemStack held by this {@link MalisisSlot}. */
-	private ItemStack itemStack;
+	private ItemStack itemStack = ItemStack.EMPTY;
 	/** ItemStack cached to detect changes. */
 	private Map<EntityPlayer, ItemStack> cachedItemStacks = new HashMap<>();
 	/** ItemStack currently dragged into the slot. */
@@ -52,7 +54,7 @@ public class MalisisSlot
 	/** ItemStack cached to detect changes. */
 	private Map<EntityPlayer, ItemStack> cachedDraggedItemStacks = new HashMap<>();
 	/** Slot position within its {@link MalisisInventory}. */
-	public int slotNumber;
+	public int index;
 	/** {@link InventoryState} of this slot. */
 	protected InventoryState state = new InventoryState();
 
@@ -61,34 +63,29 @@ public class MalisisSlot
 	 *
 	 * @param inventory the inventory
 	 * @param itemStack the item stack
-	 * @param index the index
 	 */
-	public MalisisSlot(MalisisInventory inventory, ItemStack itemStack, int index)
+	public MalisisSlot(MalisisInventory inventory, ItemStack itemStack)
 	{
 		this.inventory = inventory;
-		this.slotNumber = index;
 		this.itemStack = itemStack;
 	}
 
 	/**
-	 * Instantiates a new {@link MalisisSlot}
+	 * Instantiates a new {@link MalisisSlot}.
 	 *
 	 * @param inventory the inventory
-	 * @param index the index
 	 */
-	public MalisisSlot(MalisisInventory inventory, int index)
+	public MalisisSlot(MalisisInventory inventory)
 	{
-		this(inventory, null, index);
+		this(inventory, ItemStack.EMPTY);
 	}
 
 	/**
-	 * Instantiates a new {@link MalisisSlot}
-	 *
-	 * @param index the index
+	 * Instantiates a new {@link MalisisSlot}.
 	 */
-	public MalisisSlot(int index)
+	public MalisisSlot()
 	{
-		this(null, null, index);
+		this(null, ItemStack.EMPTY);
 	}
 
 	/**
@@ -110,6 +107,26 @@ public class MalisisSlot
 	public void setInventory(MalisisInventory inventory)
 	{
 		this.inventory = inventory;
+	}
+
+	/**
+	 * Sets the slot index in the inventory.
+	 *
+	 * @param index the new slot index
+	 */
+	public void setSlotIndex(int index)
+	{
+		this.index = index;
+	}
+
+	/**
+	 * Gets the slot index in the inventory.
+	 *
+	 * @return the slot index
+	 */
+	public int getSlotIndex()
+	{
+		return index;
 	}
 
 	/**
@@ -139,7 +156,7 @@ public class MalisisSlot
 	 */
 	public void setItemStack(ItemStack itemStack)
 	{
-		this.itemStack = itemStack;
+		this.itemStack = checkNotNull(itemStack);
 	}
 
 	/**
@@ -159,7 +176,7 @@ public class MalisisSlot
 	 */
 	public void setDraggedItemStack(ItemStack itemStack)
 	{
-		this.draggedItemStack = itemStack;
+		this.draggedItemStack = checkNotNull(itemStack);
 	}
 
 	/**
@@ -222,7 +239,17 @@ public class MalisisSlot
 	 */
 	public boolean isFull()
 	{
-		return itemStack != null && itemStack.stackSize == Math.min(itemStack.getMaxStackSize(), getSlotStackLimit());
+		return !itemStack.isEmpty() && itemStack.getCount() == Math.min(itemStack.getMaxStackSize(), getSlotStackLimit());
+	}
+
+	/**
+	 * Checks if this {@link MalisisSlot} can accept more itemStack.
+	 *
+	 * @return true, if is full
+	 */
+	public boolean isNotFull()
+	{
+		return itemStack.isEmpty() || itemStack.getCount() < Math.min(itemStack.getMaxStackSize(), getSlotStackLimit());
 	}
 
 	/**
@@ -232,7 +259,17 @@ public class MalisisSlot
 	 */
 	public boolean isEmpty()
 	{
-		return itemStack == null || itemStack.stackSize == 0;
+		return itemStack.isEmpty();
+	}
+
+	/**
+	 * Checks if this {@link MalisisSlot} is not empty.
+	 *
+	 * @return true, if is empty
+	 */
+	public boolean isNotEmpty()
+	{
+		return !itemStack.isEmpty();
 	}
 
 	/**
@@ -262,14 +299,12 @@ public class MalisisSlot
 	 */
 	public int setItemStackSize(int stackSize)
 	{
-		if (itemStack == null)
+		if (itemStack.isEmpty())
 			return 0;
-		if (stackSize <= 0)
-			stackSize = 0;
 
-		int start = itemStack.stackSize;
-		itemStack.stackSize = Math.min(stackSize, Math.min(itemStack.getMaxStackSize(), getSlotStackLimit()));
-		return itemStack.stackSize - start;
+		int start = itemStack.getCount();
+		itemStack.setCount(Math.min(stackSize, Math.min(itemStack.getMaxStackSize(), getSlotStackLimit())));
+		return itemStack.getCount() - start;
 	}
 
 	/**
@@ -280,10 +315,25 @@ public class MalisisSlot
 	 */
 	public int addItemStackSize(int stackSize)
 	{
-		if (itemStack == null)
+		if (itemStack.isEmpty())
 			return 0;
 
-		return setItemStackSize(itemStack.stackSize + stackSize);
+		return setItemStackSize(itemStack.getCount() + stackSize);
+	}
+
+	/**
+	 * Extracts the full stack from this {@link MalisisSlot}.
+	 *
+	 * @return the item stack
+	 */
+	public ItemStack extract()
+	{
+		if (isEmpty())
+			return ItemStack.EMPTY;
+		ItemStack is = getItemStack();
+		setItemStack(ItemStack.EMPTY);
+		onSlotChanged();
+		return is;
 	}
 
 	/**
@@ -310,7 +360,7 @@ public class MalisisSlot
 	 */
 	public ItemStack insert(ItemStack insert)
 	{
-		return insert(insert, insert != null ? insert.stackSize : 0, false);
+		return insert(insert, insert.getCount(), false);
 	}
 
 	/**
@@ -336,8 +386,8 @@ public class MalisisSlot
 	 */
 	public ItemStack insert(ItemStack insert, int amount, boolean force)
 	{
-		if (insert == null)
-			return null;
+		if (insert.isEmpty())
+			return ItemStack.EMPTY;
 
 		if (!isItemValid(insert))
 			return insert;
@@ -350,7 +400,7 @@ public class MalisisSlot
 
 			ItemStack slotStack = extract(ItemUtils.FULL_STACK);
 			ItemStack insertStack = insert.copy();
-			if (insert(insertStack, amount, false) != null)
+			if (insert(insertStack, amount, false).isEmpty())
 			{
 				setItemStack(slotStack);
 				return insert;
@@ -391,7 +441,8 @@ public class MalisisSlot
 	{
 		ItemStack cached = cachedItemStacks.get(player);
 		ItemStack cachedDragged = cachedDraggedItemStacks.get(player);
-		return !ItemStack.areItemStacksEqual(itemStack, cached) || !ItemStack.areItemStacksEqual(draggedItemStack, cachedDragged);
+		return !ItemStack.areItemStacksEqual(itemStack, cached != null ? cached : ItemStack.EMPTY)
+				|| !ItemStack.areItemStacksEqual(draggedItemStack, cachedDragged != null ? cachedDragged : ItemStack.EMPTY);
 	}
 
 	/**
@@ -401,8 +452,8 @@ public class MalisisSlot
 	 */
 	public void updateCache(EntityPlayer player)
 	{
-		cachedItemStacks.put(player, itemStack != null ? itemStack.copy() : null);
-		cachedDraggedItemStacks.put(player, draggedItemStack != null ? draggedItemStack.copy() : null);
+		cachedItemStacks.put(player, itemStack.copy());
+		cachedDraggedItemStacks.put(player, draggedItemStack.copy());
 	}
 
 	/**
@@ -419,6 +470,6 @@ public class MalisisSlot
 	@Override
 	public String toString()
 	{
-		return slotNumber + (inventory != null ? "/" + inventory.getSizeInventory() : "") + " > " + itemStack;
+		return index + (inventory != null ? "/" + inventory.getSize() : "") + " > " + itemStack;
 	}
 }
