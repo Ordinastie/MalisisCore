@@ -79,13 +79,9 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 		super(gui);
 
 		shape = new XYResizableGuiShape();
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5), gui.getGuiTexture()
-																											.getXYResizableIcon(0,
-																													40,
-																													200,
-																													20,
-																													5),
-				gui.getGuiTexture().getXYResizableIcon(0, 0, 200, 20, 5));
+		iconProvider = new GuiIconProvider(	gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5),
+											gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5),
+											gui.getGuiTexture().getXYResizableIcon(0, 0, 200, 20, 5));
 
 		iconPressedProvider = new GuiIconProvider((GuiIcon) gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5).flip(true, true));
 	}
