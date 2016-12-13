@@ -64,11 +64,12 @@ public class ClientNotificationManager
 		try
 		{
 			Class<? extends Block> clazz = block.getClass();
-			Method m = clazz.getMethod(MalisisCore.isObfEnv ? "func_189540_a" : "neighborChanged",
-					IBlockState.class,
-					World.class,
-					BlockPos.class,
-					Block.class);
+			Method m = clazz.getMethod(	MalisisCore.isObfEnv ? "func_189540_a" : "neighborChanged",
+										IBlockState.class,
+										World.class,
+										BlockPos.class,
+										Block.class,
+										BlockPos.class);
 			ClientNotification anno = m.getAnnotation(ClientNotification.class);
 			if (anno != null)
 				registerBlockNotif(block);
