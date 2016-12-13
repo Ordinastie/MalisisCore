@@ -70,7 +70,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * The Class MalisisCore.
  */
-@Mod(modid = MalisisCore.modid, name = MalisisCore.modname, version = MalisisCore.version, acceptedMinecraftVersions = "[1.9.4,1.10.2]")
+@Mod(modid = MalisisCore.modid, name = MalisisCore.modname, version = MalisisCore.version, acceptedMinecraftVersions = "[1.11,1.12)")
 public class MalisisCore implements IMalisisMod
 {
 	/** Mod ID. */
@@ -183,8 +183,8 @@ public class MalisisCore implements IMalisisMod
 	 */
 	private void autoLoadClasses(ASMDataTable asmDataTable)
 	{
-		Set<ASMData> classes = ImmutableSortedSet.copyOf(Ordering.natural().onResultOf(ASMData::getClassName),
-				asmDataTable.getAll(AutoLoad.class.getName()));
+		Set<ASMData> classes = ImmutableSortedSet.copyOf(	Ordering.natural().onResultOf(ASMData::getClassName),
+															asmDataTable.getAll(AutoLoad.class.getName()));
 
 		Set<ASMData> clientClasses = asmDataTable.getAll(SideOnly.class.getName());
 
