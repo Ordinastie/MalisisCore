@@ -80,8 +80,8 @@ public class ChunkCollision
 
 	public ChunkCollision()
 	{
-		collisionRegistry.registerCallback(this::collisionBoxesCallback,
-				CallbackOption.of((IChunkCallbackPredicate) this::isChunkCollidable));
+		collisionRegistry.registerCallback(	this::collisionBoxesCallback,
+											CallbackOption.of((IChunkCallbackPredicate) this::isChunkCollidable));
 		rayTraceRegistry.registerCallback(this::rayTraceCallback, CallbackOption.of((IChunkCallbackPredicate) this::isChunkCollidable));
 		placeAtRegistry.registerCallback(this::placeAtCallback, CallbackOption.of((IChunkCallbackPredicate) this::isChunkCollidable));
 	}
@@ -199,8 +199,9 @@ public class ChunkCollision
 	 * @param side the side
 	 * @return true, if can be placed
 	 */
-	public boolean canPlaceBlockAt(ItemStack itemStack, EntityPlayer player, World world, Block block, BlockPos pos, EnumHand hand, EnumFacing side)
+	public boolean canPlaceBlockAt(EntityPlayer player, World world, Block block, BlockPos pos, EnumHand hand, EnumFacing side)
 	{
+		ItemStack itemStack = player.getHeldItem(hand);
 		AxisAlignedBB[] aabbs;
 		if (block instanceof IChunkCollidable)
 		{
