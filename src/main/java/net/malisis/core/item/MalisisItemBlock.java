@@ -28,6 +28,7 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
+import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.IMergedBlock;
@@ -58,7 +59,7 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 	public MalisisItemBlock(Block block)
 	{
 		super(block);
-		if (block instanceof IComponentProvider)
+		if (!(block instanceof IComponentProvider))
 			components = Lists.newArrayList();
 	}
 
@@ -133,11 +134,11 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 		{
 			SoundType soundType = block.getSoundType(placedState, world, pos, player);
 			world.playSound(player,
-					pos,
-					soundType.getPlaceSound(),
-					SoundCategory.BLOCKS,
-					(soundType.getVolume() + 1.0F) / 2.0F,
-					soundType.getPitch() * 0.8F);
+							pos,
+							soundType.getPlaceSound(),
+							SoundCategory.BLOCKS,
+							(soundType.getVolume() + 1.0F) / 2.0F,
+							soundType.getPitch() * 0.8F);
 			itemStack.shrink(1);
 		}
 
@@ -180,5 +181,23 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 			return null;
 
 		return mergedBlock.mergeBlock(world, pos, state, itemStack, player, side, hitX, hitY, hitZ);
+	}
+
+	/**
+	 * Checks whether the associated {@link MalisisItem} has subtypes.
+	 *
+	 * @param item the item
+	 * @return true, if successful
+	 */
+	@Override
+	public boolean getHasSubtypes()
+	{
+		if (block instanceof MalisisBlock)
+		{
+			for (IBlockComponent component : ((MalisisBlock) block).getBlockComponents())
+				if (component.getHasSubtypes(block, this))
+					return true;
+		}
+		return false;
 	}
 }

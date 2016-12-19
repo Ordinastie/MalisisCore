@@ -44,17 +44,17 @@ import net.minecraft.item.ItemStack;
 public class MalisisSlot
 {
 	/** Inventory containing this {@link MalisisSlot}. */
-	private MalisisInventory inventory;
+	protected MalisisInventory inventory;
 	/** ItemStack held by this {@link MalisisSlot}. */
-	private ItemStack itemStack = ItemStack.EMPTY;
+	protected ItemStack itemStack = ItemStack.EMPTY;
 	/** ItemStack cached to detect changes. */
-	private Map<EntityPlayer, ItemStack> cachedItemStacks = new HashMap<>();
+	protected Map<EntityPlayer, ItemStack> cachedItemStacks = new HashMap<>();
 	/** ItemStack currently dragged into the slot. */
-	private ItemStack draggedItemStack;
+	protected ItemStack draggedItemStack = ItemStack.EMPTY;
 	/** ItemStack cached to detect changes. */
-	private Map<EntityPlayer, ItemStack> cachedDraggedItemStacks = new HashMap<>();
+	protected Map<EntityPlayer, ItemStack> cachedDraggedItemStacks = new HashMap<>();
 	/** Slot position within its {@link MalisisInventory}. */
-	public int index;
+	protected int index;
 	/** {@link InventoryState} of this slot. */
 	protected InventoryState state = new InventoryState();
 
@@ -64,20 +64,9 @@ public class MalisisSlot
 	 * @param inventory the inventory
 	 * @param itemStack the item stack
 	 */
-	public MalisisSlot(MalisisInventory inventory, ItemStack itemStack)
+	public MalisisSlot(ItemStack itemStack)
 	{
-		this.inventory = inventory;
 		this.itemStack = itemStack;
-	}
-
-	/**
-	 * Instantiates a new {@link MalisisSlot}.
-	 *
-	 * @param inventory the inventory
-	 */
-	public MalisisSlot(MalisisInventory inventory)
-	{
-		this(inventory, ItemStack.EMPTY);
 	}
 
 	/**
@@ -85,7 +74,19 @@ public class MalisisSlot
 	 */
 	public MalisisSlot()
 	{
-		this(null, ItemStack.EMPTY);
+		this(ItemStack.EMPTY);
+	}
+
+	/**
+	 * Setup {@link MalisisSlot} with {@link MalisisInventory} containing it and slot index.
+	 *
+	 * @param inventory the inventory
+	 * @param slotIndex the slot index
+	 */
+	protected void setup(MalisisInventory inventory, int slotIndex)
+	{
+		this.inventory = inventory;
+		this.index = slotIndex;
 	}
 
 	/**
@@ -100,23 +101,13 @@ public class MalisisSlot
 	}
 
 	/**
-	 * Sets the inventory containing this {@link MalisisSlot}.
+	 * Gets the {@link MalisisInventory} of this {@link MalisisSlot}.
 	 *
-	 * @param inventory the new inventory
+	 * @return the inventory
 	 */
-	public void setInventory(MalisisInventory inventory)
+	public MalisisInventory getInventory()
 	{
-		this.inventory = inventory;
-	}
-
-	/**
-	 * Sets the slot index in the inventory.
-	 *
-	 * @param index the new slot index
-	 */
-	public void setSlotIndex(int index)
-	{
-		this.index = index;
+		return inventory;
 	}
 
 	/**
@@ -127,16 +118,6 @@ public class MalisisSlot
 	public int getSlotIndex()
 	{
 		return index;
-	}
-
-	/**
-	 * Gets the {@link MalisisInventory} of this {@link MalisisSlot}.
-	 *
-	 * @return the inventory
-	 */
-	public MalisisInventory getInventory()
-	{
-		return inventory;
 	}
 
 	/**
@@ -350,6 +331,25 @@ public class MalisisSlot
 		//if (hasChanged())
 		onSlotChanged();
 		return iss.split;
+	}
+
+	/**
+	 * Extracts the maximum possible from this slots {@link ItemStack} into <code>itemStack</code>.<br>
+	 *
+	 * @param itemStack the itemStack the slot is extracted into
+	 * @return true, if the destination itemStack is now full
+	 */
+	public boolean extractInto(ItemStack itemStack)
+	{
+		ItemStacksMerger ism = new ItemStacksMerger(getItemStack(), itemStack);
+		if (!ism.merge())
+			return false;
+		if (ism.nbMerged != 0)
+		{
+			setItemStack(ism.merge);
+			onSlotChanged();
+		}
+		return itemStack.getCount() >= itemStack.getMaxStackSize();
 	}
 
 	/**

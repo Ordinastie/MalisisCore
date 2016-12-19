@@ -111,6 +111,12 @@ public class ColorComponent implements IBlockComponent, IRegisterComponent
 	}
 
 	@Override
+	public boolean getHasSubtypes(Block block, Item item)
+	{
+		return true;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubBlocks(Block block, Item item, CreativeTabs tab, NonNullList<ItemStack> list)
 	{

@@ -54,7 +54,7 @@ import net.minecraftforge.fml.relauncher.Side;
 @MalisisMessage
 public class UpdateInventorySlotsMessage implements IMalisisMessageHandler<UpdateInventorySlotsMessage.Packet, IMessage>
 {
-	public static int PICKEDITEM = -1;
+	public static int PICKEDITEM = -2;
 
 	public UpdateInventorySlotsMessage()
 	{
@@ -143,7 +143,7 @@ public class UpdateInventorySlotsMessage implements IMalisisMessageHandler<Updat
 
 		public void addSlot(MalisisSlot slot)
 		{
-			slots.put(slot.index, slot.getItemStack());
+			slots.put(slot.getSlotIndex(), slot.getItemStack());
 		}
 
 		public void setSlots(HashMap<Integer, ItemStack> slots)

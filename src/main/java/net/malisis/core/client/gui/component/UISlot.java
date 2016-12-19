@@ -110,14 +110,14 @@ public class UISlot extends UIComponent<UISlot>
 	 */
 	protected void updateTooltip()
 	{
-		if (slot.getItemStack() == null)
+		if (slot.getItemStack().isEmpty())
 		{
 			tooltip = defaultTooltip;
 			return;
 		}
 
 		List<String> lines = slot.getItemStack().getTooltip(Utils.getClientPlayer(),
-				Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
+															Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 
 		lines.set(0, slot.getItemStack().getRarity().rarityColor + lines.get(0));
 		for (int i = 1; i < lines.size(); i++)
@@ -142,25 +142,25 @@ public class UISlot extends UIComponent<UISlot>
 		if (container == null)
 			return;
 
-		ItemStack itemStack = slot.getItemStack() != null ? slot.getItemStack().copy() : null;
+		ItemStack itemStack = slot.getItemStack().copy();
 		ItemStack draggedItemStack = slot.getDraggedItemStack();
 
 		// if dragged slots contains an itemStack for this slot, add the stack size
 		TextFormatting format = null;
-		if (itemStack == null)
+		if (itemStack.isEmpty())
 			itemStack = draggedItemStack;
-		else if (draggedItemStack != null)
+		else if (!draggedItemStack.isEmpty())
 		{
 			itemStack.grow(draggedItemStack.getCount());
 			if (itemStack.getCount() == itemStack.getMaxStackSize())
 				format = TextFormatting.YELLOW;
 		}
 
-		if (itemStack != null)
+		if (!itemStack.isEmpty())
 			renderer.drawItemStack(itemStack, 1, 1, new Style().setColor(format));
 
 		// draw the white shade over the slot
-		if (hovered || draggedItemStack != null)
+		if (hovered || !draggedItemStack.isEmpty())
 		{
 			renderer.disableTextures();
 			GlStateManager.disableLighting();
@@ -197,7 +197,7 @@ public class UISlot extends UIComponent<UISlot>
 		ActionType action = null;
 		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
 
-		if (container.getPickedItemStack() != null)
+		if (!container.getPickedItemStack().isEmpty())
 			return super.onButtonPress(x, y, button);
 
 		if (button.getCode() == Minecraft.getMinecraft().gameSettings.keyBindPickBlock.getKeyCode() + 100)
@@ -221,7 +221,7 @@ public class UISlot extends UIComponent<UISlot>
 		ActionType action = null;
 		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
 
-		if (container.getPickedItemStack() == null || !buttonRelased)
+		if (container.getPickedItemStack().isEmpty() || !buttonRelased)
 		{
 			buttonRelased = true;
 			return super.onButtonPress(x, y, button);
@@ -243,7 +243,7 @@ public class UISlot extends UIComponent<UISlot>
 		MalisisInventoryContainer container = MalisisGui.currentGui().getInventoryContainer();
 		ActionType action = null;
 
-		if (container.getPickedItemStack() != null && !container.isDraggingItemStack() && buttonRelased)
+		if (!container.getPickedItemStack().isEmpty() && !container.isDraggingItemStack() && buttonRelased)
 		{
 			if (button == MouseButton.LEFT)
 				action = GuiScreen.isCtrlKeyDown() ? ActionType.DRAG_START_PICKUP : ActionType.DRAG_START_LEFT_CLICK;

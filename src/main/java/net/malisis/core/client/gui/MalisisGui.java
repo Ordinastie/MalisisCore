@@ -34,6 +34,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.lang3.StringUtils;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.component.IKeyListener;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -60,12 +66,6 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
-
-import org.apache.commons.lang3.StringUtils;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
 
 /**
  * GuiScreenProxy
@@ -793,7 +793,7 @@ public abstract class MalisisGui extends GuiScreen
 			return;
 
 		int inventoryId = slot != null ? slot.getInventoryId() : 0;
-		int slotNumber = slot != null ? slot.index : 0;
+		int slotNumber = slot != null ? slot.getSlotIndex() : 0;
 
 		currentGui().inventoryContainer.handleAction(action, inventoryId, slotNumber, code);
 		InventoryActionMessage.sendAction(action, inventoryId, slotNumber, code);

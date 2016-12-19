@@ -34,22 +34,16 @@ public class PlayerInventory extends MalisisInventory
 
 	public PlayerInventory(EntityPlayer p)
 	{
-		super(null, 0);
-		for (int i = 0; i < 36; i++)
-			slots.add(new PlayerInventorySlot(this, p, i));
-	}
-
-	@Override
-	public void setSlots(MalisisSlot... slots)
-	{
-		throw new IllegalStateException();
+		super(null, () -> new PlayerInventorySlot(p), 36);
+		inventoryId = -1;
 	}
 
 	@Override
 	public void overrideSlot(MalisisSlot slot, int slotIndex)
 	{
 		if (slot instanceof PlayerInventorySlot)
-			super.overrideSlot(slot, slotIndex);
+			throw new IllegalArgumentException("Slots needs to be PlayerInventorySlot");
+		super.overrideSlot(slot, slotIndex);
 	}
 
 	@Override

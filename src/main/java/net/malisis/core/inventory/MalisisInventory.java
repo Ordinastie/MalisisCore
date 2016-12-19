@@ -31,6 +31,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -87,6 +88,21 @@ public class MalisisInventory
 	public InventoryState state = new InventoryState();
 
 	/**
+	 * Instantiates a new {@link MalisisInventory} with <code>size</size> amount of slots from supplied by the <code>supplier</code>.
+	 *
+	 * @param provider the provider
+	 * @param supplier the supplier
+	 * @param size the size
+	 */
+	public MalisisInventory(IInventoryProvider provider, Supplier<? extends MalisisSlot> supplier, int size)
+	{
+		this.inventoryProvider = provider;
+		for (int index = 0; index < size; index++)
+			slots.add(supplier.get());
+		setupSlots();
+	}
+
+	/**
 	 * Instantiates a new {@link MalisisInventory}.
 	 *
 	 * @param provider the provider
@@ -94,14 +110,11 @@ public class MalisisInventory
 	 */
 	public MalisisInventory(IInventoryProvider provider, int size)
 	{
-		this.inventoryProvider = provider;
-		for (int i = 0; i < size; i++)
-			slots.add(new MalisisSlot(this));
-		setSlotIndexes();
+		this(provider, MalisisSlot::new, size);
 	}
 
 	/**
-	 * Instantiates a new {@link MalisisInventory}.
+	 * Instantiates a new {@link MalisisInventory} with the specified {@link MalisisSlot}.
 	 *
 	 * @param provider the provider
 	 * @param slots the slots
@@ -109,7 +122,17 @@ public class MalisisInventory
 	public MalisisInventory(IInventoryProvider provider, MalisisSlot... slots)
 	{
 		this.inventoryProvider = provider;
-		setSlots(slots);
+		Arrays.stream(slots).filter(Objects::nonNull).forEach(this.slots::add);
+		setupSlots();
+	}
+
+	/**
+	 * Setup the inventory and slot index for all the {@link MalisisSlot} added to this {@link MalisisInventory}.
+	 */
+	private void setupSlots()
+	{
+		for (int i = 0; i < slots.size(); i++)
+			slots.get(i).setup(this, i);
 	}
 
 	/**
@@ -123,20 +146,6 @@ public class MalisisInventory
 	}
 
 	/**
-	 * Sets the slots for this {@link MalisisInventory}.
-	 *
-	 * @param slots the new slots
-	 */
-	public void setSlots(MalisisSlot... slots)
-	{
-		for (MalisisSlot slot : slots)
-		{
-			slot.setInventory(this);
-			this.slots.add(slot);
-		}
-	}
-
-	/**
 	 * Overrides a specific slot with a new one.
 	 *
 	 * @param slot the slot
@@ -146,15 +155,9 @@ public class MalisisInventory
 	{
 		if (slotIndex < 0 || slotIndex >= getSize())
 			return;
-		slots.get(slotIndex).setInventory(null);
-		slot.setSlotIndex(slotIndex);
-		slot.setInventory(this);
-	}
-
-	private void setSlotIndexes()
-	{
-		for (int i = 0; i < slots.size(); i++)
-			slots.get(i).setSlotIndex(i);
+		slots.get(slotIndex).setup(null, -1);
+		slots.add(slotIndex, slot);
+		slot.setup(this, slotIndex);
 	}
 
 	/**
@@ -308,8 +311,10 @@ public class MalisisInventory
 	 */
 	public NonNullList<ItemStack> getItemStackList()
 	{
-		return getSlots().stream().filter(MalisisSlot::isNotEmpty).map(MalisisSlot::getItemStack).collect(
-				Collectors.toCollection(NonNullList::create));
+		return getSlots()	.stream()
+							.filter(MalisisSlot::isNotEmpty)
+							.map(MalisisSlot::getItemStack)
+							.collect(Collectors.toCollection(NonNullList::create));
 	}
 
 	/**
@@ -378,8 +383,8 @@ public class MalisisInventory
 	public void setItemStackProvider(ItemStack itemStack)
 	{
 		if (!(inventoryProvider instanceof Item))
-			throw new IllegalArgumentException(
-					"setItemStack not allowed with " + inventoryProvider.getClass().getSimpleName() + " provider.");
+			throw new IllegalArgumentException("setItemStack not allowed with " + inventoryProvider.getClass().getSimpleName()
+					+ " provider.");
 
 		if (itemStack.getItem() != inventoryProvider)
 		{
@@ -480,6 +485,23 @@ public class MalisisInventory
 	}
 
 	/**
+	 * Pulls all the possible non-full {@link ItemStack} into <code>itemStack</code>.
+	 *
+	 * @param itemStack the item stack
+	 * @return true, if the destination itemStack is now full
+	 */
+	public boolean pullItemStacks(ItemStack itemStack, boolean ignoreFullStacks)
+	{
+		for (MalisisSlot s : getNonEmptySlots())
+		{
+			ItemStack is = s.getItemStack();
+			if ((!ignoreFullStacks || is.getCount() < is.getMaxStackSize()) && s.extractInto(itemStack))
+				return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Transfers into this {@link MalisisInventory} the contents of <code>inventory</code>.
 	 *
 	 * @param inventory the inventory
@@ -547,10 +569,10 @@ public class MalisisInventory
 			end = current;
 		}
 
-		while (itemStack != null && current >= start && current <= end)
+		while (!itemStack.isEmpty() && current >= start && current <= end)
 		{
 			slot = getSlot(current);
-			if (slot.isItemValid(itemStack) && !slot.isOutputSlot() && (emptySlot || slot.getItemStack() != null))
+			if (slot.isItemValid(itemStack) && !slot.isOutputSlot() && (emptySlot || !slot.getItemStack().isEmpty()))
 				itemStack = slot.insert(itemStack);
 			current += step;
 		}
@@ -578,7 +600,7 @@ public class MalisisInventory
 	public void emptyInventory()
 	{
 		for (MalisisSlot slot : slots)
-			slot.setItemStack(null);
+			slot.setItemStack(ItemStack.EMPTY);
 	}
 
 	/**

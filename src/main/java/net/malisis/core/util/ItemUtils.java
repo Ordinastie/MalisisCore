@@ -94,20 +94,14 @@ public class ItemUtils
 
 		/**
 		 * Merges the specified amount for the {@link ItemStacksMerger#merge merge} {@link ItemStack}.<br>
-		 * Amount will be capped to the {@link ItemStack#getMaxStackSize()} amount, or 64 if both {@link ItemStacksMerger#merge merge} and
-		 * {@link ItemStacksMerger#into into} are empty.
+		 * Amount will be capped to the {@link ItemStack#getMaxStackSize()} amount of {@link ItemStacksMerger#merge merge}.
 		 *
 		 * @param amount the amount to be merged
 		 * @return true, if stacks could be merged, false otherwise
 		 */
 		public boolean merge(int amount)
 		{
-			int max = 64;
-			if (!into.isEmpty())
-				max = into.getMaxStackSize();
-			else if (!merge.isEmpty())
-				max = merge.getMaxStackSize();
-			return merge(amount, max);
+			return merge(amount, merge.getMaxStackSize());
 		}
 
 		/**

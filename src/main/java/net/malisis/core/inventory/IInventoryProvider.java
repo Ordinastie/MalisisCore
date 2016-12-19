@@ -93,6 +93,12 @@ public interface IInventoryProvider
 
 		//#region IInventory
 		@Override
+		public default boolean isEmpty()
+		{
+			return getInventory() == null || getInventory().isEmpty();
+		}
+
+		@Override
 		public default boolean hasCustomName()
 		{
 			return getInventory() != null && getInventory().hasCustomName();
@@ -143,8 +149,7 @@ public interface IInventoryProvider
 		@Override
 		public default ItemStack decrStackSize(int index, int count)
 		{
-			return getInventory() != null ? (new ItemUtils.ItemStackSplitter(getInventory().getItemStack(index))).split(
-					count) : ItemStack.EMPTY;
+			return getInventory() != null ? (new ItemUtils.ItemStackSplitter(getInventory().getItemStack(index))).split(count) : ItemStack.EMPTY;
 		}
 
 		/**

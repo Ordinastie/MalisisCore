@@ -261,6 +261,16 @@ public interface IBlockComponent extends IComponent
 	}
 
 	/**
+	 * Checks whether the Item has subtypes.
+	 *
+	 * @return true, if successful
+	 */
+	public default boolean getHasSubtypes(Block block, Item item)
+	{
+		return false;
+	}
+
+	/**
 	 * Fills the list with the sub-blocks associated with this {@link Block}.
 	 *
 	 * @param block the block
