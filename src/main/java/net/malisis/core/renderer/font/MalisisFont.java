@@ -43,6 +43,12 @@ import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.lwjgl.opengl.GL11;
+
+import com.google.common.io.Files;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.renderer.MalisisRenderer;
@@ -57,12 +63,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.lwjgl.opengl.GL11;
-
-import com.google.common.io.Files;
 
 /**
  * @author Ordinastie
@@ -234,6 +234,11 @@ public class MalisisFont
 	{
 		if (StringUtils.isEmpty(text))
 			return;
+		if (font == null && this != minecraftFont)
+		{
+			minecraftFont.render(renderer, text, x, y, z, options);
+			return;
+		}
 
 		boolean isDrawing = renderer.isDrawing();
 
@@ -493,6 +498,9 @@ public class MalisisFont
 	 */
 	public float getStringWidth(String str, FontOptions options, int start, int end)
 	{
+		if (font == null) //couldn't load the font, use vanilla font size
+			return minecraftFont.getStringWidth(str, options, start, end);
+
 		if (start > end)
 			return 0;
 
