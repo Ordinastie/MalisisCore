@@ -24,6 +24,13 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
+import static com.google.common.base.Preconditions.*;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.base.Converter;
+import com.mojang.realmsclient.gui.ChatFormatting;
+
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
@@ -36,14 +43,14 @@ import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
-
-import org.apache.commons.lang3.StringUtils;
+import net.malisis.core.util.Silenced;
+import net.minecraft.util.math.MathHelper;
 
 /**
  * @author Ordinastie
  *
  */
-public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider>
+public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UISlider<T>>
 {
 	public static int SLIDER_WIDTH = 8;
 
@@ -56,23 +63,29 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 	/** The {@link FontOptions} to use for this {@link UISlider} when hovered. */
 	protected FontOptions hoveredFontOptions = FontOptions.builder().color(0xFFFFA0).shadow().build();
 
-	private String text;
-	private float minValue;
-	private float maxValue;
-	private float value;
-	private float offset;
+	/** Text to display over the slider. */
+	protected String text;
+	/** Current value. */
+	protected T value;
+	/** Position offset of the slider. */
+	protected float offset;
 
-	private GuiShape sliderShape;
+	/** Amount of offset scrolled by when using the scroll wheel. */
+	protected float scrollStep = 0.05F;
 
-	public UISlider(MalisisGui gui, int width, float min, float max, String text)
+	/** Converter from float (0-1 offset) to the value. */
+	protected Converter<Float, T> converter;
+
+	protected GuiShape sliderShape;
+
+	public UISlider(MalisisGui gui, int width, Converter<Float, T> converter, String text)
 	{
 		super(gui);
 		this.text = text;
+		this.converter = checkNotNull(converter);
+		this.value = converter.convert(0F);
 
 		setSize(width, 20);
-
-		minValue = min;
-		maxValue = max;
 
 		shape = new XResizableGuiShape();
 		sliderShape = new SimpleGuiShape();
@@ -81,13 +94,12 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 
 		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXResizableIcon(0, 0, 200, 20, 5));
 		sliderIcon = new GuiIconProvider(gui.getGuiTexture().getIcon(227, 46, 8, 20));
-
 	}
 
-	public UISlider(MalisisGui gui, int width, float min, float max)
-	{
-		this(gui, width, min, max, null);
-	}
+	//	public UISlider(MalisisGui gui, int width, float min, float max)
+	//	{
+	//		this(gui, width, null, null);
+	//	}
 
 	//#region Getters/Setters
 	@Override
@@ -97,7 +109,7 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 	}
 
 	@Override
-	public UISlider setFont(MalisisFont font)
+	public UISlider<T> setFont(MalisisFont font)
 	{
 		this.font = font;
 		return this;
@@ -110,9 +122,49 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 	}
 
 	@Override
-	public UISlider setFontOptions(FontOptions fro)
+	public UISlider<T> setFontOptions(FontOptions fro)
 	{
 		this.fontOptions = fro;
+		return this;
+	}
+
+	/**
+	 * Sets the value for this {@link UISlider}.
+	 *
+	 * @param value the value
+	 * @return this UI slider
+	 */
+	public UISlider<T> setValue(T value)
+	{
+		if (this.value == value)
+			return this;
+		if (!fireEvent(new ComponentEvent.ValueChange<>(this, this.value, value)))
+			return this;
+
+		this.value = value;
+		this.offset = MathHelper.clamp(converter.reverse().convert(value), 0, 1);
+		return this;
+	}
+
+	/**
+	 * Gets the value for this {@link UISlider}.
+	 *
+	 * @return the value
+	 */
+	public T getValue()
+	{
+		return value;
+	}
+
+	/**
+	 * Sets the amount of offset to scroll with the wheel.
+	 *
+	 * @param scrollStep the scroll step
+	 * @return the UI slider
+	 */
+	public UISlider<T> setScrollStep(float scrollStep)
+	{
+		this.scrollStep = scrollStep;
 		return this;
 	}
 
@@ -128,7 +180,7 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 	@Override
 	public boolean onScrollWheel(int x, int y, int delta)
 	{
-		slideBy(delta);
+		slideTo(offset + delta * scrollStep);
 		return true;
 	}
 
@@ -139,35 +191,31 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 		return true;
 	}
 
+	/**
+	 * Slides the slider to the specified pixel position.<br>
+	 *
+	 * @param x the x
+	 */
 	public void slideTo(int x)
 	{
 		int l = width - SLIDER_WIDTH;
 		int pos = relativeX(x);
-		pos = Math.max(0, Math.min(pos - SLIDER_WIDTH / 2, l));
+		pos = MathHelper.clamp(pos - SLIDER_WIDTH / 2, 0, l);
 		slideTo((float) pos / l);
 	}
 
+	/**
+	 * Slides the slider to the specified offset between 0 and 1.<br>
+	 * Sets the value relative to the offset between {@link #minValue} and {@link #maxValue}.
+	 *
+	 * @param offset the offset
+	 */
 	public void slideTo(float offset)
 	{
 		if (isDisabled())
 			return;
 
-		if (offset < 0)
-			offset = 0;
-		if (offset > 1)
-			offset = 1;
-
-		this.offset = offset;
-		float oldValue = this.value;
-		float newValue = minValue + (maxValue - minValue) * offset;
-		if (fireEvent(new ComponentEvent.ValueChange<>(this, oldValue, newValue)))
-			value = newValue;
-	}
-
-	public void slideBy(float amount)
-	{
-		amount *= 0.05F;
-		slideTo(offset + amount);
+		setValue(converter.convert(MathHelper.clamp(offset, 0, 1)));
 	}
 
 	@Override
@@ -193,7 +241,9 @@ public class UISlider extends UIComponent<UISlider> implements IGuiText<UISlider
 
 		if (!StringUtils.isEmpty(text))
 		{
-			String str = String.format(text, value);
+			String str = Silenced.get(() -> String.format(text, value));
+			if (str == null)
+				str = ChatFormatting.ITALIC + "Format error";
 			int x = (int) ((width - font.getStringWidth(str, fontOptions)) / 2);
 			int y = 6;
 
