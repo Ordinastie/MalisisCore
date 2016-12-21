@@ -102,6 +102,8 @@ public abstract class SpaceChangeEvent<T extends UIComponent<T>> extends Compone
 		public SizeChangeEvent(T component, int newWidth, int newHeight)
 		{
 			super(component);
+			this.newWidth = newWidth;
+			this.newHeight = newHeight;
 		}
 
 		/**
