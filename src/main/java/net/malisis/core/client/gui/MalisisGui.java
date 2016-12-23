@@ -124,7 +124,7 @@ public abstract class MalisisGui extends GuiScreen
 		this.itemRender = mc.getRenderItem();
 		this.fontRendererObj = mc.fontRendererObj;
 		this.renderer = new GuiRenderer();
-		this.screen = new UIContainer<>(this);
+		this.screen = new UIContainer<>(this).setName("Screen");
 		this.ar = new AnimationRenderer();
 		this.ar.autoClearAnimations();
 		this.screen.setClipContent(false);
@@ -212,9 +212,7 @@ public abstract class MalisisGui extends GuiScreen
 	 */
 	@Override
 	public final void setWorldAndResolution(Minecraft minecraft, int width, int height)
-	{
-		setResolution();
-	}
+	{}
 
 	/**
 	 * Sets the resolution for this {@link MalisisGui}.
@@ -679,6 +677,7 @@ public abstract class MalisisGui extends GuiScreen
 	 */
 	public void display(boolean cancelClose)
 	{
+		setResolution();
 		if (!doConstruct())
 			return;
 
