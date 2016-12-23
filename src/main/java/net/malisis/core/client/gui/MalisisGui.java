@@ -212,7 +212,9 @@ public abstract class MalisisGui extends GuiScreen
 	 */
 	@Override
 	public final void setWorldAndResolution(Minecraft minecraft, int width, int height)
-	{}
+	{
+		setResolution();
+	}
 
 	/**
 	 * Sets the resolution for this {@link MalisisGui}.
