@@ -27,6 +27,10 @@ package net.malisis.core.client.gui.component.container;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.eventbus.Subscribe;
+
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
@@ -41,10 +45,6 @@ import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
 import net.minecraft.client.gui.GuiScreen;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * {@link UIContainer} are the base for components holding other components.<br>
@@ -458,13 +458,13 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	@Override
 	public float getOffsetX()
 	{
-		return xOffset;
+		return (float) xOffset / (getContentWidth() - getWidth());
 	}
 
 	@Override
 	public void setOffsetX(float offsetX, int delta)
 	{
-		this.xOffset = (int) ((getContentWidth() - getWidth() + delta) * offsetX);
+		this.xOffset = Math.round((getContentWidth() - getWidth() + delta) * offsetX);
 	}
 
 	@Override
@@ -476,7 +476,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
-		this.yOffset = (int) ((getContentHeight() - getHeight() + delta) * offsetY);
+		this.yOffset = Math.round((getContentHeight() - getHeight() + delta) * offsetY);
 	}
 
 	@Override
