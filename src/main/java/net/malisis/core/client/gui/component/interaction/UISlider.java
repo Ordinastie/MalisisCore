@@ -36,8 +36,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiShape;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.element.XResizableGuiShape;
+import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
@@ -87,13 +86,11 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 
 		setSize(width, 20);
 
-		shape = new XResizableGuiShape();
-		sliderShape = new SimpleGuiShape();
-		sliderShape.setSize(8, 20);
-		sliderShape.storeState();
+		shape = new XYResizableGuiShape();
+		sliderShape = new XYResizableGuiShape(3);
 
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXResizableIcon(0, 0, 200, 20, 5));
-		sliderIcon = new GuiIconProvider(gui.getGuiTexture().getIcon(227, 46, 8, 20));
+		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(0, 0, 200, 20, 5));
+		sliderIcon = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(227, 46, 8, 20, 3));
 	}
 
 	//	public UISlider(MalisisGui gui, int width, float min, float max)
@@ -229,8 +226,9 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 	{
 		zIndex = 0;
 		int ox = (int) (offset * (width - SLIDER_WIDTH));
-
+		float factor = getHeight() / 20F;
 		sliderShape.resetState();
+		sliderShape.setSize((int) (8 * factor), getHeight());
 		sliderShape.setPosition(ox, 0);
 
 		rp.iconProvider.set(sliderIcon);
@@ -244,8 +242,8 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 			String str = Silenced.get(() -> String.format(text, value));
 			if (str == null)
 				str = ChatFormatting.ITALIC + "Format error";
-			int x = (int) ((width - font.getStringWidth(str, fontOptions)) / 2);
-			int y = 6;
+			int x = (int) ((getWidth() - font.getStringWidth(str, fontOptions)) / 2);
+			int y = (int) Math.ceil((getHeight() - font.getStringHeight(fontOptions)) / 2);
 
 			renderer.drawText(font, str, x, y, 0, isHovered() ? hoveredFontOptions : fontOptions);
 		}
