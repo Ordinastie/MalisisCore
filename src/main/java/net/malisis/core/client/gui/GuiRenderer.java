@@ -537,7 +537,8 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	 */
 	public void drawItemStack(ItemStack itemStack, int x, int y, String label, Style format, boolean relative)
 	{
-		if (itemStack == null)
+		//we want to be able to render itemStack with 0 size, so we can't check for isEmpty
+		if (itemStack == null || itemStack == ItemStack.EMPTY)
 			return;
 
 		if (relative && currentComponent != null)
@@ -582,19 +583,23 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	 */
 	public void renderPickedItemStack(ItemStack itemStack)
 	{
-		if (itemStack == null)
+		if (itemStack == null || itemStack == ItemStack.EMPTY)
 			return;
+
+		int size = itemStack.getCount();
+		String label = null;
+		if (size == 0)
+		{
+			itemStack.setCount(size != 0 ? size : 1);
+			label = TextFormatting.YELLOW + "0";
+		}
 
 		itemRenderer.zLevel = 100;
 		prepare(RenderType.GUI);
 		startDrawing();
-		drawItemStack(itemStack,
-				mouseX - 8,
-				mouseY - 8,
-				null,
-				itemStack.getCount() == 0 ? new Style().setColor(TextFormatting.YELLOW) : null,
-				false);
+		drawItemStack(itemStack, mouseX - 8, mouseY - 8, label, null, false);
 		draw();
+		itemStack.setCount(size);
 		itemRenderer.zLevel = 0;
 		clean();
 	}

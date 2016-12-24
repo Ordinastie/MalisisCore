@@ -27,14 +27,12 @@ package net.malisis.core.client.gui;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
-import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -53,6 +51,7 @@ import net.malisis.core.renderer.RenderType;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.AnimationRenderer;
 import net.malisis.core.renderer.font.FontOptions;
+import net.malisis.core.util.ItemUtils;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -116,7 +115,7 @@ public abstract class MalisisGui extends GuiScreen
 	protected Set<IKeyListener> keyListeners = new HashSet<>();
 	/** Debug **/
 	private boolean debug = false;
-	private HashMap<String, Callable<String>> debugMap = new HashMap<>();
+	private HashMap<String, Supplier<String>> debugMap = new HashMap<>();
 
 	protected MalisisGui()
 	{
@@ -144,6 +143,7 @@ public abstract class MalisisGui extends GuiScreen
 			if (!constructed)
 			{
 				debugMap.clear();
+				addDefaultDebug();
 				construct();
 				constructed = true;
 			}
@@ -239,45 +239,6 @@ public abstract class MalisisGui extends GuiScreen
 		height = renderer.isIgnoreScale() ? displayHeight : resolution.getScaledHeight();
 
 		screen.setSize(width, height);
-	}
-
-	@SuppressWarnings("unchecked")
-	public void addDebug(String name, final Object... objects)
-	{
-		Callable<String> call;
-		if (objects.length == 1 && objects[0] instanceof Callable)
-		{
-			call = (Callable<String>) objects[0];
-		}
-		else if (objects.length > 1 && objects[0] instanceof String)
-		{
-			call = new Callable<String>()
-			{
-				@Override
-				public String call()
-				{
-					return String.format((String) objects[0], Arrays.copyOfRange(objects, 1, objects.length));
-				}
-			};
-		}
-		else
-		{
-			call = new Callable<String>()
-			{
-				@Override
-				public String call()
-				{
-					return StringUtils.join(objects, ',');
-				}
-			};
-		}
-
-		debugMap.put(name, call);
-	}
-
-	public void removeDebug(String name)
-	{
-		debugMap.remove(name);
 	}
 
 	/**
@@ -438,7 +399,7 @@ public abstract class MalisisGui extends GuiScreen
 			else
 			{
 				setFocusedComponent(null, true);
-				if (inventoryContainer != null && inventoryContainer.getPickedItemStack() != null)
+				if (inventoryContainer != null && !inventoryContainer.getPickedItemStack().isEmpty())
 				{
 					ActionType action = button == 1 ? ActionType.DROP_ONE : ActionType.DROP_STACK;
 					MalisisGui.sendAction(action, null, button);
@@ -588,32 +549,7 @@ public abstract class MalisisGui extends GuiScreen
 
 		renderer.drawScreen(screen, mouseX, mouseY, partialTicks);
 
-		if (debug)
-		{
-			renderer.set(mouseX, mouseY, partialTicks);
-			renderer.prepare(RenderType.GUI);
-
-			int dy = 0, oy = 5;
-			FontOptions fro = FontOptions.builder().color(0xFFFFFF).shadow().build();
-			renderer.drawText(null, "Mouse : " + mouseX + "," + mouseY, 5, dy++ * 10 + oy, 0, fro, false);
-			renderer.drawText(null, "Focus : " + focusedComponent, 5, dy++ * 10 + oy, 0, fro, false);
-			renderer.drawText(null, "Hover : " + hoveredComponent, 5, dy++ * 10 + oy, 0, fro, false);
-
-			for (Entry<String, Callable<String>> entry : debugMap.entrySet())
-			{
-				Callable<String> call = entry.getValue();
-				try
-				{
-					renderer.drawText(null, entry.getKey() + " : " + call.call(), 5, dy++ * 10 + oy, 0, fro, false);
-				}
-				catch (Exception e)
-				{
-					renderer.drawText(null, entry.getKey() + " : " + e.getMessage(), 5, dy++ * 10 + oy, 0, fro, false);
-				}
-			}
-
-			renderer.clean();
-		}
+		renderDebug(mouseX, mouseY, partialTicks);
 
 		if (inventoryContainer != null)
 		{
@@ -630,6 +566,51 @@ public abstract class MalisisGui extends GuiScreen
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 
 	}
+
+	//#region Debug
+	private void addDefaultDebug()
+	{
+		addDebug("Focus", () -> String.valueOf(focusedComponent));
+		addDebug("Hover", () -> String.valueOf(hoveredComponent));
+		if (inventoryContainer != null)
+			addDebug("Picked", () -> ItemUtils.toString(inventoryContainer.getPickedItemStack()));
+	}
+
+	public void addDebug(String name, String value)
+	{
+		addDebug(name, () -> value);
+	}
+
+	public void addDebug(String name, Supplier<String> supplier)
+	{
+		debugMap.put(name, supplier);
+	}
+
+	public void removeDebug(String name)
+	{
+		debugMap.remove(name);
+	}
+
+	private void renderDebug(int mouseX, int mouseY, float partialTicks)
+	{
+		if (debug)
+		{
+			renderer.set(mouseX, mouseY, partialTicks);
+			renderer.prepare(RenderType.GUI);
+
+			int dy = 0, oy = 5;
+			FontOptions fro = FontOptions.builder().color(0xFFFFFF).shadow().build();
+			//hard code mouse
+			renderer.drawText(null, "Mouse : " + mouseX + "," + mouseY, 5, dy++ * 10 + oy, 0, fro, false);
+			for (Entry<String, Supplier<String>> entry : debugMap.entrySet())
+				renderer.drawText(null, entry.getKey() + " : " + entry.getValue().get(), 5, dy++ * 10 + oy, 0, fro, false);
+
+			renderer.clean();
+		}
+
+	}
+
+	//#end Debug
 
 	/**
 	 * Called every frame.
