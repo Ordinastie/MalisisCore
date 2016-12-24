@@ -26,9 +26,6 @@ package net.malisis.core.inventory;
 
 import static com.google.common.base.Preconditions.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.malisis.core.util.ItemUtils;
 import net.malisis.core.util.ItemUtils.ItemStackSplitter;
 import net.malisis.core.util.ItemUtils.ItemStacksMerger;
@@ -47,12 +44,9 @@ public class MalisisSlot
 	protected MalisisInventory inventory;
 	/** ItemStack held by this {@link MalisisSlot}. */
 	protected ItemStack itemStack = ItemStack.EMPTY;
-	/** ItemStack cached to detect changes. */
-	protected Map<EntityPlayer, ItemStack> cachedItemStacks = new HashMap<>();
 	/** ItemStack currently dragged into the slot. */
 	protected ItemStack draggedItemStack = ItemStack.EMPTY;
-	/** ItemStack cached to detect changes. */
-	protected Map<EntityPlayer, ItemStack> cachedDraggedItemStacks = new HashMap<>();
+
 	/** Slot position within its {@link MalisisInventory}. */
 	protected int index;
 	/** {@link InventoryState} of this slot. */
@@ -402,8 +396,8 @@ public class MalisisSlot
 			ItemStack insertStack = insert.copy();
 			if (insert(insertStack, amount, false).isEmpty())
 			{
-				setItemStack(slotStack);
-				return insert;
+				setItemStack(insert);
+				return slotStack;
 			}
 			else
 				return slotStack;
@@ -431,45 +425,12 @@ public class MalisisSlot
 		return this.inventory.getInventoryStackLimit();
 	}
 
-	/**
-	 * Checks whether this slot has changed for the {@link EntityPlayer}.
-	 *
-	 * @param player the player
-	 * @return true, if changed, false otherwise
-	 */
-	public boolean hasChanged(EntityPlayer player)
-	{
-		ItemStack cached = cachedItemStacks.get(player);
-		ItemStack cachedDragged = cachedDraggedItemStacks.get(player);
-		return !ItemStack.areItemStacksEqual(itemStack, cached != null ? cached : ItemStack.EMPTY)
-				|| !ItemStack.areItemStacksEqual(draggedItemStack, cachedDragged != null ? cachedDragged : ItemStack.EMPTY);
-	}
-
-	/**
-	 * Update the cached {@link ItemStack itemStacks} of this {@link MalisisSlot} for the {@link EntityPlayer}.
-	 *
-	 * @param player the player
-	 */
-	public void updateCache(EntityPlayer player)
-	{
-		cachedItemStacks.put(player, itemStack.copy());
-		cachedDraggedItemStacks.put(player, draggedItemStack.copy());
-	}
-
-	/**
-	 * Clear cache for the {@link EntityPlayer}.
-	 *
-	 * @param player the player
-	 */
-	public void clearCache(EntityPlayer player)
-	{
-		cachedItemStacks.remove(player);
-		cachedDraggedItemStacks.remove(player);
-	}
-
 	@Override
 	public String toString()
 	{
-		return index + (inventory != null ? "/" + inventory.getSize() : "") + " > " + itemStack;
+		String str = index + (inventory != null ? "/" + inventory.getSize() : "") + " > " + ItemUtils.toString(itemStack);
+		if (!draggedItemStack.isEmpty())
+			str += " (D: " + ItemUtils.toString(draggedItemStack) + ")";
+		return str;
 	}
 }

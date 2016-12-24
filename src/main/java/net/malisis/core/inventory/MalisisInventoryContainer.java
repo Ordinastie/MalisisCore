@@ -29,13 +29,15 @@ import static net.malisis.core.inventory.InventoryState.*;
 import static net.malisis.core.inventory.MalisisInventoryContainer.ActionType.*;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import com.google.common.collect.Maps;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.inventory.cache.CachedItemStack;
+import net.malisis.core.inventory.cache.InventoryCache;
 import net.malisis.core.inventory.message.CloseInventoryMessage;
 import net.malisis.core.inventory.message.UpdateInventorySlotsMessage;
 import net.malisis.core.inventory.player.PlayerInventory;
@@ -101,13 +103,18 @@ public class MalisisInventoryContainer extends Container
 	protected EntityPlayer owner;
 	/** Id to use for the next inventory added. */
 	private int nexInventoryId = 0;
+	/** Player inventory. */
 	protected PlayerInventory playerInventory;
+	/** Player inventory cache. */
+	protected InventoryCache playerInventoryCache;
 	/** List of inventories handled by this container. */
-	protected HashMap<Integer, MalisisInventory> inventories = new HashMap<>();
+	protected Map<Integer, MalisisInventory> inventories = Maps.newHashMap();
+	/** List of inventory caches this container. */
+	protected Map<MalisisInventory, InventoryCache> inventoryCaches = Maps.newHashMap();
 	/** ItemStack currently picked and following the cursor. */
 	protected ItemStack pickedItemStack = ItemStack.EMPTY;
 	/** Cache for the itemStack currently picked. */
-	protected ItemStack pickedItemStackCache = ItemStack.EMPTY;
+	protected CachedItemStack pickedItemStackCache = new CachedItemStack(() -> pickedItemStack);
 	/** Stack size when dragging started. */
 	protected int draggedAmount = 0;
 	/** The dragged slots. */
@@ -125,19 +132,25 @@ public class MalisisInventoryContainer extends Container
 	 */
 	public MalisisInventoryContainer(EntityPlayer player, int windowId)
 	{
-		// if server
-		if (player instanceof EntityPlayerMP)
+		this.owner = player;
+		this.playerInventory = new PlayerInventory(player);
+		this.windowId = windowId;
+
+		if (isServer())
 		{
 			EntityPlayerMP p = (EntityPlayerMP) player;
 			p.closeContainer();
 			p.getNextWindowId();
-			windowId = p.currentWindowId;
+			this.windowId = p.currentWindowId;
+			playerInventoryCache = new InventoryCache(player, playerInventory, windowId);
 		}
 
-		this.owner = player;
-		this.windowId = windowId;
-		playerInventory = new PlayerInventory(player);
 		this.owner.openContainer = this;
+	}
+
+	private boolean isServer()
+	{
+		return owner instanceof EntityPlayerMP;
 	}
 
 	/**
@@ -149,6 +162,8 @@ public class MalisisInventoryContainer extends Container
 	public int addInventory(MalisisInventory inventory)
 	{
 		inventories.put(nexInventoryId, inventory);
+		if (isServer())
+			inventoryCaches.put(inventory, new InventoryCache(owner, inventory, windowId));
 		inventory.setInventoryId(nexInventoryId);
 		inventory.addOpenedContainer(this);
 		return nexInventoryId++;
@@ -164,6 +179,8 @@ public class MalisisInventoryContainer extends Container
 		checkNotNull(inventory);
 		inventory.removeOpenedContainer(this);
 		inventories.remove(inventory.getInventoryId());
+		if (isServer())
+			inventoryCaches.remove(inventory);
 	}
 
 	// #region getters/setters
@@ -283,8 +300,7 @@ public class MalisisInventoryContainer extends Container
 	 */
 	public void sendInventoryContent()
 	{
-		//TODO: check whether the player needs to be sent too
-		getInventories().forEach(i -> sendInventory(i, false));
+		inventoryCaches.values().forEach(InventoryCache::sendAll);
 	}
 
 	/**
@@ -293,40 +309,13 @@ public class MalisisInventoryContainer extends Container
 	@Override
 	public void detectAndSendChanges()
 	{
-		getInventories().forEach(i -> sendInventory(i, true));
-		sendInventory(playerInventory, true);
-		detectAndSendPickedItemStack();
-	}
+		playerInventoryCache.sendChanges();
+		inventoryCaches.values().forEach(InventoryCache::sendChanges);
 
-	/**
-	 * Sends the slots for the {@link MalisisInventory} to the client.
-	 *
-	 * @param inventory the inventory
-	 * @param changesOnly whether to send only the changes
-	 */
-	public void sendInventory(MalisisInventory inventory, boolean changesOnly)
-	{
-		List<MalisisSlot> changedSlots = inventory.getSlots();
-		if (changesOnly)
-			changedSlots = inventory.getSlots()
-									.stream()
-									.filter(s -> s.hasChanged(owner))
-									.peek(s -> s.updateCache(owner))
-									.collect(Collectors.toList());
-		if (changedSlots.size() > 0)
-			UpdateInventorySlotsMessage.updateSlots(inventory.getInventoryId(), changedSlots, (EntityPlayerMP) owner, windowId);
-	}
-
-	/**
-	 * Sends the currently picked itemStack if changed.
-	 */
-	public void detectAndSendPickedItemStack()
-	{
-		if (ItemStack.areItemStacksEqual(pickedItemStack, pickedItemStackCache))
-			return;
-
-		UpdateInventorySlotsMessage.updatePickedItemStack(pickedItemStack, (EntityPlayerMP) owner, windowId);
-		pickedItemStackCache = pickedItemStack.copy();
+		//picked itemStack
+		pickedItemStackCache.update();
+		if (pickedItemStackCache.hasChanged())
+			UpdateInventorySlotsMessage.updatePickedItemStack(pickedItemStackCache.get(), (EntityPlayerMP) owner, windowId);
 	}
 
 	// #end network
@@ -668,7 +657,7 @@ public class MalisisInventoryContainer extends Container
 		if (slot.getItemStack().isEmpty() || !pickedItemStack.isEmpty())
 			return ItemStack.EMPTY;
 
-		ItemStack itemStack = slot.getItemStack().copy();
+		ItemStack itemStack = ItemUtils.copy(slot.getItemStack());
 		itemStack.setCount(itemStack.getMaxStackSize());
 		setPickedItemStack(itemStack);
 
@@ -685,7 +674,8 @@ public class MalisisInventoryContainer extends Container
 	 */
 	private ItemStack handleDrag(ActionType action, MalisisSlot slot)
 	{
-		if (pickedItemStack.isEmpty())
+		//the picked itemStack can have size 0, so we can't check isEmpty()
+		if (pickedItemStack == ItemStack.EMPTY)
 			return ItemStack.EMPTY;
 
 		if ((action == DRAG_START_LEFT_CLICK || action == DRAG_START_RIGHT_CLICK) && isDraggingItemStack())
@@ -791,7 +781,7 @@ public class MalisisInventoryContainer extends Container
 			if (s.isItemValid(pickedItemStack))
 			{
 				// work on a copy because we alter pickedItemStack only in the end
-				ItemStack itemStack = pickedItemStack.copy();
+				ItemStack itemStack = ItemUtils.copy(pickedItemStack);
 				itemStack.setCount(draggedAmount);
 				ItemStack slotStack = s.getItemStack();
 				if (!slotStack.isEmpty()) //work on a copy because we don't want to alter the slot itemStack
@@ -799,12 +789,11 @@ public class MalisisInventoryContainer extends Container
 
 				ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(itemStack, slotStack);
 				ism.merge(amountPerSlot, s.getSlotStackLimit());
-				ism.into.shrink(s.getItemStack().getCount());
+				ism.merge.shrink(s.getItemStack().getCount());
 				s.setDraggedItemStack(ism.into);
 
 				amountTotal += ism.nbMerged;
 			}
-
 		}
 
 		pickedItemStack.setCount(draggedAmount - amountTotal);
