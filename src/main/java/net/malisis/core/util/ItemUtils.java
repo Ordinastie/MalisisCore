@@ -155,6 +155,12 @@ public class ItemUtils
 		{
 			return merge.isEmpty() || into.isEmpty() || areItemStacksStackable(merge, into);
 		}
+
+		@Override
+		public String toString()
+		{
+			return ItemUtils.toString(merge) + " -> " + ItemUtils.toString(into) + " (" + nbMerged + ")";
+		}
 	}
 
 	/**
@@ -169,7 +175,7 @@ public class ItemUtils
 		public ItemStack split;
 
 		/** The amount of items to split. */
-		public int amount;
+		public int amount = -1;
 
 		/**
 		 * Instantiates the {@link ItemStackSplitter}.
@@ -192,6 +198,7 @@ public class ItemUtils
 			if (source.isEmpty())
 			{
 				split = ItemStack.EMPTY;
+				this.amount = 0;
 				return split;
 			}
 
@@ -206,6 +213,12 @@ public class ItemUtils
 				source = ItemStack.EMPTY;
 
 			return split;
+		}
+
+		@Override
+		public String toString()
+		{
+			return ItemUtils.toString(source) + " -> " + ItemUtils.toString(split) + " (" + amount + ")";
 		}
 	}
 
@@ -306,5 +319,40 @@ public class ItemUtils
 			return ItemStack.EMPTY;
 
 		return new ItemStack(item, size, damage);
+	}
+
+	/**
+	 * {@link ItemStack#copy()} version that doesn't loose the actual item if the stack is empty.
+	 *
+	 * @param itemStack the item stack
+	 * @return the item stack
+	 */
+	public static ItemStack copy(ItemStack itemStack)
+	{
+		//we need to make sure the itemStack is not empty before copying
+		int originalSize = itemStack.getCount();
+		itemStack.setCount(1);
+
+		ItemStack copy = itemStack.copy();
+		//set the size back
+		copy.setCount(originalSize);
+		itemStack.setCount(originalSize);
+		return copy;
+	}
+
+	/**
+	 * ToString version of {@link ItemStack} that doesn't hide the actual item if the stack is empty.
+	 *
+	 * @param itemStack the item stack
+	 * @return the string
+	 */
+	public static String toString(ItemStack itemStack)
+	{
+		if (itemStack == null)
+			return "null";
+		if (itemStack == ItemStack.EMPTY)
+			return "Empty";
+
+		return itemStack.getCount() + "x" + itemStack.item.getUnlocalizedName() + "@" + itemStack.getItemDamage();
 	}
 }
