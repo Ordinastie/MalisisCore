@@ -312,4 +312,10 @@ public class UISlot extends UIComponent<UISlot>
 		}
 
 	}
+
+	@Override
+	public String toString()
+	{
+		return (this.name == null ? getClass().getSimpleName() : this.name) + " (Slot : " + slot + ")";
+	}
 }
