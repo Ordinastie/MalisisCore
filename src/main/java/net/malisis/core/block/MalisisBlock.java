@@ -167,7 +167,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 
 	public String getUnlocalizedName(IBlockState state)
 	{
-		for (IBlockComponent component : blockComponents)
+		for (IBlockComponent component : getBlockComponents())
 		{
 			String name = component.getUnlocalizedName(this, state);
 			if (name != null)
@@ -179,7 +179,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	@Override
 	public Item getItem(Block block)
 	{
-		for (IBlockComponent component : blockComponents)
+		for (IBlockComponent component : getBlockComponents())
 		{
 			Item item = component.getItem(this);
 			if (item == null || item.getClass() != MalisisItemBlock.class)
@@ -187,6 +187,14 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 		}
 
 		return IRegisterable.super.getItem(this);
+	}
+
+	public boolean hasItemSubtypes(Item item)
+	{
+		for (IBlockComponent component : getBlockComponents())
+			if (component.getHasSubtypes(this, item))
+				return true;
+		return false;
 	}
 
 	public void setTexture(String textureName)

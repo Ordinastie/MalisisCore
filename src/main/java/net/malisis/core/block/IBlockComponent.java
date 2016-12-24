@@ -35,6 +35,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -88,7 +89,10 @@ public interface IBlockComponent extends IComponent
 
 	public default Item getItem(Block block)
 	{
-		return new MalisisItemBlock(block);
+		if (this instanceof MalisisBlock)
+			return new MalisisItemBlock((MalisisBlock) block);
+
+		return new ItemBlock(block);
 	}
 
 	/**

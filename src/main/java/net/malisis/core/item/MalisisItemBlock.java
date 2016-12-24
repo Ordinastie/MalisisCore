@@ -26,9 +26,6 @@ package net.malisis.core.item;
 
 import java.util.List;
 
-import com.google.common.collect.Lists;
-
-import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.IMergedBlock;
@@ -48,56 +45,45 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 /**
- * @author Ordinastie
+ * ItemBlock adapted for MalisisCore.<br>
+ * Users shouldn't need to extend this class as all the functionalities are queried from the corresponding block
  *
+ * @author Ordinastie
  */
 public class MalisisItemBlock extends ItemBlock implements IRegisterable, IComponentProvider
 {
-	protected String name;
-	protected List<IComponent> components;
-
-	public MalisisItemBlock(Block block)
+	public MalisisItemBlock(MalisisBlock block)
 	{
 		super(block);
-		if (!(block instanceof IComponentProvider))
-			components = Lists.newArrayList();
 	}
 
-	public MalisisItemBlock setName(String name)
+	private MalisisBlock block()
 	{
-		this.name = name;
-		setUnlocalizedName(name);
-		return this;
+		return (MalisisBlock) block;
 	}
 
 	@Override
 	public String getName()
 	{
-		return name;
+		return block().getName();
 	}
 
 	@Override
 	public void addComponent(IComponent component)
 	{
-		getComponents().add(component);
+		block().addComponent(component);
 	}
 
 	@Override
 	public List<IComponent> getComponents()
 	{
-		return block instanceof IComponentProvider ? ((IComponentProvider) block).getComponents() : components;
+		return block().getComponents();
 	}
 
 	@Override
 	public String getUnlocalizedName(ItemStack itemStack)
 	{
-		if (block instanceof MalisisBlock)
-		{
-			IBlockState state = ((MalisisBlock) block).getStateFromItemStack(itemStack);
-			return ((MalisisBlock) block).getUnlocalizedName(state);
-		}
-
-		return super.getUnlocalizedName(itemStack);
+		return block().getUnlocalizedName(block().getStateFromItemStack(itemStack));
 	}
 
 	@Override
@@ -106,6 +92,7 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 		return damage;
 	}
 
+	//onItemUse needs to be overriden to be able to handle merged blocks and components.
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
@@ -115,20 +102,24 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 		if (!player.canPlayerEdit(pos.offset(side), side, itemStack))
 			return EnumActionResult.FAIL;
 
-		IBlockState placedState = checkMerge(itemStack, player, world, pos, side, hitX, hitY, hitZ, false);
+		//first check if the block clicked can be merged with the one in hand
+		IBlockState placedState = checkMerge(itemStack, player, world, pos, side, hitX, hitY, hitZ);
 		BlockPos p = pos;
+		//can't merge, offset the placed position to where the block should be placed in the world
 		if (placedState == null)
 		{
 			p = pos.offset(side);
 			float x = hitX - side.getFrontOffsetX();
 			float y = hitY - side.getFrontOffsetY();
 			float z = hitZ - side.getFrontOffsetZ();
-			placedState = checkMerge(itemStack, player, world, p, side, x, y, z, true);
+			//check for merge at the new position too
+			placedState = checkMerge(itemStack, player, world, p, side, x, y, z);
 		}
 
 		if (placedState == null)
 			return super.onItemUse(player, world, pos, hand, side, hitX, hitY, hitZ);
 
+		//block can be merged
 		Block block = placedState.getBlock();
 		if (world.checkNoEntityCollision(placedState.getCollisionBoundingBox(world, p)) && world.setBlockState(p, placedState, 3))
 		{
@@ -160,19 +151,40 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 		return super.canPlaceBlockOnSide(world, pos, side, player, itemStack);
 	}
 
+	/**
+	 * Gets the {@link IMergedBlock} associated with the passed {@link IBlockState}.<br>
+	 * If a component found doesn't allow merging between two different blocks and the passed state's block doesn't this block, null is
+	 * returned instead.
+	 *
+	 * @param state the state
+	 * @return the component, or null if there is no component, or if the component
+	 */
 	private IMergedBlock getMerged(IBlockState state)
 	{
 		IMergedBlock mergedBlock = IComponent.getComponent(IMergedBlock.class, state.getBlock());
 		if (mergedBlock == null)
 			return null;
 
-		if (mergedBlock.mergeSelfOnly() && state.getBlock() != this.block)
+		if (mergedBlock.mergeSelfOnly() && state.getBlock() != block())
 			return null;
 
 		return mergedBlock;
 	}
 
-	private IBlockState checkMerge(ItemStack itemStack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, boolean offset)
+	/**
+	 * Checks whether the block can be merged with the one already in the world.
+	 *
+	 * @param itemStack the item stack
+	 * @param player the player
+	 * @param world the world
+	 * @param pos the pos
+	 * @param side the side
+	 * @param hitX the hit X
+	 * @param hitY the hit Y
+	 * @param hitZ the hit Z
+	 * @return the i block state
+	 */
+	private IBlockState checkMerge(ItemStack itemStack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
 		IBlockState state = world.getBlockState(pos);
 		IMergedBlock mergedBlock = getMerged(state);
@@ -192,12 +204,6 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 	@Override
 	public boolean getHasSubtypes()
 	{
-		if (block instanceof MalisisBlock)
-		{
-			for (IBlockComponent component : ((MalisisBlock) block).getBlockComponents())
-				if (component.getHasSubtypes(block, this))
-					return true;
-		}
-		return false;
+		return block instanceof MalisisBlock ? ((MalisisBlock) block).hasItemSubtypes(this) : false;
 	}
 }

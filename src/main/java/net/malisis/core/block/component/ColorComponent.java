@@ -25,10 +25,10 @@
 package net.malisis.core.block.component;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.IRegisterComponent;
+import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.item.MalisisItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockColored;
@@ -36,10 +36,10 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
@@ -49,28 +49,37 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
- * @author Ordinastie
+ * This {@link ColorComponent} automatically handles blocks with color variants.<br>
+ * The component determines if the color is dynamically calculated and render. If not, it's up to the user to provide the different
+ * textures.<br>
+ * Expected localization is in the form tile.unlocalizedBlockName.color.name.
  *
+ * @author Ordinastie
  */
-public class ColorComponent implements IBlockComponent, IRegisterComponent
+public class ColorComponent extends SubtypeComponent<EnumDyeColor> implements IRegisterComponent
 {
-	public static PropertyEnum<EnumDyeColor> COLOR = BlockColored.COLOR;
+	/** Whether the color is handled by the renderer. */
 	private boolean useColorMultiplier = true;
 
+	/**
+	 * Instantiates a new {@link ColorComponent}.
+	 *
+	 * @param useColorMultiplier true if the renderer should handle the color, false if the color is already in the texture
+	 */
 	public ColorComponent(boolean useColorMultiplier)
 	{
+		super(EnumDyeColor.class, BlockColored.COLOR);
 		this.useColorMultiplier = useColorMultiplier;
 	}
 
+	/**
+	 * Gets whether the color is handled by the renderer or by the texture.
+	 *
+	 * @return true, if the renderer should handle the color, false if the color is already in the texture
+	 */
 	public boolean useColorMultiplier()
 	{
 		return useColorMultiplier;
-	}
-
-	@Override
-	public PropertyEnum<EnumDyeColor> getProperty()
-	{
-		return COLOR;
 	}
 
 	@Override
@@ -89,7 +98,7 @@ public class ColorComponent implements IBlockComponent, IRegisterComponent
 	@SideOnly(Side.CLIENT)
 	private void registerColorHandler(Block block)
 	{
-		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new ColorHandler(), block);
+		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(this::getRenderColor, block);
 	}
 
 	@Override
@@ -101,7 +110,10 @@ public class ColorComponent implements IBlockComponent, IRegisterComponent
 	@Override
 	public Item getItem(Block block)
 	{
-		return new MalisisItemBlock(block);
+		if (block instanceof MalisisBlock)
+			return new MalisisItemBlock((MalisisBlock) block);
+
+		return new ItemBlock(block);
 	}
 
 	@Override
@@ -125,14 +137,17 @@ public class ColorComponent implements IBlockComponent, IRegisterComponent
 	}
 
 	/**
-	 * Gets the render color for this {@link Block}.
+	 * Gets the render color for this {@link Block}.<br>
+	 * If {@link #useColorMultiplier()} is false, color is already in the texture, and white (0xFFFFFF) is returned.
 	 *
 	 * @param block the block
 	 * @param state the state
 	 * @return the render color
 	 */
-	public int getRenderColor(Block block, IBlockState state)
+	public int getRenderColor(IBlockState state, IBlockAccess world, BlockPos pos, int tintIndex)
 	{
+		if (!useColorMultiplier())
+			return 0xFFFFFF;
 		return ItemDye.DYE_COLORS[getColor(state).getDyeDamage()];
 	}
 
@@ -206,18 +221,4 @@ public class ColorComponent implements IBlockComponent, IRegisterComponent
 
 		return state.getValue(property);
 	}
-
-	@SideOnly(Side.CLIENT)
-	public class ColorHandler implements IBlockColor
-	{
-		@Override
-		public int colorMultiplier(IBlockState state, IBlockAccess world, BlockPos pos, int tintIndex)
-		{
-			if (!useColorMultiplier)
-				return 0xFFFFFF;
-			return getRenderColor(state.getBlock(), state);
-		}
-
-	}
-
 }
