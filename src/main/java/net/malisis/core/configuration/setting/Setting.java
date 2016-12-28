@@ -24,16 +24,15 @@
 
 package net.malisis.core.configuration.setting;
 
+import com.google.common.base.Preconditions;
+
 import net.malisis.core.MalisisCore;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.minecraft.client.resources.I18n;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import com.google.common.base.Preconditions;
 
 /**
  * The Class Setting.
@@ -172,7 +171,7 @@ public abstract class Setting<T>
 	 * @return the component
 	 */
 	@SideOnly(Side.CLIENT)
-	public abstract UIComponent<?> getComponent(MalisisGui gui);
+	public abstract UIComponent<?> getComponent();
 
 	/**
 	 * Gets the value from component.
