@@ -36,37 +36,37 @@ public class UIInventory extends UIContainer<UIInventory>
 	private int numCols;
 	private boolean hasTitle;
 
-	public UIInventory(MalisisGui gui, String title, MalisisInventory inventory, int numCols)
+	public UIInventory(String title, MalisisInventory inventory, int numCols)
 	{
-		super(gui, title != null ? title : inventory.getName(), 0, 0);
+		super(title != null ? title : inventory.getName(), 0, 0);
 		this.hasTitle = title != null || inventory.hasCustomName();
 		this.inventory = inventory;
 		this.numCols = numCols;
 		this.width = Math.min(inventory.getSize() * 18, numCols * 18);
 		this.height = (int) Math.ceil((float) inventory.getSize() / numCols) * 18 + (hasTitle ? 11 : 0);
 		for (int i = 0; i < inventory.getSize(); i++)
-			addSlot(gui, inventory.getSlot(i), i);
+			addSlot(inventory.getSlot(i), i);
 	}
 
-	public UIInventory(MalisisGui gui, MalisisInventory inventory, int numCols)
+	public UIInventory(MalisisInventory inventory, int numCols)
 	{
-		this(gui, null, inventory, numCols);
+		this(null, inventory, numCols);
 
 	}
 
 	public UIInventory(MalisisGui gui, String title, MalisisInventory inventory)
 	{
-		this(gui, title, inventory, 9);
+		this(title, inventory, 9);
 	}
 
-	public UIInventory(MalisisGui gui, MalisisInventory inventory)
+	public UIInventory(MalisisInventory inventory)
 	{
-		this(gui, null, inventory, 9);
+		this(null, inventory, 9);
 	}
 
-	protected void addSlot(MalisisGui gui, MalisisSlot slot, int number)
+	protected void addSlot(MalisisSlot slot, int number)
 	{
-		UISlot uislot = new UISlot(gui, slot);
+		UISlot uislot = new UISlot(slot);
 
 		int row = number / numCols;
 		int col = number % numCols;

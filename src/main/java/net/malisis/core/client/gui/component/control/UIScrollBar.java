@@ -28,6 +28,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.lwjgl.input.Keyboard;
+
+import com.google.common.eventbus.Subscribe;
+
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
@@ -39,10 +43,6 @@ import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
-
-import org.lwjgl.input.Keyboard;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * UIScrollBar
@@ -58,6 +58,8 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	}
 
 	private static Map<UIComponent<?>, Map<Type, UIScrollBar>> scrollbars = new WeakHashMap<>();
+
+	protected GuiShape shape = new GuiShape();
 
 	/** The scroll thickness (Width for vertical, height for horizontal). */
 	protected int scrollThickness = 10;
@@ -77,9 +79,8 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	private GuiIconProvider verticalIconProvider;
 	private GuiIconProvider horizontalIconProvider;
 
-	public <T extends UIComponent<T> & IScrollable> UIScrollBar(MalisisGui gui, T parent, Type type)
+	public <T extends UIComponent<T> & IScrollable> UIScrollBar(T parent, Type type)
 	{
-		super(gui);
 		this.type = type;
 
 		parent.addControlComponent(this);
@@ -89,7 +90,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		setPosition();
 		updateScrollbar();
 
-		createShape(gui);
+		createShape();
 	}
 
 	/**
@@ -125,7 +126,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 *
 	 * @param gui the gui
 	 */
-	protected void createShape(MalisisGui gui)
+	protected void createShape()
 	{
 		int w = scrollThickness - 2;
 		int h = scrollHeight;
@@ -142,22 +143,17 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		scrollShape.setSize(w, h);
 		scrollShape.storeState();
 
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(215, 0, 15, 15, 1), null, gui.getGuiTexture()
-																												.getXYResizableIcon(215,
-																														15,
-																														15,
-																														15,
-																														1));
+		iconProvider = new GuiIconProvider(	gui.getGuiTexture().getXYResizableIcon(215, 0, 15, 15, 1),
+											null,
+											gui.getGuiTexture().getXYResizableIcon(215, 15, 15, 15, 1));
 
-		verticalIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(230, 0, 8, 15), null, gui.getGuiTexture().getIcon(238,
-				0,
-				8,
-				15));
+		verticalIconProvider = new GuiIconProvider(	gui.getGuiTexture().getIcon(230, 0, 8, 15),
+													null,
+													gui.getGuiTexture().getIcon(238, 0, 8, 15));
 
-		horizontalIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(230, 15, 15, 8), null, gui.getGuiTexture().getIcon(230,
-				23,
-				15,
-				8));
+		horizontalIconProvider = new GuiIconProvider(	gui.getGuiTexture().getIcon(230, 15, 15, 8),
+														null,
+														gui.getGuiTexture().getIcon(230, 23, 15, 8));
 	}
 
 	/**

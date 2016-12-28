@@ -28,36 +28,34 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.VanillaTexture;
 import net.malisis.core.client.gui.component.control.ICloseable;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.client.gui.element.GuiShape;
 
 /**
  * @author Ordinastie, PaleoCrafter
  */
 public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 {
+	protected GuiShape shape = new GuiShape(VanillaTexture.WINDOW_ICON);
 	/** Background color multiplier. */
 	protected int backgroundColor = -1;
 
-	public UIWindow(MalisisGui gui, String title, int width, int height, int anchor)
+	public UIWindow(String title, int width, int height, int anchor)
 	{
-		super(gui, title, width, height);
+		super(title, width, height);
 		setPadding(5, 5);
 		this.anchor = anchor;
-
-		shape = new XYResizableGuiShape();
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 0, 15, 15, 5));
 	}
 
-	public UIWindow(MalisisGui gui, String title, int width, int height)
+	public UIWindow(String title, int width, int height)
 	{
-		this(gui, title, width, height, Anchor.CENTER | Anchor.MIDDLE);
+		this(title, width, height, Anchor.CENTER | Anchor.MIDDLE);
 	}
 
-	public UIWindow(MalisisGui gui, int width, int height)
+	public UIWindow(int width, int height)
 	{
-		this(gui, null, width, height, Anchor.CENTER | Anchor.MIDDLE);
+		this(null, width, height, Anchor.CENTER | Anchor.MIDDLE);
 	}
 
 	/**
@@ -93,8 +91,9 @@ public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.colorMultiplier.set(getBackgroundColor());
-		renderer.drawShape(shape, rp);
+		shape.setSize(getWidth(), getHeight());
+		shape.setColor(getBackgroundColor());
+		renderer.drawShape(shape);
 	}
 
 	@Override

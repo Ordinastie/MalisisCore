@@ -32,14 +32,14 @@ import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.VanillaTexture;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.inventory.InventoryEvent;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.malisis.core.util.Utils;
 import net.minecraft.client.Minecraft;
@@ -51,10 +51,11 @@ import net.minecraft.util.text.TextFormatting;
 
 public class UISlot extends UIComponent<UISlot>
 {
-	/** IconProvider for Mojang fix */
-	protected GuiIconProvider iconLeftProvider;
-	/** IconProvider for Mojang fix */
-	protected GuiIconProvider iconTopProvider;
+	protected GuiShape shape = new GuiShape(VanillaTexture.SLOT_ICON);
+	//	/** IconProvider for Mojang fix */
+	//	protected GuiIconProvider iconLeftProvider;
+	//	/** IconProvider for Mojang fix */
+	//	protected GuiIconProvider iconTopProvider;
 
 	/** Whether the mouse button has been released at least once. */
 	public static boolean buttonRelased = true;
@@ -69,30 +70,16 @@ public class UISlot extends UIComponent<UISlot>
 	 * @param gui the gui
 	 * @param slot the slot
 	 */
-	public UISlot(MalisisGui gui, MalisisSlot slot)
+	public UISlot(MalisisSlot slot)
 	{
-		super(gui);
 		this.slot = slot;
 		this.width = 18;
 		this.height = 18;
 		slot.register(this);
 
-		shape = new SimpleGuiShape();
+		//		iconLeftProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 30, 1, 18));
+		//		iconTopProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 30, 18, 1));
 
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 30, 18, 18));
-		iconLeftProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 30, 1, 18));
-		iconTopProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 30, 18, 1));
-
-	}
-
-	/**
-	 * Instantiates a new {@link UISlot}.
-	 *
-	 * @param gui the gui
-	 */
-	public UISlot(MalisisGui gui)
-	{
-		this(gui, null);
 	}
 
 	@Override
@@ -123,16 +110,14 @@ public class UISlot extends UIComponent<UISlot>
 		for (int i = 1; i < lines.size(); i++)
 			lines.set(i, TextFormatting.GRAY + lines.get(i));
 
-		tooltip = new UITooltip(getGui()).setText(lines);
+		tooltip = new UITooltip().setText(lines);
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		shape.resetState();
 		shape.setSize(18, 18);
-		renderer.drawShape(shape, rp);
-		renderer.next();
+		renderer.drawShape(shape);
 	}
 
 	@Override

@@ -25,10 +25,9 @@
 package net.malisis.core.client.gui.component.decoration;
 
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.VanillaTexture;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.client.gui.element.GuiShape;
 
 /**
  * @author Ordinastie
@@ -36,24 +35,20 @@ import net.malisis.core.renderer.icon.provider.GuiIconProvider;
  */
 public class UISeparator extends UIComponent<UISeparator>
 {
+	protected GuiShape shape = new GuiShape(VanillaTexture.SEPARATOR_ICON);
 	/** Color multiplier. */
-	protected int color = -1;
+	protected int color = 0xFFFFFF;
 	protected boolean vertical;
 
-	public UISeparator(MalisisGui gui, boolean vertical)
+	public UISeparator(boolean vertical)
 	{
-		super(gui);
 		this.vertical = vertical;
-
-		shape = new XYResizableGuiShape(1);
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 15, 15, 15, 3));
-
-		setSize(0, 0);
+		setSize(INHERITED, INHERITED);
 	}
 
-	public UISeparator(MalisisGui gui)
+	public UISeparator()
 	{
-		this(gui, false);
+		this(false);
 	}
 
 	@Override
@@ -87,10 +82,9 @@ public class UISeparator extends UIComponent<UISeparator>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.useTexture.set(true);
-		rp.alpha.set(255);
-		rp.colorMultiplier.set(getColor());
-		renderer.drawShape(shape, rp);
+		shape.setSize(getWidth(), getHeight());
+		shape.setColor(getColor());
+		renderer.drawShape(shape);
 	}
 
 	@Override

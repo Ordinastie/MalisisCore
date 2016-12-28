@@ -24,83 +24,132 @@
 
 package net.malisis.core.client.gui.element;
 
-import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.element.vertex.BottomSouthEast;
-import net.malisis.core.renderer.element.vertex.BottomSouthWest;
-import net.malisis.core.renderer.element.vertex.TopSouthEast;
-import net.malisis.core.renderer.element.vertex.TopSouthWest;
+import static com.google.common.base.Preconditions.*;
+
+import java.util.List;
+
+import org.lwjgl.util.vector.Matrix4f;
+
+import com.google.common.collect.Lists;
+
+import net.malisis.core.client.gui.element.GuiVertex.VertexPosition;
+import net.minecraft.client.renderer.VertexBuffer;
 
 /**
  * @author Ordinastie
  *
  */
-public abstract class GuiShape extends Shape
+public class GuiShape
 {
-	public GuiShape(Face... faces)
+	List<GuiVertex> vertexes = Lists.newArrayList();
+	/** The matrix containing all the transformations applied to this {@link GuiShape}. */
+	protected Matrix4f matrix = new Matrix4f();
+
+	private int x;
+	private int y;
+	private int zIndex;
+	private int width;
+	private int height;
+
+	private GuiIcon icon;
+
+	public GuiShape()
 	{
-		super(faces);
+		for (VertexPosition p : VertexPosition.values())
+			vertexes.add(new GuiVertex(p));
 	}
 
-	public GuiShape(int faceCount)
+	public GuiShape(GuiIcon icon)
 	{
-		faces = new Face[faceCount];
-		for (int i = 0; i < faceCount; i++)
-			faces[i] = new GuiFace();
+		this();
+		setIcon(icon);
 	}
 
 	public void setPosition(int x, int y)
 	{
-		translate(x, y, 0);
+		this.x = x;
+		this.y = y;
 	}
 
-	@Override
-	public void translate(float x, float y, float z)
+	public int getX()
 	{
-		super.translate(x, y, z);
-		applyMatrix();
+		return x;
 	}
 
-	public void translate(int x, int y)
+	public int getY()
 	{
-		translate(x, y, 0);
+		return y;
 	}
 
-	@Override
-	public void rotate(float angle, float x, float y, float z)
+	public void setZIndex(int zIndex)
 	{
-		rotate(angle, 0, 0, 1, x, y, z);
+		this.zIndex = zIndex;
 	}
 
-	public void rotate(float angle)
+	public int getZIndex()
 	{
-		//		rotate(angle, x + (x + width) / 2, y + (y + height) / 2, 0);
-		//		applyMatrix();
+		return zIndex;
 	}
 
-	@Override
-	public void scale(float scale)
+	public void setSize(int width, int height)
 	{
-		scale(scale, scale);
+		this.width = width;
+		this.height = height;
 	}
 
-	public abstract void setSize(int width, int height);
-
-	public abstract void scale(float x, float y);
-
-	public static class GuiFace extends Face
+	public int getWidth()
 	{
-		public GuiFace()
-		{
-			super(new BottomSouthWest().setBaseName("TopLeft"), new TopSouthWest().setBaseName("BottomLeft"), new TopSouthEast()
-					.setBaseName("BottomRight"), new BottomSouthEast().setBaseName("TopRight"));
-			setStandardUV();
-		}
-
-		public GuiFace(int width, int height)
-		{
-			this();
-			scale(width, height, 0);
-		}
+		return width;
 	}
+
+	public int getHeight()
+	{
+		return height;
+	}
+
+	public void setIcon(GuiIcon icon)
+	{
+		this.icon = checkNotNull(icon);
+	}
+
+	public GuiIcon getIcon()
+	{
+		return icon;
+	}
+
+	public void setColor(int color)
+	{
+		vertexes.forEach(v -> v.setColor(color));
+	}
+
+	public void setColor(VertexPosition position, int color)
+	{
+		getVertex(position).setColor(color);
+	}
+
+	public void setAlpha(int alpha)
+	{
+		vertexes.forEach(v -> v.setAlpha(alpha));
+	}
+
+	public void setAlpha(VertexPosition position, int alpha)
+	{
+		getVertex(position).setAlpha(alpha);
+	}
+
+	public GuiVertex getVertex(VertexPosition position)
+	{
+		return vertexes.get(position.ordinal());
+	}
+
+	public void render(VertexBuffer buffer)
+	{
+		renderAt(buffer, 0, 0, 0);
+	}
+
+	public void renderAt(VertexBuffer buffer, int offsetX, int offsetY, int offsetZ)
+	{
+		vertexes.forEach(v -> buffer.addVertexData(v.getVertexData(this, offsetX, offsetY, offsetZ)));
+	}
+
 }

@@ -29,15 +29,15 @@ import java.util.List;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.VanillaTexture;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.AlphaTransform;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
  * UITooltip
@@ -46,6 +46,7 @@ import net.malisis.core.renderer.icon.provider.GuiIconProvider;
  */
 public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITooltip>
 {
+	protected GuiShape shape = new GuiShape(VanillaTexture.TOOLTIP_ICON);
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontOptions} to use for this {@link UITooltip}. */
@@ -56,33 +57,24 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 	protected int delay = 0;
 	protected Animation<ITransformable.Alpha> animation;
 
-	public UITooltip(MalisisGui gui)
+	public UITooltip()
 	{
-		super(gui);
+		super();
 		setSize(16, 16);
 		zIndex = 300;
-
-		shape = new XYResizableGuiShape();
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(227, 31, 15, 15, 5));
 
 		animation = new Animation<>(this, new AlphaTransform(0, 255).forTicks(2));
 	}
 
-	public UITooltip(MalisisGui gui, String text)
+	public UITooltip(String text)
 	{
-		this(gui);
+		this();
 		setText(text);
 	}
 
-	public UITooltip(MalisisGui gui, int delay)
+	public UITooltip(String text, int delay)
 	{
-		this(gui);
-		setDelay(delay);
-	}
-
-	public UITooltip(MalisisGui gui, String text, int delay)
-	{
-		this(gui);
+		this();
 		setText(text);
 		setDelay(delay);
 	}
@@ -169,14 +161,15 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 			return;
 
 		setAlpha(0);
-		getGui().animate(animation, delay);
+		MalisisGui.currentGui().animate(animation, delay);
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		shape.setPosition(mouseX + getOffsetX(), mouseY + getOffsetY());
-		renderer.drawShape(shape, rp);
+		shape.setSize(getWidth(), getHeight());
+		renderer.drawShape(shape);
 	}
 
 	@Override

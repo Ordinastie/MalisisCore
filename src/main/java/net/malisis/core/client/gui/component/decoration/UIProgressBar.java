@@ -26,12 +26,11 @@ package net.malisis.core.client.gui.component.decoration;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.GuiTexture;
-import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.VanillaTexture;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.renderer.icon.Icon;
-import net.malisis.core.renderer.icon.VanillaIcon;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.malisis.core.client.gui.element.GuiIcon;
+import net.malisis.core.client.gui.element.GuiShape;
+import net.minecraft.util.math.MathHelper;
 
 /**
  * @author Ordinastie
@@ -39,35 +38,27 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
  */
 public class UIProgressBar extends UIComponent<UIProgressBar>
 {
+	protected GuiShape shape = new GuiShape();
 	protected float progress = 0;
 	protected boolean reversed = false;
 	protected boolean vertical = false;
 
 	protected GuiTexture texture;
-	protected Icon backgroundIcon;
-	protected Icon filledIcon;
+	protected GuiIcon backgroundIcon;
+	protected GuiIcon filledIcon;
 
-	//by default, use furnace arrows
-	public UIProgressBar(MalisisGui gui)
+	public UIProgressBar(int width, int height, GuiTexture texture, GuiIcon backgroundIcon, GuiIcon filledIcon)
 	{
-		super(gui);
-		setSize(22, 16);
-
-		shape = new SimpleGuiShape();
-		texture = getGui().getGuiTexture();
-		backgroundIcon = texture.createIcon(246, 0, 22, 16);
-		filledIcon = texture.createIcon(246, 16, 22, 16);
-	}
-
-	public UIProgressBar(MalisisGui gui, int width, int height, GuiTexture texture, Icon backgroundIcon, Icon filledIcon)
-	{
-		super(gui);
 		setSize(width, height);
-
-		shape = new SimpleGuiShape();
 		this.texture = texture;
 		this.backgroundIcon = backgroundIcon;
 		this.filledIcon = filledIcon;
+	}
+
+	//by default, use furnace arrows
+	public UIProgressBar()
+	{
+		this(22, 16, null, VanillaTexture.ARROWEMPTY_ICON, VanillaTexture.ARROWFILLED_ICON);
 	}
 
 	public UIProgressBar setReversed()
@@ -89,11 +80,7 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 
 	public void setProgress(float progress)
 	{
-		if (progress < 0)
-			progress = 0;
-		if (progress > 1)
-			progress = 1;
-		this.progress = progress;
+		this.progress = MathHelper.clamp(progress, 0, 1);
 		//	this.progress = .4F;
 	}
 
@@ -101,33 +88,32 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		renderer.bindTexture(texture);
-		rp.icon.set(backgroundIcon.flip(!vertical && reversed, vertical && reversed));
-		shape.resetState();
-		shape.setSize(width, height);
-		renderer.drawShape(shape, rp);
+		shape.setSize(getWidth(), getHeight());
+		shape.setIcon(backgroundIcon);
+		renderer.drawShape(shape);
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.bindTexture(texture);
-		int length = (int) ((vertical ? height : width) * progress);
-		Icon icon = filledIcon;
-		if (icon instanceof VanillaIcon)
-			icon = new Icon((TextureAtlasSprite) icon);
-		if (vertical)
-			icon = icon.clip(0, icon.getIconHeight() - length, icon.getIconWidth(), length);
-		else
-			icon = icon.clip(0, 0, length, icon.getIconHeight());
-		icon.flip(!vertical && reversed, vertical && reversed);
-		rp.icon.set(icon);
+		int length = Math.round((vertical ? getHeight() : getWidth()) * progress);
 
-		shape.resetState();
-		shape.setSize(vertical ? width : length, vertical ? length : height);
+		GuiIcon icon = filledIcon;
 		if (vertical)
-			shape.translate(0, reversed ? 0 : height - length);
+		{
+			icon = icon.clip(0, reversed ? progress : 0, 1, reversed ? 1 : progress);
+			shape.setPosition(0, reversed ? 0 : getHeight() - length);
+			shape.setSize(getWidth(), length);
+		}
 		else
-			shape.translate(reversed ? width - length : 0, 0);
-		renderer.drawShape(shape, rp);
+		{
+			shape.setPosition(reversed ? getWidth() - length : 0, 0);
+			shape.setSize(length, getHeight());
+			icon = icon.clip(reversed ? progress : 0, 0, reversed ? 1 : progress, 1);
+		}
+
+		renderer.bindTexture(texture);
+		shape.setIcon(icon);
+		renderer.drawShape(shape);
 	}
 }

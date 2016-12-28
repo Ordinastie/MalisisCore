@@ -27,6 +27,11 @@ package net.malisis.core.client.gui.component;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
+
+import com.google.common.eventbus.EventBus;
+
 import net.malisis.core.ExceptionHandler;
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
@@ -35,8 +40,6 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.control.IControlComponent;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
-import net.malisis.core.client.gui.element.GuiShape;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.GuiEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
@@ -46,18 +49,9 @@ import net.malisis.core.client.gui.event.component.StateChangeEvent.DisabledStat
 import net.malisis.core.client.gui.event.component.StateChangeEvent.FocusStateChange;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
-import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.malisis.core.renderer.icon.GuiIcon;
-import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
-import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.renderer.GlStateManager;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * {@link UIComponent} is the base of everything drawn onto a GUI.<br>
@@ -67,16 +61,12 @@ import com.google.common.eventbus.EventBus;
  * @author Ordinastie, PaleoCrafter
  * @param <T> the type of <code>UIComponent</code>
  */
-public abstract class UIComponent<T extends UIComponent<T>> implements ITransformable.Position<T>, ITransformable.Size<T>,
-		ITransformable.Alpha, IKeyListener
+public abstract class UIComponent<T extends UIComponent<T>>
+		implements ITransformable.Position<T>, ITransformable.Size<T>, ITransformable.Alpha, IKeyListener
 {
 	/** The Constant INHERITED. */
 	public final static int INHERITED = 0;
 
-	/** Reference to the {@link MalisisGui} this {@link UIComponent} was added to. */
-	private final MalisisGui gui;
-	/** Reference to the {@link GuiRenderer} that will draw this {@link UIComponent}. */
-	private final GuiRenderer renderer;
 	/** List of {@link UIComponent components} controlling this {@link UIContainer}. */
 	private final Set<IControlComponent> controlComponents;
 	/** Position of this {@link UIComponent}. */
@@ -103,12 +93,6 @@ public abstract class UIComponent<T extends UIComponent<T>> implements ITransfor
 	protected boolean hovered = false;
 	/** Focus state of this {@link UIComponent}. */
 	protected boolean focused = false;
-	/** GuiShape used to draw this {@link UIComponent}. */
-	protected GuiShape shape;
-	/** {@link RenderParameters} used to draw this {@link UIComponent}. */
-	protected RenderParameters rp;
-	/** {@link GuiIcon} used to draw this {@link UIComponent}. */
-	protected IGuiIconProvider iconProvider;
 	/** Alpha transparency of this {@link UIComponent}. */
 	protected int alpha = 255;
 
@@ -119,15 +103,11 @@ public abstract class UIComponent<T extends UIComponent<T>> implements ITransfor
 	 *
 	 * @param gui the gui
 	 */
-	public UIComponent(MalisisGui gui)
+	public UIComponent()
 	{
-		this.gui = gui;
-		this.renderer = gui.getRenderer();
 		bus = new EventBus(ExceptionHandler.instance);
 		bus.register(this);
 		controlComponents = new LinkedHashSet<>();
-		rp = new RenderParameters();
-		shape = new SimpleGuiShape();
 	}
 
 	// #region getters/setters
@@ -135,26 +115,6 @@ public abstract class UIComponent<T extends UIComponent<T>> implements ITransfor
 	public T self()
 	{
 		return (T) this;
-	}
-
-	/**
-	 * Gets the {@link MalisisGui} this {@link UIComponent} was added to.
-	 *
-	 * @return the gui
-	 */
-	public MalisisGui getGui()
-	{
-		return gui;
-	}
-
-	/**
-	 * Gets the {@link GuiRenderer} that will draw this {@link UIComponent}.
-	 *
-	 * @return the renderer
-	 */
-	public GuiRenderer getRenderer()
-	{
-		return renderer;
 	}
 
 	/**
@@ -294,7 +254,6 @@ public abstract class UIComponent<T extends UIComponent<T>> implements ITransfor
 			//event is cancelled, restore old values
 			this.width = oldWidth;
 			this.height = oldHeight;
-			return self();
 		}
 
 		return self();
@@ -579,7 +538,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements ITransfor
 	 */
 	public T setTooltip(String text)
 	{
-		setTooltip(new UITooltip(getGui(), text));
+		setTooltip(new UITooltip(text));
 		return self();
 	}
 
@@ -618,11 +577,6 @@ public abstract class UIComponent<T extends UIComponent<T>> implements ITransfor
 	}
 
 	// #end getters/setters
-
-	public IIconProvider getIconProvider()
-	{
-		return iconProvider;
-	}
 
 	/**
 	 * Registers an <code>object</code> to handle events received by this {@link UIComponent}.
@@ -1009,14 +963,6 @@ public abstract class UIComponent<T extends UIComponent<T>> implements ITransfor
 	{
 		if (!isVisible())
 			return;
-
-		if (shape != null)
-		{
-			shape.resetState();
-			shape.setSize(getWidth(), getHeight());
-		}
-		if (rp != null)
-			rp.reset();
 
 		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 		if (getAlpha() < 255)

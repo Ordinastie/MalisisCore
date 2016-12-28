@@ -22,37 +22,29 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.element;
+package net.malisis.core.client.gui;
 
-import net.malisis.core.renderer.element.Face;
+import net.malisis.core.client.gui.element.GuiIcon;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * @author Ordinastie
  *
  */
-public class SimpleGuiShape extends GuiShape
+public class VanillaTexture extends GuiTexture
 {
-	public SimpleGuiShape(Face face)
-	{
-		super(face);
-		storeState();
-	}
+	public static final VanillaTexture instance = new VanillaTexture();
 
-	public SimpleGuiShape()
-	{
-		this(new GuiFace());
-	}
+	public static final GuiIcon SLOT_ICON = new GuiIcon(instance, 209, 30, 18, 18);
+	public static final GuiIcon PANEL_ICON = new GuiIcon(instance, 200, 15, 15, 15, 5);
+	public static final GuiIcon TOOLTIP_ICON = new GuiIcon(instance, 227, 31, 15, 15, 5);
+	public static final GuiIcon WINDOW_ICON = new GuiIcon(instance, 200, 0, 15, 15, 5);
+	public static final GuiIcon ARROWEMPTY_ICON = new GuiIcon(instance, 246, 0, 22, 16);
+	public static final GuiIcon ARROWFILLED_ICON = new GuiIcon(instance, 246, 16, 22, 16);
+	public static final GuiIcon SEPARATOR_ICON = new GuiIcon(instance, 200, 15, 15, 15, 3);
 
-	@Override
-	public void setSize(int width, int height)
+	public VanillaTexture()
 	{
-		faces[0].scale(width, height, 0);
-	}
-
-	@Override
-	public void scale(float x, float y)
-	{
-		super.scale(x, y, 0);
-		applyMatrix();
+		super(new ResourceLocation("malisiscore", "textures/gui/gui.png"), 300, 100);
 	}
 }

@@ -26,11 +26,10 @@ package net.malisis.core.client.gui.component.decoration;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.GuiTexture;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.element.GuiIcon;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.renderer.icon.Icon;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.minecraft.item.ItemStack;
 
 /**
@@ -40,10 +39,11 @@ import net.minecraft.item.ItemStack;
  */
 public class UIImage extends UIComponent<UIImage>
 {
+	protected GuiShape shape = new GuiShape();
 	/** {@link GuiTexture} to use for the icon. */
 	private GuiTexture texture;
 	/** {@link Icon} to use for the texture. */
-	private Icon icon = null;
+	private GuiIcon icon = null;
 	/** {@link ItemStack} to render. */
 	private ItemStack itemStack;
 
@@ -54,17 +54,10 @@ public class UIImage extends UIComponent<UIImage>
 	 * @param texture the texture
 	 * @param icon the icon
 	 */
-	public UIImage(MalisisGui gui, GuiTexture texture, Icon icon)
+	public UIImage(GuiTexture texture, GuiIcon icon)
 	{
-		super(gui);
-
-		iconProvider = new GuiIconProvider(null);
-
 		setIcon(texture, icon);
 		setSize(16, 16);
-
-		shape = new SimpleGuiShape();
-		iconProvider = new GuiIconProvider(null);
 	}
 
 	/**
@@ -73,16 +66,10 @@ public class UIImage extends UIComponent<UIImage>
 	 * @param gui the gui
 	 * @param itemStack the item stack
 	 */
-	public UIImage(MalisisGui gui, ItemStack itemStack)
+	public UIImage(ItemStack itemStack)
 	{
-		super(gui);
-
-		iconProvider = new GuiIconProvider(null);
-
 		setItemStack(itemStack);
 		setSize(16, 16);
-
-		shape = new SimpleGuiShape();
 	}
 
 	/**
@@ -91,10 +78,10 @@ public class UIImage extends UIComponent<UIImage>
 	 * @param icon the icon
 	 * @return this UIImage
 	 */
-	public UIImage setIcon(Icon icon)
+	public UIImage setIcon(GuiIcon icon)
 	{
 		this.itemStack = null;
-		this.icon = icon != null ? icon : new Icon();
+		this.icon = icon != null ? icon : new GuiIcon();
 		return this;
 	}
 
@@ -105,10 +92,10 @@ public class UIImage extends UIComponent<UIImage>
 	 * @param icon the icon
 	 * @return this UIImage
 	 */
-	public UIImage setIcon(GuiTexture texture, Icon icon)
+	public UIImage setIcon(GuiTexture texture, GuiIcon icon)
 	{
 		this.itemStack = null;
-		this.icon = icon != null ? icon : new Icon();
+		this.icon = icon != null ? icon : new GuiIcon();
 		this.texture = texture;
 		return this;
 	}
@@ -133,9 +120,9 @@ public class UIImage extends UIComponent<UIImage>
 	 *
 	 * @return the icon
 	 */
-	public Icon getIcon()
+	public GuiIcon getIcon()
 	{
-		return iconProvider.getIcon();
+		return icon;
 	}
 
 	/**
@@ -186,9 +173,10 @@ public class UIImage extends UIComponent<UIImage>
 	{
 		if (icon != null)
 		{
-			((GuiIconProvider) iconProvider).setIcon(icon);
 			renderer.bindTexture(texture);
-			renderer.drawShape(shape, rp);
+			shape.setSize(getWidth(), getHeight());
+			shape.setIcon(icon);
+			renderer.drawShape(shape);
 		}
 		else if (itemStack != null)
 		{

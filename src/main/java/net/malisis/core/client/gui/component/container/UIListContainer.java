@@ -28,7 +28,6 @@ import java.util.Collection;
 
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
@@ -56,16 +55,14 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 	/** Y Offset for the contents of this {@link UIListContainer}. */
 	protected int yOffset;
 
-	public UIListContainer(MalisisGui gui)
+	public UIListContainer()
 	{
-		super(gui);
-		scrollbar = new UIScrollBar(gui, self(), UIScrollBar.Type.VERTICAL);
+		scrollbar = new UIScrollBar(self(), UIScrollBar.Type.VERTICAL);
 		scrollbar.setAutoHide(true);
 	}
 
-	public UIListContainer(MalisisGui gui, int width, int height)
+	public UIListContainer(int width, int height)
 	{
-		this(gui);
 		setSize(width, height);
 	}
 

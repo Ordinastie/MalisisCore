@@ -29,12 +29,12 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.collect.Sets;
 import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.ICloseable;
@@ -58,13 +58,13 @@ import net.minecraft.client.gui.GuiScreen;
 public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implements IClipable, IScrollable, ICloseable
 {
 	/** List of {@link UIComponent} inside this {@link UIContainer}. */
-	protected final Set<UIComponent<?>> components;
+	protected final Set<UIComponent<?>> components = Sets.newHashSet();
 	/** Horizontal padding to apply to this {@link UIContainer}. */
 	protected int horizontalPadding;
 	/** Vertical padding to apply to this {@link UIContainer}. */
 	protected int verticalPadding;
 	/** Label for the title of this {@link UIContainer}. */
-	protected UILabel titleLabel;
+	protected UILabel titleLabel = new UILabel();
 	//IClipable
 	/** Determines whether this {@link UIContainer} should clip its contents to its drawn area. */
 	protected boolean clipContent = true;
@@ -78,16 +78,9 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	/** Y Offset for the contents of this {@link UIContainer} from 0 to 1. */
 	protected int yOffset;
 
-	/**
-	 * Default constructor, creates the components list.
-	 *
-	 * @param gui the gui
-	 */
-	public UIContainer(MalisisGui gui)
+	public UIContainer()
 	{
-		super(gui);
-		components = new LinkedHashSet<>();
-		titleLabel = new UILabel(gui);
+
 	}
 
 	/**
@@ -96,9 +89,8 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	 * @param gui the gui
 	 * @param title the title
 	 */
-	public UIContainer(MalisisGui gui, String title)
+	public UIContainer(String title)
 	{
-		this(gui);
 		setTitle(title);
 	}
 
@@ -109,9 +101,8 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	 * @param width the width
 	 * @param height the height
 	 */
-	public UIContainer(MalisisGui gui, int width, int height)
+	public UIContainer(int width, int height)
 	{
-		this(gui);
 		setSize(width, height);
 	}
 
@@ -123,9 +114,8 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	 * @param width the width
 	 * @param height the height
 	 */
-	public UIContainer(MalisisGui gui, String title, int width, int height)
+	public UIContainer(String title, int width, int height)
 	{
-		this(gui);
 		setTitle(title);
 		setSize(width, height);
 	}

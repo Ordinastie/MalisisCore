@@ -36,7 +36,6 @@ import java.util.function.Supplier;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.component.IKeyListener;
@@ -47,7 +46,6 @@ import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
 import net.malisis.core.inventory.message.InventoryActionMessage;
-import net.malisis.core.renderer.RenderType;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.AnimationRenderer;
 import net.malisis.core.renderer.font.FontOptions;
@@ -57,7 +55,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundEvent;
@@ -73,7 +70,7 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
  */
 public abstract class MalisisGui extends GuiScreen
 {
-	public static GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+	public static GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE, 1, 1);
 
 	/** Whether or not to cancel the next gui close event. */
 	public static boolean cancelClose = false;
@@ -123,7 +120,7 @@ public abstract class MalisisGui extends GuiScreen
 		this.itemRender = mc.getRenderItem();
 		this.fontRendererObj = mc.fontRendererObj;
 		this.renderer = new GuiRenderer();
-		this.screen = new UIContainer<>(this).setName("Screen");
+		this.screen = new UIContainer<>().setName("Screen");
 		this.ar = new AnimationRenderer();
 		this.ar.autoClearAnimations();
 		this.screen.setClipContent(false);
@@ -525,9 +522,13 @@ public abstract class MalisisGui extends GuiScreen
 
 	/**
 	 * Draws this {@link MalisisGui}.
+	 *
+	 * @param mouseX the mouse X
+	 * @param mouseY the mouse Y
+	 * @param partialTick the partial tick
 	 */
 	@Override
-	public void drawScreen(int mouseX, int mouseY, float partialTicks)
+	public void drawScreen(int mouseX, int mouseY, float partialTick)
 	{
 		ar.animate();
 
@@ -538,18 +539,16 @@ public abstract class MalisisGui extends GuiScreen
 			mouseY = this.height - Mouse.getY() - 1;
 		}
 
-		update(mouseX, mouseY, partialTicks);
+		update(mouseX, mouseY, partialTick);
 
 		if (guiscreenBackground)
 			drawWorldBackground(1);
 
-		RenderHelper.enableGUIStandardItemLighting();
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_LIGHTING);
+		renderer.setup(mouseX, mouseY, partialTick);
 
-		renderer.drawScreen(screen, mouseX, mouseY, partialTicks);
-
-		renderDebug(mouseX, mouseY, partialTicks);
+		screen.draw(renderer, mouseX, mouseY, partialTick);
+		if (debug)
+			renderDebug(mouseX, mouseY);
 
 		if (inventoryContainer != null)
 		{
@@ -562,8 +561,7 @@ public abstract class MalisisGui extends GuiScreen
 		else if (hoveredComponent != null && hoveredComponent.isHovered())
 			renderer.drawTooltip(hoveredComponent.getTooltip());
 
-		GL11.glEnable(GL11.GL_LIGHTING);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		renderer.clean();
 
 	}
 
@@ -591,22 +589,14 @@ public abstract class MalisisGui extends GuiScreen
 		debugMap.remove(name);
 	}
 
-	private void renderDebug(int mouseX, int mouseY, float partialTicks)
+	private void renderDebug(int mouseX, int mouseY)
 	{
-		if (debug)
-		{
-			renderer.set(mouseX, mouseY, partialTicks);
-			renderer.prepare(RenderType.GUI);
-
-			int dy = 0, oy = 5;
-			FontOptions fro = FontOptions.builder().color(0xFFFFFF).shadow().build();
-			//hard code mouse
-			renderer.drawText(null, "Mouse : " + mouseX + "," + mouseY, 5, dy++ * 10 + oy, 0, fro, false);
-			for (Entry<String, Supplier<String>> entry : debugMap.entrySet())
-				renderer.drawText(null, entry.getKey() + " : " + entry.getValue().get(), 5, dy++ * 10 + oy, 0, fro, false);
-
-			renderer.clean();
-		}
+		int dy = 0, oy = 5;
+		FontOptions fro = FontOptions.builder().color(0xFFFFFF).shadow().build();
+		//hard code mouse
+		renderer.drawText(null, "Mouse : " + mouseX + "," + mouseY, 5, dy++ * 10 + oy, 0, fro, false);
+		for (Entry<String, Supplier<String>> entry : debugMap.entrySet())
+			renderer.drawText(null, entry.getKey() + " : " + entry.getValue().get(), 5, dy++ * 10 + oy, 0, fro, false);
 
 	}
 

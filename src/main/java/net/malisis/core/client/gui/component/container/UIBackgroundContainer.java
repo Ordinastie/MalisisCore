@@ -25,12 +25,9 @@
 package net.malisis.core.client.gui.component.container;
 
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
-import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.GuiVertex.VertexPosition;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.malisis.core.renderer.element.Face;
 
 /**
  * @author Ordinastie
@@ -38,6 +35,7 @@ import net.malisis.core.renderer.element.Face;
  */
 public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> implements ITransformable.Color
 {
+	protected GuiShape shape = new GuiShape();
 	/** Top left corner color **/
 	protected int topLeftColor = -1;
 	/** Top right corner color **/
@@ -62,27 +60,14 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	protected int borderAlpha = 0;
 
 	/**
-	 * Default constructor, creates the components list.
-	 *
-	 * @param gui the gui
-	 */
-	public UIBackgroundContainer(MalisisGui gui)
-	{
-		super(gui);
-
-		shape = new SimpleGuiShape();
-	}
-
-	/**
 	 * Instantiates a new {@link UIBackgroundContainer}.
 	 *
 	 * @param gui the gui
 	 * @param title the title
 	 */
-	public UIBackgroundContainer(MalisisGui gui, String title)
+	public UIBackgroundContainer(String title)
 	{
-		this(gui);
-		setTitle(title);
+		super(title);
 	}
 
 	/**
@@ -92,10 +77,9 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 * @param width the width
 	 * @param height the height
 	 */
-	public UIBackgroundContainer(MalisisGui gui, int width, int height)
+	public UIBackgroundContainer(int width, int height)
 	{
-		this(gui);
-		setSize(width, height);
+		super(width, height);
 	}
 
 	/**
@@ -106,11 +90,9 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 * @param width the width
 	 * @param height the height
 	 */
-	public UIBackgroundContainer(MalisisGui gui, String title, int width, int height)
+	public UIBackgroundContainer(String title, int width, int height)
 	{
-		this(gui);
-		setTitle(title);
-		setSize(width, height);
+		super(title, width, height);
 	}
 
 	/**
@@ -124,10 +106,6 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 		borderColor = color;
 		borderSize = size;
 		borderAlpha = alpha;
-		if (size >= 0)
-			shape = new XYResizableGuiShape(size);
-		else
-			shape = new SimpleGuiShape();
 		return self();
 	}
 
@@ -422,33 +400,41 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (alpha == 0)
-			return;
-
-		renderer.enableBlending();
-
-		Face f = shape.getFaces()[0];
-		if (borderSize != 0)
+		if (borderSize > 0)
 		{
-			f = shape.getFaces()[4];
-			rp.colorMultiplier.set(borderColor);
-			rp.alpha.set(borderAlpha);
+			shape.setColor(borderColor);
+			shape.setAlpha(borderAlpha);
+			//top
+			shape.setSize(getWidth(), borderSize);
+			shape.setPosition(0, 0);
+			renderer.drawShape(shape);
+			//bottom
+			//shape.setSize(getWidth(), borderSize);
+			shape.setPosition(0, getHeight() - borderSize);
+			renderer.drawShape(shape);
+			//left
+			shape.setSize(borderSize, getHeight() - borderSize * 2);
+			shape.setPosition(0, borderSize);
+			renderer.drawShape(shape);
+			//right
+			//shape.setSize(borderSize, getHeight()- borderSize * 2);
+			shape.setPosition(getWidth() - borderSize, borderSize);
+			renderer.drawShape(shape);
 		}
 
-		RenderParameters frp = f.getParameters();
-		frp.usePerVertexColor.set(true);
-		frp.usePerVertexAlpha.set(true);
-		f.getVertexes("TopLeft").get(0).setColor(topLeftColor).setAlpha(topLeftAlpha);
-		f.getVertexes("TopRight").get(0).setColor(topRightColor).setAlpha(topRightAlpha);
-		f.getVertexes("BottomLeft").get(0).setColor(bottomLeftColor).setAlpha(bottomLeftAlpha);
-		f.getVertexes("BottomRight").get(0).setColor(bottomRightColor).setAlpha(bottomRightAlpha);
+		shape.setPosition(getX() + borderSize, getY() + borderSize);
+		shape.setSize(getWidth() - borderSize * 2, getHeight() - borderSize * 2);
 
-		renderer.disableTextures();
+		shape.setColor(VertexPosition.TOPLEFT, topLeftColor);
+		shape.setAlpha(VertexPosition.TOPLEFT, topLeftAlpha);
+		shape.setColor(VertexPosition.TOPRIGHT, topRightColor);
+		shape.setAlpha(VertexPosition.TOPRIGHT, topRightAlpha);
+		shape.setColor(VertexPosition.BOTTOMLEFT, bottomLeftColor);
+		shape.setAlpha(VertexPosition.BOTTOMLEFT, bottomLeftAlpha);
+		shape.setColor(VertexPosition.BOTTOMRIGHT, bottomRightColor);
+		shape.setAlpha(VertexPosition.BOTTOMRIGHT, bottomRightAlpha);
 
-		renderer.drawShape(shape, rp);
-		renderer.next();
-
-		renderer.enableTextures();
+		renderer.drawShape(shape);
 	}
 
 }

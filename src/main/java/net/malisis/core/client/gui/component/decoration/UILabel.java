@@ -27,8 +27,11 @@ package net.malisis.core.client.gui.component.decoration;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.eventbus.Subscribe;
+
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
@@ -44,10 +47,6 @@ import net.malisis.core.util.bbcode.BBString;
 import net.malisis.core.util.bbcode.render.BBCodeRenderer;
 import net.malisis.core.util.bbcode.render.IBBCodeRenderer;
 import net.minecraft.client.gui.GuiScreen;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * UILabel.
@@ -93,9 +92,8 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	 * @param text the text
 	 * @param multiLine the multi line
 	 */
-	public UILabel(MalisisGui gui, String text, boolean multiLine)
+	public UILabel(String text, boolean multiLine)
 	{
-		super(gui);
 		this.setText(text);
 		this.multiLine = multiLine;
 	}
@@ -106,9 +104,8 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	 * @param gui the gui
 	 * @param text the text
 	 */
-	public UILabel(MalisisGui gui, BBString text)
+	public UILabel(BBString text)
 	{
-		this(gui);
 		this.setText(text);
 		this.multiLine = true;
 	}
@@ -119,9 +116,9 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	 * @param gui the gui
 	 * @param text the text
 	 */
-	public UILabel(MalisisGui gui, String text)
+	public UILabel(String text)
 	{
-		this(gui, text, false);
+		this(text, false);
 	}
 
 	/**
@@ -130,9 +127,9 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	 * @param gui the gui
 	 * @param multiLine the multi line
 	 */
-	public UILabel(MalisisGui gui, boolean multiLine)
+	public UILabel(boolean multiLine)
 	{
-		this(gui, (String) null, multiLine);
+		this((String) null, multiLine);
 	}
 
 	/**
@@ -140,10 +137,8 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	 *
 	 * @param gui the gui
 	 */
-	public UILabel(MalisisGui gui)
-	{
-		this(gui, (String) null, false);
-	}
+	public UILabel()
+	{}
 
 	// #region getters/setters
 	/**

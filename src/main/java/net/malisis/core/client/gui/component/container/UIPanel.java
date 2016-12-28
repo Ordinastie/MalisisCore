@@ -26,40 +26,38 @@ package net.malisis.core.client.gui.component.container;
 
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.client.gui.VanillaTexture;
+import net.malisis.core.client.gui.element.GuiIcon;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 public class UIPanel extends UIContainer<UIPanel> implements ITransformable.Color
 {
+	protected GuiShape shape = new GuiShape(VanillaTexture.PANEL_ICON);
+	protected GuiIcon icon;
 	/** Background color multiplier. */
 	protected int backgroundColor = -1;
 
-	public UIPanel(MalisisGui gui)
+	public UIPanel()
 	{
-		super(gui);
 		setPadding(3, 3);
-
-		shape = new XYResizableGuiShape(5);
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 15, 15, 15, 5));
 	}
 
-	public UIPanel(MalisisGui gui, int width, int height)
+	public UIPanel(int width, int height)
 	{
-		this(gui);
+		this();
 		setSize(width, height);
 	}
 
-	public UIPanel(MalisisGui gui, String title)
+	public UIPanel(String title)
 	{
-		this(gui);
+		this();
 		setTitle(title);
 	}
 
-	public UIPanel(MalisisGui gui, String title, int width, int height)
+	public UIPanel(String title, int width, int height)
 	{
-		this(gui);
+		this();
 		setTitle(title);
 		setSize(width, height);
 	}
@@ -106,10 +104,9 @@ public class UIPanel extends UIContainer<UIPanel> implements ITransformable.Colo
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.useTexture.set(true);
-		rp.alpha.set(255);
-		rp.colorMultiplier.set(getBackgroundColor() != 0x404040 ? getBackgroundColor() : -1);
-		renderer.drawShape(shape, rp);
-		renderer.next();
+		shape.setPosition(getX(), getY());
+		shape.setSize(getWidth(), getHeight());
+		shape.setColor(getBackgroundColor() != 0x404040 ? getBackgroundColor() : -1);
+		renderer.drawShape(shape);
 	}
 }

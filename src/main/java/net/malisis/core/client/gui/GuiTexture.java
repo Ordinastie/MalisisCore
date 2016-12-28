@@ -30,10 +30,10 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import net.malisis.core.renderer.icon.GuiIcon;
 import net.malisis.core.renderer.icon.Icon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -93,16 +93,6 @@ public class GuiTexture
 	}
 
 	/**
-	 * Instantiates a new {@link GuiTexture}.
-	 *
-	 * @param rl the rl
-	 */
-	public GuiTexture(ResourceLocation rl)
-	{
-		this(rl, 1, 1);
-	}
-
-	/**
 	 * Gets the width of this {@link GuiTexture}.
 	 *
 	 * @return the width
@@ -133,102 +123,8 @@ public class GuiTexture
 	}
 
 	/**
-	 * Creates the {@link Icon} and initializes it.
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param width the width
-	 * @param height the height
-	 * @return the {@link Icon}
+	 * Deletes this texture from the {@link TextureManager}.
 	 */
-	public Icon createIcon(int x, int y, int width, int height)
-	{
-		Icon icon = new Icon();
-		icon.setSize(width, height);
-		icon.initSprite(this.width, this.height, x, y, false);
-
-		return icon;
-	}
-
-	/**
-	 * Gets a {@link GuiIcon} from a single icon (used for single face shapes).
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param width the width
-	 * @param height the height
-	 * @return the icon
-	 */
-	public GuiIcon getIcon(int x, int y, int width, int height)
-	{
-		return new GuiIcon(createIcon(x, y, width, height));
-	}
-
-	/**
-	 * Gets a {@link GuiIcon} that is resizable from both X and Y axis.<br>
-	 * The {@code GuiIcon} will hold 9 icons that will behave when resized :<br>
-	 * - the top and bottom row will not change in height when resized<br>
-	 * - left left and right row will not change in width when resized<br>
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param width the width
-	 * @param height the height
-	 * @param corner the corner
-	 * @return the XY resizable icon
-	 */
-	public GuiIcon getXYResizableIcon(int x, int y, int width, int height, int corner)
-	{
-		int w = width - corner * 2;
-		int h = height - corner * 2;
-
-		//@formatter:off
-		Icon[] icons = new Icon[] {
-				createIcon(x, 					y, 					corner, 	corner),
-				createIcon(x + corner, 		y, 					w, 			corner),
-				createIcon(x + corner + w, 	y, 					corner, 	corner),
-
-				createIcon(x, 					y + corner, 		corner, 	h),
-				createIcon(x + corner, 		y + corner, 		w, 			h),
-				createIcon(x + corner + w, 	y + corner, 		corner, 	h),
-
-				createIcon(x, 					y + corner + h, 	corner, 	corner),
-				createIcon(x + corner, 		y + corner + h, 	w, 			corner),
-				createIcon(x + corner + w, 	y + corner + h, 	corner, 	corner),
-		};
-		//@formatter:on
-
-		return new GuiIcon(icons);
-	}
-
-	/**
-	 * Gets a {@link GuiIcon} that is resizable only on the X axis.<br>
-	 * The {@code GuiIcon} will hold 3 icons that will behave when resized :<br>
-	 * - left left and right icon will not change in width when resized<br>
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param width the width
-	 * @param height the height
-	 * @param side the side
-	 * @return the x resizable icon
-	 */
-	public GuiIcon getXResizableIcon(int x, int y, int width, int height, int side)
-	{
-		int w = width - side * 2;
-		int h = height;
-
-		//@formatter:off
-		Icon[] icons = new Icon[] {
-				createIcon(x, 				y, 		side, 	h),
-				createIcon(x + side, 		y, 		w, 		h),
-				createIcon(x + side + w, 	y, 		side, 	h),
-		};
-		//@formatter:on
-
-		return new GuiIcon(icons);
-	}
-
 	public void delete()
 	{
 		Minecraft.getMinecraft().getTextureManager().deleteTexture(resourceLocation);
