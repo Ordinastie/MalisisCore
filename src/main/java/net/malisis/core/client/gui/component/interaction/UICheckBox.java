@@ -24,20 +24,17 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
+import org.apache.commons.lang3.StringUtils;
+import org.lwjgl.input.Keyboard;
+
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.element.GuiIcon;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
-import net.minecraft.client.renderer.OpenGlHelper;
-
-import org.apache.commons.lang3.StringUtils;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 /**
  * UICheckBox
@@ -46,6 +43,7 @@ import org.lwjgl.opengl.GL11;
  */
 public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICheckBox>
 {
+	protected GuiShape shape = new GuiShape();
 	/** The {@link MalisisFont} to use for this {@link UICheckBox}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontOptions} to use for this {@link UICheckBox}. */
@@ -55,23 +53,14 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	/** Whether this {@link UICheckBox} is checked. */
 	private boolean checked;
 
-	private GuiIconProvider cbIconProvider;
-
-	public UICheckBox(MalisisGui gui, String text)
+	public UICheckBox(String text)
 	{
-		super(gui);
 		setText(text);
-
-		shape = new SimpleGuiShape();
-
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(242, 32, 10, 10), null, gui.getGuiTexture().getIcon(252, 32, 10, 10));
-		cbIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(242, 52, 12, 10), gui.getGuiTexture().getIcon(254, 42, 12, 10),
-				gui.getGuiTexture().getIcon(242, 42, 12, 10));
 	}
 
-	public UICheckBox(MalisisGui gui)
+	public UICheckBox()
 	{
-		this(gui, null);
+		this(null);
 	}
 
 	//#region Getters/Setters
@@ -184,37 +173,15 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		shape.resetState();
-		shape.setSize(10, 10);
-		shape.setPosition(1, 0);
-		renderer.drawShape(shape, rp);
-
+		setupShape(shape, GuiIcon.CHECKBOX_BG, GuiIcon.CHECKBOX_HOVER_BG, null);
+		shape.translate(1, 0);
+		shape.setSize(12, 12);
+		renderer.drawShape(shape);
 		renderer.next();
 
 		// draw the white shade over the slot
 		if (hovered)
-		{
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glDisable(GL11.GL_ALPHA_TEST);
-			OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-			GL11.glShadeModel(GL11.GL_SMOOTH);
-
-			rp.colorMultiplier.set(0xFFFFFF);
-			rp.alpha.set(80);
-			rp.useTexture.set(false);
-
-			shape.resetState();
-			shape.setSize(8, 8);
-			shape.setPosition(2, 1);
-			renderer.drawShape(shape, rp);
-			renderer.next();
-
-			GL11.glShadeModel(GL11.GL_FLAT);
-			GL11.glDisable(GL11.GL_BLEND);
-			GL11.glEnable(GL11.GL_ALPHA_TEST);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-		}
+			renderer.drawRectangle(2, 1, 0, 8, 8, 0xFFFFFF, 80, true);
 
 		if (!StringUtils.isEmpty(text))
 			renderer.drawText(font, text, 14, 2, 0, fontOptions);
@@ -223,19 +190,12 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (checked)
-		{
-			if (isHovered() && !isDisabled())
-				GL11.glEnable(GL11.GL_BLEND);
-			rp.reset();
-			shape.resetState();
-			shape.setSize(12, 10);
-			rp.iconProvider.set(cbIconProvider);
-			renderer.drawShape(shape, rp);
-			renderer.next();
-			if (isHovered() && !isDisabled())
-				GL11.glDisable(GL11.GL_BLEND);
-		}
+		if (!checked)
+			return;
+
+		setupShape(shape, GuiIcon.CHECKBOX, GuiIcon.CHECKBOX_HOVER, GuiIcon.CHECKBOX_DISABLED);
+		shape.setSize(12, 10);
+		renderer.drawShape(shape);
 	}
 
 	@Override

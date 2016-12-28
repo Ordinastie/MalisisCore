@@ -29,12 +29,11 @@ import java.util.Map;
 
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ComponentPosition;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.interaction.UITab;
+import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.malisis.core.renderer.icon.GuiIcon;
 
 /**
  * @author Ordinastie
@@ -66,24 +65,22 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 * @param gui the gui
 	 * @param tabPosition the tab position
 	 */
-	public UITabGroup(MalisisGui gui, ComponentPosition tabPosition)
+	public UITabGroup(ComponentPosition tabPosition)
 	{
-		super(gui);
 		this.tabPosition = tabPosition;
 		clipContent = false;
 		setSize(0, 0);
 
-		//@formatter:off
-		windowIcons = new GuiIcon[] {	gui.getGuiTexture().getXYResizableIcon(0, 60, 15, 15, 5),
-										gui.getGuiTexture().getXYResizableIcon(15, 60, 15, 15, 5),
-										gui.getGuiTexture().getXYResizableIcon(0, 75, 15, 15, 5),
-										gui.getGuiTexture().getXYResizableIcon(15, 75, 15, 15, 5)};
+		//		windowIcons = new GuiIcon[] {	gui.getGuiTexture().getXYResizableIcon(0, 60, 15, 15, 5),
+		//										gui.getGuiTexture().getXYResizableIcon(15, 60, 15, 15, 5),
+		//										gui.getGuiTexture().getXYResizableIcon(0, 75, 15, 15, 5),
+		//										gui.getGuiTexture().getXYResizableIcon(15, 75, 15, 15, 5) };
+		//
+		//		panelIcons = new GuiIcon[] {	gui.getGuiTexture().getXYResizableIcon(30, 60, 15, 15, 5),
+		//										gui.getGuiTexture().getXYResizableIcon(45, 60, 15, 15, 5),
+		//										gui.getGuiTexture().getXYResizableIcon(30, 75, 15, 15, 5),
+		//										gui.getGuiTexture().getXYResizableIcon(45, 75, 15, 15, 5) };
 
-		panelIcons = new GuiIcon[] {	gui.getGuiTexture().getXYResizableIcon(30, 60, 15, 15, 5),
-										gui.getGuiTexture().getXYResizableIcon(45, 60, 15, 15, 5),
-										gui.getGuiTexture().getXYResizableIcon(30, 75, 15, 15, 5),
-										gui.getGuiTexture().getXYResizableIcon(45, 75, 15, 15, 5)};
-		//@formatter:on
 	}
 
 	/**
@@ -91,9 +88,9 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 *
 	 * @param gui the gui
 	 */
-	public UITabGroup(MalisisGui gui)
+	public UITabGroup()
 	{
-		this(gui, ComponentPosition.TOP);
+		this(ComponentPosition.TOP);
 	}
 
 	/**
@@ -113,10 +110,11 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 */
 	public GuiIcon getIcons()
 	{
-		if (attachedContainer instanceof UIWindow)
-			return windowIcons[tabPosition.ordinal()];
-		else
-			return panelIcons[tabPosition.ordinal()];
+		return null;
+		//		if (attachedContainer instanceof UIWindow)
+		//			return windowIcons[tabPosition.ordinal()];
+		//		else
+		//			return panelIcons[tabPosition.ordinal()];
 	}
 
 	/**

@@ -32,8 +32,8 @@ import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.VanillaTexture;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
+import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.inventory.InventoryEvent;
@@ -51,7 +51,7 @@ import net.minecraft.util.text.TextFormatting;
 
 public class UISlot extends UIComponent<UISlot>
 {
-	protected GuiShape shape = new GuiShape(VanillaTexture.SLOT_ICON);
+	protected GuiShape shape = new GuiShape(0, 0, 18, 18, GuiIcon.SLOT);
 	//	/** IconProvider for Mojang fix */
 	//	protected GuiIconProvider iconLeftProvider;
 	//	/** IconProvider for Mojang fix */
@@ -116,7 +116,6 @@ public class UISlot extends UIComponent<UISlot>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		shape.setSize(18, 18);
 		renderer.drawShape(shape);
 	}
 

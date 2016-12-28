@@ -26,7 +26,6 @@ package net.malisis.core.client.gui.component.decoration;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.GuiTexture;
-import net.malisis.core.client.gui.VanillaTexture;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
@@ -58,7 +57,7 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	//by default, use furnace arrows
 	public UIProgressBar()
 	{
-		this(22, 16, null, VanillaTexture.ARROWEMPTY_ICON, VanillaTexture.ARROWFILLED_ICON);
+		this(22, 16, null, GuiIcon.ARROW_EMPTY, GuiIcon.ARROW_FILLED);
 	}
 
 	public UIProgressBar setReversed()

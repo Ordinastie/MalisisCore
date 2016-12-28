@@ -30,7 +30,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import net.malisis.core.renderer.icon.Icon;
+import net.malisis.core.client.gui.element.GuiIcon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -40,8 +40,8 @@ import net.minecraft.util.ResourceLocation;
  * The Class GuiTexture represents the textures loaded and to be drawn inside a {@link MalisisGui}.<br>
  * The textures can used from a {@link ResourceLocation} if the resource is inside the project, from a {@link File} or directly from a
  * {@link BufferedImage}.<br>
- * In case of {@code ResourceLocation}, the original dimension should be specified if parts of the texture is to be retrieved as
- * {@link Icon}.
+ * In case of {@code ResourceLocation}, the original dimension should be specified if parts of the texture are to be retrieved as
+ * {@link GuiIcon}.
  *
  * @author Ordinastie
  */

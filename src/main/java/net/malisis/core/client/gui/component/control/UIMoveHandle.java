@@ -24,12 +24,14 @@
 
 package net.malisis.core.client.gui.component.control;
 
+import static com.google.common.base.Preconditions.*;
+
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.client.gui.element.GuiIcon;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.util.MouseButton;
 
 /**
@@ -40,15 +42,17 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 {
 	public enum Type
 	{
-		BOTH, HORIZONTAL, VERTICAL
+		BOTH,
+		HORIZONTAL,
+		VERTICAL
 	}
 
+	protected GuiShape shape = new GuiShape(0, 0, 5, 5, GuiIcon.MOVE);
 	private Type type;
 
-	public UIMoveHandle(MalisisGui gui, UIComponent<?> parent, Type type)
+	public UIMoveHandle(UIComponent<?> parent, Type type)
 	{
-		super(gui);
-		this.type = type != null ? type : Type.BOTH;
+		this.type = checkNotNull(type);
 
 		int x = 1;
 		int y = 1;
@@ -63,13 +67,11 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 		register(this);
 
 		parent.addControlComponent(this);
-
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(268, 15, 15, 15));
 	}
 
-	public UIMoveHandle(MalisisGui gui, UIComponent<?> parent)
+	public UIMoveHandle(UIComponent<?> parent)
 	{
-		this(gui, parent, Type.BOTH);
+		this(parent, Type.BOTH);
 	}
 
 	@Override
@@ -104,7 +106,7 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawShape(shape, rp);
+		renderer.drawShape(shape);
 	}
 
 }

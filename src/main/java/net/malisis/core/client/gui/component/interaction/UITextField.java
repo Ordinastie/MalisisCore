@@ -27,34 +27,30 @@ package net.malisis.core.client.gui.component.interaction;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.IGuiText;
-import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.control.IScrollable;
-import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
-import net.malisis.core.client.gui.component.control.UISlimScrollbar;
-import net.malisis.core.client.gui.component.decoration.UITooltip;
-import net.malisis.core.client.gui.element.GuiShape;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
-import net.malisis.core.client.gui.event.ComponentEvent;
-import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
-import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.font.Link;
-import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.icon.GuiIcon;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
-import net.malisis.core.util.MouseButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.util.ChatAllowedCharacters;
-
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+
+import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.component.IGuiText;
+import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.control.IScrollable;
+import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
+import net.malisis.core.client.gui.component.control.UISlimScrollbar;
+import net.malisis.core.client.gui.component.decoration.UITooltip;
+import net.malisis.core.client.gui.element.GuiIcon;
+import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
+import net.malisis.core.renderer.font.FontOptions;
+import net.malisis.core.renderer.font.Link;
+import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.util.MouseButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.ChatAllowedCharacters;
 
 /**
  * UITextField.
@@ -116,14 +112,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	protected int selectColor = 0x0000FF;
 
 	//drawing
-	/** Shape used to draw the cursor of this {@link UITextField}. */
-	protected GuiShape cursorShape;
-	/** Shape used to draw the selection box. */
-	protected GuiShape selectShape;
-	/** Icon used to draw this {@link UITextField}. */
-	protected GuiIcon iconTextfield;
-	/** Icon used to draw this {@link UITextField} when disabled. */
-	protected GuiIcon iconTextfieldDisabled;
+	protected GuiShape shape = new GuiShape();
 
 	/**
 	 * Instantiates a new {@link UITextField}.
@@ -132,9 +121,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 * @param text the text
 	 * @param multiLine whether the textfield handles multiple lines
 	 */
-	public UITextField(MalisisGui gui, String text, boolean multiLine)
+	public UITextField(String text, boolean multiLine)
 	{
-		super(gui);
 		this.multiLine = multiLine;
 		cursorPosition = new CursorPosition();
 		selectionPosition = new CursorPosition();
@@ -142,19 +130,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (text != null)
 			this.setText(text);
 
-		shape = new XYResizableGuiShape(1);
-		cursorShape = new SimpleGuiShape();
-		selectShape = new SimpleGuiShape();
-
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1), null, gui.getGuiTexture()
-																												.getXYResizableIcon(200,
-																														42,
-																														9,
-																														12,
-																														1));
-
 		if (multiLine)
-			scrollBar = new UISlimScrollbar(gui, this, Type.VERTICAL);
+			scrollBar = new UISlimScrollbar(this, Type.VERTICAL);
 	}
 
 	/**
@@ -163,9 +140,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 * @param gui the gui
 	 * @param text the text
 	 */
-	public UITextField(MalisisGui gui, String text)
+	public UITextField(String text)
 	{
-		this(gui, text, false);
+		this(text, false);
 	}
 
 	/**
@@ -174,9 +151,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 * @param gui the gui
 	 * @param multiLine the multi line
 	 */
-	public UITextField(MalisisGui gui, boolean multiLine)
+	public UITextField(boolean multiLine)
 	{
-		this(gui, null, multiLine);
+		this(null, multiLine);
 	}
 
 	@Override
@@ -1105,10 +1082,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.useTexture.reset();
-		rp.colorMultiplier.reset();
-		rp.colorMultiplier.set(bgColor);
-		renderer.drawShape(shape, rp);
+		setupShape(shape, GuiIcon.TEXTFIELD, null, GuiIcon.TEXTFIELD_DISABLED);
+		shape.setColor(bgColor);
+		renderer.drawShape(shape);
 	}
 
 	/**
@@ -1174,14 +1150,14 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (cursorPosition.line < lineOffset || cursorPosition.line >= lineOffset + getVisibleLines())
 			return;
 
-		renderer.drawRectangle(cursorPosition.getXOffset() + 1,
-				cursorPosition.getYOffset() + 1,
-				getZIndex(),
-				1,
-				getLineHeight(),
-				cursorColor,
-				255,
-				true);
+		renderer.drawRectangle(	cursorPosition.getXOffset() + 1,
+								cursorPosition.getYOffset() + 1,
+								getZIndex(),
+								1,
+								getLineHeight(),
+								cursorColor,
+								255,
+								true);
 	}
 
 	/**
@@ -1211,14 +1187,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				if (i == last.line)
 					X = last.getXOffset();
 
-				selectShape.resetState();
-				selectShape.setSize(Math.min(getWidth() - 2, X) - x, getLineHeight());
-				selectShape.setPosition(x + 2, y + 1);
-
-				rp.useTexture.set(false);
-				rp.colorMultiplier.set(selectColor);
-
-				renderer.drawShape(selectShape, rp);
+				renderer.drawRectangle(x + 2, y + 1, 0, Math.min(getWidth() - 2, X) - x, getLineHeight(), selectColor, 255, true);
 			}
 		}
 

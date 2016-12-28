@@ -57,6 +57,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -70,7 +71,10 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
  */
 public abstract class MalisisGui extends GuiScreen
 {
-	public static GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE, 1, 1);
+	public static final GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE, 1, 1);
+	public static final GuiTexture VANILLAGUI_TEXTURE = new GuiTexture(	new ResourceLocation("malisiscore", "textures/gui/gui.png"),
+																		300,
+																		100);
 
 	/** Whether or not to cancel the next gui close event. */
 	public static boolean cancelClose = false;

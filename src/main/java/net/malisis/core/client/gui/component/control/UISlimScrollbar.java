@@ -24,17 +24,16 @@
 
 package net.malisis.core.client.gui.component.control;
 
+import com.google.common.eventbus.Subscribe;
+
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.AlphaTransform;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
@@ -49,9 +48,9 @@ public class UISlimScrollbar extends UIScrollBar
 	/** Whether the scrollbar should fade in/out */
 	protected boolean fade = true;
 
-	public <T extends UIComponent<T> & IScrollable> UISlimScrollbar(MalisisGui gui, T parent, Type type)
+	public <T extends UIComponent<T> & IScrollable> UISlimScrollbar(T parent, Type type)
 	{
-		super(gui, parent, type);
+		super(parent, type);
 		setScrollSize(2, 15);
 	}
 
@@ -75,20 +74,6 @@ public class UISlimScrollbar extends UIScrollBar
 			setPosition(hp + offsetX, -vp + offsetY, Anchor.BOTTOM);
 		else
 			setPosition(-hp + offsetX, vp + offsetY, Anchor.RIGHT);
-	}
-
-	@Override
-	protected void createShape(MalisisGui gui)
-	{
-		int w = type == Type.HORIZONTAL ? scrollHeight : scrollThickness;
-		int h = type == Type.HORIZONTAL ? scrollThickness : scrollHeight;
-
-		//background shape
-		shape = new SimpleGuiShape();
-		//scroller shape
-		scrollShape = new SimpleGuiShape();
-		scrollShape.setSize(w, h);
-		scrollShape.storeState();
 	}
 
 	@Override
@@ -135,27 +120,27 @@ public class UISlimScrollbar extends UIScrollBar
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.disableTextures();
-		rp.colorMultiplier.set(backgroundColor);
-		renderer.drawShape(shape, rp);
+		renderer.drawRectangle(0, 0, 0, getWidth(), getHeight(), backgroundColor, 255, true);
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int ox = 0, oy = 0;
 		int l = getLength() - scrollHeight;
+		int ox = 0;
+		int oy = (int) (getOffset() * l);
+		int w = scrollThickness;
+		int h = scrollHeight;
+
 		if (isHorizontal())
+		{
 			ox = (int) (getOffset() * l);
-		else
-			oy = (int) (getOffset() * l);
+			oy = 0;
+			w = scrollHeight;
+			h = scrollThickness;
+		}
 
-		renderer.disableTextures();
-
-		scrollShape.resetState();
-		scrollShape.setPosition(ox, oy);
-		rp.colorMultiplier.set(scrollColor);
-		renderer.drawShape(scrollShape, rp);
+		renderer.drawRectangle(ox, oy, 0, w, h, scrollColor, 255, true);
 	}
 
 	@Subscribe
@@ -172,6 +157,6 @@ public class UISlimScrollbar extends UIScrollBar
 
 		Animation<ITransformable.Alpha> anim = new Animation<>(this, new AlphaTransform(from, to).forTicks(5));
 
-		event.getComponent().getGui().animate(anim);
+		MalisisGui.currentGui().animate(anim);
 	}
 }

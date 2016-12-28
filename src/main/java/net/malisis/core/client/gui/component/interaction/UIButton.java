@@ -31,11 +31,11 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.client.gui.element.GuiIcon;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.icon.GuiIcon;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.init.SoundEvents;
@@ -47,6 +47,7 @@ import net.minecraft.init.SoundEvents;
  */
 public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton>
 {
+	protected GuiShape shape = new GuiShape();
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontOptions} to use for this {@link UITooltip}. */
@@ -74,16 +75,9 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	 *
 	 * @param gui the gui
 	 */
-	public UIButton(MalisisGui gui)
+	public UIButton()
 	{
-		super(gui);
 
-		shape = new XYResizableGuiShape();
-		iconProvider = new GuiIconProvider(	gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5),
-											gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5),
-											gui.getGuiTexture().getXYResizableIcon(0, 0, 200, 20, 5));
-
-		iconPressedProvider = new GuiIconProvider((GuiIcon) gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5).flip(true, true));
 	}
 
 	/**
@@ -92,9 +86,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	 * @param gui the gui
 	 * @param text the text
 	 */
-	public UIButton(MalisisGui gui, String text)
+	public UIButton(String text)
 	{
-		this(gui);
 		setText(text);
 	}
 
@@ -104,9 +97,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	 * @param gui the gui
 	 * @param image the image
 	 */
-	public UIButton(MalisisGui gui, UIImage image)
+	public UIButton(UIImage image)
 	{
-		this(gui);
 		setImage(image);
 	}
 
@@ -363,11 +355,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (isPressed && isHovered())
-			rp.iconProvider.set(iconPressedProvider);
-
-		rp.colorMultiplier.set(bgColor);
-		renderer.drawShape(shape, rp);
+		setupShape(shape, GuiIcon.BUTTON, isPressed ? GuiIcon.BUTTON_HOVER_PRESSED : GuiIcon.BUTTON_HOVER, GuiIcon.BUTTON_DISABLED);
+		renderer.drawShape(shape);
 	}
 
 	@Override

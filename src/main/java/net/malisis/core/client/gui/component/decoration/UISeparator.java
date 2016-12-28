@@ -25,8 +25,8 @@
 package net.malisis.core.client.gui.component.decoration;
 
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.VanillaTexture;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
 
 /**
@@ -35,7 +35,7 @@ import net.malisis.core.client.gui.element.GuiShape;
  */
 public class UISeparator extends UIComponent<UISeparator>
 {
-	protected GuiShape shape = new GuiShape(VanillaTexture.SEPARATOR_ICON);
+	protected GuiShape shape = new GuiShape(GuiIcon.SEPARATOR);
 	/** Color multiplier. */
 	protected int color = 0xFFFFFF;
 	protected boolean vertical;

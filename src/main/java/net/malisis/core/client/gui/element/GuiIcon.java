@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.element;
 
+import static net.malisis.core.client.gui.MalisisGui.*;
+
 import net.malisis.core.client.gui.GuiTexture;
 import net.malisis.core.renderer.icon.Icon;
 
@@ -33,16 +35,64 @@ import net.malisis.core.renderer.icon.Icon;
  */
 public class GuiIcon
 {
+	//UISlot
+	public static final GuiIcon SLOT = new GuiIcon(VANILLAGUI_TEXTURE, 209, 30, 18, 18);
+	//UIPanel
+	public static final GuiIcon PANEL = new GuiIcon(VANILLAGUI_TEXTURE, 200, 15, 15, 15, 5);
+	//UITooltip
+	public static final GuiIcon TOOLTIP = new GuiIcon(VANILLAGUI_TEXTURE, 227, 31, 15, 15, 5);
+	//UIWindow
+	public static final GuiIcon WINDOW = new GuiIcon(VANILLAGUI_TEXTURE, 200, 0, 15, 15, 5);
+	//UIProgressBar
+	public static final GuiIcon ARROW_EMPTY = new GuiIcon(VANILLAGUI_TEXTURE, 246, 0, 22, 16);
+	public static final GuiIcon ARROW_FILLED = new GuiIcon(VANILLAGUI_TEXTURE, 246, 16, 22, 16);
+	//UISeparator
+	public static final GuiIcon SEPARATOR = new GuiIcon(VANILLAGUI_TEXTURE, 200, 15, 15, 15, 3);
+	//UIButton
+	public static final GuiIcon BUTTON = new GuiIcon(VANILLAGUI_TEXTURE, 0, 20, 200, 20, 5);
+	public static final GuiIcon BUTTON_HOVER = new GuiIcon(VANILLAGUI_TEXTURE, 0, 40, 200, 20, 5);
+	public static final GuiIcon BUTTON_HOVER_PRESSED = BUTTON_HOVER.flip(true, true);
+	public static final GuiIcon BUTTON_DISABLED = new GuiIcon(VANILLAGUI_TEXTURE, 0, 0, 200, 20, 5);
+	//UICheckbox
+	public static final GuiIcon CHECKBOX_BG = new GuiIcon(VANILLAGUI_TEXTURE, 242, 32, 10, 10);
+	public static final GuiIcon CHECKBOX_HOVER_BG = new GuiIcon(VANILLAGUI_TEXTURE, 252, 32, 10, 10);
+	public static final GuiIcon CHECKBOX = new GuiIcon(VANILLAGUI_TEXTURE, 242, 52, 12, 10);
+	public static final GuiIcon CHECKBOX_HOVER = new GuiIcon(VANILLAGUI_TEXTURE, 254, 42, 12, 10);
+	public static final GuiIcon CHECKBOX_DISABLED = new GuiIcon(VANILLAGUI_TEXTURE, 242, 42, 12, 10);
+	//UIRadioButton
+	public static final GuiIcon RADIO_BG = new GuiIcon(VANILLAGUI_TEXTURE, 200, 54, 8, 8);
+	public static final GuiIcon RADIO_DISABLED_BG = new GuiIcon(VANILLAGUI_TEXTURE, 200, 62, 8, 8);
+	public static final GuiIcon RADIO = new GuiIcon(VANILLAGUI_TEXTURE, 214, 54, 6, 6);
+	public static final GuiIcon RADIO_HOVER = new GuiIcon(VANILLAGUI_TEXTURE, 220, 54, 6, 6);
+	public static final GuiIcon RADIO_DISABLED = new GuiIcon(VANILLAGUI_TEXTURE, 208, 54, 6, 6);
+	//UISelect
+	public static final GuiIcon SELECT = new GuiIcon(VANILLAGUI_TEXTURE, 200, 30, 9, 12, 3);
+	public static final GuiIcon SELECT_DISABLED = new GuiIcon(VANILLAGUI_TEXTURE, 200, 42, 9, 12, 3);
+	public static final GuiIcon SELECT_BOX = new GuiIcon(VANILLAGUI_TEXTURE, 200, 30, 9, 12, 1);
+	public static final GuiIcon SELECT_ARROW = new GuiIcon(VANILLAGUI_TEXTURE, 209, 48, 7, 4);
+	//UISlider
+	public static final GuiIcon SLIDER = new GuiIcon(VANILLAGUI_TEXTURE, 227, 46, 8, 20, 3);
+	public static final GuiIcon SLIDER_BG = new GuiIcon(VANILLAGUI_TEXTURE, 0, 0, 200, 20, 5);
+	//UITextfield
+	public static final GuiIcon TEXTFIELD = new GuiIcon(VANILLAGUI_TEXTURE, 200, 30, 9, 12, 1);
+	public static final GuiIcon TEXTFIELD_DISABLED = new GuiIcon(VANILLAGUI_TEXTURE, 200, 42, 9, 12, 1);
+	//ControlComponents
+	public static final GuiIcon CLOSE = new GuiIcon(VANILLAGUI_TEXTURE, 268, 30, 15, 15);
+	public static final GuiIcon MOVE = new GuiIcon(VANILLAGUI_TEXTURE, 268, 15, 15, 15);
+	public static final GuiIcon RESIZE = new GuiIcon(VANILLAGUI_TEXTURE, 268, 0, 15, 15);
+	//UIScrollbar
+	public static final GuiIcon SCROLLBAR_BG = new GuiIcon(VANILLAGUI_TEXTURE, 215, 0, 15, 15, 1);
+	public static final GuiIcon SCROLLBAR_DISABLED_BG = new GuiIcon(VANILLAGUI_TEXTURE, 215, 15, 15, 15, 1);
+	public static final GuiIcon SCROLLBAR_HORIZONTAL = new GuiIcon(VANILLAGUI_TEXTURE, 230, 15, 15, 8);
+	public static final GuiIcon SCROLLBAR_HORIZONTAL_DISABLED = new GuiIcon(VANILLAGUI_TEXTURE, 230, 23, 15, 8);
+	public static final GuiIcon SCROLLBAR_VERTICAL = new GuiIcon(VANILLAGUI_TEXTURE, 230, 0, 8, 15);
+	public static final GuiIcon SCROLLBAR_VERTICAL_DISABLED = new GuiIcon(VANILLAGUI_TEXTURE, 238, 0, 8, 15);
+
 	private float minU = 0;
 	private float minV = 0;
 	private float maxU = 1;
 	private float maxV = 1;
 	private int border = 0;
-
-	/** Is the icon flipped on the horizontal axis. */
-	protected boolean flippedU = false;
-	/** Is the icon flipped on the vertical axis. */
-	protected boolean flippedV = false;
 
 	public GuiIcon()
 	{
@@ -75,6 +125,11 @@ public class GuiIcon
 		this(texture, x, y, width, height, 0);
 	}
 
+	public GuiIcon(GuiIcon icon)
+	{
+		this(icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV());
+	}
+
 	/**
 	 * Gets the min u.
 	 *
@@ -83,7 +138,7 @@ public class GuiIcon
 
 	public float getMinU()
 	{
-		return this.flippedU ? maxU : minU;
+		return minU;
 	}
 
 	/**
@@ -94,7 +149,7 @@ public class GuiIcon
 
 	public float getMaxU()
 	{
-		return this.flippedU ? minU : maxU;
+		return maxU;
 	}
 
 	/**
@@ -105,7 +160,7 @@ public class GuiIcon
 
 	public float getMinV()
 	{
-		return this.flippedV ? maxV : minV;
+		return minV;
 	}
 
 	/**
@@ -116,40 +171,7 @@ public class GuiIcon
 
 	public float getMaxV()
 	{
-		return this.flippedV ? minV : maxV;
-	}
-
-	/**
-	 * Sets this {@link Icon} to be flipped.
-	 *
-	 * @param horizontal whether to flip horizontally
-	 * @param vertical whether to flip vertically
-	 * @return this {@link Icon}
-	 */
-	public void flip(boolean horizontal, boolean vertical)
-	{
-		flippedU = horizontal;
-		flippedV = vertical;
-	}
-
-	/**
-	 * Checks if is flipped u.
-	 *
-	 * @return true if this {@link Icon} is flipped horizontally.
-	 */
-	public boolean isFlippedU()
-	{
-		return flippedU;
-	}
-
-	/**
-	 * Checks if is flipped v.
-	 *
-	 * @return true if this {@link Icon} is flipped vertically.
-	 */
-	public boolean isFlippedV()
-	{
-		return flippedV;
+		return maxV;
 	}
 
 	public float getInterpolatedU(float i)
@@ -170,6 +192,21 @@ public class GuiIcon
 	public GuiIcon clip(float fromU, float fromV, float toU, float toV)
 	{
 		return new GuiIcon(getInterpolatedU(fromU), getInterpolatedV(fromV), getInterpolatedU(toU), getInterpolatedV(toV));
+	}
+
+	/**
+	 * Gets a new {@link GuiIcon} where the UVs are flipped
+	 *
+	 * @param horizontal whether to flip horizontally
+	 * @param vertical whether to flip vertically
+	 * @return this {@link Icon}
+	 */
+	public GuiIcon flip(boolean horizontal, boolean vertical)
+	{
+		return new GuiIcon(	horizontal ? getMaxU() : getMinU(),
+							vertical ? getMaxV() : getMinV(),
+							horizontal ? getMinU() : getMaxU(),
+							vertical ? getMinV() : getMaxV());
 	}
 
 }

@@ -28,19 +28,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.element.GuiIcon;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
-
-import org.apache.commons.lang3.StringUtils;
-import org.lwjgl.opengl.GL11;
 
 /**
  * @author Ordinastie
@@ -50,6 +47,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 {
 	private static HashMap<String, List<UIRadioButton>> radioButtons = new HashMap<>();
 
+	protected GuiShape shape = new GuiShape();
 	/** The {@link MalisisFont} to use for this {@link UIRadioButton}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontOptions} to use for this {@link UIRadioButton}. */
@@ -59,26 +57,17 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 	private String text;
 	private boolean selected;
 
-	private GuiIconProvider rbIconProvider;
-
-	public UIRadioButton(MalisisGui gui, String name, String text)
+	public UIRadioButton(String name, String text)
 	{
-		super(gui);
 		this.name = name;
 		setText(text);
-
-		shape = new SimpleGuiShape();
-
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(200, 54, 8, 8), null, gui.getGuiTexture().getIcon(200, 62, 8, 8));
-		rbIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(214, 54, 6, 6), gui.getGuiTexture().getIcon(220, 54, 6, 6),
-				gui.getGuiTexture().getIcon(208, 54, 6, 6));
 
 		addRadioButton(this);
 	}
 
-	public UIRadioButton(MalisisGui gui, String name)
+	public UIRadioButton(String name)
 	{
-		this(gui, name, null);
+		this(name, null);
 	}
 
 	//#region Getters/Setters
@@ -171,55 +160,31 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		shape.resetState();
+		setupShape(shape, GuiIcon.RADIO_BG, null, GuiIcon.RADIO_DISABLED_BG);
+		shape.translate(1, 0);
 		shape.setSize(8, 8);
-		shape.translate(1, 0, 0);
-		renderer.drawShape(shape, rp);
+		renderer.drawShape(shape);
 
 		renderer.next();
 
 		// draw the white shade over the slot
 		if (hovered)
-		{
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glDisable(GL11.GL_ALPHA_TEST);
-			renderer.enableBlending();
-
-			rp = new RenderParameters();
-			rp.colorMultiplier.set(0xFFFFFF);
-			rp.alpha.set(80);
-			rp.useTexture.set(false);
-
-			shape.resetState();
-			shape.setSize(6, 6);
-			shape.setPosition(2, 1);
-			renderer.drawShape(shape, rp);
-			renderer.next();
-
-			GL11.glShadeModel(GL11.GL_FLAT);
-			GL11.glDisable(GL11.GL_BLEND);
-			GL11.glEnable(GL11.GL_ALPHA_TEST);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-		}
+			renderer.drawRectangle(2, 1, 0, 6, 6, 0xFFFFFF, 80, true);
 
 		if (text != null)
 			renderer.drawText(font, text, 12, 0, 0, fontOptions);
-
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (selected)
-		{
-			GL11.glEnable(GL11.GL_BLEND);
-			rp.reset();
-			shape.resetState();
-			shape.setSize(6, 6);
-			shape.setPosition(2, 1);
-			rp.iconProvider.set(rbIconProvider);
-			renderer.drawShape(shape, rp);
-		}
+		if (!selected)
+			return;
+
+		setupShape(shape, GuiIcon.RADIO, GuiIcon.RADIO_HOVER, GuiIcon.RADIO_DISABLED);
+		shape.setSize(6, 6);
+		shape.translate(2, 1);
+		renderer.drawShape(shape);
 	}
 
 	@Override

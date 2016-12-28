@@ -27,7 +27,6 @@ package net.malisis.core.client.gui.component.interaction;
 
 import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
@@ -35,13 +34,13 @@ import net.malisis.core.client.gui.component.container.UITabGroup;
 import net.malisis.core.client.gui.component.container.UITabGroup.TabChangeEvent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.client.gui.element.GuiIcon;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.Icon;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
  * @author Ordinastie
@@ -73,21 +72,18 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	/** Background color for this {@link UITab}. */
 	protected int bgColor = 0xFFFFFF;
 
+	protected GuiShape shape = new GuiShape();
+
 	/**
 	 * Instantiates a new {@link UITab}.
 	 *
 	 * @param gui the gui
 	 * @param label the label
 	 */
-	public UITab(MalisisGui gui, String label)
+	public UITab(String label)
 	{
-		super(gui);
-
 		setSize(0, 0);
 		setLabel(label);
-
-		shape = new XYResizableGuiShape();
-		iconProvider = new GuiIconProvider(null);
 	}
 
 	/**
@@ -96,14 +92,10 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	 * @param gui the gui
 	 * @param image the image
 	 */
-	public UITab(MalisisGui gui, UIImage image)
+	public UITab(UIImage image)
 	{
-		super(gui);
 		setSize(0, 0);
 		setImage(image);
-
-		shape = new XYResizableGuiShape();
-		iconProvider = new GuiIconProvider(null);
 	}
 
 	//#region Getters/Setters
@@ -256,9 +248,6 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 		this.autoHeight = height == 0;
 		this.height = autoHeight ? calcAutoHeight() : height;
 
-		if (shape != null)
-			shape.setSize(this.width, this.height);
-
 		return this;
 	}
 
@@ -384,10 +373,10 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	 *
 	 * @return the icons to render.
 	 */
-	private Icon getIcon()
+	private GuiIcon getIcon()
 	{
 		if (parent == null)
-			return null;
+			return new GuiIcon();
 
 		return ((UITabGroup) parent).getIcons();
 	}
@@ -451,9 +440,9 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		rp.colorMultiplier.set(bgColor);
-		((GuiIconProvider) iconProvider).setIcon(getIcon());
-		renderer.drawShape(shape, rp);
+		setupShape(shape, getIcon(), null, null);
+		shape.setColor(getBgColor());
+		renderer.drawShape(shape);
 	}
 
 	@Override

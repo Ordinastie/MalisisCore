@@ -26,10 +26,10 @@ package net.malisis.core.client.gui.component.control;
 
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.client.gui.element.GuiIcon;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.util.MouseButton;
 
 /**
@@ -40,14 +40,16 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 {
 	public enum Type
 	{
-		BOTH, HORIZONTAL, VERTICAL
+		BOTH,
+		HORIZONTAL,
+		VERTICAL
 	}
 
+	protected GuiShape shape = new GuiShape(0, 0, 5, 5, GuiIcon.RESIZE);
 	private Type type;
 
-	public UIResizeHandle(MalisisGui gui, UIComponent<?> parent, Type type)
+	public UIResizeHandle(UIComponent<?> parent, Type type)
 	{
-		super(gui);
 		this.type = type != null ? type : Type.BOTH;
 
 		int x = -1;
@@ -63,13 +65,11 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		register(this);
 
 		parent.addControlComponent(this);
-
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(268, 0, 15, 15));
 	}
 
-	public UIResizeHandle(MalisisGui gui, UIComponent<?> parent)
+	public UIResizeHandle(UIComponent<?> parent)
 	{
-		this(gui, parent, Type.BOTH);
+		this(parent, Type.BOTH);
 	}
 
 	@Override
@@ -105,6 +105,6 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawShape(shape, rp);
+		renderer.drawShape(shape);
 	}
 }

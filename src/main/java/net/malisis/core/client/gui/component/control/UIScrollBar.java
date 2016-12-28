@@ -36,11 +36,9 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
 
@@ -75,10 +73,6 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 
 	public boolean autoHide = false;
 
-	protected GuiShape scrollShape;
-	private GuiIconProvider verticalIconProvider;
-	private GuiIconProvider horizontalIconProvider;
-
 	public <T extends UIComponent<T> & IScrollable> UIScrollBar(T parent, Type type)
 	{
 		this.type = type;
@@ -89,8 +83,6 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		addScrollbar(parent, this);
 		setPosition();
 		updateScrollbar();
-
-		createShape();
 	}
 
 	/**
@@ -103,7 +95,6 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	{
 		scrollThickness = thickness;
 		scrollHeight = height;
-		createShape(getGui());
 	}
 
 	/**
@@ -119,41 +110,6 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 			setPosition(-hp + offsetX, vp + offsetY, Anchor.BOTTOM);
 		else
 			setPosition(hp + offsetX, -vp + offsetY, Anchor.RIGHT);
-	}
-
-	/**
-	 * Creates the shapes for this {@link UIScrollBar}.
-	 *
-	 * @param gui the gui
-	 */
-	protected void createShape()
-	{
-		int w = scrollThickness - 2;
-		int h = scrollHeight;
-		if (type == Type.HORIZONTAL)
-		{
-			w = scrollHeight;
-			h = scrollThickness - 2;
-		}
-
-		//background shape
-		shape = new XYResizableGuiShape(1);
-		//scroller shape
-		scrollShape = new SimpleGuiShape();
-		scrollShape.setSize(w, h);
-		scrollShape.storeState();
-
-		iconProvider = new GuiIconProvider(	gui.getGuiTexture().getXYResizableIcon(215, 0, 15, 15, 1),
-											null,
-											gui.getGuiTexture().getXYResizableIcon(215, 15, 15, 15, 1));
-
-		verticalIconProvider = new GuiIconProvider(	gui.getGuiTexture().getIcon(230, 0, 8, 15),
-													null,
-													gui.getGuiTexture().getIcon(238, 0, 8, 15));
-
-		horizontalIconProvider = new GuiIconProvider(	gui.getGuiTexture().getIcon(230, 15, 15, 8),
-														null,
-														gui.getGuiTexture().getIcon(230, 23, 15, 8));
 	}
 
 	/**
@@ -320,29 +276,32 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawShape(shape, rp);
+		setupShape(shape, GuiIcon.SCROLLBAR_BG, null, GuiIcon.SCROLLBAR_DISABLED_BG);
+		renderer.drawShape(shape);
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int ox = 0, oy = 0;
 		int l = getLength() - scrollHeight - 2;
+		int ox = 1;
+		int oy = (int) (getOffset() * l);
+		int w = scrollThickness - 2;
+		int h = scrollHeight;
+		GuiIcon icon = isDisabled() ? GuiIcon.SCROLLBAR_VERTICAL : GuiIcon.SCROLLBAR_VERTICAL_DISABLED;
 		if (isHorizontal())
 		{
-			rp.iconProvider.set(horizontalIconProvider);
 			ox = (int) (getOffset() * l);
-		}
-		else
-		{
-			rp.iconProvider.set(verticalIconProvider);
-			oy = (int) (getOffset() * l);
+			oy = 1;
+			w = scrollHeight;
+			h = scrollThickness - 2;
+			icon = isDisabled() ? GuiIcon.SCROLLBAR_HORIZONTAL : GuiIcon.SCROLLBAR_HORIZONTAL_DISABLED;
 		}
 
-		scrollShape.resetState();
-		scrollShape.setPosition(ox + 1, oy + 1);
-
-		renderer.drawShape(scrollShape, rp);
+		shape.setPosition(ox + 1, oy + 1);
+		shape.setSize(w, h);
+		shape.setIcon(icon);
+		renderer.drawShape(shape);
 	}
 
 	@Subscribe

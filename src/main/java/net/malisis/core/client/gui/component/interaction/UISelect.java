@@ -39,7 +39,6 @@ import com.google.common.collect.Iterables;
 
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -47,14 +46,11 @@ import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
 import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.interaction.UISelect.Option;
+import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.element.XResizableGuiShape;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
  * The Class UISelect.
@@ -117,16 +113,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	/** Hovered background color */
 	protected int hoverBgColor = 0x5E789F;
 
+	protected GuiShape shape = new GuiShape();
 	/** Shape used to draw the arrow. */
-	protected GuiShape arrowShape;
-	/** Shape used to draw the {@link Option options} box */
-	protected GuiShape optionsShape;
-	/** Shape used to draw the hovered {@link Option} background **/
-	protected GuiShape optionBackground;
-	/** Icon used to draw the option container. */
-	protected GuiIconProvider iconsExpanded;
-	/** Icon used to draw the arrow. */
-	protected GuiIconProvider arrowIcon;
+	protected GuiShape arrowShape = new GuiShape(0, 0, 7, 4, GuiIcon.SELECT_ARROW);
 
 	/**
 	 * Instantiates a new {@link UISelect}.
@@ -135,29 +124,15 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	 * @param width the width
 	 * @param values the values
 	 */
-	public UISelect(MalisisGui gui, int width, Iterable<T> values)
+	public UISelect(int width, Iterable<T> values)
 	{
-		super(gui);
 		setSize(width, 12);
 		setOptions(values);
 
-		scrollbar = new UISlimScrollbar(gui, this, UIScrollBar.Type.VERTICAL);
+		scrollbar = new UISlimScrollbar(this, UIScrollBar.Type.VERTICAL);
 		scrollbar.setFade(false);
 		scrollbar.setAutoHide(true);
 		scrollbar.setOffset(0, 12);
-
-		shape = new XResizableGuiShape(3);
-		arrowShape = new SimpleGuiShape();
-		arrowShape.setSize(7, 4);
-		arrowShape.storeState();
-		optionsShape = new XYResizableGuiShape(1);
-		optionBackground = new SimpleGuiShape();
-
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXResizableIcon(200, 30, 9, 12, 3), null,
-				gui.getGuiTexture().getXResizableIcon(200, 42, 9, 12, 3));
-
-		iconsExpanded = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1));
-		arrowIcon = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 48, 7, 4));
 	}
 
 	/**
@@ -166,9 +141,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	 * @param gui the gui
 	 * @param width the width
 	 */
-	public UISelect(MalisisGui gui, int width)
+	public UISelect(int width)
 	{
-		this(gui, width, null);
+		this(width, null);
 	}
 
 	//#region Getters/Setters
@@ -710,10 +685,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		shape.resetState();
-		shape.setSize(super.getWidth(), super.getHeight());
-		rp.colorMultiplier.set(bgColor);
-		renderer.drawShape(shape, rp);
+		setupShape(shape, GuiIcon.SELECT, null, GuiIcon.SELECT_DISABLED);
+		shape.setColor(getBgColor());
+		renderer.drawShape(shape);
 	}
 
 	@Override
@@ -725,15 +699,10 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		if (selectedOption != null)
 			select(selectedOption.getKey());
 
-		//draw regular select
-		arrowShape.resetState();
-		arrowShape.setPosition(width - 9, 4);
-		if (isHovered() || expanded)
-			rp.colorMultiplier.set(0xBEC8FF);
-		else
-			rp.colorMultiplier.reset();
-		rp.iconProvider.set(arrowIcon);
-		renderer.drawShape(arrowShape, rp);
+		//draw the arrow on the right
+		arrowShape.setPosition(getWidth() - 9, getHeight() / 2 - 2);
+		arrowShape.setColor(isHovered() || expanded ? 0xBEC8FF : 0xFFFFFF);
+		renderer.drawShape(arrowShape);
 
 		//draw selected value
 		if (selectedOption != null)
@@ -749,13 +718,12 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		ClipArea area = getClipArea();
 		renderer.startClipping(area);
 
-		optionsShape.resetState();
-		optionsShape.setSize(optionsWidth, optionsHeight);
-		optionsShape.translate(0, 12, 1);
-		rp.iconProvider.set(iconsExpanded);
-		rp.colorMultiplier.set(bgColor);
-
-		renderer.drawShape(optionsShape, rp);
+		shape.setSize(optionsWidth, optionsHeight);
+		shape.setPosition(0, 12);
+		shape.setZIndex(1);
+		shape.setColor(getBgColor());
+		shape.setIcon(GuiIcon.SELECT_BOX);
+		renderer.drawShape(shape);
 		renderer.next();
 
 		int y = 14;

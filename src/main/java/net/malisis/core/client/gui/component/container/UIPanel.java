@@ -26,14 +26,13 @@ package net.malisis.core.client.gui.component.container;
 
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.VanillaTexture;
 import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 
 public class UIPanel extends UIContainer<UIPanel> implements ITransformable.Color
 {
-	protected GuiShape shape = new GuiShape(VanillaTexture.PANEL_ICON);
+	protected GuiShape shape = new GuiShape(GuiIcon.PANEL);
 	protected GuiIcon icon;
 	/** Background color multiplier. */
 	protected int backgroundColor = -1;

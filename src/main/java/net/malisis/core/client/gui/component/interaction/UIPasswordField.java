@@ -1,10 +1,9 @@
 package net.malisis.core.client.gui.component.interaction;
 
-import net.malisis.core.client.gui.MalisisGui;
+import org.lwjgl.input.Keyboard;
+
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.minecraft.client.gui.GuiScreen;
-
-import org.lwjgl.input.Keyboard;
 
 /**
  * The Class UIPasswordField.
@@ -23,9 +22,9 @@ public class UIPasswordField extends UITextField
 	 *
 	 * @param gui the gui
 	 */
-	public UIPasswordField(MalisisGui gui)
+	public UIPasswordField()
 	{
-		super(gui, null, false);
+		super(null, false);
 	}
 
 	/**
@@ -34,9 +33,9 @@ public class UIPasswordField extends UITextField
 	 * @param gui the gui
 	 * @param passwordChar the password char
 	 */
-	public UIPasswordField(MalisisGui gui, char passwordChar)
+	public UIPasswordField(char passwordChar)
 	{
-		this(gui);
+		this();
 		this.passwordChar = passwordChar;
 	}
 

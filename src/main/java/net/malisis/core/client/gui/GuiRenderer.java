@@ -99,7 +99,7 @@ public class GuiRenderer
 	 */
 	public GuiRenderer()
 	{
-		defaultGuiTexture = VanillaTexture.instance;
+		defaultGuiTexture = MalisisGui.VANILLAGUI_TEXTURE;
 	}
 
 	/**

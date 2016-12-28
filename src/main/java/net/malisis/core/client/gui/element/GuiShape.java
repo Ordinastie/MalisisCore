@@ -65,10 +65,31 @@ public class GuiShape
 		setIcon(icon);
 	}
 
+	public GuiShape(int x, int y, int width, int height)
+	{
+		this();
+		setPosition(x, y);
+		setSize(width, height);
+	}
+
+	public GuiShape(int x, int y, int width, int height, GuiIcon icon)
+	{
+		this();
+		setPosition(x, y);
+		setSize(width, height);
+		setIcon(icon);
+	}
+
 	public void setPosition(int x, int y)
 	{
 		this.x = x;
 		this.y = y;
+	}
+
+	public void translate(int x, int y)
+	{
+		this.x += x;
+		this.y += y;
 	}
 
 	public int getX()

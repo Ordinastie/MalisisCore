@@ -29,9 +29,9 @@ import java.util.List;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.VanillaTexture;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.AlphaTransform;
@@ -46,7 +46,7 @@ import net.malisis.core.renderer.font.MalisisFont;
  */
 public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITooltip>
 {
-	protected GuiShape shape = new GuiShape(VanillaTexture.TOOLTIP_ICON);
+	protected GuiShape shape = new GuiShape(GuiIcon.TOOLTIP);
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontOptions} to use for this {@link UITooltip}. */

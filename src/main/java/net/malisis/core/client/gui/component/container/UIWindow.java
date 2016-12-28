@@ -28,8 +28,8 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.VanillaTexture;
 import net.malisis.core.client.gui.component.control.ICloseable;
+import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
 
 /**
@@ -37,7 +37,7 @@ import net.malisis.core.client.gui.element.GuiShape;
  */
 public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 {
-	protected GuiShape shape = new GuiShape(VanillaTexture.WINDOW_ICON);
+	protected GuiShape shape = new GuiShape(GuiIcon.WINDOW);
 	/** Background color multiplier. */
 	protected int backgroundColor = -1;
 
