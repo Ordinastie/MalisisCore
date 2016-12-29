@@ -46,6 +46,7 @@ public class Shader
 {
 	private int program = 0;
 	private int lastProgram = 0;
+	private int shader = 0;
 	private ResourceLocation resourceLocation;
 
 	private final HashMap<String, Integer> params = Maps.newHashMap();
@@ -56,13 +57,45 @@ public class Shader
 		load();
 	}
 
-	private void load()
+	public boolean load()
 	{
-		String code = loadShaderCode();
-		createProgram(code);
+		if (program == 0)
+			program = createProgram();
+		if (shader == 0)
+			shader = createShader();
+
+		if (program == 0 || shader == 0)
+			return false;
+
+		String code = loadCode();
+		if (code == null)
+			return false;
+
+		if (!loadShader(code))
+			return false;
+
+		attachShader();
+		boolean linked = linkProgram();
+		detachShader();
+
+		params.clear();
+
+		return linked;
 	}
 
-	private String loadShaderCode()
+	private int createShader()
+	{
+		return GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
+	}
+
+	private void deleteShader()
+	{
+		if (shader != 0)
+			GL20.glDeleteShader(shader);
+		shader = 0;
+	}
+
+	private String loadCode()
 	{
 		try
 		{
@@ -76,39 +109,86 @@ public class Shader
 		}
 	}
 
-	private void createProgram(String code)
+	private boolean loadShader(String code)
 	{
 		try
 		{
-			program = GL20.glCreateProgram();
-			GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
-			if (program == 0)
-				return;
-			GL20.glShaderSource(program, code);
-			GL20.glCompileShader(program);
+			GL20.glShaderSource(shader, code);
+			GL20.glCompileShader(shader);
+			if (GL20.glGetShaderi(shader, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE)
+			{
+				error("Failed to compile shader :");
+				deleteShader();
+				return false;
+			}
+			return true;
 		}
 		catch (Exception e)
 		{
 			MalisisCore.log.error("Failed to create shader.", e);
+			return false;
 		}
+	}
+
+	private void attachShader()
+	{
+		GL20.glAttachShader(program, shader);
+	}
+
+	private void detachShader()
+	{
+		//always detach
+		GL20.glDetachShader(program, shader);
+	}
+
+	private int createProgram()
+	{
+		return GL20.glCreateProgram();
+	}
+
+	public void deleteProgram()
+	{
+		stop();
+		deleteShader();
+		if (program != 0)
+			GL20.glDeleteProgram(program);
+		program = 0;
+	}
+
+	private boolean linkProgram()
+	{
+		GL20.glLinkProgram(program);
+		GL20.glValidateProgram(program);
+		if (GL20.glGetProgrami(program, GL20.GL_LINK_STATUS) != GL11.GL_TRUE)
+		{
+			error("Failed to link program :");
+			return false;
+		}
+		return true;
 	}
 
 	public boolean start()
 	{
-		GL20.glLinkProgram(program);
-		GL20.glValidateProgram(program);
-		boolean active = GL20.glGetProgrami(program, GL20.GL_LINK_STATUS) == GL11.GL_TRUE;
-		if (active)
-		{
-			lastProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
-			GL20.glUseProgram(program);
-		}
-		return active;
+		if (program == 0 || shader == 0)
+			return false;
+
+		lastProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
+		GL20.glUseProgram(program);
+		setUniform1i("tex", 0);
+
+		return true;
 	}
 
 	public void stop()
 	{
-		GL20.glUseProgram(lastProgram);
+		if (program != 0 && shader != 0)
+			GL20.glUseProgram(lastProgram);
+	}
+
+	private void error(String text)
+	{
+		String log = GL20.glGetShaderInfoLog(shader, GL20.glGetShaderi(shader, GL20.GL_INFO_LOG_LENGTH));
+		MalisisCore.log.error(text + "\n" + log);
 	}
 
 	public void setUniform1i(String param, int value)
