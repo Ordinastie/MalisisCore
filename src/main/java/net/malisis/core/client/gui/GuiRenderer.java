@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.*;
 
 import org.apache.logging.log4j.core.helpers.Strings;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -207,15 +208,20 @@ public class GuiRenderer
 		currentTexture = null;
 		bindDefaultTexture();
 
+		GlStateManager.pushMatrix();
 		if (ignoreScale)
 		{
-			GlStateManager.pushMatrix();
 			GlStateManager.scale(1F / scaleFactor, 1F / scaleFactor, 1);
 		}
 
 		RenderHelper.enableGUIStandardItemLighting();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_LIGHTING);
+		GlStateManager.setActiveTexture(GL13.GL_TEXTURE1);
+		GlStateManager.matrixMode(GL11.GL_TEXTURE);
+		GlStateManager.loadIdentity();
+		GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
+		GlStateManager.matrixMode(GL11.GL_MODELVIEW);
 		enableBlending();
 
 		repeatShader.start();
@@ -231,8 +237,7 @@ public class GuiRenderer
 		draw();
 
 		repeatShader.stop();
-		if (ignoreScale)
-			GlStateManager.popMatrix();
+		GlStateManager.popMatrix();
 		GL11.glEnable(GL11.GL_LIGHTING);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 	}

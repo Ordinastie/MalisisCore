@@ -363,7 +363,6 @@ public class GuiVertex
 							Float.floatToRawIntBits(textureHeight),
 							Float.floatToRawIntBits(width),
 							Float.floatToRawIntBits(height),
-							//index 3
 							Float.floatToRawIntBits(border) };
 	}
 

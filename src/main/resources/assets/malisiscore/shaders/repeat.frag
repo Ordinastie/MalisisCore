@@ -30,7 +30,7 @@ void main()
 
 //	minUV = vec2(100.0/300.0, 70.0/100.0);
 //	maxUV = vec2(120.0/300.0, 90.0/100.0);
-	minUV = vec2(0, 0);
+//	minUV = vec2(0, 0);
 //	maxUV = vec2(1, 1);
 //	textureSize = vec2(300.0, 100.0);
 //	quadSize = vec2(100.0, 100.0);
@@ -78,14 +78,9 @@ void main()
         uvOut.y = maxBorderOut.y;
     }
 
-
-	if(pos.x > minUV.x && pos.x < maxUV.x && pos.y > minUV.y && pos.y < maxUV.y) 
-	{
-		color = red; 
-	}
 	//uvOut = mix(minUV, maxUV, pos);
 	//uvOut = gl_TexCoord[0].st; 
-	uvOut = pos;
+	//uvOut = pos;
 	//uvOut.x =  mix(minUV.x, maxUV.x, pos.x);
 	//uvOut.y =  mix(minUV.y, maxUV.y, pos.y);
 	gl_FragColor = texture2D(tex, uvOut) * color; 
