@@ -45,18 +45,20 @@ public class GuiShape
 	/** The matrix containing all the transformations applied to this {@link GuiShape}. */
 	protected Matrix4f matrix = new Matrix4f();
 
-	private int x;
-	private int y;
-	private int zIndex;
-	private int width;
-	private int height;
+	private int x = 0;
+	private int y = 0;
+	private int zIndex = 0;
+	private int width = 0;
+	private int height = 0;
 
-	private GuiIcon icon;
+	private GuiIcon icon = GuiIcon.EMPTY;
 
 	public GuiShape()
 	{
-		for (VertexPosition p : VertexPosition.values())
-			vertexes.add(new GuiVertex(p));
+		vertexes.add(new GuiVertex(VertexPosition.TOPLEFT));
+		vertexes.add(new GuiVertex(VertexPosition.BOTTOMLEFT));
+		vertexes.add(new GuiVertex(VertexPosition.BOTTOMRIGHT));
+		vertexes.add(new GuiVertex(VertexPosition.TOPRIGHT));
 	}
 
 	public GuiShape(GuiIcon icon)
@@ -170,7 +172,11 @@ public class GuiShape
 
 	public void renderAt(VertexBuffer buffer, int offsetX, int offsetY, int offsetZ)
 	{
-		vertexes.forEach(v -> buffer.addVertexData(v.getVertexData(this, offsetX, offsetY, offsetZ)));
+		for (GuiVertex v : vertexes)
+		{
+			int[] data = v.getVertexData(buffer, this, offsetX, offsetY, offsetZ);
+			buffer.addVertexData(data);
+		}
 	}
 
 }

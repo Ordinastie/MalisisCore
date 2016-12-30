@@ -143,6 +143,7 @@ public abstract class MalisisGui extends GuiScreen
 		{
 			if (!constructed)
 			{
+				renderer.init();
 				debugMap.clear();
 				addDefaultDebug();
 				construct();
@@ -510,6 +511,7 @@ public abstract class MalisisGui extends GuiScreen
 				{
 					clearScreen();
 					setResolution();
+					renderer.init();
 					construct();
 				}
 				if (keyCode == Keyboard.KEY_D)
@@ -549,6 +551,8 @@ public abstract class MalisisGui extends GuiScreen
 			drawWorldBackground(1);
 
 		renderer.setup(mouseX, mouseY, partialTick);
+
+		//renderer.drawRectangle(150, 50, 0, 300, 100, 0xFF3366, 150, false);
 
 		screen.draw(renderer, mouseX, mouseY, partialTick);
 		if (debug)

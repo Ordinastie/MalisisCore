@@ -91,7 +91,7 @@ public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		shape.setSize(getWidth(), getHeight());
+		setupShape(shape);
 		shape.setColor(getBackgroundColor());
 		renderer.drawShape(shape);
 	}

@@ -26,6 +26,7 @@ package net.malisis.core.client.gui.component.container;
 
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
@@ -103,8 +104,12 @@ public class UIPanel extends UIContainer<UIPanel> implements ITransformable.Colo
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		shape.setPosition(getX(), getY());
-		shape.setSize(getWidth(), getHeight());
+		GuiIcon icon = new GuiIcon(MalisisGui.VANILLAGUI_TEXTURE, 100, 70, 20, 20, 2);
+
+		setupShape(shape);
+		shape.setIcon(icon);
+		//shape.setColor(0xFF6633);
+
 		shape.setColor(getBackgroundColor() != 0x404040 ? getBackgroundColor() : -1);
 		renderer.drawShape(shape);
 	}

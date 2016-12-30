@@ -28,6 +28,12 @@ import static net.malisis.core.client.gui.MalisisGui.*;
 
 import net.malisis.core.client.gui.GuiTexture;
 import net.malisis.core.renderer.icon.Icon;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 
 /**
  * @author Ordinastie
@@ -35,6 +41,7 @@ import net.malisis.core.renderer.icon.Icon;
  */
 public class GuiIcon
 {
+	public static final GuiIcon EMPTY = new GuiIcon();
 	//UISlot
 	public static final GuiIcon SLOT = new GuiIcon(VANILLAGUI_TEXTURE, 209, 30, 18, 18);
 	//UIPanel
@@ -88,6 +95,8 @@ public class GuiIcon
 	public static final GuiIcon SCROLLBAR_VERTICAL = new GuiIcon(VANILLAGUI_TEXTURE, 230, 0, 8, 15);
 	public static final GuiIcon SCROLLBAR_VERTICAL_DISABLED = new GuiIcon(VANILLAGUI_TEXTURE, 238, 0, 8, 15);
 
+	private int textureWidth = 1;
+	private int textureHeight = 1;
 	private float minU = 0;
 	private float minV = 0;
 	private float maxU = 1;
@@ -109,13 +118,13 @@ public class GuiIcon
 
 	public GuiIcon(GuiTexture texture, int x, int y, int width, int height, int border)
 	{
-		int texWidth = texture.getWidth();
-		int texHeight = texture.getHeight();
+		textureWidth = texture.getWidth();
+		textureHeight = texture.getHeight();
 
-		this.minU = (float) x / texWidth;
-		this.minV = (float) y / texHeight;
-		this.maxU = (float) (x + width) / texWidth;
-		this.maxV = (float) (y + height) / texHeight;
+		this.minU = (float) x / textureWidth;
+		this.minV = (float) y / textureHeight;
+		this.maxU = (float) (x + width) / textureWidth;
+		this.maxV = (float) (y + height) / textureHeight;
 
 		this.border = border;
 	}
@@ -126,6 +135,11 @@ public class GuiIcon
 	}
 
 	public GuiIcon(GuiIcon icon)
+	{
+		this(icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV());
+	}
+
+	public GuiIcon(TextureAtlasSprite icon)
 	{
 		this(icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV());
 	}
@@ -189,6 +203,16 @@ public class GuiIcon
 		return border;
 	}
 
+	public int getTextureWidth()
+	{
+		return textureWidth;
+	}
+
+	public int getTextureHeight()
+	{
+		return textureHeight;
+	}
+
 	public GuiIcon clip(float fromU, float fromV, float toU, float toV)
 	{
 		return new GuiIcon(getInterpolatedU(fromU), getInterpolatedV(fromV), getInterpolatedU(toU), getInterpolatedV(toV));
@@ -207,6 +231,33 @@ public class GuiIcon
 							vertical ? getMaxV() : getMinV(),
 							horizontal ? getMinU() : getMaxU(),
 							vertical ? getMinV() : getMaxV());
+	}
+
+	public static GuiIcon from(ItemStack itemStack)
+	{
+		if (Minecraft.getMinecraft().getRenderItem() == null)
+			return new GuiIcon();
+		TextureAtlasSprite icon = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getParticleIcon(itemStack.getItem(),
+																												itemStack.getMetadata());
+
+		return new GuiIcon(icon);
+	}
+
+	public static GuiIcon from(Item item)
+	{
+		return from(new ItemStack(item));
+	}
+
+	public static GuiIcon from(IBlockState state)
+	{
+		TextureAtlasSprite icon = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getTexture(state);
+
+		return new GuiIcon(icon);
+	}
+
+	public static GuiIcon from(Block block)
+	{
+		return from(block.getDefaultState());
 	}
 
 }

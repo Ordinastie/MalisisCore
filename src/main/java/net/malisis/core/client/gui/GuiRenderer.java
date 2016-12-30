@@ -29,9 +29,11 @@ import static com.google.common.base.Preconditions.*;
 import org.apache.logging.log4j.core.helpers.Strings;
 import org.lwjgl.opengl.GL11;
 
+import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.shader.Shader;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.util.Utils;
@@ -46,6 +48,7 @@ import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 
@@ -63,9 +66,12 @@ public class GuiRenderer
 			addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
 			addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.UBYTE, VertexFormatElement.EnumUsage.COLOR, 4));
 			addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 2));
-			addElement(new VertexFormatElement(1, VertexFormatElement.EnumType.SHORT, VertexFormatElement.EnumUsage.UV, 2));
-			addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.NORMAL, 3));
-			addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.BYTE, VertexFormatElement.EnumUsage.PADDING, 1));
+			//Element filled with UV min/max of the GuiIcon
+			addElement(new VertexFormatElement(1, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 4));
+			//width, height, border
+			addElement(new VertexFormatElement(2, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 3));
+			//relative x/y in the quad
+			addElement(new VertexFormatElement(3, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 2));
 		}
 	};
 
@@ -92,6 +98,7 @@ public class GuiRenderer
 	/** Currently used buffer. */
 	protected VertexBuffer buffer = Tessellator.getInstance().getBuffer();
 
+	public static Shader repeatShader = new Shader(new ResourceLocation(MalisisCore.modid, "shaders/repeat.frag"));
 	private static GuiShape rectangle = new GuiShape();
 
 	/**
@@ -163,6 +170,27 @@ public class GuiRenderer
 		return ignoreScale;
 	}
 
+	public void init()
+	{
+		vertexFormat = new VertexFormat()
+		{
+			{
+				addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
+				addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.UBYTE, VertexFormatElement.EnumUsage.COLOR, 4));
+				//pack UV and relative pos
+				addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 4));
+				//UV min/max of the GuiIcon
+				addElement(new VertexFormatElement(1, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 4));
+				//texture size and quad size in pixels
+				addElement(new VertexFormatElement(2, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 4));
+				//border size in pixels
+				addElement(new VertexFormatElement(3, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.UV, 1));
+			}
+		};
+
+		repeatShader.load();
+	}
+
 	/**
 	 * Sets up the rendering and start drawing.
 	 *
@@ -190,6 +218,8 @@ public class GuiRenderer
 		GL11.glDisable(GL11.GL_LIGHTING);
 		enableBlending();
 
+		repeatShader.start();
+
 		startDrawing();
 	}
 
@@ -199,6 +229,8 @@ public class GuiRenderer
 	public void clean()
 	{
 		draw();
+
+		repeatShader.stop();
 		if (ignoreScale)
 			GlStateManager.popMatrix();
 		GL11.glEnable(GL11.GL_LIGHTING);
@@ -223,28 +255,38 @@ public class GuiRenderer
 		return buffer.isDrawing;
 	}
 
+	public void startDrawing()
+	{
+		startDrawing(GL11.GL_QUADS);
+	}
+
 	/**
 	 * Tells the {@link Tessellator} to start drawing with specified <b>drawMode and specified {@link VertexFormat}.
 	 *
 	 * @param drawMode the draw mode
 	 * @param vertexFormat the vertex format
 	 */
-	public void startDrawing()
+	public void startDrawing(int drawMode)
 	{
 		if (isBatched())
 			return;
 		draw();
-		buffer.begin(GL11.GL_QUADS, vertexFormat);
+		buffer.begin(drawMode, vertexFormat);
+	}
+
+	public void next()
+	{
+		next(GL11.GL_QUADS);
 	}
 
 	/**
 	 * Triggers a draw and restarts drawing.<br>
 	 * Rebinds the {@link #getDefaultTexture()} if necessary.
 	 */
-	public void next()
+	public void next(int drawMode)
 	{
 		draw();
-		startDrawing();
+		startDrawing(drawMode);
 		bindDefaultTexture();
 	}
 

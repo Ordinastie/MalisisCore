@@ -29,6 +29,7 @@ import org.lwjgl.util.vector.Vector4f;
 
 import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.util.Point;
+import net.minecraft.client.renderer.VertexBuffer;
 
 /**
  * @author Ordinastie
@@ -319,22 +320,51 @@ public class GuiVertex
 	 * @param offset the offset
 	 * @return the vertex data
 	 */
-	public int[] getVertexData(GuiShape shape, int offsetX, int offsetY, int offsetZ)
+	public int[] getVertexData(VertexBuffer buffer, GuiShape shape, int offsetX, int offsetY, int offsetZ)
 	{
 		float x = position.getX(shape.getX() + offsetX, shape.getWidth());
-		float y = position.getX(shape.getY() + offsetY, shape.getHeight());
+		float y = position.getY(shape.getY() + offsetY, shape.getHeight());
 		float z = shape.getZIndex() + getZIndex() + offsetZ;
-		float u = shape.getIcon().getInterpolatedU(getU());
-		float v = shape.getIcon().getInterpolatedV(getV());
+		GuiIcon icon = shape.getIcon();
+		//index 0
+		float u = icon.getInterpolatedU(getU());
+		float v = icon.getInterpolatedV(getV());
+		float px = position.x;
+		float py = position.y;
+		//index 1
+		float minU = icon.getMinU();
+		float minV = icon.getMinV();
+		float maxU = icon.getMaxU();
+		float maxV = icon.getMaxV();
+		//index 2
+		float textureWidth = icon.getTextureWidth();
+		float textureHeight = icon.getTextureHeight();
+		float width = shape.getWidth();
+		float height = shape.getHeight();
+		//index 3
+		int border = icon.getBorder();
 
 		return new int[] {	Float.floatToRawIntBits(x),
 							Float.floatToRawIntBits(y),
 							Float.floatToRawIntBits(z),
 							getRGBA(),
+							//index 0
 							Float.floatToRawIntBits(u),
 							Float.floatToRawIntBits(v),
-							getBrightness(),
-							getNormal() };
+							Float.floatToRawIntBits(px),
+							Float.floatToRawIntBits(py),
+							//index 1
+							Float.floatToRawIntBits(minU),
+							Float.floatToRawIntBits(minV),
+							Float.floatToRawIntBits(maxU),
+							Float.floatToRawIntBits(maxV),
+							//index 2
+							Float.floatToRawIntBits(textureWidth),
+							Float.floatToRawIntBits(textureHeight),
+							Float.floatToRawIntBits(width),
+							Float.floatToRawIntBits(height),
+							//index 3
+							Float.floatToRawIntBits(border) };
 	}
 
 	public String name()
