@@ -30,6 +30,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
@@ -52,12 +58,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * The {@link AnimatedModelComponent} allows animated parts to be rendered for a {@link MalisisBlock} without the need for a
@@ -261,28 +261,20 @@ public class AnimatedModelComponent extends ModelComponent
 			renderCallback.accept(world, pos, state, this);
 	}
 
+	/**
+	 * Only called for BLOCK and ITEM render type
+	 */
 	@Override
 	public void render(Block block, MalisisRenderer<TileEntity> renderer)
 	{
 		if (renderer.getRenderType() == RenderType.BLOCK && animatedShapes.size() != 0)
 			onRender(renderer.getWorldAccess(), renderer.getPos(), renderer.getBlockState());
 
-		RenderParameters rp = new RenderParameters();
-		rp.rotateIcon.set(false);
-
-		//no groups defined, render whole model static
-		if (staticShapes.isEmpty() && animatedShapes.isEmpty())
-		{
-			super.render(block, renderer);
-			return;
-		}
-
 		model.resetState();
-
 		if (renderer.getRenderType() == RenderType.BLOCK)
 			model.rotate(DirectionalComponent.getDirection(renderer.getBlockState()));
 
-		staticShapes.forEach(name -> model.render(renderer, name));
+		staticShapes.forEach(name -> model.render(renderer, name, rp));
 		if (renderer.getRenderType() == RenderType.ITEM)
 			animatedShapes.forEach(name -> model.render(renderer, name, rp));
 	}
