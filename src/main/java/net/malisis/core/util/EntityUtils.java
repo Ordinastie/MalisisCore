@@ -29,6 +29,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.ArrayUtils;
+
+import com.google.common.collect.Lists;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.minecraft.block.Block;
@@ -56,10 +60,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import org.apache.commons.lang3.ArrayUtils;
-
-import com.google.common.collect.Lists;
-
 /**
  * Utility class for Entities.
  *
@@ -69,8 +69,12 @@ import com.google.common.collect.Lists;
 
 public class EntityUtils
 {
-	private static EnumFacing[] facings = new EnumFacing[] { EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST,
-			EnumFacing.UP, EnumFacing.DOWN };
+	private static EnumFacing[] facings = new EnumFacing[] {	EnumFacing.NORTH,
+																EnumFacing.EAST,
+																EnumFacing.SOUTH,
+																EnumFacing.WEST,
+																EnumFacing.UP,
+																EnumFacing.DOWN };
 
 	private static Field playersWatchingChunk;
 	static
@@ -196,7 +200,7 @@ public class EntityUtils
 	 */
 	public static boolean isEquipped(EntityPlayer player, Item item, EnumHand hand)
 	{
-		return player != null && player.getHeldItem(hand) != null && player.getHeldItemMainhand().getItem() == item;
+		return player != null && player.getHeldItem(hand) != null && player.getHeldItem(hand).getItem() == item;
 	}
 
 	/**
@@ -297,8 +301,15 @@ public class EntityUtils
 
 					int id = Block.getStateId(states[world.rand.nextInt(states.length)]);
 
-					ParticleDigging fx = (ParticleDigging) factory.createParticle(0, world, fxX, fxY, fxZ, fxX - pos.getX() - 0.5D, fxY
-							- pos.getY() - 0.5D, fxZ - pos.getZ() - 0.5D, id);
+					ParticleDigging fx = (ParticleDigging) factory.createParticle(	0,
+																					world,
+																					fxX,
+																					fxY,
+																					fxZ,
+																					fxX - pos.getX() - 0.5D,
+																					fxY - pos.getY() - 0.5D,
+																					fxZ - pos.getZ() - 0.5D,
+																					id);
 					particleManager.addEffect(fx);
 				}
 			}
