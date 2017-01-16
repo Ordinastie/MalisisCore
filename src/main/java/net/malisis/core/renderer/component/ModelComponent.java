@@ -28,6 +28,7 @@ import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.IRenderComponent;
 import net.malisis.core.renderer.MalisisRenderer;
+import net.malisis.core.renderer.RenderType;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
@@ -78,7 +79,8 @@ public class ModelComponent implements IRenderComponent
 	public void render(Block block, MalisisRenderer<TileEntity> renderer)
 	{
 		model.resetState();
-		model.rotate(DirectionalComponent.getDirection(renderer.getBlockState()));
+		if (renderer.getRenderType() == RenderType.BLOCK)
+			model.rotate(DirectionalComponent.getDirection(renderer.getBlockState()));
 		model.render(renderer);
 	}
 }
