@@ -29,6 +29,10 @@ import java.util.Set;
 
 import javax.vecmath.Matrix4f;
 
+import org.lwjgl.opengl.GL11;
+
+import com.google.common.collect.Sets;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.block.BoundingBoxType;
@@ -86,10 +90,6 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
-import org.lwjgl.opengl.GL11;
-
-import com.google.common.collect.Sets;
-
 /**
  * Base class for rendering. Handles the rendering. Provides easy registration of the renderer, and automatically sets up the context for
  * the rendering.
@@ -100,8 +100,8 @@ import com.google.common.collect.Sets;
 public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRenderer<T> implements IBlockRenderer, IRenderWorldLast
 {
 	/** Batched buffer reference. */
-	protected static final VertexBuffer batchedBuffer = ((Tessellator) Silenced.get(() -> AsmUtils.changeFieldAccess(TileEntityRendererDispatcher.class,
-			"batchBuffer")
+	protected static final VertexBuffer batchedBuffer = ((Tessellator) Silenced.get(() -> AsmUtils	.changeFieldAccess(	TileEntityRendererDispatcher.class,
+																														"batchBuffer")
 																									.get(TileEntityRendererDispatcher.instance))).getBuffer();
 
 	public static VertexFormat malisisVertexFormat = new VertexFormat()
@@ -379,8 +379,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	{
 		if (tranformType == TransformType.FIRST_PERSON_RIGHT_HAND || tranformType == TransformType.FIRST_PERSON_LEFT_HAND)
 		{
-			ItemStack stackInv = Utils.getClientPlayer()
-										.getHeldItem(tranformType == TransformType.FIRST_PERSON_RIGHT_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
+			ItemStack stackInv = Utils	.getClientPlayer()
+										.getHeldItem(tranformType == TransformType.FIRST_PERSON_RIGHT_HAND	? EnumHand.MAIN_HAND
+																											: EnumHand.OFF_HAND);
 			if (itemStack != stackInv && stackInv != null && stackInv.getItem() == itemStack.getItem())
 				itemStack = stackInv;
 		}
@@ -535,7 +536,6 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 				GlStateManager.pushAttrib();
 				GlStateManager.pushMatrix();
 				GlStateManager.disableLighting();
-
 				GlStateManager.translate(data[0], data[1], data[2]);
 
 				bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
@@ -547,7 +547,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		{
 			GlStateManager.pushAttrib();
 			GlStateManager.pushMatrix();
-
+			Minecraft.getMinecraft().entityRenderer.enableLightmap();
 			GlStateManager.translate(data[0], data[1], data[2]);
 
 			bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
@@ -880,9 +880,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		int vertexCount = face.getVertexes().length;
 		if (vertexCount != 4 && renderType == RenderType.BLOCK)
 		{
-			MalisisCore.log.error("[MalisisRenderer] Attempting to render a face containing {} vertexes in BLOCK for {}. Ignored",
-					vertexCount,
-					block);
+			MalisisCore.log.error(	"[MalisisRenderer] Attempting to render a face containing {} vertexes in BLOCK for {}. Ignored",
+									vertexCount,
+									block);
 			return;
 		}
 
@@ -1334,7 +1334,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	protected AxisAlignedBB getRenderBounds(RenderParameters params)
 	{
-		if (block == null || (params != null && !params.useBlockBounds.get()))
+		if (params != null && (!params.useBlockBounds.get() || block == null))
 			return params.renderBounds.get();
 
 		if (block instanceof IBoundingBox)
