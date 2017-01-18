@@ -357,7 +357,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 
 		if (!StringUtils.isEmpty(text))
 		{
-			UIScrollBar sc = UIScrollBar.getScrollbar(this, Type.VERTICAL);
+			UIScrollBar<?> sc = UIScrollBar.getScrollbar(this, Type.VERTICAL);
 			int width = getWidth();
 			if (sc != null && sc.isVisible())
 				width -= sc.getWidth();

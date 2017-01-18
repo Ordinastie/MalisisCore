@@ -33,6 +33,7 @@ import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.GuiShape.ShapePosition;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.AlphaTransform;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
@@ -46,7 +47,6 @@ import net.malisis.core.renderer.font.MalisisFont;
  */
 public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITooltip>
 {
-	protected GuiShape shape = new GuiShape(GuiIcon.TOOLTIP);
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontOptions} to use for this {@link UITooltip}. */
@@ -56,6 +56,8 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 	protected int padding = 4;
 	protected int delay = 0;
 	protected Animation<ITransformable.Alpha> animation;
+	protected ShapePosition shapePosition;
+	protected GuiShape shape = GuiShape.builder().forComponent(this).position(this::getShapePosition).icon(GuiIcon.TOOLTIP).build();
 
 	public UITooltip()
 	{
@@ -144,6 +146,11 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 		return -16;
 	}
 
+	private ShapePosition getShapePosition()
+	{
+		return shapePosition;
+	}
+
 	//#end Getters/Setters
 
 	protected void calculateSize()
@@ -167,9 +174,8 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		shape.setPosition(mouseX + getOffsetX(), mouseY + getOffsetY());
-		shape.setSize(getWidth(), getHeight());
-		renderer.drawShape(shape);
+		shapePosition = ShapePosition.of(mouseX + getOffsetX(), mouseY + getOffsetY());
+		shape.render();
 	}
 
 	@Override

@@ -72,7 +72,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	/** Background color for this {@link UITab}. */
 	protected int bgColor = 0xFFFFFF;
 
-	protected GuiShape shape = new GuiShape();
+	protected GuiShape shape = GuiShape.builder().forComponent(this).color(this::getBgColor).icon(this::getIcon).build();
 
 	/**
 	 * Instantiates a new {@link UITab}.
@@ -376,7 +376,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	private GuiIcon getIcon()
 	{
 		if (parent == null)
-			return new GuiIcon();
+			return GuiIcon.NONE;
 
 		return ((UITabGroup) parent).getIcons();
 	}
@@ -440,9 +440,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		setupShape(shape, getIcon(), null, null);
-		shape.setColor(getBgColor());
-		renderer.drawShape(shape);
+		shape.render();
 	}
 
 	@Override

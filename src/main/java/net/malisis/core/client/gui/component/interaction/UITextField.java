@@ -43,6 +43,8 @@ import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.GuiShape.ShapePosition;
+import net.malisis.core.client.gui.element.GuiShape.ShapeSize;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.renderer.font.FontOptions;
@@ -112,7 +114,29 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	protected int selectColor = 0x0000FF;
 
 	//drawing
-	protected GuiShape shape = new GuiShape();
+	protected GuiShape background = GuiShape.builder()
+											.forComponent(this)
+											.color(this::getBackgroundColor)
+											.icon(GuiIcon.forComponent(this, GuiIcon.TEXTFIELD, null, GuiIcon.TEXTFIELD_DISABLED))
+											.build();
+	protected GuiShape cursorShape = GuiShape	.builder()
+												.position(() -> ShapePosition.of(	screenX() + cursorPosition.getXOffset(),
+																					screenY() + cursorPosition.getYOffset()))
+												.size(() -> ShapeSize.of(1, getLineHeight()))
+												.color(this::getCursorColor)
+												.icon(GuiIcon.NONE)
+
+												.build();
+
+	protected ShapePosition boxShapePosition;
+	protected ShapeSize boxShapeSize;
+
+	protected GuiShape selectionBoxShape = GuiShape	.builder()
+													.position(() -> boxShapePosition)
+													.size(() -> boxShapeSize)
+													.color(this::getSelectColor)
+													.icon(GuiIcon.NONE)
+													.build();
 
 	/**
 	 * Instantiates a new {@link UITextField}.
@@ -318,7 +342,28 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	/**
-	 * Sets the options.
+	 * Gets the background color.
+	 *
+	 * @param bgColor the bg color
+	 * @return the background color
+	 */
+	public int getBackgroundColor()
+	{
+		return bgColor;
+	}
+
+	/**
+	 * Sets the background color.
+	 *
+	 * @param bgColor the new background color
+	 */
+	public void setBackgroundColor(int bgColor)
+	{
+		this.bgColor = bgColor;
+	}
+
+	/**
+	 * Sets the color options.
 	 *
 	 * @param bgColor the bg color
 	 * @param cursorColor the cursor color
@@ -1082,9 +1127,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		setupShape(shape, GuiIcon.TEXTFIELD, null, GuiIcon.TEXTFIELD_DISABLED);
-		shape.setColor(bgColor);
-		renderer.drawShape(shape);
+		background.render();
 	}
 
 	/**
@@ -1150,14 +1193,17 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (cursorPosition.line < lineOffset || cursorPosition.line >= lineOffset + getVisibleLines())
 			return;
 
-		renderer.drawRectangle(	cursorPosition.getXOffset() + 1,
-								cursorPosition.getYOffset() + 1,
-								getZIndex(),
-								1,
-								getLineHeight(),
-								cursorColor,
-								255,
-								true);
+		cursorShape.render();
+	}
+
+	public ShapePosition getSelectionBoxPosition()
+	{
+		return boxShapePosition;
+	}
+
+	public ShapeSize getSelectionBoxSize()
+	{
+		return boxShapeSize;
 	}
 
 	/**
@@ -1187,7 +1233,10 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				if (i == last.line)
 					X = last.getXOffset();
 
-				renderer.drawRectangle(x + 2, y + 1, 0, Math.min(getWidth() - 2, X) - x, getLineHeight(), selectColor, 255, true);
+				boxShapePosition = ShapePosition.of(screenX() + x + 1, screenY() + y + 1);
+				boxShapeSize = ShapeSize.of(X - x, getLineHeight());
+
+				selectionBoxShape.render();
 			}
 		}
 
@@ -1485,7 +1534,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			if (charOffset >= character || charOffset >= currentLineText().length())
 				return 0;
 
-			return (int) font.getStringWidth(currentLineText(), fontOptions, charOffset, character);
+			return (int) font.getStringWidth(currentLineText(), fontOptions, charOffset, character) + 1;
 		}
 
 		/**
@@ -1495,7 +1544,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		 */
 		public int getYOffset()
 		{
-			return (line - lineOffset) * getLineHeight();
+			return (line - lineOffset) * getLineHeight() + 1;
 		}
 
 		public Link getLink()

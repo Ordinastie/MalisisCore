@@ -27,6 +27,7 @@ package net.malisis.core.client.gui.component.interaction;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.function.IntSupplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
@@ -48,6 +49,8 @@ import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.interaction.UISelect.Option;
 import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.GuiShape.ShapePosition;
+import net.malisis.core.client.gui.element.GuiShape.ShapeSize;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
@@ -113,9 +116,36 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	/** Hovered background color */
 	protected int hoverBgColor = 0x5E789F;
 
-	protected GuiShape shape = new GuiShape();
+	/** Shape used for the background of the select. */
+	protected GuiShape background = GuiShape.builder(this)
+											.color(this::getBgColor)
+											.icon(GuiIcon.forComponent(this, GuiIcon.SELECT, null, GuiIcon.SELECT_DISABLED))
+											.build();
 	/** Shape used to draw the arrow. */
-	protected GuiShape arrowShape = new GuiShape(0, 0, 7, 4, GuiIcon.SELECT_ARROW);
+	protected GuiShape arrowShape = GuiShape.builder()
+											.position(() -> ShapePosition.of(screenX() + getWidth() - 9, screenY() + getHeight() / 2 - 2))
+											.size(7, 4)
+											.color((IntSupplier) () -> isHovered() || isExpanded() ? 0xBEC8FF : 0xFFFFFF)
+											.icon(GuiIcon.SELECT_ARROW)
+											.build();
+
+	/** Shape used to draw the option box. */
+	protected GuiShape optionShape = GuiShape	.builder()
+												.position(ShapePosition.fromComponent(this, 0, 12))
+												.size(this::getOptionSize)
+												.zIndex(1)
+												.color(this::getBgColor)
+												.icon(GuiIcon.SELECT_BOX)
+												.build();
+
+	//	renderer.drawRectangle(x + 1, y - 1, z + 2, select.optionsWidth - 2, getHeight(select), select.getHoverBgColor(), 255);
+	protected ShapePosition hoveredPosition;
+	protected ShapeSize hoveredSize;
+	protected GuiShape hoveredShape = GuiShape	.builder()
+												.position(() -> hoveredPosition)
+												.size(() -> hoveredSize)
+												.color(this::getHoverBgColor)
+												.build();
 
 	/**
 	 * Instantiates a new {@link UISelect}.
@@ -323,6 +353,11 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		return this;
 	}
 
+	public boolean isExpanded()
+	{
+		return expanded;
+	}
+
 	/**
 	 * Sets the max width of the option container.
 	 *
@@ -348,6 +383,11 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		optionsWidth += 4;
 		if (maxExpandedWidth > 0)
 			optionsWidth = Math.min(maxExpandedWidth, optionsWidth);
+	}
+
+	private ShapeSize getOptionSize()
+	{
+		return ShapeSize.of(optionsWidth, optionsHeight);
 	}
 
 	/**
@@ -685,9 +725,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		setupShape(shape, GuiIcon.SELECT, null, GuiIcon.SELECT_DISABLED);
-		shape.setColor(getBgColor());
-		renderer.drawShape(shape);
+		background.render();
 	}
 
 	@Override
@@ -700,15 +738,11 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			select(selectedOption.getKey());
 
 		//draw the arrow on the right
-		arrowShape.setPosition(getWidth() - 9, getHeight() / 2 - 2);
-		arrowShape.setColor(isHovered() || expanded ? 0xBEC8FF : 0xFFFFFF);
-		renderer.drawShape(arrowShape);
+		arrowShape.render();
 
 		//draw selected value
 		if (selectedOption != null)
-		{
 			selectedOption.draw(this, renderer, 2, 2, 2, partialTick, false, true);
-		}
 
 		if (!expanded)
 			return;
@@ -718,12 +752,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		ClipArea area = getClipArea();
 		renderer.startClipping(area);
 
-		shape.setSize(optionsWidth, optionsHeight);
-		shape.setPosition(0, 12);
-		shape.setZIndex(1);
-		shape.setColor(getBgColor());
-		shape.setIcon(GuiIcon.SELECT_BOX);
-		renderer.drawShape(shape);
+		optionShape.render();
 		renderer.next();
 
 		int y = 14;
@@ -924,7 +953,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 			if (hovered && !disabled)
 			{
-				renderer.drawRectangle(x + 1, y - 1, z + 2, select.optionsWidth - 2, getHeight(select), select.getHoverBgColor(), 255);
+				select.hoveredPosition = ShapePosition.of(select.screenX() + x + 1, select.screenY() + y + 1);
+				select.hoveredSize = ShapeSize.of(select.optionsWidth - 2, getHeight(select));
+				select.hoveredShape.render();
 			}
 
 			if (isTop)

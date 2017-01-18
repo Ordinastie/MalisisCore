@@ -36,7 +36,6 @@ import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.init.SoundEvents;
 
@@ -47,7 +46,6 @@ import net.minecraft.init.SoundEvents;
  */
 public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton>
 {
-	protected GuiShape shape = new GuiShape();
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontOptions} to use for this {@link UITooltip}. */
@@ -68,7 +66,7 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	/** Offset for the contents */
 	protected int offsetX, offsetY;
 
-	protected GuiIconProvider iconPressedProvider;
+	protected GuiShape shape = GuiShape.builder().forComponent(this).icon(this::getIcon).build();
 
 	/**
 	 * Instantiates a new {@link UIButton}.
@@ -352,11 +350,21 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 		return super.onButtonRelease(x, y, button);
 	}
 
+	private GuiIcon getIcon()
+	{
+		if (isDisabled())
+			return GuiIcon.BUTTON_DISABLED;
+
+		if (isHovered())
+			return isPressed ? GuiIcon.BUTTON_HOVER_PRESSED : GuiIcon.BUTTON_HOVER;
+
+		return GuiIcon.BUTTON;
+	}
+
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		setupShape(shape, GuiIcon.BUTTON, isPressed ? GuiIcon.BUTTON_HOVER_PRESSED : GuiIcon.BUTTON_HOVER, GuiIcon.BUTTON_DISABLED);
-		renderer.drawShape(shape);
+		shape.render();
 	}
 
 	@Override

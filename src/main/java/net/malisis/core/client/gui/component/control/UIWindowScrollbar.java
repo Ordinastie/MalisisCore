@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Ordinastie
+ * Copyright (c) 2017 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,72 +22,67 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.component.decoration;
+package net.malisis.core.client.gui.component.control;
+
+import java.util.function.Supplier;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.GuiShape.ShapePosition;
+import net.malisis.core.client.gui.element.GuiShape.ShapeSize;
 
 /**
  * @author Ordinastie
  *
  */
-public class UISeparator extends UIComponent<UISeparator>
+public final class UIWindowScrollbar extends UIScrollBar<UIWindowScrollbar>
 {
-	/** Color multiplier. */
-	protected int color = 0xFFFFFF;
-	/** Whether this {@link UISeparator} is vertical or horizontal. */
-	protected boolean vertical;
+	private ShapeSize scrollSize;
+	private Supplier<GuiIcon> scrollIcon;
 
-	protected GuiShape shape = GuiShape.builder().forComponent(this).color(this::getColor).icon(GuiIcon.SEPARATOR).build();
+	public final GuiShape background = GuiShape	.builder()
+												.forComponent(this)
+												.icon(GuiIcon.forComponent(this, GuiIcon.SCROLLBAR_BG, null, GuiIcon.SCROLLBAR_DISABLED_BG))
+												.build();
 
-	public UISeparator(boolean vertical)
+	public final GuiShape scroll = GuiShape.builder().position(this::getScrollPosition).size(scrollSize).icon(scrollIcon).build();
+
+	public <T extends UIComponent<T> & IScrollable> UIWindowScrollbar(T parent, Type type)
 	{
-		this.vertical = vertical;
-		setSize(INHERITED, INHERITED);
+		super(parent, type);
+		if (isHorizontal())
+		{
+			scrollSize = ShapeSize.of(scrollHeight, scrollThickness);
+			scrollIcon = GuiIcon.forComponent(this, GuiIcon.SCROLLBAR_HORIZONTAL, null, GuiIcon.SCROLLBAR_HORIZONTAL_DISABLED);
+		}
+		else
+		{
+			scrollSize = ShapeSize.of(scrollThickness, scrollHeight);
+			scrollIcon = GuiIcon.forComponent(this, GuiIcon.SCROLLBAR_VERTICAL, null, GuiIcon.SCROLLBAR_VERTICAL_DISABLED);
+		}
 	}
 
-	public UISeparator()
+	public ShapePosition getScrollPosition()
 	{
-		this(false);
-	}
+		int l = getLength() - scrollHeight - 2;
+		int ox = isHorizontal() ? (int) (getOffset() * l) : 1;
+		int oy = isHorizontal() ? 1 : (int) (getOffset() * l);
+		return ShapePosition.of(ox, oy);
 
-	@Override
-	public UISeparator setSize(int width, int height)
-	{
-		return super.setSize(vertical ? 1 : width, vertical ? height : 1);
-	}
-
-	/**
-	 * Sets the color for this {@link UISeparator}.
-	 *
-	 * @param color the color
-	 * @return this {@link UISeparator}
-	 */
-	public UISeparator setColor(int color)
-	{
-		this.color = color;
-		return this;
-	}
-
-	/**
-	 * Gets the color.
-	 *
-	 * @return the color for this {@link UISeparator}.
-	 */
-	public int getColor()
-	{
-		return color;
 	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		shape.render();
+		background.render();
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{}
+	{
+		scroll.render();
+	}
+
 }

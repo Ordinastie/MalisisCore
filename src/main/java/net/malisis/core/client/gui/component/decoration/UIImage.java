@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
+import static com.google.common.base.Preconditions.*;
+
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.GuiTexture;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -39,13 +41,14 @@ import net.minecraft.item.ItemStack;
  */
 public class UIImage extends UIComponent<UIImage>
 {
-	protected GuiShape shape = new GuiShape();
 	/** {@link GuiTexture} to use for the icon. */
 	private GuiTexture texture;
 	/** {@link Icon} to use for the texture. */
 	private GuiIcon icon = null;
 	/** {@link ItemStack} to render. */
 	private ItemStack itemStack;
+
+	protected GuiShape shape = GuiShape.builder().forComponent(this).icon(this::getIcon).build();
 
 	/**
 	 * Instantiates a new {@link UIImage}.
@@ -81,7 +84,7 @@ public class UIImage extends UIComponent<UIImage>
 	public UIImage setIcon(GuiIcon icon)
 	{
 		this.itemStack = null;
-		this.icon = icon != null ? icon : new GuiIcon();
+		this.icon = checkNotNull(icon);
 		return this;
 	}
 
@@ -95,8 +98,8 @@ public class UIImage extends UIComponent<UIImage>
 	public UIImage setIcon(GuiTexture texture, GuiIcon icon)
 	{
 		this.itemStack = null;
-		this.icon = icon != null ? icon : new GuiIcon();
-		this.texture = texture;
+		this.texture = checkNotNull(texture);
+		this.icon = checkNotNull(icon);
 		return this;
 	}
 
@@ -174,9 +177,7 @@ public class UIImage extends UIComponent<UIImage>
 		if (icon != null)
 		{
 			renderer.bindTexture(texture);
-			shape.setSize(getWidth(), getHeight());
-			shape.setIcon(icon);
-			renderer.drawShape(shape);
+			shape.render();
 		}
 		else if (itemStack != null)
 		{

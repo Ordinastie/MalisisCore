@@ -26,11 +26,10 @@ package net.malisis.core.client.gui.component.mceditor;
 
 import java.util.Arrays;
 
-import net.malisis.core.client.gui.MalisisGui;
+import com.google.common.base.Function;
+
 import net.malisis.core.client.gui.component.interaction.UISelect;
 import net.minecraft.util.text.TextFormatting;
-
-import com.google.common.base.Function;
 
 /**
  * @author Ordinastie
@@ -40,9 +39,9 @@ public class EcfSelect extends UISelect<TextFormatting>
 {
 	private MCEditor editor;
 
-	public EcfSelect(MalisisGui gui, MCEditor editor)
+	public EcfSelect(MCEditor editor)
 	{
-		super(gui, 80);
+		super(80);
 		this.editor = editor;
 
 		labelFunction = new Function<TextFormatting, String>()

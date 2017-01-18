@@ -36,6 +36,8 @@ import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.GuiShape.ShapePosition;
+import net.malisis.core.client.gui.element.GuiShape.ShapeSize;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
@@ -71,7 +73,8 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 	/** Converter from float (0-1 offset) to the value. */
 	protected Converter<Float, T> converter;
 
-	protected GuiShape shape = new GuiShape();
+	protected GuiShape background = GuiShape.builder().forComponent(this).icon(GuiIcon.SLIDER_BG).build();
+	protected GuiShape slider = GuiShape.builder().position(this::getSliderPosition).size(this::getSliderSize).icon(GuiIcon.SLIDER).build();
 
 	public UISlider(int width, Converter<Float, T> converter, String text)
 	{
@@ -204,27 +207,26 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 		setValue(converter.convert(MathHelper.clamp(offset, 0, 1)));
 	}
 
+	public ShapePosition getSliderPosition()
+	{
+		return ShapePosition.of((int) (offset * (width - SLIDER_WIDTH)), 0);
+	}
+
+	public ShapeSize getSliderSize()
+	{
+		return ShapeSize.of((int) (8 * getHeight() / 20F), getHeight());
+	}
+
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		setupShape(shape);
-		shape.setIcon(GuiIcon.SLIDER_BG);
-		renderer.drawShape(shape);
+		background.render();
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int ox = (int) (offset * (width - SLIDER_WIDTH));
-		float factor = getHeight() / 20F;
-
-		shape.setPosition(ox, 0);
-		shape.setSize((int) (8 * factor), getHeight());
-		shape.setIcon(GuiIcon.SLIDER);
-		renderer.drawShape(shape);
-
-		renderer.next();
-		//zIndex = 1;
+		slider.render();
 
 		if (!StringUtils.isEmpty(text))
 		{

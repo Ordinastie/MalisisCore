@@ -35,6 +35,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.GuiShape.ShapePosition;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.inventory.InventoryEvent;
 import net.malisis.core.inventory.MalisisInventoryContainer;
@@ -44,14 +45,12 @@ import net.malisis.core.util.MouseButton;
 import net.malisis.core.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 
 public class UISlot extends UIComponent<UISlot>
 {
-	protected GuiShape shape = new GuiShape(0, 0, 18, 18, GuiIcon.SLOT);
 	//	/** IconProvider for Mojang fix */
 	//	protected GuiIconProvider iconLeftProvider;
 	//	/** IconProvider for Mojang fix */
@@ -63,6 +62,14 @@ public class UISlot extends UIComponent<UISlot>
 	protected MalisisSlot slot;
 	/** */
 	protected UITooltip defaultTooltip;
+
+	protected GuiShape shape = GuiShape.builder().position(ShapePosition.fromComponent(this)).size(18, 18).icon(GuiIcon.SLOT).build();
+	protected GuiShape overlay = GuiShape	.builder()
+											.position(ShapePosition.fromComponent(this, 1, 1))
+											.zIndex(200)
+											.size(16, 16)
+											.alpha(0x80)
+											.build();
 
 	/**
 	 * Instantiates a new {@link UISlot}.
@@ -116,7 +123,7 @@ public class UISlot extends UIComponent<UISlot>
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawShape(shape);
+		shape.render();
 	}
 
 	@Override
@@ -145,22 +152,7 @@ public class UISlot extends UIComponent<UISlot>
 
 		// draw the white shade over the slot
 		if (hovered || !draggedItemStack.isEmpty())
-		{
-			renderer.disableTextures();
-			GlStateManager.disableLighting();
-			GlStateManager.disableDepth();
-			GlStateManager.colorMask(true, true, true, false);
-
-			renderer.next();
-			renderer.drawRectangle(1, 1, 100, 16, 16, 0xFFFFFF, 80);
-			renderer.next();
-
-			GlStateManager.colorMask(true, true, true, true);
-			GlStateManager.enableLighting();
-			GlStateManager.enableDepth();
-			renderer.enableTextures();
-		}
-		//GL11.glEnable(GL11.GL_ALPHA_TEST);
+			overlay.render();
 	}
 
 	@Override

@@ -40,8 +40,6 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.control.IControlComponent;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
-import net.malisis.core.client.gui.element.GuiIcon;
-import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.GuiEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
@@ -948,25 +946,6 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	{
 		if (width <= 0 || height <= 0)
 			fireEvent(new SizeChangeEvent<>(self(), getWidth(), getHeight()));
-	}
-
-	public void setupShape(GuiShape shape)
-	{
-		setupShape(shape, null, null, null);
-	}
-
-	public void setupShape(GuiShape shape, GuiIcon icon, GuiIcon hover, GuiIcon disabled)
-	{
-		shape.setSize(getWidth(), getHeight());
-		if (icon != null)
-		{
-			if (disabled != null && isDisabled())
-				shape.setIcon(disabled);
-			else if (hover != null && isHovered())
-				shape.setIcon(hover);
-			else
-				shape.setIcon(icon);
-		}
 	}
 
 	/**

@@ -47,7 +47,7 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 		VERTICAL
 	}
 
-	protected GuiShape shape = new GuiShape(0, 0, 5, 5, GuiIcon.MOVE);
+	protected GuiShape shape = GuiShape.builder().size(5, 5).icon(GuiIcon.MOVE).build();
 	private Type type;
 
 	public UIMoveHandle(UIComponent<?> parent, Type type)
@@ -106,7 +106,7 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawShape(shape);
+		shape.render();
 	}
 
 }

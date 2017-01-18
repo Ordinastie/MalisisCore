@@ -552,9 +552,11 @@ public abstract class MalisisGui extends GuiScreen
 
 		renderer.setup(mouseX, mouseY, partialTick);
 
-		//renderer.drawRectangle(150, 50, 0, 300, 100, 0xFF3366, 150, false);
-
 		screen.draw(renderer, mouseX, mouseY, partialTick);
+
+		//GuiShape s = GuiShape.builder().position(100, 100).size(150, 50).color(0x6699FF).alpha(150).build();
+		//s.render();
+
 		if (debug)
 			renderDebug(mouseX, mouseY);
 

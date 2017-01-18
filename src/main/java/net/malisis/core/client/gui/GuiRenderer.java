@@ -24,8 +24,6 @@
 
 package net.malisis.core.client.gui;
 
-import static com.google.common.base.Preconditions.*;
-
 import org.apache.logging.log4j.core.helpers.Strings;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -33,7 +31,6 @@ import org.lwjgl.opengl.GL13;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
-import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.shader.Shader;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
@@ -61,6 +58,9 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class GuiRenderer
 {
+	/** Currently used buffer. */
+	public static final VertexBuffer buffer = Tessellator.getInstance().getBuffer();
+
 	public static VertexFormat vertexFormat = new VertexFormat()
 	{
 		{
@@ -96,11 +96,7 @@ public class GuiRenderer
 	/** Progression of current tick. */
 	private float partialTick = 0;
 
-	/** Currently used buffer. */
-	protected VertexBuffer buffer = Tessellator.getInstance().getBuffer();
-
 	public static Shader repeatShader = new Shader(new ResourceLocation(MalisisCore.modid, "shaders/repeat.frag"));
-	private static GuiShape rectangle = new GuiShape();
 
 	/**
 	 * Instantiates a new {@link GuiRenderer}.
@@ -108,6 +104,11 @@ public class GuiRenderer
 	public GuiRenderer()
 	{
 		defaultGuiTexture = MalisisGui.VANILLAGUI_TEXTURE;
+	}
+
+	public VertexBuffer getBuffer()
+	{
+		return buffer;
 	}
 
 	/**
@@ -214,6 +215,14 @@ public class GuiRenderer
 			GlStateManager.scale(1F / scaleFactor, 1F / scaleFactor, 1);
 		}
 
+		setupGl();
+		repeatShader.start();
+		startDrawing();
+	}
+
+	public void setupGl()
+	{
+		RenderHelper.disableStandardItemLighting();
 		RenderHelper.enableGUIStandardItemLighting();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_LIGHTING);
@@ -223,10 +232,6 @@ public class GuiRenderer
 		GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
 		GlStateManager.matrixMode(GL11.GL_MODELVIEW);
 		enableBlending();
-
-		repeatShader.start();
-
-		startDrawing();
 	}
 
 	/**
@@ -363,74 +368,6 @@ public class GuiRenderer
 		bindTexture(null);
 	}
 
-	public void drawShape(GuiShape shape)
-	{
-		drawShape(shape, true);
-	}
-
-	/**
-	 * Draws a {@link GuiShape} to the GUI.
-	 *
-	 * @param shape the shape
-	 */
-	public void drawShape(GuiShape shape, boolean relative)
-	{
-		checkNotNull(shape);
-
-		int x = 0;
-		int y = 0;
-		int z = 0;
-		if (relative && currentComponent != null)
-		{
-			x = currentComponent.screenX();
-			y = currentComponent.screenY();
-			z = currentComponent.getZIndex();
-		}
-
-		shape.renderAt(buffer, x, y, z);
-	}
-
-	/**
-	 * Draws an non-textured rectangle in the GUI at a position relative to {@link #currentComponent}.
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
-	 * @param width the width
-	 * @param height the height
-	 * @param color the color
-	 * @param alpha the alpha
-	 */
-	public void drawRectangle(int x, int y, int z, int width, int height, int color, int alpha)
-	{
-		drawRectangle(x, y, z, width, height, color, alpha, true);
-	}
-
-	/**
-	 * Draws an non-textured rectangle in the GUI.
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
-	 * @param width the width
-	 * @param height the height
-	 * @param color the color
-	 * @param alpha the alpha
-	 * @param relative true if the position of the rectangle is relative to {@link #currentComponent}
-	 */
-	public void drawRectangle(int x, int y, int z, int width, int height, int color, int alpha, boolean relative)
-	{
-		rectangle.setPosition(x, y);
-		rectangle.setZIndex(z);
-		rectangle.setSize(width, height);
-		rectangle.setColor(color);
-		rectangle.setAlpha(alpha);
-
-		disableTextures();
-		drawShape(rectangle, relative);
-		next();
-	}
-
 	/**
 	 * Draws a {@link UITooltip} to the screen.
 	 *
@@ -520,6 +457,17 @@ public class GuiRenderer
 		if (fro == null)
 			fro = FontOptions.builder().build();
 
+		GlStateManager.pushMatrix();
+		GlStateManager.scale(fro.getFontScale(), fro.getFontScale(), z);
+
+		FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
+		fontRenderer.drawString(text, x / fro.getFontScale(), y / fro.getFontScale(), fro.getColor(), fro.hasShadow());
+
+		GlStateManager.popMatrix();
+
+		currentTexture = null;
+		bindDefaultTexture();
+
 		//font.render(this, text, x, y, z, fro);
 	}
 
@@ -608,7 +556,7 @@ public class GuiRenderer
 		if (!Strings.isEmpty(formatStr))
 			label = formatStr + label;
 
-		Tessellator.getInstance().draw();
+		draw();
 
 		RenderHelper.disableStandardItemLighting();
 		RenderHelper.enableGUIStandardItemLighting();
@@ -617,8 +565,7 @@ public class GuiRenderer
 		itemRenderer.renderItemModelIntoGUI(itemStack, x, y, model);
 		itemRenderer.renderItemOverlayIntoGUI(fontRenderer, itemStack, x, y, label);
 
-		RenderHelper.enableStandardItemLighting();
-		GlStateManager.enableBlend(); //Forge commented blend reenabling
+		setupGl();
 
 		currentTexture = null;
 		bindDefaultTexture();
@@ -651,7 +598,6 @@ public class GuiRenderer
 		draw();
 		itemStack.setCount(size);
 		itemRenderer.zLevel = 0;
-		clean();
 	}
 
 	/**

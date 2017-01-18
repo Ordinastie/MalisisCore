@@ -45,7 +45,7 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		VERTICAL
 	}
 
-	protected GuiShape shape = new GuiShape(0, 0, 5, 5, GuiIcon.RESIZE);
+	protected GuiShape shape = GuiShape.builder().size(5, 5).icon(GuiIcon.RESIZE).build();
 	private Type type;
 
 	public UIResizeHandle(UIComponent<?> parent, Type type)
@@ -105,6 +105,6 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawShape(shape);
+		shape.render();
 	}
 }

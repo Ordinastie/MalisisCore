@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.component.mceditor;
 
+import com.google.common.eventbus.Subscribe;
+
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
@@ -34,8 +36,6 @@ import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.minecraft.util.text.TextFormatting;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie
@@ -52,13 +52,12 @@ public class MCEditor extends UIContainer<MCEditor> implements IGuiText<MCEditor
 
 	public MCEditor(MalisisGui gui)
 	{
-		super(gui);
-		tf = new UITextField(gui, true);
+		tf = new UITextField(true);
 		tf.setSize(0, -14).setAnchor(Anchor.BOTTOM);
 
-		sel = new EcfSelect(gui, this);
+		sel = new EcfSelect(this);
 
-		cb = new UICheckBox(gui, "Use litteral formatting");
+		cb = new UICheckBox("Use litteral formatting");
 		cb.setPosition(85, 0).register(this);
 
 		add(tf, sel, cb);

@@ -29,6 +29,8 @@ import net.malisis.core.client.gui.GuiTexture;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.GuiShape.ShapePosition;
+import net.malisis.core.client.gui.element.GuiShape.ShapeSize;
 import net.minecraft.util.math.MathHelper;
 
 /**
@@ -37,7 +39,6 @@ import net.minecraft.util.math.MathHelper;
  */
 public class UIProgressBar extends UIComponent<UIProgressBar>
 {
-	protected GuiShape shape = new GuiShape();
 	protected float progress = 0;
 	protected boolean reversed = false;
 	protected boolean vertical = false;
@@ -45,6 +46,8 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	protected GuiTexture texture;
 	protected GuiIcon backgroundIcon;
 	protected GuiIcon filledIcon;
+	protected GuiShape background = GuiShape.builder().forComponent(this).icon(backgroundIcon).build();
+	protected GuiShape filled = GuiShape.builder().position(this::getFillPosition).size(this::getFillSize).icon(this::getFillIcon).build();
 
 	public UIProgressBar(int width, int height, GuiTexture texture, GuiIcon backgroundIcon, GuiIcon filledIcon)
 	{
@@ -83,36 +86,40 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 		//	this.progress = .4F;
 	}
 
+	private int getProgressLength()
+	{
+		return Math.round((vertical ? getHeight() : getWidth()) * progress);
+	}
+
+	public ShapePosition getFillPosition()
+	{
+		int length = getProgressLength();
+		return vertical	? ShapePosition.of(0, reversed ? 0 : getHeight() - length)
+						: ShapePosition.of(reversed ? getWidth() - length : 0, 0);
+	}
+
+	public ShapeSize getFillSize()
+	{
+		int length = getProgressLength();
+		return vertical ? ShapeSize.of(getWidth(), length) : ShapeSize.of(length, getHeight());
+	}
+
+	public GuiIcon getFillIcon()
+	{
+		return vertical	? filledIcon.clip(0, reversed ? progress : 0, 1, reversed ? 1 : progress)
+						: filledIcon.clip(reversed ? progress : 0, 0, reversed ? 1 : progress, 1);
+	}
+
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		renderer.bindTexture(texture);
-		shape.setSize(getWidth(), getHeight());
-		shape.setIcon(backgroundIcon);
-		renderer.drawShape(shape);
+		background.render();
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int length = Math.round((vertical ? getHeight() : getWidth()) * progress);
-
-		GuiIcon icon = filledIcon;
-		if (vertical)
-		{
-			icon = icon.clip(0, reversed ? progress : 0, 1, reversed ? 1 : progress);
-			shape.setPosition(0, reversed ? 0 : getHeight() - length);
-			shape.setSize(getWidth(), length);
-		}
-		else
-		{
-			shape.setPosition(reversed ? getWidth() - length : 0, 0);
-			shape.setSize(length, getHeight());
-			icon = icon.clip(reversed ? progress : 0, 0, reversed ? 1 : progress, 1);
-		}
-
-		renderer.bindTexture(texture);
-		shape.setIcon(icon);
-		renderer.drawShape(shape);
+		filled.render();
 	}
 }

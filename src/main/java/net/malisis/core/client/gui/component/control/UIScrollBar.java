@@ -33,11 +33,8 @@ import org.lwjgl.input.Keyboard;
 import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.Anchor;
-import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.element.GuiIcon;
-import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -47,7 +44,7 @@ import net.minecraft.client.gui.GuiScreen;
  *
  * @author Ordinastie
  */
-public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlComponent
+public abstract class UIScrollBar<S extends UIScrollBar<S>> extends UIComponent<S> implements IControlComponent
 {
 	public enum Type
 	{
@@ -55,9 +52,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		VERTICAL
 	}
 
-	private static Map<UIComponent<?>, Map<Type, UIScrollBar>> scrollbars = new WeakHashMap<>();
-
-	protected GuiShape shape = new GuiShape();
+	private static Map<UIComponent<?>, Map<Type, UIScrollBar<?>>> scrollbars = new WeakHashMap<>();
 
 	/** The scroll thickness (Width for vertical, height for horizontal). */
 	protected int scrollThickness = 10;
@@ -129,7 +124,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 */
 	public boolean hasVisibleOtherScrollbar()
 	{
-		UIScrollBar scrollbar = getScrollbar(getParent(), isHorizontal() ? Type.VERTICAL : Type.HORIZONTAL);
+		UIScrollBar<?> scrollbar = getScrollbar(getParent(), isHorizontal() ? Type.VERTICAL : Type.HORIZONTAL);
 		return scrollbar != null && scrollbar.isVisible();
 	}
 
@@ -150,10 +145,10 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 * @param autoHide the auto hide
 	 * @return this {@link UIScrollBar}
 	 */
-	public UIScrollBar setAutoHide(boolean autoHide)
+	public S setAutoHide(boolean autoHide)
 	{
 		this.autoHide = autoHide;
-		return this;
+		return self();
 	}
 
 	@Override
@@ -201,12 +196,12 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 * @param y the y
 	 * @return the UI scroll bar
 	 */
-	public UIScrollBar setOffset(int x, int y)
+	public S setOffset(int x, int y)
 	{
 		this.offsetX = x;
 		this.offsetY = y;
 		setPosition();
-		return this;
+		return self();
 	}
 
 	/**
@@ -273,39 +268,8 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 			setVisible(!hide);
 	}
 
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		setupShape(shape, GuiIcon.SCROLLBAR_BG, null, GuiIcon.SCROLLBAR_DISABLED_BG);
-		renderer.drawShape(shape);
-	}
-
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		int l = getLength() - scrollHeight - 2;
-		int ox = 1;
-		int oy = (int) (getOffset() * l);
-		int w = scrollThickness - 2;
-		int h = scrollHeight;
-		GuiIcon icon = isDisabled() ? GuiIcon.SCROLLBAR_VERTICAL : GuiIcon.SCROLLBAR_VERTICAL_DISABLED;
-		if (isHorizontal())
-		{
-			ox = (int) (getOffset() * l);
-			oy = 1;
-			w = scrollHeight;
-			h = scrollThickness - 2;
-			icon = isDisabled() ? GuiIcon.SCROLLBAR_HORIZONTAL : GuiIcon.SCROLLBAR_HORIZONTAL_DISABLED;
-		}
-
-		shape.setPosition(ox + 1, oy + 1);
-		shape.setSize(w, h);
-		shape.setIcon(icon);
-		renderer.drawShape(shape);
-	}
-
 	@Subscribe
-	public void onContentUpdate(ContentUpdateEvent<UIScrollBar> event)
+	public void onContentUpdate(ContentUpdateEvent<S> event)
 	{
 		if (getParent() != event.getComponent())
 			return;
@@ -317,7 +281,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	public boolean onButtonPress(int x, int y, MouseButton button)
 	{
 		if (button != MouseButton.LEFT)
-			return onButtonPress(x, y, button);
+			return super.onButtonPress(x, y, button);
 
 		onScrollTo(x, y);
 		return true;
@@ -392,9 +356,9 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 * @param type the type
 	 * @return the scrollbar
 	 */
-	public static UIScrollBar getScrollbar(UIComponent<?> component, Type type)
+	public static UIScrollBar<?> getScrollbar(UIComponent<?> component, Type type)
 	{
-		Map<Type, UIScrollBar> bars = scrollbars.get(component);
+		Map<Type, UIScrollBar<?>> bars = scrollbars.get(component);
 		if (bars == null)
 			return null;
 
@@ -407,9 +371,9 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 * @param component the component
 	 * @param scrollbar the scrollbar
 	 */
-	private static void addScrollbar(UIComponent<?> component, UIScrollBar scrollbar)
+	private static void addScrollbar(UIComponent<?> component, UIScrollBar<?> scrollbar)
 	{
-		Map<Type, UIScrollBar> bars = scrollbars.get(component);
+		Map<Type, UIScrollBar<?>> bars = scrollbars.get(component);
 		if (bars == null)
 		{
 			bars = new HashMap<>();

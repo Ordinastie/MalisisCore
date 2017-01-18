@@ -33,6 +33,7 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
 import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
+import net.malisis.core.client.gui.component.control.UIWindowScrollbar;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.minecraft.client.gui.GuiScreen;
@@ -51,13 +52,13 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 
 	//IScrollable
 	/** Vertical Scrollbar. */
-	protected UIScrollBar scrollbar;
+	protected UIWindowScrollbar scrollbar;
 	/** Y Offset for the contents of this {@link UIListContainer}. */
 	protected int yOffset;
 
 	public UIListContainer()
 	{
-		scrollbar = new UIScrollBar(self(), UIScrollBar.Type.VERTICAL);
+		scrollbar = new UIWindowScrollbar(self(), UIScrollBar.Type.VERTICAL);
 		scrollbar.setAutoHide(true);
 	}
 
@@ -162,7 +163,7 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 	@Override
 	public int getContentWidth()
 	{
-		UIScrollBar sb = UIScrollBar.getScrollbar(this, Type.VERTICAL);
+		UIScrollBar<?> sb = UIScrollBar.getScrollbar(this, Type.VERTICAL);
 		if (sb != null && sb.isVisible())
 			return getWidth() - sb.getWidth() - 2 - getHorizontalPadding() * 2;
 
@@ -179,7 +180,7 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 		for (S element : elements)
 			height += getElementHeight(element) + elementSpacing;
 
-		UIScrollBar sb = UIScrollBar.getScrollbar(this, Type.HORIZONTAL);
+		UIScrollBar<?> sb = UIScrollBar.getScrollbar(this, Type.HORIZONTAL);
 		if (sb != null && sb.isVisible())
 			return getWidth() - sb.getWidth() - 2 - getHorizontalPadding() * 2;
 

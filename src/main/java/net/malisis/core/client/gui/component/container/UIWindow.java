@@ -37,9 +37,10 @@ import net.malisis.core.client.gui.element.GuiShape;
  */
 public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 {
-	protected GuiShape shape = new GuiShape(GuiIcon.WINDOW);
 	/** Background color multiplier. */
 	protected int backgroundColor = -1;
+
+	protected GuiShape shape = GuiShape.builder().forComponent(this).color(this::getBackgroundColor).icon(GuiIcon.WINDOW).build();
 
 	public UIWindow(String title, int width, int height, int anchor)
 	{
@@ -91,9 +92,7 @@ public class UIWindow extends UIContainer<UIWindow> implements ICloseable
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		setupShape(shape);
-		shape.setColor(getBackgroundColor());
-		renderer.drawShape(shape);
+		shape.render();
 	}
 
 	@Override

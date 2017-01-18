@@ -32,6 +32,7 @@ import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.GuiShape.ShapePosition;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
@@ -43,7 +44,6 @@ import net.malisis.core.renderer.font.MalisisFont;
  */
 public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICheckBox>
 {
-	protected GuiShape shape = new GuiShape();
 	/** The {@link MalisisFont} to use for this {@link UICheckBox}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontOptions} to use for this {@link UICheckBox}. */
@@ -52,6 +52,21 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	private String text;
 	/** Whether this {@link UICheckBox} is checked. */
 	private boolean checked;
+
+	protected GuiShape shape = GuiShape	.builder()
+										.position(ShapePosition.fromComponent(this, 1, 0))
+										.size(12, 12)
+										.icon(GuiIcon.CHECKBOX_BG)
+										.build();
+	protected GuiShape check = GuiShape	.builder()
+										.position(ShapePosition.fromComponent(this, 1, 1))
+										.size(12, 10)
+										.icon(GuiIcon.forComponent(	this,
+																	GuiIcon.CHECKBOX,
+																	GuiIcon.CHECKBOX_HOVER,
+																	GuiIcon.CHECKBOX_DISABLED))
+										.build();
+	protected GuiShape overlay = GuiShape.builder().position(ShapePosition.fromComponent(this, 2, 1)).size(10, 10).alpha(80).build();
 
 	public UICheckBox(String text)
 	{
@@ -173,15 +188,9 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		setupShape(shape, GuiIcon.CHECKBOX_BG, GuiIcon.CHECKBOX_HOVER_BG, null);
-		shape.translate(1, 0);
-		shape.setSize(12, 12);
-		renderer.drawShape(shape);
-		renderer.next();
-
-		// draw the white shade over the slot
-		if (hovered)
-			renderer.drawRectangle(2, 1, 0, 8, 8, 0xFFFFFF, 80, true);
+		shape.render();
+		if (isHovered())
+			overlay.render();
 
 		if (!StringUtils.isEmpty(text))
 			renderer.drawText(font, text, 14, 2, 0, fontOptions);
@@ -193,9 +202,7 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 		if (!checked)
 			return;
 
-		setupShape(shape, GuiIcon.CHECKBOX, GuiIcon.CHECKBOX_HOVER, GuiIcon.CHECKBOX_DISABLED);
-		shape.setSize(12, 10);
-		renderer.drawShape(shape);
+		check.render();
 	}
 
 	@Override

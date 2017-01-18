@@ -26,7 +26,10 @@ package net.malisis.core.client.gui.element;
 
 import static net.malisis.core.client.gui.MalisisGui.*;
 
+import java.util.function.Supplier;
+
 import net.malisis.core.client.gui.GuiTexture;
+import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.renderer.icon.Icon;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -41,7 +44,9 @@ import net.minecraft.item.ItemStack;
  */
 public class GuiIcon
 {
-	public static final GuiIcon EMPTY = new GuiIcon();
+	public static final GuiIcon FULL = new GuiIcon(0, 0, 1, 1);
+	public static final GuiIcon NONE = new GuiIcon(-1, -1, -1, -1);
+	public static final GuiIcon DEBUG = new GuiIcon(VANILLAGUI_TEXTURE, 100, 70, 20, 20, 2);
 	//UISlot
 	public static final GuiIcon SLOT = new GuiIcon(VANILLAGUI_TEXTURE, 209, 30, 18, 18);
 	//UIPanel
@@ -102,11 +107,6 @@ public class GuiIcon
 	private float maxU = 1;
 	private float maxV = 1;
 	private int border = 0;
-
-	public GuiIcon()
-	{
-
-	}
 
 	public GuiIcon(float u, float v, float U, float V)
 	{
@@ -236,7 +236,7 @@ public class GuiIcon
 	public static GuiIcon from(ItemStack itemStack)
 	{
 		if (Minecraft.getMinecraft().getRenderItem() == null)
-			return new GuiIcon();
+			return FULL;
 		TextureAtlasSprite icon = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getParticleIcon(itemStack.getItem(),
 																												itemStack.getMetadata());
 
@@ -258,6 +258,17 @@ public class GuiIcon
 	public static GuiIcon from(Block block)
 	{
 		return from(block.getDefaultState());
+	}
+
+	public static Supplier<GuiIcon> forComponent(UIComponent<?> component, GuiIcon icon, GuiIcon hover, GuiIcon disabled)
+	{
+		return () -> {
+			if (disabled != null && component.isDisabled())
+				return disabled;
+			else if (hover != null && component.isHovered())
+				return hover;
+			return icon;
+		};
 	}
 
 }

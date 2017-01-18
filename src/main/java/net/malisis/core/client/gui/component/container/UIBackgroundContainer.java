@@ -24,9 +24,14 @@
 
 package net.malisis.core.client.gui.component.container;
 
+import static com.google.common.base.Preconditions.*;
+
+import java.util.function.ToIntFunction;
+
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiShape;
-import net.malisis.core.client.gui.element.GuiVertex.VertexPosition;
+import net.malisis.core.client.gui.element.GuiShape.VertexPosition;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 
 /**
@@ -35,23 +40,11 @@ import net.malisis.core.renderer.animation.transformation.ITransformable;
  */
 public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> implements ITransformable.Color
 {
-	protected GuiShape shape = new GuiShape();
-	/** Top left corner color **/
-	protected int topLeftColor = -1;
-	/** Top right corner color **/
-	protected int topRightColor = -1;
-	/** Bottom left corner color */
-	protected int bottomLeftColor = -1;
-	/** Bottom right corner color */
-	protected int bottomRightColor = -1;
-	/** Top left corner alpha **/
-	protected int topLeftAlpha = 255;
-	/** Top right corner alpha **/
-	protected int topRightAlpha = 255;
-	/** Bottom left corner alpha */
-	protected int bottomLeftAlpha = 255;
-	/** Bottom right corner alpha */
-	protected int bottomRightAlpha = 255;
+	/** Colors for each vertex position **/
+	protected int[] colors = { -1, -1, -1, -1 };
+	/** Alpha values for each vertex position **/
+	protected int[] alphas = { 255, 255, 255, 255 };
+
 	/** Border size **/
 	protected int borderSize = 0;
 	/** Border color **/
@@ -59,28 +52,11 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	/** Border alpha **/
 	protected int borderAlpha = 0;
 
-	/**
-	 * Instantiates a new {@link UIBackgroundContainer}.
-	 *
-	 * @param gui the gui
-	 * @param title the title
-	 */
-	public UIBackgroundContainer(String title)
-	{
-		super(title);
-	}
-
-	/**
-	 * Instantiates a new {@link UIBackgroundContainer}.
-	 *
-	 * @param gui the gui
-	 * @param width the width
-	 * @param height the height
-	 */
-	public UIBackgroundContainer(int width, int height)
-	{
-		super(width, height);
-	}
+	protected GuiShape shape = GuiShape	.builder()
+										.forComponent(this)
+										.color(this::getColor)
+										.alpha((ToIntFunction<VertexPosition>) this::getAlpha)
+										.build();
 
 	/**
 	 * Instantiates a new {@link UIBackgroundContainer}.
@@ -93,6 +69,29 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	public UIBackgroundContainer(String title, int width, int height)
 	{
 		super(title, width, height);
+	}
+
+	/**
+	 * Instantiates a new {@link UIBackgroundContainer}.
+	 *
+	 * @param gui the gui
+	 * @param title the title
+	 */
+	public UIBackgroundContainer(String title)
+	{
+		this(title, UIComponent.INHERITED, UIComponent.INHERITED);
+	}
+
+	/**
+	 * Instantiates a new {@link UIBackgroundContainer}.
+	 *
+	 * @param gui the gui
+	 * @param width the width
+	 * @param height the height
+	 */
+	public UIBackgroundContainer(int width, int height)
+	{
+		this(null, width, height);
 	}
 
 	/**
@@ -110,87 +109,27 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	}
 
 	/**
-	 * Gets the top left color.
+	 * Sets the color for the {@link VertexPosition}.
 	 *
-	 * @return the top left color
+	 * @param position the position
+	 * @param color the color
+	 * @return the UI background container
 	 */
-	public int getTopLeftColor()
+	public UIBackgroundContainer setColor(VertexPosition position, int color)
 	{
-		return topLeftColor;
-	}
-
-	/**
-	 * Sets the top left color.
-	 *
-	 * @param topLeftColor the new top left color
-	 */
-	public UIBackgroundContainer setTopLeftColor(int topLeftColor)
-	{
-		this.topLeftColor = topLeftColor;
+		colors[checkNotNull(position).ordinal()] = color;
 		return this;
 	}
 
 	/**
-	 * Gets the top right color.
+	 * Gets the color for the {@link VertexPosition}.
 	 *
-	 * @return the top right color
+	 * @param position the position
+	 * @return the color
 	 */
-	public int getTopRightColor()
+	public int getColor(VertexPosition position)
 	{
-		return topRightColor;
-	}
-
-	/**
-	 * Sets the top right color.
-	 *
-	 * @param topRightColor the new top right color
-	 */
-	public UIBackgroundContainer setTopRightColor(int topRightColor)
-	{
-		this.topRightColor = topRightColor;
-		return this;
-	}
-
-	/**
-	 * Gets the bottom left color.
-	 *
-	 * @return the bottom left color
-	 */
-	public int getBottomLeftColor()
-	{
-		return bottomLeftColor;
-	}
-
-	/**
-	 * Sets the bottom left color.
-	 *
-	 * @param bottomLeftColor the new bottom left color
-	 */
-	public UIBackgroundContainer setBottomLeftColor(int bottomLeftColor)
-	{
-		this.bottomLeftColor = bottomLeftColor;
-		return this;
-	}
-
-	/**
-	 * Gets the bottom right color.
-	 *
-	 * @return the bottom right color
-	 */
-	public int getBottomRightColor()
-	{
-		return bottomRightColor;
-	}
-
-	/**
-	 * Sets the bottom right color.
-	 *
-	 * @param bottomRightColor the new bottom right color
-	 */
-	public UIBackgroundContainer setBottomRightColor(int bottomRightColor)
-	{
-		this.bottomRightColor = bottomRightColor;
-		return this;
+		return colors[checkNotNull(position).ordinal()];
 	}
 
 	/**
@@ -200,8 +139,8 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 */
 	public UIBackgroundContainer setTopColor(int color)
 	{
-		setTopLeftColor(color);
-		setTopRightColor(color);
+		setColor(VertexPosition.TOPLEFT, color);
+		setColor(VertexPosition.TOPRIGHT, color);
 		return this;
 	}
 
@@ -212,8 +151,8 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 */
 	public UIBackgroundContainer setBottomColor(int color)
 	{
-		setBottomLeftColor(color);
-		setBottomRightColor(color);
+		setColor(VertexPosition.BOTTOMLEFT, color);
+		setColor(VertexPosition.BOTTOMRIGHT, color);
 		return this;
 	}
 
@@ -224,8 +163,8 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 */
 	public UIBackgroundContainer setLeftColor(int color)
 	{
-		setTopLeftColor(color);
-		setBottomLeftColor(color);
+		setColor(VertexPosition.TOPLEFT, color);
+		setColor(VertexPosition.BOTTOMLEFT, color);
 		return this;
 	}
 
@@ -236,105 +175,44 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 */
 	public UIBackgroundContainer setRightColor(int color)
 	{
-		setTopRightColor(color);
-		setBottomRightColor(color);
+		setColor(VertexPosition.TOPRIGHT, color);
+		setColor(VertexPosition.BOTTOMRIGHT, color);
 		return this;
 	}
 
 	/**
-	 * Sets the color of this {@link UIBackgroundContainer}.
+	 * Sets the color for all the {@link VertexPosition}.
 	 *
 	 * @param color the new color
 	 */
 	@Override
 	public void setColor(int color)
 	{
-		setTopColor(color);
-		setBottomColor(color);
+		colors = new int[] { color, color, color, color };
 	}
 
 	/**
-	 * Gets the top left alpha.
+	 * Sets the alpha for the {@link VertexPosition}.
 	 *
-	 * @return the top left alpha
+	 * @param position the position
+	 * @param alpha the alpha
+	 * @return the UI background container
 	 */
-	public int getTopLeftAlpha()
+	public UIBackgroundContainer setAlpha(VertexPosition position, int alpha)
 	{
-		return topLeftAlpha;
-	}
-
-	/**
-	 * Sets the top left alpha.
-	 *
-	 * @param topLeftAlpha the new top left alpha
-	 */
-	public UIBackgroundContainer setTopLeftAlpha(int topLeftAlpha)
-	{
-		this.topLeftAlpha = topLeftAlpha;
+		alphas[checkNotNull(position).ordinal()] = alpha;
 		return this;
 	}
 
 	/**
-	 * Gets the top right alpha.
+	 * Gets the alpha for the {@link VertexPosition}.
 	 *
-	 * @return the top right alpha
+	 * @param position the position
+	 * @return the alpha
 	 */
-	public int getTopRightAlpha()
+	public int getAlpha(VertexPosition position)
 	{
-		return topRightAlpha;
-	}
-
-	/**
-	 * Sets the top right alpha.
-	 *
-	 * @param topRightAlpha the new top right alpha
-	 */
-	public UIBackgroundContainer setTopRightAlpha(int topRightAlpha)
-	{
-		this.topRightAlpha = topRightAlpha;
-		return this;
-	}
-
-	/**
-	 * Gets the bottom left alpha.
-	 *
-	 * @return the bottom left alpha
-	 */
-	public int getBottomLeftAlpha()
-	{
-		return bottomLeftAlpha;
-	}
-
-	/**
-	 * Sets the bottom left alpha.
-	 *
-	 * @param bottomLeftAlpha the new bottom left alpha
-	 */
-	public UIBackgroundContainer setBottomLeftAlpha(int bottomLeftAlpha)
-	{
-		this.bottomLeftAlpha = bottomLeftAlpha;
-		return this;
-	}
-
-	/**
-	 * Gets the bottom right alpha.
-	 *
-	 * @return the bottom right alpha
-	 */
-	public int getBottomRightAlpha()
-	{
-		return bottomRightAlpha;
-	}
-
-	/**
-	 * Sets the bottom right alpha.
-	 *
-	 * @param bottomRightAlpha the new bottom right alpha
-	 */
-	public UIBackgroundContainer setBottomRightAlpha(int bottomRightAlpha)
-	{
-		this.bottomRightAlpha = bottomRightAlpha;
-		return this;
+		return alphas[checkNotNull(position).ordinal()];
 	}
 
 	/**
@@ -344,8 +222,8 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 */
 	public UIBackgroundContainer setTopAlpha(int alpha)
 	{
-		setTopLeftAlpha(alpha);
-		setTopRightAlpha(alpha);
+		setAlpha(VertexPosition.TOPLEFT, alpha);
+		setAlpha(VertexPosition.TOPRIGHT, alpha);
 		return this;
 	}
 
@@ -356,8 +234,8 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 */
 	public UIBackgroundContainer setBottomAlpha(int alpha)
 	{
-		setBottomLeftAlpha(alpha);
-		setBottomRightAlpha(alpha);
+		setAlpha(VertexPosition.BOTTOMLEFT, alpha);
+		setAlpha(VertexPosition.BOTTOMRIGHT, alpha);
 		return this;
 	}
 
@@ -368,8 +246,8 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 */
 	public UIBackgroundContainer setLeftAlpha(int alpha)
 	{
-		setTopLeftAlpha(alpha);
-		setBottomLeftAlpha(alpha);
+		setAlpha(VertexPosition.TOPLEFT, alpha);
+		setAlpha(VertexPosition.BOTTOMLEFT, alpha);
 		return this;
 	}
 
@@ -380,21 +258,19 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 */
 	public UIBackgroundContainer setRightAlpha(int alpha)
 	{
-		setTopRightAlpha(alpha);
-		setBottomRightAlpha(alpha);
+		setAlpha(VertexPosition.TOPRIGHT, alpha);
+		setAlpha(VertexPosition.BOTTOMRIGHT, alpha);
 		return this;
 	}
 
 	/**
-	 * Sets the alpha background of this {@link UIBackgroundContainer}.
+	 * Sets the alpha for all the {@link VertexPosition}.
 	 *
 	 * @param alpha the new alpha
 	 */
-	public UIBackgroundContainer setBackgroundAlpha(int alpha)
+	public void setBackgroundAlpha(int alpha)
 	{
-		setTopAlpha(alpha);
-		setBottomAlpha(alpha);
-		return this;
+		alphas = new int[] { alpha, alpha, alpha, alpha };
 	}
 
 	@Override
@@ -402,39 +278,27 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	{
 		if (borderSize > 0)
 		{
-			shape.setColor(borderColor);
-			shape.setAlpha(borderAlpha);
-			//top
-			shape.setSize(getWidth(), borderSize);
-			shape.setPosition(0, 0);
-			renderer.drawShape(shape);
-			//bottom
-			//shape.setSize(getWidth(), borderSize);
-			shape.setPosition(0, getHeight() - borderSize);
-			renderer.drawShape(shape);
-			//left
-			shape.setSize(borderSize, getHeight() - borderSize * 2);
-			shape.setPosition(0, borderSize);
-			renderer.drawShape(shape);
-			//right
-			//shape.setSize(borderSize, getHeight()- borderSize * 2);
-			shape.setPosition(getWidth() - borderSize, borderSize);
-			renderer.drawShape(shape);
+			//			shape.setColor(borderColor);
+			//			shape.setAlpha(borderAlpha);
+			//			//top
+			//			shape.setSize(getWidth(), borderSize);
+			//			shape.setPosition(0, 0);
+			//			renderer.drawShape(shape);
+			//			//bottom
+			//			//shape.setSize(getWidth(), borderSize);
+			//			shape.setPosition(0, getHeight() - borderSize);
+			//			renderer.drawShape(shape);
+			//			//left
+			//			shape.setSize(borderSize, getHeight() - borderSize * 2);
+			//			shape.setPosition(0, borderSize);
+			//			renderer.drawShape(shape);
+			//			//right
+			//			//shape.setSize(borderSize, getHeight()- borderSize * 2);
+			//			shape.setPosition(getWidth() - borderSize, borderSize);
+			//			renderer.drawShape(shape);
 		}
 
-		shape.setPosition(getX() + borderSize, getY() + borderSize);
-		shape.setSize(getWidth() - borderSize * 2, getHeight() - borderSize * 2);
-
-		shape.setColor(VertexPosition.TOPLEFT, topLeftColor);
-		shape.setAlpha(VertexPosition.TOPLEFT, topLeftAlpha);
-		shape.setColor(VertexPosition.TOPRIGHT, topRightColor);
-		shape.setAlpha(VertexPosition.TOPRIGHT, topRightAlpha);
-		shape.setColor(VertexPosition.BOTTOMLEFT, bottomLeftColor);
-		shape.setAlpha(VertexPosition.BOTTOMLEFT, bottomLeftAlpha);
-		shape.setColor(VertexPosition.BOTTOMRIGHT, bottomRightColor);
-		shape.setAlpha(VertexPosition.BOTTOMRIGHT, bottomRightAlpha);
-
-		renderer.drawShape(shape);
+		shape.render();
 	}
 
 }

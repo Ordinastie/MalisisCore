@@ -35,6 +35,7 @@ import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiIcon;
 import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.GuiShape.ShapePosition;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
@@ -47,7 +48,6 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 {
 	private static HashMap<String, List<UIRadioButton>> radioButtons = new HashMap<>();
 
-	protected GuiShape shape = new GuiShape();
 	/** The {@link MalisisFont} to use for this {@link UIRadioButton}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontOptions} to use for this {@link UIRadioButton}. */
@@ -56,6 +56,19 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 	private String name;
 	private String text;
 	private boolean selected;
+
+	protected GuiShape backgroundShape = GuiShape	.builder(this)
+													.position(ShapePosition.fromComponent(this, 1, 0))
+													.size(8, 8)
+													.icon(GuiIcon.forComponent(this, GuiIcon.RADIO_BG, null, GuiIcon.RADIO_DISABLED_BG))
+													.build();
+	protected GuiShape radioShape = GuiShape.builder(this)
+											.position(ShapePosition.fromComponent(this, 2, 1))
+											.size(6, 6)
+											.icon(GuiIcon.forComponent(this, GuiIcon.RADIO, GuiIcon.RADIO_HOVER, GuiIcon.RADIO_DISABLED))
+											.build();
+	//renderer.drawRectangle(2, 1, 0, 6, 6, 0xFFFFFF, 80, true);
+	protected GuiShape overlayShape = GuiShape.builder(this).position(ShapePosition.fromComponent(this, 2, 1)).size(6, 6).alpha(80).build();
 
 	public UIRadioButton(String name, String text)
 	{
@@ -160,16 +173,12 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		setupShape(shape, GuiIcon.RADIO_BG, null, GuiIcon.RADIO_DISABLED_BG);
-		shape.translate(1, 0);
-		shape.setSize(8, 8);
-		renderer.drawShape(shape);
-
+		backgroundShape.render();
 		renderer.next();
 
 		// draw the white shade over the slot
 		if (hovered)
-			renderer.drawRectangle(2, 1, 0, 6, 6, 0xFFFFFF, 80, true);
+			overlayShape.render();
 
 		if (text != null)
 			renderer.drawText(font, text, 12, 0, 0, fontOptions);
@@ -181,10 +190,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 		if (!selected)
 			return;
 
-		setupShape(shape, GuiIcon.RADIO, GuiIcon.RADIO_HOVER, GuiIcon.RADIO_DISABLED);
-		shape.setSize(6, 6);
-		shape.translate(2, 1);
-		renderer.drawShape(shape);
+		radioShape.render();
 	}
 
 	@Override

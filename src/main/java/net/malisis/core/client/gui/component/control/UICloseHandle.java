@@ -37,7 +37,7 @@ import net.malisis.core.client.gui.element.GuiShape;
  */
 public class UICloseHandle extends UIComponent<UICloseHandle> implements IControlComponent
 {
-	protected GuiShape shape = new GuiShape(0, 0, 5, 5, GuiIcon.CLOSE);
+	protected GuiShape shape = GuiShape.builder().size(5, 5).icon(GuiIcon.CLOSE).build();
 
 	public <T extends UIComponent<T> & ICloseable> UICloseHandle(T parent)
 	{
@@ -70,6 +70,6 @@ public class UICloseHandle extends UIComponent<UICloseHandle> implements IContro
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawShape(shape);
+		shape.render();
 	}
 }

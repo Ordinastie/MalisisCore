@@ -30,6 +30,9 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.element.GuiShape;
+import net.malisis.core.client.gui.element.GuiShape.ShapePosition;
+import net.malisis.core.client.gui.element.GuiShape.ShapeSize;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.AlphaTransform;
@@ -39,7 +42,7 @@ import net.malisis.core.renderer.animation.transformation.ITransformable;
  * @author Ordinastie
  *
  */
-public class UISlimScrollbar extends UIScrollBar
+public final class UISlimScrollbar extends UIScrollBar<UISlimScrollbar>
 {
 	/** Background color of the scroll. */
 	protected int backgroundColor = 0x999999;
@@ -48,10 +51,20 @@ public class UISlimScrollbar extends UIScrollBar
 	/** Whether the scrollbar should fade in/out */
 	protected boolean fade = true;
 
+	protected GuiShape backgroundShape = GuiShape.builder(this).color(this::getBackgroundColor).build();
+	protected ShapePosition scrollPosition;
+	protected ShapeSize scrollSize;
+	protected GuiShape scrollShape = GuiShape	.builder()
+												.position(() -> scrollPosition)
+												.size(() -> scrollSize)
+												.color(this::getScrollColor)
+												.build();
+
 	public <T extends UIComponent<T> & IScrollable> UISlimScrollbar(T parent, Type type)
 	{
 		super(parent, type);
 		setScrollSize(2, 15);
+		scrollSize = isHorizontal() ? ShapeSize.of(15, 2) : ShapeSize.of(2, 15);
 	}
 
 	public void setFade(boolean fade)
@@ -70,7 +83,7 @@ public class UISlimScrollbar extends UIScrollBar
 		int vp = getScrollable().getVerticalPadding();
 		int hp = getScrollable().getHorizontalPadding();
 
-		if (type == Type.HORIZONTAL)
+		if (isHorizontal())
 			setPosition(hp + offsetX, -vp + offsetY, Anchor.BOTTOM);
 		else
 			setPosition(-hp + offsetX, vp + offsetY, Anchor.RIGHT);
@@ -117,30 +130,28 @@ public class UISlimScrollbar extends UIScrollBar
 		this.backgroundColor = backgroundColor;
 	}
 
+	public int getScrollColor()
+	{
+		return scrollColor;
+	}
+
+	public int getBackgroundColor()
+	{
+		return backgroundColor;
+	}
+
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		renderer.drawRectangle(0, 0, 0, getWidth(), getHeight(), backgroundColor, 255, true);
+		backgroundShape.render();
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int l = getLength() - scrollHeight;
-		int ox = 0;
-		int oy = (int) (getOffset() * l);
-		int w = scrollThickness;
-		int h = scrollHeight;
-
-		if (isHorizontal())
-		{
-			ox = (int) (getOffset() * l);
-			oy = 0;
-			w = scrollHeight;
-			h = scrollThickness;
-		}
-
-		renderer.drawRectangle(ox, oy, 0, w, h, scrollColor, 255, true);
+		int offset = (int) (getOffset() * (getLength() - scrollHeight));
+		scrollPosition = ShapePosition.of(isHorizontal() ? offset : 0, isHorizontal() ? 0 : offset);
+		scrollShape.render();
 	}
 
 	@Subscribe

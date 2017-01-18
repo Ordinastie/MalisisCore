@@ -27,13 +27,16 @@ package net.malisis.core.client.gui.element;
 import static com.google.common.base.Preconditions.*;
 
 import java.util.List;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 
-import org.lwjgl.util.vector.Matrix4f;
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 
-import com.google.common.collect.Lists;
-
-import net.malisis.core.client.gui.element.GuiVertex.VertexPosition;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.renderer.element.Vertex;
 
 /**
  * @author Ordinastie
@@ -41,141 +44,353 @@ import net.minecraft.client.renderer.VertexBuffer;
  */
 public class GuiShape
 {
-	List<GuiVertex> vertexes = Lists.newArrayList();
-	/** The matrix containing all the transformations applied to this {@link GuiShape}. */
-	protected Matrix4f matrix = new Matrix4f();
-
-	private int x = 0;
-	private int y = 0;
-	private int zIndex = 0;
-	private int width = 0;
-	private int height = 0;
-
-	private GuiIcon icon = GuiIcon.EMPTY;
-
-	public GuiShape()
+	public static enum VertexPosition
 	{
-		vertexes.add(new GuiVertex(VertexPosition.TOPLEFT));
-		vertexes.add(new GuiVertex(VertexPosition.BOTTOMLEFT));
-		vertexes.add(new GuiVertex(VertexPosition.BOTTOMRIGHT));
-		vertexes.add(new GuiVertex(VertexPosition.TOPRIGHT));
+		TOPLEFT(0, 0),
+		TOPRIGHT(1, 0),
+		BOTTOMRIGHT(1, 1),
+		BOTTOMLEFT(0, 1);
+
+		//@formatter:off
+		private int x, y;
+		VertexPosition(int x, int y) { this.x = x; this.y = y; }
+		public int getX() { return x; }
+		public int getY() { return y; }
+		public int getX(int x, int width) { return x + this.x * width; }
+		public int getY(int y, int height) { return y + this.y * height; }
+		//@formatter:on
 	}
 
-	public GuiShape(GuiIcon icon)
-	{
-		this();
-		setIcon(icon);
-	}
+	public static final List<VertexPosition> positions = ImmutableList.of(	VertexPosition.TOPLEFT,
+																			VertexPosition.BOTTOMLEFT,
+																			VertexPosition.BOTTOMRIGHT,
+																			VertexPosition.TOPRIGHT);
 
-	public GuiShape(int x, int y, int width, int height)
-	{
-		this();
-		setPosition(x, y);
-		setSize(width, height);
-	}
+	private final Supplier<ShapePosition> position;
+	private final IntSupplier zIndex;
+	private final Supplier<ShapeSize> size;
+	private final ToIntFunction<VertexPosition> color;
+	private final ToIntFunction<VertexPosition> alpha;
+	private final Supplier<GuiIcon> icon;
 
-	public GuiShape(int x, int y, int width, int height, GuiIcon icon)
+	private GuiShape(Supplier<ShapePosition> position, IntSupplier zIndex, Supplier<ShapeSize> size, ToIntFunction<VertexPosition> color, ToIntFunction<VertexPosition> alpha, Supplier<GuiIcon> icon)
 	{
-		this();
-		setPosition(x, y);
-		setSize(width, height);
-		setIcon(icon);
-	}
-
-	public void setPosition(int x, int y)
-	{
-		this.x = x;
-		this.y = y;
-	}
-
-	public void translate(int x, int y)
-	{
-		this.x += x;
-		this.y += y;
-	}
-
-	public int getX()
-	{
-		return x;
-	}
-
-	public int getY()
-	{
-		return y;
-	}
-
-	public void setZIndex(int zIndex)
-	{
+		this.position = position;
 		this.zIndex = zIndex;
+		this.size = size;
+		this.color = color;
+		this.alpha = alpha;
+		this.icon = icon;
+	}
+
+	public ShapePosition getPosition()
+	{
+		return position != null ? position.get() : ShapePosition.ZERO;
 	}
 
 	public int getZIndex()
 	{
-		return zIndex;
+		return zIndex != null ? zIndex.getAsInt() : 0;
 	}
 
-	public void setSize(int width, int height)
+	public ShapeSize getSize()
 	{
-		this.width = width;
-		this.height = height;
+		return size != null ? size.get() : ShapeSize.ZERO;
 	}
 
-	public int getWidth()
+	public int getColor(VertexPosition vertexPosition)
 	{
-		return width;
+		if (color == null)
+			return 0xFFFFFF;
+		return color.applyAsInt(vertexPosition);
 	}
 
-	public int getHeight()
+	public int getAlpha(VertexPosition vertexPosition)
 	{
-		return height;
-	}
-
-	public void setIcon(GuiIcon icon)
-	{
-		this.icon = checkNotNull(icon);
+		if (alpha == null)
+			return 255;
+		return alpha.applyAsInt(vertexPosition);
 	}
 
 	public GuiIcon getIcon()
 	{
-		return icon;
+		if (icon == null)
+			return GuiIcon.NONE;
+		return Objects.firstNonNull(icon.get(), GuiIcon.NONE);
 	}
 
-	public void setColor(int color)
+	public void render()
 	{
-		vertexes.forEach(v -> v.setColor(color));
+		ShapePosition p = getPosition();
+		ShapeSize s = getSize();
+		int z = getZIndex();
+		GuiIcon i = getIcon();
+
+		positions.forEach(vp -> GuiRenderer.buffer.addVertexData(getVertexData(vp, p, s, z, i)));
 	}
 
-	public void setColor(VertexPosition position, int color)
+	private int flipColor(int color)
 	{
-		getVertex(position).setColor(color);
+		int r = (color >> 16) & 0xFF;
+		int g = (color >> 8) & 0xFF;
+		int b = (color) & 0xFF;
+
+		return (b << 16) + (g << 8) + r;
 	}
 
-	public void setAlpha(int alpha)
+	/**
+	 * Gets the vertex data for this {@link Vertex}.
+	 *
+	 * @param vertexFormat the vertex format
+	 * @param offset the offset
+	 * @return the vertex data
+	 */
+	public int[] getVertexData(VertexPosition position, ShapePosition p, ShapeSize s, int z, GuiIcon icon)
 	{
-		vertexes.forEach(v -> v.setAlpha(alpha));
+		float x = position.getX(p.getX(), s.getWidth());
+		float y = position.getY(p.getY(), s.getHeight());
+		int rgba = flipColor(getColor(position)) + (getAlpha(position) << 24);
+
+		//index 0
+		float u = icon.getInterpolatedU(position.getX());
+		float v = icon.getInterpolatedV(position.getY());
+		float px = position.getX();
+		float py = position.getY();
+		//index 1
+		float minU = icon.getMinU();
+		float minV = icon.getMinV();
+		float maxU = icon.getMaxU();
+		float maxV = icon.getMaxV();
+		//index 2
+		float textureWidth = icon.getTextureWidth();
+		float textureHeight = icon.getTextureHeight();
+		float width = s.getWidth();
+		float height = s.getHeight();
+		//index 3
+		int border = icon.getBorder();
+
+		return new int[] {	Float.floatToRawIntBits(x),
+							Float.floatToRawIntBits(y),
+							Float.floatToRawIntBits(z),
+							rgba,
+							//index 0
+							Float.floatToRawIntBits(u),
+							Float.floatToRawIntBits(v),
+							Float.floatToRawIntBits(px),
+							Float.floatToRawIntBits(py),
+							//index 1
+							Float.floatToRawIntBits(minU),
+							Float.floatToRawIntBits(minV),
+							Float.floatToRawIntBits(maxU),
+							Float.floatToRawIntBits(maxV),
+							//index 2
+							Float.floatToRawIntBits(textureWidth),
+							Float.floatToRawIntBits(textureHeight),
+							Float.floatToRawIntBits(width),
+							Float.floatToRawIntBits(height),
+							Float.floatToRawIntBits(border) };
 	}
 
-	public void setAlpha(VertexPosition position, int alpha)
+	public static Builder builder()
 	{
-		getVertex(position).setAlpha(alpha);
+		return new Builder();
 	}
 
-	public GuiVertex getVertex(VertexPosition position)
+	public static Builder builder(UIComponent<?> component)
 	{
-		return vertexes.get(position.ordinal());
+		return new Builder().forComponent(component);
 	}
 
-	public void render(VertexBuffer buffer)
+	public static class Builder
 	{
-		renderAt(buffer, 0, 0, 0);
-	}
+		private Supplier<ShapePosition> position;
+		private IntSupplier zIndex;
+		private Supplier<ShapeSize> size;
+		private ToIntFunction<VertexPosition> color;
+		private ToIntFunction<VertexPosition> alpha;
+		private Supplier<GuiIcon> icon;
 
-	public void renderAt(VertexBuffer buffer, int offsetX, int offsetY, int offsetZ)
-	{
-		for (GuiVertex v : vertexes)
+		public Builder forComponent(UIComponent<?> component)
 		{
-			int[] data = v.getVertexData(buffer, this, offsetX, offsetY, offsetZ);
-			buffer.addVertexData(data);
+			position = ShapePosition.fromComponent(component);
+			size = ShapeSize.fromComponent(component);
+			return this;
+		}
+
+		public Builder position(int x, int y)
+		{
+			position = () -> ShapePosition.of(x, y);
+			return this;
+		}
+
+		public Builder position(ShapePosition sp)
+		{
+			checkNotNull(sp);
+			position = () -> sp;
+			return this;
+		}
+
+		public Builder position(Supplier<ShapePosition> supplier)
+		{
+			position = checkNotNull(supplier);
+			return this;
+		}
+
+		public Builder zIndex(int z)
+		{
+			zIndex = () -> z;
+			return this;
+		}
+
+		public Builder zIndex(IntSupplier supplier)
+		{
+			zIndex = checkNotNull(supplier);
+			return this;
+		}
+
+		public Builder size(int w, int h)
+		{
+			size = () -> ShapeSize.of(w, h);
+			return this;
+		}
+
+		public Builder size(ShapeSize ss)
+		{
+			checkNotNull(ss);
+			size = () -> ss;
+			return this;
+		}
+
+		public Builder size(Supplier<ShapeSize> supplier)
+		{
+			size = checkNotNull(supplier);
+			return this;
+		}
+
+		public Builder color(int c)
+		{
+			color = (vp) -> c;
+			return this;
+		}
+
+		public Builder color(IntSupplier supplier)
+		{
+			color = (vp) -> supplier.getAsInt();
+			return this;
+		}
+
+		public Builder color(ToIntFunction<VertexPosition> func)
+		{
+			color = checkNotNull(func);
+			return this;
+		}
+
+		public Builder alpha(int a)
+		{
+			this.alpha = (vp) -> a;
+			return this;
+		}
+
+		public Builder alpha(IntSupplier supplier)
+		{
+			alpha = (vp) -> supplier.getAsInt();
+			return this;
+		}
+
+		public Builder alpha(ToIntFunction<VertexPosition> func)
+		{
+			alpha = checkNotNull(func);
+			return this;
+		}
+
+		public Builder icon(GuiIcon i)
+		{
+			icon = () -> i;
+			return this;
+		}
+
+		public Builder icon(Supplier<GuiIcon> supplier)
+		{
+			icon = checkNotNull(supplier);
+			return this;
+		}
+
+		public GuiShape build()
+		{
+			if (size == null)
+				throw new IllegalStateException("No size specified for the GuiShape.");
+			return new GuiShape(position, zIndex, size, color, alpha, icon);
+		}
+	}
+
+	public static class ShapePosition
+	{
+		private static final ShapePosition ZERO = ShapePosition.of(0, 0);
+		private final int x;
+		private final int y;
+
+		private ShapePosition(int x, int y)
+		{
+			this.x = x;
+			this.y = y;
+		}
+
+		public int getX()
+		{
+			return x;
+		}
+
+		public int getY()
+		{
+			return y;
+		}
+
+		public static ShapePosition of(int x, int y)
+		{
+			return new ShapePosition(x, y);
+		}
+
+		public static Supplier<ShapePosition> fromComponent(UIComponent<?> component, int offsetX, int offsetY)
+		{
+			return () -> ShapePosition.of(component.screenX() + offsetX, component.screenY() + offsetY);
+		}
+
+		public static Supplier<ShapePosition> fromComponent(UIComponent<?> component)
+		{
+			return fromComponent(component, 0, 0);
+		}
+	}
+
+	public static class ShapeSize
+	{
+		private static final ShapeSize ZERO = ShapeSize.of(0, 0);
+		private final int width;
+		private final int height;
+
+		private ShapeSize(int width, int height)
+		{
+			this.width = width;
+			this.height = height;
+		}
+
+		public int getWidth()
+		{
+			return width;
+		}
+
+		public int getHeight()
+		{
+			return height;
+		}
+
+		public static ShapeSize of(int width, int height)
+		{
+			return new ShapeSize(width, height);
+		}
+
+		public static Supplier<ShapeSize> fromComponent(UIComponent<?> component)
+		{
+			return () -> ShapeSize.of(component.getWidth(), component.getHeight());
 		}
 	}
 
