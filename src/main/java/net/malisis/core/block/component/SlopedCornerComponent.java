@@ -26,6 +26,8 @@ package net.malisis.core.block.component;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
@@ -46,8 +48,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-
-import com.google.common.collect.Lists;
 
 /**
  * @author Ordinastie
@@ -103,6 +103,9 @@ public class SlopedCornerComponent implements IBlockComponent
 	@Override
 	public AxisAlignedBB[] getBoundingBoxes(Block block, IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
+		if (type == BoundingBoxType.RAYTRACE || type == BoundingBoxType.SELECTION)
+			return AABBUtils.identities();
+
 		boolean inverted = isInverted(state);
 		boolean down = isDown(state);
 		float[][] fx;
