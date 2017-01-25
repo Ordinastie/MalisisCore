@@ -251,7 +251,8 @@ public abstract class MalisisGui extends GuiScreen
 	protected void addToScreen(UIComponent<?> component)
 	{
 		screen.add(component);
-		component.onAddedToScreen();
+		if (component != null)
+			component.onAddedToScreen();
 	}
 
 	/**
@@ -545,12 +546,20 @@ public abstract class MalisisGui extends GuiScreen
 			mouseY = this.height - Mouse.getY() - 1;
 		}
 
-		update(mouseX, mouseY, partialTick);
-
 		if (guiscreenBackground)
 			drawWorldBackground(1);
 
 		renderer.setup(mouseX, mouseY, partialTick);
+
+		removeDebug("Update exception");
+		try
+		{
+			update(mouseX, mouseY, partialTick);
+		}
+		catch (Exception e)
+		{
+			addDebug("Update exception", e.getMessage());
+		}
 
 		screen.draw(renderer, mouseX, mouseY, partialTick);
 
