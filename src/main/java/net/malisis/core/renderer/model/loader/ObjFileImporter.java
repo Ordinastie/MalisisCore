@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Maps;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.element.Face;
@@ -46,8 +48,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-
-import com.google.common.collect.Maps;
 
 /**
  * Model loader for OBJ files (Wavefront).
@@ -235,10 +235,10 @@ public class ObjFileImporter implements IModelLoader
 		float v = 0;
 		if (coords.length != 2)
 		{
-			MalisisCore.log.error("[ObjFileImporter] Wrong UV coordinates number {} at line {} : {}",
-					coords.length,
-					lineNumber,
-					currentLine);
+			MalisisCore.log.error(	"[ObjFileImporter] Wrong UV coordinates number {} at line {} : {}",
+									coords.length,
+									lineNumber,
+									currentLine);
 		}
 		else
 		{
@@ -262,10 +262,10 @@ public class ObjFileImporter implements IModelLoader
 		float z = 0;
 		if (coords.length != 3)
 		{
-			MalisisCore.log.error("[ObjFileImporter] Wrong Normal coordinates number {} at line {} : {}",
-					coords.length,
-					lineNumber,
-					currentLine);
+			MalisisCore.log.error(	"[ObjFileImporter] Wrong Normal coordinates number {} at line {} : {}",
+									coords.length,
+									lineNumber,
+									currentLine);
 		}
 		else
 		{
@@ -342,7 +342,7 @@ public class ObjFileImporter implements IModelLoader
 		params.renderAllFaces.set(true);
 		params.interpolateUV.set(false);
 		params.calculateAOColor.set(false);
-		params.useEnvironmentBrightness.set(false);
+		//params.useEnvironmentBrightness.set(false);
 
 		faces.add(f);
 	}

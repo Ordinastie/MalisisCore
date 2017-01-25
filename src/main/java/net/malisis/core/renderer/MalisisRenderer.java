@@ -101,9 +101,9 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRenderer<T> implements IBlockRenderer, IRenderWorldLast
 {
 	/** Batched buffer reference. */
-	protected static final VertexBuffer batchedBuffer = ((Tessellator) Silenced.get(
-			() -> AsmUtils	.changeFieldAccess(TileEntityRendererDispatcher.class, "batchBuffer")
-							.get(TileEntityRendererDispatcher.instance))).getBuffer();
+	protected static final VertexBuffer batchedBuffer = ((Tessellator) Silenced.get(() -> AsmUtils	.changeFieldAccess(	TileEntityRendererDispatcher.class,
+																														"batchBuffer")
+																									.get(TileEntityRendererDispatcher.instance))).getBuffer();
 
 	public static VertexFormat malisisVertexFormat = new VertexFormat()
 	{
@@ -380,8 +380,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	{
 		if (tranformType == TransformType.FIRST_PERSON_RIGHT_HAND || tranformType == TransformType.FIRST_PERSON_LEFT_HAND)
 		{
-			ItemStack stackInv = Utils.getClientPlayer().getHeldItem(
-					tranformType == TransformType.FIRST_PERSON_RIGHT_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
+			ItemStack stackInv = Utils	.getClientPlayer()
+										.getHeldItem(tranformType == TransformType.FIRST_PERSON_RIGHT_HAND	? EnumHand.MAIN_HAND
+																											: EnumHand.OFF_HAND);
 			if (itemStack != stackInv && stackInv != null && stackInv.getItem() == itemStack.getItem())
 				itemStack = stackInv;
 		}
@@ -536,7 +537,6 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 				GlStateManager.pushAttrib();
 				GlStateManager.pushMatrix();
 				GlStateManager.disableLighting();
-
 				GlStateManager.translate(data[0], data[1], data[2]);
 
 				bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
@@ -548,7 +548,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		{
 			GlStateManager.pushAttrib();
 			GlStateManager.pushMatrix();
-
+			Minecraft.getMinecraft().entityRenderer.enableLightmap();
 			GlStateManager.translate(data[0], data[1], data[2]);
 
 			bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
@@ -881,9 +881,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		int vertexCount = face.getVertexes().length;
 		if (vertexCount != 4 && renderType == RenderType.BLOCK)
 		{
-			MalisisCore.log.error("[MalisisRenderer] Attempting to render a face containing {} vertexes in BLOCK for {}. Ignored",
-					vertexCount,
-					block);
+			MalisisCore.log.error(	"[MalisisRenderer] Attempting to render a face containing {} vertexes in BLOCK for {}. Ignored",
+									vertexCount,
+									block);
 			return;
 		}
 
