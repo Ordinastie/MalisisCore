@@ -48,6 +48,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 
 /**
  * Complete rewrite of {@link Container}.
@@ -162,10 +163,10 @@ public class MalisisInventoryContainer extends Container
 	public int addInventory(MalisisInventory inventory)
 	{
 		inventories.put(nexInventoryId, inventory);
-		if (isServer())
-			inventoryCaches.put(inventory, new InventoryCache(owner, inventory, windowId));
 		inventory.setInventoryId(nexInventoryId);
 		inventory.addOpenedContainer(this);
+		if (isServer())
+			inventoryCaches.put(inventory, new InventoryCache(owner, inventory, windowId));
 		return nexInventoryId++;
 	}
 
@@ -373,13 +374,18 @@ public class MalisisInventoryContainer extends Container
 		//TODO : freeze the slot at inventory creation
 		if (slot.getItemStack().getItem() instanceof IInventoryProvider && slot.getItemStack().getTagCompound() != null)
 		{
-			if (slot.getItemStack().getTagCompound().getInteger("inventoryId") == 1)
+			NBTTagCompound nbt = slot.getItemStack().getTagCompound();
+			if (nbt.hasKey("inventoryId"))
 			{
-				owner.closeScreen();
-				return null;
+				if (nbt.getInteger("inventoryId") == 0) //it is main inventory
+				{
+					owner.closeScreen();
+					nbt.removeTag("inventoryId");
+					return null;
+				}
+				else //removed the stack with inventory, it's not opened anymore
+					nbt.removeTag("inventoryId");
 			}
-			else if (slot.getItemStack().getTagCompound().hasKey("inventoryId"))
-				slot.getItemStack().getTagCompound().removeTag("inventoryId");
 		}
 
 		// player pressed 1-9 key while hovering a slot
