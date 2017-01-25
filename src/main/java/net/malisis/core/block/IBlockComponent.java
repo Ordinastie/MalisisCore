@@ -89,7 +89,7 @@ public interface IBlockComponent extends IComponent
 
 	public default Item getItem(Block block)
 	{
-		if (this instanceof MalisisBlock)
+		if (block instanceof MalisisBlock)
 			return new MalisisItemBlock((MalisisBlock) block);
 
 		return new ItemBlock(block);
