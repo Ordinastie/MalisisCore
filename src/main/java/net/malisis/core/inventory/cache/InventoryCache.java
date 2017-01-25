@@ -62,7 +62,7 @@ public class InventoryCache
 		return slotCache.stream()
 						.peek(CachedSlot::update)
 						.filter(cs -> sendAll || cs.hasChanged())
-						.map(CachedSlot::getSlot)
+						.map(CachedSlot::get)
 						.collect(Collectors.toList());
 	}
 

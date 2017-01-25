@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Ordinastie
+ * Copyright (c) 2017 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,24 +28,29 @@ package net.malisis.core.util.cacheddata;
  * @author Ordinastie
  *
  */
-public interface ICachedData<T>
+
+public class FixedData<T> implements ICachedData<T>
 {
-	/**
-	 * Gets the current value of the data.
-	 *
-	 * @return the t
-	 */
-	public T get();
+	private final T data;
 
-	/**
-	 * Checks if data has changed.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean hasChanged();
+	public FixedData(T data)
+	{
+		this.data = data;
+	}
 
-	/**
-	 * Updates the current data.
-	 */
-	public void update();
+	@Override
+	public T get()
+	{
+		return data;
+	}
+
+	@Override
+	public void update()
+	{}
+
+	@Override
+	public boolean hasChanged()
+	{
+		return false;
+	}
 }
