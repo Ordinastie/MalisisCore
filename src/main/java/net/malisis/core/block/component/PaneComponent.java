@@ -26,6 +26,8 @@ package net.malisis.core.block.component;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.ISmartCull;
@@ -39,8 +41,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-
-import com.google.common.collect.Lists;
 
 /**
  * @author Ordinastie
@@ -100,12 +100,7 @@ public class PaneComponent implements IBlockComponent, ISmartCull
 		}
 
 		if (!north && !south && !east && !west)
-		{
-			north = true;
-			south = true;
-			east = true;
-			west = true;
-		}
+			return new AxisAlignedBB[] { base };
 
 		List<AxisAlignedBB> list = Lists.newArrayList();
 		if (north || south)
