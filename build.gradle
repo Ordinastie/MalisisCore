@@ -45,11 +45,7 @@ defaultTasks 'build', 'install'
 // Basic project information
 group = 'net.malisis'
 archivesBaseName = 'malisiscore'
-<<<<<<< HEAD
 version = '1.11-5.0.0-SNAPSHOT'
-=======
-version = '1.10.2-4.2.11-SNAPSHOT'
->>>>>>> refs/remotes/origin/1.9.4
 ext.packaging = 'jar'
 
 // Extended project information
