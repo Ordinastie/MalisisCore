@@ -36,31 +36,22 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.io.Files;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.renderer.MalisisRenderer;
-import net.malisis.core.renderer.element.Face;
-import net.malisis.core.renderer.element.Shape;
-import net.malisis.core.renderer.element.face.SouthFace;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 
@@ -71,8 +62,6 @@ import net.minecraft.util.text.TextFormatting;
 public class MalisisFont
 {
 	public static MalisisFont minecraftFont = new MinecraftFont();
-
-	private static Pattern pattern = Pattern.compile("\\{(.*?)}");
 
 	/** AWT font used **/
 	protected Font font;
@@ -86,8 +75,8 @@ public class MalisisFont
 	protected ResourceLocation textureRl;
 	/** Size of the texture (width and height) **/
 	protected int size;
-	/** Whether the currently drawn text is the shadow part **/
-	protected boolean drawingShadow = false;
+
+	protected boolean loaded = false;
 
 	public MalisisFont(File fontFile)
 	{
@@ -124,7 +113,12 @@ public class MalisisFont
 			this.fontGeneratorOptions = options;
 
 		loadCharacterData();
-		loadTexture(false);
+		loaded = loadTexture(false);
+	}
+
+	public boolean isLoaded()
+	{
+		return loaded;
 	}
 
 	public ResourceLocation getResourceLocation()
@@ -146,148 +140,121 @@ public class MalisisFont
 		return charData[c];
 	}
 
-	public Shape getShape(String text, float fontSize)
-	{
-		text = processString(text, null);
-		List<Face> faces = new ArrayList<>();
-		float offset = 0;
-		float factor = fontGeneratorOptions.fontSize / fontSize;
-		for (int i = 0; i < text.length(); i++)
-		{
-			CharData cd = getCharData(text.charAt(i));
-			if (cd.getChar() != ' ')
-			{
-				Face f = new SouthFace();
-				f.scale(cd.getFullWidth(fontGeneratorOptions) / factor, cd.getFullHeight(fontGeneratorOptions) / factor, 0);
-				f.translate((offset - fontGeneratorOptions.mx) / factor, -fontGeneratorOptions.my / factor, 0);
-				f.setTexture(cd.getIcon());
-
-				faces.add(f);
-			}
-			offset += cd.getCharWidth();
-
-		}
-
-		return new Shape(faces).storeState();
-	}
-
 	//#region Prepare/Clean
-	protected void prepare(MalisisRenderer<?> renderer, float x, float y, float z, FontOptions options)
+	protected void prepare()
 	{
-		boolean isGui = renderer instanceof GuiRenderer;
-		renderer.next(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-
+		VertexBuffer buffer = Tessellator.getInstance().getBuffer();
+		if (buffer.isDrawing)
+			Tessellator.getInstance().draw();
+		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 		Minecraft.getMinecraft().getTextureManager().bindTexture(textureRl);
-		GL11.glPushMatrix();
-		GL11.glTranslatef(x, y + (isGui ? 0 : options.getFontScale()), z);
-
-		if (!isGui)
-			GL11.glScalef(1 / 9F, -1 / 9F, 1 / 9F);
 	}
 
-	protected void clean(MalisisRenderer<?> renderer, boolean isDrawing)
+	protected void clean()
 	{
-		if (isDrawing)
-			renderer.next(MalisisRenderer.malisisVertexFormat);
-		else
-			renderer.draw();
-		if (renderer instanceof GuiRenderer)
-			Minecraft.getMinecraft().getTextureManager().bindTexture(((GuiRenderer) renderer).getDefaultTexture().getResourceLocation());
-		GL11.glPopMatrix();
+		Tessellator.getInstance().draw();
 	}
 
-	protected void prepareShadow(MalisisRenderer<?> renderer)
+	protected void prepareLines()
 	{
-		drawingShadow = true;
-		if (renderer instanceof GuiRenderer)
-			return;
-		renderer.next();
-		GL11.glPolygonOffset(3.0F, 3.0F);
-		GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+		Tessellator.getInstance().getBuffer().begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		GlStateManager.disableTexture2D();
 	}
 
-	protected void cleanShadow(MalisisRenderer<?> renderer)
+	protected void cleanLines()
 	{
-		drawingShadow = false;
-		if (renderer instanceof GuiRenderer)
-			return;
-		renderer.next();
-		GL11.glPolygonOffset(0.0F, 0.0F);
-		GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
+		Tessellator.getInstance().getBuffer().finishDrawing();
+		GlStateManager.enableTexture2D();
 	}
 
-	protected void prepareLines(MalisisRenderer<?> renderer, FontOptions options)
-	{
-		renderer.next(DefaultVertexFormats.POSITION_COLOR);
-		renderer.disableTextures();
-	}
-
-	protected void cleanLines(MalisisRenderer<?> renderer)
-	{
-		renderer.next();
-		renderer.enableTextures();
-	}
-
+	/**
+	 * Render the
+	 *
+	 * @param lines the lines
+	 * @param x the x
+	 * @param y the y
+	 * @param z the z
+	 * @param options the options
+	 */
 	//#end Prepare/Clean
-
-	public void render(MalisisRenderer<?> renderer, String text, float x, float y, float z, FontOptions options)
+	public void render(List<String> lines, float x, float y, float z, FontOptions options)
 	{
-		if (StringUtils.isEmpty(text))
+		if (!isLoaded() || lines.isEmpty())
 			return;
-		if (font == null && this != minecraftFont)
+
+		boolean hasLines = false;
+		float originY = y;
+		prepare();
+
+		StringWalker walker = new StringWalker(this, options);
+		walker.applyStyles(true);
+
+		for (String text : lines)
 		{
-			minecraftFont.render(renderer, text, x, y, z, options);
-			return;
-		}
-
-		boolean isDrawing = renderer.isDrawing();
-
-		prepare(renderer, x, y, z, options);
-
-		text = processString(text, options);
-
-		if (options.hasShadow())
-		{
-			prepareShadow(renderer);
-			drawString(text, options);
-			cleanShadow(renderer);
-		}
-		drawString(text, options);
-
-		if (hasLines(text, options))
-		{
-			prepareLines(renderer, options);
+			hasLines |= hasLines(text, options);
+			walker.setText(text);
 			if (options.hasShadow())
-			{
-				prepareShadow(renderer);
-				drawLines(text, options);
-				cleanShadow(renderer);
-			}
-			drawLines(text, options);
-			cleanLines(renderer);
+				drawString(walker, text, x, y, z, options, true);
+			drawString(walker, text, x, y, z, options, false);
+			y += getStringHeight(options) + 2;
 		}
+		clean();
 
-		clean(renderer, isDrawing);
+		if (hasLines)
+			return;
+
+		//render underline or strikethrough
+		y = originY;
+		prepareLines();
+		walker.reset();
+		for (String text : lines)
+		{
+			if (options.hasShadow())
+				drawLines(walker, text, x, y, z, options, true);
+			drawLines(walker, text, x, y, z, options, false);
+			y += getStringHeight(options) + 2;
+		}
+		cleanLines();
 	}
 
-	protected void drawString(String text, FontOptions options)
+	public void render(String text, float x, float y, float z, FontOptions options)
 	{
-		float x = 0;
+		if (!isLoaded() || StringUtils.isEmpty(text))
+			return;
 
-		options.resetLineOptions();
+		prepare();
 		StringWalker walker = new StringWalker(text, this, options);
 		walker.applyStyles(true);
+		if (options.hasShadow())
+			drawString(walker, text, x, y, z, options, true);
+		drawString(walker, text, x, y, z, options, false);
+		clean();
+
+		if (!hasLines(text, options))
+			return;
+
+		walker.reset();
+		prepareLines();
+		if (options.hasShadow())
+			drawLines(walker, text, x, y, z, options, true);
+		drawLines(walker, text, x, y, z, options, false);
+		cleanLines();
+
+	}
+
+	protected void drawString(StringWalker walker, String text, float x, float y, float z, FontOptions options, boolean shadow)
+	{
 		while (walker.walk())
 		{
 			CharData cd = getCharData(walker.getChar());
-			drawChar(cd, x, 0, options);
-			if (options.isBold())
-				drawChar(cd, x + options.getFontScale(), 0, options);
+			drawChar(walker, cd, x, y, z, options, shadow);
+			if (walker.isBold())
+				drawChar(walker, cd, x + options.getFontScale(), y, z, options, shadow);
 			x += walker.getWidth();
 		}
 	}
 
-	protected void drawChar(CharData cd, float offsetX, float offsetY, FontOptions options)
+	protected void drawChar(StringWalker walker, CharData cd, float x, float y, float z, FontOptions options, boolean shadow)
 	{
 		if (Character.isWhitespace(cd.getChar()))
 			return;
@@ -296,31 +263,32 @@ public class MalisisFont
 		float factor = options.getFontScale() / fontGeneratorOptions.fontSize * 9;
 		float w = cd.getFullWidth(fontGeneratorOptions) * factor;
 		float h = cd.getFullHeight(fontGeneratorOptions) * factor;
-		float i = options.isItalic() ? options.getFontScale() : 0;
-		int color = drawingShadow ? options.getShadowColor() : options.getColor();
-
-		if (drawingShadow)
+		float i = walker.isItalic() ? options.getFontScale() : 0;
+		int color = walker.getColor();
+		if (shadow)
 		{
-			offsetX += options.getFontScale();
-			offsetY += options.getFontScale();
+			x += options.getFontScale();
+			y += options.getFontScale();
+			color = FontOptions.getShadowColor(color);
 		}
 
-		buffer.pos(offsetX + i, offsetY, 0);
+		//TODO: vertex data ?
+		buffer.pos(x + i, y, z);
 		buffer.tex(cd.u(), cd.v());
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX - i, offsetY + h, 0);
+		buffer.pos(x - i, y + h, z);
 		buffer.tex(cd.u(), cd.V());
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX + w - i, offsetY + h, 0);
+		buffer.pos(x + w - i, y + h, z);
 		buffer.tex(cd.U(), cd.V());
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX + w + i, offsetY, 0);
+		buffer.pos(x + w + i, y, z);
 		buffer.tex(cd.U(), cd.v());
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
@@ -335,55 +303,50 @@ public class MalisisFont
 		*/
 	}
 
-	protected void drawLines(String text, FontOptions options)
+	protected void drawLines(StringWalker walker, String text, float x, float y, float z, FontOptions options, boolean shadow)
 	{
-		float x = 0;
-		options.resetLineOptions();
-
-		StringWalker walker = new StringWalker(text, this, options);
-		walker.applyStyles(true);
 		while (walker.walk())
 		{
 			if (!walker.isFormatted())
 			{
 				CharData cd = getCharData(walker.getChar());
 				if (options.isUnderline())
-					drawLineChar(cd, x, getStringHeight(options) + options.getFontScale(), options);
+					drawLineChar(walker, cd, x, getStringHeight(options) + options.getFontScale(), z, options, shadow);
 				if (options.isStrikethrough())
-					drawLineChar(cd, x, getStringHeight(options) * 0.5F + options.getFontScale(), options);
+					drawLineChar(walker, cd, x, getStringHeight(options) * 0.5F + options.getFontScale(), z, options, shadow);
 
 				x += walker.getWidth();
 			}
 		}
 	}
 
-	protected void drawLineChar(CharData cd, float offsetX, float offsetY, FontOptions options)
+	protected void drawLineChar(StringWalker walker, CharData cd, float x, float y, float z, FontOptions options, boolean shadow)
 	{
 		VertexBuffer buffer = Tessellator.getInstance().getBuffer();
 		float factor = options.getFontScale() / fontGeneratorOptions.fontSize * 9;
 		float w = cd.getFullWidth(fontGeneratorOptions) * factor;
 		float h = cd.getFullHeight(fontGeneratorOptions) / 9F * factor;
-		int color = drawingShadow ? options.getShadowColor() : options.getColor();
-
-		if (drawingShadow)
+		int color = walker.getColor();
+		if (shadow)
 		{
-			offsetX += options.getFontScale();
-			offsetY += options.getFontScale();
+			x += options.getFontScale();
+			y += options.getFontScale();
+			color = FontOptions.getShadowColor(color);
 		}
 
-		buffer.pos(offsetX, offsetY, 0);
+		buffer.pos(x, y, z);
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX, offsetY + h, 0);
+		buffer.pos(x, y + h, z);
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX + w, offsetY + h, 0);
+		buffer.pos(x + w, y + h, z);
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX + w, offsetY, 0);
+		buffer.pos(x + w, y, z);
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
@@ -397,34 +360,6 @@ public class MalisisFont
 	}
 
 	//#region String processing
-	/**
-	 * Processes the passed string by translating it and replacing spacing characters and new lines.<br>
-	 * Keeps the formatting if passed at the beginning of the translation key.
-	 *
-	 * @param str the str
-	 * @return the string
-	 */
-	public String processString(String str, FontOptions options)
-	{
-		str = str.replaceAll("\r?\n", "");
-		Pair<String, String> p = FontOptions.getStartFormat(str);
-		return p.getLeft() + translate(p.getRight());
-	}
-
-	private String translate(String str)
-	{
-		if (str.indexOf('{') == -1 || str.indexOf('{') >= str.indexOf('}'))
-			return I18n.format(str);
-
-		StringBuffer output = new StringBuffer();
-		Matcher matcher = pattern.matcher(str);
-
-		while (matcher.find())
-			matcher.appendReplacement(output, I18n.format(matcher.group(1)));
-
-		matcher.appendTail(output);
-		return output.toString();
-	}
 
 	private boolean hasLines(String text, FontOptions options)
 	{
@@ -468,7 +403,6 @@ public class MalisisFont
 	 */
 	public String clipString(String str, int width, FontOptions options, boolean appendPeriods)
 	{
-		str = processString(str, options);
 		if (appendPeriods)
 			width -= 4;
 
@@ -498,21 +432,16 @@ public class MalisisFont
 	 */
 	public float getStringWidth(String str, FontOptions options, int start, int end)
 	{
-		if (font == null) //couldn't load the font, use vanilla font size
-			return minecraftFont.getStringWidth(str, options, start, end);
-
-		if (start > end)
+		if (StringUtils.isEmpty(str) || start >= end)
 			return 0;
 
-		if (options != null && !options.isFormattingDisabled())
-			str = TextFormatting.getTextWithoutFormattingCodes(str);
+		float width = 0;
+		StringWalker walker = new StringWalker(this, options);
+		walker.setText(str, start, end);
+		while (walker.walk())
+			width += walker.getWidth();
 
-		if (StringUtils.isEmpty(str))
-			return 0;
-
-		str = processString(str, options);
-		return (float) font.getStringBounds(str, frc).getWidth() / fontGeneratorOptions.fontSize
-				* (options != null ? options.getFontScale() : 1) * 9;
+		return width;// * (fro != null ? fro.fontScale : 1);
 	}
 
 	public float getStringWidth(String str, FontOptions options)
@@ -540,7 +469,7 @@ public class MalisisFont
 	 */
 	public float getStringHeight(FontOptions options)
 	{
-		return (options != null ? options.getFontScale() : 1) * 9;
+		return (options != null ? options.getFontScale() : 1) * 9; //fontRenderer.FONT_HEIGHT = 9;
 	}
 
 	/**
@@ -573,28 +502,17 @@ public class MalisisFont
 	 * Gets the rendering width of a char.
 	 *
 	 * @param c the c
+	 * @param options the options
 	 * @return the char width
 	 */
 	public float getCharWidth(char c)
 	{
-		return getCharWidth(c, null);
-	}
-
-	/**
-	 * Gets the rendering width of a char with the specified fontScale.
-	 *
-	 * @param c the c
-	 * @param options the options
-	 * @return the char width
-	 */
-	public float getCharWidth(char c, FontOptions options)
-	{
 		if (c == '\r' || c == '\n')
 			return 0;
 		if (c == '\t')
-			return getCharWidth(' ', options) * 4;
+			return getCharWidth(' ') * 4;
 
-		return getCharData(c).getCharWidth() / fontGeneratorOptions.fontSize * (options != null ? options.getFontScale() : 1) * 9;
+		return getCharData(c).getCharWidth() / fontGeneratorOptions.fontSize * 9;
 	}
 
 	/**
@@ -611,111 +529,13 @@ public class MalisisFont
 		if (StringUtils.isEmpty(str))
 			return 0;
 
-		str = processString(str, options);
 		//float fx = position / (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
 
-		StringWalker walker = new StringWalker(str, this, options);
-		walker.startIndex(charOffset);
-		walker.skipChars(true);
+		StringWalker walker = new StringWalker(this, options);
+		walker.setText(str, charOffset, str.length());
+		walker.skipFormattingChars(true);
 		return walker.walkTo(position);
 	}
-
-	/**
-	 * Splits the string in multiple lines to fit in the specified maxWidth.
-	 *
-	 * @param text the text
-	 * @param maxWidth the max width
-	 * @return list of lines that won't exceed maxWidth limit
-	 */
-	public List<String> wrapText(String text, int maxWidth)
-	{
-		return wrapText(text, maxWidth, null);
-	}
-
-	/**
-	 * Splits the string in multiple lines to fit in the specified maxWidth using the specified fontScale.
-	 *
-	 * @param str the str
-	 * @param maxWidth the max width
-	 * @param options the options
-	 * @return list of lines that won't exceed maxWidth limit
-	 */
-	public List<String> wrapText(String str, int maxWidth, FontOptions options)
-	{
-		List<String> lines = new ArrayList<>();
-		String[] texts = str.split("\r?(?<=\n)");
-		if (texts.length > 1)
-		{
-			for (String t : texts)
-				lines.addAll(wrapText(t, maxWidth, options));
-			return lines;
-		}
-
-		StringBuilder line = new StringBuilder();
-		StringBuilder word = new StringBuilder();
-		//FontRenderOptions fro = new FontRenderOptions();
-
-		maxWidth -= 4;
-		//maxWidth /= (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
-		float lineWidth = 0;
-		float wordWidth = 0;
-
-		str = processString(str, options);
-		texts = str.split("\\\\r?\\\\n");
-		if (texts.length > 1)
-		{
-			for (String t : texts)
-				lines.addAll(wrapText(t, maxWidth, options));
-			return lines;
-		}
-
-		StringWalker walker = new StringWalker(str, this, options);
-		walker.skipChars(false);
-		walker.applyStyles(true);
-		while (walker.walk())
-		{
-			char c = walker.getChar();
-			lineWidth += walker.getWidth();
-			wordWidth += walker.getWidth();
-			//			if (walker.isFormatting())
-			//			{
-			//				word.append(walker.getFormatting());
-			//				continue;
-			//			}
-			//			else
-			word.append(c);
-
-			//we just ended a new word, add it to the current line
-			if (c == ' ' || c == '-' || c == '.')
-			{
-				line.append(word);
-				word.setLength(0);
-				wordWidth = 0;
-			}
-			if (lineWidth >= maxWidth)
-			{
-				//the first word on the line is too large, split anyway
-				if (line.length() == 0)
-				{
-					line.append(word);
-					word.setLength(0);
-					wordWidth = 0;
-				}
-				//make a new line
-				lines.add(line.toString());
-				line.setLength(0);
-
-				lineWidth = wordWidth;
-			}
-		}
-
-		line.append(word);
-		lines.add(line.toString());
-
-		return lines;
-	}
-
-	//#end String processing
 
 	//#region Load font
 	protected void loadCharacterData()
@@ -752,7 +572,7 @@ public class MalisisFont
 		return r + 1;
 	}
 
-	protected void loadTexture(boolean forceGenerate)
+	protected boolean loadTexture(boolean forceGenerate)
 	{
 		File textureFile = new File("fonts/" + font.getName() + ".png");
 		File uvFile = new File("fonts/" + font.getName() + ".bin");
@@ -770,13 +590,15 @@ public class MalisisFont
 		}
 
 		if (img == null)
-			return;
+			return false;
 
 		if (textureRl != null)
 			Minecraft.getMinecraft().getTextureManager().deleteTexture(textureRl);
 
 		DynamicTexture dynTex = new DynamicTexture(img);
 		textureRl = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(font.getName(), dynTex);
+
+		return true;
 	}
 
 	protected BufferedImage readTextureFile(File textureFile)

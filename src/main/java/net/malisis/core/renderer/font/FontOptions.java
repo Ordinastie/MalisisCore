@@ -28,12 +28,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.util.text.TextFormatting;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
+
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * @author Ordinastie
@@ -66,26 +66,25 @@ public class FontOptions
 		}
 	}
 
-	/** Scale for the font **/
-	private float fontScale = 1;
-	/** Color of the text **/
-	private int color = 0x000000; //black
-	/** Draw with shadow **/
-	private boolean shadow = false;
-	/** Use bold font **/
-	private boolean bold;
-	/** Use italic font **/
-	private boolean italic;
-	/** Underline the text **/
-	private boolean underline;
-	/** Striketrhough the text **/
-	private boolean strikethrough;
-	/** Disable ECF so char are actually drawn **/
-	private boolean formattingDisabled = false;
+	public static FontOptions EMPTY = FontOptions.builder().build();
 
-	private FontOptions defaultFro;
-	private FontOptions lineOptions;
-	private boolean defaultSaved = false;
+	/** Scale for the font **/
+	protected float fontScale = 1;
+	/** Color of the text **/
+	protected int color = 0x000000; //black
+	/** Draw with shadow **/
+	protected boolean shadow = false;
+	/** Use bold font **/
+	protected boolean bold = false;
+	/** Use italic font **/
+	protected boolean italic = false;
+	/** Underline the text **/
+	protected boolean underline = false;
+	/** Strikethrough the text **/
+	protected boolean strikethrough = false;
+
+	/** Disable ECF so char are actually drawn **/
+	//private Boolean formattingDisabled = false;
 
 	private FontOptions(float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough)
 	{
@@ -95,18 +94,6 @@ public class FontOptions
 		this.italic = italic;
 		this.underline = underline;
 		this.strikethrough = strikethrough;
-
-		defaultFro = new FontOptions();
-		lineOptions = new FontOptions();
-
-		saveDefault();
-		lineOptions.from(this);
-	}
-
-	private FontOptions()
-	{
-		//constructor without a default.
-		//'this' object should already be the default for another FRO
 	}
 
 	/**
@@ -180,154 +167,11 @@ public class FontOptions
 	}
 
 	/**
-	 * Checks if formatting is disabled (formatting character are renderer literally).
-	 *
-	 * @return true, if is formatting disabled
-	 */
-	public boolean isFormattingDisabled()
-	{
-		return formattingDisabled;
-	}
-
-	/**
-	 * Process styles applied to the beginning of the text with {@link TextFormatting} values.<br>
-	 * Applies the styles to this {@link FontOptions} and returns the number of characters read.
-	 *
-	 * @param text the text
-	 * @return the string with ECF
-	 */
-	public int processStyles(String text)
-	{
-		return processStyles(text, 0);
-	}
-
-	/**
-	 * Process styles applied at the specified position in the text with {@link TextFormatting} values.<br>
-	 * Applies the styles to this {@link FontOptions} and returns the number of characters read.
-	 *
-	 * @param text the text
-	 * @param index the index
-	 * @return the int
-	 */
-	public int processStyles(String text, int index)
-	{
-		if (!defaultSaved)
-			saveDefault();
-		if (formattingDisabled)
-			return 0;
-		TextFormatting ecf;
-		int offset = 0;
-		while ((ecf = getFormatting(text, index + offset)) != null)
-		{
-			offset += 2;
-			apply(ecf);
-		}
-
-		return offset;
-	}
-
-	/**
-	 * Applies the {@link TextFormatting} style to this {@link FontOptions}.
-	 *
-	 * @param ecf the ecf
-	 */
-	public void apply(TextFormatting ecf)
-	{
-		if (!defaultSaved)
-			saveDefault();
-		if (ecf == TextFormatting.RESET)
-			resetStyles();
-		else if (ecf.isColor())
-		{
-			color = colors[ecf.ordinal()];
-		}
-		else
-		{
-			switch (ecf)
-			{
-				case STRIKETHROUGH:
-					strikethrough = true;
-					break;
-				case BOLD:
-					bold = true;
-					break;
-				case ITALIC:
-					italic = true;
-					break;
-				case UNDERLINE:
-					underline = true;
-					break;
-				default:
-					break;
-			}
-		}
-	}
-
-	/**
-	 * Saves the current styles as default.<br>
-	 * Default styles are restored when {@link #resetStyles()} is called.
-	 */
-	public void saveDefault()
-	{
-		defaultSaved = true;
-		defaultFro.color = color;
-		defaultFro.strikethrough = strikethrough;
-		defaultFro.bold = bold;
-		defaultFro.italic = italic;
-		defaultFro.underline = underline;
-		defaultFro.fontScale = fontScale;
-	}
-
-	/**
-	 * Resets styles to the default values.
-	 */
-	public void resetStyles()
-	{
-		if (!defaultSaved)
-		{
-			saveDefault();
-			return;
-		}
-
-		from(defaultFro);
-	}
-
-	/**
-	 * Sets the line options.
-	 *
-	 * @param options the new line options
-	 */
-	public void setLineOptions(FontOptions options)
-	{
-		lineOptions.from(options);
-	}
-
-	public void resetLineOptions()
-	{
-		from(lineOptions);
-	}
-
-	/**
-	 * Sets the styles for this {@link FontOptions} based on the passed one.
-	 *
-	 * @param options the fro
-	 */
-	private void from(FontOptions options)
-	{
-		fontScale = options.fontScale;
-		color = options.color;
-		bold = options.bold;
-		italic = options.italic;
-		strikethrough = options.strikethrough;
-		underline = options.underline;
-	}
-
-	/**
 	 * Gets the shadow color corresponding to the current color.
 	 *
 	 * @return the shadow color
 	 */
-	public int getShadowColor()
+	public static int getShadowColor(int color)
 	{
 		if (color == 0) //black
 			return 0x222222;
@@ -437,6 +281,17 @@ public class FontOptions
 
 		Link link = new Link(index, text.substring(index + 1, i));
 		return link.isValid() ? link : null;
+	}
+
+	/**
+	 * Gets the color for the text format.
+	 *
+	 * @param format the format
+	 * @return the color
+	 */
+	public static int getColor(TextFormatting format)
+	{
+		return colors[format.ordinal()];
 	}
 
 	/**
@@ -563,10 +418,23 @@ public class FontOptions
 			return this;
 		}
 
+		public FontOptionsBuilder from(FontOptions options)
+		{
+			fontScale = options.fontScale;
+			color = options.color;
+			shadow = options.shadow;
+			bold = options.bold;
+			italic = options.italic;
+			underline = options.underline;
+			strikethrough = options.strikethrough;
+
+			return this;
+		}
+
 		public FontOptions build()
 		{
 			return new FontOptions(fontScale, color, shadow, bold, italic, underline, strikethrough);
 		}
-
 	}
+
 }

@@ -27,17 +27,17 @@ package net.malisis.core.renderer.font;
 import java.awt.Font;
 import java.lang.reflect.Field;
 
+import org.lwjgl.opengl.GL11;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
-import net.malisis.core.renderer.MalisisRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.FMLClientHandler;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Ordinastie
@@ -53,7 +53,6 @@ public class MinecraftFont extends MalisisFont
 	private FontRenderer fontRenderer;
 	private MCCharData mcCharData = new MCCharData();
 	private UnicodeCharData unicodeCharData = new UnicodeCharData();
-	private MalisisRenderer<?> renderer;
 
 	public MinecraftFont()
 	{
@@ -64,11 +63,14 @@ public class MinecraftFont extends MalisisFont
 		this.textureRl = new ResourceLocation("textures/font/ascii.png");
 		this.size = 256;
 
-		fontRenderer = Minecraft.getMinecraft().fontRendererObj;
-		setFields();
+		if (Minecraft.getMinecraft() != null)
+		{
+			fontRenderer = Minecraft.getMinecraft().fontRendererObj;
+			loaded = setFields();
+		}
 	}
 
-	private void setFields()
+	private boolean setFields()
 	{
 		String srg = "field_78286_d";
 		Field charWidthField = AsmUtils.changeFieldAccess(FontRenderer.class, "charWidth", srg, true);
@@ -93,11 +95,13 @@ public class MinecraftFont extends MalisisFont
 				mcCharWidth = (int[]) charWidthField.get(fontRenderer);
 			glyphWidth = (byte[]) glyphWidthField.get(fontRenderer);
 			unicodePages = (ResourceLocation[]) unicodePagesField.get(fontRenderer);
+			return true;
 
 		}
 		catch (IllegalStateException | IllegalArgumentException | IllegalAccessException e)
 		{
 			MalisisCore.log.error("[MinecraftFont] Failed to gets the FontRenderer fields :", e);
+			return false;
 		}
 	}
 
@@ -113,98 +117,68 @@ public class MinecraftFont extends MalisisFont
 		}
 		if (rl != lastFontTexture)
 		{
-			renderer.next();
+			Tessellator.getInstance().getBuffer().finishDrawing();
+			Tessellator.getInstance().getBuffer().begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 			Minecraft.getMinecraft().getTextureManager().bindTexture(rl);
 			lastFontTexture = rl;
 		}
 	}
 
 	@Override
-	protected void prepare(MalisisRenderer<?> renderer, float x, float y, float z, FontOptions options)
-	{
-		super.prepare(renderer, x, y, z, options);
-		this.renderer = renderer;
-	}
-
-	@Override
-	protected void clean(MalisisRenderer<?> renderer, boolean isDrawing)
-	{
-		super.clean(renderer, isDrawing);
-		lastFontTexture = null;
-	}
-
-	@Override
 	public CharData getCharData(char c)
 	{
-		if (c < 0 || c >= 256 || fontRenderer.getUnicodeFlag())
+		if (c < 0 || c >= 256 || (fontRenderer != null && fontRenderer.getUnicodeFlag()))
 			return unicodeCharData.set(c);
 		else
 			return mcCharData.set(c);
 	}
 
 	@Override
-	protected void drawChar(CharData cd, float offsetX, float offsetY, FontOptions options)
+	protected void drawChar(StringWalker walker, CharData cd, float x, float y, float z, FontOptions options, boolean shadow)
 	{
 		bindFontTexture(cd);
-		if (drawingShadow && cd instanceof UnicodeCharData)
+		if (shadow && cd instanceof UnicodeCharData)
 		{
-			offsetX -= options.getFontScale() / 2;
-			offsetY -= options.getFontScale() / 2;
+			x -= options.getFontScale() / 2;
+			y -= options.getFontScale() / 2;
 		}
 
-		super.drawChar(cd, offsetX, offsetY, options);
+		super.drawChar(walker, cd, x, y, z, options, shadow);
 	}
 
 	@Override
-	protected void drawLineChar(CharData cd, float offsetX, float offsetY, FontOptions options)
+	protected void drawLineChar(StringWalker walker, CharData cd, float x, float y, float z, FontOptions options, boolean shadow)
 	{
 		VertexBuffer buffer = Tessellator.getInstance().getBuffer();
 		float factor = options.getFontScale() / fontGeneratorOptions.fontSize * 9;
 		float w = cd.getFullWidth(fontGeneratorOptions) * factor;
 		float h = cd.getFullHeight(fontGeneratorOptions) / 9F * factor;
-		int color = drawingShadow ? options.getShadowColor() : options.getColor();
+		int color = walker.getColor();
+		if (shadow)
+		{
+			x += options.getFontScale();
+			y += options.getFontScale();
+			color = FontOptions.getShadowColor(color);
+		}
 
-		offsetY -= factor + h;
+		y -= factor + h;
 		w += 1.01F * factor;
 
-		buffer.pos(offsetX, offsetY, 0);
+		buffer.pos(x, y, z);
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX, offsetY + h, 0);
+		buffer.pos(x, y + h, z);
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX + w, offsetY + h, 0);
+		buffer.pos(x + w, y + h, z);
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX + w, offsetY, 0);
+		buffer.pos(x + w, y, 0);
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
-	}
-
-	@Override
-	public float getStringWidth(String str, FontOptions options, int start, int end)
-	{
-		if (StringUtils.isEmpty(str))
-			return 0;
-
-		str = processString(str, null);
-		float width = 0;
-		StringWalker walker = new StringWalker(str, this, options);
-		walker.startIndex(start);
-		walker.endIndex(end);
-		while (walker.walk())
-			width += walker.getWidth();
-
-		return width;// * (fro != null ? fro.fontScale : 1);
-	}
-
-	@Override
-	public float getStringHeight(FontOptions options)
-	{
-		return fontRenderer.FONT_HEIGHT * (options != null ? options.getFontScale() : 1);
 	}
 
 	public class MCCharData extends CharData
@@ -259,10 +233,12 @@ public class MinecraftFont extends MalisisFont
 		{
 			if (c == ' ' || c < 0 || c >= 256 || pos == -1)
 				return 4.0F;
-			else if (FMLClientHandler.instance().hasOptifine())
+			else if (optifineCharWidth != null)
 				return optifineCharWidth[c];
-			else
+			else if (mcCharWidth != null)
 				return mcCharWidth[pos];
+			else
+				return 4.0F;
 		}
 
 		@Override

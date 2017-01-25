@@ -24,6 +24,8 @@
 
 package net.malisis.core.renderer.font;
 
+import static com.google.common.base.Preconditions.*;
+
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -34,9 +36,9 @@ public class StringWalker
 {
 	private MalisisFont font;
 	private FontOptions fontOptions;
-	private String str;
+	private String text;
 	private boolean litteral;
-	private boolean skipChars = true;
+	private boolean skipFormattingChars = true;
 	private boolean applyStyles;
 	private boolean isText;
 
@@ -50,26 +52,107 @@ public class StringWalker
 	private Link link;
 	private float width;
 
-	public StringWalker(String str, MalisisFont font, FontOptions options)
+	private boolean bold;
+	private boolean italic;
+	private boolean underline;
+	private boolean strikethrough;
+	private int color;
+
+	public StringWalker(MalisisFont font, FontOptions options)
 	{
-		this.str = str;
 		this.font = font;
 		this.fontOptions = options;
-		this.index = 0;
-		this.endIndex = str.length();
-		this.litteral = options != null && options.isFormattingDisabled();
+
+		applyFontOptions();
+	}
+
+	public StringWalker(String text, MalisisFont font, FontOptions options)
+	{
+		this(font, options);
+		setText(text);
+	}
+
+	private void applyFontOptions()
+	{
+		this.bold = fontOptions.isBold();
+		this.italic = fontOptions.isItalic();
+		this.underline = fontOptions.isUnderline();
+		this.strikethrough = fontOptions.isStrikethrough();
+		this.color = fontOptions.getColor();
 	}
 
 	//#region Getters/Setters
+
+	public void setText(String text, int start, int end)
+	{
+		this.text = checkNotNull(text);
+		this.index = Math.max(0, start);
+		this.endIndex = Math.min(end, text.length());
+	}
+
+	public void setText(String text)
+	{
+		setText(text, 0, text.length());
+	}
+
+	/**
+	 * Checks if this {@link FontOptions} is bold.
+	 *
+	 * @return true, if is bold
+	 */
+	public boolean isBold()
+	{
+		return bold;
+	}
+
+	/**
+	 * Checks if this {@link FontOptions} is italic.
+	 *
+	 * @return true, if is italic
+	 */
+	public boolean isItalic()
+	{
+		return italic;
+	}
+
+	/**
+	 * Checks if this {@link FontOptions} is underlined.
+	 *
+	 * @return true, if is underline
+	 */
+	public boolean isUnderline()
+	{
+		return underline;
+	}
+
+	/**
+	 * Checks if this {@link FontOptions} is strikethrough.
+	 *
+	 * @return true, if is strikethrough
+	 */
+	public boolean isStrikethrough()
+	{
+		return strikethrough;
+	}
+
+	/**
+	 * Gets the color for this {@link FontOptions}.
+	 *
+	 * @return the color
+	 */
+	public int getColor()
+	{
+		return color;
+	}
 
 	public void setLitteral(boolean litteral)
 	{
 		this.litteral = litteral;
 	}
 
-	public void skipChars(boolean skip)
+	public void skipFormattingChars(boolean skip)
 	{
-		this.skipChars = skip;
+		this.skipFormattingChars = skip;
 	}
 
 	public void applyStyles(boolean apply)
@@ -117,18 +200,6 @@ public class StringWalker
 		return width;
 	}
 
-	public void startIndex(int index)
-	{
-		this.index = index;
-	}
-
-	public void endIndex(int index)
-	{
-		if (index == 0)
-			index = str.length();
-		this.endIndex = index;
-	}
-
 	private void setLinkStyle(FontOptions options)
 	{
 		if (options == null || litteral || !applyStyles)
@@ -154,20 +225,61 @@ public class StringWalker
 
 	private void checkFormatting()
 	{
-		format = FontOptions.getFormatting(str, index);
+		format = FontOptions.getFormatting(text, index);
 		if (format == null)
-			format = FontOptions.getFormatting(str, index - 1);
+			format = FontOptions.getFormatting(text, index - 1);
 
 		if (format == null)
 			return;
 
 		if (applyStyles && fontOptions != null && !isLink())
-			fontOptions.apply(format);
+			applyFormatting(format);
 
-		if (skipChars && !litteral)
+		if (skipFormattingChars && !litteral)
 		{
 			index += 2;
 			checkFormatting();
+		}
+	}
+
+	public void reset()
+	{
+		index = 0;
+		applyFontOptions();
+	}
+
+	/**
+	 * Applies the {@link TextFormatting} style to this {@link StringWalker}.
+	 *
+	 * @param format the ecf
+	 */
+	private void applyFormatting(TextFormatting format)
+	{
+		if (format.isColor())
+		{
+			color = FontOptions.getColor(format);
+			return;
+		}
+
+		switch (format)
+		{
+			case STRIKETHROUGH:
+				strikethrough = true;
+				break;
+			case BOLD:
+				bold = true;
+				break;
+			case ITALIC:
+				italic = true;
+				break;
+			case UNDERLINE:
+				underline = true;
+				break;
+			case RESET:
+				applyFontOptions();
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -177,19 +289,19 @@ public class StringWalker
 		{
 			isText = link.isText(getIndex());
 
-			if (str.charAt(index) == ']')
+			if (text.charAt(index) == ']')
 			{
 				resetLinkStyle(fontOptions);
-				if (skipChars && !litteral)
+				if (skipFormattingChars && !litteral)
 					index++;
 			}
 		}
 		else
 		{
-			link = FontOptions.getLink(str, index);
+			link = FontOptions.getLink(text, index);
 			if (isLink())
 			{
-				if (skipChars && !litteral)
+				if (skipFormattingChars && !litteral)
 					index += link.indexAdvance();
 				setLinkStyle(fontOptions);
 			}
@@ -221,12 +333,13 @@ public class StringWalker
 		if (index >= endIndex)
 			return false;
 
-		c = str.charAt(index);
-		width = font.getCharWidth(c, fontOptions);
-		if (fontOptions != null && fontOptions.isBold())
+		c = text.charAt(index);
+		width = font.getCharWidth(c) * fontOptions.getFontScale();
+		//width += fontOptions.getFontScale();
+		if (isBold())
 			width += fontOptions.getFontScale();
 
-		if (!litteral && !skipChars && (format != null || (link != null && !isText)))
+		if (!litteral && !skipFormattingChars && (format != null || (link != null && !isText)))
 			width = 0;
 
 		index++;
