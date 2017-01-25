@@ -44,8 +44,6 @@ import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.Vertex;
 import net.malisis.core.renderer.element.shape.Cube;
-import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
@@ -101,9 +99,9 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRenderer<T> implements IBlockRenderer, IRenderWorldLast
 {
 	/** Batched buffer reference. */
-	protected static final VertexBuffer batchedBuffer = ((Tessellator) Silenced.get(
-			() -> AsmUtils	.changeFieldAccess(TileEntityRendererDispatcher.class, "batchBuffer")
-							.get(TileEntityRendererDispatcher.instance))).getBuffer();
+	protected static final VertexBuffer batchedBuffer = ((Tessellator) Silenced.get(() -> AsmUtils	.changeFieldAccess(	TileEntityRendererDispatcher.class,
+																														"batchBuffer")
+																									.get(TileEntityRendererDispatcher.instance))).getBuffer();
 
 	public static VertexFormat malisisVertexFormat = new VertexFormat()
 	{
@@ -380,8 +378,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	{
 		if (tranformType == TransformType.FIRST_PERSON_RIGHT_HAND || tranformType == TransformType.FIRST_PERSON_LEFT_HAND)
 		{
-			ItemStack stackInv = Utils.getClientPlayer().getHeldItem(
-					tranformType == TransformType.FIRST_PERSON_RIGHT_HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND);
+			ItemStack stackInv = Utils	.getClientPlayer()
+										.getHeldItem(tranformType == TransformType.FIRST_PERSON_RIGHT_HAND	? EnumHand.MAIN_HAND
+																											: EnumHand.OFF_HAND);
 			if (itemStack != stackInv && stackInv != null && stackInv.getItem() == itemStack.getItem())
 				itemStack = stackInv;
 		}
@@ -881,9 +880,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		int vertexCount = face.getVertexes().length;
 		if (vertexCount != 4 && renderType == RenderType.BLOCK)
 		{
-			MalisisCore.log.error("[MalisisRenderer] Attempting to render a face containing {} vertexes in BLOCK for {}. Ignored",
-					vertexCount,
-					block);
+			MalisisCore.log.error(	"[MalisisRenderer] Attempting to render a face containing {} vertexes in BLOCK for {}. Ignored",
+									vertexCount,
+									block);
 			return;
 		}
 
@@ -945,26 +944,6 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		buffer.addVertexData(vertex.getVertexData(vertexFormat, posOffset));
 
 		vertexDrawn = true;
-	}
-
-	/**
-	 * Draws a string at the specified coordinates, with color and shadow. The string gets translated. Uses FontRenderer.drawString().
-	 *
-	 * @param font the font
-	 * @param text the text
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
-	 * @param fro the fro
-	 */
-	public void drawText(MalisisFont font, String text, float x, float y, float z, FontOptions fro)
-	{
-		if (font == null)
-			font = MalisisFont.minecraftFont;
-		if (fro == null)
-			fro = FontOptions.builder().build();
-
-		font.render(this, text, x, y, z, fro);
 	}
 
 	/**
