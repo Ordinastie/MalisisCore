@@ -243,11 +243,11 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	}
 
 	@Override
-	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, EnumHand hand)
 	{
-		IBlockState state = super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer);
+		IBlockState state = super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, hand);
 		for (IBlockComponent component : getBlockComponents())
-			state = component.getStateForPlacement(this, world, pos, state, facing, hitX, hitY, hitZ, meta, placer);
+			state = component.getStateForPlacement(this, world, pos, state, facing, hitX, hitY, hitZ, meta, placer, hand);
 
 		return state;
 	}

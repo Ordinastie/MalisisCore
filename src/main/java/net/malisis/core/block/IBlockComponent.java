@@ -132,9 +132,10 @@ public interface IBlockComponent extends IComponent
 	 * @param hitZ the hit z
 	 * @param meta the meta
 	 * @param placer the placer
+	 * @param hand the hand
 	 * @return the i block state
 	 */
-	public default IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+	public default IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, EnumHand hand)
 	{
 		return state;
 	}
