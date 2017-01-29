@@ -119,7 +119,7 @@ public class IconProviderBuilder
 
 	private void setType(Type type)
 	{
-		if (type != Type.DEFAULT)
+		if (this.type != Type.DEFAULT && this.type != type)
 			throw new IllegalArgumentException("Cannot set type to " + type + " because it's already set to " + this.type);
 		this.type = type;
 	}
