@@ -34,6 +34,10 @@ import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import com.google.common.base.Supplier;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.util.DoubleKeyMap;
 import net.malisis.core.util.Silenced;
@@ -43,10 +47,6 @@ import net.malisis.core.util.syncer.message.SyncerMessage;
 import net.malisis.core.util.syncer.message.SyncerMessage.Packet;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
-
-import com.google.common.base.Supplier;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Ordering;
 
 /**
  * This class handles the synchronization between server and client objects. Objects to be synchronized need to have the {@link Syncable}
@@ -72,10 +72,10 @@ public class Syncer
 
 	private Syncer()
 	{
-		registerFacotory("TileEntity", TileEntitySyncHandler::new);
+		registerFactory("TileEntity", TileEntitySyncHandler::new);
 	}
 
-	private void registerFacotory(String name, Supplier<ISyncHandler<?, ? extends ISyncableData>> supplier)
+	private void registerFactory(String name, Supplier<ISyncHandler<?, ? extends ISyncableData>> supplier)
 	{
 		factories.put(name, supplier);
 	}
@@ -336,7 +336,7 @@ public class Syncer
 	 */
 	public static void registerHandlerFactory(String name, Supplier<ISyncHandler<?, ? extends ISyncableData>> supplier)
 	{
-		get().registerFacotory(name, supplier);
+		get().registerFactory(name, supplier);
 	}
 
 	/**
