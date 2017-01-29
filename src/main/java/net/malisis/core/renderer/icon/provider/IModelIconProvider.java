@@ -24,41 +24,59 @@
 
 package net.malisis.core.renderer.icon.provider;
 
-import static com.google.common.base.Preconditions.*;
-
 import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import net.malisis.core.block.IComponentProvider;
+import net.malisis.core.renderer.MalisisRenderer;
+import net.malisis.core.renderer.component.ModelComponent;
 import net.malisis.core.renderer.icon.Icon;
+import net.minecraft.tileentity.TileEntity;
 
 /**
  * @author Ordinastie
  *
  */
-public class ModelIconProvider implements IIconProvider
+public interface IModelIconProvider extends IIconProvider
 {
-	private Icon icon;
-	private Map<String, Icon> icons = Maps.newHashMap();
-
-	public ModelIconProvider(Icon baseIcon)
+	@Override
+	public default void onComponentAdded(IComponentProvider provider)
 	{
-		this.icon = checkNotNull(baseIcon);
-	}
-
-	public void bind(String shapeName, Icon icon)
-	{
-		icons.put(shapeName.toLowerCase(), checkNotNull(icon));
-	}
-
-	public Icon getIcon(String shapeName)
-	{
-		return icons.getOrDefault(shapeName, icon);
+		ModelComponent mc = provider.getComponent(ModelComponent.class);
+		if (mc != null)
+			mc.setIconProvider(this);
 	}
 
 	@Override
-	public Icon getIcon()
+	public default Icon getIcon()
 	{
-		return icon;
+		return null;
+	}
+
+	public Icon getIcon(MalisisRenderer<TileEntity> renderer, String shapeName);
+
+	public static class ModelIconProvider implements IModelIconProvider
+	{
+		private Icon icon;
+		private Map<String, Icon> icons = Maps.newHashMap();
+
+		public ModelIconProvider(IconProviderBuilder builder)
+		{
+			this.icon = builder.defaultIcon;
+			this.icons = Maps.newHashMap(builder.shapeIcons);
+		}
+
+		@Override
+		public Icon getIcon(MalisisRenderer<TileEntity> renderer, String shapeName)
+		{
+			return icons.getOrDefault(shapeName, icon);
+		}
+
+		@Override
+		public Icon getIcon()
+		{
+			return icon;
+		}
 	}
 }

@@ -24,21 +24,25 @@
 
 package net.malisis.core.renderer.icon.provider;
 
+import static com.google.common.base.Preconditions.*;
+
 import java.util.Map;
 import java.util.Objects;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Table;
 
 import net.malisis.core.block.component.WallComponent;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider.ISidesIconProvider;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider.IStatesIconProvider;
+import net.malisis.core.renderer.icon.provider.IModelIconProvider.ModelIconProvider;
+import net.malisis.core.renderer.model.MalisisModel;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Table;
 
 /**
  * @author Ordinastie
@@ -49,7 +53,12 @@ public class IconProviderBuilder
 {
 	private enum Type
 	{
-		DEFAULT, SIDES, CONNECTED, STATE, WALL
+		DEFAULT,
+		SIDES,
+		CONNECTED,
+		STATE,
+		WALL,
+		MODEL,
 	}
 
 	Type type = Type.DEFAULT;
@@ -69,8 +78,11 @@ public class IconProviderBuilder
 	Table<IProperty<?>, Object, Icon> stateIcons = HashBasedTable.create();
 	IProperty<?> currentProperty;
 
-	//WALL
+	//Wall
 	Icon insideIcon;
+
+	//ModelIconProvider
+	Map<String, Icon> shapeIcons = Maps.newHashMap();
 
 	/**
 	 * Instantiates a new {@link IconProviderBuilder} with default {@link Icon}.
@@ -105,6 +117,13 @@ public class IconProviderBuilder
 		return Icon.from(prefix + name);
 	}
 
+	private void setType(Type type)
+	{
+		if (type != Type.DEFAULT)
+			throw new IllegalArgumentException("Cannot set type to " + type + " because it's already set to " + this.type);
+		this.type = type;
+	}
+
 	/**
 	 * Sets the {@link Icon} to use for specific side.
 	 *
@@ -114,7 +133,7 @@ public class IconProviderBuilder
 	 */
 	public IconProviderBuilder withSide(EnumFacing side, Icon icon)
 	{
-		type = Type.SIDES;
+		setType(Type.SIDES);
 		sidesIcons.put(Objects.requireNonNull(side), icon);
 		return this;
 	}
@@ -149,7 +168,7 @@ public class IconProviderBuilder
 	 */
 	public IconProviderBuilder connectedWith(Icon icon)
 	{
-		type = Type.CONNECTED;
+		setType(Type.CONNECTED);
 		connectedIcon = Objects.requireNonNull(icon);
 		return this;
 	}
@@ -173,7 +192,7 @@ public class IconProviderBuilder
 	 */
 	public IconProviderBuilder forProperty(IProperty<?> property)
 	{
-		type = Type.STATE;
+		setType(Type.STATE);
 		currentProperty = property;
 		return this;
 	}
@@ -194,10 +213,18 @@ public class IconProviderBuilder
 			throw new IllegalStateException("The property " + currentProperty + "(" + currentProperty.getClass().getSimpleName()
 					+ ") doesn't not contain value " + value);
 
-		stateIcons.put(currentProperty, value, icon);
+		stateIcons.put(currentProperty, value, checkNotNull(icon));
 		return this;
 	}
 
+	/**
+	 * Sets the {@link Icon} to use for the state value.<br>
+	 * {@link #forProperty(IProperty)} must be called before with the corresponding {@link IProperty}.
+	 *
+	 * @param value the value
+	 * @param iconName the icon name
+	 * @return the icon provider builder
+	 */
 	public IconProviderBuilder withValue(Object value, String iconName)
 	{
 		return withValue(value, icon(iconName));
@@ -212,14 +239,49 @@ public class IconProviderBuilder
 	 */
 	public IconProviderBuilder wall(Icon insideIcon)
 	{
-		type = Type.WALL;
+		setType(Type.WALL);
 		this.insideIcon = insideIcon;
 		return this;
 	}
 
+	/**
+	 * Sets the icon to use for WALL type blocks (with {@link WallComponent}) for the inside.<br>
+	 * The defaultIcon is used for the outside.
+	 *
+	 * @param insideIconName the inside icon name
+	 * @return the icon provider builder
+	 */
 	public IconProviderBuilder wall(String insideIconName)
 	{
 		return wall(icon(insideIconName));
+	}
+
+	/**
+	 * Sets the icon to use for a specific shape/group in a {@link MalisisModel}.
+	 *
+	 * @param shapeName the shape name
+	 * @param icon the icon
+	 * @return the icon provider builder
+	 */
+	public IconProviderBuilder forShape(String shapeName, Icon icon)
+	{
+		setType(Type.MODEL);
+		shapeIcons.put(shapeName, checkNotNull(icon));
+		return this;
+	}
+
+	/**
+	 * Sets the icon to use for a specific shape/group in a {@link MalisisModel}.
+	 *
+	 * @param shapeName the shape name
+	 * @param iconName the icon name
+	 * @return the icon provider builder
+	 */
+	public IconProviderBuilder forShape(String shapeName, String iconName)
+	{
+		setType(Type.MODEL);
+		shapeIcons.put(shapeName, icon(iconName));
+		return this;
 	}
 
 	/**
@@ -274,6 +336,8 @@ public class IconProviderBuilder
 				return getWallIconProvider();
 			case CONNECTED:
 				return new ConnectedIconsProvider(this);
+			case MODEL:
+				return new ModelIconProvider(this);
 
 			default:
 				return null;

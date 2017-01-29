@@ -24,13 +24,14 @@
 
 package net.malisis.core.renderer.component;
 
+import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.IRenderComponent;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.RenderType;
-import net.malisis.core.renderer.icon.provider.ModelIconProvider;
+import net.malisis.core.renderer.icon.provider.IModelIconProvider;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
@@ -47,28 +48,52 @@ public class ModelComponent implements IRenderComponent
 	protected ResourceLocation resourceLocation;
 	/** {@link MalisisModel} for this {@link ModelComponent}. */
 	protected MalisisModel model;
-	/** {@link RenderParameters} use for rendering. */
+	/** {@link RenderParameters} used for rendering. */
 	protected RenderParameters renderParameters = new RenderParameters();
-
-	protected ModelIconProvider modelIconProvider;
+	/** {@link IModelIconProvider} used for rendering. */
+	protected IModelIconProvider modelIconProvider;
+	/** Shape/group visibility check. */
 	protected IVisibilityProvider visibilityProvider;
 
 	/**
-	 * Instantiates a new {@link ModelComponent} and load its {@link MalisisModel}.
+	 * Instantiates a new {@link ModelComponent} with a {@link IVisibilityProvider} and load its {@link MalisisModel}.
 	 *
 	 * @param modelName the model name
 	 */
-	public ModelComponent(String modelName, ModelIconProvider modelIconProvider, IVisibilityProvider visibilityProvider)
+	public ModelComponent(String modelName, IVisibilityProvider visibilityProvider)
 	{
 		this.resourceLocation = new ResourceLocation(modelName);
-		this.modelIconProvider = modelIconProvider;
 		this.visibilityProvider = visibilityProvider;
 		loadModel();
 	}
 
+	/**
+	 * Instantiates a new {@link ModelComponent} with a {@link IVisibilityProvider} and load its {@link MalisisModel}.
+	 *
+	 * @param modelName the model name
+	 */
 	public ModelComponent(String modelName)
 	{
-		this(modelName, null, null);
+		this(modelName, null);
+	}
+
+	/**
+	 * Sets the {@link IModelIconProvider} to use with this {@link ModelComponent}.
+	 *
+	 * @param iconProvider the new icon provider
+	 */
+	public void setIconProvider(IModelIconProvider iconProvider)
+	{
+		this.modelIconProvider = iconProvider;
+	}
+
+	@Override
+	public void onComponentAdded(IComponentProvider provider)
+	{
+		//check if a IModelIconProvider was already added to the provider
+		IModelIconProvider mip = provider.getComponent(IModelIconProvider.class);
+		if (mip != null)
+			setIconProvider(mip);
 	}
 
 	/**
@@ -102,7 +127,7 @@ public class ModelComponent implements IRenderComponent
 			if (visibilityProvider == null || visibilityProvider.isVisible(renderer, name))
 			{
 				if (modelIconProvider != null)
-					renderParameters.icon.set(modelIconProvider.getIcon(name));
+					renderParameters.icon.set(modelIconProvider.getIcon(renderer, name));
 
 				model.render(renderer, name, renderParameters);
 			}
@@ -110,8 +135,19 @@ public class ModelComponent implements IRenderComponent
 
 	}
 
+	/**
+	 * IVisibilityProvider determines whether a specific shape/group should be rendered.
+	 */
 	public static interface IVisibilityProvider
 	{
+
+		/**
+		 * Checks if the specified shape/group should be rendered.
+		 *
+		 * @param renderer the renderer
+		 * @param shapeName the shape name
+		 * @return true, if is visible
+		 */
 		public boolean isVisible(MalisisRenderer<TileEntity> renderer, String shapeName);
 	}
 }
