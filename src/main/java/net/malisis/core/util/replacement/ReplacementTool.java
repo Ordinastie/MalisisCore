@@ -88,7 +88,14 @@ public class ReplacementTool
 	{
 		boolean block = replacement instanceof Block;
 		RegistryNamespaced<ResourceLocation, ?> registry = block ? Block.REGISTRY : Item.REGISTRY;
-		ItemBlock ib = block ? (ItemBlock) Item.getItemFromBlock((Block) vanilla) : null;
+		ItemBlock ib = null;
+		if (block)
+		{
+			Item item = Item.getItemFromBlock((Block) vanilla);
+			if (item instanceof ItemBlock)
+				ib = (ItemBlock) item;
+		}
+
 		Class<?> clazz = block ? Blocks.class : Items.class;
 		ResourceLocation rl = new ResourceLocation("minecraft", registryName);
 

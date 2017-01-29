@@ -25,11 +25,11 @@
 package net.malisis.core.util.replacement;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.registry.AutoLoad;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 /**
@@ -62,7 +62,7 @@ public class ShapelessOreRecipeHandler extends ReplacementHandler<ShapelessOreRe
 			}
 
 			@SuppressWarnings("unchecked")
-			ArrayList<Object> input = (ArrayList<Object>) inputField.get(recipe);
+			NonNullList<Object> input = (NonNullList<Object>) inputField.get(recipe);
 			for (int i = 0; i < input.size(); i++)
 			{
 				if (input.get(i) instanceof ItemStack && isMatched((ItemStack) input.get(i), vanilla))
