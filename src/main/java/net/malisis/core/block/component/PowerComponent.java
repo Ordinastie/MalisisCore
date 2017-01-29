@@ -44,11 +44,11 @@ public class PowerComponent extends BooleanComponent
 	/** InterractionType defines how the {@link PowerComponent} is changed. */
 	public static enum InteractionType
 	{
-		/** The {@link PowerComponent} if affected by right click. */
+		/** The {@link PowerComponent} is affected by right click. */
 		RIGHT_CLICK,
-		/** The {@link PowerComponent} if affected by neighbor redstone power change. */
+		/** The {@link PowerComponent} is affected by neighbor redstone power change. */
 		REDSTONE,
-		/** The {@link PowerComponent} if affected by both right click and neighbor redstone power change. */
+		/** The {@link PowerComponent} is affected by both right click and neighbor redstone power change. */
 		BOTH
 	}
 
@@ -62,7 +62,9 @@ public class PowerComponent extends BooleanComponent
 		/** The {@link PowerComponent} is a power receiver and reacts to redstone current. */
 		RECEIVER,
 		/** The {@link PowerComponent} is both a power provider and receiver. */
-		BOTH;
+		BOTH,
+		/** The {@link PowerComponent} doesn't provide nor react to redstone. (On/Off is handled by the block) */
+		NONE
 	}
 
 	/** Type of interraction. */
