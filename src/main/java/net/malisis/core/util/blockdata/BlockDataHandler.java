@@ -24,14 +24,17 @@
 
 package net.malisis.core.util.blockdata;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.base.Function;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.registry.AutoLoad;
@@ -49,10 +52,6 @@ import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
-import com.google.common.base.Function;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 
 /**
  * {@link BlockDataHandler} handles custom data being stored for a specific {@link BlockPos}.
@@ -72,8 +71,10 @@ import com.google.common.collect.Table;
 public class BlockDataHandler
 {
 	private static BlockDataHandler instance = new BlockDataHandler();
-	private static Field chunkCacheField = MalisisCore.isClient() && FMLClientHandler.instance().hasOptifine() ? AsmUtils.changeFieldAccess(Silenced.get(() -> Class.forName("ChunkCacheOF")),
-			"chunkCache") : null;
+	private static Field chunkCacheField = MalisisCore.isClient() && FMLClientHandler.instance().hasOptifine()
+																													? AsmUtils.changeFieldAccess(	Silenced.get(() -> Class.forName("ChunkCacheOF")),
+																																				"chunkCache")
+																												: null;
 
 	private Map<String, HandlerInfo<?>> handlerInfos = new HashMap<>();
 	private static final ThreadLocal<Table<String, Chunk, ChunkData<?>>> datas = ThreadLocal.withInitial(HashBasedTable::create);
@@ -260,9 +261,9 @@ public class BlockDataHandler
 	 * @param from the from
 	 * @param to the to
 	 */
-	public static <T> void registerBlockData(String identifier, Function<ByteBuf, T> from, Function<T, ByteBuf> to)
+	public static <T> void registerBlockData(String identifier, Function<ByteBuf, T> fromBytes, Function<T, ByteBuf> toBytes)
 	{
-		instance.handlerInfos.put(identifier, new HandlerInfo<>(identifier, from, to));
+		instance.handlerInfos.put(identifier, new HandlerInfo<>(identifier, fromBytes, toBytes));
 	}
 
 	/**
@@ -384,14 +385,14 @@ public class BlockDataHandler
 	public static class HandlerInfo<T>
 	{
 		String identifier;
-		private Function<ByteBuf, T> from;
-		private Function<T, ByteBuf> to;
+		private Function<ByteBuf, T> fromBytes;
+		private Function<T, ByteBuf> toBytes;
 
-		public HandlerInfo(String identifier, Function<ByteBuf, T> from, Function<T, ByteBuf> to)
+		public HandlerInfo(String identifier, Function<ByteBuf, T> fromBytes, Function<T, ByteBuf> toBytes)
 		{
 			this.identifier = identifier;
-			this.from = from;
-			this.to = to;
+			this.fromBytes = fromBytes;
+			this.toBytes = toBytes;
 		}
 	}
 
@@ -434,7 +435,7 @@ public class BlockDataHandler
 			{
 				BlockPos pos = BlockPos.fromLong(buf.readLong());
 				ByteBuf b = buf.readBytes(buf.readInt());
-				T blockData = handlerInfos.from.apply(b);
+				T blockData = handlerInfos.fromBytes.apply(b);
 				data.put(pos, blockData);
 			}
 
@@ -445,7 +446,7 @@ public class BlockDataHandler
 		{
 			for (Entry<BlockPos, T> entry : data.entrySet())
 			{
-				ByteBuf b = handlerInfos.to.apply(entry.getValue());
+				ByteBuf b = handlerInfos.toBytes.apply(entry.getValue());
 				buf.writeLong(entry.getKey().toLong());
 				buf.writeInt(b.writerIndex());
 				buf.writeBytes(b);
