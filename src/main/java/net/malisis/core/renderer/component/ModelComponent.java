@@ -28,7 +28,9 @@ import net.malisis.core.block.MalisisBlock;
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.IRenderComponent;
 import net.malisis.core.renderer.MalisisRenderer;
+import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.RenderType;
+import net.malisis.core.renderer.icon.provider.ModelIconProvider;
 import net.malisis.core.renderer.model.MalisisModel;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
@@ -45,16 +47,28 @@ public class ModelComponent implements IRenderComponent
 	protected ResourceLocation resourceLocation;
 	/** {@link MalisisModel} for this {@link ModelComponent}. */
 	protected MalisisModel model;
+	/** {@link RenderParameters} use for rendering. */
+	protected RenderParameters renderParameters = new RenderParameters();
+
+	protected ModelIconProvider modelIconProvider;
+	protected IVisibilityProvider visibilityProvider;
 
 	/**
 	 * Instantiates a new {@link ModelComponent} and load its {@link MalisisModel}.
 	 *
 	 * @param modelName the model name
 	 */
-	public ModelComponent(String modelName)
+	public ModelComponent(String modelName, ModelIconProvider modelIconProvider, IVisibilityProvider visibilityProvider)
 	{
 		this.resourceLocation = new ResourceLocation(modelName);
+		this.modelIconProvider = modelIconProvider;
+		this.visibilityProvider = visibilityProvider;
 		loadModel();
+	}
+
+	public ModelComponent(String modelName)
+	{
+		this(modelName, null, null);
 	}
 
 	/**
@@ -78,9 +92,26 @@ public class ModelComponent implements IRenderComponent
 	@Override
 	public void render(Block block, MalisisRenderer<TileEntity> renderer)
 	{
+		loadModel();
 		model.resetState();
 		if (renderer.getRenderType() == RenderType.BLOCK)
 			model.rotate(DirectionalComponent.getDirection(renderer.getBlockState()));
-		model.render(renderer);
+
+		for (String name : model.getShapeNames())
+		{
+			if (visibilityProvider == null || visibilityProvider.isVisible(renderer, name))
+			{
+				if (modelIconProvider != null)
+					renderParameters.icon.set(modelIconProvider.getIcon(name));
+
+				model.render(renderer, name, renderParameters);
+			}
+		}
+
+	}
+
+	public static interface IVisibilityProvider
+	{
+		public boolean isVisible(MalisisRenderer<TileEntity> renderer, String shapeName);
 	}
 }
