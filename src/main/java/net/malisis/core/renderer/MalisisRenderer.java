@@ -339,7 +339,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	private boolean checkBlock()
 	{
-		if (block == null || ensureBlocks.size() == 0)
+		//AIR allows render because of Items
+		if (block == Blocks.AIR || ensureBlocks.size() == 0)
 			return true;
 
 		return ensureBlocks.contains(block.getClass());
