@@ -37,6 +37,8 @@ import com.google.common.collect.Lists;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
+import net.malisis.core.block.component.ITickableComponent.PeriodicTickableComponent;
+import net.malisis.core.block.component.ITickableComponent.RandomTickableComponent;
 import net.malisis.core.block.component.LadderComponent;
 import net.malisis.core.item.MalisisItemBlock;
 import net.malisis.core.renderer.DefaultRenderer;
@@ -290,6 +292,27 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 		getBlockComponents().forEach(c -> c.breakBlock(this, world, pos, state));
 
 		super.breakBlock(world, pos, state);
+	}
+
+	//UPDATE
+	@Override
+	public void randomTick(World world, BlockPos pos, IBlockState state, Random rand)
+	{
+		RandomTickableComponent rtc = IComponent.getComponent(RandomTickableComponent.class, this);
+		if (rtc != null)
+			rtc.update(this, world, pos, state, rand);
+	}
+
+	@Override
+	public void updateTick(World world, BlockPos pos, IBlockState state, Random rand)
+	{
+		PeriodicTickableComponent ptc = IComponent.getComponent(PeriodicTickableComponent.class, this);
+		if (ptc == null)
+			return;
+
+		int nextTick = ptc.update(this, world, pos, state, rand);
+		if (nextTick > 0)
+			world.scheduleBlockUpdate(pos, this, nextTick, nextTick);
 	}
 
 	//BOUNDING BOX
