@@ -572,7 +572,8 @@ public class Face implements ITransformable.Translate, ITransformable.Rotate
 
 		params.direction.set(dir);
 		params.textureSide.set(dir);
-		params.aoMatrix.set(calculateAoMatrix(dir));
+		if (dir != null)
+			params.aoMatrix.set(calculateAoMatrix(dir));
 
 		//fry's patent
 		float f = (float) ((normal.x * normal.x * 0.6 + normal.y * (normal.y * 3 + 1) / 4 + normal.z * normal.z * 0.8));
