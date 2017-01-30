@@ -554,7 +554,7 @@ public abstract class MalisisGui extends GuiScreen
 		if (inventoryContainer != null)
 		{
 			ItemStack itemStack = inventoryContainer.getPickedItemStack();
-			if (itemStack != null)
+			if (!itemStack.isEmpty())
 				renderer.renderPickedItemStack(itemStack);
 			else if (hoveredComponent != null && hoveredComponent.isHovered()) //do not draw the tooltip if an itemStack is picked up
 				renderer.drawTooltip(hoveredComponent.getTooltip());
