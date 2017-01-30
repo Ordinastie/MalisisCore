@@ -886,6 +886,12 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 			return;
 		}
 
+		if (params == null)
+			params = face.getParameters();
+
+		if (params.deductParameters.get())
+			face.deductParameters();
+
 		params = RenderParameters.merge(params, face.getParameters());
 
 		if (!shouldRenderFace(face, params))

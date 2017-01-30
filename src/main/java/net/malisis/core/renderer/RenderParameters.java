@@ -133,6 +133,9 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 	/** Defines whether to flip the texture on the U coordinates (Face Level) */
 	public Parameter<Boolean> flipV = new Parameter<>(false);
 
+	/** Defines whether a face should deducts its parameters before rendering. (Face level). */
+	public Parameter<Boolean> deductParameters = new Parameter<>(false);
+
 	/**
 	 * Instantiates a new {@link RenderParameters}.
 	 */
@@ -185,6 +188,7 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 		listParams.add(aoMatrix);
 		listParams.add(flipU);
 		listParams.add(flipV);
+		listParams.add(deductParameters);
 	}
 
 	/**
@@ -291,6 +295,7 @@ public class RenderParameters implements ITransformable.Color, ITransformable.Al
 			rp.aoMatrix = aoMatrix.clone();
 			rp.flipU = flipU.clone();
 			rp.flipV = flipV.clone();
+			rp.deductParameters = deductParameters.clone();
 			rp.buildList();
 			return rp;
 		}
