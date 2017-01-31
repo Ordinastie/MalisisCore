@@ -1076,7 +1076,8 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		}
 
 		boolean flipU = params.flipU.get();
-		if (params.direction.get() == EnumFacing.NORTH || params.direction.get() == EnumFacing.EAST)
+		//if parameters are deducted, do not flip because the new direction can now NORTH from the last frame
+		if (!params.deductParameters.get() && (params.direction.get() == EnumFacing.NORTH || params.direction.get() == EnumFacing.EAST))
 			flipU = !flipU;
 		face.setTexture(icon, flipU, params.flipV.get(), params.interpolateUV.get());
 	}
@@ -1227,24 +1228,23 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		AxisAlignedBB bounds = getRenderBounds(params);
 		EnumFacing dir = params.direction.get();
 		BlockPos p = pos;
-		if (dir != null)
-			p = p.offset(dir);
 
 		//use the brightness of the block next to it
+		//TODO: check if face is actually at bounds
 		if (bounds != null)
 		{
-			if (dir == EnumFacing.WEST && bounds.minX > 0)
-				p = p.east();
-			else if (dir == EnumFacing.EAST && bounds.maxX < 1)
+			if (dir == EnumFacing.WEST && bounds.minX <= 0)
 				p = p.west();
-			else if (dir == EnumFacing.NORTH && bounds.minZ > 0)
-				p = p.south();
-			else if (dir == EnumFacing.SOUTH && bounds.maxZ < 1)
+			else if (dir == EnumFacing.EAST && bounds.maxX >= 1)
+				p = p.east();
+			else if (dir == EnumFacing.NORTH && bounds.minZ <= 0)
 				p = p.north();
-			else if (dir == EnumFacing.DOWN && bounds.minY > 0)
-				p = p.up();
-			else if (dir == EnumFacing.UP && bounds.maxY < 1)
+			else if (dir == EnumFacing.SOUTH && bounds.maxZ >= 1)
+				p = p.south();
+			else if (dir == EnumFacing.DOWN && bounds.minY <= 0)
 				p = p.down();
+			else if (dir == EnumFacing.UP && bounds.maxY >= 1)
+				p = p.up();
 		}
 
 		return getMixedBrightnessForBlock(world, p);
@@ -1342,17 +1342,13 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	protected AxisAlignedBB getRenderBounds(RenderParameters params)
 	{
-		if (block == null)
-		{
-			if (params != null && !params.useBlockBounds.get())
-				return params.renderBounds.get();
-			return AABBUtils.identity();
-		}
+		if (params != null && !params.useBlockBounds.get())
+			return params.renderBounds.get();
 
 		if (block instanceof IBoundingBox)
 			return ((IBoundingBox) block).getBoundingBox(world, pos, blockState, BoundingBoxType.RENDER);
 
-		if (world != null)
+		if (blockState != null && world != null)
 			return blockState.getBoundingBox(world, pos);
 
 		return AABBUtils.identity();
