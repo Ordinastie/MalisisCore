@@ -50,7 +50,7 @@ public interface IMalisisMessageHandler<REQ extends IMessage, REPLY extends IMes
 			if (ctx.side.isClient())
 				Minecraft.getMinecraft().addScheduledTask(() -> process(message, ctx));
 			else if (ctx.side.isServer())
-				((WorldServer) ctx.getServerHandler().playerEntity.world).addScheduledTask(() -> process(message, ctx));
+				((WorldServer) ctx.getServerHandler().player.world).addScheduledTask(() -> process(message, ctx));
 		}
 		else
 		{
@@ -81,7 +81,7 @@ public interface IMalisisMessageHandler<REQ extends IMessage, REPLY extends IMes
 	public static World getWorld(MessageContext ctx)
 	{
 		if (ctx.side == Side.SERVER)
-			return ctx.getServerHandler().playerEntity.world;
+			return ctx.getServerHandler().player.world;
 		else
 			return Utils.getClientWorld();
 	}
@@ -95,7 +95,7 @@ public interface IMalisisMessageHandler<REQ extends IMessage, REPLY extends IMes
 	public static EntityPlayer getPlayer(MessageContext ctx)
 	{
 		if (ctx.side == Side.SERVER)
-			return ctx.getServerHandler().playerEntity;
+			return ctx.getServerHandler().player;
 		else
 			return Utils.getClientPlayer();
 	}

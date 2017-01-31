@@ -61,7 +61,7 @@ public class InventoryActionMessage implements IMalisisMessageHandler<InventoryA
 	@Override
 	public void process(Packet message, MessageContext ctx)
 	{
-		Container c = ctx.getServerHandler().playerEntity.openContainer;
+		Container c = ctx.getServerHandler().player.openContainer;
 		if (message.windowId != c.windowId || !(c instanceof MalisisInventoryContainer))
 			return;
 

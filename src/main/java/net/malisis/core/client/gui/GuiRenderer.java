@@ -549,7 +549,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 
 		FontRenderer fontRenderer = itemStack.getItem().getFontRenderer(itemStack);
 		if (fontRenderer == null)
-			fontRenderer = Minecraft.getMinecraft().fontRendererObj;
+			fontRenderer = Minecraft.getMinecraft().fontRenderer;
 
 		String formatStr = format != null ? format.getFormattingCode() : null;
 		if (label == null && (itemStack.getCount() > 1 || !Strings.isEmpty(formatStr)))

@@ -27,6 +27,8 @@ package net.malisis.core.renderer.font;
 import java.awt.Font;
 import java.lang.reflect.Field;
 
+import org.apache.commons.lang3.StringUtils;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.renderer.MalisisRenderer;
@@ -36,8 +38,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.FMLClientHandler;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Ordinastie
@@ -64,7 +64,7 @@ public class MinecraftFont extends MalisisFont
 		this.textureRl = new ResourceLocation("textures/font/ascii.png");
 		this.size = 256;
 
-		fontRenderer = Minecraft.getMinecraft().fontRendererObj;
+		fontRenderer = Minecraft.getMinecraft().fontRenderer;
 		setFields();
 	}
 

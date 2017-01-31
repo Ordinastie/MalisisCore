@@ -121,7 +121,7 @@ public abstract class MalisisGui extends GuiScreen
 	{
 		this.mc = Minecraft.getMinecraft();
 		this.itemRender = mc.getRenderItem();
-		this.fontRendererObj = mc.fontRendererObj;
+		this.fontRenderer = mc.fontRenderer;
 		this.renderer = new GuiRenderer();
 		this.screen = new UIContainer<>(this).setName("Screen");
 		this.ar = new AnimationRenderer();
