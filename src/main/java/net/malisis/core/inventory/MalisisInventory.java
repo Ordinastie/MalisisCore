@@ -234,7 +234,7 @@ public class MalisisInventory
 	/**
 	 * Gets the slot at position slotNumber.
 	 *
-	 * @param slotNumber the slot number
+	 * @param slotIndex the slot index
 	 * @return the slot
 	 */
 	public MalisisSlot getSlot(int slotIndex)

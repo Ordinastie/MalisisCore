@@ -140,8 +140,10 @@ public class ColorComponent extends SubtypeComponent<EnumDyeColor> implements IR
 	 * Gets the render color for this {@link Block}.<br>
 	 * If {@link #useColorMultiplier()} is false, color is already in the texture, and white (0xFFFFFF) is returned.
 	 *
-	 * @param block the block
 	 * @param state the state
+	 * @param world the world
+	 * @param pos the pos
+	 * @param tintIndex the tint index
 	 * @return the render color
 	 */
 	public int getRenderColor(IBlockState state, IBlockAccess world, BlockPos pos, int tintIndex)

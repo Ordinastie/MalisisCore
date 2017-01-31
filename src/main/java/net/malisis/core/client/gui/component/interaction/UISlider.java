@@ -203,7 +203,7 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 
 	/**
 	 * Slides the slider to the specified offset between 0 and 1.<br>
-	 * Sets the value relative to the offset between {@link #minValue} and {@link #maxValue}.
+	 * Sets the value relative to the offset.
 	 *
 	 * @param offset the offset
 	 */

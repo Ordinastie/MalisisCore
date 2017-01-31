@@ -27,6 +27,7 @@ package net.malisis.core.util.chunklistener;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.registry.MalisisRegistry;
+import net.malisis.core.registry.SetBlockCallbackRegistry;
 import net.malisis.core.util.callback.CallbackResult;
 import net.malisis.core.util.callback.ICallback;
 import net.malisis.core.util.callback.ICallback.CallbackOption;
@@ -141,13 +142,15 @@ public class ChunkListener
 		@Override
 		public default CallbackResult<Void> call(Chunk chunk, BlockPos listener, Object... params)
 		{
-			return call(chunk, listener, (BlockPos) params[0], (IBlockState) params[1], (IBlockState) params[2]) ? CallbackResult.noResult() : CANCELLED;
+			return call(chunk, listener, (BlockPos) params[0], (IBlockState) params[1], (IBlockState) params[2])
+																														? CallbackResult.noResult()
+																													: CANCELLED;
 		}
 
 		/**
 		 * If this {@link IBlockListenerCallback} was registered with
-		 * {@link MalisisRegistry#onPreSetBlock(net.malisis.core.registry.SetBlockCallbackRegistry.ISetBlockCallback, CallbackOption)},
-		 * returns whether to cancel the block placement or not.
+		 * {@link MalisisRegistry#onPreSetBlock(SetBlockCallbackRegistry.ISetBlockCallback, ICallback.CallbackOption)}, returns whether to
+		 * cancel the block placement or not.
 		 *
 		 * @param chunk the chunk
 		 * @param listener the listener

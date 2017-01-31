@@ -198,7 +198,6 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 	/**
 	 * Checks whether the associated {@link MalisisItem} has subtypes.
 	 *
-	 * @param item the item
 	 * @return true, if successful
 	 */
 	@Override

@@ -258,8 +258,8 @@ public class BlockDataHandler
 	 *
 	 * @param <T> the generic type
 	 * @param identifier the identifier
-	 * @param from the from
-	 * @param to the to
+	 * @param fromBytes the from bytes
+	 * @param toBytes the to bytes
 	 */
 	public static <T> void registerBlockData(String identifier, Function<ByteBuf, T> fromBytes, Function<T, ByteBuf> toBytes)
 	{

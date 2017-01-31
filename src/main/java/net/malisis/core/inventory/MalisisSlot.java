@@ -55,7 +55,6 @@ public class MalisisSlot
 	/**
 	 * Instantiates a new {@link MalisisSlot}.
 	 *
-	 * @param inventory the inventory
 	 * @param itemStack the item stack
 	 */
 	public MalisisSlot(ItemStack itemStack)

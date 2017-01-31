@@ -186,16 +186,16 @@ public class ChunkCollision
 	//#region canPlaceBlockAt
 	/**
 	 * Checks whether the block can be placed at the position.<br>
-	 * Called via ASM from {@link ItemBlock#onItemUse(ItemStack, EntityPlayer, World, BlockPos, EnumHand, EnumFacing, float, float, float)}
-	 * at the beginning.<br>
+	 * Called via ASM from {@link ItemBlock#onItemUse(EntityPlayer, World, BlockPos, EnumHand, EnumFacing, float, float, float)} at the
+	 * beginning.<br>
 	 * Tests the block bounding box (boxes if {@link IChunkCollidable}) against the occupied blocks position, then against all the bounding
 	 * boxes of the {@link IChunkCollidable} available for those chunks.
 	 *
-	 * @param itemStack the item stack
 	 * @param player the player
 	 * @param world the world
 	 * @param block the block
 	 * @param pos the pos
+	 * @param hand the hand
 	 * @param side the side
 	 * @return true, if can be placed
 	 */

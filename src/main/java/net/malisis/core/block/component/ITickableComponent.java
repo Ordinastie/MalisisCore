@@ -87,7 +87,6 @@ public interface ITickableComponent
 		 * @param pos the pos
 		 * @param state the state
 		 * @param rand the rand
-		 * @return the int
 		 */
 		public void update(Block block, World world, BlockPos pos, IBlockState state, Random rand)
 		{
