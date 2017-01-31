@@ -290,7 +290,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 																		"net/minecraft/network/NetHandlerPlayServer",
 																		"(Lnet/minecraft/network/play/client/CPacketPlayerDigging;)V");
 
-		McpFieldMapping playerEntity = new McpFieldMapping(	"playerEntity",
+		McpFieldMapping playerEntity = new McpFieldMapping(	"player",
 															"field_147369_b",
 															"net/minecraft/network/NetHandlerPlayServer",
 															"Lnet/minecraft/entity/player/EntityPlayerMP;");
