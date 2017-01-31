@@ -45,7 +45,7 @@ defaultTasks 'build', 'install'
 // Basic project information
 group = 'net.malisis'
 archivesBaseName = 'malisiscore'
-version = '1.11-5.0.0-SNAPSHOT'
+version = '1.11.2-5.0.1-SNAPSHOT'
 ext.packaging = 'jar'
 
 // Extended project information
@@ -242,9 +242,7 @@ if (project.hasProperty('curseapi')) {
 			
 			addArtifact deobfJar
 			addArtifact sourcesJar
-			addArtifact javadocJar
-			
-			addGameVersion '1.9.4'			   		
+			addArtifact javadocJar			   		
 		}
 	}
 }
