@@ -26,6 +26,8 @@ package net.malisis.core.block;
 
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.raytrace.RaytraceBlock;
@@ -38,11 +40,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 /**
  * {@link IBoundingBox} defines an implementers that have bounding box.<br>
- * Currently used in {@link RaytraceBlock#trace()}.
+ * Currently used in {@link RaytraceBlock#trace()}. TODO: use list instead of array
  *
  * @author Ordinastie
  *
