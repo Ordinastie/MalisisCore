@@ -71,7 +71,7 @@ public interface IBoundingBox
 		return aabbs;
 	}
 
-	public default void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
+	public default void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity, boolean useActualState)
 	{
 		AxisAlignedBB[] aabbs = getBoundingBoxes(world, pos, state, BoundingBoxType.COLLISION);
 		aabbs = AABBUtils.rotate(aabbs, DirectionalComponent.getDirection(state));

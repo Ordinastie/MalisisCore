@@ -348,7 +348,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	@Override
 	public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, @Nullable Entity collidingEntity, boolean useActualState)
 	{
-		IBoundingBox.super.addCollisionBoxToList(state, world, pos, mask, list, collidingEntity);
+		IBoundingBox.super.addCollisionBoxToList(state, world, pos, mask, list, collidingEntity, false);
 	}
 
 	@Override
