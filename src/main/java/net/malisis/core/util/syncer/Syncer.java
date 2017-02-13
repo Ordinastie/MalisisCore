@@ -72,10 +72,10 @@ public class Syncer
 
 	private Syncer()
 	{
-		registerFacotory("TileEntity", TileEntitySyncHandler::new);
+		registerFactory("TileEntity", TileEntitySyncHandler::new);
 	}
 
-	private void registerFacotory(String name, Supplier<ISyncHandler<?, ? extends ISyncableData>> supplier)
+	private void registerFactory(String name, Supplier<ISyncHandler<?, ? extends ISyncableData>> supplier)
 	{
 		factories.put(name, supplier);
 	}
@@ -336,7 +336,7 @@ public class Syncer
 	 */
 	public static void registerHandlerFactory(String name, Supplier<ISyncHandler<?, ? extends ISyncableData>> supplier)
 	{
-		get().registerFacotory(name, supplier);
+		get().registerFactory(name, supplier);
 	}
 
 	/**
