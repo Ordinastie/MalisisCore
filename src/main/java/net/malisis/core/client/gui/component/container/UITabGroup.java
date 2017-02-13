@@ -264,10 +264,11 @@ public class UITabGroup extends UIContainer<UITabGroup>
 
 		activeTab = tab;
 		if (tab != null)
+		{
 			tab.setActive(true);
-
-		if (attachedContainer instanceof ITransformable.Color)
-			((ITransformable.Color) attachedContainer).setColor(tab.getBgColor());
+			if (attachedContainer instanceof ITransformable.Color)
+				((ITransformable.Color) attachedContainer).setColor(tab.getBgColor());
+		}
 
 	}
 
