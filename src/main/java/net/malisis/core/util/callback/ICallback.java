@@ -129,8 +129,8 @@ public interface ICallback<T>
 	}
 
 	/**
-	 * The {@link CallbackOption} holds the {@link ICallbackPredicate} and {@link Priority} necessary for the associated {@link ICallback}
-	 * to be executed.
+	 * The {@link ICallback.CallbackOption} holds the {@link ICallbackPredicate} and {@link Priority} necessary for the associated
+	 * {@link ICallback} to be executed.
 	 */
 	public static class CallbackOption<P extends ICallbackPredicate>
 	{
@@ -146,7 +146,7 @@ public interface ICallback<T>
 		}
 
 		/**
-		 * Gets the {@link Priority} of this {@link CallbackOption}
+		 * Gets the {@link Priority} of this {@link ICallback.CallbackOption}
 		 *
 		 * @return the priority
 		 */
@@ -156,7 +156,7 @@ public interface ICallback<T>
 		}
 
 		/**
-		 * Returns the result of the {@link ICallbackPredicate} held by this {@link CallbackOption}.
+		 * Returns the result of the {@link ICallbackPredicate} held by this {@link ICallback.CallbackOption}.
 		 *
 		 * @param params the params
 		 * @return true, if successful
@@ -167,8 +167,8 @@ public interface ICallback<T>
 		}
 
 		/**
-		 * Constructs an empty {@link CallbackOption}, with predicate {@link ICallbackPredicate#alwaysTrue()} and {@link Priority#NORMAL}
-		 * priority.
+		 * Constructs an empty {@link ICallback.CallbackOption}, with predicate {@link ICallback.ICallbackPredicate#alwaysTrue()} and
+		 * {@link Priority#NORMAL} priority.
 		 *
 		 * @param <P> the generic type
 		 * @return the callback option
@@ -181,7 +181,8 @@ public interface ICallback<T>
 		}
 
 		/**
-		 * Constructs an empty {@link CallbackOption}, with {@link Priority#NORMAL} priority and the specified {@link ICallbackPredicate}.
+		 * Constructs an empty {@link ICallback.CallbackOption}, with {@link Priority#NORMAL} priority and the specified
+		 * {@link ICallbackPredicate}.
 		 *
 		 * @param <P> the generic type
 		 * @param predicate the predicate
@@ -193,7 +194,8 @@ public interface ICallback<T>
 		}
 
 		/**
-		 * Constructs a {@link CallbackOption} with predicate {@link ICallbackPredicate#alwaysTrue()} and the specified {@link Priority}.
+		 * Constructs a {@link ICallback.CallbackOption} with predicate {@link ICallback.ICallbackPredicate#alwaysTrue()} and the specified
+		 * {@link Priority}.
 		 *
 		 * @param <P> the generic type
 		 * @param priority the priority
@@ -205,7 +207,7 @@ public interface ICallback<T>
 		}
 
 		/**
-		 * Constructs an empty {@link CallbackOption}, with specified {@link ICallbackPredicate} and {@link Priority}.
+		 * Constructs an empty {@link ICallback.CallbackOption}, with specified {@link ICallbackPredicate} and {@link Priority}.
 		 *
 		 * @param <P> the generic type
 		 * @param predicate the predicate
