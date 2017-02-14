@@ -53,12 +53,18 @@ public class Icon extends TextureAtlasSprite
 	private final static Map<String, Icon> registeredIcons = Maps.newHashMap();
 
 	/** {@link Icon} version of the missing texture **/
-	public static Icon missing = new ProxyIcon()
+	public static Icon missing = new ProxyIcon("MISSINGNO")
 	{
 		@Override
 		public TextureAtlasSprite getIcon()
 		{
 			return Minecraft.getMinecraft().getTextureMapBlocks().getMissingSprite();
+		}
+
+		@Override
+		public String toString()
+		{
+			return "MISSINGNO";
 		}
 	};
 
@@ -471,6 +477,17 @@ public class Icon extends TextureAtlasSprite
 	public static Icon from(Item item)
 	{
 		return new VanillaIcon(item);
+	}
+
+	/**
+	 * Gets a {@link Icon} for the texture used for the {@link Item}
+	 *
+	 * @param item the item
+	 * @return the malisis icon
+	 */
+	public static Icon from(Item item, int metadata)
+	{
+		return new VanillaIcon(item, metadata);
 	}
 
 	/**

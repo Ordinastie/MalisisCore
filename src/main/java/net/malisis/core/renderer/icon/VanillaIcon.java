@@ -40,58 +40,70 @@ public class VanillaIcon extends ProxyIcon
 	protected Item item;
 	protected IBlockState blockState;
 	protected int metadata;
-	protected String name;
 
-	public VanillaIcon(String name)
+	VanillaIcon(String name)
 	{
-		this.name = name;
+		super(name);
 	}
 
-	public VanillaIcon(Block block)
+	VanillaIcon(Block block)
 	{
+		super(block.getRegistryName().toString());
 		this.blockState = block.getDefaultState();
 	}
 
-	public VanillaIcon(IBlockState blockState)
+	VanillaIcon(IBlockState blockState)
 	{
+		super(blockState.getBlock().getRegistryName().toString());
 		this.blockState = blockState;
 	}
 
-	public VanillaIcon(Item item, int metadata)
+	VanillaIcon(Item item, int metadata)
 	{
+		super(item.getRegistryName().toString());
 		this.item = item;
 		this.metadata = metadata;
 	}
 
-	public VanillaIcon(Item item)
+	VanillaIcon(Item item)
 	{
 		this(item, 0);
 	}
 
 	@Override
+	public TextureAtlasSprite getIcon()
+	{
+		if (proxy == null)
+			resolveIcon(Minecraft.getMinecraft().getTextureMapBlocks());
+
+		return super.getIcon();
+	}
+
+	@Override
 	public void register(TextureMap map)
 	{
+		if (getIconName() == null) //if blockState or item, resolve when needed
+			return;
+
+		TextureAtlasSprite icon = map.getAtlasSprite(getIconName());
+		if (icon == map.getMissingSprite()) //the models using it were overwritten by a resourcepack and don't use it anymore, so we have to register a new icon.
+		{
+			icon = new Icon(getIconName());
+			map.setTextureEntry(icon);
+		}
+
+		setProxy(icon);
+	}
+
+	private void resolveIcon(TextureMap map)
+	{
 		TextureAtlasSprite icon = null;
-		if (name != null)
-			icon = getNameIcon(map);
-		else if (item != null)
+		if (item != null)
 			icon = getItemIcon();
 		else if (blockState != null)
 			icon = getBlockIcon();
 		if (icon != null)
 			setProxy(icon);
-	}
-
-	private TextureAtlasSprite getNameIcon(TextureMap map)
-	{
-		TextureAtlasSprite icon = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(name);
-		if (icon == map.getMissingSprite()) //the models using it were overwritten by a resourcepack and don't use it anymore, so we have to register a new icon.
-		{
-			icon = new Icon(name);
-			map.setTextureEntry(icon);
-		}
-
-		return icon;
 	}
 
 	private TextureAtlasSprite getItemIcon()
@@ -106,6 +118,12 @@ public class VanillaIcon extends ProxyIcon
 		if (blockState == null)
 			return null;
 		return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getTexture(blockState);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "VanillaIcon [" + getIcon() + "]";
 	}
 
 }

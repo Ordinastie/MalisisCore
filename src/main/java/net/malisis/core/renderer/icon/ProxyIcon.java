@@ -39,11 +39,14 @@ public class ProxyIcon extends Icon
 {
 	protected TextureAtlasSprite proxy;
 
-	public ProxyIcon()
-	{}
+	public ProxyIcon(String name)
+	{
+		super(name);
+	}
 
 	public ProxyIcon(TextureAtlasSprite proxy)
 	{
+		super(proxy.getIconName());
 		setProxy(proxy);
 	}
 
@@ -132,12 +135,6 @@ public class ProxyIcon extends Icon
 	}
 
 	@Override
-	public String getIconName()
-	{
-		return getIcon().getIconName();
-	}
-
-	@Override
 	public void updateAnimation()
 	{}
 
@@ -186,7 +183,7 @@ public class ProxyIcon extends Icon
 	@Override
 	public String toString()
 	{
-		return "VanillaIcon [" + getIcon() + "]";
+		return "ProxyIcon [" + getIcon() + "]";
 	}
 
 }
