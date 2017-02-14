@@ -41,6 +41,7 @@ import net.malisis.core.renderer.element.face.SouthFace;
 import net.malisis.core.renderer.element.face.TopFace;
 import net.malisis.core.renderer.element.face.WestFace;
 import net.malisis.core.renderer.icon.Icon;
+import net.malisis.core.renderer.icon.ProxyIcon;
 import net.malisis.core.renderer.model.IModelLoader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
@@ -52,7 +53,7 @@ import net.minecraft.util.ResourceLocation;
  */
 public class TextureModelLoader implements IModelLoader
 {
-	private TextureAtlasSprite sprite;
+	private Icon icon;
 	private int width;
 	private int height;
 	private int[] pixels;
@@ -64,20 +65,20 @@ public class TextureModelLoader implements IModelLoader
 		//TODO
 	}
 
-	public TextureModelLoader(TextureAtlasSprite sprite)
+	public TextureModelLoader(TextureAtlasSprite icon)
 	{
-		load(sprite);
+		this.icon = icon instanceof Icon ? (Icon) icon : new ProxyIcon(icon);
+		load();
 	}
 
-	private void load(TextureAtlasSprite sprite)
+	private void load()
 	{
-		this.sprite = sprite;
-		if (sprite.getFrameCount() == 0)
+		if (icon.getFrameCount() == 0)
 			return;
 		//TODO: handle animation
-		this.pixels = sprite.getFrameTextureData(0)[0];
-		this.width = sprite.getIconWidth();
-		this.height = sprite.getIconHeight();
+		this.pixels = icon.getFrameTextureData(0)[0];
+		this.width = icon.getIconWidth();
+		this.height = icon.getIconHeight();
 
 		List<Face> faces = readTexture();
 
@@ -94,11 +95,11 @@ public class TextureModelLoader implements IModelLoader
 		Face front = new SouthFace();
 		front.scale(width, height, 1);
 		front.translate(0, 0, width / 16F - 1);
-		front.setTexture(new Icon(sprite));
+		front.setTexture(icon);
 
 		Face back = new NorthFace();
 		back.scale(width, height, 1);
-		back.setTexture(new Icon(sprite), true, false, false);
+		back.setTexture(icon, true, false, false);
 
 		faces.add(front);
 		faces.add(back);
@@ -166,11 +167,11 @@ public class TextureModelLoader implements IModelLoader
 	{
 		//x = 0;
 		y++;
-		float u = sprite.getInterpolatedU(((float) x / width) * 16F + 0.01F);
-		float v = sprite.getInterpolatedV(((float) y / height) * 16F - 0.01F);
-		float U = sprite.getInterpolatedU(((float) x / width) * 16 + 0.01F);
-		float V = sprite.getInterpolatedV(((float) y / height) * 16 - 0.01F);
-		face.setTexture(new Icon("", u, v, U, V));
+		float u = icon.getInterpolatedU(((float) x / width) * 16F + 0.01F);
+		float v = icon.getInterpolatedV(((float) y / height) * 16F - 0.01F);
+		float U = icon.getInterpolatedU(((float) x / width) * 16 + 0.01F);
+		float V = icon.getInterpolatedV(((float) y / height) * 16 - 0.01F);
+		face.setTexture(new Icon(x + "." + y, u, v, U, V));
 	}
 
 	private int getPixel(int x, int y)

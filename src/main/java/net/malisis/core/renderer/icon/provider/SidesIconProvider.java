@@ -24,6 +24,9 @@
 
 package net.malisis.core.renderer.icon.provider;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IBlockIconProvider.ISidesIconProvider;
@@ -33,9 +36,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * This {@link IIconProvider} allows a {@link Block} to have different icons for its sides.<br>
@@ -79,7 +79,7 @@ public class SidesIconProvider implements ISidesIconProvider
 	 */
 	public void setDefaultIcon(String name)
 	{
-		defaultIcon = new Icon(name);
+		defaultIcon = Icon.from(name);
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class SidesIconProvider implements ISidesIconProvider
 		for (int i = 0; i < names.length; i++)
 		{
 			if (!StringUtils.isEmpty(names[i]))
-				setSideIcon(EnumFacing.getFront(i), new Icon(names[i]));
+				setSideIcon(EnumFacing.getFront(i), Icon.from(names[i]));
 		}
 	}
 
@@ -134,7 +134,7 @@ public class SidesIconProvider implements ISidesIconProvider
 
 	public void setSideIcon(EnumFacing side, String name)
 	{
-		setSideIcon(side, new Icon(name));
+		setSideIcon(side, Icon.from(name));
 	}
 
 	/**

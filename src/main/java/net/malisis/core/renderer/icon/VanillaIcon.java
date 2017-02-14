@@ -24,21 +24,18 @@
 
 package net.malisis.core.renderer.icon;
 
-import java.io.IOException;
-import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.PngSizeInfo;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.Item;
 
 /**
  * @author Ordinastie
  *
  */
-public class VanillaIcon extends Icon
+public class VanillaIcon extends ProxyIcon
 {
 	protected Item item;
 	protected IBlockState blockState;
@@ -71,17 +68,30 @@ public class VanillaIcon extends Icon
 		this(item, 0);
 	}
 
-	protected TextureAtlasSprite getIcon()
+	@Override
+	public void register(TextureMap map)
 	{
 		TextureAtlasSprite icon = null;
 		if (name != null)
-			icon = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(name);
+			icon = getNameIcon(map);
 		else if (item != null)
 			icon = getItemIcon();
 		else if (blockState != null)
 			icon = getBlockIcon();
+		if (icon != null)
+			setProxy(icon);
+	}
 
-		return icon == null ? missing : icon;
+	private TextureAtlasSprite getNameIcon(TextureMap map)
+	{
+		TextureAtlasSprite icon = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(name);
+		if (icon == map.getMissingSprite()) //the models using it were overwritten by a resourcepack and don't use it anymore, so we have to register a new icon.
+		{
+			icon = new Icon(name);
+			map.setTextureEntry(icon);
+		}
+
+		return icon;
 	}
 
 	private TextureAtlasSprite getItemIcon()
@@ -98,149 +108,4 @@ public class VanillaIcon extends Icon
 		return Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getTexture(blockState);
 	}
 
-	@Override
-	public void initSprite(int inX, int inY, int originInX, int originInY, boolean rotatedIn)
-	{}
-
-	@Override
-	public void copyFrom(TextureAtlasSprite atlasSprite)
-	{}
-
-	@Override
-	public int getOriginX()
-	{
-		return getIcon().getOriginX();
-	}
-
-	@Override
-	public int getOriginY()
-	{
-		return getIcon().getOriginY();
-	}
-
-	@Override
-	public int getIconWidth()
-	{
-		return getIcon().getIconWidth();
-	}
-
-	@Override
-	public int getIconHeight()
-	{
-		return getIcon().getIconHeight();
-	}
-
-	@Override
-	public float getMinU()
-	{
-		return flippedU ? getIcon().getMaxU() : getIcon().getMinU();
-	}
-
-	@Override
-	public float getMaxU()
-	{
-		return flippedU ? getIcon().getMinU() : getIcon().getMaxU();
-	}
-
-	@Override
-	public float getInterpolatedU(double u)
-	{
-		float f = getMaxU() - this.getMinU();
-		return getMinU() + f * (float) u / 16.0F;
-	}
-
-	@Override
-	public float getMinV()
-	{
-		return flippedV ? getIcon().getMaxV() : getIcon().getMinV();
-	}
-
-	@Override
-	public float getMaxV()
-	{
-		return flippedV ? getIcon().getMinV() : getIcon().getMaxV();
-	}
-
-	@Override
-	public float getInterpolatedV(double v)
-	{
-		float f = getMaxV() - this.getMinV();
-		return getMinV() + f * (float) v / 16.0F;
-	}
-
-	@Override
-	public String getIconName()
-	{
-		return getIcon().getIconName();
-	}
-
-	@Override
-	public void updateAnimation()
-	{}
-
-	@Override
-	public int[][] getFrameTextureData(int index)
-	{
-		return getIcon().getFrameTextureData(index);
-	}
-
-	@Override
-	public int getFrameCount()
-	{
-		return getIcon().getFrameCount();
-	}
-
-	@Override
-	public void setIconWidth(int newWidth)
-	{}
-
-	@Override
-	public void setIconHeight(int newHeight)
-	{}
-
-	@Override
-	public void loadSprite(PngSizeInfo sizeInfo, boolean animated) throws IOException
-	{}
-
-	@Override
-	public void generateMipmaps(int level)
-	{}
-
-	@Override
-	public void clearFramesTextureData()
-	{}
-
-	@Override
-	public boolean hasAnimationMetadata()
-	{
-		return getIcon().hasAnimationMetadata();
-	}
-
-	@Override
-	public void setFramesTextureData(List<int[][]> newFramesTextureData)
-	{}
-
-	@Override
-	public String toString()
-	{
-		return "VanillaIcon [" + getIcon() + "]";
-	}
-
-	public static class MissingIcon extends VanillaIcon
-	{
-		private TextureAtlasSprite missing;
-
-		public MissingIcon()
-		{
-			super((Item) null);
-		}
-
-		@Override
-		protected TextureAtlasSprite getIcon()
-		{
-			if (missing == null)
-				missing = Minecraft.getMinecraft().getTextureMapBlocks().getMissingSprite();
-			return missing;
-		}
-	}
 }

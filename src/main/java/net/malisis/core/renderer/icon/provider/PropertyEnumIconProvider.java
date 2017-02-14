@@ -46,7 +46,7 @@ public class PropertyEnumIconProvider<T extends Enum<T> & IStringSerializable> i
 	{
 		this.property = property;
 		this.icons = new EnumMap<>(enumClass);
-		this.defaultIcon = new Icon(defaultName);
+		this.defaultIcon = Icon.from(defaultName);
 	}
 
 	public PropertyEnumIconProvider(PropertyEnum<T> property, Class<T> enumClass, Icon defaultIcon)
@@ -68,7 +68,7 @@ public class PropertyEnumIconProvider<T extends Enum<T> & IStringSerializable> i
 
 	public void setIcon(T enumValue, String iconName)
 	{
-		icons.put(enumValue, new Icon(iconName));
+		icons.put(enumValue, Icon.from(iconName));
 	}
 
 	@Override

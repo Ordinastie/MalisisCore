@@ -28,13 +28,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.collect.Maps;
 
-import net.malisis.core.renderer.icon.VanillaIcon.MissingIcon;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.Item;
@@ -44,7 +42,7 @@ import net.minecraftforge.client.event.TextureStitchEvent;
  * Extension of {@link TextureAtlasSprite} to allow common operations like clipping and offset.<br>
  * Icons should be acquired by using the {@link #from(String)} method so that multiple call with the same name return the same {@link Icon}
  * instance.<br>
- * For non registered {@link Icon}, use {@link #Icon(String, boolean)} constructor.
+ * For non registered {@link Icon}, use constructors directly.
  *
  * @author Ordinastie
  *
@@ -55,7 +53,14 @@ public class Icon extends TextureAtlasSprite
 	private final static Map<String, Icon> registeredIcons = Maps.newHashMap();
 
 	/** {@link Icon} version of the missing texture **/
-	public static Icon missing = new MissingIcon();
+	public static Icon missing = new ProxyIcon()
+	{
+		@Override
+		public TextureAtlasSprite getIcon()
+		{
+			return Minecraft.getMinecraft().getTextureMapBlocks().getMissingSprite();
+		}
+	};
 
 	/** Width of the block's texture atlas. */
 	public static int BLOCK_TEXTURE_WIDTH = -1;
@@ -82,19 +87,11 @@ public class Icon extends TextureAtlasSprite
 	 *
 	 * @param name the name
 	 */
-	public Icon(String name, boolean register)
+	public Icon(String name)
 	{
 		super(name);
 		maxU = 1;
 		maxV = 1;
-
-		if (register && !StringUtils.isEmpty(name) && !registeredIcons.containsKey(name))
-			registeredIcons.put(name, this);
-	}
-
-	public Icon(String name)
-	{
-		this(name, true);
 	}
 
 	/**
@@ -102,18 +99,7 @@ public class Icon extends TextureAtlasSprite
 	 */
 	public Icon()
 	{
-		this("", false);
-	}
-
-	/**
-	 * Instantiates a new {@link Icon}.
-	 *
-	 * @param baseIcon the base icon
-	 */
-	public Icon(Icon baseIcon)
-	{
-		this(baseIcon.getIconName(), false);
-		baseIcon.addDependant(this);
+		this("");
 	}
 
 	/**
@@ -127,7 +113,7 @@ public class Icon extends TextureAtlasSprite
 	 */
 	public Icon(String name, float u, float v, float U, float V)
 	{
-		this(name, true);
+		this(name);
 		minU = u;
 		minV = v;
 		maxU = U;
@@ -136,19 +122,8 @@ public class Icon extends TextureAtlasSprite
 
 	public Icon(TextureAtlasSprite icon)
 	{
-		this(icon.getIconName(), false);
+		this(icon.getIconName());
 		copyFrom(icon);
-	}
-
-	/**
-	 * Adds a {@link Icon} to be dependant on this one. Will call {@link #initIcon(Icon, int, int, int, int, boolean)} when stiched to the
-	 * sheet.
-	 *
-	 * @param icon the icon
-	 */
-	public void addDependant(Icon icon)
-	{
-		dependants.add(icon);
 	}
 
 	//#region getters/setters
@@ -426,9 +401,12 @@ public class Icon extends TextureAtlasSprite
 	 */
 	public Icon copy()
 	{
-		Icon icon = new Icon();
-		icon.copyFrom(this);
-		return icon;
+		return new Icon(this);
+	}
+
+	public void register(TextureMap map)
+	{
+		map.setTextureEntry(this);
 	}
 
 	/**
@@ -438,7 +416,7 @@ public class Icon extends TextureAtlasSprite
 	 */
 	public static void registerIcons(TextureMap map)
 	{
-		registeredIcons.values().forEach(map::setTextureEntry);
+		registeredIcons.values().forEach(icon -> icon.register(map));
 	}
 
 	/**
@@ -450,12 +428,16 @@ public class Icon extends TextureAtlasSprite
 	 */
 	public static Icon from(String name)
 	{
-		if (name.indexOf("minecraft:") == 0)
-			return new VanillaIcon(name);
-
 		if (registeredIcons.get(name) != null)
 			return registeredIcons.get(name);
-		return new Icon(name);
+
+		Icon icon = null;
+		if (name.indexOf("minecraft:") == 0)
+			icon = new VanillaIcon(name);
+		else
+			icon = new Icon(name);
+		registeredIcons.put(name, icon);
+		return icon;
 	}
 
 	/**
