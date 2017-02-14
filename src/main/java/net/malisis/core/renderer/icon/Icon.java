@@ -50,7 +50,7 @@ import net.minecraftforge.client.event.TextureStitchEvent;
 public class Icon extends TextureAtlasSprite
 {
 	/** Map of all registered {@link Icon}. These icons will be stitched with the {@link TextureStitchEvent}. */
-	private final static Map<String, Icon> registeredIcons = Maps.newHashMap();
+	protected final static Map<String, Icon> registeredIcons = Maps.newHashMap();
 
 	/** {@link Icon} version of the missing texture **/
 	public static Icon missing = new ProxyIcon("MISSINGNO")
