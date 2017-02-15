@@ -26,6 +26,10 @@ package net.malisis.core.item;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.collect.Lists;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
@@ -37,10 +41,6 @@ import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.Lists;
 
 /**
  * @author Ordinastie
@@ -80,19 +80,13 @@ public class MalisisItem extends Item implements IComponentProvider, IRegisterab
 	public void setTexture(String textureName)
 	{
 		if (!StringUtils.isEmpty(textureName) && MalisisCore.isClient())
-		{
-			Icon icon = Icon.from(textureName);
-			addComponent((IIconProvider) () -> icon);
-		}
+			addComponent(IIconProvider.create(textureName).build());
 	}
 
 	public void setTexture(Item item)
 	{
 		if (item != null && MalisisCore.isClient())
-		{
-			Icon icon = Icon.from(item);
-			addComponent((IIconProvider) () -> icon);
-		}
+			addComponent(IIconProvider.create(Icon.from(item)).build());
 	}
 
 	public void setTexture(Block block)
@@ -104,9 +98,7 @@ public class MalisisItem extends Item implements IComponentProvider, IRegisterab
 	public void setTexture(IBlockState state)
 	{
 		if (state != null && MalisisCore.isClient())
-		{
-			Icon icon = Icon.from(state);
-			addComponent((IIconProvider) () -> icon);
-		}
+			addComponent(IIconProvider.create(Icon.from(state)).build());
+
 	}
 }
