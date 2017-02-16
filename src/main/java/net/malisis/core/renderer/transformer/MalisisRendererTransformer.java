@@ -25,9 +25,6 @@
 package net.malisis.core.renderer.transformer;
 
 import static org.objectweb.asm.Opcodes.*;
-import net.malisis.core.asm.AsmHook;
-import net.malisis.core.asm.MalisisClassTransformer;
-import net.malisis.core.asm.mappings.McpMethodMapping;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
@@ -38,6 +35,10 @@ import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
+
+import net.malisis.core.asm.AsmHook;
+import net.malisis.core.asm.MalisisClassTransformer;
+import net.malisis.core.asm.mappings.McpMethodMapping;
 
 /**
  * @author Ordinastie
@@ -55,19 +56,20 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 
 	private AsmHook blockHook()
 	{
-		McpMethodMapping renderBlock = new McpMethodMapping(
-				"renderBlock",
-				"func_175018_a",
-				"net/minecraft/client/renderer/BlockRendererDispatcher",
-				"(Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/VertexBuffer;)Z");
+		McpMethodMapping renderBlock = new McpMethodMapping("renderBlock",
+															"func_175018_a",
+															"net/minecraft/client/renderer/BlockRendererDispatcher",
+															"(Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/VertexBuffer;)Z");
 		AsmHook ah = new AsmHook(renderBlock);
 
 		//int i = state.getBlock().getRenderType();
 		//	    ALOAD 1
 		//	    INVOKEINTERFACE net/minecraft/block/state/IBlockState.getRenderType ()Lnet/minecraft/util/EnumBlockRenderType;
 		//	    ASTORE 5
-		McpMethodMapping getRenderType = new McpMethodMapping("getRenderType", "func_185901_i", "net/minecraft/block/state/IBlockState",
-				"()Lnet/minecraft/util/EnumBlockRenderType;");
+		McpMethodMapping getRenderType = new McpMethodMapping(	"getRenderType",
+																"func_185901_i",
+																"net/minecraft/block/state/IBlockState",
+																"()Lnet/minecraft/util/EnumBlockRenderType;");
 
 		InsnList match = new InsnList();
 		match.add(new VarInsnNode(ALOAD, 1));
@@ -102,19 +104,21 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		insert.add(new VarInsnNode(ALOAD, 3));
 		insert.add(new VarInsnNode(ALOAD, 2));
 		insert.add(new VarInsnNode(ALOAD, 1));
-		insert.add(new MethodInsnNode(
-				INVOKESTATIC,
-				"net/malisis/core/registry/Registries",
-				"processRenderBlockCallbacks",
-				"(Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/CallbackResult;",
-				false));
+		insert.add(new MethodInsnNode(	INVOKESTATIC,
+										"net/malisis/core/registry/Registries",
+										"processRenderBlockCallbacks",
+										"(Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/CallbackResult;",
+										false));
 		insert.add(new VarInsnNode(ASTORE, 8));
 		insert.add(new VarInsnNode(ALOAD, 8));
 		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/callback/CallbackResult", "shouldReturn", "()Z", false));
 		insert.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert.add(new VarInsnNode(ALOAD, 8));
-		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "net/malisis/core/util/callback/CallbackResult", "getValue", "()Ljava/lang/Object;",
-				false));
+		insert.add(new MethodInsnNode(	INVOKEVIRTUAL,
+										"net/malisis/core/util/callback/CallbackResult",
+										"getValue",
+										"()Ljava/lang/Object;",
+										false));
 		insert.add(new TypeInsnNode(CHECKCAST, "java/lang/Boolean"));
 		insert.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false));
 		insert.add(new InsnNode(IRETURN));
@@ -126,8 +130,10 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 
 	private AsmHook itemHook()
 	{
-		McpMethodMapping renderModel = new McpMethodMapping("renderModel", "func_175045_a", "net/minecraft/client/renderer/RenderItem",
-				"(Lnet/minecraft/client/renderer/block/model/IBakedModel;ILnet/minecraft/item/ItemStack;)V");
+		McpMethodMapping renderModel = new McpMethodMapping("renderModel",
+															"func_175045_a",
+															"net/minecraft/client/renderer/RenderItem",
+															"(Lnet/minecraft/client/renderer/block/model/IBakedModel;ILnet/minecraft/item/ItemStack;)V");
 		AsmHook ah = new AsmHook(renderModel);
 
 		//		if (Registries.renderItem(itemStack))
@@ -145,8 +151,11 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		LabelNode falseLabel = new LabelNode();
 		InsnList insert = new InsnList();
 		insert.add(new VarInsnNode(ALOAD, 3));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/registry/Registries", "renderItem",
-				"(Lnet/minecraft/item/ItemStack;)Z", false));
+		insert.add(new MethodInsnNode(	INVOKESTATIC,
+										"net/malisis/core/registry/Registries",
+										"renderItem",
+										"(Lnet/minecraft/item/ItemStack;)Z",
+										false));
 		insert.add(new JumpInsnNode(IFEQ, falseLabel));
 		insert.add(new InsnNode(RETURN));
 		insert.add(falseLabel);
@@ -157,8 +166,10 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 
 	private AsmHook particleHook()
 	{
-		McpMethodMapping getTexture = new McpMethodMapping("getTexture", "func_178122_a", "net/minecraft/client/renderer/BlockModelShapes",
-				"(Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;");
+		McpMethodMapping getTexture = new McpMethodMapping(	"getTexture",
+															"func_178122_a",
+															"net/minecraft/client/renderer/BlockModelShapes",
+															"(Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;");
 		AsmHook ah = new AsmHook(getTexture);
 
 		//		if (IComponent.getComponent(IIconProvider.class, state.getBlock()) != null)
@@ -172,20 +183,28 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		//	    INVOKESTATIC net/malisis/core/registry/Registries.getParticleIcon (Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
 		//		ARETURN
 
-		McpMethodMapping getBlock = new McpMethodMapping("getBlock", "func_177230_c", "net/minecraft/block/state/IBlockState",
-				"()Lnet/minecraft/block/Block;");
+		McpMethodMapping getBlock = new McpMethodMapping(	"getBlock",
+															"func_177230_c",
+															"net/minecraft/block/state/IBlockState",
+															"()Lnet/minecraft/block/Block;");
 
 		LabelNode falseLabel = new LabelNode();
 		InsnList insert = new InsnList();
 		insert.add(new LdcInsnNode(Type.getObjectType("net/malisis/core/renderer/icon/provider/IIconProvider")));
 		insert.add(new VarInsnNode(ALOAD, 1));
 		insert.add(getBlock.getInsnNode(INVOKEINTERFACE));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/block/IComponent", "getComponent",
-				"(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;", false));
+		insert.add(new MethodInsnNode(	INVOKESTATIC,
+										"net/malisis/core/block/IComponent",
+										"getComponent",
+										"(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;",
+										false));
 		insert.add(new JumpInsnNode(IFNULL, falseLabel));
 		insert.add(new VarInsnNode(ALOAD, 1));
-		insert.add(new MethodInsnNode(INVOKESTATIC, "net/malisis/core/registry/Registries", "getParticleIcon",
-				"(Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;", false));
+		insert.add(new MethodInsnNode(	INVOKESTATIC,
+										"net/malisis/core/registry/Registries",
+										"getParticleIcon",
+										"(Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;",
+										false));
 		insert.add(new InsnNode(ARETURN));
 		insert.add(falseLabel);
 

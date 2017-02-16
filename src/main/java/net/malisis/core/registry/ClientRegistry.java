@@ -30,6 +30,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.renderer.DefaultRenderer;
@@ -50,6 +56,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -61,12 +68,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * @author Ordinastie
@@ -164,10 +165,10 @@ public class ClientRegistry
 		}
 		catch (InstantiationException | IllegalAccessException e)
 		{
-			MalisisCore.log.error("[MalisisRegistry] Failed to load {} renderer for {}",
-					rendererClasses.getLeft().getSimpleName(),
-					object.getClass().getSimpleName(),
-					e);
+			MalisisCore.log.error(	"[MalisisRegistry] Failed to load {} renderer for {}",
+									rendererClasses.getLeft().getSimpleName(),
+									object.getClass().getSimpleName(),
+									e);
 			return;
 		}
 
@@ -185,14 +186,14 @@ public class ClientRegistry
 		}
 		catch (InstantiationException | IllegalAccessException e)
 		{
-			MalisisCore.log.error("[MalisisRegistry] Failed to load {} renderer for {}",
-					rendererClasses.getLeft().getSimpleName(),
-					object.getClass().getSimpleName());
+			MalisisCore.log.error(	"[MalisisRegistry] Failed to load {} renderer for {}",
+									rendererClasses.getLeft().getSimpleName(),
+									object.getClass().getSimpleName());
 			return;
 		}
 
 		//register the item renderer
-		if (object instanceof Item && renderer != null)
+		if (object != Items.AIR && renderer != null)
 		{
 			itemRenderers.put((Item) object, renderer);
 		}
@@ -263,7 +264,7 @@ public class ClientRegistry
 			return CallbackResult.noResult();
 
 		//convert pos to immutable one
-		return CallbackResult.<Boolean> builder()
+		return CallbackResult	.<Boolean> builder()
 								.value(renderer.renderBlock(buffer, world, new BlockPos(pos), state))
 								.withReturn(true)
 								.result();
@@ -297,7 +298,7 @@ public class ClientRegistry
 	 */
 	boolean renderItem(ItemStack itemStack)
 	{
-		if (itemStack == null)
+		if (itemStack.isEmpty())
 			return false;
 
 		IItemRenderer renderer = getItemRendererOverride(itemStack);
