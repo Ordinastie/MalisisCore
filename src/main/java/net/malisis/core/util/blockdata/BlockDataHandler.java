@@ -208,7 +208,7 @@ public class BlockDataHandler
 			}
 
 			//unload data on save because saving is called after unload
-			if (event.getChunk().unloaded)
+			if (event.getChunk().unloadQueued)
 				datas.get().remove(handlerInfo.identifier, event.getChunk());
 
 		}
