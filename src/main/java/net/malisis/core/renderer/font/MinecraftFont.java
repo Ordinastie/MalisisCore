@@ -27,6 +27,8 @@ package net.malisis.core.renderer.font;
 import java.awt.Font;
 import java.lang.reflect.Field;
 
+import org.apache.commons.lang3.StringUtils;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.renderer.MalisisRenderer;
@@ -37,8 +39,6 @@ import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.FMLClientHandler;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * @author Ordinastie
  *
@@ -46,7 +46,7 @@ import org.apache.commons.lang3.StringUtils;
 public class MinecraftFont extends MalisisFont
 {
 	private int[] mcCharWidth;
-	private float[] optifineCharWidth;
+	//private float[] optifineCharWidth;
 	private byte[] glyphWidth;
 	private ResourceLocation[] unicodePages;
 	private ResourceLocation lastFontTexture;
@@ -87,10 +87,11 @@ public class MinecraftFont extends MalisisFont
 			if (fontRenderer == null)
 				throw new IllegalStateException("fontRenderer not initialized");
 
-			if (FMLClientHandler.instance().hasOptifine())
-				optifineCharWidth = (float[]) charWidthField.get(fontRenderer);
-			else
-				mcCharWidth = (int[]) charWidthField.get(fontRenderer);
+			//https://github.com/sp614x/optifine/issues/438 : changed field back to int[]
+			//			if (FMLClientHandler.instance().hasOptifine())
+			//				optifineCharWidth = (float[]) charWidthField.get(fontRenderer);
+			//			else
+			mcCharWidth = (int[]) charWidthField.get(fontRenderer);
 			glyphWidth = (byte[]) glyphWidthField.get(fontRenderer);
 			unicodePages = (ResourceLocation[]) unicodePagesField.get(fontRenderer);
 
@@ -259,8 +260,8 @@ public class MinecraftFont extends MalisisFont
 		{
 			if (c == ' ' || c < 0 || c >= 256 || pos == -1)
 				return 4.0F;
-			else if (FMLClientHandler.instance().hasOptifine())
-				return optifineCharWidth[c];
+			//			else if (FMLClientHandler.instance().hasOptifine())
+			//				return optifineCharWidth[c];
 			else
 				return mcCharWidth[pos];
 		}
