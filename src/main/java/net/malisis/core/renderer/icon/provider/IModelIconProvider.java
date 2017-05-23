@@ -54,7 +54,7 @@ public interface IModelIconProvider extends IIconProvider
 		return null;
 	}
 
-	public Icon getIcon(MalisisRenderer<TileEntity> renderer, String shapeName);
+	public Icon getIcon(MalisisRenderer<? extends TileEntity> renderer, String shapeName);
 
 	public static class ModelIconProvider implements IModelIconProvider
 	{
@@ -68,7 +68,7 @@ public interface IModelIconProvider extends IIconProvider
 		}
 
 		@Override
-		public Icon getIcon(MalisisRenderer<TileEntity> renderer, String shapeName)
+		public Icon getIcon(MalisisRenderer<? extends TileEntity> renderer, String shapeName)
 		{
 			return icons.getOrDefault(shapeName, icon);
 		}

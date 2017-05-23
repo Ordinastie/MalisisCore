@@ -48,7 +48,7 @@ public class SlopeShapeComponent extends ShapeComponent
 	}
 
 	@Override
-	public void render(Block block, MalisisRenderer<TileEntity> renderer)
+	public void render(Block block, MalisisRenderer<? extends TileEntity> renderer)
 	{
 		boolean down = SlopeComponent.isDown(renderer.getBlockState());
 		shape = down ? downSlope : slope;

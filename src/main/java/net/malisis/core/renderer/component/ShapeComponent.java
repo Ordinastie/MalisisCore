@@ -48,7 +48,7 @@ public class ShapeComponent implements IRenderComponent
 	}
 
 	@Override
-	public void render(Block block, MalisisRenderer<TileEntity> renderer)
+	public void render(Block block, MalisisRenderer<? extends TileEntity> renderer)
 	{
 		rp.interpolateUV.set(false);
 		shape.resetState();

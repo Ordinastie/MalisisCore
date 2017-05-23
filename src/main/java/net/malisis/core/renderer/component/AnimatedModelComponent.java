@@ -265,7 +265,7 @@ public class AnimatedModelComponent extends ModelComponent
 	 * Only called for BLOCK and ITEM render type
 	 */
 	@Override
-	public void render(Block block, MalisisRenderer<TileEntity> renderer)
+	public void render(Block block, MalisisRenderer<? extends TileEntity> renderer)
 	{
 		if (renderer.getRenderType() == RenderType.BLOCK && animatedShapes.size() != 0)
 			onRender(renderer.getWorldAccess(), renderer.getPos(), renderer.getBlockState());

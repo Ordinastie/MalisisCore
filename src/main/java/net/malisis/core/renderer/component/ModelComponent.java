@@ -115,11 +115,11 @@ public class ModelComponent implements IRenderComponent
 	}
 
 	@Override
-	public void render(Block block, MalisisRenderer<TileEntity> renderer)
+	public void render(Block block, MalisisRenderer<? extends TileEntity> renderer)
 	{
 		loadModel();
 		model.resetState();
-		if (renderer.getRenderType() == RenderType.BLOCK)
+		if (renderer.getRenderType() != RenderType.ITEM)
 			model.rotate(DirectionalComponent.getDirection(renderer.getBlockState()));
 
 		for (String name : model.getShapeNames())
@@ -148,6 +148,6 @@ public class ModelComponent implements IRenderComponent
 		 * @param shapeName the shape name
 		 * @return true, if is visible
 		 */
-		public boolean isVisible(MalisisRenderer<TileEntity> renderer, String shapeName);
+		public boolean isVisible(MalisisRenderer<? extends TileEntity> renderer, String shapeName);
 	}
 }

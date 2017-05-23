@@ -51,7 +51,7 @@ public class SlopedCornerShapeComponent extends ShapeComponent
 	}
 
 	@Override
-	public void render(Block block, MalisisRenderer<TileEntity> renderer)
+	public void render(Block block, MalisisRenderer<? extends TileEntity> renderer)
 	{
 		boolean inverted = SlopedCornerComponent.isInverted(renderer.getBlockState());
 		boolean isDown = SlopedCornerComponent.isDown(renderer.getBlockState());

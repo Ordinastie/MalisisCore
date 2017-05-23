@@ -40,5 +40,5 @@ public interface IRenderComponent extends IComponent
 		return true;
 	}
 
-	public void render(Block block, MalisisRenderer<TileEntity> renderer);
+	public void render(Block block, MalisisRenderer<? extends TileEntity> renderer);
 }
