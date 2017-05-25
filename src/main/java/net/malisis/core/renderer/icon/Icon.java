@@ -30,6 +30,10 @@ import java.util.Set;
 
 import com.google.common.collect.Maps;
 
+import net.malisis.core.registry.AutoLoad;
+import net.malisis.core.registry.MalisisRegistry;
+import net.malisis.core.util.callback.CallbackResult;
+import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -47,10 +51,18 @@ import net.minecraftforge.client.event.TextureStitchEvent;
  * @author Ordinastie
  *
  */
+@AutoLoad
 public class Icon extends TextureAtlasSprite
 {
 	/** Map of all registered {@link Icon}. These icons will be stitched with the {@link TextureStitchEvent}. */
 	protected final static Map<String, Icon> registeredIcons = Maps.newHashMap();
+	/** Map of all registered {@link VanillaIcon}. These icons will be updated after the {@link TextureStitchEvent}. */
+	protected final static Map<String, VanillaIcon> vanillaIcons = Maps.newHashMap();
+
+	static
+	{
+		MalisisRegistry.onTextureStitched(Icon::registerIcons, CallbackOption.of());
+	}
 
 	/** {@link Icon} version of the missing texture **/
 	public static Icon missing = new ProxyIcon("MISSINGNO")
@@ -420,9 +432,10 @@ public class Icon extends TextureAtlasSprite
 	 *
 	 * @param map the map
 	 */
-	public static void registerIcons(TextureMap map)
+	public static CallbackResult<Void> registerIcons(TextureMap map)
 	{
 		registeredIcons.values().forEach(icon -> icon.register(map));
+		return CallbackResult.noResult();
 	}
 
 	/**
@@ -465,7 +478,13 @@ public class Icon extends TextureAtlasSprite
 	 */
 	public static Icon from(IBlockState state)
 	{
-		return new VanillaIcon(state);
+		String name = state.getBlock().getRegistryName().toString();
+		if (vanillaIcons.get(name) != null)
+			return vanillaIcons.get(name);
+
+		VanillaIcon icon = new VanillaIcon(state);
+		vanillaIcons.put(name, icon);
+		return icon;
 	}
 
 	/**
@@ -476,7 +495,7 @@ public class Icon extends TextureAtlasSprite
 	 */
 	public static Icon from(Item item)
 	{
-		return new VanillaIcon(item);
+		return from(item, 0);
 	}
 
 	/**
@@ -487,7 +506,13 @@ public class Icon extends TextureAtlasSprite
 	 */
 	public static Icon from(Item item, int metadata)
 	{
-		return new VanillaIcon(item, metadata);
+		String name = item.getRegistryName().toString();
+		if (vanillaIcons.get(name) != null)
+			return vanillaIcons.get(name);
+
+		VanillaIcon icon = new VanillaIcon(item, metadata);
+		vanillaIcons.put(name, icon);
+		return icon;
 	}
 
 	/**

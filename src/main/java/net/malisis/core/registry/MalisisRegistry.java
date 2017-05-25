@@ -26,6 +26,11 @@ package net.malisis.core.registry;
 
 import static com.google.common.base.Preconditions.*;
 import static net.malisis.core.registry.Registries.*;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.collect.ImmutableMap;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IRegisterable;
 import net.malisis.core.registry.ClientRegistry.BlockRendererOverride;
@@ -35,6 +40,8 @@ import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallback;
 import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallbackPredicate;
 import net.malisis.core.registry.SetBlockCallbackRegistry.ISetBlockCallback;
 import net.malisis.core.registry.SetBlockCallbackRegistry.ISetBlockCallbackPredicate;
+import net.malisis.core.registry.TextureStitchedRegistry.ITextureStitchedCallback;
+import net.malisis.core.registry.TextureStitchedRegistry.ITextureStitchedCallbackPredicate;
 import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
 import net.malisis.core.renderer.IItemRenderer.DummyModel;
@@ -55,10 +62,6 @@ import net.minecraftforge.fml.common.registry.GameData;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.ImmutableMap;
 
 /**
  * @author Ordinastie
@@ -151,6 +154,11 @@ public class MalisisRegistry
 			if (MalisisCore.isClient())
 				registerDummyModel(item, res);
 		}
+	}
+
+	public static void onTextureStitched(ITextureStitchedCallback callback, CallbackOption<ITextureStitchedCallbackPredicate> option)
+	{
+		textureStitchedRegtistry.registerCallback(callback, option);
 	}
 
 	/**

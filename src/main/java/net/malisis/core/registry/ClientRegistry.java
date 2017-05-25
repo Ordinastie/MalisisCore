@@ -133,14 +133,14 @@ public class ClientRegistry
 	}
 
 	/**
-	 * Stitches all the registered {@link Icon Icons}.
+	 * Processes all callbacks registered for the event.
 	 *
 	 * @param event the event
 	 */
 	@SubscribeEvent
 	public void onTextureStitchEvent(TextureStitchEvent.Pre event)
 	{
-		Icon.registerIcons(event.getMap());
+		Registries.processTextureStitchEvent(event.getMap());
 	}
 
 	/**

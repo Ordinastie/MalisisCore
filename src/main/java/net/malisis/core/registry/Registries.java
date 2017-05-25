@@ -32,6 +32,7 @@ import net.malisis.core.block.IRegisterComponent;
 import net.malisis.core.registry.ModEventRegistry.IFMLEventCallback;
 import net.malisis.core.registry.RenderBlockRegistry.IRenderBlockCallback;
 import net.malisis.core.registry.SetBlockCallbackRegistry.ISetBlockCallback;
+import net.malisis.core.registry.TextureStitchedRegistry.ITextureStitchedCallback;
 import net.malisis.core.renderer.IItemRenderer;
 import net.malisis.core.util.callback.CallbackResult;
 import net.minecraft.block.Block;
@@ -41,6 +42,7 @@ import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -62,6 +64,8 @@ public class Registries
 	static ModEventRegistry modEventRegistry = new ModEventRegistry();
 	/** The {@link RenderBlockRegistry} instance. */
 	static RenderBlockRegistry renderBlockRegistry = new RenderBlockRegistry();
+	/** The {@link TextureStitchedRegistry} instance. */
+	static TextureStitchedRegistry textureStitchedRegtistry = new TextureStitchedRegistry();
 
 	static SetBlockCallbackRegistry preSetBlockRegistry = new SetBlockCallbackRegistry();
 	static SetBlockCallbackRegistry postSetBlockRegistry = new SetBlockCallbackRegistry();
@@ -70,10 +74,10 @@ public class Registries
 	{
 		//Calls IRegisterComponent.register for all the IBlockComponent that implement the interface.
 		//Fired in FMLInitializationEvent, so all the blocks should already be registered
-		MalisisRegistry.onInit(event -> StreamSupport.stream(Block.REGISTRY.spliterator(), false)
+		MalisisRegistry.onInit(event -> StreamSupport	.stream(Block.REGISTRY.spliterator(), false)
 														.filter(IComponentProvider.class::isInstance)
 														.map(IComponentProvider.class::cast)
-														.forEach(p -> p.getComponents()
+														.forEach(p -> p	.getComponents()
 																		.stream()
 																		.filter(IRegisterComponent.class::isInstance)
 																		.map(IRegisterComponent.class::cast)
@@ -90,6 +94,16 @@ public class Registries
 	public static void processFMLStateEvent(FMLStateEvent event)
 	{
 		modEventRegistry.processCallbacks(event);
+	}
+
+	/**
+	 * Processes {@link ITextureStitchedCallback} registered.
+	 *
+	 * @param map the map
+	 */
+	public static void processTextureStitchEvent(TextureMap map)
+	{
+		textureStitchedRegtistry.processCallbacks(map);
 	}
 
 	/**

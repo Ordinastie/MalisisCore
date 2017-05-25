@@ -24,6 +24,7 @@
 
 package net.malisis.core.renderer.icon;
 
+import net.malisis.core.MalisisCore;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -46,16 +47,15 @@ public class VanillaIcon extends ProxyIcon
 		super(name);
 	}
 
-	VanillaIcon(Block block)
-	{
-		super(block.getRegistryName().toString());
-		this.blockState = block.getDefaultState();
-	}
-
 	VanillaIcon(IBlockState blockState)
 	{
 		super(blockState.getBlock().getRegistryName().toString());
 		this.blockState = blockState;
+	}
+
+	VanillaIcon(Block block)
+	{
+		this(block.getDefaultState());
 	}
 
 	VanillaIcon(Item item, int metadata)
@@ -82,8 +82,12 @@ public class VanillaIcon extends ProxyIcon
 	@Override
 	public void register(TextureMap map)
 	{
-		if (getIconName() == null) //if blockState or item, resolve when needed
+		setProxy(null);
+		if (blockState != null && item != null) //if blockState or item, resolve when needed (should never happen)
+		{
+			MalisisCore.log.error("[VanillaIcon] Tried to register an icon set for {}.", getIconName());
 			return;
+		}
 
 		TextureAtlasSprite icon = map.getAtlasSprite(getIconName());
 		if (icon == map.getMissingSprite()) //the models using it were overwritten by a resourcepack and don't use it anymore, so we have to register a new icon.
@@ -91,17 +95,21 @@ public class VanillaIcon extends ProxyIcon
 			icon = new Icon(getIconName());
 			map.setTextureEntry(icon);
 		}
-
-		setProxy(icon);
+		//MalisisCore.log.warn("Registering " + getIconName() + " to " + icon);
+		//setProxy(icon);
 	}
 
-	private void resolveIcon(TextureMap map)
+	public void resolveIcon(TextureMap map)
 	{
 		TextureAtlasSprite icon = null;
 		if (item != null)
 			icon = getItemIcon();
 		else if (blockState != null)
 			icon = getBlockIcon();
+		else
+			icon = map.getAtlasSprite(getIconName());
+
+		//	MalisisCore.log.warn("Resolved " + getIconName() + " to " + icon);
 		if (icon != null)
 			setProxy(icon);
 	}
