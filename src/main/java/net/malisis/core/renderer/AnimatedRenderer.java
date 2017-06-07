@@ -27,7 +27,9 @@ package net.malisis.core.renderer;
 import java.util.Map;
 import java.util.Optional;
 
-import net.malisis.core.block.IComponent;
+import com.google.common.collect.Maps;
+
+import net.malisis.core.MalisisCore;
 import net.malisis.core.registry.MalisisRegistry;
 import net.malisis.core.renderer.component.AnimatedModelComponent;
 import net.malisis.core.util.BlockPosUtils;
@@ -46,9 +48,8 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
-import com.google.common.collect.Maps;
 
 /**
  * @author Ordinastie
@@ -97,7 +98,7 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 		//camera.setPosition(viewOffset.x, viewOffset.y, viewOffset.z);
 
 		renderType = RenderType.ANIMATED;
-		animatedRenderables.values()
+		animatedRenderables	.values()
 							.stream()
 							.filter(r -> r.inFrustrum(camera))
 							.sorted((r1, r2) -> -BlockPosUtils.compare(viewOffset, r1.getPos(), r2.getPos()))
@@ -127,8 +128,14 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 	@SubscribeEvent
 	public void onChunkUnload(ChunkEvent.Unload event)
 	{
-		animatedRenderables.keySet().removeIf(p -> (p.getX() >> 4) == event.getChunk().xPosition
-				&& (p.getZ() >> 4) == event.getChunk().zPosition);
+		animatedRenderables	.keySet()
+							.removeIf(p -> (p.getX() >> 4) == event.getChunk().xPosition && (p.getZ() >> 4) == event.getChunk().zPosition);
+	}
+
+	@SubscribeEvent
+	public void onWorldUnload(WorldEvent.Unload event)
+	{
+		animatedRenderables.clear();
 	}
 
 	/**
@@ -146,10 +153,7 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 		if (oldState.getBlock() == newState.getBlock()) //same block, so same components
 			return CallbackResult.noResult();
 
-		//TODO: make IRenderableProvider ?
-		AnimatedModelComponent comp = IComponent.getComponent(AnimatedModelComponent.class, oldState.getBlock());
-		if (comp != null)
-			animatedRenderables.remove(pos);
+		animatedRenderables.remove(pos);
 
 		return CallbackResult.noResult();
 	}
@@ -175,6 +179,9 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 	{
 		IAnimatedRenderable r = animatedRenderables.get(pos);
 		if (r == null)
+		{
+			MalisisCore.message("Registered : " + pos);
 			animatedRenderables.put(pos, amc.createRenderable(world, pos));
+		}
 	}
 }
