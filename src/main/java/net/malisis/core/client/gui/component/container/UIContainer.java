@@ -367,10 +367,10 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 				component = c;
 		}
 
-		if (component instanceof IClipable && ((IClipable) component).shouldClipContent())
-			return component;
+		//		if (component instanceof IClipable && ((IClipable) component).shouldClipContent())
+		//			return component;
 
-		if (clipContent && !getClipArea().isInside(x, y))
+		if (shouldClipContent() && !getClipArea().isInside(x, y))
 			return null;
 
 		return component;
