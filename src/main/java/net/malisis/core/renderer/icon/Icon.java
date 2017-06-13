@@ -41,6 +41,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Extension of {@link TextureAtlasSprite} to allow common operations like clipping and offset.<br>
@@ -52,6 +54,7 @@ import net.minecraftforge.client.event.TextureStitchEvent;
  *
  */
 @AutoLoad
+@SideOnly(Side.CLIENT) //for @Autoload
 public class Icon extends TextureAtlasSprite
 {
 	/** Map of all registered {@link Icon}. These icons will be stitched with the {@link TextureStitchEvent}. */
