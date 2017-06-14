@@ -26,7 +26,6 @@ package net.malisis.core.asm;
 
 import java.util.Map;
 
-import net.malisis.javacompat.JavaCompatibility;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
@@ -38,8 +37,6 @@ public class MalisisCorePlugin implements IFMLLoadingPlugin
 	@Override
 	public String[] getASMTransformerClass()
 	{
-		JavaCompatibility.checkVersion();
-
 		return new String[] {	"net.malisis.core.util.chunkcollision.ChunkCollisionTransformer",
 								"net.malisis.core.util.chunkblock.ChunkBlockTransformer",
 								"net.malisis.core.renderer.transformer.MalisisRendererTransformer",

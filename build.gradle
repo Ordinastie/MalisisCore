@@ -35,9 +35,6 @@ repositories {
 	}
 }
 
-// Project dependencies
-dependencies {
-}
 
 // Gradle default tasks
 defaultTasks 'build', 'install'
@@ -132,28 +129,6 @@ task deobfJar(type: Jar) {
 	from sourceSets.main.output
 	classifier = 'dev'
 }
-
-task compilePlugin(type : JavaCompile) {
- 	source = fileTree(dir: "src/main/java")
-    classpath = sourceSets.main.compileClasspath
-    destinationDir = sourceSets.main.output.classesDir
-    include 'net/malisis/core/asm/MalisisCorePlugin*'
-    include 'net/malisis/core/asm/MalisisCoreAccessTransformer*'
-    include 'net/malisis/javacompat/JavaCompatibility*'
-    sourceCompatibility = 1.6
-    targetCompatibility = 1.6
-}
-
-compileJava {
-	exclude 'net/malisis/core/asm/MalisisCorePlugin*'
-	exclude 'net/malisis/core/asm/MalisisCoreAccessTransformer*'
-    exclude 'net/malisis/javacompat/JavaCompatibility*'
-
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}
-
-tasks.compileJava.dependsOn('compilePlugin')
 
 
 makeStart {
