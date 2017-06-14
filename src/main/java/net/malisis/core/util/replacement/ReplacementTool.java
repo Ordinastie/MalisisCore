@@ -37,7 +37,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.IntIdentityHashBiMap;
 import net.minecraft.util.ResourceLocation;
@@ -126,7 +125,7 @@ public class ReplacementTool
 			else
 				originalItems.put((Item) replacement, (Item) vanilla);
 
-			replaceIn(CraftingManager.getInstance().getRecipeList(), vanilla, replacement);
+			//replaceIn(CraftingManager.getInstance().getRecipeList(), vanilla, replacement);
 			replaceIn(StatList.ALL_STATS, vanilla, replacement);
 
 			//ReplacementTool.doubleCheck(registry, replacement, vanilla);

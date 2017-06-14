@@ -27,6 +27,8 @@ package net.malisis.core.block.component;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
+
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IComponent;
@@ -45,8 +47,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-
-import com.google.common.collect.Lists;
 
 /**
  * A WallComponent when applied to a {@link MalisisBlock} makes it behave like walls.<br>

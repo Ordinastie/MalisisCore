@@ -25,7 +25,6 @@
 package net.malisis.core.asm;
 
 import static org.objectweb.asm.Opcodes.*;
-import net.malisis.core.asm.mappings.McpMethodMapping;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -34,6 +33,8 @@ import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
+
+import net.malisis.core.asm.mappings.McpMethodMapping;
 
 public class MalisisCoreTransformer extends MalisisClassTransformer
 {

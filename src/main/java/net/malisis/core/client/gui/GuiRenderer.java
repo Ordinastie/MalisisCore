@@ -24,7 +24,7 @@
 
 package net.malisis.core.client.gui;
 
-import org.apache.logging.log4j.core.helpers.Strings;
+import org.apache.logging.log4j.util.Strings;
 import org.lwjgl.opengl.GL11;
 
 import net.malisis.core.client.gui.component.UIComponent;

@@ -223,7 +223,7 @@ public class EntityUtils
 	 */
 	public static List<EntityPlayerMP> getPlayersWatchingChunk(Chunk chunk)
 	{
-		return getPlayersWatchingChunk((WorldServer) chunk.getWorld(), chunk.xPosition, chunk.zPosition);
+		return getPlayersWatchingChunk((WorldServer) chunk.getWorld(), chunk.x, chunk.z);
 	}
 
 	/**

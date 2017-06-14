@@ -26,6 +26,10 @@ package net.malisis.core.util.bbcode.gui;
 
 import java.util.EnumSet;
 
+import org.lwjgl.input.Keyboard;
+
+import com.google.common.eventbus.Subscribe;
+
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.MalisisGui;
@@ -39,10 +43,6 @@ import net.malisis.core.util.bbcode.node.BBNode;
 import net.malisis.core.util.bbcode.node.BBShadowNode;
 import net.malisis.core.util.bbcode.node.BBStyleNode;
 import net.minecraft.client.gui.GuiScreen;
-
-import org.lwjgl.input.Keyboard;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie

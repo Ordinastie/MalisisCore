@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.component.control;
 
+import com.google.common.eventbus.Subscribe;
+
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
@@ -33,8 +35,6 @@ import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredState
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.AlphaTransform;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie

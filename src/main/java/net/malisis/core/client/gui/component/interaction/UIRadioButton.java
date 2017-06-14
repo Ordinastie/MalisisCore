@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.lwjgl.opengl.GL11;
+
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
@@ -38,9 +41,6 @@ import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
-
-import org.apache.commons.lang3.StringUtils;
-import org.lwjgl.opengl.GL11;
 
 /**
  * @author Ordinastie

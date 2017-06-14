@@ -24,6 +24,8 @@
 
 package net.malisis.core.util.raytrace;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import net.malisis.core.block.IBoundingBox;
 import net.malisis.core.util.AABBUtils;
 import net.malisis.core.util.Point;
@@ -36,8 +38,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * RayTrace class that offers more control to handle raytracing.

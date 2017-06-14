@@ -128,8 +128,7 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 	@SubscribeEvent
 	public void onChunkUnload(ChunkEvent.Unload event)
 	{
-		animatedRenderables	.keySet()
-							.removeIf(p -> (p.getX() >> 4) == event.getChunk().xPosition && (p.getZ() >> 4) == event.getChunk().zPosition);
+		animatedRenderables.keySet().removeIf(p -> (p.getX() >> 4) == event.getChunk().x && (p.getZ() >> 4) == event.getChunk().z);
 	}
 
 	@SubscribeEvent

@@ -27,6 +27,11 @@ package net.malisis.core.client.gui.component;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
+
+import com.google.common.eventbus.EventBus;
+
 import net.malisis.core.ExceptionHandler;
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
@@ -53,11 +58,6 @@ import net.malisis.core.renderer.icon.provider.IGuiIconProvider;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.renderer.GlStateManager;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-
-import com.google.common.eventbus.EventBus;
 
 /**
  * {@link UIComponent} is the base of everything drawn onto a GUI.<br>

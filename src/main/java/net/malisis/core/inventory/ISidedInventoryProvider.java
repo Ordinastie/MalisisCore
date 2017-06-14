@@ -24,6 +24,8 @@
 
 package net.malisis.core.inventory;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import net.malisis.core.inventory.IInventoryProvider.IDirectInventoryProvider;
 import net.malisis.core.util.EnumFacingUtils;
 import net.malisis.core.util.ItemUtils;
@@ -32,8 +34,6 @@ import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * @author Ordinastie

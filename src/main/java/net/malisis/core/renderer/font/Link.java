@@ -27,12 +27,12 @@ package net.malisis.core.renderer.font;
 import java.awt.Desktop;
 import java.net.URI;
 
+import org.apache.commons.lang3.StringUtils;
+
 import net.malisis.core.MalisisCore;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiConfirmOpenLink;
 import net.minecraft.client.gui.GuiYesNoCallback;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Ordinastie

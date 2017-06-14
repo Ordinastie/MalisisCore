@@ -24,12 +24,12 @@
 
 package net.malisis.core;
 
-import net.malisis.core.client.gui.event.ComponentEvent;
-
 import org.apache.logging.log4j.Level;
 
 import com.google.common.eventbus.SubscriberExceptionContext;
 import com.google.common.eventbus.SubscriberExceptionHandler;
+
+import net.malisis.core.client.gui.event.ComponentEvent;
 
 /**
  * This Class handles the exceptions thrown from inside {@link ComponentEvent}.

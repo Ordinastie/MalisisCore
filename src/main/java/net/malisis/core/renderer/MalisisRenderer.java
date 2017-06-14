@@ -60,11 +60,11 @@ import net.malisis.core.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
@@ -101,7 +101,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRenderer<T> implements IBlockRenderer, IRenderWorldLast
 {
 	/** Batched buffer reference. */
-	protected static final VertexBuffer batchedBuffer = ((Tessellator) Silenced.get(() -> AsmUtils	.changeFieldAccess(	TileEntityRendererDispatcher.class,
+	protected static final BufferBuilder batchedBuffer = ((Tessellator) Silenced.get(() -> AsmUtils	.changeFieldAccess(	TileEntityRendererDispatcher.class,
 																														"batchBuffer")
 																									.get(TileEntityRendererDispatcher.instance))).getBuffer();
 
@@ -120,7 +120,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	/** Whether this {@link MalisisRenderer} initialized. (initialize() already called) */
 	private boolean initialized = false;
 	/** Currently used buffer. */
-	protected VertexBuffer buffer = null;
+	protected BufferBuilder buffer = null;
 	/** Current used vertex format. */
 	protected VertexFormat vertexFormat = malisisVertexFormat;
 	/** Current world reference (BLOCK/TESR/IRWL). */
@@ -361,7 +361,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 	//#region IBlockRenderer
 	@Override
-	public synchronized boolean renderBlock(VertexBuffer wr, IBlockAccess world, BlockPos pos, IBlockState state)
+	public synchronized boolean renderBlock(BufferBuilder wr, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		this.buffer = wr;
 		set(world, state.getBlock(), pos, state);
@@ -430,7 +430,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 * @param partialTick the partial tick
 	 */
 	@Override
-	public synchronized void renderTileEntityAt(T te, double x, double y, double z, float partialTick, int destroyStage)
+	public synchronized void renderTileEntityAt(T te, double x, double y, double z, float partialTick, int destroyStage, float f)
 	{
 		if (te.getWorld().getBlockState(te.getPos()).getBlock() == Blocks.AIR)
 			return;
@@ -1215,7 +1215,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		}
 
 		if (renderType == RenderType.ITEM)
-			return Utils.getClientPlayer().getBrightnessForRender(getPartialTick());
+			return Utils.getClientPlayer().getBrightnessForRender();
 
 		//not in world
 		if (world == null || block == null)
@@ -1356,7 +1356,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 	public static float getPartialTick()
 	{
-		return Minecraft.getMinecraft().timer.elapsedPartialTicks;
+		return Minecraft.getMinecraft().func_193989_ak();
 	}
 
 	/**

@@ -24,9 +24,9 @@
 
 package net.malisis.core.asm.mappings;
 
-import net.minecraft.launchwrapper.Launch;
-
 import org.objectweb.asm.tree.AbstractInsnNode;
+
+import net.minecraft.launchwrapper.Launch;
 
 public abstract class McpMapping<T extends AbstractInsnNode>
 {

@@ -28,8 +28,9 @@ import java.lang.reflect.Field;
 
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.registry.AutoLoad;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipes;
+import net.minecraft.util.NonNullList;
 
 /**
  * @author Ordinastie
@@ -59,12 +60,12 @@ public class ShapedRecipesHandler extends ReplacementHandler<ShapedRecipes>
 				replaced = true;
 			}
 
-			ItemStack[] input = recipe.recipeItems;
-			for (int i = 0; i < input.length; i++)
+			NonNullList<Ingredient> input = recipe.recipeItems;
+			for (int i = 0; i < input.size(); i++)
 			{
-				if (isMatched(input[i], vanilla))
+				if (isMatched(input.get(i), vanilla))
 				{
-					input[i] = getItemStack(replacement, input[i]);
+					input.set(i, getItemStack(replacement, input.get(i)));
 					replaced = true;
 				}
 			}

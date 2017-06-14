@@ -1,10 +1,10 @@
 package net.malisis.core.client.gui.component.interaction;
 
+import org.lwjgl.input.Keyboard;
+
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.minecraft.client.gui.GuiScreen;
-
-import org.lwjgl.input.Keyboard;
 
 /**
  * The Class UIPasswordField.

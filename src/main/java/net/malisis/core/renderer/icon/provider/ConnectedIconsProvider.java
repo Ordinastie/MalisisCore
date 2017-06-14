@@ -25,6 +25,7 @@
 package net.malisis.core.renderer.icon.provider;
 
 import static net.minecraft.util.EnumFacing.*;
+
 import net.malisis.core.renderer.icon.Icon;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;

@@ -25,6 +25,7 @@
 package net.malisis.core.renderer.element.face;
 
 import static net.minecraft.util.EnumFacing.*;
+
 import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.vertex.BottomSouthEast;
 import net.malisis.core.renderer.element.vertex.BottomSouthWest;

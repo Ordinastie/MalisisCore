@@ -56,8 +56,8 @@ import net.malisis.core.renderer.element.Face;
 import net.malisis.core.renderer.element.Shape;
 import net.malisis.core.renderer.element.face.SouthFace;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
@@ -292,7 +292,7 @@ public class MalisisFont
 		if (Character.isWhitespace(cd.getChar()))
 			return;
 
-		VertexBuffer buffer = Tessellator.getInstance().getBuffer();
+		BufferBuilder buffer = Tessellator.getInstance().getBuffer();
 		float factor = options.getFontScale() / fontGeneratorOptions.fontSize * 9;
 		float w = cd.getFullWidth(fontGeneratorOptions) * factor;
 		float h = cd.getFullHeight(fontGeneratorOptions) * factor;
@@ -359,7 +359,7 @@ public class MalisisFont
 
 	protected void drawLineChar(CharData cd, float offsetX, float offsetY, FontOptions options)
 	{
-		VertexBuffer buffer = Tessellator.getInstance().getBuffer();
+		BufferBuilder buffer = Tessellator.getInstance().getBuffer();
 		float factor = options.getFontScale() / fontGeneratorOptions.fontSize * 9;
 		float w = cd.getFullWidth(fontGeneratorOptions) * factor;
 		float h = cd.getFullHeight(fontGeneratorOptions) / 9F * factor;

@@ -27,11 +27,11 @@ package net.malisis.core.asm;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import net.malisis.core.asm.mappings.McpMethodMapping;
-
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodNode;
+
+import net.malisis.core.asm.mappings.McpMethodMapping;
 
 public class AsmHook
 {

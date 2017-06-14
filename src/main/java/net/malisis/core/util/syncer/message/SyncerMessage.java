@@ -24,12 +24,11 @@
 
 package net.malisis.core.util.syncer.message;
 
-import io.netty.buffer.ByteBuf;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.network.IMalisisMessageHandler;

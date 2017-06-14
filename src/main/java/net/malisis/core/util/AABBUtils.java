@@ -24,6 +24,8 @@
 
 package net.malisis.core.util;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import net.malisis.core.block.IBoundingBox;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
@@ -32,8 +34,6 @@ import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * @author Ordinastie
@@ -236,8 +236,13 @@ public class AABBUtils
 	public static AxisAlignedBB readFromNBT(NBTTagCompound tag, String prefix)
 	{
 		prefix = prefix == null ? "" : prefix + ".";
-		return tag != null ? new AxisAlignedBB(tag.getDouble(prefix + "minX"), tag.getDouble(prefix + "minY"), tag.getDouble(prefix
-				+ "minZ"), tag.getDouble(prefix + "maxX"), tag.getDouble(prefix + "maxY"), tag.getDouble(prefix + "maxZ")) : null;
+		return tag != null	? new AxisAlignedBB(tag.getDouble(prefix + "minX"),
+												tag.getDouble(prefix + "minY"),
+												tag.getDouble(prefix + "minZ"),
+												tag.getDouble(prefix + "maxX"),
+												tag.getDouble(prefix + "maxY"),
+												tag.getDouble(prefix + "maxZ"))
+							: null;
 	}
 
 	/**
@@ -381,7 +386,7 @@ public class AABBUtils
 			if (aabb1 != null)
 			{
 				for (AxisAlignedBB aabb2 : aabbs2)
-					if (aabb2 != null && aabb1.intersectsWith(aabb2))
+					if (aabb2 != null && aabb1.intersects(aabb2))
 						return true;
 			}
 		}

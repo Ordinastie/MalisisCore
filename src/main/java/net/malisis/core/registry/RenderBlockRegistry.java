@@ -31,7 +31,7 @@ import net.malisis.core.util.callback.CallbackResult;
 import net.malisis.core.util.callback.ICallback;
 import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
@@ -49,10 +49,10 @@ public class RenderBlockRegistry extends CallbackRegistry<IRenderBlockCallback, 
 		@Override
 		public default CallbackResult<Boolean> call(Object... params)
 		{
-			return callback((VertexBuffer) params[0], (IBlockAccess) params[1], (BlockPos) params[2], (IBlockState) params[3]);
+			return callback((BufferBuilder) params[0], (IBlockAccess) params[1], (BlockPos) params[2], (IBlockState) params[3]);
 		}
 
-		public CallbackResult<Boolean> callback(VertexBuffer buffer, IBlockAccess world, BlockPos pos, IBlockState state);
+		public CallbackResult<Boolean> callback(BufferBuilder buffer, IBlockAccess world, BlockPos pos, IBlockState state);
 	}
 
 	/**
@@ -63,9 +63,9 @@ public class RenderBlockRegistry extends CallbackRegistry<IRenderBlockCallback, 
 		@Override
 		public default boolean apply(Object... params)
 		{
-			return apply((VertexBuffer) params[0], (IBlockAccess) params[1], (BlockPos) params[2], (IBlockState) params[3]);
+			return apply((BufferBuilder) params[0], (IBlockAccess) params[1], (BlockPos) params[2], (IBlockState) params[3]);
 		}
 
-		public boolean apply(VertexBuffer buffer, IBlockAccess world, BlockPos pos, IBlockState state);
+		public boolean apply(BufferBuilder buffer, IBlockAccess world, BlockPos pos, IBlockState state);
 	}
 }

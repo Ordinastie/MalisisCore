@@ -25,7 +25,7 @@
 package net.malisis.core.renderer;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
@@ -35,5 +35,5 @@ import net.minecraft.world.IBlockAccess;
  */
 public interface IBlockRenderer extends IItemRenderer
 {
-	public boolean renderBlock(VertexBuffer buffer, IBlockAccess world, BlockPos pos, IBlockState state);
+	public boolean renderBlock(BufferBuilder buffer, IBlockAccess world, BlockPos pos, IBlockState state);
 }

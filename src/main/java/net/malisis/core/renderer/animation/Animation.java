@@ -24,11 +24,11 @@
 
 package net.malisis.core.renderer.animation;
 
+import com.google.common.base.Preconditions;
+
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.animation.transformation.Transformation;
 import net.malisis.core.util.Timer;
-
-import com.google.common.base.Preconditions;
 
 /**
  * The {@link Animation} class represent a element to animate ({@link ITransformable}) with its {@link Transformation}.

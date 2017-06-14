@@ -30,10 +30,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import net.malisis.core.renderer.animation.transformation.ITransformable;
-
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
+
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 
 /**
  * MergedVertex are holders of vertex that share the same position inside a shape. The position is determined by the vertexes base name when

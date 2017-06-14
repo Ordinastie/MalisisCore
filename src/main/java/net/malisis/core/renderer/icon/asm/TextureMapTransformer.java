@@ -25,13 +25,14 @@
 package net.malisis.core.renderer.icon.asm;
 
 import static org.objectweb.asm.Opcodes.*;
-import net.malisis.core.asm.AsmHook;
-import net.malisis.core.asm.MalisisClassTransformer;
-import net.malisis.core.asm.mappings.McpMethodMapping;
 
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.VarInsnNode;
+
+import net.malisis.core.asm.AsmHook;
+import net.malisis.core.asm.MalisisClassTransformer;
+import net.malisis.core.asm.mappings.McpMethodMapping;
 
 /**
  * @author Ordinastie

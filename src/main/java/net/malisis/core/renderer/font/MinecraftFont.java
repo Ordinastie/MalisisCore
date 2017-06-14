@@ -34,8 +34,8 @@ import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.FMLClientHandler;
 
@@ -159,7 +159,7 @@ public class MinecraftFont extends MalisisFont
 	@Override
 	protected void drawLineChar(CharData cd, float offsetX, float offsetY, FontOptions options)
 	{
-		VertexBuffer buffer = Tessellator.getInstance().getBuffer();
+		BufferBuilder buffer = Tessellator.getInstance().getBuffer();
 		float factor = options.getFontScale() / fontGeneratorOptions.fontSize * 9;
 		float w = cd.getFullWidth(fontGeneratorOptions) * factor;
 		float h = cd.getFullHeight(fontGeneratorOptions) / 9F * factor;

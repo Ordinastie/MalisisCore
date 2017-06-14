@@ -26,6 +26,8 @@ package net.malisis.core.block.component;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
@@ -38,8 +40,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-
-import com.google.common.collect.Lists;
 
 /**
  * @author Ordinastie

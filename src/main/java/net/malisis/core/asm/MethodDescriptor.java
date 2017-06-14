@@ -25,12 +25,13 @@
 package net.malisis.core.asm;
 
 import static net.malisis.core.util.parser.token.Token.*;
-import net.malisis.core.util.parser.Parser;
-import net.malisis.core.util.parser.token.Token;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
+
+import net.malisis.core.util.parser.Parser;
+import net.malisis.core.util.parser.token.Token;
 
 /**
  * @author Ordinastie

@@ -29,6 +29,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.eventbus.Subscribe;
+
 import net.malisis.core.IMalisisMod;
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.MalisisGui;
@@ -41,10 +45,6 @@ import net.malisis.core.client.gui.component.interaction.UIButton;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.configuration.setting.Setting;
 import net.malisis.core.renderer.font.FontOptions;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie

@@ -26,6 +26,8 @@ package net.malisis.core.util.raytrace;
 
 import java.util.HashMap;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.util.Point;
 import net.malisis.core.util.Ray;
@@ -36,8 +38,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * RayTrace class that offers more control to handle raytracing.

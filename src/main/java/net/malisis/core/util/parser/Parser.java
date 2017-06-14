@@ -29,9 +29,9 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import net.malisis.core.util.parser.token.Token;
-
 import org.apache.commons.lang3.mutable.Mutable;
+
+import net.malisis.core.util.parser.token.Token;
 
 /**
  * @author Ordinastie

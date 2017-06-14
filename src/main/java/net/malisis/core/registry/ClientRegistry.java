@@ -54,7 +54,7 @@ import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BlockModelShapes;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -255,7 +255,7 @@ public class ClientRegistry
 	 * @param state the state
 	 * @return true, if successful
 	 */
-	private CallbackResult<Boolean> renderBlock(VertexBuffer buffer, IBlockAccess world, BlockPos pos, IBlockState state)
+	private CallbackResult<Boolean> renderBlock(BufferBuilder buffer, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		IBlockRenderer renderer = getBlockRendererOverride(world, pos, state);
 		if (renderer == null)

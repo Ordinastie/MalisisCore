@@ -30,6 +30,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.malisis.core.renderer.RenderParameters;
@@ -41,13 +48,6 @@ import net.malisis.core.renderer.model.loader.ObjFileImporter;
 import net.malisis.core.renderer.model.loader.TextureModelLoader;
 import net.malisis.core.util.Timer;
 import net.minecraft.util.ResourceLocation;
-
-import com.google.common.base.Objects;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 
 /**
  * This class is a holder for multiple shapes.<br>
@@ -252,7 +252,7 @@ public class MalisisModel implements ITransformable.Translate, ITransformable.Ro
 	 */
 	public Collection<Animation<Shape>> getAnimation(String name)
 	{
-		return Objects.firstNonNull(animations.get(name), ImmutableList.<Animation<Shape>> of());
+		return MoreObjects.firstNonNull(animations.get(name), ImmutableList.<Animation<Shape>> of());
 	}
 
 	public Set<String> getAnimatedShapes()

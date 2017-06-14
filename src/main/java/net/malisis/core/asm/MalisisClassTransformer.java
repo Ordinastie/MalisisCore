@@ -26,9 +26,6 @@ package net.malisis.core.asm;
 
 import java.util.Collection;
 
-import net.minecraft.launchwrapper.IClassTransformer;
-import net.minecraft.launchwrapper.Launch;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
@@ -38,6 +35,9 @@ import org.objectweb.asm.tree.MethodNode;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+
+import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.Launch;
 
 public abstract class MalisisClassTransformer implements IClassTransformer
 {

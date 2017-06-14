@@ -26,11 +26,11 @@ package net.malisis.core.client.gui.component.mceditor;
 
 import java.util.Arrays;
 
+import com.google.common.base.Function;
+
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.interaction.UISelect;
 import net.minecraft.util.text.TextFormatting;
-
-import com.google.common.base.Function;
 
 /**
  * @author Ordinastie

@@ -24,6 +24,8 @@
 
 package net.malisis.core.configuration.setting;
 
+import com.google.common.base.Preconditions;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -32,8 +34,6 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import com.google.common.base.Preconditions;
 
 /**
  * The Class Setting.

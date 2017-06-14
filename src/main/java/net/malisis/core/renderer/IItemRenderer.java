@@ -28,6 +28,10 @@ import java.util.List;
 
 import javax.vecmath.Matrix4f;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.ImmutableList;
+
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.component.ItemTransformComponent;
 import net.malisis.core.registry.ClientRegistry;
@@ -44,10 +48,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
-
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * @author Ordinastie

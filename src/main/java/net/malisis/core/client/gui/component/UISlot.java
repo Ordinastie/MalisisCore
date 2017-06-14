@@ -45,6 +45,7 @@ import net.malisis.core.util.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
@@ -116,8 +117,10 @@ public class UISlot extends UIComponent<UISlot>
 			return;
 		}
 
-		List<String> lines = slot.getItemStack().getTooltip(Utils.getClientPlayer(),
-															Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
+		List<String> lines = slot	.getItemStack()
+									.getTooltip(Utils.getClientPlayer(),
+												Minecraft.getMinecraft().gameSettings.advancedItemTooltips	? ITooltipFlag.TooltipFlags.ADVANCED
+																											: ITooltipFlag.TooltipFlags.NORMAL);
 
 		lines.set(0, slot.getItemStack().getRarity().rarityColor + lines.get(0));
 		for (int i = 1; i < lines.size(); i++)

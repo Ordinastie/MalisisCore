@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.*;
 import java.util.Map;
 import java.util.Objects;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
@@ -329,7 +330,7 @@ public class IconProviderBuilder
 			case DEFAULT:
 				return (IIconProvider) () -> defaultIcon;
 			case SIDES:
-				return (ISidesIconProvider) side -> com.google.common.base.Objects.firstNonNull(sidesIcons.get(side), defaultIcon);
+				return (ISidesIconProvider) side -> MoreObjects.firstNonNull(sidesIcons.get(side), defaultIcon);
 			case STATE:
 				return getStateIconProvider();
 			case WALL:

@@ -35,9 +35,9 @@ import java.nio.charset.StandardCharsets;
 
 import javax.imageio.ImageIO;
 
-import net.malisis.core.MalisisCore;
-
 import org.apache.commons.io.FileUtils;
+
+import net.malisis.core.MalisisCore;
 
 /**
  * @author Ordinastie

@@ -40,7 +40,6 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -144,10 +143,10 @@ public class SlopedCornerComponent implements IBlockComponent
 	}
 
 	@Override
-	public void getSubBlocks(Block block, Item item, CreativeTabs tab, NonNullList<ItemStack> list)
+	public void getSubBlocks(Block block, CreativeTabs tab, NonNullList<ItemStack> list)
 	{
-		list.add(new ItemStack(item, 1, 0));
-		list.add(new ItemStack(item, 1, 4)); //inverted : use 4 as metadata so it maps to the right state with getStateFromMeta
+		list.add(new ItemStack(block, 1, 0));
+		list.add(new ItemStack(block, 1, 4)); //inverted : use 4 as metadata so it maps to the right state with getStateFromMeta
 	}
 
 	@Override

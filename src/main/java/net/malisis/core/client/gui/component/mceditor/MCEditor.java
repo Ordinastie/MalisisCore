@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.component.mceditor;
 
+import com.google.common.eventbus.Subscribe;
+
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
@@ -34,8 +36,6 @@ import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.minecraft.util.text.TextFormatting;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * @author Ordinastie

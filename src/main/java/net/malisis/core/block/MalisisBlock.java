@@ -398,31 +398,32 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	}
 
 	@Override
-	public void getSubBlocks(Item item, CreativeTabs tab, NonNullList<ItemStack> list)
+	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list)
 	{
 		NonNullList<ItemStack> l = NonNullList.<ItemStack> create();
 		for (IBlockComponent component : getBlockComponents())
-			component.getSubBlocks(this, item, tab, l);
+			component.getSubBlocks(this, tab, l);
 
 		//only add default itemStack if components don't add itemStacks
 		if (l.isEmpty())
-			super.getSubBlocks(item, tab, list);
+			super.getSubBlocks(tab, list);
 		else
 			list.addAll(l);
 	}
 
 	//COLORS
+
 	@Override
-	public MapColor getMapColor(IBlockState state)
+	public MapColor getMapColor(IBlockState state, IBlockAccess world, BlockPos pos)
 	{
 		for (IBlockComponent component : getBlockComponents())
 		{
-			MapColor color = component.getMapColor(this, state);
+			MapColor color = component.getMapColor(this, state, world, pos);
 			if (color != null)
 				return color;
 		}
 
-		return super.getMapColor(state);
+		return super.getMapColor(state, world, pos);
 	}
 
 	@Override

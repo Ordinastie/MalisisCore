@@ -279,12 +279,11 @@ public interface IBlockComponent extends IComponent
 	 * Fills the list with the sub-blocks associated with this {@link Block}.
 	 *
 	 * @param block the block
-	 * @param item the item
 	 * @param tab the tab
 	 * @param list the list
 	 */
 	@SideOnly(Side.CLIENT)
-	public default void getSubBlocks(Block block, Item item, CreativeTabs tab, NonNullList<ItemStack> list)
+	public default void getSubBlocks(Block block, CreativeTabs tab, NonNullList<ItemStack> list)
 	{}
 
 	//#end Sub-blocks
@@ -295,9 +294,11 @@ public interface IBlockComponent extends IComponent
 	 *
 	 * @param block the block
 	 * @param state the state
+	 * @param world TODO
+	 * @param pos TODO
 	 * @return the map color
 	 */
-	public default MapColor getMapColor(Block block, IBlockState state)
+	public default MapColor getMapColor(Block block, IBlockState state, IBlockAccess world, BlockPos pos)
 	{
 		return null;
 	}

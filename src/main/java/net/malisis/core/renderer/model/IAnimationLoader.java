@@ -26,10 +26,10 @@ package net.malisis.core.renderer.model;
 
 import java.util.Map;
 
+import com.google.common.collect.Multimap;
+
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.element.Shape;
-
-import com.google.common.collect.Multimap;
 
 /**
  * Interface for loading animations

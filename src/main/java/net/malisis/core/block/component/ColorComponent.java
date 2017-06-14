@@ -130,10 +130,10 @@ public class ColorComponent extends SubtypeComponent<EnumDyeColor> implements IR
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Block block, Item item, CreativeTabs tab, NonNullList<ItemStack> list)
+	public void getSubBlocks(Block block, CreativeTabs tab, NonNullList<ItemStack> list)
 	{
 		for (EnumDyeColor color : EnumDyeColor.values())
-			list.add(new ItemStack(item, 1, color.getMetadata()));
+			list.add(new ItemStack(block, 1, color.getMetadata()));
 	}
 
 	/**
@@ -161,9 +161,9 @@ public class ColorComponent extends SubtypeComponent<EnumDyeColor> implements IR
 	 * @return the map color
 	 */
 	@Override
-	public MapColor getMapColor(Block block, IBlockState state)
+	public MapColor getMapColor(Block block, IBlockState state, IBlockAccess world, BlockPos pos)
 	{
-		return state.getValue(getProperty()).getMapColor();
+		return MapColor.func_193558_a(state.getValue(getProperty()));
 	}
 
 	/**

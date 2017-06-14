@@ -100,9 +100,9 @@ public class Vector
 	 */
 	public Vector(Vec3d vec)
 	{
-		x = vec.xCoord;
-		y = vec.yCoord;
-		z = vec.zCoord;
+		x = vec.x;
+		y = vec.y;
+		z = vec.z;
 	}
 
 	/**

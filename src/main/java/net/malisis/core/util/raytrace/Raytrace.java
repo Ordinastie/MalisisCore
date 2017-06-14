@@ -27,6 +27,9 @@ package net.malisis.core.util.raytrace;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
 import net.malisis.core.util.Point;
 import net.malisis.core.util.Ray;
 import net.malisis.core.util.Vector;
@@ -34,9 +37,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @author Ordinastie

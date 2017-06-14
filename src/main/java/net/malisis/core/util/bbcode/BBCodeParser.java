@@ -25,16 +25,17 @@
 package net.malisis.core.util.bbcode;
 
 import static net.malisis.core.util.parser.token.Token.*;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
+
 import net.malisis.core.util.bbcode.node.BBColorNode;
 import net.malisis.core.util.bbcode.node.BBItemNode;
 import net.malisis.core.util.bbcode.node.BBNode;
 import net.malisis.core.util.bbcode.node.BBStyleNode;
 import net.malisis.core.util.bbcode.node.BBTextNode;
 import net.malisis.core.util.parser.Parser;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.mutable.Mutable;
-import org.apache.commons.lang3.mutable.MutableObject;
 
 /**
  * @author Ordinastie

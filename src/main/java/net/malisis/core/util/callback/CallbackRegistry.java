@@ -29,14 +29,14 @@ import static com.google.common.base.Preconditions.*;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import net.malisis.core.util.callback.ICallback.CallbackOption;
-import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
-import net.malisis.core.util.callback.ICallback.Priority;
-
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+
+import net.malisis.core.util.callback.ICallback.CallbackOption;
+import net.malisis.core.util.callback.ICallback.ICallbackPredicate;
+import net.malisis.core.util.callback.ICallback.Priority;
 
 /**
  * A {@link CallbackRegistry} allows the registration and processing of {@link ICallback ICallbacks}.<br>

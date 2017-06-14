@@ -28,15 +28,15 @@ import static net.malisis.core.util.parser.token.Token.*;
 
 import java.util.LinkedList;
 
-import net.malisis.core.util.parser.HTMLParser.HTMLNode;
-import net.malisis.core.util.parser.token.Token;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+
+import net.malisis.core.util.parser.HTMLParser.HTMLNode;
+import net.malisis.core.util.parser.token.Token;
 
 /**
  * @author Ordinastie

@@ -35,6 +35,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockPane;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
@@ -104,9 +105,9 @@ public class PaneComponent implements IBlockComponent, ISmartCull
 
 		List<AxisAlignedBB> list = Lists.newArrayList();
 		if (north || south)
-			list.add(base.addCoord(0, 0, north ? -f : 0).addCoord(0, 0, south ? f : 0));
+			list.add(base.expand(0, 0, north ? -f : 0).expand(0, 0, south ? f : 0));
 		if (east || west)
-			list.add(base.addCoord(west ? -f : 0, 0, 0).addCoord(east ? f : 0, 0, 0));
+			list.add(base.expand(west ? -f : 0, 0, 0).expand(east ? f : 0, 0, 0));
 
 		return list.toArray(new AxisAlignedBB[0]);
 	}
@@ -134,8 +135,9 @@ public class PaneComponent implements IBlockComponent, ISmartCull
 		BlockPos offset = pos.offset(dir);
 		IBlockState state = world.getBlockState(offset);
 		Block connected = state.getBlock();
-		return connected == block || canPaneConnectToBlock(state.getBlock(), state)
-				|| connected.isSideSolid(state, world, offset, dir.getOpposite());
+		BlockFaceShape shape = state.getBlockFaceShape(world, pos, dir);
+		return connected == block || canPaneConnectToBlock(state.getBlock(), state) || shape == BlockFaceShape.SOLID
+				|| shape == BlockFaceShape.MIDDLE_POLE_THIN;
 	}
 
 	public static boolean isConnected(IBlockState state, PropertyBool property)

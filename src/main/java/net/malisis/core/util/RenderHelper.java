@@ -25,6 +25,7 @@
 package net.malisis.core.util;
 
 import static org.lwjgl.opengl.GL20.*;
+
 import net.minecraft.util.ResourceLocation;
 
 /**

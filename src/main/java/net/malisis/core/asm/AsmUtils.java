@@ -34,8 +34,6 @@ import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.ListIterator;
 
-import net.malisis.core.MalisisCore;
-
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -50,6 +48,8 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.util.Printer;
 import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
+
+import net.malisis.core.MalisisCore;
 
 public class AsmUtils
 {

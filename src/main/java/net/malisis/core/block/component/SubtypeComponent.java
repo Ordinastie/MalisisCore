@@ -97,10 +97,10 @@ public class SubtypeComponent<T extends Enum<T> & IStringSerializable> implement
 	}
 
 	@Override
-	public void getSubBlocks(Block block, Item item, CreativeTabs tab, NonNullList<ItemStack> list)
+	public void getSubBlocks(Block block, CreativeTabs tab, NonNullList<ItemStack> list)
 	{
 		for (int i = 0; i < enumClass.getEnumConstants().length; i++)
-			list.add(new ItemStack(item, 1, i));
+			list.add(new ItemStack(block, 1, i));
 	}
 
 	@Override

@@ -27,11 +27,11 @@ package net.malisis.core.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  *

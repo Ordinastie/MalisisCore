@@ -126,7 +126,7 @@ public class ChunkCollision
 			if (aabb != null)
 			{
 				aabb = AABBUtils.offset(listener, aabb);
-				if (mask.intersectsWith(aabb))
+				if (mask.intersects(aabb))
 					list.add(aabb);
 			}
 		}

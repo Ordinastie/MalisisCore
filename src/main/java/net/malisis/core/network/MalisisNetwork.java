@@ -26,6 +26,8 @@ package net.malisis.core.network;
 
 import java.util.List;
 
+import com.google.common.collect.Ordering;
+
 import net.malisis.core.IMalisisMod;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.message.OpenInventoryMessage;
@@ -37,8 +39,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
-
-import com.google.common.collect.Ordering;
 
 /**
  * {@link MalisisNetwork} is a wrapper around {@link SimpleNetworkWrapper} in order to ease the handling of discriminators.<br>
