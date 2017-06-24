@@ -29,6 +29,7 @@ import java.util.Optional;
 
 import com.google.common.collect.Maps;
 
+import net.malisis.core.block.IComponent;
 import net.malisis.core.registry.MalisisRegistry;
 import net.malisis.core.renderer.component.AnimatedModelComponent;
 import net.malisis.core.util.BlockPosUtils;
@@ -152,7 +153,9 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 		if (oldState.getBlock() == newState.getBlock()) //same block, so same components
 			return CallbackResult.noResult();
 
-		animatedRenderables.remove(pos);
+		AnimatedModelComponent comp = IComponent.getComponent(AnimatedModelComponent.class, oldState.getBlock());
+		if (comp != null)
+			animatedRenderables.remove(pos);
 
 		return CallbackResult.noResult();
 	}
