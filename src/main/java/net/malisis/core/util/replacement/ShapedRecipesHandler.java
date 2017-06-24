@@ -63,11 +63,11 @@ public class ShapedRecipesHandler extends ReplacementHandler<ShapedRecipes>
 			NonNullList<Ingredient> input = recipe.recipeItems;
 			for (int i = 0; i < input.size(); i++)
 			{
-				if (isMatched(input.get(i), vanilla))
-				{
-					input.set(i, getItemStack(replacement, input.get(i)));
-					replaced = true;
-				}
+				//				if (isMatched(input.get(i), vanilla))
+				//				{
+				//					input.set(i, getItemStack(replacement, input.get(i)));
+				//					replaced = true;
+				//				}
 			}
 		}
 		catch (IllegalArgumentException | IllegalAccessException e)
