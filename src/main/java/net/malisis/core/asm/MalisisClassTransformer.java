@@ -77,8 +77,11 @@ public abstract class MalisisClassTransformer implements IClassTransformer
 			if (methodNode != null)
 			{
 				if (!hook.walkSteps(methodNode))
-					LogManager.getLogger(logString).error("[{}] The instruction list was not found in {}:{}{}", hook.getTransformer(),
-							hook.getTargetClass(), hook.getMethodName(), hook.getMethodDescriptor());
+					LogManager.getLogger(logString).error(	"[{}] The instruction list was not found in {}:{}{}",
+															hook.getTransformer(),
+															hook.getTargetClass(),
+															hook.getMethodName(),
+															hook.getMethodDescriptor());
 
 				if (hook.isDebug() == true && (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment"))
 				{
@@ -87,12 +90,15 @@ public abstract class MalisisClassTransformer implements IClassTransformer
 			}
 			else
 			{
-				LogManager.getLogger(logString).error("[{}] Method not found : {}:{}{}", hook.getTransformer(), hook.getTargetClass(),
-						hook.getMethodName(), hook.getMethodDescriptor());
+				LogManager.getLogger(logString).error(	"[{}] Method not found : {}:{}{}",
+														hook.getTransformer(),
+														hook.getTargetClass(),
+														hook.getMethodName(),
+														hook.getMethodDescriptor());
 			}
 		}
 
-		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS /* | ClassWriter.COMPUTE_FRAMES */);
+		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 		classNode.accept(writer);
 		return writer.toByteArray();
 	}
