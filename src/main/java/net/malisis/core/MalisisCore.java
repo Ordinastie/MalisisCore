@@ -70,7 +70,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * The Class MalisisCore.
  */
-@Mod(modid = MalisisCore.modid, name = MalisisCore.modname, version = MalisisCore.version, acceptedMinecraftVersions = "[1.11,1.12)")
+@Mod(modid = MalisisCore.modid, name = MalisisCore.modname, version = MalisisCore.version, acceptedMinecraftVersions = "[1.12,1.13)")
 public class MalisisCore implements IMalisisMod
 {
 	/** Mod ID. */
