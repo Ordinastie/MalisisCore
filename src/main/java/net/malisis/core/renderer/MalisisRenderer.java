@@ -590,6 +590,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		{
 			draw();
 			disableBlending();
+			Minecraft.getMinecraft().entityRenderer.disableLightmap();
 			GlStateManager.popMatrix();
 			GlStateManager.popAttrib();
 		}
