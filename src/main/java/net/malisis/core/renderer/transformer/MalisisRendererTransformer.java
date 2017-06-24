@@ -59,7 +59,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		McpMethodMapping renderBlock = new McpMethodMapping("renderBlock",
 															"func_175018_a",
 															"net/minecraft/client/renderer/BlockRendererDispatcher",
-															"(Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/VertexBuffer;)Z");
+															"(Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/BufferBuilder;)Z");
 		AsmHook ah = new AsmHook(renderBlock);
 
 		//int i = state.getBlock().getRenderType();
@@ -83,7 +83,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		//	    ALOAD 3
 		//	    ALOAD 2
 		//	    ALOAD 1
-		//		INVOKESTATIC net/malisis/core/registry/Registries.processRenderBlockCallbacks (Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/CallbackResult;
+		//		INVOKESTATIC net/malisis/core/registry/Registries.processRenderBlockCallbacks (Lnet/minecraft/client/renderer/BufferBuilder;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/CallbackResult;
 		//		ASTORE 8
 		//		L2
 		//		LINENUMBER 69 L2
@@ -107,7 +107,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 		insert.add(new MethodInsnNode(	INVOKESTATIC,
 										"net/malisis/core/registry/Registries",
 										"processRenderBlockCallbacks",
-										"(Lnet/minecraft/client/renderer/VertexBuffer;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/CallbackResult;",
+										"(Lnet/minecraft/client/renderer/BufferBuilder;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/malisis/core/util/callback/CallbackResult;",
 										false));
 		insert.add(new VarInsnNode(ASTORE, 8));
 		insert.add(new VarInsnNode(ALOAD, 8));
