@@ -29,7 +29,6 @@ import java.util.Optional;
 
 import com.google.common.collect.Maps;
 
-import net.malisis.core.MalisisCore;
 import net.malisis.core.registry.MalisisRegistry;
 import net.malisis.core.renderer.component.AnimatedModelComponent;
 import net.malisis.core.util.BlockPosUtils;
@@ -179,9 +178,6 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 	{
 		IAnimatedRenderable r = animatedRenderables.get(pos);
 		if (r == null)
-		{
-			MalisisCore.message("Registered : " + pos);
 			animatedRenderables.put(pos, amc.createRenderable(world, pos));
-		}
 	}
 }
