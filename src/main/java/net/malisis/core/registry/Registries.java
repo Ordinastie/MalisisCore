@@ -39,10 +39,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -118,7 +118,7 @@ public class Registries
 	 * @return the callback result
 	 */
 	@SideOnly(Side.CLIENT)
-	public static CallbackResult<Boolean> processRenderBlockCallbacks(VertexBuffer buffer, IBlockAccess world, BlockPos pos, IBlockState state)
+	public static CallbackResult<Boolean> processRenderBlockCallbacks(BufferBuilder buffer, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
 		//warning mutable BlockPos received
 		return renderBlockRegistry.processCallbacks(buffer, world, pos, state);
