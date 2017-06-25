@@ -47,7 +47,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.IPerspectiveAwareModel;
 
 /**
  * @author Ordinastie
@@ -63,7 +62,7 @@ public interface IItemRenderer
 
 	public boolean isGui3d();
 
-	public static class DummyModel implements IPerspectiveAwareModel
+	public static class DummyModel implements IBakedModel
 	{
 		private Item item;
 		private ModelResourceLocation mrl;

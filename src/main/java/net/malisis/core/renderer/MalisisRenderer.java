@@ -430,7 +430,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 * @param partialTick the partial tick
 	 */
 	@Override
-	public synchronized void renderTileEntityAt(T te, double x, double y, double z, float partialTick, int destroyStage, float f)
+	public synchronized void render(T te, double x, double y, double z, float partialTick, int destroyStage, float f)
 	{
 		if (te.getWorld().getBlockState(te.getPos()).getBlock() == Blocks.AIR)
 			return;
@@ -1357,7 +1357,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 
 	public static float getPartialTick()
 	{
-		return Minecraft.getMinecraft().func_193989_ak();
+		return Minecraft.getMinecraft().getRenderPartialTicks();
 	}
 
 	/**

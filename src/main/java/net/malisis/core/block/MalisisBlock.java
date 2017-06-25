@@ -160,6 +160,7 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	{
 		this.name = name;
 		setUnlocalizedName(name);
+		setRegistryName(name);
 		return this;
 	}
 

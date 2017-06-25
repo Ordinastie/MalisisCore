@@ -163,7 +163,7 @@ public class ColorComponent extends SubtypeComponent<EnumDyeColor> implements IR
 	@Override
 	public MapColor getMapColor(Block block, IBlockState state, IBlockAccess world, BlockPos pos)
 	{
-		return MapColor.func_193558_a(state.getValue(getProperty()));
+		return MapColor.getBlockColor(state.getValue(getProperty()));
 	}
 
 	/**

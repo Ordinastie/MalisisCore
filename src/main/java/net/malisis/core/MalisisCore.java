@@ -60,7 +60,6 @@ import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
 import net.minecraftforge.fml.common.discovery.asm.ModAnnotation;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
-import net.minecraftforge.fml.common.event.FMLMissingMappingsEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -274,12 +273,6 @@ public class MalisisCore implements IMalisisMod
 	public void postInit(FMLLoadCompleteEvent event)
 	{
 		Registries.processFMLStateEvent(event);
-	}
-
-	@EventHandler
-	public void missingMapping(FMLMissingMappingsEvent event)
-	{
-		//RemappingTool.processMissingMappings(event);
 	}
 
 	/**

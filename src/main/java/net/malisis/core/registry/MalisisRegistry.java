@@ -58,8 +58,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.registry.GameData;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -129,13 +128,10 @@ public class MalisisRegistry
 		if (registerable instanceof Block)
 		{
 			Block block = (Block) registerable;
+			ForgeRegistries.BLOCKS.register(block);
 			Item item = registerable.getItem(block);
-			GameRegistry.register(block, res);
 			if (item != null)
-			{
-				GameRegistry.register(item, res);
-				GameData.getBlockItemMap().put(block, item);
-			}
+				ForgeRegistries.ITEMS.register(item);
 
 			//register the mapper for the block and the model for the item
 			if (MalisisCore.isClient())
@@ -150,7 +146,7 @@ public class MalisisRegistry
 		else if (registerable instanceof Item)
 		{
 			Item item = (Item) registerable;
-			GameRegistry.register(item, res);
+			ForgeRegistries.ITEMS.register(item);
 			if (MalisisCore.isClient())
 				registerDummyModel(item, res);
 		}
@@ -299,7 +295,7 @@ public class MalisisRegistry
 	{
 		ResourceLocation rl = new ResourceLocation(modId, soundId);
 		SoundEvent sound = new SoundEvent(rl);
-		GameRegistry.register(sound, rl);
+		ForgeRegistries.SOUND_EVENTS.register(sound);
 		return sound;
 	}
 }
