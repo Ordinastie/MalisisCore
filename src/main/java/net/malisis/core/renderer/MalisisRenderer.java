@@ -25,7 +25,6 @@
 package net.malisis.core.renderer;
 
 import java.util.Arrays;
-import java.util.ConcurrentModificationException;
 import java.util.Set;
 
 import javax.vecmath.Matrix4f;
@@ -243,14 +242,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		this.pos = new BlockPos(pos);
 		this.block = block;
 		this.blockState = blockState;
-		try
-		{
-			this.tileEntity = (T) world.getTileEntity(pos);
-		}
-		catch (ConcurrentModificationException e)
-		{
-			//Sometimes the IBlockAccess cache doesn't have the TE loaded and tries to load it from its underlying world.
-		}
+		this.tileEntity = (T) world.getTileEntity(pos);
 	}
 
 	public void set(IBlockAccess world, BlockPos pos)
