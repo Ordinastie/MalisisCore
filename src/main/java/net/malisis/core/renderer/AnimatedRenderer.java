@@ -27,6 +27,7 @@ package net.malisis.core.renderer;
 import java.util.Map;
 import java.util.Optional;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 import net.malisis.core.block.IComponent;
@@ -98,11 +99,11 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 		//camera.setPosition(viewOffset.x, viewOffset.y, viewOffset.z);
 
 		renderType = RenderType.ANIMATED;
-		animatedRenderables	.values()
-							.stream()
-							.filter(r -> r.inFrustrum(camera))
-							.sorted((r1, r2) -> -BlockPosUtils.compare(viewOffset, r1.getPos(), r2.getPos()))
-							.forEach(this::renderRenderable);
+		ImmutableList	.copyOf(animatedRenderables.values())
+						.stream()
+						.filter(r -> r.inFrustrum(camera))
+						.sorted((r1, r2) -> -BlockPosUtils.compare(viewOffset, r1.getPos(), r2.getPos()))
+						.forEach(this::renderRenderable);
 		renderType = RenderType.WORLD_LAST;
 	}
 
@@ -128,8 +129,7 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 	@SubscribeEvent
 	public void onChunkUnload(ChunkEvent.Unload event)
 	{
-		animatedRenderables	.keySet()
-							.removeIf(p -> (p.getX() >> 4) == event.getChunk().xPosition && (p.getZ() >> 4) == event.getChunk().zPosition);
+		animatedRenderables.keySet().removeIf(p -> (p.getX() >> 4) == event.getChunk().x && (p.getZ() >> 4) == event.getChunk().z);
 	}
 
 	@SubscribeEvent

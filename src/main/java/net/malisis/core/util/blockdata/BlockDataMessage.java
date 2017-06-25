@@ -91,8 +91,8 @@ public class BlockDataMessage implements IMalisisMessageHandler<Packet, IMessage
 
 		public Packet(Chunk chunk, String identifier, ByteBuf data)
 		{
-			this.x = chunk.xPosition;
-			this.z = chunk.zPosition;
+			this.x = chunk.x;
+			this.z = chunk.z;
 			this.identifier = identifier;
 			this.data = data;
 		}

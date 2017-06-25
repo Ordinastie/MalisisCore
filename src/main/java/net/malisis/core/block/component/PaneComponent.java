@@ -104,9 +104,9 @@ public class PaneComponent implements IBlockComponent, ISmartCull
 
 		List<AxisAlignedBB> list = Lists.newArrayList();
 		if (north || south)
-			list.add(base.addCoord(0, 0, north ? -f : 0).addCoord(0, 0, south ? f : 0));
+			list.add(base.expand(0, 0, north ? -f : 0).expand(0, 0, south ? f : 0));
 		if (east || west)
-			list.add(base.addCoord(west ? -f : 0, 0, 0).addCoord(east ? f : 0, 0, 0));
+			list.add(base.expand(west ? -f : 0, 0, 0).expand(east ? f : 0, 0, 0));
 
 		return list.toArray(new AxisAlignedBB[0]);
 	}

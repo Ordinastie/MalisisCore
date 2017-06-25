@@ -24,10 +24,11 @@
 
 package net.malisis.core.util.chunkblock;
 
-import io.netty.buffer.ByteBuf;
-
 import java.util.Set;
 
+import com.google.common.collect.Sets;
+
+import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.network.IMalisisMessageHandler;
 import net.malisis.core.network.MalisisMessage;
@@ -37,8 +38,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
-
-import com.google.common.collect.Sets;
 
 /**
  * @author Ordinastie
@@ -74,8 +73,8 @@ public class ChunkBlockMessage implements IMalisisMessageHandler<ChunkBlockMessa
 
 		public Packet(Chunk chunk, Set<BlockPos> coords)
 		{
-			this.x = chunk.xPosition;
-			this.z = chunk.zPosition;
+			this.x = chunk.x;
+			this.z = chunk.z;
 			this.coords = coords;
 		}
 

@@ -239,8 +239,9 @@ public class MBlockPos
 	 */
 	public MBlockPos offset(EnumFacing facing, int n)
 	{
-		return new MBlockPos(this.getX() + facing.getFrontOffsetX() * n, this.getY() + facing.getFrontOffsetY() * n, this.getZ()
-				+ facing.getFrontOffsetZ() * n);
+		return new MBlockPos(	this.getX() + facing.getFrontOffsetX() * n,
+								this.getY() + facing.getFrontOffsetY() * n,
+								this.getZ() + facing.getFrontOffsetZ() * n);
 	}
 
 	//#end Moves
@@ -255,7 +256,7 @@ public class MBlockPos
 
 	public boolean isInside(AxisAlignedBB aabb)
 	{
-		return aabb.intersectsWith(AABBUtils.identity(this.toBlockPos()));
+		return aabb.intersects(AABBUtils.identity(this.toBlockPos()));
 	}
 
 	public BlockPos toBlockPos()
@@ -319,8 +320,8 @@ public class MBlockPos
 
 	public static Iterable<MBlockPos> getAllInBox(AxisAlignedBB aabb)
 	{
-		return getAllInBox(new MBlockPos(aabb.minX, aabb.minY, aabb.minZ), new MBlockPos(Math.ceil(aabb.maxX) - 1,
-				Math.ceil(aabb.maxY) - 1, Math.ceil(aabb.maxZ) - 1));
+		return getAllInBox(	new MBlockPos(aabb.minX, aabb.minY, aabb.minZ),
+							new MBlockPos(Math.ceil(aabb.maxX) - 1, Math.ceil(aabb.maxY) - 1, Math.ceil(aabb.maxZ) - 1));
 	}
 
 	/**

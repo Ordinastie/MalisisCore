@@ -24,14 +24,18 @@
 
 package net.malisis.core.util.chunkblock;
 
-import gnu.trove.procedure.TLongProcedure;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
+
+import gnu.trove.procedure.TLongProcedure;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.registry.AutoLoad;
@@ -53,11 +57,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
-import org.apache.commons.lang3.ArrayUtils;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
 
 /**
  * This class is the entry point for blocks that need to stored inside a chunk for later processing.<br>
@@ -256,7 +255,7 @@ public class ChunkBlockHandler
 	@SubscribeEvent
 	public void onChunkWatched(ChunkWatchEvent.Watch event)
 	{
-		Chunk chunk = event.getPlayer().world.getChunkFromChunkCoords(event.getChunk().chunkXPos, event.getChunk().chunkZPos);
+		Chunk chunk = event.getPlayer().world.getChunkFromChunkCoords(event.getChunk().x, event.getChunk().z);
 		Set<BlockPos> coords = chunks(chunk).get(chunk);
 		if (!coords.isEmpty())
 			ChunkBlockMessage.sendCoords(chunk, coords, event.getPlayer());
@@ -367,11 +366,11 @@ public class ChunkBlockHandler
 
 			if (!(state.getBlock() instanceof IChunkBlock))
 			{
-				MalisisCore.log.info("[ChunkNotificationHandler]  Removing invalid {} coordinate : {} in chunk {},{}",
-						world.isRemote ? "client" : "server",
-						state,
-						chunk.xPosition,
-						chunk.zPosition);
+				MalisisCore.log.info(	"[ChunkNotificationHandler]  Removing invalid {} coordinate : {} in chunk {},{}",
+										world.isRemote ? "client" : "server",
+										state,
+										chunk.x,
+										chunk.z);
 				get().removeCoord(chunk, state.getPos());
 				return false;
 			}

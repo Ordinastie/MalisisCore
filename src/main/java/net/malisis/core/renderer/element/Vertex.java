@@ -461,9 +461,9 @@ public class Vertex
 
 		if (offset != null)
 		{
-			x += offset.xCoord;
-			y += offset.yCoord;
-			z += offset.zCoord;
+			x += offset.x;
+			y += offset.y;
+			z += offset.z;
 		}
 
 		int[] data = new int[vertexFormat.getIntegerSize()];

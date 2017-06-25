@@ -27,6 +27,8 @@ package net.malisis.core.block.component;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import net.malisis.core.block.BoundingBoxType;
 import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IComponent;
@@ -42,8 +44,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-
-import com.google.common.collect.Lists;
 
 /**
  * @author Ordinastie
@@ -153,7 +153,7 @@ public class StairComponent implements IBlockComponent, ISmartCull
 		}
 
 		//extend the corner to full width and add to list
-		List<AxisAlignedBB> list = Lists.newArrayList(aabb.addCoord(0.5F, 0, 0));
+		List<AxisAlignedBB> list = Lists.newArrayList(aabb.expand(0.5F, 0, 0));
 
 		//check back side (full width + corner) :
 		stateOther = world.getBlockState(pos.offset(dir));

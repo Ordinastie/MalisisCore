@@ -77,9 +77,9 @@ public class Point
 	 */
 	public Point(Vec3d v)
 	{
-		x = v.xCoord;
-		y = v.yCoord;
-		z = v.zCoord;
+		x = v.x;
+		y = v.y;
+		z = v.z;
 	}
 
 	/**
