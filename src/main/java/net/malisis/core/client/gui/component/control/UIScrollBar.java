@@ -395,7 +395,9 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 			return super.onScrollWheel(x, y, delta);
 
 		scrollBy(-delta * getScrollable().getScrollStep());
-		return true;
+		//true = stop
+		float o = getOffset();
+		return !(delta > 0 && o == 0 || delta < 0 && o == 1);
 	}
 
 	@Override
