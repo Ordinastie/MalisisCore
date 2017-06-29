@@ -27,6 +27,10 @@ package net.malisis.core.client.gui.component.decoration;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.eventbus.Subscribe;
+
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
@@ -44,10 +48,6 @@ import net.malisis.core.util.bbcode.BBString;
 import net.malisis.core.util.bbcode.render.BBCodeRenderer;
 import net.malisis.core.util.bbcode.render.IBBCodeRenderer;
 import net.minecraft.client.gui.GuiScreen;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * UILabel.
@@ -262,6 +262,9 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	@Override
 	public float getOffsetY()
 	{
+		if (lines.size() < getVisibleLines())
+			return 0;
+
 		return (float) lineOffset / (lines.size() - getVisibleLines());
 	}
 

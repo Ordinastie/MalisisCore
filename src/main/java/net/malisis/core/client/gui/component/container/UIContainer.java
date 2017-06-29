@@ -458,6 +458,8 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	@Override
 	public float getOffsetX()
 	{
+		if (getContentWidth() < getWidth())
+			return 0;
 		return (float) xOffset / (getContentWidth() - getWidth());
 	}
 
@@ -470,6 +472,8 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	@Override
 	public float getOffsetY()
 	{
+		if (getContentHeight() < getHeight())
+			return 0;
 		return (float) yOffset / (getContentHeight() - getHeight());
 	}
 

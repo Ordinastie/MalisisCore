@@ -202,6 +202,8 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 	@Override
 	public float getOffsetY()
 	{
+		if (getContentHeight() < getHeight())
+			return 0;
 		return (float) yOffset / (getContentHeight() - getHeight());
 	}
 

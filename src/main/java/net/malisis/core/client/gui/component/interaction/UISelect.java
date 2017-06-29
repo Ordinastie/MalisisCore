@@ -678,6 +678,8 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	@Override
 	public float getOffsetY()
 	{
+		if (options.size() < maxDisplayedOptions)
+			return 0;
 		return (float) optionOffset / (options.size() - maxDisplayedOptions);
 	}
 
