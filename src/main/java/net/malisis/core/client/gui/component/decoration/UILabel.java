@@ -262,6 +262,9 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	@Override
 	public float getOffsetY()
 	{
+		if (lines.size() < getVisibleLines())
+			return 0;
+
 		return (float) lineOffset / (lines.size() - getVisibleLines());
 	}
 
