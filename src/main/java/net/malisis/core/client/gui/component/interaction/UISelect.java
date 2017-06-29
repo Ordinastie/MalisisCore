@@ -803,7 +803,13 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public boolean onScrollWheel(int x, int y, int delta)
 	{
 		if (!isFocused() || maxDisplayedOptions < options.size())
-			return super.onScrollWheel(x, y, delta);
+		{
+			if (isDisabled())
+				return false;
+
+			scrollbar.onScrollWheel(x, y, delta);
+			return true; //prevent the scrolling of the parent container
+		}
 
 		if (delta < 0)
 			selectNext();
