@@ -153,8 +153,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		optionsShape = new XYResizableGuiShape(1);
 		optionBackground = new SimpleGuiShape();
 
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXResizableIcon(200, 30, 9, 12, 3), null,
-				gui.getGuiTexture().getXResizableIcon(200, 42, 9, 12, 3));
+		iconProvider = new GuiIconProvider(	gui.getGuiTexture().getXResizableIcon(200, 30, 9, 12, 3),
+											null,
+											gui.getGuiTexture().getXResizableIcon(200, 42, 9, 12, 3));
 
 		iconsExpanded = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1));
 		arrowIcon = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 48, 7, 4));
@@ -537,7 +538,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		if (selectedOption == null)
 			return selectFirst();
 
-		Option<T> option = null;
+		Option<T> option = Iterables.getFirst(options, null);
 		for (Option<T> opt : this)
 		{
 			if (opt.isDisabled())
