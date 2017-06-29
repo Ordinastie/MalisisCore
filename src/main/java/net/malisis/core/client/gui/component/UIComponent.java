@@ -67,8 +67,8 @@ import net.minecraft.client.renderer.GlStateManager;
  * @author Ordinastie, PaleoCrafter
  * @param <T> the type of <code>UIComponent</code>
  */
-public abstract class UIComponent<T extends UIComponent<T>> implements ITransformable.Position<T>, ITransformable.Size<T>,
-		ITransformable.Alpha, IKeyListener
+public abstract class UIComponent<T extends UIComponent<T>>
+		implements ITransformable.Position<T>, ITransformable.Size<T>, ITransformable.Alpha, IKeyListener
 {
 	/** The Constant INHERITED. */
 	public final static int INHERITED = 0;
@@ -990,7 +990,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements ITransfor
 	 */
 	public void onAddedToScreen()
 	{
-		if (width <= 0 || height <= 0)
+		if (isRelativeWidth() || isRelativeHeight())
 			fireEvent(new SizeChangeEvent<>(self(), getWidth(), getHeight()));
 	}
 

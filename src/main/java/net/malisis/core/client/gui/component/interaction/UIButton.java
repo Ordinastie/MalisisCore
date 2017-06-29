@@ -386,8 +386,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 			h = (int) font.getStringHeight(fontOptions);
 		}
 
-		int x = (width - w) / 2;
-		int y = (height - h) / 2;
+		int x = (getWidth() - w) / 2;
+		int y = (getHeight() - h) / 2;
 		if (x == 0)
 			x = 1;
 		if (y == 0)
