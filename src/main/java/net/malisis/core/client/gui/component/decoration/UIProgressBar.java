@@ -31,7 +31,6 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.VanillaIcon;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 /**
  * @author Ordinastie
@@ -103,7 +102,7 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 		renderer.bindTexture(texture);
 		rp.icon.set(backgroundIcon.flip(!vertical && reversed, vertical && reversed));
 		shape.resetState();
-		shape.setSize(width, height);
+		shape.setSize(getWidth(), getHeight());
 		renderer.drawShape(shape, rp);
 	}
 
@@ -111,10 +110,13 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		renderer.bindTexture(texture);
-		int length = (int) ((vertical ? height : width) * progress);
+		int width = getWidth();
+		int height = getHeight();
+		int length = (int) ((vertical ? width : height) * progress);
+
 		Icon icon = filledIcon;
 		if (icon instanceof VanillaIcon)
-			icon = new Icon((TextureAtlasSprite) icon);
+			icon = new Icon(icon);
 		if (vertical)
 			icon = icon.clip(0, icon.getIconHeight() - length, icon.getIconWidth(), length);
 		else

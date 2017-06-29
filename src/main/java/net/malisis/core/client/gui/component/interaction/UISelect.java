@@ -728,7 +728,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 		//draw regular select
 		arrowShape.resetState();
-		arrowShape.setPosition(width - 9, 4);
+		arrowShape.setPosition(getWidth() - 9, 4);
 		if (isHovered() || expanded)
 			rp.colorMultiplier.set(0xBEC8FF);
 		else

@@ -195,7 +195,7 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 	 */
 	public void slideTo(int x)
 	{
-		int l = width - SLIDER_WIDTH;
+		int l = getWidth() - SLIDER_WIDTH;
 		int pos = relativeX(x);
 		pos = MathHelper.clamp(pos - SLIDER_WIDTH / 2, 0, l);
 		slideTo((float) pos / l);
@@ -225,8 +225,8 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		zIndex = 0;
-		int ox = (int) (offset * (width - SLIDER_WIDTH));
 		float factor = getHeight() / 20F;
+		int ox = (int) (offset * (getWidth() - SLIDER_WIDTH * factor));
 		sliderShape.resetState();
 		sliderShape.setSize((int) (8 * factor), getHeight());
 		sliderShape.setPosition(ox, 0);
