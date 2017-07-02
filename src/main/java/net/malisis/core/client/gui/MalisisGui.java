@@ -109,6 +109,8 @@ public abstract class MalisisGui extends GuiScreen
 	protected UIComponent<?> hoveredComponent;
 	/** Currently focused child component. */
 	protected UIComponent<?> focusedComponent;
+	/** Component for which to display the tooltip (can be disabled and not receive events). */
+	protected UIComponent<?> tooltipComponent;
 	/** Whether this GUI has been constructed. */
 	protected boolean constructed = false;
 	/** List of {@link IKeyListener} registered. */
@@ -338,10 +340,14 @@ public abstract class MalisisGui extends GuiScreen
 			if (lastMouseX != mouseX || lastMouseY != mouseY)
 			{
 				UIComponent<?> component = getComponentAt(mouseX, mouseY);
-				if (component != null && !component.isDisabled())
+				if (component != null)
 				{
-					component.onMouseMove(lastMouseX, lastMouseY, mouseX, mouseY);
-					component.setHovered(true);
+					tooltipComponent = component;
+					if (!component.isDisabled())
+					{
+						component.onMouseMove(lastMouseX, lastMouseY, mouseX, mouseY);
+						component.setHovered(true);
+					}
 				}
 				else
 					setHoveredComponent(null, false);
@@ -556,16 +562,10 @@ public abstract class MalisisGui extends GuiScreen
 			ItemStack itemStack = inventoryContainer.getPickedItemStack();
 			if (!itemStack.isEmpty())
 				renderer.renderPickedItemStack(itemStack);
-			//else if (hoveredComponent != null && hoveredComponent.isHovered()) //do not draw the tooltip if an itemStack is picked up
-			else
-			{
-				UIComponent<?> component = getComponentAt(mouseX, mouseY);
-				if (component != null)
-					renderer.drawTooltip(component.getTooltip());
-			}
-
+			else if (tooltipComponent != null)
+				renderer.drawTooltip(tooltipComponent.getTooltip());
 		}
-		else if (hoveredComponent != null && hoveredComponent.isHovered())
+		else if (tooltipComponent != null)
 			renderer.drawTooltip(hoveredComponent.getTooltip());
 
 		GL11.glEnable(GL11.GL_LIGHTING);
