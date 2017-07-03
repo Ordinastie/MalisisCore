@@ -369,18 +369,15 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 		rectangle.getFaces()[0].getParameters().colorMultiplier.set(color);
 		rectangle.getFaces()[0].getParameters().alpha.set(alpha);
 
-		GlStateManager.pushAttrib();
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0, 0, z);
 		disableTextures();
-		enableBlending();
 
 		drawShape(rectangle);
 		next();
 		enableTextures();
 
 		GlStateManager.popMatrix();
-		GlStateManager.popAttrib();
 	}
 
 	/**
