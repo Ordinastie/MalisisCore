@@ -566,7 +566,7 @@ public abstract class MalisisGui extends GuiScreen
 				renderer.drawTooltip(tooltipComponent.getTooltip());
 		}
 		else if (tooltipComponent != null)
-			renderer.drawTooltip(hoveredComponent.getTooltip());
+			renderer.drawTooltip(tooltipComponent.getTooltip());
 
 		GL11.glEnable(GL11.GL_LIGHTING);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
