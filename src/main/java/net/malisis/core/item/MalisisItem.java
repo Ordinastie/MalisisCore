@@ -56,6 +56,7 @@ public class MalisisItem extends Item implements IComponentProvider, IRegisterab
 	{
 		this.name = name;
 		setUnlocalizedName(name);
+		setRegistryName(name);
 		return this;
 	}
 

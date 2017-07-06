@@ -55,6 +55,7 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 	public MalisisItemBlock(MalisisBlock block)
 	{
 		super(block);
+		setRegistryName(block.getRegistryName());
 	}
 
 	private MalisisBlock block()
