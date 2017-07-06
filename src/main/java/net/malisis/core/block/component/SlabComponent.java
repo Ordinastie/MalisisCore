@@ -31,18 +31,13 @@ import net.malisis.core.block.IBlockComponent;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IMergedBlock;
 import net.malisis.core.block.ISmartCull;
-import net.malisis.core.block.MalisisBlock;
-import net.malisis.core.item.MalisisItemBlock;
 import net.malisis.core.util.AABBUtils;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockSlab;
-import net.minecraft.block.BlockSlab.EnumBlockHalf;
-import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -57,56 +52,39 @@ import net.minecraft.world.World;
  */
 public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 {
-	private MalisisBlock singleSlab;
-	private MalisisBlock doubleSlab;
+	public PropertyBool BOTTOM = PropertyBool.create("bottom");
+	public PropertyBool TOP = PropertyBool.create("top");
 
-	public SlabComponent(MalisisBlock singleSlab, MalisisBlock doubleSlab)
-	{
-		this.singleSlab = singleSlab;
-		this.doubleSlab = doubleSlab;
-
-		singleSlab.addComponent(this);
-		doubleSlab.addComponent(this);
-		doubleSlab.setName(singleSlab.getName() + "Double");
-	}
-
-	public boolean isDouble(Block block)
-	{
-		return block == doubleSlab;
-	}
-
-	public void register()
-	{
-		singleSlab.register();
-		doubleSlab.register();
-
-		//	GameData.getBlockItemMap().put(doubleSlab, Item.getItemFromBlock(singleSlab));
-	}
+	private static final AxisAlignedBB BOTTOM_AABB = new AxisAlignedBB(0, 0, 0, 1, 0.5F, 1);
+	private static final AxisAlignedBB TOP_AABB = new AxisAlignedBB(0, 0.5F, 0, 1, 1, 1);
 
 	@Override
-	public PropertyEnum<EnumBlockHalf> getProperty()
+	public PropertyBool[] getProperties()
 	{
-		return BlockSlab.HALF;
+		return new PropertyBool[] { TOP, BOTTOM };
+	}
+
+	public PropertyBool getTopProperty()
+	{
+		return TOP;
+
+	}
+
+	public PropertyBool getBottomProperty()
+	{
+		return BOTTOM;
 	}
 
 	@Override
 	public IBlockState setDefaultState(Block block, IBlockState state)
 	{
-		return state.withProperty(getProperty(), EnumBlockHalf.BOTTOM);
-	}
-
-	@Override
-	public Item getItem(Block block)
-	{
-		if (isDouble(block))
-			return null;
-		return new MalisisItemBlock(singleSlab);
+		return state.withProperty(getBottomProperty(), true).withProperty(getTopProperty(), false);
 	}
 
 	@Override
 	public boolean canMerge(ItemStack itemStack, EntityPlayer player, World world, BlockPos pos, EnumFacing side)
 	{
-		return world.getBlockState(pos).getBlock() == singleSlab;
+		return !isDoubleSlab(world, pos);
 	}
 
 	@Override
@@ -116,59 +94,54 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 		int y = (int) Math.floor(hitY + side.getFrontOffsetY() * 0.4F);
 		int z = (int) Math.floor(hitZ + side.getFrontOffsetZ() * 0.4F);
 		BlockPos hitPos = new BlockPos(pos).add(x, y, z);
-		return hitPos.equals(pos) ? doubleSlab.getDefaultState() : null;
+		return hitPos.equals(pos) ? state.withProperty(TOP, true).withProperty(BOTTOM, true) : null;
 	}
 
 	@Override
 	public IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, EnumHand hand)
 	{
-		if (isDouble(block))
-			return state;
+		boolean bottom = facing != EnumFacing.DOWN && (facing == EnumFacing.UP || hitY <= 0.5F);
 
-		return state.withProperty(getProperty(),
-				facing != EnumFacing.DOWN && (facing == EnumFacing.UP || hitY <= 0.5F) ? EnumBlockHalf.BOTTOM : EnumBlockHalf.TOP);
+		return state.withProperty(bottom ? BOTTOM : TOP, true);
 	}
 
 	@Override
 	public AxisAlignedBB getBoundingBox(Block block, IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
-		if (isDouble(block))
+		if (isDoubleSlab(state))
 			return AABBUtils.identity();
 
-		AxisAlignedBB aabb = new AxisAlignedBB(0, 0, 0, 1, 0.5F, 1);
-		if (isTop(state))
-			aabb = aabb.offset(0, 0.5F, 0);
-		return aabb;
+		return state.getValue(getBottomProperty()) ? BOTTOM_AABB : TOP_AABB;
 	}
 
 	@Override
 	public IBlockState getStateFromMeta(Block block, IBlockState state, int meta)
 	{
-		return state.withProperty(getProperty(), (meta & 8) != 0 ? EnumBlockHalf.TOP : EnumBlockHalf.BOTTOM);
+		return state.withProperty(getBottomProperty(), (meta & 1) != 0).withProperty(getTopProperty(), (meta & 2) != 0);
 	}
 
 	@Override
 	public int getMetaFromState(Block block, IBlockState state)
 	{
-		return isTop(state) ? 8 : 0;
+		return (state.getValue(getBottomProperty()) ? 1 : 0) + (state.getValue(getTopProperty()) ? 2 : 0);
 	}
 
 	@Override
 	public Boolean isFullCube(Block block, IBlockState state)
 	{
-		return false;//isDouble(block);
+		return isDoubleSlab(state);
 	}
 
 	@Override
 	public Boolean isFullBlock(Block block, IBlockState state)
 	{
-		return false;// isDouble(block);
+		return isDoubleSlab(state);
 	}
 
 	@Override
 	public Boolean isOpaqueCube(Block block, IBlockState state)
 	{
-		return false;//isDouble(block);
+		return isDoubleSlab(state);
 	}
 
 	@Override
@@ -178,50 +151,29 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 	}
 
 	@Override
-	public Item getItemDropped(Block block, IBlockState state, Random rand, int fortune)
-	{
-		return Item.getItemFromBlock(singleSlab);
-	}
-
-	@Override
 	public Integer quantityDropped(Block block, IBlockState state, int fortune, Random random)
 	{
-		return isDouble(block) ? 2 : 1;
+		return isDoubleSlab(state) ? 2 : 1;
 	}
 
 	@Override
 	public Integer getLightOpacity(Block block, IBlockAccess world, BlockPos pos, IBlockState state)
 	{
-		return isDouble(block) ? 255 : 0;
+		return isDoubleSlab(world, pos) ? 255 : 0;
 	}
 
-	public static boolean isTop(IBlockAccess world, BlockPos pos)
+	public static boolean isDoubleSlab(IBlockAccess world, BlockPos pos)
 	{
-		return world != null ? isTop(world.getBlockState(pos)) : false;
+		return isDoubleSlab(world.getBlockState(pos));
 	}
 
-	public static boolean isTop(IBlockState state)
+	public static boolean isDoubleSlab(IBlockState state)
 	{
 		SlabComponent sc = IComponent.getComponent(SlabComponent.class, state.getBlock());
 		if (sc == null)
 			return false;
 
-		PropertyEnum<EnumBlockHalf> property = sc.getProperty();
-		if (property == null || !state.getProperties().containsKey(property))
-			return false;
-
-		return state.getValue(property) == EnumBlockHalf.TOP;
-	}
-
-	public static boolean isDoubleSlab(IBlockAccess world, BlockPos pos)
-	{
-		return isDoubleSlab(world.getBlockState(pos).getBlock());
-	}
-
-	public static boolean isDoubleSlab(Block block)
-	{
-		SlabComponent sc = IComponent.getComponent(SlabComponent.class, block);
-		return sc != null && sc.isDouble(block);
+		return state.getValue(sc.getTopProperty()) && state.getValue(sc.getBottomProperty());
 	}
 
 	public static boolean isSlab(IBlockAccess world, BlockPos pos)
