@@ -387,7 +387,7 @@ public class AnimatedModelComponent extends ModelComponent
 				{
 					//animation is done and doesn't persist
 					if (model.animate(entry.getKey(), entry.getValue()))
-						timers.remove(renderer.getPos(), entry.getKey());
+						this.timers.remove(renderer.getPos(), entry.getKey());
 				}
 			}
 
