@@ -101,8 +101,7 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 	public IBlockState getStateForPlacement(Block block, World world, BlockPos pos, IBlockState state, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, EnumHand hand)
 	{
 		boolean bottom = facing != EnumFacing.DOWN && (facing == EnumFacing.UP || hitY <= 0.5F);
-
-		return state.withProperty(bottom ? BOTTOM : TOP, true);
+		return state.withProperty(getBottomProperty(), bottom).withProperty(getTopProperty(), !bottom);
 	}
 
 	@Override
@@ -154,6 +153,12 @@ public class SlabComponent implements IBlockComponent, IMergedBlock, ISmartCull
 	public Integer quantityDropped(Block block, IBlockState state, int fortune, Random random)
 	{
 		return isDoubleSlab(state) ? 2 : 1;
+	}
+
+	@Override
+	public int damageDropped(Block block, IBlockState state)
+	{
+		return 1;
 	}
 
 	@Override
