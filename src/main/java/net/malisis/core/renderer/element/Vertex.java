@@ -463,7 +463,7 @@ public class Vertex
 		{
 			x += offset.x;
 			y += offset.y;
-			z += offset.y;
+			z += offset.z;
 		}
 
 		int[] data = new int[vertexFormat.getIntegerSize()];
