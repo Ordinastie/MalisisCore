@@ -243,6 +243,11 @@ public abstract class MalisisGui extends GuiScreen
 		screen.setSize(width, height);
 	}
 
+	public boolean isOverlay()
+	{
+		return isOverlay;
+	}
+
 	/**
 	 * Adds container to the screen.
 	 *

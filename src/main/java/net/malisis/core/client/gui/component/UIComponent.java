@@ -1020,6 +1020,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 
 		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 		//if (getAlpha() < 255)
+		if (getGui().isOverlay())
 		{
 			GlStateManager.blendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE_MINUS_CONSTANT_ALPHA);
 			GL14.glBlendColor(1, 1, 1, (float) getAlpha() / 255);
