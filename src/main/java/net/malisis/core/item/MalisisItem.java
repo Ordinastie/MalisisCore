@@ -34,12 +34,14 @@ import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.IRegisterable;
+import net.malisis.core.inventory.MalisisTab;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 
 /**
@@ -101,5 +103,14 @@ public class MalisisItem extends Item implements IComponentProvider, IRegisterab
 		if (state != null && MalisisCore.isClient())
 			addComponent(IIconProvider.create(Icon.from(state)).build());
 
+	}
+
+	@Override
+	public Item setCreativeTab(CreativeTabs tab)
+	{
+		super.setCreativeTab(tab);
+		if (tab instanceof MalisisTab)
+			((MalisisTab) tab).addItem(this);
+		return this;
 	}
 }

@@ -42,6 +42,7 @@ import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.block.component.ITickableComponent.PeriodicTickableComponent;
 import net.malisis.core.block.component.ITickableComponent.RandomTickableComponent;
 import net.malisis.core.block.component.LadderComponent;
+import net.malisis.core.inventory.MalisisTab;
 import net.malisis.core.item.MalisisItemBlock;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.MalisisRendered;
@@ -570,4 +571,12 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 		return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
 	}
 
+	@Override
+	public MalisisBlock setCreativeTab(CreativeTabs tab)
+	{
+		super.setCreativeTab(tab);
+		if (tab instanceof MalisisTab)
+			((MalisisTab) tab).addItem(this);
+		return this;
+	}
 }
