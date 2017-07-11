@@ -55,7 +55,9 @@ public interface IRegisterable
 		if (this instanceof MalisisBlock)
 			return new MalisisItemBlock((MalisisBlock) block);
 
-		return new ItemBlock(block);
+		Item item = new ItemBlock(block);
+		item.setRegistryName(block.getRegistryName());
+		return item;
 	}
 
 	/**

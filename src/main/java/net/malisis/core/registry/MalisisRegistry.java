@@ -295,6 +295,7 @@ public class MalisisRegistry
 	{
 		ResourceLocation rl = new ResourceLocation(modId, soundId);
 		SoundEvent sound = new SoundEvent(rl);
+		sound.setRegistryName(rl);
 		ForgeRegistries.SOUND_EVENTS.register(sound);
 		return sound;
 	}
