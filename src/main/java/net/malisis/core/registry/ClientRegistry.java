@@ -28,20 +28,17 @@ import static net.malisis.core.registry.Registries.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
-import net.malisis.core.renderer.IItemRenderer.DummyModel;
 import net.malisis.core.renderer.IRenderWorldLast;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.MalisisRenderer;
@@ -61,7 +58,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -83,9 +79,6 @@ public class ClientRegistry
 	Map<Item, IItemRenderer> itemRenderers = Maps.newHashMap();
 	/** List of registered {@link IRenderWorldLast} */
 	List<IRenderWorldLast> renderWorldLastRenderers = Lists.newArrayList();
-	/** List of registered {@link IIconProvider} */
-	/** List of {@link DummyModel} for registered items */
-	Set<DummyModel> itemModels = Sets.newHashSet();
 	/** List of all registered renderers. */
 	Map<Class<? extends MalisisRenderer<?>>, MalisisRenderer<?>> registeredRenderers = Maps.newHashMap();
 	/** List of {@link BlockRendererOverride}. */
@@ -116,20 +109,6 @@ public class ClientRegistry
 			if (renderer.shouldRender(event, Utils.getClientWorld()))
 				renderer.renderWorldLastEvent(event, Utils.getClientWorld());
 		}
-	}
-
-	/**
-	 * Registers {@link DummyModel DummyModels}.<br>
-	 * {@code DummyModel} forwards transforms to the {@link IItemRenderer} for the {@link Item}.
-	 *
-	 * @param event the event
-	 */
-	@SubscribeEvent
-	public void onModelBakeEvent(ModelBakeEvent event)
-	{
-		DefaultRenderer.item.clearModels();
-		for (DummyModel model : itemModels)
-			event.getModelRegistry().putObject(model.getResourceLocation(), model);
 	}
 
 	/**

@@ -44,9 +44,8 @@ import net.malisis.core.registry.TextureStitchedRegistry.ITextureStitchedCallbac
 import net.malisis.core.registry.TextureStitchedRegistry.ITextureStitchedCallbackPredicate;
 import net.malisis.core.renderer.IBlockRenderer;
 import net.malisis.core.renderer.IItemRenderer;
-import net.malisis.core.renderer.IItemRenderer.DummyModel;
 import net.malisis.core.renderer.IRenderWorldLast;
-import net.malisis.core.util.Utils;
+import net.malisis.core.renderer.model.EmptyModelLoader;
 import net.malisis.core.util.callback.ICallback.CallbackOption;
 import net.malisis.core.util.clientnotif.ClientNotificationManager;
 import net.minecraft.block.Block;
@@ -124,7 +123,6 @@ public class MalisisRegistry
 			throw new IllegalArgumentException("Cannot register " + registerable.getClass().getName() + " (" + name
 					+ ") because it's neither a block or an item.");
 
-		ResourceLocation res = Utils.getResourceLocation(name);
 		if (registerable instanceof Block)
 		{
 			Block block = (Block) registerable;
@@ -138,7 +136,7 @@ public class MalisisRegistry
 			{
 				ModelLoader.setCustomStateMapper(block, b -> ImmutableMap.of());
 				if (item != null)
-					registerDummyModel(item, name);
+					EmptyModelLoader.register(item);
 			}
 
 			ClientNotificationManager.discover(block);
@@ -148,7 +146,7 @@ public class MalisisRegistry
 			Item item = (Item) registerable;
 			ForgeRegistries.ITEMS.register(item);
 			if (MalisisCore.isClient())
-				registerDummyModel(item, res);
+				EmptyModelLoader.register(item);
 		}
 	}
 
@@ -240,36 +238,6 @@ public class MalisisRegistry
 	public static void unregisterRenderWorldLast(IRenderWorldLast renderer)
 	{
 		clientRegistry.renderWorldLastRenderers.remove(renderer);
-	}
-
-	/**
-	 * Registers a {@link DummyModel} for the {@link Item}.<br>
-	 * Registered {@code DummyModels} will prevent complaints from MC about missing model definitions and will redirect method calls to the
-	 * registered {@link IItemRenderer} for the item.
-	 *
-	 * @param item the item
-	 */
-	@SideOnly(Side.CLIENT)
-	public static void registerDummyModel(Item item, String name)
-	{
-		registerDummyModel(item, Utils.getResourceLocation(name));
-	}
-
-	/**
-	 * Registers a {@link DummyModel} for the {@link Item}.<br>
-	 * Registered {@code DummyModels} will prevent complaints from MC about missing model definitions and will redirect method calls to the
-	 * registered {@link IItemRenderer} for the item.
-	 *
-	 * @param item the item
-	 * @param rl the rl
-	 */
-	@SideOnly(Side.CLIENT)
-	public static void registerDummyModel(Item item, ResourceLocation rl)
-	{
-		DummyModel model = new DummyModel(item, rl);
-		//ModelLoader.setCustomModelResourceLocation(item, 0, model.getResourceLocation());
-		ModelLoader.setCustomMeshDefinition(item, stack -> model.getResourceLocation());
-		clientRegistry.itemModels.add(model);
 	}
 
 	@SideOnly(Side.CLIENT)
