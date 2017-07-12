@@ -24,6 +24,8 @@
 
 package net.malisis.core.inventory;
 
+import static com.google.common.base.Preconditions.*;
+
 import java.util.List;
 
 import com.google.common.base.Supplier;
@@ -68,9 +70,12 @@ public class MalisisTab extends CreativeTabs
 			for (Object o : items)
 			{
 				if (o instanceof Item)
-					((Item) o).getSubItems(this, itemStacks);
+					((Item) o).getSubItems(((Item) o).getCreativeTab(), itemStacks);
 				else
-					Item.getItemFromBlock((Block) o).getSubItems(this, itemStacks);
+				{
+					Item i = Item.getItemFromBlock((Block) o);
+					i.getSubItems(i.getCreativeTab(), itemStacks);
+				}
 			}
 		}
 		list.addAll(itemStacks);
@@ -78,12 +83,12 @@ public class MalisisTab extends CreativeTabs
 
 	public void addItem(Item item)
 	{
-		items.add(item);
+		items.add(checkNotNull(item));
 	}
 
 	public void addItem(Block block)
 	{
-		items.add(block);
+		items.add(checkNotNull(block));
 	}
 
 }
