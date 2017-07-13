@@ -24,8 +24,11 @@
 
 package net.malisis.core.util;
 
+import java.lang.reflect.Field;
 import java.util.Optional;
 
+import net.malisis.core.MalisisCore;
+import net.malisis.core.asm.AsmUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -36,6 +39,7 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 /**
  * @author Ordinastie
@@ -118,6 +122,24 @@ public class Utils
 		}
 
 		return new ResourceLocation(modid, res);
+	}
+
+	private static Field registryName = AsmUtils.changeFieldAccess(IForgeRegistryEntry.Impl.class, "registryName");
+
+	public static void silentRegistryName(IForgeRegistryEntry<?> object, String name)
+	{
+		ResourceLocation rl = Utils.getResourceLocation(name);
+		String mod = Loader.instance().activeModContainer().getModId();
+		if (rl.getResourceDomain() == mod.toLowerCase())
+			MalisisCore.log.warn("Setting registry name {} for already active container {}. Use setRegistryName() instead.", rl, mod);
+		try
+		{
+			registryName.set(object, rl);
+		}
+		catch (IllegalArgumentException | IllegalAccessException e)
+		{
+			MalisisCore.log.error("Failed to set registry name {} for {}.", rl, object.getClass(), e);
+		}
 	}
 
 }

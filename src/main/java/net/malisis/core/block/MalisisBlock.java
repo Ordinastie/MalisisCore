@@ -48,6 +48,7 @@ import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
+import net.malisis.core.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -161,7 +162,10 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 	{
 		this.name = name;
 		setUnlocalizedName(name);
-		setRegistryName(name);
+		if (name.startsWith("minecraft:"))
+			Utils.silentRegistryName(this, name);
+		else
+			setRegistryName(name);
 		return this;
 	}
 

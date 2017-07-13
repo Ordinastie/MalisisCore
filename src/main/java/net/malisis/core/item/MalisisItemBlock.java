@@ -31,6 +31,7 @@ import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.IMergedBlock;
 import net.malisis.core.block.IRegisterable;
 import net.malisis.core.block.MalisisBlock;
+import net.malisis.core.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
@@ -40,6 +41,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -55,7 +57,11 @@ public class MalisisItemBlock extends ItemBlock implements IRegisterable, ICompo
 	public MalisisItemBlock(MalisisBlock block)
 	{
 		super(block);
-		setRegistryName(block.getRegistryName());
+		ResourceLocation rl = block.getRegistryName();
+		if (rl.getResourceDomain().equals("minecraft"))
+			Utils.silentRegistryName(this, rl.toString());
+		else
+			setRegistryName(block.getRegistryName());
 	}
 
 	private MalisisBlock block()

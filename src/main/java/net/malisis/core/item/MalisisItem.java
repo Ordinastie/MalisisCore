@@ -39,6 +39,7 @@ import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
+import net.malisis.core.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
@@ -58,7 +59,10 @@ public class MalisisItem extends Item implements IComponentProvider, IRegisterab
 	{
 		this.name = name;
 		setUnlocalizedName(name);
-		setRegistryName(name);
+		if (name.startsWith("minecraft:"))
+			Utils.silentRegistryName(this, name);
+		else
+			setRegistryName(name);
 		return this;
 	}
 

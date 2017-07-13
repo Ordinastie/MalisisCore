@@ -26,9 +26,11 @@ package net.malisis.core.block;
 
 import net.malisis.core.item.MalisisItemBlock;
 import net.malisis.core.registry.MalisisRegistry;
+import net.malisis.core.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * This interface allows {@link Block} or {@link Item} implementing it to be registered via {@link MalisisRegistry#register(IRegisterable)}.
@@ -56,7 +58,11 @@ public interface IRegisterable
 			return new MalisisItemBlock((MalisisBlock) block);
 
 		Item item = new ItemBlock(block);
-		item.setRegistryName(block.getRegistryName());
+		ResourceLocation rl = block.getRegistryName();
+		if (rl.getResourceDomain().equals("minecraft"))
+			Utils.silentRegistryName(item, rl.toString());
+		else
+			item.setRegistryName(block.getRegistryName());
 		return item;
 	}
 
