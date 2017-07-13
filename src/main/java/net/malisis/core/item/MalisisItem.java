@@ -39,7 +39,6 @@ import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
-import net.malisis.core.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
@@ -50,26 +49,16 @@ import net.minecraft.item.Item;
  *
  */
 @MalisisRendered(DefaultRenderer.Item.class)
-public class MalisisItem extends Item implements IComponentProvider, IRegisterable
+public class MalisisItem extends Item implements IComponentProvider, IRegisterable<Item>
 {
-	protected String name;
 	protected final List<IComponent> components = Lists.newArrayList();
 
+	@Override
 	public MalisisItem setName(String name)
 	{
-		this.name = name;
+		IRegisterable.super.setName(name);
 		setUnlocalizedName(name);
-		if (name.startsWith("minecraft:"))
-			Utils.silentRegistryName(this, name);
-		else
-			setRegistryName(name);
 		return this;
-	}
-
-	@Override
-	public String getName()
-	{
-		return name;
 	}
 
 	@Override

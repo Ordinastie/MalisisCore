@@ -31,20 +31,61 @@ import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 /**
- * This interface allows {@link Block} or {@link Item} implementing it to be registered via {@link MalisisRegistry#register(IRegisterable)}.
+ * This interface allows {@link Block} or {@link Item} implementing it to be registered via
+ * {@link MalisisRegistry#register(IRegisterable)}.<br>
+ * The generic type must match the generic type of {@link IForgeRegistryEntry} if this is implemented by a class that also implements
+ * {@link IForgeRegistryEntry}
  *
  * @author Ordinastie
  */
-public interface IRegisterable
+public interface IRegisterable<T>
 {
 	/**
-	 * Gets the registry name to use.
+	 * Sets the registry name for this {@link IRegisterable}.<br>
+	 * Already implemented by {@link net.minecraftforge.registries.IForgeRegistryEntry.Impl}.
+	 *
+	 * @param name the name
+	 * @return this object
+	 */
+	public T setRegistryName(String name);
+
+	/**
+	 * Gets the registry name for this {@link IRegisterable}.<br>
+	 * Already implemented by {@link net.minecraftforge.registries.IForgeRegistryEntry.Impl}.
 	 *
 	 * @return the registry name
 	 */
-	public String getName();
+	public ResourceLocation getRegistryName();
+
+	/**
+	 * Sets the registry name of this {@link IRegisterable}.
+	 *
+	 * @param name the name
+	 * @return this object
+	 */
+	@SuppressWarnings("unchecked")
+	public default T setName(String name)
+	{
+		if (this instanceof IForgeRegistryEntry<?> && name.startsWith("minecraft:"))
+			Utils.silentRegistryName((IForgeRegistryEntry<?>) this, name);
+		else
+			setRegistryName(name);
+
+		return (T) this;
+	}
+
+	/**
+	 * Gets the registry name of this {@link IRegisterable}
+	 *
+	 * @return the registry name
+	 */
+	public default ResourceLocation getName()
+	{
+		return getRegistryName();
+	}
 
 	/**
 	 * Gets the item to register the implementing {@link Block} with.<br>

@@ -27,8 +27,6 @@ package net.malisis.core.registry;
 import static com.google.common.base.Preconditions.*;
 import static net.malisis.core.registry.Registries.*;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.collect.ImmutableMap;
 
 import net.malisis.core.MalisisCore;
@@ -114,10 +112,10 @@ public class MalisisRegistry
 	 *
 	 * @param registerable the registerable
 	 */
-	public static void register(IRegisterable registerable)
+	public static void register(IRegisterable<?> registerable)
 	{
-		String name = registerable.getName();
-		if (StringUtils.isEmpty(name))
+		ResourceLocation name = registerable.getName();
+		if (name == null)
 			throw new IllegalArgumentException("No name specified for registration for " + registerable.getClass().getName());
 		if (!(registerable instanceof Block || registerable instanceof Item))
 			throw new IllegalArgumentException("Cannot register " + registerable.getClass().getName() + " (" + name

@@ -48,7 +48,6 @@ import net.malisis.core.renderer.DefaultRenderer;
 import net.malisis.core.renderer.MalisisRendered;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.IIconProvider;
-import net.malisis.core.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -80,11 +79,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 @MalisisRendered(DefaultRenderer.Block.class)
 @SuppressWarnings("deprecation")
-public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, IComponentProvider
+public class MalisisBlock extends Block implements IBoundingBox, IRegisterable<Block>, IComponentProvider
 {
 	private static Field blockStateField = AsmUtils.changeFieldAccess(Block.class, "blockState", "field_176227_L");
 
-	protected String name;
 	protected AxisAlignedBB boundingBox;
 	protected final List<IBlockComponent> blockComponents = Lists.newArrayList();
 	protected final List<IComponent> components = Lists.newArrayList();
@@ -158,21 +156,12 @@ public class MalisisBlock extends Block implements IBoundingBox, IRegisterable, 
 		lightOpacity = getDefaultState().isOpaqueCube() ? 255 : 0;
 	}
 
-	public Block setName(String name)
-	{
-		this.name = name;
-		setUnlocalizedName(name);
-		if (name.startsWith("minecraft:"))
-			Utils.silentRegistryName(this, name);
-		else
-			setRegistryName(name);
-		return this;
-	}
-
 	@Override
-	public String getName()
+	public MalisisBlock setName(String name)
 	{
-		return name;
+		IRegisterable.super.setName(name);
+		setUnlocalizedName(name);
+		return this;
 	}
 
 	public String getUnlocalizedName(IBlockState state)

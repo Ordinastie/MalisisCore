@@ -31,17 +31,16 @@ import net.malisis.core.block.IComponentProvider;
 import net.malisis.core.block.IMergedBlock;
 import net.malisis.core.block.IRegisterable;
 import net.malisis.core.block.MalisisBlock;
-import net.malisis.core.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -52,27 +51,17 @@ import net.minecraft.world.World;
  *
  * @author Ordinastie
  */
-public class MalisisItemBlock extends ItemBlock implements IRegisterable, IComponentProvider
+public class MalisisItemBlock extends ItemBlock implements IRegisterable<Item>, IComponentProvider
 {
 	public MalisisItemBlock(MalisisBlock block)
 	{
 		super(block);
-		ResourceLocation rl = block.getRegistryName();
-		if (rl.getResourceDomain().equals("minecraft"))
-			Utils.silentRegistryName(this, rl.toString());
-		else
-			setRegistryName(block.getRegistryName());
+		setName(block.getName().toString());
 	}
 
 	private MalisisBlock block()
 	{
 		return (MalisisBlock) block;
-	}
-
-	@Override
-	public String getName()
-	{
-		return block().getName();
 	}
 
 	@Override
