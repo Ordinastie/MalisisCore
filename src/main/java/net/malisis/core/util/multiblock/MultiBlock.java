@@ -186,6 +186,17 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 		}
 	}
 
+	public void setOriginData(World world, BlockPos pos, IBlockState state)
+	{
+		setRotation(state);
+		for (MBlockState mstate : this)
+		{
+			mstate = mstate.rotate(rotation).offset(pos);
+			BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, mstate.getPos(), pos);
+		}
+		BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, pos, pos);
+	}
+
 	public boolean isComplete(World world, BlockPos pos)
 	{
 		return isComplete(world, pos, null);
@@ -215,11 +226,6 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 	}
 
 	protected abstract void buildStates();
-
-	public static void registerBlockData()
-	{
-
-	}
 
 	public static BlockPos getOrigin(IBlockAccess world, BlockPos pos)
 	{
