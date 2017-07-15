@@ -19,7 +19,7 @@ buildscript {
 plugins {
 	id "maven"
 	id "signing"
-	id "com.matthewprenger.cursegradle" version "1.0.7"
+	id "com.matthewprenger.cursegradle" version "1.0.9"
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -42,7 +42,7 @@ defaultTasks 'build', 'install'
 // Basic project information
 group = 'net.malisis'
 archivesBaseName = 'malisiscore'
-version = '1.12-6.0.0-SNAPSHOT'
+version = '1.12-6.0.1-SNAPSHOT'
 ext.packaging = 'jar'
 
 // Extended project information
