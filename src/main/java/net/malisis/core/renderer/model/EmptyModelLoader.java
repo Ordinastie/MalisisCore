@@ -25,7 +25,7 @@
 package net.malisis.core.renderer.model;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.function.Function;
 
 import javax.vecmath.Matrix4f;
@@ -33,7 +33,7 @@ import javax.vecmath.Matrix4f;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.component.ItemTransformComponent;
@@ -58,7 +58,6 @@ import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.model.IModelState;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 /**
  * @author Ordinastie
@@ -68,29 +67,23 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 public class EmptyModelLoader implements ICustomModelLoader
 {
 	private static EmptyModelLoader INSTANCE = new EmptyModelLoader();
-	private Set<ResourceLocation> locations = Sets.newHashSet();
+	private Map<ResourceLocation, DummyModel> locations = Maps.newHashMap();
 
 	private EmptyModelLoader()
 	{
 		ModelLoaderRegistry.registerLoader(this);
 	}
 
-	private ResourceLocation simpleRL(ResourceLocation rl)
-	{
-		return new ResourceLocation(rl.getResourceDomain(), rl.getResourcePath());
-	}
-
 	@Override
 	public boolean accepts(ResourceLocation modelLocation)
 	{
-		return locations.contains(simpleRL(modelLocation));
+		return locations.containsKey(modelLocation);
 	}
 
 	@Override
 	public IModel loadModel(ResourceLocation modelLocation) throws Exception
 	{
-		Item item = ForgeRegistries.ITEMS.getValue(simpleRL(modelLocation));
-		return new DummyModel(item);
+		return locations.get(modelLocation);
 	}
 
 	@Override
@@ -99,8 +92,13 @@ public class EmptyModelLoader implements ICustomModelLoader
 
 	public static void register(Item item)
 	{
-		INSTANCE.locations.add(item.getRegistryName());
 		ModelResourceLocation mrl = new ModelResourceLocation(item.getRegistryName(), "inventory");
+		register(item, mrl);
+	}
+
+	public static void register(Item item, ModelResourceLocation mrl)
+	{
+		INSTANCE.locations.put(mrl, new DummyModel(item));
 		ModelLoader.setCustomMeshDefinition(item, stack -> mrl);
 	}
 
@@ -160,7 +158,7 @@ public class EmptyModelLoader implements ICustomModelLoader
 		@Override
 		public String toString()
 		{
-			return item.getUnlocalizedName() + "[" + mrl + "]";
+			return item.getRegistryName() + "[" + mrl + "]";
 		}
 
 	}
