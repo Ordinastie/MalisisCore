@@ -28,6 +28,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.google.common.collect.Maps;
 
 import net.malisis.core.registry.AutoLoad;
@@ -60,7 +62,7 @@ public class Icon extends TextureAtlasSprite
 	/** Map of all registered {@link Icon}. These icons will be stitched with the {@link TextureStitchEvent}. */
 	protected final static Map<String, Icon> registeredIcons = Maps.newHashMap();
 	/** Map of all registered {@link VanillaIcon}. These icons will be updated after the {@link TextureStitchEvent}. */
-	protected final static Map<String, VanillaIcon> vanillaIcons = Maps.newHashMap();
+	protected final static Map<Object, VanillaIcon> vanillaIcons = Maps.newHashMap();
 
 	static
 	{
@@ -481,12 +483,11 @@ public class Icon extends TextureAtlasSprite
 	 */
 	public static Icon from(IBlockState state)
 	{
-		String name = state.getBlock().getRegistryName().toString();
-		if (vanillaIcons.get(name) != null)
-			return vanillaIcons.get(name);
+		if (vanillaIcons.get(state) != null)
+			return vanillaIcons.get(state);
 
 		VanillaIcon icon = new VanillaIcon(state);
-		vanillaIcons.put(name, icon);
+		vanillaIcons.put(state, icon);
 		return icon;
 	}
 
@@ -509,12 +510,12 @@ public class Icon extends TextureAtlasSprite
 	 */
 	public static Icon from(Item item, int metadata)
 	{
-		String name = item.getRegistryName().toString();
-		if (vanillaIcons.get(name) != null)
-			return vanillaIcons.get(name);
+		Pair<Item, Integer> p = Pair.of(item, metadata);
+		if (vanillaIcons.get(p) != null)
+			return vanillaIcons.get(p);
 
 		VanillaIcon icon = new VanillaIcon(item, metadata);
-		vanillaIcons.put(name, icon);
+		vanillaIcons.put(p, icon);
 		return icon;
 	}
 
