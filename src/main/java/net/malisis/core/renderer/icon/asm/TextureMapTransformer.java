@@ -48,14 +48,20 @@ public class TextureMapTransformer extends MalisisClassTransformer
 
 	private AsmHook loadTextureAtlas()
 	{
-		McpMethodMapping loadTextureAtlas = new McpMethodMapping("loadTextureAtlas", "func_110571_b",
-				"net/minecraft/client/renderer/texture/TextureMap", "(Lnet/minecraft/client/resources/IResourceManager;)V");
+		McpMethodMapping loadTextureAtlas = new McpMethodMapping(	"loadTextureAtlas",
+																	"func_110571_b",
+																	"net/minecraft/client/renderer/texture/TextureMap",
+																	"(Lnet/minecraft/client/resources/IResourceManager;)V");
 		AsmHook ah = new AsmHook(loadTextureAtlas);
 
-		McpMethodMapping width = new McpMethodMapping("getCurrentWidth", "func_110935_a", "net/minecraft/client/renderer/texture/Stitcher",
-				"()I");
-		McpMethodMapping height = new McpMethodMapping("getCurrentHeight", "func_110936_b",
-				"net/minecraft/client/renderer/texture/Stitcher", "()I");
+		McpMethodMapping width = new McpMethodMapping(	"getCurrentWidth",
+														"func_110935_a",
+														"net/minecraft/client/renderer/texture/Stitcher",
+														"()I");
+		McpMethodMapping height = new McpMethodMapping(	"getCurrentHeight",
+														"func_110936_b",
+														"net/minecraft/client/renderer/texture/Stitcher",
+														"()I");
 
 		//		Stitcher stitcher = new Stitcher(0, 0, false, 0, 0);
 		//		MalisisIcon.BLOCK_TEXTURE_WIDTH = stitcher.getCurrentWidth();
