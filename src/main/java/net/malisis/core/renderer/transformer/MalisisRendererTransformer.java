@@ -131,7 +131,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 	private AsmHook itemHook()
 	{
 		McpMethodMapping renderModel = new McpMethodMapping("renderModel",
-															"func_175045_a",
+															"func_191967_a",
 															"net/minecraft/client/renderer/RenderItem",
 															"(Lnet/minecraft/client/renderer/block/model/IBakedModel;ILnet/minecraft/item/ItemStack;)V");
 		AsmHook ah = new AsmHook(renderModel);
