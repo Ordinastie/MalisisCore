@@ -58,12 +58,15 @@ import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.model.IModelState;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
  *
  */
 @AutoLoad
+@SideOnly(Side.CLIENT)
 public class EmptyModelLoader implements ICustomModelLoader
 {
 	private static EmptyModelLoader INSTANCE = new EmptyModelLoader();
