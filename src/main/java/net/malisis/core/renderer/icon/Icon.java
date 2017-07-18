@@ -440,6 +440,7 @@ public class Icon extends TextureAtlasSprite
 	public static CallbackResult<Void> registerIcons(TextureMap map)
 	{
 		registeredIcons.values().forEach(icon -> icon.register(map));
+		vanillaIcons.values().forEach(icon -> icon.register(map));
 		return CallbackResult.noResult();
 	}
 
