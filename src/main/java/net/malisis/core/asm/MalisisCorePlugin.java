@@ -26,13 +26,25 @@ package net.malisis.core.asm;
 
 import java.util.Map;
 
+import net.minecraftforge.common.ForgeVersion;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
+import org.spongepowered.asm.launch.MixinBootstrap;
+import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.mixin.Mixins;
+import org.spongepowered.asm.mixin.extensibility.IEnvironmentTokenProvider;
 
 @TransformerExclusions({ "net.malisis.core.asm." })
 @IFMLLoadingPlugin.SortingIndex(1001)
 public class MalisisCorePlugin implements IFMLLoadingPlugin
 {
+
+	public MalisisCorePlugin()
+	{
+		MixinBootstrap.init();
+		Mixins.addConfiguration("mixins.malisiscore.core.json");
+	}
 
 	@Override
 	public String[] getASMTransformerClass()

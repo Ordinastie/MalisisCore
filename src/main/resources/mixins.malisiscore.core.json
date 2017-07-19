@@ -1,0 +1,16 @@
+{
+    "required": true,
+    "minVersion": "0.6.15",
+    "package": "net.malisis.core.asm.mixin.core",
+    "refmap": "mixins.malisiscore.refmap.json",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+    ],
+    "client": [
+        "client.MixinMinecraft"
+    ],
+    "server": [
+        "server.dedicated.MixinDedicatedServer"
+    ]
+}
