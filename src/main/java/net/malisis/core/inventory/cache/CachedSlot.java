@@ -40,7 +40,7 @@ public class CachedSlot implements ICachedData
 	public CachedSlot(MalisisSlot slot)
 	{
 		this.slot = slot;
-		cachedItemStack = new CachedItemStack(slot::getItemStack);
+		cachedItemStack = new CachedItemStack(() -> slot.getItemStack().copy());
 		cachedDraggedItemStack = new CachedItemStack(slot::getItemStack);
 	}
 
