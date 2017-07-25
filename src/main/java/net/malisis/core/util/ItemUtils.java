@@ -124,7 +124,7 @@ public class ItemUtils
 				amount = merge.getCount();
 			amount = Math.min(amount, merge.getCount());
 
-			if (into == ItemStack.EMPTY)
+			if (into.isEmpty())
 			{
 				nbMerged = Math.min(amount, intoMaxStackSize);
 				into = merge.copy();
