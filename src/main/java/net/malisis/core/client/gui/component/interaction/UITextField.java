@@ -142,6 +142,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (text != null)
 			this.setText(text);
 
+		//default size to prevent single line INHERITED height
+		setSize(100, multiLine ? INHERITED : 12);
+
 		shape = new XYResizableGuiShape(1);
 		cursorShape = new SimpleGuiShape();
 		selectShape = new SimpleGuiShape();
@@ -1173,14 +1176,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (cursorPosition.line < lineOffset || cursorPosition.line >= lineOffset + getVisibleLines())
 			return;
 
-		renderer.drawRectangle(	cursorPosition.getXOffset() + 1,
-								cursorPosition.getYOffset() + 1,
-								getZIndex(),
-								1,
-								getLineHeight(),
-								cursorColor,
-								255,
-								true);
+		renderer.drawRectangle(cursorPosition.getXOffset()
+				+ 1, cursorPosition.getYOffset() + 1, getZIndex(), 1, getLineHeight(), cursorColor, 255, true);
 	}
 
 	/**
