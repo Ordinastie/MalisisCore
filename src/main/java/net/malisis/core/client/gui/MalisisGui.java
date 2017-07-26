@@ -613,6 +613,14 @@ public abstract class MalisisGui extends GuiScreen
 			FontOptions fro = FontOptions.builder().color(0xFFFFFF).shadow().build();
 			//hard code mouse
 			renderer.drawText(null, "Mouse : " + mouseX + "," + mouseY, 5, dy++ * 10 + oy, 0, fro, false);
+			if (hoveredComponent != null)
+				renderer.drawText(	null,
+									"(" + hoveredComponent.relativeX(mouseX) + ", " + hoveredComponent.relativeY(mouseY) + ")",
+									100,
+									(dy - 1) * 10 + oy,
+									0,
+									fro,
+									false);
 			for (Entry<String, Supplier<String>> entry : debugMap.entrySet())
 				renderer.drawText(null, entry.getKey() + " : " + entry.getValue().get(), 5, dy++ * 10 + oy, 0, fro, false);
 
