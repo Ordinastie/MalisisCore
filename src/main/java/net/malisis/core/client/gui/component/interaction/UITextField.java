@@ -41,7 +41,6 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
 import net.malisis.core.client.gui.component.control.UISlimScrollbar;
-import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
@@ -63,12 +62,12 @@ import net.minecraft.util.ChatAllowedCharacters;
  */
 public class UITextField extends UIComponent<UITextField> implements IScrollable, IGuiText<UITextField>
 {
-	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
+	/** The {@link MalisisFont} to use for this {@link UITextField}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontOptions} to use for this {@link UITooltip}. */
-	protected FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
-	/** The {@link FontOptions} to use for this {@link UITooltip} when disabled. */
-	protected FontOptions disabledFontOptions = FontOptions.builder().build();
+	/** The {@link FontOptions} to use for this {@link UITextField}. */
+	protected FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().disableTranslation().build();
+	/** The {@link FontOptions} to use for this {@link UITextField} when disabled. */
+	protected FontOptions disabledFontOptions = FontOptions.builder().disableTranslation().build();
 	/** Current text of this {@link UITextField}. */
 	protected StringBuilder text = new StringBuilder();
 	/** Different lines if {@link #multiLine} is <code>true</code>. */
@@ -220,7 +219,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public UITextField setFontOptions(FontOptions options)
 	{
-		this.fontOptions = options;
+		this.fontOptions = options.notTranslated();
 		buildLines();
 		return this;
 	}
@@ -243,7 +242,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 */
 	public UITextField setDisabledFontOptions(FontOptions options)
 	{
-		this.disabledFontOptions = options;
+		this.disabledFontOptions = options.notTranslated();
 		return this;
 	}
 
