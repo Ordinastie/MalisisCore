@@ -33,6 +33,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
@@ -46,9 +47,11 @@ import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
+import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.Link;
 import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.renderer.font.StringWalker;
 import net.malisis.core.renderer.icon.GuiIcon;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
@@ -445,7 +448,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	/**
-	 * Sets the position of the cursor at the specified cooridnates.
+	 * Sets the position of the cursor at the specified coordinates.
 	 *
 	 * @param x the x coordinate
 	 * @param y the y coordinate
@@ -810,9 +813,17 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				charOffset = cursorPosition.character;
 			else if (text.length() != 0)
 			{
-				//charOffset = 0;
-				while (font.getStringWidth(text.substring(charOffset, cursorPosition.textPosition), fontOptions) >= getWidth() - 4)
-					charOffset++;
+				String txt = text.substring(charOffset);//toString();
+				StringWalker walker = new StringWalker(txt, font, fontOptions);
+				float cursorCoord = 0;
+				//cursor coord in string
+				while (walker.getIndex() < cursorPosition.textPosition - charOffset && walker.walk())
+					cursorCoord += walker.getWidth();
+
+				//reset walker index (0 because string already starts at charOffset)
+				walker.startIndex(0);
+				if (cursorCoord - getWidth() + 4 > 0)
+					charOffset += walker.walkToCoord(cursorCoord - getWidth() + 4) + 1;
 			}
 		}
 		else
@@ -1142,6 +1153,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		FontOptions options = isDisabled() ? disabledFontOptions : this.fontOptions;
 		if (!multiLine)
 		{
+			if (charOffset > text.length())
+				return;
 			String t = font.clipString(text.substring(charOffset, text.length()), getWidth() - 4, options);
 			renderer.drawText(font, t, 2, 2, 0, options);
 		}
@@ -1218,6 +1231,13 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 
 		GL11.glDisable(GL11.GL_COLOR_LOGIC_OP);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+
+	@Subscribe
+	public void onResize(SizeChangeEvent<UITextField> event)
+	{
+		onCursorUpdated();
+		cursorPosition.updateTextPosition();
 	}
 
 	/**

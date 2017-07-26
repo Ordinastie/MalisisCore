@@ -619,7 +619,7 @@ public class MalisisFont
 		StringWalker walker = new StringWalker(str, this, options);
 		walker.startIndex(charOffset);
 		walker.skipChars(true);
-		return walker.walkTo(position);
+		return walker.walkToCoord(position);
 	}
 
 	/**

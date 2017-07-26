@@ -198,8 +198,32 @@ public class StringWalker
 
 	}
 
-	public int walkTo(float x)
+	/**
+	 * Walk to character index {@code c} and return the coordinate for that character.
+	 *
+	 * @param c the c
+	 * @return the int
+	 */
+	public float walkToCharacter(int c)
 	{
+		endIndex(c);
+		float w = 0;
+		while (walk())
+			w += getWidth();
+
+		return w;
+	}
+
+	/**
+	 * Walk to the specified {@code x} coordinate and returns the character index at that coordinate.
+	 *
+	 * @param x the x
+	 * @return the int
+	 */
+	public int walkToCoord(float x)
+	{
+		if (x < 0)
+			return getIndex();
 		float width = 0;
 		while (walk())
 		{
