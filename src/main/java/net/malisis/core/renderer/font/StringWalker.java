@@ -24,6 +24,7 @@
 
 package net.malisis.core.renderer.font;
 
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -119,14 +120,12 @@ public class StringWalker
 
 	public void startIndex(int index)
 	{
-		this.index = index;
+		this.index = MathHelper.clamp(index, 0, endIndex);
 	}
 
 	public void endIndex(int index)
 	{
-		if (index == 0)
-			index = str.length();
-		this.endIndex = index;
+		this.endIndex = MathHelper.clamp(index, index, str.length());
 	}
 
 	private void setLinkStyle(FontOptions options)
