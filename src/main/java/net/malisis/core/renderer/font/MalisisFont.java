@@ -407,6 +407,8 @@ public class MalisisFont
 	public String processString(String str, FontOptions options)
 	{
 		str = str.replaceAll("\r?\n", "");
+		if (!options.shouldTranslate())
+			return str;
 		Pair<String, String> p = FontOptions.getStartFormat(str);
 		return p.getLeft() + translate(p.getRight());
 	}

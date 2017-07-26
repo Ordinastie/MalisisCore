@@ -78,16 +78,18 @@ public class FontOptions
 	private boolean italic;
 	/** Underline the text **/
 	private boolean underline;
-	/** Striketrhough the text **/
+	/** Strike through the text **/
 	private boolean strikethrough;
 	/** Disable ECF so char are actually drawn **/
 	private boolean formattingDisabled = false;
+	/** Translate the text before display */
+	private boolean translate = true;
 
 	private FontOptions defaultFro;
 	private FontOptions lineOptions;
 	private boolean defaultSaved = false;
 
-	private FontOptions(float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough)
+	private FontOptions(float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean translate)
 	{
 		this.fontScale = fontScale;
 		this.color = color;
@@ -95,6 +97,7 @@ public class FontOptions
 		this.italic = italic;
 		this.underline = underline;
 		this.strikethrough = strikethrough;
+		this.translate = translate;
 
 		defaultFro = new FontOptions();
 		lineOptions = new FontOptions();
@@ -187,6 +190,16 @@ public class FontOptions
 	public boolean isFormattingDisabled()
 	{
 		return formattingDisabled;
+	}
+
+	/**
+	 * Checks if the text should be translated before rendering.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean shouldTranslate()
+	{
+		return translate;
 	}
 
 	/**
@@ -440,6 +453,24 @@ public class FontOptions
 	}
 
 	/**
+	 * Get a non translation version of this {@link FontOptions}
+	 *
+	 * @return the font options
+	 */
+	public FontOptions notTranslated()
+	{
+		return builder().scale(fontScale)
+						.color(color)
+						.shadow(shadow)
+						.bold(bold)
+						.italic(italic)
+						.underline(underline)
+						.strikethrough(strikethrough)
+						.disableTranslation()
+						.build();
+	}
+
+	/**
 	 * Create the {@link FontOptionsBuilder} for a new {@link FontOptions}.
 	 *
 	 * @return the font options builder
@@ -458,6 +489,7 @@ public class FontOptions
 		private boolean italic = false;
 		private boolean underline = false;
 		private boolean strikethrough = false;
+		private boolean translate = true;
 
 		public FontOptionsBuilder()
 		{}
@@ -529,6 +561,12 @@ public class FontOptions
 			return this;
 		}
 
+		public FontOptionsBuilder disableTranslation()
+		{
+			this.translate = false;
+			return this;
+		}
+
 		public FontOptionsBuilder styles(String styles)
 		{
 			for (TextFormatting format : getFormattings(styles, 0))
@@ -565,7 +603,7 @@ public class FontOptions
 
 		public FontOptions build()
 		{
-			return new FontOptions(fontScale, color, shadow, bold, italic, underline, strikethrough);
+			return new FontOptions(fontScale, color, shadow, bold, italic, underline, strikethrough, translate);
 		}
 
 	}
