@@ -425,11 +425,11 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	 *
 	 * @param font the font
 	 * @param text the text
-	 * @param fro the fro
+	 * @param options the options
 	 */
-	public void drawText(MalisisFont font, String text, FontOptions fro)
+	public void drawText(MalisisFont font, String text, FontOptions options)
 	{
-		drawText(font, text, 0, 0, 0, fro, true);
+		drawText(font, text, 0, 0, 0, options, true);
 	}
 
 	/**
@@ -440,12 +440,12 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	 * @param x the x
 	 * @param y the y
 	 * @param z the z
-	 * @param fro the fro
+	 * @param options the options
 	 */
 	@Override
-	public void drawText(MalisisFont font, String text, float x, float y, float z, FontOptions fro)
+	public void drawText(MalisisFont font, String text, float x, float y, float z, FontOptions options)
 	{
-		drawText(font, text, x, y, z, fro, true);
+		drawText(font, text, x, y, z, options, true);
 	}
 
 	/**
@@ -456,10 +456,10 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	 * @param x the x
 	 * @param y the y
 	 * @param z the z
-	 * @param fro the fro
+	 * @param options the options
 	 * @param relative true if the coordinates are relative to current component
 	 */
-	public void drawText(MalisisFont font, String text, float x, float y, float z, FontOptions fro, boolean relative)
+	public void drawText(MalisisFont font, String text, float x, float y, float z, FontOptions options, boolean relative)
 	{
 		if (relative && currentComponent != null)
 		{
@@ -468,7 +468,7 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 			z += currentComponent.getZIndex();
 		}
 
-		super.drawText(font, text, x, y, z, fro);
+		super.drawText(font, text, x, y, z, options);
 	}
 
 	//#end drawText()

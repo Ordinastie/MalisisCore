@@ -963,16 +963,16 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 * @param x the x
 	 * @param y the y
 	 * @param z the z
-	 * @param fro the fro
+	 * @param options the options
 	 */
-	public void drawText(MalisisFont font, String text, float x, float y, float z, FontOptions fro)
+	public void drawText(MalisisFont font, String text, float x, float y, float z, FontOptions options)
 	{
 		if (font == null)
 			font = MalisisFont.minecraftFont;
-		if (fro == null)
-			fro = FontOptions.builder().build();
+		if (options == null)
+			options = FontOptions.builder().build();
 
-		font.render(this, text, x, y, z, fro);
+		font.render(this, text, x, y, z, options);
 	}
 
 	/**
