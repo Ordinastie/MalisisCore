@@ -435,7 +435,7 @@ public class MalisisFont
 	}
 
 	/**
-	 * Clips a string to fit in the specified width. The string is translated before clipping.
+	 * Clips a string to fit in the specified width.
 	 *
 	 * @param str the str
 	 * @param width the width
@@ -447,7 +447,7 @@ public class MalisisFont
 	}
 
 	/**
-	 * Clips a string to fit in the specified width. The string is translated before clipping.
+	 * Clips a string to fit in the specified width.
 	 *
 	 * @param str the str
 	 * @param width the width
@@ -460,7 +460,7 @@ public class MalisisFont
 	}
 
 	/**
-	 * Clips a string to fit in the specified width. The string is translated before clipping.
+	 * Clips a string to fit in the specified width.
 	 *
 	 * @param str the str
 	 * @param width the width
