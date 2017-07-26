@@ -142,7 +142,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			this.setText(text);
 
 		//default size to prevent single line INHERITED height
-		setSize(100, multiLine ? INHERITED : 12);
+		if (!multiLine)
+			setSize(100, 12);
 
 		shape = new XYResizableGuiShape(1);
 		cursorShape = new SimpleGuiShape();
@@ -1141,12 +1142,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		FontOptions options = isDisabled() ? disabledFontOptions : this.fontOptions;
 		if (!multiLine)
 		{
-			int end = text.length();
-			float w = font.getStringWidth(text.substring(charOffset, end), options);
-			while (w > getWidth())
-				w = font.getStringWidth(text.substring(charOffset, end--), options);
-
-			renderer.drawText(font, text.substring(charOffset, end), 2, 2, 0, options);
+			String t = font.clipString(text.substring(charOffset, text.length()), getWidth() - 4, options);
+			renderer.drawText(font, t, 2, 2, 0, options);
 		}
 		else
 		{
