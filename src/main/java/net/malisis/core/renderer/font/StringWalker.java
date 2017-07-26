@@ -125,6 +125,8 @@ public class StringWalker
 
 	public void endIndex(int index)
 	{
+		if (index == 0)
+			index = str.length();
 		this.endIndex = MathHelper.clamp(index, index, str.length());
 	}
 
