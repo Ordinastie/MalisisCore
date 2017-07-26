@@ -535,7 +535,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 			}
 			else
 			{
-				GlStateManager.pushAttrib();
+				GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 				GlStateManager.pushMatrix();
 				GlStateManager.disableLighting();
 				GlStateManager.translate(data[0], data[1], data[2]);
@@ -547,7 +547,7 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 		}
 		else if (renderType == RenderType.WORLD_LAST)
 		{
-			GlStateManager.pushAttrib();
+			GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 			GlStateManager.pushMatrix();
 			Minecraft.getMinecraft().entityRenderer.enableLightmap();
 			GlStateManager.translate(data[0], data[1], data[2]);
