@@ -243,20 +243,35 @@ public abstract class MalisisGui extends GuiScreen
 		screen.setSize(width, height);
 	}
 
+	/**
+	 * Checks whether this {@link MalisisGui} is used as an overlay.
+	 *
+	 * @return true, if is overlay
+	 */
 	public boolean isOverlay()
 	{
 		return isOverlay;
 	}
 
 	/**
-	 * Adds container to the screen.
+	 * Adds the {@link UIComponent} to the screen.
 	 *
 	 * @param component the component
 	 */
-	protected void addToScreen(UIComponent<?> component)
+	public void addToScreen(UIComponent<?> component)
 	{
 		screen.add(component);
 		component.onAddedToScreen();
+	}
+
+	/**
+	 * Removes the {@link UIComponent} from screen.
+	 *
+	 * @param component the component
+	 */
+	public void removeFromScreen(UIComponent<?> component)
+	{
+		screen.remove(component);
 	}
 
 	/**
