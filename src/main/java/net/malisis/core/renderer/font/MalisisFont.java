@@ -439,18 +439,6 @@ public class MalisisFont
 	 *
 	 * @param str the str
 	 * @param width the width
-	 * @return the string
-	 */
-	public String clipString(String str, int width)
-	{
-		return clipString(str, width, null, false);
-	}
-
-	/**
-	 * Clips a string to fit in the specified width.
-	 *
-	 * @param str the str
-	 * @param width the width
 	 * @param options the options
 	 * @return the string
 	 */
@@ -476,17 +464,6 @@ public class MalisisFont
 
 		int pos = (int) getCharPosition(str, options, width, 0);
 		return str.substring(0, pos) + (pos < str.length() && appendPeriods ? "..." : "");
-	}
-
-	/**
-	 * Gets rendering width of a string.
-	 *
-	 * @param str the str
-	 * @return the string width
-	 */
-	public float getStringWidth(String str)
-	{
-		return getStringWidth(str, null);
 	}
 
 	/**
