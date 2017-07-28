@@ -37,10 +37,9 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 
-import net.malisis.core.client.gui.ClipArea;
+import jdk.nashorn.internal.runtime.options.Options;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
@@ -61,7 +60,7 @@ import net.malisis.core.renderer.icon.provider.GuiIconProvider;
  *
  * @author Ordinastie
  */
-public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Option<T>>, IClipable, IGuiText<UISelect<T>>, IScrollable
+public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Option<T>>, IGuiText<UISelect<T>>
 {
 	/** The {@link MalisisFont} to use for this {@link UISelect}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
@@ -84,6 +83,8 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	protected int maxDisplayedOptions = Integer.MAX_VALUE;
 	/** Whether this {@link UISelect} is expanded. */
 	protected boolean expanded = false;
+	/** Container holding the {@link Options}. */
+	protected OptionsContainer optionsContainer;
 	/** Width of displayed {@link Option} box */
 	protected int optionsWidth = 0;
 	/** Height of displayed {@link Option} box */
@@ -109,9 +110,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		}
 	};
 
-	protected UISlimScrollbar scrollbar;
-	protected int optionOffset;
-
 	/** Background color */
 	protected int bgColor = 0xFFFFFF;
 	/** Hovered background color */
@@ -119,12 +117,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 	/** Shape used to draw the arrow. */
 	protected GuiShape arrowShape;
-	/** Shape used to draw the {@link Option options} box */
-	protected GuiShape optionsShape;
-	/** Shape used to draw the hovered {@link Option} background **/
-	protected GuiShape optionBackground;
-	/** Icon used to draw the option container. */
-	protected GuiIconProvider iconsExpanded;
 	/** Icon used to draw the arrow. */
 	protected GuiIconProvider arrowIcon;
 
@@ -138,27 +130,21 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public UISelect(MalisisGui gui, int width, Iterable<T> values)
 	{
 		super(gui);
+
 		setSize(width, 12);
 		setOptions(values);
-
-		scrollbar = new UISlimScrollbar(gui, this, UIScrollBar.Type.VERTICAL);
-		scrollbar.setFade(false);
-		scrollbar.setAutoHide(true);
-		scrollbar.setOffset(0, 12);
 
 		shape = new XResizableGuiShape(3);
 		arrowShape = new SimpleGuiShape();
 		arrowShape.setSize(7, 4);
 		arrowShape.storeState();
-		optionsShape = new XYResizableGuiShape(1);
-		optionBackground = new SimpleGuiShape();
 
 		iconProvider = new GuiIconProvider(	gui.getGuiTexture().getXResizableIcon(200, 30, 9, 12, 3),
 											null,
 											gui.getGuiTexture().getXResizableIcon(200, 42, 9, 12, 3));
-
-		iconsExpanded = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1));
 		arrowIcon = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 48, 7, 4));
+
+		optionsContainer = new OptionsContainer(gui);
 	}
 
 	/**
@@ -176,7 +162,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	@Override
 	public int getHeight()
 	{
-		return expanded ? optionsHeight : super.getHeight();
+		return super.getHeight();
 	}
 
 	@Override
@@ -325,17 +311,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 	//#end Getters/Setters
 
-	@Override
-	public void setFocused(boolean focused)
-	{
-		super.setFocused(focused);
-		if (!focused && expanded)
-		{
-			expanded = false;
-			scrollbar.updateScrollbar();
-		}
-	}
-
 	/**
 	 * Sets a pattern that will be used to format the option label.
 	 *
@@ -371,6 +346,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		for (Option<?> option : this)
 			optionsWidth = Math.max(optionsWidth,
 									(int) MalisisFont.minecraftFont.getStringWidth(option.getLabel(labelPattern), fontOptions));
+
 		optionsWidth += 4;
 		if (maxExpandedWidth > 0)
 			optionsWidth = Math.min(maxExpandedWidth, optionsWidth);
@@ -485,14 +461,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			setSelectedOption(option);
 
 		if (expanded && maxDisplayedOptions < options.size())
-		{
-			int i = getSelectedIndex();
-			if (i < optionOffset)
-				optionOffset = i;
-			else if (i >= optionOffset + maxDisplayedOptions)
-				optionOffset = i - maxDisplayedOptions + 1;
-			optionOffset = Math.max(0, Math.min(options.size() - maxDisplayedOptions, optionOffset));
-		}
+			optionsContainer.updateOptionOffset();
 
 		return getSelectedValue();
 	}
@@ -574,33 +543,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		return null;
 	}
 
-	/**
-	 * Gets the {@link Option} at the speicfied coordinates.
-	 *
-	 * @param mouseX the mouse x
-	 * @param mouseY the mouse y
-	 * @return the option
-	 */
-	protected Option<T> getOptionAt(int mouseX, int mouseY)
-	{
-		if (!isInsideBounds(mouseX, mouseY))
-			return null;
-
-		int y = relativeY(mouseY - 13);
-		if (y < 0)
-			return null;
-
-		int cy = 0;
-		for (int i = optionOffset; i < optionOffset + maxDisplayedOptions && i < options.size(); i++)
-		{
-			Option<T> option = options.get(i);
-			if (cy + option.getHeight(this) > y)
-				return option;
-			cy += option.getHeight(this);
-		}
-		return null;
-	}
-
 	protected int getSelectedIndex()
 	{
 		if (selectedOption == null)
@@ -627,94 +569,12 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	@Override
 	public int getZIndex()
 	{
-		return super.getZIndex() + (expanded ? 300 : 0);
+		return super.getZIndex();
 	}
-
-	//#region IClipable
-	@Override
-	public ClipArea getClipArea()
-	{
-		return new ClipArea(this, screenX(), screenY(), screenX() + optionsWidth, screenY() + optionsHeight + 12, false);
-	}
-
-	@Override
-	public void setClipContent(boolean clip)
-	{}
-
-	@Override
-	public boolean shouldClipContent()
-	{
-		return expanded;
-	}
-
-	//#end IClipable
-
-	//#region IScrollable
-	@Override
-	public int getContentHeight()
-	{
-		if (!expanded || maxDisplayedOptions > options.size())
-			return getHeight();
-
-		return optionsHeight * options.size();
-	}
-
-	@Override
-	public int getContentWidth()
-	{
-		return 0;
-	}
-
-	@Override
-	public float getOffsetX()
-	{
-		return 0;
-	}
-
-	@Override
-	public void setOffsetX(float offsetX, int delta)
-	{}
-
-	@Override
-	public float getOffsetY()
-	{
-		if (options.size() < maxDisplayedOptions)
-			return 0;
-		return (float) optionOffset / (options.size() - maxDisplayedOptions);
-	}
-
-	@Override
-	public void setOffsetY(float offsetY, int delta)
-	{
-		optionOffset = Math.round(offsetY / getScrollStep());
-		optionOffset = Math.max(0, Math.min(options.size() - maxDisplayedOptions, optionOffset));
-	}
-
-	@Override
-	public float getScrollStep()
-	{
-		return (float) 1 / (options.size() - maxDisplayedOptions);
-	}
-
-	@Override
-	public int getVerticalPadding()
-	{
-		return 1;
-	}
-
-	@Override
-	public int getHorizontalPadding()
-	{
-		return 1;
-	}
-
-	//#end IScrollable
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		shape.resetState();
-		shape.setSize(super.getWidth(), super.getHeight());
 		rp.colorMultiplier.set(bgColor);
 		renderer.drawShape(shape, rp);
 	}
@@ -744,74 +604,25 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			selectedOption.draw(this, renderer, 2, 2, 2, partialTick, false, true);
 		}
 
-		if (!expanded)
-			return;
-
-		renderer.next();
-
-		ClipArea area = getClipArea();
-		renderer.startClipping(area);
-
-		optionsShape.resetState();
-		optionsShape.setSize(optionsWidth, optionsHeight);
-		optionsShape.translate(0, 12, 1);
-		rp.iconProvider.set(iconsExpanded);
-		rp.colorMultiplier.set(bgColor);
-
-		renderer.drawShape(optionsShape, rp);
-		renderer.next();
-
-		int y = 14;
-		Option<T> hover = getOptionAt(mouseX, mouseY);
-		for (int i = optionOffset; i < optionOffset + maxDisplayedOptions && i < options.size(); i++)
-		{
-			Option<T> option = options.get(i);
-			option.draw(this, renderer, 0, y, 0, partialTick, option.equals(hover), false);
-			y += option.getHeight(this);
-		}
-
-		renderer.endClipping(area);
 	}
 
 	@Override
 	public boolean onClick(int x, int y)
 	{
 		if (!expanded)
-		{
-			expanded = true;
-			optionOffset = Math.max(0, Math.min(options.size() - maxDisplayedOptions, getSelectedIndex()));
-			scrollbar.updateScrollbar();
-			return true;
-		}
+			optionsContainer.display();
+		else
+			optionsContainer.hide();
 
-		Option<T> opt = getOptionAt(x, y);
-		if (opt != null)
-		{
-			if (opt.isDisabled())
-			{
-				setFocused(true);
-				return true;
-			}
-
-			select(opt);
-		}
-		expanded = false;
-		scrollbar.updateScrollbar();
-		setFocused(true);
 		return true;
+
 	}
 
 	@Override
 	public boolean onScrollWheel(int x, int y, int delta)
 	{
-		if (!isFocused() || maxDisplayedOptions < options.size())
-		{
-			if (isDisabled())
-				return false;
-
-			scrollbar.onScrollWheel(x, y, delta);
-			return true; //prevent the scrolling of the parent container
-		}
+		if (!isFocused())
+			return true;
 
 		if (delta < 0)
 			selectNext();
@@ -823,7 +634,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	@Override
 	public boolean onKeyTyped(char keyChar, int keyCode)
 	{
-		if (!isFocused())
+		if (!isFocused() && !optionsContainer.isFocused())
 			return super.onKeyTyped(keyChar, keyCode);
 
 		switch (keyCode)
@@ -850,6 +661,232 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public Iterator<Option<T>> iterator()
 	{
 		return options.iterator();
+	}
+
+	public class OptionsContainer extends UIComponent<OptionsContainer> implements IScrollable
+	{
+		/** The {@link UIScrollBar} used by this {@link OptionsContainer}. */
+		protected UISlimScrollbar scrollbar;
+		/** The option offset for the {@link UIScrollBar}. */
+		protected int optionOffset;
+
+		/** Shape used to draw the {@link Option options} box */
+		protected GuiShape optionsShape;
+		/** Shape used to draw the hovered {@link Option} background **/
+		protected GuiShape optionBackground;
+		/** Icon used to draw the option container. */
+		protected GuiIconProvider iconsExpanded;
+
+		public OptionsContainer(MalisisGui gui)
+		{
+			super(gui);
+			gui.addToScreen(this);
+
+			setZIndex(100);
+
+			hide();
+
+			shape = new XYResizableGuiShape(1);
+			optionBackground = new SimpleGuiShape();
+
+			scrollbar = new UISlimScrollbar(gui, this, UIScrollBar.Type.VERTICAL);
+			scrollbar.setFade(false);
+			scrollbar.setAutoHide(true);
+			scrollbar.setOffset(0, 0);
+
+			iconsExpanded = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1));
+		}
+
+		@Override
+		public int getWidth()
+		{
+			return Math.max(UISelect.this.getWidth(), maxExpandedWidth);
+		}
+
+		@Override
+		public int getHeight()
+		{
+			int h = 0;
+			for (int i = optionOffset; i < Math.min(optionOffset + maxDisplayedOptions, options.size()); i++)
+				h += options.get(i).getHeight(UISelect.this);
+			return h + 2;
+		}
+
+		private void display()
+		{
+			setVisible(true);
+			//place the container just below the UISelect
+			//TODO: place it above if room below is too small
+			setPosition(UISelect.this.screenX(), UISelect.this.screenY() + UISelect.this.getHeight());
+			optionOffset = Math.max(0, Math.min(options.size() - maxDisplayedOptions, getSelectedIndex()));
+			scrollbar.updateScrollbar();
+			setFocused(true);
+			expanded = true;
+		}
+
+		private void hide()
+		{
+			if (isFocused())
+				setFocused(false);
+			setVisible(false);
+			expanded = false;
+		}
+
+		@Override
+		public void setFocused(boolean focused)
+		{
+			super.setFocused(focused);
+			//			if (!focused && !UISelect.this.isFocused())
+			//				hide();
+		}
+
+		private void updateOptionOffset()
+		{
+			int i = getSelectedIndex();
+			if (i < optionOffset)
+				optionOffset = i;
+			else if (i >= optionOffset + maxDisplayedOptions)
+				optionOffset = i - maxDisplayedOptions + 1;
+			optionOffset = Math.max(0, Math.min(options.size() - maxDisplayedOptions, optionOffset));
+		}
+
+		/**
+		 * Gets the {@link Option} at the speicfied coordinates.
+		 *
+		 * @param mouseX the mouse x
+		 * @param mouseY the mouse y
+		 * @return the option
+		 */
+		protected Option<T> getOptionAt(int mouseX, int mouseY)
+		{
+			if (!isInsideBounds(mouseX, mouseY))
+				return null;
+
+			int y = relativeY(mouseY);
+			int cy = 0;
+			for (int i = optionOffset; i < optionOffset + maxDisplayedOptions && i < options.size(); i++)
+			{
+				Option<T> option = options.get(i);
+				if (cy + option.getHeight(UISelect.this) > y)
+					return option;
+				cy += option.getHeight(UISelect.this);
+			}
+			return null;
+		}
+
+		//#region IScrollable
+		@Override
+		public int getContentHeight()
+		{
+			int h = 0;
+			for (Option<T> option : UISelect.this)
+				h += option.getHeight(UISelect.this);
+			return h;
+		}
+
+		@Override
+		public int getContentWidth()
+		{
+			return 0;
+		}
+
+		@Override
+		public float getOffsetX()
+		{
+			return 0;
+		}
+
+		@Override
+		public void setOffsetX(float offsetX, int delta)
+		{}
+
+		@Override
+		public float getOffsetY()
+		{
+			if (options.size() < maxDisplayedOptions)
+				return 0;
+			return (float) optionOffset / (options.size() - maxDisplayedOptions);
+		}
+
+		@Override
+		public void setOffsetY(float offsetY, int delta)
+		{
+			optionOffset = Math.round(offsetY / getScrollStep());
+			optionOffset = Math.max(0, Math.min(options.size() - maxDisplayedOptions, optionOffset));
+		}
+
+		@Override
+		public float getScrollStep()
+		{
+			return (float) 1 / (options.size() - maxDisplayedOptions);
+		}
+
+		@Override
+		public int getVerticalPadding()
+		{
+			return 1;
+		}
+
+		@Override
+		public int getHorizontalPadding()
+		{
+			return 1;
+		}
+
+		//#end IScrollable
+
+		@Override
+		public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+		{
+			rp.iconProvider.set(iconsExpanded);
+			rp.colorMultiplier.set(bgColor);
+
+			renderer.drawShape(shape, rp);
+			renderer.next();
+		}
+
+		@Override
+		public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+		{
+			if (!isFocused() && !UISelect.this.isFocused() && !scrollbar.isFocused())
+				hide();
+
+			Option<T> hover = getOptionAt(mouseX, mouseY);
+			int y = 1;
+			for (int i = optionOffset; i < optionOffset + maxDisplayedOptions && i < options.size(); i++)
+			{
+				Option<T> option = options.get(i);
+				option.draw(UISelect.this, renderer, 0, y + 1, 0, partialTick, option.equals(hover), false);
+				y += option.getHeight(UISelect.this);
+			}
+		}
+
+		@Override
+		public boolean onClick(int x, int y)
+		{
+			Option<T> opt = getOptionAt(x, y);
+			if (opt != null)
+			{
+				if (opt.isDisabled())
+				{
+					setFocused(true);
+					return true;
+				}
+
+				select(opt);
+			}
+			hide();
+
+			UISelect.this.setFocused(true);
+			scrollbar.updateScrollbar();
+			return true;
+		}
+
+		@Override
+		public boolean onKeyTyped(char keyChar, int keyCode)
+		{
+			return UISelect.this.onKeyTyped(keyChar, keyCode);
+		}
 	}
 
 	/**
@@ -964,12 +1001,10 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 				return;
 
 			if (hovered && !disabled)
-			{
 				renderer.drawRectangle(x + 1, y - 1, z + 2, select.optionsWidth - 2, getHeight(select), select.getHoverBgColor(), 255);
-			}
 
 			if (isTop)
-				text = MalisisFont.minecraftFont.clipString(text, select.getWidth() - 15);
+				text = MalisisFont.minecraftFont.clipString(text, select.getWidth() - 15, select.fontOptions);
 
 			FontOptions options = select.getFontOptions();
 			if (equals(select.getSelectedOption()) && !isTop)
@@ -993,7 +1028,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	/**
 	 * Event fired when a {@link UISelect} changes its selected {@link Option}.<br>
 	 * When catching the event, the state is not applied to the {@code UISelect} yet.<br>
-	 * Cancelling the event will prevent the {@code Option} to be set for the {@code UISelect} .
+	 * Canceling the event will prevent the {@code Option} to be set for the {@code UISelect} .
 	 */
 	public static class SelectEvent<T> extends ValueChange<UISelect<T>, T>
 	{
