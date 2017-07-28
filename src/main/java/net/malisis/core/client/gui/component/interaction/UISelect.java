@@ -700,7 +700,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		@Override
 		public int getWidth()
 		{
-			return Math.max(UISelect.this.getWidth(), maxExpandedWidth);
+			return optionsWidth;// Math.max(UISelect.this.getWidth(), maxExpandedWidth);
 		}
 
 		@Override
@@ -763,7 +763,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 				return null;
 
 			int y = relativeY(mouseY);
-			int cy = 0;
+			int cy = 2;
 			for (int i = optionOffset; i < optionOffset + maxDisplayedOptions && i < options.size(); i++)
 			{
 				Option<T> option = options.get(i);
