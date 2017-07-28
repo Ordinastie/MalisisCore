@@ -369,8 +369,8 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	{
 		optionsWidth = getWidth() - 4;
 		for (Option<?> option : this)
-			optionsWidth = Math.max(optionsWidth, (int) MalisisFont.minecraftFont.getStringWidth(option.getLabel(labelPattern)));
-
+			optionsWidth = Math.max(optionsWidth,
+									(int) MalisisFont.minecraftFont.getStringWidth(option.getLabel(labelPattern), fontOptions));
 		optionsWidth += 4;
 		if (maxExpandedWidth > 0)
 			optionsWidth = Math.min(maxExpandedWidth, optionsWidth);

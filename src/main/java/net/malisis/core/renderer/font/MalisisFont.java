@@ -479,17 +479,6 @@ public class MalisisFont
 	}
 
 	/**
-	 * Gets rendering width of a string.
-	 *
-	 * @param str the str
-	 * @return the string width
-	 */
-	public float getStringWidth(String str)
-	{
-		return getStringWidth(str, null);
-	}
-
-	/**
 	 * Gets rendering width of a string according to fontScale.
 	 *
 	 * @param str the str
