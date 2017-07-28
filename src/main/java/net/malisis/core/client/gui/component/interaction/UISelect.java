@@ -582,9 +582,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		optionsHeight = 10 * Math.min(options.size(), maxDisplayedOptions) + 2;
-		if (optionsHeight < 10)
-			optionsHeight = 10;
 		if (selectedOption != null)
 			select(selectedOption.getKey());
 
@@ -700,7 +697,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		@Override
 		public int getWidth()
 		{
-			return Math.max(UISelect.this.getWidth(), maxExpandedWidth);
+			return optionsWidth;// Math.max(UISelect.this.getWidth(), maxExpandedWidth);
 		}
 
 		@Override
@@ -763,7 +760,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 				return null;
 
 			int y = relativeY(mouseY);
-			int cy = 0;
+			int cy = 2;
 			for (int i = optionOffset; i < optionOffset + maxDisplayedOptions && i < options.size(); i++)
 			{
 				Option<T> option = options.get(i);
