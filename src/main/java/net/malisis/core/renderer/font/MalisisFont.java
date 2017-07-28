@@ -439,18 +439,6 @@ public class MalisisFont
 	 *
 	 * @param str the str
 	 * @param width the width
-	 * @return the string
-	 */
-	public String clipString(String str, int width)
-	{
-		return clipString(str, width, null, false);
-	}
-
-	/**
-	 * Clips a string to fit in the specified width.
-	 *
-	 * @param str the str
-	 * @param width the width
 	 * @param options the options
 	 * @return the string
 	 */
