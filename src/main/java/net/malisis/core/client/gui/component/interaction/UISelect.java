@@ -160,12 +160,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 	//#region Getters/Setters
 	@Override
-	public int getHeight()
-	{
-		return super.getHeight();
-	}
-
-	@Override
 	public MalisisFont getFont()
 	{
 		return font;
@@ -567,12 +561,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	}
 
 	@Override
-	public int getZIndex()
-	{
-		return super.getZIndex();
-	}
-
-	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		rp.colorMultiplier.set(bgColor);
@@ -682,7 +670,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			super(gui);
 			gui.addToScreen(this);
 
-			setZIndex(100);
+			setZIndex(300);
 
 			hide();
 
@@ -730,14 +718,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 				setFocused(false);
 			setVisible(false);
 			expanded = false;
-		}
-
-		@Override
-		public void setFocused(boolean focused)
-		{
-			super.setFocused(focused);
-			//			if (!focused && !UISelect.this.isFocused())
-			//				hide();
 		}
 
 		private void updateOptionOffset()
