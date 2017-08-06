@@ -600,18 +600,6 @@ public class MalisisFont
 	}
 
 	/**
-	 * Splits the string in multiple lines to fit in the specified maxWidth.
-	 *
-	 * @param text the text
-	 * @param maxWidth the max width
-	 * @return list of lines that won't exceed maxWidth limit
-	 */
-	public List<String> wrapText(String text, int maxWidth)
-	{
-		return wrapText(text, maxWidth, null);
-	}
-
-	/**
 	 * Splits the string in multiple lines to fit in the specified maxWidth using the specified fontScale.
 	 *
 	 * @param str the str
