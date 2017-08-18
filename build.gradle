@@ -9,9 +9,15 @@ buildscript {
 			name = 'forge-repo'
 			url = 'http://files.minecraftforge.net/maven/'
 		}
+		maven {
+			name = 'sponge'
+			url = 'http://repo.spongepowered.org/maven'
+		}
 	}
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+		classpath 'org.spongepowered:mixingradle:0.4-SNAPSHOT'
+		classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.0'
 	}
 }
 
@@ -23,7 +29,8 @@ plugins {
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
-
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 // Project repositories
 repositories {
@@ -33,8 +40,16 @@ repositories {
 		name = 'sonatype-nexus-public'
 		url = 'https://oss.sonatype.org/content/repositories/public/'
 	}
+	maven {
+		name = 'sponge'
+		url = 'http://repo.spongepowered.org/maven'
+	}
 }
 
+// Project dependencies
+dependencies {
+	compile "org.spongepowered:mixin:0.6.15-SNAPSHOT"
+}
 
 // Gradle default tasks
 defaultTasks 'build', 'install'
@@ -56,6 +71,9 @@ ext.buildNumber = project.hasProperty("buildNumber") ? buildNumber : '0'
 ext.ciSystem = project.hasProperty("ciSystem") ? ciSystem : 'unknown'
 ext.commit = project.hasProperty("commit") ? commit : 'unknown'
 
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
 // MinecraftForge version
 minecraft {
     version = "1.12-14.21.1.2407"
@@ -69,6 +87,12 @@ minecraft {
 	
 	replace '${version}', project.version
     replaceIn "MalisisCore.java"
+}
+
+sourceSets {
+	main {
+		ext.refMap = "mixins.malisiscore.refmap.json"
+	}
 }
 
 // Filter, process, and include resources
@@ -91,18 +115,23 @@ processResources {
 	}
 }
 
-// JAR manifest configuration
-def commonManifest = {
-		mainAttributes(	"Built-By": "Ordinastie",
-						"Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
-						"Implementation-Title": name,
-						"Implementation-Version": version,
-						"Implementation-Vendor": url,
-						"FMLCorePlugin": "net.malisis.core.asm.MalisisCorePlugin",
-						"FMLCorePluginContainsFMLMod": true,
-						"FMLAT": "malisiscore_at.cfg")
+jar {
+    classifier 'base'
+	manifest {
+		attributes  "Built-By": "Ordinastie",
+					"Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
+					"Implementation-Title": name,
+					"Implementation-Version": version,
+					"Implementation-Vendor": url,
+					"FMLCorePlugin": "net.malisis.core.asm.MalisisCorePlugin",
+					"FMLCorePluginContainsFMLMod": true,
+					"ForceLoadAsMod": true,
+					"TweakClass": "org.spongepowered.asm.launch.MixinTweaker",
+					"TweakOrder": 0,
+					"MixinConfigs": "mixins.malisiscore.core.json",
+					"FMLAT": "malisiscore_at.cfg"
+	}
 }
-jar.manifest commonManifest
 
 if (JavaVersion.current().isJava8Compatible()) {
 	tasks.withType(Javadoc) {
@@ -125,11 +154,23 @@ task sourcesJar(type: Jar) {
 
 // Create a JAR based on deobfuscated code
 task deobfJar(type: Jar) {
-	manifest commonManifest
+	manifest.from jar.manifest
 	from sourceSets.main.output
 	classifier = 'dev'
 }
 
+shadowJar {
+	mainSpec.sourcePaths.clear()
+	dependsOn reobfJar
+	classifier ''
+	exclude 'dummyThing'
+	dependencies {
+		include dependency('org.spongepowered:mixin')
+	}
+	afterEvaluate {
+		from zipTree(reobfJar.jar)
+	}
+}
 
 makeStart {
     // TODO do this properly with FG2
@@ -141,7 +182,7 @@ makeStart {
 
 // Set all artifacts
 artifacts {
-	archives deobfJar, sourcesJar, javadocJar
+	archives shadowJar, deobfJar, sourcesJar, javadocJar
 }
 
 // Deployment signing
