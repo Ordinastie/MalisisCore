@@ -8,6 +8,9 @@
     "mixins": [
     	    ],
     "client": [
-        "client.MixinTextureMap"
+        "client.MixinTextureMap",
+        "client.MixinMalisisRenderer$MixinBlockRendererDispatcher",
+        "client.MixinMalisisRenderer$MixinRenderItem",
+        "client.MixinMalisisRenderer$MixinBlockModelShapes"
     ]
 }

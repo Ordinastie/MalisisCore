@@ -62,7 +62,7 @@ public class MalisisRendererTransformer extends MalisisClassTransformer
 															"(Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/BufferBuilder;)Z");
 		AsmHook ah = new AsmHook(renderBlock);
 
-		//int i = state.getBlock().getRenderType();
+		//int i = state.getRenderType();
 		//	    ALOAD 1
 		//	    INVOKEINTERFACE net/minecraft/block/state/IBlockState.getRenderType ()Lnet/minecraft/util/EnumBlockRenderType;
 		//	    ASTORE 5
