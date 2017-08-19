@@ -6,11 +6,8 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-    ],
+    	    ],
     "client": [
-        "client.MixinMinecraft"
-    ],
-    "server": [
-        "server.dedicated.MixinDedicatedServer"
+        "client.MixinTextureMap"
     ]
 }

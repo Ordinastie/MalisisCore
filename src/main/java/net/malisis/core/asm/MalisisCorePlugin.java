@@ -26,14 +26,11 @@ package net.malisis.core.asm;
 
 import java.util.Map;
 
-import net.minecraftforge.common.ForgeVersion;
-import net.minecraftforge.fml.common.Loader;
+import org.spongepowered.asm.launch.MixinBootstrap;
+import org.spongepowered.asm.mixin.Mixins;
+
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
-import org.spongepowered.asm.launch.MixinBootstrap;
-import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.asm.mixin.Mixins;
-import org.spongepowered.asm.mixin.extensibility.IEnvironmentTokenProvider;
 
 @TransformerExclusions({ "net.malisis.core.asm." })
 @IFMLLoadingPlugin.SortingIndex(1001)
@@ -52,7 +49,7 @@ public class MalisisCorePlugin implements IFMLLoadingPlugin
 		return new String[] {	"net.malisis.core.util.chunkcollision.ChunkCollisionTransformer",
 								"net.malisis.core.util.chunkblock.ChunkBlockTransformer",
 								"net.malisis.core.renderer.transformer.MalisisRendererTransformer",
-								"net.malisis.core.renderer.icon.asm.TextureMapTransformer",
+								//"net.malisis.core.renderer.icon.asm.TextureMapTransformer",
 								"net.malisis.core.util.clientnotif.ClientNotifTransformer", };
 	}
 
