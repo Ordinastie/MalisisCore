@@ -44,8 +44,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author Ordinastie
@@ -282,7 +280,6 @@ public interface IBlockComponent extends IComponent
 	 * @param tab the tab
 	 * @param list the list
 	 */
-	@SideOnly(Side.CLIENT)
 	public default void getSubBlocks(Block block, CreativeTabs tab, NonNullList<ItemStack> list)
 	{}
 
