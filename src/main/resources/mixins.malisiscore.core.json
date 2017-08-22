@@ -6,6 +6,8 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
+    	"MixinClientNotif$MixinWorld",
+    	"MixinClientNotif$MixinWorldServer"
     	    ],
     "client": [
         "client.MixinTextureMap",
