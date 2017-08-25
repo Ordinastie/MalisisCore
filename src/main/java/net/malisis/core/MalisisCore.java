@@ -176,7 +176,7 @@ public class MalisisCore implements IMalisisMod
 	}
 
 	/**
-	 * Automatically loads (and eventually instanciate) classes with the {@link AutoLoad} annotation.
+	 * Automatically loads (and eventually instantiate) classes with the {@link AutoLoad} annotation.
 	 *
 	 * @param asmDataTable the asm data table
 	 */
