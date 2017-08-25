@@ -46,8 +46,8 @@ public class MalisisCorePlugin implements IFMLLoadingPlugin
 	@Override
 	public String[] getASMTransformerClass()
 	{
-		return new String[] {	"net.malisis.core.util.chunkcollision.ChunkCollisionTransformer",
-								"net.malisis.core.util.chunkblock.ChunkBlockTransformer",
+		return new String[] { "net.malisis.core.util.chunkcollision.ChunkCollisionTransformer",
+				//"net.malisis.core.util.chunkblock.ChunkBlockTransformer",
 				//"net.malisis.core.renderer.transformer.MalisisRendererTransformer",
 				//"net.malisis.core.renderer.icon.asm.TextureMapTransformer",
 				//"net.malisis.core.util.clientnotif.ClientNotifTransformer",

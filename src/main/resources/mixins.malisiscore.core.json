@@ -7,7 +7,8 @@
     "compatibilityLevel": "JAVA_8",
     "mixins": [
     	"MixinClientNotif$MixinWorld",
-    	"MixinClientNotif$MixinWorldServer"
+    	"MixinClientNotif$MixinWorldServer",
+    	"MixinChunk"
     	    ],
     "client": [
         "client.MixinTextureMap",
