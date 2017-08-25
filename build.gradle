@@ -48,7 +48,7 @@ repositories {
 
 // Project dependencies
 dependencies {
-	compile "org.spongepowered:mixin:0.6.15-SNAPSHOT"
+	compile "org.spongepowered:mixin:0.7.2-SNAPSHOT"
 }
 
 // Gradle default tasks
