@@ -47,7 +47,8 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 public class MixinChunk
 {
 	@Inject(method = "setBlockState",
-			at = @At(value = "INVOKE", target = "set(IIILnet/minecraft/block/state/IBlockState;)V"),
+			at = @At(	value = "INVOKE",
+						target = "Lnet/minecraft/world/chunk/storage/ExtendedBlockStorage;set(IIILnet/minecraft/block/state/IBlockState;)V"),
 			locals = LocalCapture.CAPTURE_FAILSOFT,
 			cancellable = true)
 	private void preSetBlock(BlockPos pos, IBlockState state, CallbackInfoReturnable<IBlockState> cir, int i, int j, int k, int l, int i1, IBlockState iblockstate, Block block, Block block1, int k1, ExtendedBlockStorage extendedblockstorage, boolean flag)
@@ -58,8 +59,10 @@ public class MixinChunk
 	}
 
 	@Inject(method = "setBlockState",
-			at = @At(value = "INVOKE", target = "set(IIILnet/minecraft/block/state/IBlockState;)V", shift = Shift.AFTER),
-			locals = LocalCapture.PRINT)
+			at = @At(	value = "INVOKE",
+						target = "Lnet/minecraft/world/chunk/storage/ExtendedBlockStorage;set(IIILnet/minecraft/block/state/IBlockState;)V",
+						shift = Shift.AFTER),
+			locals = LocalCapture.CAPTURE_FAILSOFT)
 	private void postSetBlock(BlockPos pos, IBlockState oldState, CallbackInfoReturnable<IBlockState> cir, int i, int j, int k, int l, int i1, IBlockState newState, Block block, Block block1, int k1, ExtendedBlockStorage extendedblockstorage, boolean flag)
 	{
 		Registries.processPostSetBlock((Chunk) (Object) this, pos, oldState, newState);
