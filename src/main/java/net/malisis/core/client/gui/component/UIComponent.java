@@ -76,7 +76,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	/** Reference to the {@link MalisisGui} this {@link UIComponent} was added to. */
 	private final MalisisGui gui;
 	/** Reference to the {@link GuiRenderer} that will draw this {@link UIComponent}. */
-	private final GuiRenderer renderer;
+	protected final GuiRenderer renderer;
 	/** List of {@link UIComponent components} controlling this {@link UIContainer}. */
 	private final Set<IControlComponent> controlComponents;
 	/** Position of this {@link UIComponent}. */
