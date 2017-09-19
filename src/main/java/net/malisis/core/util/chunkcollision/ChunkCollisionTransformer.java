@@ -219,7 +219,7 @@ public class ChunkCollisionTransformer extends MalisisClassTransformer
 	@SuppressWarnings("deprecation")
 	private AsmHook placeBlockHook()
 	{
-		McpMethodMapping onItemUse = new McpMethodMapping(	"onItemUse",
+		McpMethodMapping onItemUse = new McpMethodMapping(	" ",
 															"func_180614_a",
 															"net/minecraft/item/ItemBlock",
 															"(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;");

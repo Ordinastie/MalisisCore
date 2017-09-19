@@ -8,7 +8,9 @@
     "mixins": [
     	"MixinClientNotif$MixinWorld",
     	"MixinClientNotif$MixinWorldServer",
-    	"MixinChunk"
+    	"MixinChunk",
+    	"MixinChunkCollision$MixinItemBlock",
+    	"MixinChunkCollision$MixinNetHandlerPlayServer"
     	    ],
     "client": [
         "client.MixinTextureMap",

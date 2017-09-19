@@ -61,6 +61,9 @@ import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.GetCollisionBoxesEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * This class is the entry point for all the chunk collision related calculation.<br>
@@ -80,6 +83,7 @@ public class ChunkCollision
 
 	public ChunkCollision()
 	{
+		MinecraftForge.EVENT_BUS.register(this);
 		collisionRegistry.registerCallback(	this::collisionBoxesCallback,
 											CallbackOption.of((IChunkCallbackPredicate) this::isChunkCollidable));
 		rayTraceRegistry.registerCallback(this::rayTraceCallback, CallbackOption.of((IChunkCallbackPredicate) this::isChunkCollidable));
@@ -96,19 +100,18 @@ public class ChunkCollision
 	 * Gets the collision bounding boxes for the intersecting chunks.<br>
 	 * Called via ASM from {@link World#getCollisionBoxes(Entity, AxisAlignedBB)}
 	 *
-	 * @param world the world
-	 * @param mask the mask
-	 * @param list the list
-	 * @param entity the entity
+	 * @param event the event
 	 */
-	public void getCollisionBoxes(World world, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity entity)
+	@SubscribeEvent
+	public void onGetCollisionBoxes(GetCollisionBoxesEvent event)
+	//	public void getCollisionBoxes(World world, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity entity)
 	{
 		//no mask, no need to check for collision
-		if (mask == null)
+		if (event.getAabb() == null)
 			return;
 
-		for (Chunk chunk : ChunkBlockHandler.getAffectedChunks(world, mask))
-			collisionRegistry.processCallbacks(chunk, mask, list);
+		for (Chunk chunk : ChunkBlockHandler.getAffectedChunks(event.getWorld(), event.getAabb()))
+			collisionRegistry.processCallbacks(chunk, event.getAabb(), event.getCollisionBoxesList());
 	}
 
 	private CallbackResult<Void> collisionBoxesCallback(Chunk chunk, BlockPos listener, Object... params)
