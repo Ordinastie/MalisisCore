@@ -152,6 +152,9 @@ public class AnimatedRenderer extends MalisisRenderer<TileEntity>
 		if (oldState.getBlock() == newState.getBlock()) //same block, so same components
 			return CallbackResult.noResult();
 
+		if (!chunk.getWorld().isRemote)
+			return CallbackResult.noResult();//callback is also called on server thread in SSP
+
 		AnimatedModelComponent comp = IComponent.getComponent(AnimatedModelComponent.class, oldState.getBlock());
 		if (comp != null)
 			animatedRenderables.remove(pos);
