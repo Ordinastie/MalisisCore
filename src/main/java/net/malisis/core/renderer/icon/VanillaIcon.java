@@ -24,7 +24,6 @@
 
 package net.malisis.core.renderer.icon;
 
-import net.malisis.core.MalisisCore;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -83,14 +82,11 @@ public class VanillaIcon extends ProxyIcon
 	public void register(TextureMap map)
 	{
 		setProxy(null);
-		if (blockState != null && item != null) //if blockState or item, resolve when needed (should never happen)
-		{
-			MalisisCore.log.error("[VanillaIcon] Tried to register an icon set for {}.", getIconName());
+		if (blockState != null || item != null)
 			return;
-		}
 
-		TextureAtlasSprite icon = map.getAtlasSprite(getIconName());
-		if (icon == map.getMissingSprite()) //the models using it were overwritten by a resourcepack and don't use it anymore, so we have to register a new icon.
+		TextureAtlasSprite icon = map.getTextureExtry(getIconName());
+		if (icon == null) //the models using it were overwritten by a resourcepack and don't use it anymore, so we have to register a new icon.
 		{
 			icon = new Icon(getIconName());
 			map.setTextureEntry(icon);
