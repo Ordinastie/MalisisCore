@@ -63,7 +63,7 @@ public class MixinChunk
 						target = "Lnet/minecraft/world/chunk/storage/ExtendedBlockStorage;set(IIILnet/minecraft/block/state/IBlockState;)V",
 						shift = Shift.AFTER),
 			locals = LocalCapture.CAPTURE_FAILSOFT)
-	private void postSetBlock(BlockPos pos, IBlockState oldState, CallbackInfoReturnable<IBlockState> cir, int i, int j, int k, int l, int i1, IBlockState newState, Block block, Block block1, int k1, ExtendedBlockStorage extendedblockstorage, boolean flag)
+	private void postSetBlock(BlockPos pos, IBlockState newState, CallbackInfoReturnable<IBlockState> cir, int i, int j, int k, int l, int i1, IBlockState oldState, Block block, Block block1, int k1, ExtendedBlockStorage extendedblockstorage, boolean flag)
 	{
 		Registries.processPostSetBlock((Chunk) (Object) this, pos, oldState, newState);
 	}
