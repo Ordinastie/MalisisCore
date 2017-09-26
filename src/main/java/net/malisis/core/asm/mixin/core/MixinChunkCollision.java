@@ -65,7 +65,7 @@ public class MixinChunkCollision
 	{
 		//When placing a block we need to check if it doesn't collide with a IChunkCollidable further away with a bigger bounding box
 		@Inject(method = "onItemUse",
-				at = @At(value = "INVOKE", target = "getMetadata"),
+				at = @At(value = "INVOKE", target = "net/minecraft/item/ItemBlock.getMetadata(I)I"),
 				locals = LocalCapture.CAPTURE_FAILSOFT,
 				cancellable = true)
 		private void onOnItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ, CallbackInfoReturnable<EnumActionResult> cir, IBlockState iblockstate, Block block, ItemStack itemstack)
