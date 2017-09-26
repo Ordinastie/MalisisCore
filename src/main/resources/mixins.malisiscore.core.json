@@ -10,7 +10,8 @@
     	"MixinClientNotif$MixinWorldServer",
     	"MixinChunk",
     	"MixinChunkCollision$MixinItemBlock",
-    	"MixinChunkCollision$MixinNetHandlerPlayServer"
+    	"MixinChunkCollision$MixinNetHandlerPlayServer",
+    	"MixinChunkCollision$MixinWorld"
     	    ],
     "client": [
         "client.MixinTextureMap",
