@@ -1,6 +1,6 @@
 {
     "required": true,
-    "minVersion": "0.6.15",
+    "minVersion": "0.7.4",
     "package": "net.malisis.core.asm.mixin.core",
     "refmap": "mixins.malisiscore.refmap.json",
     "target": "@env(DEFAULT)",
