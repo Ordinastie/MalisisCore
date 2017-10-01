@@ -82,7 +82,7 @@ public class ModMessageManager
 	 */
 	private static void register(IMalisisMod mod, Class<?> messageHandlerClass, Object messageHandler)
 	{
-		Method[] methods = messageHandler.getClass().getMethods();
+		Method[] methods = messageHandlerClass.getMethods();
 		for (Method method : methods)
 		{
 			ModMessage ann = method.getAnnotation(ModMessage.class);
@@ -91,7 +91,7 @@ public class ModMessageManager
 
 			String name = ann.value().equals("") ? method.getName() : ann.value();
 			boolean isStatic = Modifier.isStatic(method.getModifiers());
-			//only register static methods if an instance is passed
+			//only register static methods if no instance is passed
 			if (isStatic || (messageHandler != null))
 				messages.put(mod.getModId() + ":" + name, Pair.of(isStatic ? null : messageHandler, method));
 			//MalisisCore.log.info("Registered mod message " + mod.getModId() + ":" + name + " in "
@@ -106,17 +106,18 @@ public class ModMessageManager
 	 * @param messageName the message name
 	 * @param data the data
 	 */
-	public static void message(String modid, String messageName, Object... data)
+	@SuppressWarnings("unchecked")
+	public static <T> T message(String modid, String messageName, Object... data)
 	{
 		//do not print warnings if mod is not loaded
 		if (!Loader.isModLoaded(modid))
-			return;
+			return null;
 
 		Collection<Pair<Object, Method>> messageList = messages.get(modid + ":" + messageName);
 		if (messageList.size() == 0)
 		{
 			MalisisCore.log.warn("No message handler matching the parameters passed for {}", modid + ":" + messageName);
-			return;
+			return null;
 		}
 
 		for (Pair<Object, Method> message : messageList)
@@ -125,7 +126,7 @@ public class ModMessageManager
 			{
 				try
 				{
-					message.getRight().invoke(message.getLeft(), data);
+					return (T) message.getRight().invoke(message.getLeft(), data);
 				}
 				catch (ReflectiveOperationException e)
 				{
@@ -133,6 +134,8 @@ public class ModMessageManager
 				}
 			}
 		}
+
+		return null;
 
 	}
 
