@@ -16,7 +16,7 @@ buildscript {
 	}
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-		classpath 'org.spongepowered:mixingradle:0.4-SNAPSHOT'
+		classpath 'org.spongepowered:mixingradle:0.5-SNAPSHOT'
 		classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.0'
 	}
 }
@@ -57,7 +57,7 @@ defaultTasks 'build', 'install'
 // Basic project information
 group = 'net.malisis'
 archivesBaseName = 'malisiscore'
-version = '1.12-6.1.1-SNAPSHOT'
+version = '1.12.2-6.1.2-SNAPSHOT'
 ext.packaging = 'jar'
 
 // Extended project information
@@ -76,8 +76,8 @@ targetCompatibility = '1.8'
 
 // MinecraftForge version
 minecraft {
-    version = "1.12-14.21.1.2407"
-    mappings = "snapshot_20170712"
+    version = "1.12.2-14.23.0.2494"
+    mappings = "snapshot_20171001"
 	
 	if(file("../../run").exists()) 
 		runDir = "../../run/assets"
@@ -256,6 +256,7 @@ if (project.hasProperty('curseapi')) {
 			id = '223896'
 			releaseType = 'release'
 			
+			mainArtifact shadowJar
 			addArtifact deobfJar
 			addArtifact sourcesJar
 			addArtifact javadocJar			   		
