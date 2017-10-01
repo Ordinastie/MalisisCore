@@ -82,7 +82,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	protected int maxDisplayedOptions = Integer.MAX_VALUE;
 	/** Whether this {@link UISelect} is expanded. */
 	protected boolean expanded = false;
-	/** Container holding the {@link Options}. */
+	/** Container holding the {@link Option}. */
 	protected OptionsContainer optionsContainer;
 	/** Width of displayed {@link Option} box */
 	protected int optionsWidth = 0;
