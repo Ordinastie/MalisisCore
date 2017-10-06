@@ -27,6 +27,7 @@ package net.malisis.core.asm.mixin.core;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -46,11 +47,12 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 @Mixin(Chunk.class)
 public class MixinChunk
 {
-	@Inject(method = "setBlockState",
+	@Inject(method = "setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/state/IBlockState;",
 			at = @At(	value = "INVOKE",
 						target = "Lnet/minecraft/world/chunk/storage/ExtendedBlockStorage;set(IIILnet/minecraft/block/state/IBlockState;)V"),
 			locals = LocalCapture.CAPTURE_FAILSOFT,
 			cancellable = true)
+	@Group(name = "pre", min = 1, max = 1)
 	private void preSetBlock(BlockPos pos, IBlockState state, CallbackInfoReturnable<IBlockState> cir, int i, int j, int k, int l, int i1, IBlockState iblockstate, Block block, Block block1, int k1, ExtendedBlockStorage extendedblockstorage, boolean flag)
 	{
 		CallbackResult<Void> cb = Registries.processPreSetBlock((Chunk) (Object) this, pos, iblockstate, state);
@@ -58,11 +60,12 @@ public class MixinChunk
 			cir.cancel();
 	}
 
-	@Inject(method = "setBlockState",
+	@Inject(method = "setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/state/IBlockState;",
 			at = @At(	value = "INVOKE",
 						target = "Lnet/minecraft/world/chunk/storage/ExtendedBlockStorage;set(IIILnet/minecraft/block/state/IBlockState;)V",
 						shift = Shift.AFTER),
 			locals = LocalCapture.CAPTURE_FAILSOFT)
+	@Group(name = "post", min = 1, max = 1)
 	private void postSetBlock(BlockPos pos, IBlockState newState, CallbackInfoReturnable<IBlockState> cir, int i, int j, int k, int l, int i1, IBlockState oldState, Block block, Block block1, int k1, ExtendedBlockStorage extendedblockstorage, boolean flag)
 	{
 		Registries.processPostSetBlock((Chunk) (Object) this, pos, oldState, newState);
