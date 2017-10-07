@@ -39,7 +39,7 @@ import net.minecraft.world.chunk.Chunk;
  * @author Ordinastie
  *
  */
-@Mixin(Chunk.class)
+@Mixin(value = Chunk.class, priority = 1001)
 public class MixinChunk
 {
 	private IBlockState oldState;
