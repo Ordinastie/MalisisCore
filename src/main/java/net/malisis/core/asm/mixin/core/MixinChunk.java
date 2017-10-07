@@ -26,19 +26,14 @@ package net.malisis.core.asm.mixin.core;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
-import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.malisis.core.registry.Registries;
 import net.malisis.core.util.callback.CallbackResult;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
 /**
  * @author Ordinastie
@@ -47,26 +42,23 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 @Mixin(Chunk.class)
 public class MixinChunk
 {
+	private IBlockState oldState;
+
 	@Inject(method = "setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/state/IBlockState;",
-			at = @At(	value = "INVOKE",
-						target = "Lnet/minecraft/world/chunk/storage/ExtendedBlockStorage;set(IIILnet/minecraft/block/state/IBlockState;)V"),
-			locals = LocalCapture.CAPTURE_FAILSOFT,
+			at = @At("HEAD"),
 			cancellable = true)
-	@Group(name = "pre", min = 1, max = 1)
-	private void preSetBlock(BlockPos pos, IBlockState state, CallbackInfoReturnable<IBlockState> cir, int i, int j, int k, int l, int i1, IBlockState iblockstate, Block block, Block block1, int k1, ExtendedBlockStorage extendedblockstorage, boolean flag)
+	private void preSetBlock(BlockPos pos, IBlockState newState, CallbackInfoReturnable<IBlockState> cir)
 	{
-		CallbackResult<Void> cb = Registries.processPreSetBlock((Chunk) (Object) this, pos, iblockstate, state);
+		Chunk chunk = (Chunk) (Object) this;
+		oldState = chunk.getBlockState(pos);
+		CallbackResult<Void> cb = Registries.processPreSetBlock(chunk, pos, oldState, newState);
 		if (cb.shouldReturn())
 			cir.cancel();
 	}
 
 	@Inject(method = "setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/state/IBlockState;",
-			at = @At(	value = "INVOKE",
-						target = "Lnet/minecraft/world/chunk/storage/ExtendedBlockStorage;set(IIILnet/minecraft/block/state/IBlockState;)V",
-						shift = Shift.AFTER),
-			locals = LocalCapture.CAPTURE_FAILSOFT)
-	@Group(name = "post", min = 1, max = 1)
-	private void postSetBlock(BlockPos pos, IBlockState newState, CallbackInfoReturnable<IBlockState> cir, int i, int j, int k, int l, int i1, IBlockState oldState, Block block, Block block1, int k1, ExtendedBlockStorage extendedblockstorage, boolean flag)
+			at = @At("TAIL"))
+	private void postSetBlock(BlockPos pos, IBlockState newState, CallbackInfoReturnable<IBlockState> cir)
 	{
 		Registries.processPostSetBlock((Chunk) (Object) this, pos, oldState, newState);
 	}
