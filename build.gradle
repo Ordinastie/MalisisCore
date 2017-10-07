@@ -48,7 +48,13 @@ repositories {
 
 // Project dependencies
 dependencies {
-	compile "org.spongepowered:mixin:0.7.4-SNAPSHOT"
+	    compile('org.spongepowered:mixin:0.7.4-SNAPSHOT') {
+        exclude module: 'asm-commons'
+        exclude module: 'asm-tree'
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+        exclude module: 'log4j-core'
+    }
 }
 
 // Gradle default tasks
