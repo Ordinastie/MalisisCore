@@ -109,7 +109,7 @@ public class AABBUtils
 
 	/**
 	 * Rotates the {@link AxisAlignedBB} based on the specified direction.<br>
-	 * Assumes {@link EnumFacing#SOUTH} to be the default non rotated direction.<br>
+	 * Assumes {@link EnumFacing#SOUTH} to be the default non rotated direction.
 	 *
 	 *
 	 * @param aabb the aabb
@@ -129,7 +129,7 @@ public class AABBUtils
 
 	/**
 	 * Rotates an array of {@link AxisAlignedBB} around the Y axis based on the specified direction.<br>
-	 * Assumes {@link EnumFacing#SOUTH} to be the default non rotated direction.<br>
+	 * Assumes {@link EnumFacing#SOUTH} to be the default non rotated direction.
 	 *
 	 * @param aabbs the aabbs
 	 * @param dir the dir
@@ -161,7 +161,7 @@ public class AABBUtils
 	}
 
 	/**
-	 * Rotates the {@link AxisAlignedBB} around the axis based on the specified angle.<br>
+	 * Rotates the {@link AxisAlignedBB} around the axis based on the specified angle.
 	 *
 	 * @param aabb the aabb
 	 * @param angle the angle
@@ -216,7 +216,7 @@ public class AABBUtils
 	}
 
 	/**
-	 * Reads a {@link AxisAlignedBB} from {@link NBTTagCompound}.<br>
+	 * Reads a {@link AxisAlignedBB} from {@link NBTTagCompound}.
 	 *
 	 * @param tag the tag
 	 * @return the axis aligned BB
@@ -227,7 +227,7 @@ public class AABBUtils
 	}
 
 	/**
-	 * Reads a {@link AxisAlignedBB} from {@link NBTTagCompound} with the specified prefix.<br>
+	 * Reads a {@link AxisAlignedBB} from {@link NBTTagCompound} with the specified prefix.
 	 *
 	 * @param tag the tag
 	 * @param prefix the prefix
@@ -246,7 +246,7 @@ public class AABBUtils
 	}
 
 	/**
-	 * Writes a {@link AxisAlignedBB} to a {@link NBTTagCompound}.<br>
+	 * Writes a {@link AxisAlignedBB} to a {@link NBTTagCompound}.
 	 *
 	 * @param tag the tag
 	 * @param aabb the aabb
@@ -257,7 +257,7 @@ public class AABBUtils
 	}
 
 	/**
-	 * Writes a {@link AxisAlignedBB} to a {@link NBTTagCompound} with the specified prefix.<br>
+	 * Writes a {@link AxisAlignedBB} to a {@link NBTTagCompound} with the specified prefix.
 	 *
 	 * @param tag the tag
 	 * @param aabb the aabb
@@ -462,9 +462,24 @@ public class AABBUtils
 		return aabbs;
 	}
 
+	/**
+	 * Create stair shaped bounding boxes.<br>
+	 * The position of the bounding boxes corners are interpolated between <code>fx[0]</code> (start) and <code>fx[1]</code> (end).<br>
+	 * The second index determines the mininum (<code>fx[.]<b>[0]</b></code>) and maximum (<code>fx[.]<b>[1]</b></code>) bounds for the
+	 * bounding boxes.<br>
+	 * Same applies for <code>fy</code> and <code>fz</code>.<br>
+	 * If <code>vertical</code> is false, the bounding boxes will be stacked horizontally.
+	 *
+	 * @param slices number of bounding boxes composing the global shape
+	 * @param fx bounds for the x axis for the bounding boxes
+	 * @param fy bounds for the y axis for the bounding boxes
+	 * @param fz bounds for the z axis for the bounding boxes
+	 * @param vertical true if the bounding boxes should be stack vertically
+	 * @return the bounding boxes creating the shapes
+	 */
 	public static AxisAlignedBB[] slice(int slices, float fx[][], float fy[][], float fz[][], boolean vertical)
 	{
-		float delta = 1 / (float) slices;
+		final float delta = 1 / (float) slices;
 		final int START = 0;
 		final int MIN = 0;
 		final int END = 1;

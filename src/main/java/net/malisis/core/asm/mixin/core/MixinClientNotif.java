@@ -45,6 +45,7 @@ public class MixinClientNotif
 	@Mixin(World.class)
 	public static class MixinWorld
 	{
+		//keep track of neighbor changes on the server to they can be sent to clients
 		@Inject(method = "neighborChanged", at = @At("HEAD"))
 		private void onNeighborChanged(BlockPos pos, Block neighborBlock, BlockPos neighborPos, CallbackInfo ci)
 		{
@@ -55,6 +56,7 @@ public class MixinClientNotif
 	@Mixin(WorldServer.class)
 	public static class MixinWorldServer
 	{
+		//at the end of server tick, send neighbor changes to clients
 		@Inject(method = "tick", at = @At("TAIL"))
 		private void onTick(CallbackInfo ci)
 		{

@@ -43,6 +43,7 @@ import net.minecraftforge.fml.common.ProgressManager;
 @Mixin(TextureMap.class)
 public abstract class MixinTextureMap
 {
+	//capture atlas size
 	@Inject(method = "loadTextureAtlas", at = @At("RETURN"), locals = LocalCapture.CAPTURE_FAILSOFT)
 	private void onLoadTextureAtlas(IResourceManager resourceManager, CallbackInfo ci, int i, Stitcher stitcher, int j, int k, ProgressManager.ProgressBar bar)
 	{
