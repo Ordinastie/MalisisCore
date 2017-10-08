@@ -161,8 +161,9 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 
 	public void breakBlocks(World world, BlockPos pos, IBlockState state)
 	{
-		BlockPos origin = getOrigin(world, pos);
-		if (origin == null)
+		//we can't check the origin from world as the state is already changed in the chunk, so we check the passed state
+		BlockPos origin = MultiBlockComponent.isOrigin(state) ? pos : getOrigin(world, pos);
+		if (origin == null) //shound not happen
 		{
 			world.setBlockToAir(pos);
 			return;
