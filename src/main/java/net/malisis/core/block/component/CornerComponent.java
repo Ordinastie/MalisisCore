@@ -47,6 +47,23 @@ import net.minecraft.world.IBlockAccess;
  */
 public class CornerComponent implements IBlockComponent
 {
+	private static final AxisAlignedBB[] BOUNDING_BOXES = AABBUtils.slice(
+		8,
+		new float[][] {
+			{ 0f, 1f },
+			{ 0f, 1f }
+		},
+		new float[][] {
+			{ 0f, 1f },
+			{ 0f, 1f }
+		},
+		new float[][] {
+			{ 0f, 1f },
+			{ 0f, 0f }
+		},
+		false
+	);
+
 	public CornerComponent()
 	{
 
@@ -78,11 +95,7 @@ public class CornerComponent implements IBlockComponent
 	@Override
 	public AxisAlignedBB[] getBoundingBoxes(Block block, IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
-		float[][] fx = { { 0, 1 }, { 0, 1 } };
-		float[][] fy = { { 0, 1 }, { 0, 1 } };
-		float[][] fz = { { 0, 1 }, { 0, 0 } };
-
-		return AABBUtils.slice(8, fx, fy, fz, false);
+		return BOUNDING_BOXES;
 	}
 
 	@Override

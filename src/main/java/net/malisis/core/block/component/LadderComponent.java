@@ -47,6 +47,8 @@ import net.minecraft.world.World;
  */
 public class LadderComponent implements IBlockComponent
 {
+	private static final AxisAlignedBB BOUNDING_BOX = new AxisAlignedBB(0, 0, 0, 1, 1, 0.125f);
+
 	@Override
 	public IProperty<?> getProperty()
 	{
@@ -85,7 +87,7 @@ public class LadderComponent implements IBlockComponent
 	@Override
 	public AxisAlignedBB getBoundingBox(Block block, IBlockAccess world, BlockPos pos, IBlockState state, BoundingBoxType type)
 	{
-		return new AxisAlignedBB(0, 0, 0, 1, 1, 0.125F);
+		return BOUNDING_BOX;
 	}
 
 	@Override

@@ -55,6 +55,62 @@ import net.minecraft.world.World;
  */
 public class SlopedCornerComponent implements IBlockComponent
 {
+	private static final float[][] FY = {
+		{ 0f, 1f },
+		{ 0f, 1f }
+	};
+	private static final AxisAlignedBB[] BOUNDING_BOXES = AABBUtils.slice(
+		8,
+		new float[][] {
+			{ 0f, 0.5f },
+			{ 0f, 0f }
+		},
+		FY,
+		new float[][] {
+			{ 0f, 0.5f },
+			{ 0f, 0f }
+		},
+		true
+	);
+	private static final AxisAlignedBB[] BOUNDING_BOXES_DOWN = AABBUtils.slice(
+		8,
+		new float[][] {
+			{ 0f, 1f / 8f },
+			{ 0f, 9f / 8f }
+		},
+		FY,
+		new float[][] {
+			{ 0f, 1f / 8f },
+			{ 0f, 9f / 8f }
+		},
+		true
+	);
+	private static final AxisAlignedBB[] BOUNDING_BOXES_INVERTED = AABBUtils.slice(
+		8,
+		new float[][] {
+			{ 0f, 1f },
+			{ 0f, .25f }
+		},
+		FY,
+		new float[][] {
+			{ 0f, 1f },
+			{ 0f, .25f }
+		},
+		true
+	);
+	private static final AxisAlignedBB[] BOUNDING_BOXES_INVERTED_DOWN = AABBUtils.slice(
+		8,
+		new float[][] {
+			{ 0f, 0.25f },
+			{ 0f, 1f }
+		},
+		FY,
+		new float[][] {
+			{ 0f, 0.25f },
+			{ 0f, 1f }
+		},
+		true
+	);
 	public static PropertyBool INVERTED = PropertyBool.create("inverted");
 	public static PropertyBool DOWN = PropertyBool.create("down");
 
@@ -108,38 +164,11 @@ public class SlopedCornerComponent implements IBlockComponent
 
 		boolean inverted = isInverted(state);
 		boolean down = isDown(state);
-		float[][] fx;
-		float[][] fy = { { 0, 1 }, { 0, 1 } };
-		float[][] fz;
 		if (inverted)
 		{
-			if (down)
-			{
-				fx = new float[][] { { 0, .25F }, { 0, 1F } };
-				fz = new float[][] { { 0, .25F }, { 0, 1F } };
-			}
-			else
-			{
-				fx = new float[][] { { 0, 1 }, { 0, .25F } };
-				fz = new float[][] { { 0, 1 }, { 0, .25F } };
-			}
-
+			return down ? BOUNDING_BOXES_INVERTED_DOWN : BOUNDING_BOXES_INVERTED;
 		}
-		else
-		{
-			if (down)
-			{
-				fx = new float[][] { { 0, 1 / 8F }, { 0, 9 / 8F } };
-				fz = new float[][] { { 0, 1 / 8F }, { 0, 9 / 8F } };
-			}
-			else
-			{
-				fx = new float[][] { { 0, .5F }, { 0, 0 } };
-				fz = new float[][] { { 0, .5F }, { 0, 0 } };
-			}
-		}
-
-		return AABBUtils.slice(8, fx, fy, fz, true);
+		return down ? BOUNDING_BOXES_DOWN : BOUNDING_BOXES;
 	}
 
 	@Override
