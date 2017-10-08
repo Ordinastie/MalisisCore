@@ -24,6 +24,8 @@
 
 package net.malisis.core.block.component;
 
+import static com.google.common.base.Preconditions.*;
+
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.IComponentProvider;
 import net.minecraft.block.Block;
@@ -73,6 +75,7 @@ public class PowerComponent extends BooleanComponent
 	private final ComponentType componentType;
 	/** Whether this {@link PowerComponent} {@link IComponentProvider} also has a {@link DirectionalComponent}. */
 	private boolean hasDirectionalComponent = false;
+	private IPowerChange onPowerChange = null;
 
 	public PowerComponent(InteractionType interractionType, ComponentType componentType)
 	{
@@ -94,9 +97,12 @@ public class PowerComponent extends BooleanComponent
 		if (interractionType == InteractionType.REDSTONE)
 			return false;
 
-		invert(world, pos);
+		boolean isPowered = invert(world, pos);
 		if (hasDirectionalComponent)
 			world.notifyNeighborsOfStateChange(pos.offset(DirectionalComponent.getDirection(state).getOpposite()), block, true);
+
+		if (onPowerChange != null)
+			onPowerChange.powerChanged(world, pos, isPowered);
 		return true;
 	}
 
@@ -105,9 +111,14 @@ public class PowerComponent extends BooleanComponent
 	{
 		if (interractionType == InteractionType.RIGHT_CLICK || componentType == ComponentType.PROVIDER
 				|| !neighborBlock.getDefaultState().canProvidePower())
+
 			return;
 
+		boolean isPowered = get(world, pos);
 		set(world, pos, world.isBlockPowered(pos));
+		if (onPowerChange != null && isPowered != get(world, pos))
+			onPowerChange.powerChanged(world, pos, !isPowered);
+
 	}
 
 	@Override
@@ -127,6 +138,11 @@ public class PowerComponent extends BooleanComponent
 		if (IComponent.getComponent(DirectionalComponent.class, block) != null)
 			world.notifyNeighborsOfStateChange(pos.offset(DirectionalComponent.getDirection(state).getOpposite()), block, true);
 
+	}
+
+	public void onPowerChange(IPowerChange onPowerChange)
+	{
+		this.onPowerChange = checkNotNull(onPowerChange);
 	}
 
 	/**
@@ -164,5 +180,11 @@ public class PowerComponent extends BooleanComponent
 	{
 		PowerComponent pc = IComponent.getComponent(PowerComponent.class, block);
 		return pc != null ? pc.getProperty() : null;
+	}
+
+	@FunctionalInterface
+	public static interface IPowerChange
+	{
+		public void powerChanged(World world, BlockPos pos, boolean isPowered);
 	}
 }

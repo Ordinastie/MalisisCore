@@ -164,9 +164,14 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 		//we can't check the origin from world as the state is already changed in the chunk, so we check the passed state
 		if (!MultiBlockComponent.isOrigin(state))
 		{
-			pos = getOrigin(world, pos);
-			if (pos != null) //should not happen
+			BlockPos originPos = getOrigin(world, pos);
+			if (originPos == null) //should not happen
+			{
 				world.setBlockToAir(pos);
+				return;
+			}
+
+			world.setBlockToAir(originPos);
 			return;
 		}
 
