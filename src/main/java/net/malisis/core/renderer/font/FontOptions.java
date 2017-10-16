@@ -601,6 +601,19 @@ public class FontOptions
 			return this;
 		}
 
+		public FontOptionsBuilder from(FontOptions options)
+		{
+			fontScale = options.fontScale;
+			color = options.color;
+			shadow = options.shadow;
+			bold = options.bold;
+			italic = options.italic;
+			underline = options.underline;
+			strikethrough = options.strikethrough;
+
+			return this;
+		}
+
 		public FontOptions build()
 		{
 			return new FontOptions(fontScale, color, shadow, bold, italic, underline, strikethrough, translate);
