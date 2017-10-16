@@ -88,6 +88,7 @@ public class MalisisFont
 	protected int size;
 	/** Whether the currently drawn text is the shadow part **/
 	protected boolean drawingShadow = false;
+	protected float zIndex = 0f;
 
 	public MalisisFont(File fontFile)
 	{
@@ -179,7 +180,9 @@ public class MalisisFont
 
 		Minecraft.getMinecraft().getTextureManager().bindTexture(textureRl);
 		GL11.glPushMatrix();
-		GL11.glTranslatef(x, y + (isGui ? 0 : options.getFontScale()), z);
+		GL11.glTranslatef(x, y + (isGui ? 0 : options.getFontScale()), 0);
+
+		zIndex = z;
 
 		if (!isGui)
 			GL11.glScalef(1 / 9F, -1 / 9F, 1 / 9F);
@@ -194,6 +197,8 @@ public class MalisisFont
 		if (renderer instanceof GuiRenderer)
 			Minecraft.getMinecraft().getTextureManager().bindTexture(((GuiRenderer) renderer).getDefaultTexture().getResourceLocation());
 		GL11.glPopMatrix();
+
+		zIndex = 0;
 	}
 
 	protected void prepareShadow(MalisisRenderer<?> renderer)
@@ -305,22 +310,22 @@ public class MalisisFont
 			offsetY += options.getFontScale();
 		}
 
-		buffer.pos(offsetX + i, offsetY, 0);
+		buffer.pos(offsetX + i, offsetY, zIndex);
 		buffer.tex(cd.u(), cd.v());
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX - i, offsetY + h, 0);
+		buffer.pos(offsetX - i, offsetY + h, zIndex);
 		buffer.tex(cd.u(), cd.V());
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX + w - i, offsetY + h, 0);
+		buffer.pos(offsetX + w - i, offsetY + h, zIndex);
 		buffer.tex(cd.U(), cd.V());
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX + w + i, offsetY, 0);
+		buffer.pos(offsetX + w + i, offsetY, zIndex);
 		buffer.tex(cd.U(), cd.v());
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
@@ -371,19 +376,19 @@ public class MalisisFont
 			offsetY += options.getFontScale();
 		}
 
-		buffer.pos(offsetX, offsetY, 0);
+		buffer.pos(offsetX, offsetY, zIndex);
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX, offsetY + h, 0);
+		buffer.pos(offsetX, offsetY + h, zIndex);
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX + w, offsetY + h, 0);
+		buffer.pos(offsetX + w, offsetY + h, zIndex);
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
-		buffer.pos(offsetX + w, offsetY, 0);
+		buffer.pos(offsetX + w, offsetY, zIndex);
 		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
 		buffer.endVertex();
 
