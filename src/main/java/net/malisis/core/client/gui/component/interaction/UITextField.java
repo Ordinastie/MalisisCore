@@ -611,24 +611,26 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		return (GuiScreen.isCtrlKeyDown() ? 5 * step : step);
 	}
 
-	/**
-	 * Gets the vertical padding.
-	 *
-	 * @return the vertical padding
-	 */
 	@Override
-	public int getVerticalPadding()
+	public int getLeftPadding()
 	{
 		return 1;
 	}
 
-	/**
-	 * Gets the horizontal padding.
-	 *
-	 * @return the horizontal padding
-	 */
 	@Override
-	public int getHorizontalPadding()
+	public int getRightPadding()
+	{
+		return 1;
+	}
+
+	@Override
+	public int getTopPadding()
+	{
+		return 1;
+	}
+
+	@Override
+	public int getBottomPadding()
 	{
 		return 1;
 	}

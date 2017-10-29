@@ -801,13 +801,25 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		}
 
 		@Override
-		public int getVerticalPadding()
+		public int getLeftPadding()
 		{
 			return 1;
 		}
 
 		@Override
-		public int getHorizontalPadding()
+		public int getRightPadding()
+		{
+			return 1;
+		}
+
+		@Override
+		public int getTopPadding()
+		{
+			return 1;
+		}
+
+		@Override
+		public int getBottomPadding()
 		{
 			return 1;
 		}

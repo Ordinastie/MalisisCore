@@ -59,10 +59,14 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 {
 	/** List of {@link UIComponent} inside this {@link UIContainer}. */
 	protected final Set<UIComponent<?>> components;
-	/** Horizontal padding to apply to this {@link UIContainer}. */
-	protected int horizontalPadding;
-	/** Vertical padding to apply to this {@link UIContainer}. */
-	protected int verticalPadding;
+	/** Top padding to apply to this {@link UIContainer}. */
+	private int topPadding;
+	/** Bottom padding to apply to this {@link UIContainer}. */
+	private int bottomPadding;
+	/** Left padding to apply to this {@link UIContainer}. */
+	private int leftPadding;
+	/** Right padding to apply to this {@link UIContainer}. */
+	private int rightPadding;
 	/** Label for the title of this {@link UIContainer}. */
 	protected UILabel titleLabel;
 	//IClipable
@@ -179,35 +183,64 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	/**
 	 * Set the padding for this {@link UIContainer}.
 	 *
-	 * @param horizontal the horizontal
-	 * @param vertical the vertical
+	 * @param horizontalPadding the padding to apply to left and right
+	 * @param verticalPadding the padding to apply to top and bottom
 	 */
-	public void setPadding(int horizontal, int vertical)
+	public T setPadding(int horizontalPadding, int verticalPadding)
 	{
-		this.horizontalPadding = horizontal;
-		this.verticalPadding = vertical;
+		this.leftPadding = horizontalPadding;
+		this.rightPadding = horizontalPadding;
+		this.topPadding = verticalPadding;
+		this.bottomPadding = verticalPadding;
+		return self();
 	}
 
-	/**
-	 * Gets the horizontal padding.
-	 *
-	 * @return horizontal padding of this {@link UIContainer}.
-	 */
 	@Override
-	public int getHorizontalPadding()
+	public int getTopPadding()
 	{
-		return horizontalPadding;
+		return this.topPadding;
 	}
 
-	/**
-	 * Gets the vertical padding.
-	 *
-	 * @return horizontal padding of this {@link UIContainer}.
-	 */
-	@Override
-	public int getVerticalPadding()
+	public T setTopPadding(int topPadding)
 	{
-		return verticalPadding;
+		this.topPadding = topPadding;
+		return self();
+	}
+
+	@Override
+	public int getBottomPadding()
+	{
+		return this.bottomPadding;
+	}
+
+	public T setBottomPadding(int bottomPadding)
+	{
+		this.bottomPadding = bottomPadding;
+		return self();
+	}
+
+	@Override
+	public int getLeftPadding()
+	{
+		return this.leftPadding;
+	}
+
+	public T setLeftPadding(int leftPadding)
+	{
+		this.leftPadding = leftPadding;
+		return self();
+	}
+
+	@Override
+	public int getRightPadding()
+	{
+		return this.rightPadding;
+	}
+
+	public T setRightPadding(int rightPadding)
+	{
+		this.rightPadding = rightPadding;
+		return self();
 	}
 
 	/**
@@ -254,9 +287,9 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 		int x = super.componentX(component);
 		int a = Anchor.horizontal(component.getAnchor());
 		if (a == Anchor.LEFT || a == Anchor.NONE)
-			x += getHorizontalPadding();
+			x += getLeftPadding();
 		else if (a == Anchor.RIGHT)
-			x -= getHorizontalPadding();
+			x -= getRightPadding();
 
 		if (!(component instanceof IControlComponent))
 			x -= xOffset;
@@ -276,9 +309,9 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 		int y = super.componentY(component);
 		int a = Anchor.vertical(component.getAnchor());
 		if (a == Anchor.TOP || a == Anchor.NONE)
-			y += getVerticalPadding();
+			y += getTopPadding();
 		else if (a == Anchor.BOTTOM)
-			y -= getVerticalPadding();
+			y -= getBottomPadding();
 
 		if (!(component instanceof IControlComponent))
 			y -= yOffset;
@@ -402,8 +435,8 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 			}
 		}
 
-		this.contentHeight = contentHeight + 2 * getVerticalPadding();
-		this.contentWidth = contentWidth + 2 * getHorizontalPadding();
+		this.contentHeight = contentHeight + getTopPadding() + getBottomPadding();
+		this.contentWidth = contentWidth + getLeftPadding() + getRightPadding();
 	}
 
 	//#region IClipable
