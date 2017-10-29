@@ -88,16 +88,30 @@ public interface IScrollable
 	public float getScrollStep();
 
 	/**
-	 * Gets the vertical padding.
+	 * Gets the padding for the top.
 	 *
-	 * @return the vertical padding
+	 * @return the top padding
 	 */
-	public int getVerticalPadding();
+	int getTopPadding();
 
 	/**
-	 * Gets the horizontal padding.
+	 * Gets the padding for the bottom.
 	 *
-	 * @return the horizontal padding
+	 * @return the bottom padding
 	 */
-	public int getHorizontalPadding();
+	int getBottomPadding();
+
+	/**
+	 * Gets the padding for the left.
+	 *
+	 * @return the left padding
+	 */
+	int getLeftPadding();
+
+	/**
+	 * Gets the padding for the right.
+	 *
+	 * @return the right padding
+	 */
+	int getRightPadding();
 }

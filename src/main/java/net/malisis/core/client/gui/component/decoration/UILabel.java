@@ -283,13 +283,25 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	}
 
 	@Override
-	public int getVerticalPadding()
+	public int getLeftPadding()
 	{
 		return 0;
 	}
 
 	@Override
-	public int getHorizontalPadding()
+	public int getRightPadding()
+	{
+		return 0;
+	}
+
+	@Override
+	public int getTopPadding()
+	{
+		return 0;
+	}
+
+	@Override
+	public int getBottomPadding()
 	{
 		return 0;
 	}

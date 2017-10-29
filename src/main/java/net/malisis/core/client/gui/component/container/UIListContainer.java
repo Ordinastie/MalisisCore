@@ -167,7 +167,7 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 	{
 		UIScrollBar sb = UIScrollBar.getScrollbar(this, Type.VERTICAL);
 		if (sb != null && sb.isVisible())
-			return getWidth() - sb.getWidth() - 2 - getHorizontalPadding() * 2;
+			return getWidth() - sb.getWidth() - 2 - (getLeftPadding() + getRightPadding());
 
 		return getWidth();
 	}
@@ -184,7 +184,7 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 
 		UIScrollBar sb = UIScrollBar.getScrollbar(this, Type.HORIZONTAL);
 		if (sb != null && sb.isVisible())
-			return getWidth() - sb.getWidth() - 2 - getHorizontalPadding() * 2;
+			return getWidth() - sb.getWidth() - 2 - (getLeftPadding() + getRightPadding());
 
 		return height;
 	}
@@ -219,24 +219,26 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 		return (GuiScreen.isCtrlKeyDown() ? 0.125F : 0.025F);
 	}
 
-	/**
-	 * Gets the horizontal padding.
-	 *
-	 * @return horizontal padding of this {@link UIContainer}.
-	 */
 	@Override
-	public int getHorizontalPadding()
+	public int getLeftPadding()
 	{
 		return 0;
 	}
 
-	/**
-	 * Gets the vertical padding.
-	 *
-	 * @return horizontal padding of this {@link UIContainer}.
-	 */
 	@Override
-	public int getVerticalPadding()
+	public int getRightPadding()
+	{
+		return 0;
+	}
+
+	@Override
+	public int getTopPadding()
+	{
+		return 0;
+	}
+
+	@Override
+	public int getBottomPadding()
 	{
 		return 0;
 	}

@@ -68,8 +68,8 @@ public class UISlimScrollbar extends UIScrollBar
 	@Override
 	protected void setPosition()
 	{
-		int vp = getScrollable().getVerticalPadding();
-		int hp = getScrollable().getHorizontalPadding();
+		int vp = getScrollable().getRightPadding();
+		int hp = getScrollable().getBottomPadding();
 
 		if (type == Type.HORIZONTAL)
 			setPosition(hp + offsetX, -vp + offsetY, Anchor.BOTTOM);
@@ -96,7 +96,7 @@ public class UISlimScrollbar extends UIScrollBar
 	{
 		int w = super.getWidth();
 		if (type == Type.HORIZONTAL)
-			w -= 2 * getScrollable().getHorizontalPadding();
+			w -= getScrollable().getLeftPadding() + getScrollable().getRightPadding();
 		return w;
 	}
 
@@ -105,7 +105,7 @@ public class UISlimScrollbar extends UIScrollBar
 	{
 		int h = super.getHeight();
 		if (type == Type.VERTICAL)
-			h -= 2 * getScrollable().getVerticalPadding();
+			h -= getScrollable().getTopPadding() + getScrollable().getBottomPadding();
 		return h;
 
 	}

@@ -111,8 +111,8 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 */
 	protected void setPosition()
 	{
-		int vp = getScrollable().getVerticalPadding();
-		int hp = getScrollable().getHorizontalPadding();
+		int vp = getScrollable().getRightPadding();
+		int hp = getScrollable().getBottomPadding();
 
 		if (type == Type.HORIZONTAL)
 			setPosition(-hp + offsetX, vp + offsetY, Anchor.BOTTOM);
