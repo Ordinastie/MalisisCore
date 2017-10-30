@@ -1047,10 +1047,10 @@ public abstract class UIComponent<T extends UIComponent<T>>
 
 		drawForeground(renderer, mouseX, mouseY, partialTick);
 
+		renderer.next();
+
 		if (area != null)
 			renderer.endClipping(area);
-
-		renderer.next();
 
 		for (IControlComponent c : controlComponents)
 			c.draw(renderer, mouseX, mouseY, partialTick);
