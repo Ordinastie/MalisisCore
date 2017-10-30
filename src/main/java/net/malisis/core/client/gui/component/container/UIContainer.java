@@ -435,8 +435,8 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 			}
 		}
 
-		this.contentHeight = contentHeight + getTopPadding() + getBottomPadding();
-		this.contentWidth = contentWidth + getLeftPadding() + getRightPadding();
+		this.contentHeight = contentHeight + getBottomPadding();
+		this.contentWidth = contentWidth + getRightPadding();
 	}
 
 	//#region IClipable
