@@ -673,6 +673,11 @@ public abstract class MalisisGui extends GuiScreen
 		ar.addAnimation(animation);
 	}
 
+	public void stopAnimation(Animation<?> animation)
+	{
+		ar.deleteAnimation(animation);
+	}
+
 	@Override
 	public boolean doesGuiPauseGame()
 	{
