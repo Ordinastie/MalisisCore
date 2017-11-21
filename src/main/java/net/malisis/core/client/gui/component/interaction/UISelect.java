@@ -37,8 +37,10 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 
+import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
@@ -72,12 +74,17 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	/** The {@link FontOptions} to use for this {@link UISelect} when option is disabled. */
 	protected FontOptions disabledFontOptions = FontOptions.builder().color(0x444444).build();
 
+	/** Make the options width match the longest option available. */
+	public static int LONGEST_OPTION = -1;
+	/** Make the options width match the {@link UISelect} width. */
+	public static int SELECT_WIDTH = -2;
+
 	/** The {@link Option options} of this {@link UISelect}. */
 	protected FluentIterable<Option<T>> options;
 	/** Currently selected option index. */
 	protected Option<T> selectedOption = null;
 	/** Max width of the option container. */
-	protected int maxExpandedWidth = -1;
+	protected int maxOptionsWidth = LONGEST_OPTION;
 	/** Max number displayed options. */
 	protected int maxDisplayedOptions = Integer.MAX_VALUE;
 	/** Whether this {@link UISelect} is expanded. */
@@ -326,14 +333,17 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	}
 
 	/**
-	 * Sets the max width of the option container.
+	 * Sets the max width of the option container.<br>
+	 * Behavior can be altered with {@link #LONGEST_OPTION} and {@link #SELECT_WIDTH} constants.
 	 *
-	 * @param width the width
+	 * @param optionWidth the width
 	 * @return this {@link UISelect}
 	 */
-	public UISelect<T> setMaxExpandedWidth(int width)
+	public UISelect<T> setOptionsWidth(int optionWidth)
 	{
-		maxExpandedWidth = width;
+		if (optionWidth <= 0 && optionWidth != LONGEST_OPTION && optionWidth != SELECT_WIDTH)
+			throw new IllegalArgumentException("OptionWidth must be positive or LONGEST_OPTION or SELECT_WIDTH");
+		maxOptionsWidth = optionWidth;
 		calcOptionsSize();
 		return this;
 	}
@@ -345,14 +355,24 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	{
 		if (options == null)
 			return;
+
+		if (maxOptionsWidth == SELECT_WIDTH)
+		{
+			optionsWidth = getWidth();
+			return;
+		}
+
 		optionsWidth = getWidth() - 4;
 		for (Option<?> option : this)
 			optionsWidth = Math.max(optionsWidth,
 									(int) MalisisFont.minecraftFont.getStringWidth(option.getLabel(labelPattern), fontOptions));
-
 		optionsWidth += 4;
-		if (maxExpandedWidth > 0 && maxExpandedWidth >= getWidth())
-			optionsWidth = Math.min(maxExpandedWidth, optionsWidth);
+
+		if (maxOptionsWidth == LONGEST_OPTION)
+			return;
+
+		if (maxOptionsWidth >= getWidth())
+			optionsWidth = Math.min(maxOptionsWidth, optionsWidth);
 	}
 
 	/**
@@ -660,7 +680,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		return options.iterator();
 	}
 
-	public class OptionsContainer extends UIComponent<OptionsContainer> implements IScrollable
+	public class OptionsContainer extends UIComponent<OptionsContainer> implements IScrollable, IClipable
 	{
 		/** The {@link UIScrollBar} used by this {@link OptionsContainer}. */
 		protected UISlimScrollbar scrollbar;
@@ -887,6 +907,22 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		public boolean onKeyTyped(char keyChar, int keyCode)
 		{
 			return UISelect.this.onKeyTyped(keyChar, keyCode);
+		}
+
+		@Override
+		public ClipArea getClipArea()
+		{
+			return new ClipArea(this);
+		}
+
+		@Override
+		public void setClipContent(boolean clip)
+		{}
+
+		@Override
+		public boolean shouldClipContent()
+		{
+			return true;
 		}
 	}
 
