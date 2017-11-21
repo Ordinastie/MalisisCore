@@ -384,7 +384,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public void setFocused(boolean focused)
 	{
-		if (isDisabled() || !isVisible())
+		if (!isEnabled() || !isVisible())
 			return;
 
 		if (!this.focused)
@@ -1152,7 +1152,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 */
 	public void drawText(GuiRenderer renderer)
 	{
-		FontOptions options = isDisabled() ? disabledFontOptions : this.fontOptions;
+		FontOptions options = isEnabled() ? this.fontOptions : disabledFontOptions;
 		if (!multiLine)
 		{
 			if (charOffset > text.length())

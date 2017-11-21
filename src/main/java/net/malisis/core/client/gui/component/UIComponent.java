@@ -98,7 +98,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	/** Determines whether this {@link UIComponent} is visible. */
 	protected boolean visible = true;
 	/** Determines whether this {@link UIComponent} is enabled. If set to false, will cancel any {@link GuiEvent events} received. */
-	protected boolean disabled = false;
+	protected boolean enabled = true;
 	/** Hover state of this {@link UIComponent}. */
 	protected boolean hovered = false;
 	/** Focus state of this {@link UIComponent}. */
@@ -424,7 +424,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 */
 	public void setFocused(boolean focused)
 	{
-		if (isDisabled())
+		if (!isEnabled())
 			return;
 
 		boolean flag = this.focused != focused;
@@ -506,27 +506,27 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 *
 	 * @return true if disabled
 	 */
-	public boolean isDisabled()
+	public boolean isEnabled()
 	{
-		return disabled || (parent != null && parent.isDisabled());
+		return enabled && (parent == null || parent.isEnabled());
 	}
 
 	/**
 	 * Set the state of this {@link UIComponent}.
 	 *
-	 * @param disabled the new state
+	 * @param enabled the new state
 	 * @return this {@link UIComponent}
 	 */
-	public T setDisabled(boolean disabled)
+	public T setEnabled(boolean enabled)
 	{
-		if (isDisabled() == disabled)
+		if (isEnabled() == enabled)
 			return self();
 
-		if (!fireEvent(new DisabledStateChange<>(self(), disabled)))
+		if (!fireEvent(new DisabledStateChange<>(self(), enabled)))
 			return self();
 
-		this.disabled = disabled;
-		if (disabled)
+		this.enabled = enabled;
+		if (enabled)
 		{
 			setHovered(false);
 			setFocused(false);
@@ -679,7 +679,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 */
 	public boolean onMouseMove(int lastX, int lastY, int x, int y)
 	{
-		if (isDisabled())
+		if (!isEnabled())
 			return false;
 
 		return parent != null ? parent.onMouseMove(lastX, lastY, x, y) : false;
@@ -695,7 +695,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 */
 	public boolean onButtonPress(int x, int y, MouseButton button)
 	{
-		if (isDisabled())
+		if (!isEnabled())
 			return false;
 
 		return parent != null ? parent.onButtonPress(x, y, button) : false;
@@ -711,7 +711,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 */
 	public boolean onButtonRelease(int x, int y, MouseButton button)
 	{
-		if (isDisabled())
+		if (!isEnabled())
 			return false;
 
 		return parent != null ? parent.onButtonRelease(x, y, button) : false;
@@ -726,7 +726,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 */
 	public boolean onClick(int x, int y)
 	{
-		if (isDisabled())
+		if (!isEnabled())
 			return false;
 
 		return parent != null ? parent.onClick(x, y) : false;
@@ -741,7 +741,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 */
 	public boolean onRightClick(int x, int y)
 	{
-		if (isDisabled())
+		if (!isEnabled())
 			return false;
 
 		return parent != null ? parent.onRightClick(x, y) : false;
@@ -757,7 +757,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 */
 	public boolean onDoubleClick(int x, int y, MouseButton button)
 	{
-		if (isDisabled())
+		if (!isEnabled())
 			return false;
 
 		return parent != null ? parent.onDoubleClick(x, y, button) : false;
@@ -775,7 +775,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 */
 	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
 	{
-		if (isDisabled())
+		if (!isEnabled())
 			return false;
 
 		return parent != null ? parent.onDrag(lastX, lastY, x, y, button) : false;
@@ -791,7 +791,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 */
 	public boolean onScrollWheel(int x, int y, int delta)
 	{
-		if (isDisabled())
+		if (!isEnabled())
 			return false;
 
 		for (IControlComponent c : controlComponents)
@@ -804,7 +804,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	@Override
 	public boolean onKeyTyped(char keyChar, int keyCode)
 	{
-		if (isDisabled())
+		if (!isEnabled())
 			return false;
 
 		for (IControlComponent c : controlComponents)

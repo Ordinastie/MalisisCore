@@ -363,7 +363,7 @@ public abstract class MalisisGui extends GuiScreen
 				if (component != null)
 				{
 					tooltipComponent = component;
-					if (!component.isDisabled())
+					if (component.isEnabled())
 					{
 						component.onMouseMove(lastMouseX, lastMouseY, mouseX, mouseY);
 						component.setHovered(true);
@@ -385,7 +385,7 @@ public abstract class MalisisGui extends GuiScreen
 				delta = -1;
 
 			UIComponent<?> component = getComponentAt(mouseX, mouseY);
-			if (component != null && !component.isDisabled())
+			if (component != null && component.isEnabled())
 			{
 				component.onScrollWheel(mouseX, mouseY, delta);
 			}
@@ -408,7 +408,7 @@ public abstract class MalisisGui extends GuiScreen
 			long time = System.currentTimeMillis();
 
 			UIComponent<?> component = getComponentAt(x, y);
-			if (component != null && !component.isDisabled())
+			if (component != null && component.isEnabled())
 			{
 				//double click
 				if (button == lastClickButton && time - lastClickTime < 250)
@@ -485,7 +485,7 @@ public abstract class MalisisGui extends GuiScreen
 			}
 
 			UIComponent<?> component = getComponentAt(x, y);
-			if (component != null && !component.isDisabled())
+			if (component != null && component.isEnabled())
 			{
 				MouseButton mb = MouseButton.getButton(button);
 				component.onButtonRelease(x, y, mb);

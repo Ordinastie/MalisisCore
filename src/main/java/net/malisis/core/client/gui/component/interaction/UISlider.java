@@ -209,7 +209,7 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 	 */
 	public void slideTo(float offset)
 	{
-		if (isDisabled())
+		if (!isEnabled())
 			return;
 
 		setValue(converter.convert(MathHelper.clamp(offset, 0, 1)));

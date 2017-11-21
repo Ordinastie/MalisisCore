@@ -372,7 +372,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 
 		this.active = active;
 		this.container.setVisible(active);
-		this.container.setDisabled(!active);
+		this.container.setEnabled(active);
 		this.zIndex = container.getZIndex() + (active ? 1 : 0);
 
 		fireEvent(new ActiveStateChange<>(this, active));

@@ -162,14 +162,14 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	/**
 	 * Sets the disabled.
 	 *
-	 * @param disabled the disabled
+	 * @param enabled the disabled
 	 * @return the t
 	 */
 	@Override
-	public T setDisabled(boolean disabled)
+	public T setEnabled(boolean enabled)
 	{
-		super.setDisabled(disabled);
-		if (disabled)
+		super.setEnabled(enabled);
+		if (enabled)
 		{
 			for (UIComponent<?> c : components)
 			{
@@ -379,7 +379,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 		if (superComp != null && superComp != this)
 			return superComp;
 
-		if (isDisabled() || !isVisible())
+		if (!isEnabled() || !isVisible())
 			return null;
 
 		Set<UIComponent<?>> list = new LinkedHashSet<>();

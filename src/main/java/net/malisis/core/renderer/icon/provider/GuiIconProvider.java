@@ -74,7 +74,7 @@ public class GuiIconProvider implements IGuiIconProvider
 	@Override
 	public Icon getIcon(UIComponent<?> component)
 	{
-		if (component.isDisabled())
+		if (!component.isEnabled())
 			return disabledIcon != null ? disabledIcon : icon;
 		if (component.isHovered())
 			return hoveredIcon != null ? hoveredIcon : icon;

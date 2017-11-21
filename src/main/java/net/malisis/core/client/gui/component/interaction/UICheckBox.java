@@ -64,9 +64,12 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 
 		shape = new SimpleGuiShape();
 
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(242, 32, 10, 10), null, gui.getGuiTexture().getIcon(252, 32, 10, 10));
-		cbIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(242, 52, 12, 10), gui.getGuiTexture().getIcon(254, 42, 12, 10),
-				gui.getGuiTexture().getIcon(242, 42, 12, 10));
+		iconProvider = new GuiIconProvider(	gui.getGuiTexture().getIcon(242, 32, 10, 10),
+											null,
+											gui.getGuiTexture().getIcon(252, 32, 10, 10));
+		cbIconProvider = new GuiIconProvider(	gui.getGuiTexture().getIcon(242, 52, 12, 10),
+												gui.getGuiTexture().getIcon(254, 42, 12, 10),
+												gui.getGuiTexture().getIcon(242, 42, 12, 10));
 	}
 
 	public UICheckBox(MalisisGui gui)
@@ -225,7 +228,7 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	{
 		if (checked)
 		{
-			if (isHovered() && !isDisabled())
+			if (isHovered() && isEnabled())
 				GL11.glEnable(GL11.GL_BLEND);
 			rp.reset();
 			shape.resetState();
@@ -233,7 +236,7 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 			rp.iconProvider.set(cbIconProvider);
 			renderer.drawShape(shape, rp);
 			renderer.next();
-			if (isHovered() && !isDisabled())
+			if (isHovered() && isEnabled())
 				GL11.glDisable(GL11.GL_BLEND);
 		}
 	}

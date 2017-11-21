@@ -259,7 +259,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 */
 	public void scrollTo(float offset)
 	{
-		if (isDisabled())
+		if (!isEnabled())
 			return;
 
 		if (offset < 0)
@@ -307,11 +307,11 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 				hide = true;
 		}
 
-		if (hide != isDisabled() || offset < 0)
+		if (hide == isEnabled() || offset < 0)
 			scrollTo(0);
 		if (offset > 1)
 			scrollTo(1);
-		setDisabled(hide);
+		setEnabled(!hide);
 		if (autoHide)
 			setVisible(!hide);
 	}
