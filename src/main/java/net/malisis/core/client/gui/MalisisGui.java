@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -109,6 +110,8 @@ public abstract class MalisisGui extends GuiScreen
 	protected UIComponent<?> hoveredComponent;
 	/** Currently focused child component. */
 	protected UIComponent<?> focusedComponent;
+	/** Currently dragged child component. */
+	protected UIComponent<?> draggedComponent;
 	/** Component for which to display the tooltip (can be disabled and not receive events). */
 	protected UIComponent<?> tooltipComponent;
 	/** Whether this GUI has been constructed. */
@@ -117,7 +120,7 @@ public abstract class MalisisGui extends GuiScreen
 	protected Set<IKeyListener> keyListeners = new HashSet<>();
 	/** Debug **/
 	private boolean debug = false;
-	private HashMap<String, Supplier<String>> debugMap = new HashMap<>();
+	private HashMap<String, Supplier<String>> debugMap = new LinkedHashMap<>();
 
 	protected MalisisGui()
 	{
@@ -350,6 +353,7 @@ public abstract class MalisisGui extends GuiScreen
 
 				this.eventButton = -1;
 				this.mouseReleased(mouseX, mouseY, button);
+				this.draggedComponent = null;
 			}
 			else if (this.eventButton != -1 && this.lastMouseEvent > 0L)
 			{
@@ -416,9 +420,12 @@ public abstract class MalisisGui extends GuiScreen
 					component.onDoubleClick(x, y, MouseButton.getButton(button));
 					lastClickTime = 0;
 				}
-				else
-					//do not trigger onButtonPress when double clicked (fixed shift-double click issue in inventory)
+				else //do not trigger onButtonPress when double clicked (fixed shift-double click issue in inventory)
+				{
 					component.onButtonPress(x, y, MouseButton.getButton(button));
+					if (draggedComponent == null)
+						draggedComponent = component;
+				}
 
 				component.setFocused(true);
 			}
@@ -450,8 +457,8 @@ public abstract class MalisisGui extends GuiScreen
 	{
 		try
 		{
-			if (focusedComponent != null)
-				focusedComponent.onDrag(lastMouseX, lastMouseY, x, y, MouseButton.getButton(button));
+			if (draggedComponent != null)
+				draggedComponent.onDrag(lastMouseX, lastMouseY, x, y, MouseButton.getButton(button));
 		}
 		catch (Exception e)
 		{
@@ -488,7 +495,8 @@ public abstract class MalisisGui extends GuiScreen
 			if (component != null && component.isEnabled())
 			{
 				MouseButton mb = MouseButton.getButton(button);
-				component.onButtonRelease(x, y, mb);
+				if (draggedComponent != null)
+					draggedComponent.onButtonRelease(x, y, mb);
 				if (component == focusedComponent)
 				{
 					if (mb == MouseButton.LEFT)
@@ -598,6 +606,7 @@ public abstract class MalisisGui extends GuiScreen
 	{
 		addDebug("Focus", () -> String.valueOf(focusedComponent));
 		addDebug("Hover", () -> String.valueOf(hoveredComponent));
+		addDebug("Dragged", () -> String.valueOf(draggedComponent));
 		if (inventoryContainer != null)
 			addDebug("Picked", () -> ItemUtils.toString(inventoryContainer.getPickedItemStack()));
 	}
@@ -858,6 +867,9 @@ public abstract class MalisisGui extends GuiScreen
 
 			gui.hoveredComponent = component;
 		}
+
+		if (component == null)
+			gui.hoveredComponent = null;
 
 		return true;
 	}
