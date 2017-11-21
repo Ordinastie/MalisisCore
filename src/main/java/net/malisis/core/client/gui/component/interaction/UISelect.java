@@ -159,6 +159,14 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 	//#region Getters/Setters
 	@Override
+	public UISelect<T> setSize(int width, int height)
+	{
+		super.setSize(width, height);
+		calcOptionsSize();
+		return this;
+	}
+
+	@Override
 	public MalisisFont getFont()
 	{
 		return font;
@@ -335,13 +343,15 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	 */
 	private void calcOptionsSize()
 	{
+		if (options == null)
+			return;
 		optionsWidth = getWidth() - 4;
 		for (Option<?> option : this)
 			optionsWidth = Math.max(optionsWidth,
 									(int) MalisisFont.minecraftFont.getStringWidth(option.getLabel(labelPattern), fontOptions));
 
 		optionsWidth += 4;
-		if (maxExpandedWidth > 0)
+		if (maxExpandedWidth > 0 && maxExpandedWidth >= getWidth())
 			optionsWidth = Math.min(maxExpandedWidth, optionsWidth);
 	}
 
