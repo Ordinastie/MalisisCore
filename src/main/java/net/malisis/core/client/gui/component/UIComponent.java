@@ -1031,6 +1031,11 @@ public abstract class UIComponent<T extends UIComponent<T>>
 			GL14.glBlendColor(1, 1, 1, (float) getAlpha() / 255);
 		}
 
+		//store last drawn component so that it can be set back after drawing.
+		//makes sure components overriding rendering and calling super still have correct
+		//relative position in case super renders other components.
+		UIComponent<?> oldComponent = renderer.currentComponent;
+
 		//draw background
 		renderer.currentComponent = this;
 		drawBackground(renderer, mouseX, mouseY, partialTick);
@@ -1054,6 +1059,8 @@ public abstract class UIComponent<T extends UIComponent<T>>
 
 		for (IControlComponent c : controlComponents)
 			c.draw(renderer, mouseX, mouseY, partialTick);
+
+		renderer.currentComponent = oldComponent;
 
 		GL11.glPopAttrib();
 	}
