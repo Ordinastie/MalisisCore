@@ -393,10 +393,10 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 		if (list.size() == 0)
 			return superComp;
 
-		UIComponent<?> component = null;
+		UIComponent<?> component = superComp;
 		for (UIComponent<?> c : list)
 		{
-			if (component == null || component.getZIndex() <= c.getZIndex())
+			if (component != null && (component.getZIndex() <= c.getZIndex()))
 				component = c;
 		}
 
@@ -406,7 +406,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 		if (shouldClipContent() && !getClipArea().isInside(x, y))
 			return null;
 
-		return component;
+		return component != null && component.isEnabled() ? component : superComp;
 	}
 
 	/**
