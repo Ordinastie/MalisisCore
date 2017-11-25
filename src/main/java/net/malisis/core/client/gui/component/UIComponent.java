@@ -1045,14 +1045,19 @@ public abstract class UIComponent<T extends UIComponent<T>>
 		renderer.currentComponent = this;
 
 		ClipArea area = this instanceof IClipable ? ((IClipable) this).getClipArea() : null;
+		boolean render = true;
 		if (area != null)
+		{
 			renderer.startClipping(area);
+			if (area.width() < 0 || area.height() < 0)
+				render = false;
+		}
 
-		//GL11.glColor4f(1, 1, 1, 0.5F);
-
-		drawForeground(renderer, mouseX, mouseY, partialTick);
-
-		renderer.next();
+		if (render)
+		{
+			drawForeground(renderer, mouseX, mouseY, partialTick);
+			renderer.next();
+		}
 
 		if (area != null)
 			renderer.endClipping(area);
