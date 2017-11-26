@@ -1049,7 +1049,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 		if (area != null)
 		{
 			renderer.startClipping(area);
-			if (area.width() < 0 || area.height() < 0)
+			if (area.width() <= 0 || area.height() <= 0)
 				render = false;
 		}
 
