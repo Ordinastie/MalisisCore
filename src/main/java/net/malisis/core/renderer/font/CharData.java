@@ -44,7 +44,6 @@ public class CharData
 	public CharData(char c, float ascent, float width, float height)
 	{
 		this.c = c;
-		this.c = c;
 		this.ascent = ascent;
 		this.width = width;
 		this.height = height;
