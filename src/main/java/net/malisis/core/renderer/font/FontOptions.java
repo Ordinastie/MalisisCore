@@ -80,6 +80,8 @@ public class FontOptions
 	private boolean underline;
 	/** Strike through the text **/
 	private boolean strikethrough;
+	/** Obfuscated text */
+	private boolean obfuscated = false;
 	/** Disable ECF so char are actually drawn **/
 	private boolean formattingDisabled = false;
 	/** Translate the text before display */
@@ -89,14 +91,16 @@ public class FontOptions
 	private FontOptions lineOptions;
 	private boolean defaultSaved = false;
 
-	private FontOptions(float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean translate)
+	private FontOptions(float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, boolean translate)
 	{
 		this.fontScale = fontScale;
 		this.color = color;
 		this.shadow = shadow;
+		this.bold = bold;
 		this.italic = italic;
 		this.underline = underline;
 		this.strikethrough = strikethrough;
+		this.obfuscated = obfuscated;
 		this.translate = translate;
 
 		defaultFro = new FontOptions();
@@ -160,6 +164,16 @@ public class FontOptions
 	public boolean isStrikethrough()
 	{
 		return strikethrough;
+	}
+
+	/**
+	 * Checks if this {@link FontOptions} is obfuscated.
+	 *
+	 * @return true, if is obfuscated
+	 */
+	public boolean isObfuscated()
+	{
+		return obfuscated;
 	}
 
 	/**
@@ -270,6 +284,9 @@ public class FontOptions
 				case UNDERLINE:
 					underline = true;
 					break;
+				case OBFUSCATED:
+					obfuscated = true;
+					break;
 				default:
 					break;
 			}
@@ -284,10 +301,11 @@ public class FontOptions
 	{
 		defaultSaved = true;
 		defaultFro.color = color;
-		defaultFro.strikethrough = strikethrough;
 		defaultFro.bold = bold;
 		defaultFro.italic = italic;
 		defaultFro.underline = underline;
+		defaultFro.strikethrough = strikethrough;
+		defaultFro.obfuscated = obfuscated;
 		defaultFro.fontScale = fontScale;
 	}
 
@@ -332,6 +350,7 @@ public class FontOptions
 		bold = options.bold;
 		italic = options.italic;
 		strikethrough = options.strikethrough;
+		obfuscated = options.obfuscated;
 		underline = options.underline;
 	}
 
@@ -466,6 +485,7 @@ public class FontOptions
 						.italic(italic)
 						.underline(underline)
 						.strikethrough(strikethrough)
+						.obfuscated(obfuscated)
 						.disableTranslation()
 						.build();
 	}
@@ -489,6 +509,7 @@ public class FontOptions
 		private boolean italic = false;
 		private boolean underline = false;
 		private boolean strikethrough = false;
+		private boolean obfuscated = false;
 		private boolean translate = true;
 
 		public FontOptionsBuilder()
@@ -550,6 +571,17 @@ public class FontOptions
 			return this;
 		}
 
+		public FontOptionsBuilder obfuscated()
+		{
+			return obfuscated(true);
+		}
+
+		public FontOptionsBuilder obfuscated(boolean obfuscated)
+		{
+			this.obfuscated = obfuscated;
+			return this;
+		}
+
 		public FontOptionsBuilder shadow()
 		{
 			return shadow(true);
@@ -595,6 +627,9 @@ public class FontOptions
 						case STRIKETHROUGH:
 							strikethrough();
 							break;
+						case OBFUSCATED:
+							obfuscated();
+							break;
 						default:
 					}
 			}
@@ -610,13 +645,14 @@ public class FontOptions
 			italic = options.italic;
 			underline = options.underline;
 			strikethrough = options.strikethrough;
+			obfuscated = options.obfuscated;
 
 			return this;
 		}
 
 		public FontOptions build()
 		{
-			return new FontOptions(fontScale, color, shadow, bold, italic, underline, strikethrough, translate);
+			return new FontOptions(fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated, translate);
 		}
 
 	}
