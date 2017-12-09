@@ -24,6 +24,11 @@
 
 package net.malisis.core.renderer.font;
 
+import java.util.LinkedList;
+
+import com.google.common.collect.Lists;
+
+import net.malisis.core.renderer.font.FontOptions.FontOptionsBuilder;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 
@@ -33,32 +38,39 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class StringWalker
 {
-	private MalisisFont font;
-	private FontOptions fontOptions;
-	private String str;
-	private boolean litteral;
-	private boolean skipChars = true;
-	private boolean applyStyles;
-	private boolean isText;
+	private static FontOptions DEFAULT_OPTIONS = FontOptions.builder().build();
+	protected MalisisFont font;
+	protected String str;
+	protected boolean litteral;
+	protected boolean skipChars = true;
+	protected boolean applyStyles;
 
-	//	private int prevColor;
-	//	private boolean prevUnderline;
+	protected String lines[];
+	protected int currentLine;
+	protected boolean isEOL = true;
 
-	private int index;
-	private int endIndex;
-	private char c;
-	private TextFormatting format;
-	private Link link;
-	private float width;
+	protected int index;
+	protected int endIndex;
+	protected char c;
+	protected TextFormatting format;
+	protected float width;
+
+	protected LinkedList<FontOptions> styles = Lists.newLinkedList();
 
 	public StringWalker(String str, MalisisFont font, FontOptions options)
 	{
 		this.str = str;
 		this.font = font;
-		this.fontOptions = options;
+		styles.add(options != null ? options : DEFAULT_OPTIONS);
 		this.index = 0;
 		this.endIndex = str.length();
 		this.litteral = options != null && options.isFormattingDisabled();
+	}
+
+	public StringWalker(String[] lines, MalisisFont font, FontOptions options)
+	{
+		this(lines[0], font, options);
+		this.lines = lines;
 	}
 
 	//#region Getters/Setters
@@ -103,16 +115,6 @@ public class StringWalker
 		return format != null;
 	}
 
-	public Link getLink()
-	{
-		return link;
-	}
-
-	public boolean isLink()
-	{
-		return link != null;
-	}
-
 	public float getWidth()
 	{
 		return width;
@@ -130,30 +132,34 @@ public class StringWalker
 		this.endIndex = MathHelper.clamp(index, index, str.length());
 	}
 
-	private void setLinkStyle(FontOptions options)
+	public int getCurrentLine()
 	{
-		if (options == null || litteral || !applyStyles)
-			return;
-
-		//prevColor = fro.color;
-		//prevUnderline = fro.underline;
-		//		fro.saveDefault();
-		//fro.color = 0x6666FF;
-		//fro.underline = true;
+		return currentLine;
 	}
 
-	private void resetLinkStyle(FontOptions options)
+	public String getCurrentText()
 	{
-		if (options == null || litteral || !applyStyles)
-			return;
+		return lines[getCurrentLine()];
+	}
 
-		//fro.color = prevColor;
-		//fro.underline = prevUnderline;
+	public FontOptions getCurrentStyle()
+	{
+		return styles.getLast();
+	}
+
+	public boolean isEOL()
+	{
+		return index >= endIndex;
+	}
+
+	public boolean isEndOfText()
+	{
+		return isEOL() && (lines == null || currentLine >= lines.length - 1);
 	}
 
 	//#end Getters/Setters
 
-	private void checkFormatting()
+	protected void checkFormatting()
 	{
 		format = FontOptions.getFormatting(str, index);
 		if (format == null)
@@ -162,8 +168,8 @@ public class StringWalker
 		if (format == null)
 			return;
 
-		if (applyStyles && fontOptions != null && !isLink())
-			fontOptions.apply(format);
+		if (applyStyles)
+			applyStyle(format);
 
 		if (skipChars && !litteral)
 		{
@@ -172,30 +178,19 @@ public class StringWalker
 		}
 	}
 
-	public void checkLink()
+	protected void applyStyle(TextFormatting format)
 	{
-		if (link != null)
+		if (format == TextFormatting.RESET)
 		{
-			isText = link.isText(getIndex());
-
-			if (str.charAt(index) == ']')
-			{
-				resetLinkStyle(fontOptions);
-				if (skipChars && !litteral)
-					index++;
-			}
-		}
-		else
-		{
-			link = FontOptions.getLink(str, index);
-			if (isLink())
-			{
-				if (skipChars && !litteral)
-					index += link.indexAdvance();
-				setLinkStyle(fontOptions);
-			}
+			FontOptions fontOptions = styles.getFirst();
+			styles.clear();
+			styles.add(fontOptions);
+			return;
 		}
 
+		FontOptionsBuilder builder = FontOptions.builder().from(getCurrentStyle());
+		builder.styles(format);
+		styles.add(builder.build());
 	}
 
 	/**
@@ -237,21 +232,37 @@ public class StringWalker
 
 	public boolean walk()
 	{
-		if (index >= endIndex)
+		if (walkLine())
+			return true;
+
+		if (isEndOfText())
+			return false;
+
+		//Walk next line
+		str = lines[++currentLine];
+		index = 0;
+		endIndex = str.length();
+		width = 0;
+		return true;
+	}
+
+	private boolean walkLine()
+	{
+		if (isEOL())
 			return false;
 
 		checkFormatting();
-		//checkLink();
 
-		if (index >= endIndex)
+		if (isEOL())
 			return false;
 
+		FontOptions options = styles.getLast();
 		c = str.charAt(index);
-		width = font.getCharWidth(c, fontOptions);
-		if (fontOptions != null && fontOptions.isBold())
-			width += fontOptions.getFontScale();
+		width = font.getCharWidth(c, options);
+		if (options.isBold())
+			width += options.getFontScale();
 
-		if (!litteral && !skipChars && (format != null || (link != null && !isText)))
+		if (!litteral && !skipChars && format != null)
 			width = 0;
 
 		index++;

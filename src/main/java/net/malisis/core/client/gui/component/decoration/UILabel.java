@@ -431,13 +431,15 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 
 		if (multiLine)
 		{
-			fontOptions.resetStyles();//manually reset style because fro.multiline = true
-			for (int i = lineOffset; i < lineOffset + getVisibleLines() && i < lines.size(); i++)
-			{
-				fontOptions.setLineOptions(fontOptions);
-				int h = (i - lineOffset) * getLineHeight();
-				renderer.drawText(font, lines.get(i), 0, h, 0, fontOptions);
-			}
+			font.render(renderer,
+						lines.toArray(new String[0]),
+						lineOffset,
+						lineOffset + getVisibleLines(),
+						screenX(),
+						screenY(),
+						getZIndex(),
+						lineSpacing,
+						fontOptions);
 		}
 		else
 			renderer.drawText(font, text, fontOptions);

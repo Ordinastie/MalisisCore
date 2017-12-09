@@ -26,16 +26,17 @@ package net.malisis.core.renderer.font;
 
 import java.awt.Font;
 import java.lang.reflect.Field;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.collect.Maps;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.asm.AsmUtils;
 import net.malisis.core.renderer.MalisisRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.FMLClientHandler;
 
@@ -51,8 +52,10 @@ public class MinecraftFont extends MalisisFont
 	private ResourceLocation[] unicodePages;
 	private ResourceLocation lastFontTexture;
 	private FontRenderer fontRenderer;
-	private MCCharData mcCharData = new MCCharData();
-	private UnicodeCharData unicodeCharData = new UnicodeCharData();
+	/** CharData for Unicode characters */
+	protected Map<Character, CharData> unicodeCharData = Maps.newHashMap();
+	/** Whether the character should drawn with unicode font even if unicode is disabled in MC options. */
+	protected boolean forceUnicode = false;
 	private MalisisRenderer<?> renderer;
 
 	public MinecraftFont()
@@ -66,6 +69,7 @@ public class MinecraftFont extends MalisisFont
 
 		fontRenderer = Minecraft.getMinecraft().fontRenderer;
 		setFields();
+		fillCharData();
 	}
 
 	private void setFields()
@@ -100,6 +104,16 @@ public class MinecraftFont extends MalisisFont
 		{
 			MalisisCore.log.error("[MinecraftFont] Failed to gets the FontRenderer fields :", e);
 		}
+	}
+
+	private void fillCharData()
+	{
+		for (char c = 0; c < 256; c++)
+		{
+			charData[c] = new MCCharData(c);
+			unicodeCharData.put(c, new UnicodeCharData(c));
+		}
+
 	}
 
 	private void bindFontTexture(CharData data)
@@ -137,14 +151,18 @@ public class MinecraftFont extends MalisisFont
 	@Override
 	public CharData getCharData(char c)
 	{
-		if (c < 0 || c >= 256 || fontRenderer.getUnicodeFlag())
-			return unicodeCharData.set(c);
-		else
-			return mcCharData.set(c);
+		if (c < 0 || c >= 256 || fontRenderer.getUnicodeFlag() || forceUnicode)
+		{
+			if (!unicodeCharData.containsKey(c))
+				unicodeCharData.put(c, new UnicodeCharData(c));
+			return unicodeCharData.get(c);
+		}
+
+		return super.getCharData(c);
 	}
 
 	@Override
-	protected void drawChar(CharData cd, float offsetX, float offsetY, FontOptions options)
+	protected void drawChar(CharData cd, float offsetX, float offsetY, FontOptions options, int color)
 	{
 		bindFontTexture(cd);
 		if (drawingShadow && cd instanceof UnicodeCharData)
@@ -153,36 +171,7 @@ public class MinecraftFont extends MalisisFont
 			offsetY -= options.getFontScale() / 2;
 		}
 
-		super.drawChar(cd, offsetX, offsetY, options);
-	}
-
-	@Override
-	protected void drawLineChar(CharData cd, float offsetX, float offsetY, FontOptions options)
-	{
-		BufferBuilder buffer = Tessellator.getInstance().getBuffer();
-		float factor = options.getFontScale() / fontGeneratorOptions.fontSize * 9;
-		float w = cd.getFullWidth(fontGeneratorOptions) * factor;
-		float h = cd.getFullHeight(fontGeneratorOptions) / 9F * factor;
-		int color = drawingShadow ? options.getShadowColor() : options.getColor();
-
-		offsetY -= factor + h;
-		w += 1.01F * factor;
-
-		buffer.pos(offsetX, offsetY, 0);
-		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		buffer.endVertex();
-
-		buffer.pos(offsetX, offsetY + h, 0);
-		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		buffer.endVertex();
-
-		buffer.pos(offsetX + w, offsetY + h, 0);
-		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		buffer.endVertex();
-
-		buffer.pos(offsetX + w, offsetY, 0);
-		buffer.color((color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
-		buffer.endVertex();
+		super.drawChar(cd, offsetX, offsetY, options, color);
 	}
 
 	@Override
@@ -205,21 +194,13 @@ public class MinecraftFont extends MalisisFont
 
 	public class MCCharData extends CharData
 	{
+		/** Index in the CHARLIST string. */
 		int pos;
 
-		public MCCharData()
+		public MCCharData(char c)
 		{
-			super('-', 0, 0, 0);
-		}
-
-		public CharData set(char c)
-		{
-			String ref = "\u00c0\u00c1\u00c2\u00c8\u00ca\u00cb\u00cd\u00d3\u00d4\u00d5\u00da\u00df\u00e3\u00f5\u011f\u0130\u0131\u0152\u0153\u015e\u015f\u0174\u0175\u017e\u0207\u0000\u0000\u0000\u0000\u0000\u0000\u0000 !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\u0000\u00c7\u00fc\u00e9\u00e2\u00e4\u00e0\u00e5\u00e7\u00ea\u00eb\u00e8\u00ef\u00ee\u00ec\u00c4\u00c5\u00c9\u00e6\u00c6\u00f4\u00f6\u00f2\u00fb\u00f9\u00ff\u00d6\u00dc\u00f8\u00a3\u00d8\u00d7\u0192\u00e1\u00ed\u00f3\u00fa\u00f1\u00d1\u00aa\u00ba\u00bf\u00ae\u00ac\u00bd\u00bc\u00a1\u00ab\u00bb\u2591\u2592\u2593\u2502\u2524\u2561\u2562\u2556\u2555\u2563\u2551\u2557\u255d\u255c\u255b\u2510\u2514\u2534\u252c\u251c\u2500\u253c\u255e\u255f\u255a\u2554\u2569\u2566\u2560\u2550\u256c\u2567\u2568\u2564\u2565\u2559\u2558\u2552\u2553\u256b\u256a\u2518\u250c\u2588\u2584\u258c\u2590\u2580\u03b1\u03b2\u0393\u03c0\u03a3\u03c3\u03bc\u03c4\u03a6\u0398\u03a9\u03b4\u221e\u2205\u2208\u2229\u2261\u00b1\u2265\u2264\u2320\u2321\u00f7\u2248\u00b0\u2219\u00b7\u221a\u207f\u00b2\u25a0\u0000";
-			if (c == '\u00a7')
-				c = '&';
-			this.c = c;
-			this.pos = ref.indexOf(c);
-			return this;
+			super(c == '\u00a7' ? '&' : c, 0, 0, 0);
+			this.pos = CHARLIST.indexOf(c);
 		}
 
 		@Override
@@ -284,18 +265,10 @@ public class MinecraftFont extends MalisisFont
 	{
 		float pad;
 
-		public UnicodeCharData()
+		public UnicodeCharData(char c)
 		{
-			super('-', 0, 0, 0);
-		}
-
-		public CharData set(char c)
-		{
-			this.c = c;
-			this.width = glyphWidth[c] & 15;
+			super(c, 0, glyphWidth[c] & 15, fontRenderer.FONT_HEIGHT);
 			this.pad = glyphWidth[c] >>> 4;
-
-			return this;
 		}
 
 		@Override
@@ -342,12 +315,6 @@ public class MinecraftFont extends MalisisFont
 			}
 
 			return (int) (width + 1 - pad) / 2 + 1;
-		}
-
-		@Override
-		public float getCharHeight()
-		{
-			return fontRenderer.FONT_HEIGHT;
 		}
 
 		@Override
