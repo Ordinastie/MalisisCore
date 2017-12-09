@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.google.common.collect.Iterators;
+
 import net.malisis.core.MalisisCore;
 import net.malisis.core.block.IComponent;
 import net.malisis.core.block.component.DirectionalComponent;
@@ -60,7 +62,6 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 	protected Map<BlockPos, MBlockState> states = new HashMap<>();
 	protected BlockPos offset = BlockPos.ORIGIN;
 	protected PropertyDirection property = DirectionalComponent.HORIZONTAL;
-	private int rotation;
 	private boolean bulkPlace;
 	private boolean bulkBreak;
 
@@ -75,20 +76,13 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 		this.property = property;
 	}
 
-	public void setRotation(IBlockState state)
+	public int getRotation(IBlockState state)
 	{
 		if (state == null || !state.getProperties().containsKey(property))
-			rotation = 0;
-		else
-		{
-			EnumFacing direction = state.getValue(property);
-			rotation = EnumFacingUtils.getRotationCount(direction);
-		}
-	}
+			return 0;
 
-	public int getRotation()
-	{
-		return rotation;
+		EnumFacing direction = state.getValue(property);
+		return EnumFacingUtils.getRotationCount(direction);
 	}
 
 	public void setBulkProcess(boolean bulkPlace, boolean bulkBreak)
@@ -113,11 +107,8 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 		if (origin == null)
 			return false;
 
-		IBlockState state = world.getBlockState(origin);
-		setRotation(state);
-		for (MBlockState mstate : this)
+		for (MBlockState mstate : worldStates(world, origin))
 		{
-			mstate = mstate.rotate(rotation).offset(pos);
 			if (mstate.getPos().equals(pos))
 				return true;
 		}
@@ -126,37 +117,34 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 
 	public MBlockState getState(BlockPos pos)
 	{
-		pos = BlockPosUtils.rotate(pos, 4 - rotation);
+		//FIXME
+		pos = BlockPosUtils.rotate(pos, 4 /*- rotation*/);
 		return states.get(pos);
 	}
 
-	public boolean canPlaceBlockAt(World world, BlockPos pos, IBlockState state, boolean placeOrigin)
+	public boolean canPlaceBlockAt(World world, BlockPos origin, IBlockState originState, boolean placeOrigin)
 	{
-		setRotation(state);
-		for (MBlockState mstate : this)
+		for (MBlockState mstate : worldStates(origin, originState))
 		{
-			mstate = mstate.rotate(rotation).offset(pos);
-			if ((!mstate.getPos().equals(pos) || placeOrigin)
+			if ((!mstate.getPos().equals(origin) || placeOrigin)
 					&& !world.getBlockState(mstate.getPos()).getBlock().isReplaceable(world, mstate.getPos()))
 				return false;
 		}
 		return true;
 	}
 
-	public void placeBlocks(World world, BlockPos pos, IBlockState state, boolean placeOrigin)
+	public void placeBlocks(World world, BlockPos origin, IBlockState originState, boolean placeOrigin)
 	{
-		setRotation(state);
-		for (MBlockState mstate : this)
+		for (MBlockState mstate : worldStates(world, origin))
 		{
-			mstate = mstate.rotate(rotation).offset(pos);
-			if (!mstate.getPos().equals(pos) || placeOrigin)
+			if (!mstate.getPos().equals(origin) || placeOrigin)
 			{
-				BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, mstate.getPos(), pos);
+				BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, mstate.getPos(), origin);
 				mstate.placeBlock(world, 2);
 			}
 		}
 
-		BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, pos, pos);
+		BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, origin, origin);
 	}
 
 	public void breakBlocks(World world, BlockPos pos, IBlockState state)
@@ -181,10 +169,8 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 	private void doBreakBlocks(World world, BlockPos origin, IBlockState originState)
 	{
 		BlockDataHandler.removeData(ORIGIN_BLOCK_DATA, world, origin);
-		setRotation(originState);
-		for (MBlockState mstate : this)
+		for (MBlockState mstate : worldStates(origin, originState))
 		{
-			mstate = mstate.rotate(rotation).offset(origin);
 			if (mstate.matchesWorld(world))
 			{
 				mstate.breakBlock(world, 2);
@@ -195,12 +181,9 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 
 	public void setOriginData(World world, BlockPos pos, IBlockState state)
 	{
-		setRotation(state);
 		for (MBlockState mstate : this)
-		{
-			mstate = mstate.rotate(rotation).offset(pos);
 			BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, mstate.getPos(), pos);
-		}
+
 		BlockDataHandler.setData(ORIGIN_BLOCK_DATA, world, pos, pos);
 	}
 
@@ -211,7 +194,6 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 
 	public boolean isComplete(World world, BlockPos pos, MBlockState newState)
 	{
-		setRotation(world.getBlockState(pos));
 		MultiBlockAccess mba = new MultiBlockAccess(this, world);
 		for (MBlockState mstate : this)
 		{
@@ -230,6 +212,28 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 	public Iterator<MBlockState> iterator()
 	{
 		return states.values().iterator();
+	}
+
+	public Iterable<MBlockState> worldStates(IBlockAccess world, BlockPos origin)
+	{
+		return worldStates(origin, world.getBlockState(origin));
+	}
+
+	public Iterable<MBlockState> worldStates(BlockPos origin, IBlockState originState)
+	{
+		return new Iterable<MBlockState>()
+		{
+			@Override
+			public Iterator<MBlockState> iterator()
+			{
+				return Iterators.transform(MultiBlock.this.iterator(), mstate -> getWorldState(mstate, origin, originState));
+			}
+		};
+	}
+
+	public MBlockState getWorldState(MBlockState mstate, BlockPos origin, IBlockState originState)
+	{
+		return mstate.rotate(getRotation(originState)).offset(origin);
 	}
 
 	protected abstract void buildStates();
