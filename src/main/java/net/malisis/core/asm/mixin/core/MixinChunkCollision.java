@@ -70,7 +70,7 @@ public class MixinChunkCollision
 				cancellable = true)
 		private void onOnItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ, CallbackInfoReturnable<EnumActionResult> cir, IBlockState iblockstate, Block block, ItemStack itemstack)
 		{
-			if (!ChunkCollision.get().canPlaceBlockAt(player, world, block, pos, hand, side))
+			if (!ChunkCollision.get().canPlaceBlockAt(player, world, pos, hand, side))
 				cir.setReturnValue(EnumActionResult.FAIL);
 		}
 	}

@@ -196,15 +196,15 @@ public class ChunkCollision
 	 *
 	 * @param player the player
 	 * @param world the world
-	 * @param block the block
 	 * @param pos the pos
 	 * @param hand the hand
 	 * @param side the side
 	 * @return true, if can be placed
 	 */
-	public boolean canPlaceBlockAt(EntityPlayer player, World world, Block block, BlockPos pos, EnumHand hand, EnumFacing side)
+	public boolean canPlaceBlockAt(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side)
 	{
 		ItemStack itemStack = player.getHeldItem(hand);
+		Block block = world.getBlockState(pos).getBlock();
 		AxisAlignedBB[] aabbs;
 		if (block instanceof IChunkCollidable)
 		{
