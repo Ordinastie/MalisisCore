@@ -92,7 +92,7 @@ public class Timer
 		int minutes = (elapsed % 3600) / 60;
 		int seconds = elapsed % 60;
 
-		return String.format("%02d:%02d", minutes, seconds);
+		return String.format("%02d:%02d ago", minutes, seconds);
 	}
 
 }
