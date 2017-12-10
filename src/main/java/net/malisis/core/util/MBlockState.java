@@ -186,22 +186,6 @@ public class MBlockState
 		return it;
 	}
 
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (!(obj instanceof MBlockState))
-			return false;
-
-		MBlockState bs = (MBlockState) obj;
-		return pos.equals(bs.pos) && block == bs.block && state == bs.state;
-	}
-
-	@Override
-	public String toString()
-	{
-		return "[" + pos + "] " + (block != null ? block.getUnlocalizedName().substring(5) + " (" + state + ")" : "");
-	}
-
 	public static IBlockState fromNBT(NBTTagCompound nbt)
 	{
 		return fromNBT(nbt, "block", "metadata");
@@ -239,6 +223,22 @@ public class MBlockState
 		nbt.setString(blockName, Block.REGISTRY.getNameForObject(state.getBlock()).toString());
 		nbt.setInteger(metadataName, state.getBlock().getMetaFromState(state));
 		return nbt;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (!(obj instanceof MBlockState))
+			return false;
+
+		MBlockState bs = (MBlockState) obj;
+		return pos.equals(bs.pos) && block == bs.block && state == bs.state;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "[" + pos + "] " + state;
 	}
 
 	public static class BlockStateFunction implements Function<BlockPos, MBlockState>
