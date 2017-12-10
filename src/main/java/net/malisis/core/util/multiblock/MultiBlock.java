@@ -68,7 +68,6 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 	public void setOffset(BlockPos offset)
 	{
 		this.offset = offset;
-		buildStates();
 	}
 
 	public void setPropertyDirection(PropertyDirection property)
@@ -115,10 +114,9 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 		return false;
 	}
 
-	public MBlockState getState(BlockPos pos)
+	public MBlockState getState(BlockPos pos, IBlockState originState)
 	{
-		//FIXME
-		pos = BlockPosUtils.rotate(pos, 4 /*- rotation*/);
+		pos = BlockPosUtils.rotate(pos, 4 - getRotation(originState));
 		return states.get(pos);
 	}
 
@@ -149,33 +147,17 @@ public abstract class MultiBlock implements Iterable<MBlockState>
 
 	public void breakBlocks(World world, BlockPos pos, IBlockState state)
 	{
-		//we can't check the origin from world as the state is already changed in the chunk, so we check the passed state
-		if (!MultiBlockComponent.isOrigin(state))
-		{
-			BlockPos originPos = getOrigin(world, pos);
-			if (originPos == null) //should not happen
-			{
-				world.setBlockToAir(pos);
-				return;
-			}
-
-			world.setBlockToAir(originPos);
+		BlockPos origin = getOrigin(world, pos);
+		if (origin == null) //block was removing as part of bulk
 			return;
-		}
 
-		doBreakBlocks(world, pos, state);
-	}
-
-	private void doBreakBlocks(World world, BlockPos origin, IBlockState originState)
-	{
+		IBlockState originState = world.getBlockState(origin);
 		BlockDataHandler.removeData(ORIGIN_BLOCK_DATA, world, origin);
 		for (MBlockState mstate : worldStates(origin, originState))
 		{
-			if (mstate.matchesWorld(world))
-			{
-				mstate.breakBlock(world, 2);
-				BlockDataHandler.removeData(ORIGIN_BLOCK_DATA, world, mstate.getPos());
-			}
+			//remove data first so breaking this block doesn't re-trigger this loop
+			BlockDataHandler.removeData(ORIGIN_BLOCK_DATA, world, mstate.getPos());
+			mstate.breakBlock(world, 2);
 		}
 	}
 

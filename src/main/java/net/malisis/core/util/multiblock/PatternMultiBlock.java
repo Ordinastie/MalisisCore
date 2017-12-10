@@ -74,6 +74,13 @@ public class PatternMultiBlock extends MultiBlock
 	}
 
 	@Override
+	public void setOffset(BlockPos offset)
+	{
+		super.setOffset(offset);
+		buildStates();
+	}
+
+	@Override
 	public void buildStates()
 	{
 		states.clear();

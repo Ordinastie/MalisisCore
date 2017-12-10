@@ -24,37 +24,45 @@
 
 package net.malisis.core.util.multiblock;
 
-import net.malisis.core.block.IComponent;
-import net.malisis.core.block.component.DirectionalComponent;
 import net.malisis.core.util.BlockPosUtils;
 import net.malisis.core.util.MBlockState;
-import net.minecraft.block.Block;
-import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 /**
- * @author Ordinastie
+ * AABBMultiBlock allows to define a MultiBlock from an {@link AxisAlignedBB}.<br>
+ * The first block placed will be the origin of the MultiBlock and all the block spaces intersecting the AABB (relative to the origin) will
+ * be filled.<br>
+ * The {@link IBlockState} used when placing is the default one altered to have the proper values for the origin and direction properties.
  *
+ * @author Ordinastie
  */
 public class AABBMultiBlock extends MultiBlock
 {
 	private AxisAlignedBB aabb;
 	private IBlockState blockState;
 
-	public AABBMultiBlock(Block block, AxisAlignedBB aabb)
+	public AABBMultiBlock(AxisAlignedBB aabb)
 	{
 		this.aabb = aabb;
-		this.blockState = block.getDefaultState();
-		buildStates();
+	}
+
+	public AABBMultiBlock(IBlockState state, AxisAlignedBB aabb)
+	{
+		this(aabb);
+		setDefaultState(state);
 	}
 
 	public AxisAlignedBB getBoundingBox()
 	{
 		return aabb;
+	}
+
+	public void setDefaultState(IBlockState state)
+	{
+		blockState = state;
+		buildStates();
 	}
 
 	public AxisAlignedBB getRelativeBoundingBox(BlockPos pos, BlockPos origin)
@@ -73,15 +81,5 @@ public class AABBMultiBlock extends MultiBlock
 				pos = pos.add(offset);
 			states.put(pos, new MBlockState(pos, blockState));
 		}
-	}
-
-	@Override
-	public void placeBlocks(World world, BlockPos pos, IBlockState state, boolean placeOrigin)
-	{
-		MultiBlockComponent mbc = IComponent.getComponent(MultiBlockComponent.class, state.getBlock());
-		PropertyDirection dp = DirectionalComponent.getProperty(state.getBlock());
-		blockState = state.withProperty(mbc.getProperty(), false).withProperty(dp, EnumFacing.SOUTH);
-		buildStates();
-		super.placeBlocks(world, pos, state, placeOrigin);
 	}
 }

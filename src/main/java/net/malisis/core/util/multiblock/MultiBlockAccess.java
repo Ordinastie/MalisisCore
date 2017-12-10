@@ -70,9 +70,13 @@ public class MultiBlockAccess implements IBlockAccess
 	@Override
 	public IBlockState getBlockState(BlockPos pos)
 	{
-		MBlockState state = multiBlock.getState(pos);
-		if (state != null)
-			return state.getBlockState();
+		BlockPos origin = MultiBlock.getOrigin(world, pos);
+		if (origin != null)
+		{
+			MBlockState state = multiBlock.getState(pos, world.getBlockState(origin));
+			if (state != null)
+				return state.getBlockState();
+		}
 
 		return world != null ? world.getBlockState(pos) : Blocks.AIR.getDefaultState();
 	}
