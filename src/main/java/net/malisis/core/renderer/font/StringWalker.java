@@ -25,6 +25,7 @@
 package net.malisis.core.renderer.font;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import com.google.common.collect.Lists;
 
@@ -45,7 +46,7 @@ public class StringWalker
 	protected boolean skipChars = true;
 	protected boolean applyStyles;
 
-	protected String lines[];
+	protected List<String> lines;
 	protected int currentLine;
 	protected boolean isEOL = true;
 
@@ -67,9 +68,9 @@ public class StringWalker
 		this.litteral = options != null && options.isFormattingDisabled();
 	}
 
-	public StringWalker(String[] lines, MalisisFont font, FontOptions options)
+	public StringWalker(List<String> lines, MalisisFont font, FontOptions options)
 	{
-		this(lines[0], font, options);
+		this(lines.size() > 0 ? lines.get(0) : "", font, options);
 		this.lines = lines;
 	}
 
@@ -139,7 +140,7 @@ public class StringWalker
 
 	public String getCurrentText()
 	{
-		return lines[getCurrentLine()];
+		return lines.size() > getCurrentLine() ? lines.get(getCurrentLine()) : "";
 	}
 
 	public FontOptions getCurrentStyle()
@@ -154,7 +155,7 @@ public class StringWalker
 
 	public boolean isEndOfText()
 	{
-		return isEOL() && (lines == null || currentLine >= lines.length - 1);
+		return isEOL() && (lines == null || currentLine >= lines.size() - 1);
 	}
 
 	//#end Getters/Setters
@@ -239,7 +240,7 @@ public class StringWalker
 			return false;
 
 		//Walk next line
-		str = lines[++currentLine];
+		str = lines.get(++currentLine);
 		index = 0;
 		endIndex = str.length();
 		width = 0;

@@ -24,11 +24,11 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.GuiRenderer;
@@ -67,7 +67,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	/** BBCode renderer **/
 	protected BBCodeRenderer bbRenderer;
 	/** List of strings making the text of this {@link UILabel}. */
-	protected List<String> lines = new LinkedList<>();
+	protected List<String> lines = Lists.newArrayList();
 	/** Whether this {@link UITextField} handles multiline text. */
 	protected boolean multiLine = false;
 
@@ -432,7 +432,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		if (multiLine)
 		{
 			font.render(renderer,
-						lines.toArray(new String[0]),
+						lines,
 						lineOffset,
 						lineOffset + getVisibleLines(),
 						screenX(),

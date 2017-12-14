@@ -48,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
 import net.malisis.core.MalisisCore;
@@ -235,8 +236,11 @@ public class MalisisFont
 	}
 
 	//#end Prepare/Clean
-	public void render(MalisisRenderer<?> renderer, String[] lines, int startLine, int endLine, float x, float y, float z, int lineSpacing, FontOptions options)
+	public void render(MalisisRenderer<?> renderer, List<String> lines, int startLine, int endLine, float x, float y, float z, int lineSpacing, FontOptions options)
 	{
+		if (lines.size() == 0)
+			return;
+
 		boolean isDrawing = renderer.isDrawing();
 		prepare(renderer, x, y, z, options);
 
@@ -284,7 +288,7 @@ public class MalisisFont
 			return;
 		}
 		text = processString(text, options);
-		render(renderer, new String[] { text }, 0, 1, x, y, z, 0, options);
+		render(renderer, Lists.newArrayList(text), 0, 1, x, y, z, 0, options);
 	}
 
 	protected void renderCharacter(char c, float x, float y, FontOptions options)
@@ -597,7 +601,7 @@ public class MalisisFont
 	 */
 	public List<String> wrapText(String str, int maxWidth, FontOptions options)
 	{
-		List<String> lines = new ArrayList<>();
+		List<String> lines = Lists.newArrayList();
 		String[] texts = str.split("\r?(?<=\n)");
 		if (texts.length > 1)
 		{
