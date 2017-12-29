@@ -491,6 +491,16 @@ public class FontOptions
 	}
 
 	/**
+	 * Create a {@link FontOptionsBuilder} with the values from {@code this}.
+	 *
+	 * @return the font options builder
+	 */
+	public FontOptionsBuilder toBuilder()
+	{
+		return new FontOptionsBuilder().from(this);
+	}
+
+	/**
 	 * Create the {@link FontOptionsBuilder} for a new {@link FontOptions}.
 	 *
 	 * @return the font options builder
