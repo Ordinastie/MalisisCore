@@ -1162,14 +1162,15 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		}
 		else
 		{
-			options.resetStyles();
-			for (int i = lineOffset; i < lineOffset + getVisibleLines() && i < lines.size(); i++)
-			{
-				options.setLineOptions(options);
-				int h = (i - lineOffset) * getLineHeight();
-				renderer.drawText(font, lines.get(i), 2, h + 2, 0, options);
-
-			}
+			font.render(renderer,
+						lines,
+						lineOffset,
+						lineOffset + getVisibleLines(),
+						screenX() + 2,
+						screenY() + 2,
+						getZIndex(),
+						lineSpacing,
+						fontOptions);
 		}
 	}
 
