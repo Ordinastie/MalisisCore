@@ -87,10 +87,6 @@ public class FontOptions
 	/** Translate the text before display */
 	private boolean translate = true;
 
-	private FontOptions defaultFro;
-	private FontOptions lineOptions;
-	private boolean defaultSaved = false;
-
 	private FontOptions(float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, boolean translate)
 	{
 		this.fontScale = fontScale;
@@ -102,18 +98,6 @@ public class FontOptions
 		this.strikethrough = strikethrough;
 		this.obfuscated = obfuscated;
 		this.translate = translate;
-
-		defaultFro = new FontOptions();
-		lineOptions = new FontOptions();
-
-		saveDefault();
-		lineOptions.from(this);
-	}
-
-	private FontOptions()
-	{
-		//constructor without a default.
-		//'this' object should already be the default for another FRO
 	}
 
 	/**
@@ -214,144 +198,6 @@ public class FontOptions
 	public boolean shouldTranslate()
 	{
 		return translate;
-	}
-
-	/**
-	 * Process styles applied to the beginning of the text with {@link TextFormatting} values.<br>
-	 * Applies the styles to this {@link FontOptions} and returns the number of characters read.
-	 *
-	 * @param text the text
-	 * @return the string with ECF
-	 */
-	public int processStyles(String text)
-	{
-		return processStyles(text, 0);
-	}
-
-	/**
-	 * Process styles applied at the specified position in the text with {@link TextFormatting} values.<br>
-	 * Applies the styles to this {@link FontOptions} and returns the number of characters read.
-	 *
-	 * @param text the text
-	 * @param index the index
-	 * @return the int
-	 */
-	public int processStyles(String text, int index)
-	{
-		if (!defaultSaved)
-			saveDefault();
-		if (formattingDisabled)
-			return 0;
-		TextFormatting ecf;
-		int offset = 0;
-		while ((ecf = getFormatting(text, index + offset)) != null)
-		{
-			offset += 2;
-			apply(ecf);
-		}
-
-		return offset;
-	}
-
-	/**
-	 * Applies the {@link TextFormatting} style to this {@link FontOptions}.
-	 *
-	 * @param ecf the ecf
-	 */
-	public void apply(TextFormatting ecf)
-	{
-		if (!defaultSaved)
-			saveDefault();
-		if (ecf == TextFormatting.RESET)
-			resetStyles();
-		else if (ecf.isColor())
-		{
-			color = colors[ecf.ordinal()];
-		}
-		else
-		{
-			switch (ecf)
-			{
-				case STRIKETHROUGH:
-					strikethrough = true;
-					break;
-				case BOLD:
-					bold = true;
-					break;
-				case ITALIC:
-					italic = true;
-					break;
-				case UNDERLINE:
-					underline = true;
-					break;
-				case OBFUSCATED:
-					obfuscated = true;
-					break;
-				default:
-					break;
-			}
-		}
-	}
-
-	/**
-	 * Saves the current styles as default.<br>
-	 * Default styles are restored when {@link #resetStyles()} is called.
-	 */
-	public void saveDefault()
-	{
-		defaultSaved = true;
-		defaultFro.color = color;
-		defaultFro.bold = bold;
-		defaultFro.italic = italic;
-		defaultFro.underline = underline;
-		defaultFro.strikethrough = strikethrough;
-		defaultFro.obfuscated = obfuscated;
-		defaultFro.fontScale = fontScale;
-	}
-
-	/**
-	 * Resets styles to the default values.
-	 */
-	public void resetStyles()
-	{
-		if (!defaultSaved)
-		{
-			saveDefault();
-			return;
-		}
-
-		from(defaultFro);
-	}
-
-	/**
-	 * Sets the line options.
-	 *
-	 * @param options the new line options
-	 */
-	public void setLineOptions(FontOptions options)
-	{
-		lineOptions.from(options);
-	}
-
-	public void resetLineOptions()
-	{
-		from(lineOptions);
-	}
-
-	/**
-	 * Sets the styles for this {@link FontOptions} based on the passed one.
-	 *
-	 * @param options the fro
-	 */
-	private void from(FontOptions options)
-	{
-		fontScale = options.fontScale;
-		color = options.color;
-		bold = options.bold;
-		italic = options.italic;
-		strikethrough = options.strikethrough;
-		obfuscated = options.obfuscated;
-		underline = options.underline;
 	}
 
 	/**
