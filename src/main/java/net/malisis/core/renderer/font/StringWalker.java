@@ -189,7 +189,7 @@ public class StringWalker
 			return;
 		}
 
-		FontOptionsBuilder builder = FontOptions.builder().from(getCurrentStyle());
+		FontOptionsBuilder builder = getCurrentStyle().toBuilder();
 		builder.styles(format);
 		styles.add(builder.build());
 	}
