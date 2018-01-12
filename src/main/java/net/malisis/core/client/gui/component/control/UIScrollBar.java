@@ -111,13 +111,10 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 */
 	protected void setPosition()
 	{
-		int vp = getScrollable().getRightPadding();
-		int hp = getScrollable().getBottomPadding();
-
 		if (type == Type.HORIZONTAL)
-			setPosition(-hp + offsetX, vp + offsetY, Anchor.BOTTOM);
+			setPosition(getScrollable().getLeftPadding() + offsetX, -getScrollable().getBottomPadding() + offsetY, Anchor.BOTTOM);
 		else
-			setPosition(hp + offsetX, -vp + offsetY, Anchor.RIGHT);
+			setPosition(-getScrollable().getRightPadding() + offsetX, getScrollable().getTopPadding() + offsetY, Anchor.RIGHT);
 	}
 
 	/**
@@ -208,13 +205,27 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	@Override
 	public int getWidth()
 	{
-		return isHorizontal() ? getParent().getWidth() - (hasVisibleOtherScrollbar() ? scrollThickness : 0) : scrollThickness;
+		if (!isHorizontal())
+			return scrollThickness;
+
+		int w = parent.getWidth();
+		w -= getScrollable().getLeftPadding() + getScrollable().getRightPadding();
+		if (hasVisibleOtherScrollbar())
+			w -= scrollThickness;
+		return w;
 	}
 
 	@Override
 	public int getHeight()
 	{
-		return isHorizontal() ? scrollThickness : getParent().getHeight() - (hasVisibleOtherScrollbar() ? scrollThickness : 0);
+		if (isHorizontal())
+			return scrollThickness;
+
+		int h = getParent().getHeight();
+		h -= getScrollable().getTopPadding() + getScrollable().getBottomPadding();
+		if (hasVisibleOtherScrollbar())
+			h -= scrollThickness;
+		return h;
 	}
 
 	/**

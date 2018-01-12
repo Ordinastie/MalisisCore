@@ -26,7 +26,6 @@ package net.malisis.core.client.gui.component.control;
 
 import com.google.common.eventbus.Subscribe;
 
-import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -66,18 +65,6 @@ public class UISlimScrollbar extends UIScrollBar
 	}
 
 	@Override
-	protected void setPosition()
-	{
-		int vp = getScrollable().getRightPadding();
-		int hp = getScrollable().getBottomPadding();
-
-		if (type == Type.HORIZONTAL)
-			setPosition(hp + offsetX, -vp + offsetY, Anchor.BOTTOM);
-		else
-			setPosition(-hp + offsetX, vp + offsetY, Anchor.RIGHT);
-	}
-
-	@Override
 	protected void createShape(MalisisGui gui)
 	{
 		int w = type == Type.HORIZONTAL ? scrollHeight : scrollThickness;
@@ -89,25 +76,6 @@ public class UISlimScrollbar extends UIScrollBar
 		scrollShape = new SimpleGuiShape();
 		scrollShape.setSize(w, h);
 		scrollShape.storeState();
-	}
-
-	@Override
-	public int getWidth()
-	{
-		int w = super.getWidth();
-		if (type == Type.HORIZONTAL)
-			w -= getScrollable().getLeftPadding() + getScrollable().getRightPadding();
-		return w;
-	}
-
-	@Override
-	public int getHeight()
-	{
-		int h = super.getHeight();
-		if (type == Type.VERTICAL)
-			h -= getScrollable().getTopPadding() + getScrollable().getBottomPadding();
-		return h;
-
 	}
 
 	/**
