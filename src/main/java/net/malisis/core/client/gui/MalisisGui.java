@@ -37,7 +37,6 @@ import java.util.function.Supplier;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.component.IKeyListener;
@@ -58,7 +57,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundEvent;
@@ -577,10 +575,6 @@ public abstract class MalisisGui extends GuiScreen
 		if (guiscreenBackground)
 			drawWorldBackground(1);
 
-		RenderHelper.enableGUIStandardItemLighting();
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_LIGHTING);
-
 		renderer.drawScreen(screen, mouseX, mouseY, partialTicks);
 
 		renderDebug(mouseX, mouseY, partialTicks);
@@ -595,10 +589,6 @@ public abstract class MalisisGui extends GuiScreen
 		}
 		else if (tooltipComponent != null)
 			renderer.drawTooltip(tooltipComponent.getTooltip());
-
-		GL11.glEnable(GL11.GL_LIGHTING);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-
 	}
 
 	//#region Debug

@@ -184,6 +184,9 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 		}
 
 		enableBlending();
+		//RenderHelper.enableGUIStandardItemLighting();
+		GlStateManager.enableTexture2D();
+		GlStateManager.disableLighting();
 
 		startDrawing();
 	}
@@ -192,6 +195,9 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	public void clean()
 	{
 		draw();
+
+		GlStateManager.enableLighting();
+		GlStateManager.enableDepth();
 
 		if (ignoreScale)
 			GlStateManager.popMatrix();
@@ -558,15 +564,15 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 
 		Tessellator.getInstance().draw();
 
-		RenderHelper.disableStandardItemLighting();
+		//RenderHelper.disableStandardItemLighting();
 		RenderHelper.enableGUIStandardItemLighting();
 
 		IBakedModel model = itemRenderer.getItemModelWithOverrides(itemStack, Utils.getClientWorld(), Utils.getClientPlayer());
 		itemRenderer.renderItemModelIntoGUI(itemStack, x, y, model);
 		itemRenderer.renderItemOverlayIntoGUI(fontRenderer, itemStack, x, y, label);
 
-		RenderHelper.enableStandardItemLighting();
-		GlStateManager.enableBlend(); //Forge commented blend reenabling
+		RenderHelper.disableStandardItemLighting();
+		//GlStateManager.enableBlend(); //Forge commented blend reenabling
 
 		currentTexture = null;
 		bindDefaultTexture();
