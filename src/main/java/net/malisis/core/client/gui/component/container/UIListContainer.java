@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component.container;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
@@ -46,7 +47,7 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 {
 	protected int elementSpacing = 0;
 	protected boolean unselect = true;
-	protected Collection<S> elements;
+	protected Collection<S> elements = Collections.emptyList();
 	protected S selected;
 	protected int lastSize = 0;
 
@@ -79,7 +80,7 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 
 	public void setElements(Collection<S> elements)
 	{
-		this.elements = elements;
+		this.elements = elements != null ? elements : Collections.emptyList();
 		fireEvent(new ContentUpdateEvent<>(self()));
 	}
 
@@ -175,7 +176,7 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 	@Override
 	public int getContentHeight()
 	{
-		if (elements == null || elements.size() == 0)
+		if (elements.size() == 0)
 			return 0;
 
 		int height = 0;
@@ -297,7 +298,7 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 
 	public void drawElements(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (elements == null || elements.size() == 0)
+		if (elements.size() == 0)
 		{
 			drawEmpty(renderer, mouseX, mouseY, partialTick);
 			return;
@@ -331,7 +332,7 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 
 	/**
 	 * Event fired when a {@link UIListContainer} changes its selected element.<br>
-	 * Cancelling the event will prevent the element to be selected.
+	 * Canceling the event will prevent the element to be selected.
 	 */
 	public static class SelectEvent<T extends UIListContainer<T, S>, S> extends ValueChange<T, S>
 	{
