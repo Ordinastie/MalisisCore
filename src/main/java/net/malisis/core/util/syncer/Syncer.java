@@ -26,6 +26,7 @@ package net.malisis.core.util.syncer;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -153,7 +154,11 @@ public class Syncer
 				ISyncHandler<?, ? extends ISyncableData> handler = factories.get(anno.value()).get();
 				handlers.put(clazz, handler);
 
-				for (Field f : clazz.getFields())
+				Field[] fields = clazz.getFields();
+				Arrays.sort(fields, (a, b) -> {
+					return a.getName().compareTo(b.getName());
+				});
+				for (Field f : fields)
 				{
 					Sync syncAnno = f.getAnnotation(Sync.class);
 					if (syncAnno != null)
@@ -162,7 +167,11 @@ public class Syncer
 
 				Map<String, Method> gets = Maps.newHashMap();
 				Map<String, Method> sets = Maps.newHashMap();
-				for (Method m : clazz.getMethods())
+				Method[] methods = clazz.getMethods();
+				Arrays.sort(methods, (a, b) -> {
+					return a.getName().compareTo(b.getName());
+				});
+				for (Method m : methods)
 				{
 					Sync syncAnno = m.getAnnotation(Sync.class);
 					if (syncAnno != null)
