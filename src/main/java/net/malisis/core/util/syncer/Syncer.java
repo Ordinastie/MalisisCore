@@ -39,8 +39,12 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 
+import net.malisis.core.MalisisCommand;
 import net.malisis.core.MalisisCore;
+import net.malisis.core.network.DirectMessage;
+import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.util.DoubleKeyMap;
+import net.malisis.core.util.DoubleKeyMap.DoubleKeyEntry;
 import net.malisis.core.util.Silenced;
 import net.malisis.core.util.syncer.Sync.Type;
 import net.malisis.core.util.syncer.handlers.TileEntitySyncHandler;
@@ -57,6 +61,7 @@ import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
  *
  * @author Ordinastie
  */
+@AutoLoad
 public class Syncer
 {
 	/** Map of the {@link ISyncHandler} registered. */
@@ -68,12 +73,15 @@ public class Syncer
 
 	private Map<Object, HashMap<String, Object>> syncCache = new HashMap<>();
 
+	private int debugMessage = DirectMessage.registerMessage(this::debugOutput);
+
 	/** Syncer instance **/
-	private static Syncer instance;
+	public static final Syncer instance = new Syncer();
 
 	private Syncer()
 	{
 		registerFactory("TileEntity", TileEntitySyncHandler::new);
+		MalisisCommand.registerDebug("syncer", Syncer::debug);
 	}
 
 	private void registerFactory(String name, Supplier<ISyncHandler<?, ? extends ISyncableData>> supplier)
@@ -325,16 +333,16 @@ public class Syncer
 		}
 	}
 
-	/**
-	 * Gets the {@link Syncer} instance.
-	 *
-	 * @return the syncer
-	 */
-	public static Syncer get()
+	private void debugOutput()
 	{
-		if (instance == null)
-			instance = new Syncer();
-		return instance;
+		for (DoubleKeyEntry<Class<?>, ISyncHandler<?, ? extends ISyncableData>> entry : handlers)
+			System.out.println(entry.getIndex() + ":" + entry.getKey().getSimpleName() + " (" + entry.getValue() + ")");
+	}
+
+	public static void debug()
+	{
+		instance.debugOutput();
+		DirectMessage.send(instance.debugMessage);
 	}
 
 	/**
@@ -345,7 +353,7 @@ public class Syncer
 	 */
 	public static void registerHandlerFactory(String name, Supplier<ISyncHandler<?, ? extends ISyncableData>> supplier)
 	{
-		get().registerFactory(name, supplier);
+		instance.registerFactory(name, supplier);
 	}
 
 	/**
@@ -356,12 +364,12 @@ public class Syncer
 	 */
 	public static void sync(Object caller, String... syncNames)
 	{
-		get().doSync(caller, syncNames);
+		instance.doSync(caller, syncNames);
 	}
 
 	public static void autoSync(Object caller)
 	{
-		get().registerAutoSync(caller);
+		instance.registerAutoSync(caller);
 	}
 
 }

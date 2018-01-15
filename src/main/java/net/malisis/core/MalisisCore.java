@@ -240,7 +240,7 @@ public class MalisisCore implements IMalisisMod
 
 		//TODO: migrate to @AutoLoad ?
 		MalisisNetwork.createMessages(event.getAsmData());
-		Syncer.get().discover(event.getAsmData());
+		Syncer.instance.discover(event.getAsmData());
 
 		settings = new MalisisCoreSettings(event.getSuggestedConfigurationFile());
 

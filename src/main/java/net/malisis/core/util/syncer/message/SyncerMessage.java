@@ -79,7 +79,7 @@ public class SyncerMessage implements IMalisisMessageHandler<SyncerMessage.Packe
 	{
 		ISyncHandler<T, S> handler = message.getHandler();
 		T receiver = handler.getReceiver(ctx, message.data);
-		Syncer.get().updateValues(receiver, handler, message.values);
+		Syncer.instance.updateValues(receiver, handler, message.values);
 	}
 
 	public static class Packet<T, S extends ISyncableData> implements IMessage
@@ -103,7 +103,7 @@ public class SyncerMessage implements IMalisisMessageHandler<SyncerMessage.Packe
 		@SuppressWarnings("unchecked")
 		private ISyncHandler<T, S> getHandler()
 		{
-			return (ISyncHandler<T, S>) Syncer.get().getHandlerFromId(handlerId);
+			return (ISyncHandler<T, S>) Syncer.instance.getHandlerFromId(handlerId);
 		}
 
 		@Override
