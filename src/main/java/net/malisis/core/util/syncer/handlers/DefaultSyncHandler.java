@@ -25,6 +25,7 @@
 package net.malisis.core.util.syncer.handlers;
 
 import net.malisis.core.util.DoubleKeyMap;
+import net.malisis.core.util.DoubleKeyMap.DoubleKeyEntry;
 import net.malisis.core.util.syncer.ISyncHandler;
 import net.malisis.core.util.syncer.ISyncableData;
 import net.malisis.core.util.syncer.ObjectData;
@@ -56,5 +57,16 @@ public abstract class DefaultSyncHandler<T, S extends ISyncableData> implements 
 	public ObjectData getObjectData(String name)
 	{
 		return objectDatas.get(name);
+	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+		for (DoubleKeyEntry<String, ObjectData> entry : objectDatas)
+			sb.append(entry.getIndex() + ":" + entry.getKey() + ",");
+		sb.deleteCharAt(sb.length() - 1);
+
+		return sb.toString();
 	}
 }
