@@ -26,6 +26,7 @@ package net.malisis.core.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.base.Function;
@@ -37,7 +38,7 @@ import com.google.common.collect.HashBiMap;
  * @author Ordinastie
  *
  */
-public class DoubleKeyMap<K, V>
+public class DoubleKeyMap<K, V> implements Iterable<DoubleKeyMap.DoubleKeyEntry<K, V>>
 {
 	public static class DoubleKeyEntry<K, V>
 	{
@@ -115,6 +116,12 @@ public class DoubleKeyMap<K, V>
 	{
 		DoubleKeyEntry<K, V> entry = getEntry(key);
 		return entry != null ? entry.getValue() : null;
+	}
+
+	@Override
+	public Iterator<DoubleKeyEntry<K, V>> iterator()
+	{
+		return data.iterator();
 	}
 
 	public Collection<V> values()
