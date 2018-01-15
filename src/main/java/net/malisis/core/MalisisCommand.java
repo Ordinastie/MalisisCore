@@ -24,9 +24,12 @@
 
 package net.malisis.core;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import net.malisis.core.configuration.Settings;
 import net.malisis.core.registry.AutoLoad;
@@ -50,7 +53,9 @@ import net.minecraftforge.fml.relauncher.Side;
 public class MalisisCommand extends CommandBase
 {
 	/** List of parameters available for this {@link MalisisCommand}. */
-	Set<String> parameters = new HashSet<>();
+	private Set<String> parameters = Sets.newHashSet();
+	/** List of debug Commands available */
+	private static Map<String, Runnable> debugs = Maps.newHashMap();
 
 	/**
 	 * Instantiates the command
@@ -60,6 +65,12 @@ public class MalisisCommand extends CommandBase
 		ClientCommandHandler.instance.registerCommand(this);
 		parameters.add("config");
 		parameters.add("version");
+		parameters.add("debug");
+	}
+
+	public static void registerDebug(String name, Runnable command)
+	{
+		debugs.put(name, command);
 	}
 
 	/**
@@ -119,6 +130,10 @@ public class MalisisCommand extends CommandBase
 				if (mod != null)
 					MalisisCore.message("malisiscore.commands.modversion", mod.getName(), mod.getVersion());
 				break;
+			case "debug":
+				debugCommand(sender, params);
+				break;
+
 			default:
 				MalisisCore.message("Not yet implemented");
 				break;
@@ -137,6 +152,8 @@ public class MalisisCommand extends CommandBase
 	{
 		if (params.length == 1)
 			return getListOfStringsMatchingLastWord(params, parameters);
+		else if (params.length == 2 && params[0].equals("debug"))
+			return getListOfStringsMatchingLastWord(params, debugs.keySet());
 		else if (params.length == 2)
 			return getListOfStringsMatchingLastWord(params, MalisisCore.listModId());
 		else
@@ -164,19 +181,32 @@ public class MalisisCommand extends CommandBase
 			return;
 		}
 
-		IMalisisMod mod = null;
-		if (params.length == 1)
-			mod = MalisisCore.instance;
-		else
+		IMalisisMod mod = params.length == 1 ? MalisisCore.instance : MalisisCore.getMod(params[1]);
+		if (mod == null)
 		{
-			mod = MalisisCore.getMod(params[1]);
-			if (mod == null)
-				MalisisCore.message("malisiscore.commands.modnotfound", params[1]);
+			MalisisCore.message("malisiscore.commands.modnotfound", params[1]);
+			return;
 		}
-		if (mod != null)
+
+		if (!MalisisCore.openConfigurationGui(mod))
+			MalisisCore.message("malisiscore.commands.noconfiguration", mod.getName());
+	}
+
+	public void debugCommand(ICommandSender sender, String[] params)
+	{
+		if (params.length != 2)
 		{
-			if (!MalisisCore.openConfigurationGui(mod))
-				MalisisCore.message("malisiscore.commands.noconfiguration", mod.getName());
+			MalisisCore.message("malisiscore.commands.debugparammissing");
+			return;
 		}
+
+		Runnable runnable = debugs.get(params[1]);
+		if (runnable == null)
+		{
+			MalisisCore.message("malisiscore.commands.debugnotfound", params[1]);
+			return;
+		}
+
+		runnable.run();
 	}
 }
