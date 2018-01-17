@@ -33,7 +33,7 @@ import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.network.IMalisisMessageHandler;
-import net.malisis.core.network.MalisisMessage;
+import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.util.clientnotif.NeighborChangedMessage.Packet;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
@@ -47,7 +47,7 @@ import net.minecraftforge.fml.relauncher.Side;
  * @author Ordinastie
  *
  */
-@MalisisMessage
+@AutoLoad(true)
 public class NeighborChangedMessage implements IMalisisMessageHandler<Packet, IMessage>
 {
 	public NeighborChangedMessage()
@@ -86,8 +86,9 @@ public class NeighborChangedMessage implements IMalisisMessageHandler<Packet, IM
 		{
 			int size = buf.readInt();
 			for (int i = 0; i < size; i++)
-				list.add(
-						Triple.of(BlockPos.fromLong(buf.readLong()), Block.getBlockById(buf.readInt()), BlockPos.fromLong(buf.readLong())));
+				list.add(Triple.of(	BlockPos.fromLong(buf.readLong()),
+									Block.getBlockById(buf.readInt()),
+									BlockPos.fromLong(buf.readLong())));
 		}
 
 		@Override

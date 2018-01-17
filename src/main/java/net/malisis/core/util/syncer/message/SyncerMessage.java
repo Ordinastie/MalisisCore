@@ -32,7 +32,7 @@ import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.network.IMalisisMessageHandler;
-import net.malisis.core.network.MalisisMessage;
+import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.util.syncer.ISyncHandler;
 import net.malisis.core.util.syncer.ISyncableData;
 import net.malisis.core.util.syncer.ObjectData;
@@ -48,7 +48,7 @@ import net.minecraftforge.fml.relauncher.Side;
  * @author Ordinastie
  *
  */
-@MalisisMessage
+@AutoLoad(true)
 public class SyncerMessage implements IMalisisMessageHandler<SyncerMessage.Packet<?, ?>, IMessage>
 {
 	public SyncerMessage()

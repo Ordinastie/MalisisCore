@@ -24,17 +24,12 @@
 
 package net.malisis.core.network;
 
-import java.util.List;
-
-import com.google.common.collect.Ordering;
-
 import net.malisis.core.IMalisisMod;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.inventory.message.OpenInventoryMessage;
+import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.util.EntityUtils;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.fml.common.discovery.ASMDataTable;
-import net.minecraftforge.fml.common.discovery.ASMDataTable.ASMData;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -42,8 +37,9 @@ import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * {@link MalisisNetwork} is a wrapper around {@link SimpleNetworkWrapper} in order to ease the handling of discriminators.<br>
- * Each mod should instantiate a {@code MalisisNetwork} instance when constructed, and {@link IMessageHandler} should be annotated with
- * {@link MalisisMessage} and register their packets inside their own public paramless constructors.<br>
+ * Each mod should instantiate a {@code MalisisNetwork} instance when constructed<br>
+ * Ideally, {@link IMessageHandler} should be annotated with {@link AutoLoad} and register their packets inside their own parameterless
+ * constructors.<br>
  * <br>
  * Example : {@link OpenInventoryMessage}.
  *
@@ -130,34 +126,5 @@ public class MalisisNetwork extends SimpleNetworkWrapper
 	public int getNextDiscriminator()
 	{
 		return discriminator++;
-	}
-
-	/**
-	 * Instantiates every {@link IMessageHandler} annotated with {@link MalisisMessage}.<br>
-	 *
-	 * @param asmDataTable the asm data table
-	 */
-	public static void createMessages(ASMDataTable asmDataTable)
-	{
-		List<ASMData> classes = Ordering.natural()
-										.onResultOf(ASMData::getClassName)
-										.sortedCopy(asmDataTable.getAll(MalisisMessage.class.getName()));
-
-		for (ASMData data : classes)
-		{
-			try
-			{
-				Class<?> clazz = Class.forName(data.getClassName());
-				if (IMessageHandler.class.isAssignableFrom(clazz))
-					clazz.newInstance();
-				else
-					MalisisCore.log.error("@MalisisMessage found on {} that does not implement IMessageHandler", data.getClassName());
-			}
-			catch (Exception e)
-			{
-				MalisisCore.log.error("Could not create {} message.", data.getClassName(), e);
-			}
-		}
-
 	}
 }

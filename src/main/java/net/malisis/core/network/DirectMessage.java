@@ -30,6 +30,7 @@ import com.google.common.collect.Maps;
 
 import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
+import net.malisis.core.registry.AutoLoad;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -43,7 +44,7 @@ import net.minecraftforge.fml.relauncher.Side;
  * @author Ordinastie
  *
  */
-@MalisisMessage
+@AutoLoad(true)
 public class DirectMessage implements IMalisisMessageHandler<DirectMessage.Packet, IMessage>
 {
 	private static int nextId = 0;

@@ -240,9 +240,6 @@ public class MalisisCore implements IMalisisMod
 		//register this to the EVENT_BUS for onGuiClose()
 		MinecraftForge.EVENT_BUS.register(this);
 
-		//TODO: migrate to @AutoLoad ?
-		MalisisNetwork.createMessages(event.getAsmData());
-
 		settings = new MalisisCoreSettings(event.getSuggestedConfigurationFile());
 
 		Registries.processFMLStateEvent(event);

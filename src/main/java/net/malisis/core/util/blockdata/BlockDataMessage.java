@@ -27,7 +27,7 @@ package net.malisis.core.util.blockdata;
 import io.netty.buffer.ByteBuf;
 import net.malisis.core.MalisisCore;
 import net.malisis.core.network.IMalisisMessageHandler;
-import net.malisis.core.network.MalisisMessage;
+import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.util.blockdata.BlockDataMessage.Packet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.chunk.Chunk;
@@ -40,7 +40,7 @@ import net.minecraftforge.fml.relauncher.Side;
  * @author Ordinastie
  *
  */
-@MalisisMessage
+@AutoLoad(true)
 public class BlockDataMessage implements IMalisisMessageHandler<Packet, IMessage>
 {
 	public BlockDataMessage()
