@@ -41,7 +41,6 @@ import net.malisis.core.network.MalisisNetwork;
 import net.malisis.core.registry.AutoLoad;
 import net.malisis.core.registry.Registries;
 import net.malisis.core.util.Utils;
-import net.malisis.core.util.syncer.Syncer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.launchwrapper.Launch;
@@ -86,6 +85,8 @@ public class MalisisCore implements IMalisisMod
 	public static Logger log = LogManager.getLogger(modid);
 	/** Network for the mod */
 	public static MalisisNetwork network;
+	/** AsmDataTable */
+	public static ASMDataTable asmDataTable;
 
 	/** Configs for MalisisCore. **/
 	private MalisisCoreSettings settings;
@@ -180,7 +181,7 @@ public class MalisisCore implements IMalisisMod
 	 *
 	 * @param asmDataTable the asm data table
 	 */
-	private void autoLoadClasses(ASMDataTable asmDataTable)
+	private void autoLoadClasses()
 	{
 		Set<ASMData> classes = ImmutableSortedSet.copyOf(	Ordering.natural().onResultOf(ASMData::getClassName),
 															asmDataTable.getAll(AutoLoad.class.getName()));
@@ -192,13 +193,13 @@ public class MalisisCore implements IMalisisMod
 			try
 			{
 				//don't load client classes on server.
-				if (isClient() || !isClientClass(data.getClassName(), clientClasses))
-				{
-					Class<?> clazz = Class.forName(data.getClassName());
-					AutoLoad anno = clazz.getAnnotation(AutoLoad.class);
-					if (anno.value())
-						clazz.newInstance();
-				}
+				if (!isClient() && isClientClass(data.getClassName(), clientClasses))
+					continue;
+
+				Class<?> clazz = Class.forName(data.getClassName());
+				AutoLoad anno = clazz.getAnnotation(AutoLoad.class);
+				if (anno.value())
+					clazz.newInstance();
 			}
 			catch (Exception e)
 			{
@@ -233,14 +234,14 @@ public class MalisisCore implements IMalisisMod
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event)
 	{
-		autoLoadClasses(event.getAsmData());
+		asmDataTable = event.getAsmData();
+		autoLoadClasses();
 
 		//register this to the EVENT_BUS for onGuiClose()
 		MinecraftForge.EVENT_BUS.register(this);
 
 		//TODO: migrate to @AutoLoad ?
 		MalisisNetwork.createMessages(event.getAsmData());
-		Syncer.instance.discover(event.getAsmData());
 
 		settings = new MalisisCoreSettings(event.getSuggestedConfigurationFile());
 

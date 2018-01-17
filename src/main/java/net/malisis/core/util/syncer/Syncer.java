@@ -82,6 +82,7 @@ public class Syncer
 	{
 		registerFactory("TileEntity", TileEntitySyncHandler::new);
 		MalisisCommand.registerDebug("syncer", Syncer::debug);
+		discover(MalisisCore.asmDataTable);
 	}
 
 	private void registerFactory(String name, Supplier<ISyncHandler<?, ? extends ISyncableData>> supplier)
@@ -147,7 +148,7 @@ public class Syncer
 	 *
 	 * @param asmDataTable the asm data table
 	 */
-	public void discover(ASMDataTable asmDataTable)
+	private void discover(ASMDataTable asmDataTable)
 	{
 		List<ASMData> classes = Ordering.natural()
 										.onResultOf(ASMData::getClassName)
