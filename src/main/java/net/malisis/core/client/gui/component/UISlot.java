@@ -166,7 +166,7 @@ public class UISlot extends UIComponent<UISlot>
 		if (hovered || !draggedItemStack.isEmpty())
 		{
 			renderer.disableTextures();
-			GlStateManager.disableLighting();
+			//	GlStateManager.disableLighting();
 			GlStateManager.disableDepth();
 			GlStateManager.colorMask(true, true, true, false);
 
@@ -175,7 +175,7 @@ public class UISlot extends UIComponent<UISlot>
 			renderer.next();
 
 			GlStateManager.colorMask(true, true, true, true);
-			GlStateManager.enableLighting();
+			//GlStateManager.enableLighting();
 			GlStateManager.enableDepth();
 			renderer.enableTextures();
 		}

@@ -196,7 +196,8 @@ public class GuiRenderer extends MalisisRenderer<TileEntity>
 	{
 		draw();
 
-		GlStateManager.enableLighting();
+		//GlStateManager.enableLighting();
+		RenderHelper.enableStandardItemLighting();
 		GlStateManager.enableDepth();
 
 		if (ignoreScale)
