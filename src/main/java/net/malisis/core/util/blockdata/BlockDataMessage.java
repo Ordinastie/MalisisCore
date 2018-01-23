@@ -103,7 +103,7 @@ public class BlockDataMessage implements IMalisisMessageHandler<Packet, IMessage
 			x = buf.readInt();
 			z = buf.readInt();
 			identifier = ByteBufUtils.readUTF8String(buf);
-			data = buf.readBytes(buf);
+			data = buf.readBytes(buf.readableBytes());
 		}
 
 		@Override
