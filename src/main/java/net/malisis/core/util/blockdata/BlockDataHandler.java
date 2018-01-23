@@ -71,10 +71,18 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class BlockDataHandler
 {
 	private static BlockDataHandler instance = new BlockDataHandler();
-	private static Field chunkCacheField = MalisisCore.isClient() && FMLClientHandler.instance().hasOptifine()
-																													? AsmUtils.changeFieldAccess(	Silenced.get(() -> Class.forName("ChunkCacheOF")),
-																																				"chunkCache")
-																												: null;
+	private static Field chunkCacheField;
+	private static Class<?> chunkCacheClass;
+
+	static
+	{
+		if (MalisisCore.isClient() || FMLClientHandler.instance().hasOptifine())
+		{
+			chunkCacheClass = Silenced.get(() -> Class.forName("ChunkCacheOF"));
+			if (chunkCacheClass != null)
+				chunkCacheField = AsmUtils.changeFieldAccess(chunkCacheClass, "chunkCache");
+		}
+	}
 
 	private Map<String, HandlerInfo<?>> handlerInfos = new HashMap<>();
 	private static final ThreadLocal<Table<String, Chunk, ChunkData<?>>> datas = ThreadLocal.withInitial(HashBasedTable::create);
@@ -102,10 +110,14 @@ public class BlockDataHandler
 		else if (world instanceof ChunkCache)
 			return ((ChunkCache) world).world;
 
-		if (FMLClientHandler.instance().hasOptifine() && chunkCacheField != null)
-			return world(Silenced.get(() -> ((ChunkCache) chunkCacheField.get(world))));
+		if (!FMLClientHandler.instance().hasOptifine())
+			return null;
+		if (chunkCacheClass == null || chunkCacheField != null)
+			return null;
+		if (!chunkCacheClass.isAssignableFrom(world.getClass()))
+			return null;
 
-		return null;
+		return world(Silenced.get(() -> ((ChunkCache) chunkCacheField.get(world))));
 	}
 
 	/**
