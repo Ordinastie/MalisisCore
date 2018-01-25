@@ -76,7 +76,7 @@ public class BlockDataHandler
 
 	static
 	{
-		if (MalisisCore.isClient() || FMLClientHandler.instance().hasOptifine())
+		if (MalisisCore.isClient() && FMLClientHandler.instance().hasOptifine())
 		{
 			chunkCacheClass = Silenced.get(() -> Class.forName("ChunkCacheOF"));
 			if (chunkCacheClass != null)
