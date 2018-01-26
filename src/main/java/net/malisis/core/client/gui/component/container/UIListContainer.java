@@ -26,36 +26,35 @@ package net.malisis.core.client.gui.component.container;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.BiFunction;
 
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
-import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
-import net.minecraft.client.gui.GuiScreen;
 
 /**
  * @author Ordinastie
  *
  */
-public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extends UIComponent<T> implements IScrollable, IClipable
+public class UIListContainer<S> extends UIContainer<UIListContainer<S>>
 {
 	protected int elementSpacing = 0;
 	protected boolean unselect = true;
 	protected Collection<S> elements = Collections.emptyList();
 	protected S selected;
 	protected int lastSize = 0;
+	protected BiFunction<MalisisGui, S, UIComponent<?>> elementComponentFactory = DefaultElementComponent::new;
 
 	//IScrollable
 	/** Vertical Scrollbar. */
 	protected UIScrollBar scrollbar;
 	/** Y Offset for the contents of this {@link UIListContainer}. */
 	protected int yOffset;
+
+	protected int elementsSize;
 
 	public UIListContainer(MalisisGui gui)
 	{
@@ -71,22 +70,47 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 	}
 
 	@Override
-	public T setSize(int width, int height)
+	public UIListContainer<S> setSize(int width, int height)
 	{
 		super.setSize(width, height);
 		scrollbar.updateScrollbar();
 		return self();
 	}
 
+	protected void buildElementComponents()
+	{
+
+		removeAll();
+
+		int y = 0;
+		for (S element : elements)
+		{
+			UIComponent<?> comp = elementComponentFactory.apply(getGui(), element);
+			comp.attachData(element);
+			comp.setPosition(0, y);
+
+			add(comp);
+
+			y += comp.getHeight() + elementSpacing;
+		}
+		elementsSize = elements.size();
+	}
+
 	public void setElements(Collection<S> elements)
 	{
 		this.elements = elements != null ? elements : Collections.emptyList();
-		fireEvent(new ContentUpdateEvent<>(self()));
+		buildElementComponents();
 	}
 
 	public Iterable<S> getElements()
 	{
 		return elements;
+	}
+
+	public UIListContainer<S> setComponentFactory(BiFunction<MalisisGui, S, UIComponent<?>> factory)
+	{
+		this.elementComponentFactory = factory;
+		return self();
 	}
 
 	public void setElementSpacing(int elementSpacing)
@@ -160,183 +184,22 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 		return true;
 	}
 
-	//#end IClipable
-
-	//#region IScrollable
-	@Override
-	public int getContentWidth()
-	{
-		UIScrollBar sb = UIScrollBar.getScrollbar(this, Type.VERTICAL);
-		if (sb != null && sb.isVisible())
-			return getWidth() - sb.getWidth() - 2 - (getLeftPadding() + getRightPadding());
-
-		return getWidth();
-	}
-
-	@Override
-	public int getContentHeight()
-	{
-		if (elements.size() == 0)
-			return 0;
-
-		int height = 0;
-		for (S element : elements)
-			height += getElementHeight(element) + elementSpacing;
-
-		UIScrollBar sb = UIScrollBar.getScrollbar(this, Type.HORIZONTAL);
-		if (sb != null && sb.isVisible())
-			return getWidth() - sb.getWidth() - 2 - (getLeftPadding() + getRightPadding());
-
-		return height;
-	}
-
-	@Override
-	public float getOffsetX()
-	{
-		return 0;
-	}
-
-	@Override
-	public void setOffsetX(float offsetX, int delta)
-	{}
-
-	@Override
-	public float getOffsetY()
-	{
-		if (getContentHeight() < getHeight())
-			return 0;
-		return (float) yOffset / (getContentHeight() - getHeight());
-	}
-
-	@Override
-	public void setOffsetY(float offsetY, int delta)
-	{
-		yOffset = (int) ((getContentHeight() - getHeight() + delta) * offsetY);
-	}
-
-	@Override
-	public float getScrollStep()
-	{
-		return (GuiScreen.isCtrlKeyDown() ? 0.125F : 0.025F);
-	}
-
-	@Override
-	public int getLeftPadding()
-	{
-		return 0;
-	}
-
-	@Override
-	public int getRightPadding()
-	{
-		return 0;
-	}
-
-	@Override
-	public int getTopPadding()
-	{
-		return 0;
-	}
-
-	@Override
-	public int getBottomPadding()
-	{
-		return 0;
-	}
-
-	//#end IScrollable
-
-	public S getElementAt(int x, int y)
-	{
-		if (!isHovered())
-			return null;
-		int ey = 0;
-		int cy = relativeY(y) + yOffset;
-		for (S element : elements)
-		{
-			int h = getElementHeight(element) + elementSpacing;
-			if (ey + h > cy)
-				return element;
-			ey += h;
-		}
-
-		return null;
-	}
-
-	@Override
-	public boolean onClick(int x, int y)
-	{
-		S element = getElementAt(x, y);
-		if (!canUnselect() && (element == null || isSelected(element)))
-			return super.onClick(x, y);
-
-		select(isSelected(element) ? null : element);
-		return true;
-	}
-
 	@Override
 	public void draw(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (lastSize != elements.size())
-		{
-			scrollbar.updateScrollbar();
-			lastSize = elements.size();
-		}
+		if (elements.size() != elementsSize)
+			buildElementComponents();
 
 		super.draw(renderer, mouseX, mouseY, partialTick);
 	}
-
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{}
-
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		drawElements(renderer, mouseX, mouseY, partialTick);
-	}
-
-	public void drawElements(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		if (elements.size() == 0)
-		{
-			drawEmpty(renderer, mouseX, mouseY, partialTick);
-			return;
-		}
-
-		S hoveredElement = getElementAt(mouseX, mouseY);
-
-		int bk = y;
-		y -= yOffset;
-		for (S element : elements)
-		{
-			drawElementBackground(renderer, mouseX, mouseY, partialTick, element, hoveredElement == element);
-			drawElementForeground(renderer, mouseX, mouseY, partialTick, element, hoveredElement == element);
-			y += getElementHeight(element) + elementSpacing;
-		}
-
-		y = bk;
-
-	}
-
-	public void drawEmpty(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		renderer.drawText("No element");
-	}
-
-	public abstract int getElementHeight(S element);
-
-	public abstract void drawElementBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick, S element, boolean isHovered);
-
-	public abstract void drawElementForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick, S element, boolean isHovered);
 
 	/**
 	 * Event fired when a {@link UIListContainer} changes its selected element.<br>
 	 * Canceling the event will prevent the element to be selected.
 	 */
-	public static class SelectEvent<T extends UIListContainer<T, S>, S> extends ValueChange<T, S>
+	public static class SelectEvent<S> extends ValueChange<UIListContainer<S>, S>
 	{
-		public SelectEvent(T component, S selected)
+		public SelectEvent(UIListContainer<S> component, S selected)
 		{
 			super(component, component.getSelected(), selected);
 		}
@@ -349,6 +212,27 @@ public abstract class UIListContainer<T extends UIListContainer<T, S>, S> extend
 		public S getSelected()
 		{
 			return newValue;
+		}
+	}
+
+	public class DefaultElementComponent extends UIComponent<DefaultElementComponent>
+	{
+		private S element;
+
+		public DefaultElementComponent(MalisisGui gui, S element)
+		{
+			super(gui);
+			this.element = element;
+		}
+
+		@Override
+		public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+		{}
+
+		@Override
+		public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+		{
+			renderer.drawText(element.toString());
 		}
 	}
 
