@@ -48,7 +48,7 @@ import net.minecraftforge.fml.relauncher.Side;
 public class DirectMessage implements IMalisisMessageHandler<DirectMessage.Packet, IMessage>
 {
 	private static int nextId = 0;
-	public static Map<Integer, Runnable> runnables = Maps.newHashMap();
+	private static Map<Integer, Runnable> runnables = Maps.newHashMap();
 
 	public DirectMessage()
 	{
