@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
+import org.lwjgl.input.Keyboard;
+
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
@@ -68,6 +70,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	protected int offsetX, offsetY;
 
 	protected GuiIconProvider iconPressedProvider;
+
+	protected Runnable action;
 
 	/**
 	 * Instantiates a new {@link UIButton}.
@@ -334,12 +338,24 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 		return this;
 	}
 
+	public UIButton onClick(Runnable action)
+	{
+		this.action = action;
+		return this;
+	}
+
 	//#end Getters/Setters
+	protected void executeAction()
+	{
+		MalisisGui.playSound(SoundEvents.UI_BUTTON_CLICK);
+		if (action != null)
+			action.run();
+	}
 
 	@Override
 	public boolean onClick(int x, int y)
 	{
-		MalisisGui.playSound(SoundEvents.UI_BUTTON_CLICK);
+		executeAction();
 		fireEvent(new ClickEvent(this, x, y));
 		return true;
 	}
@@ -358,6 +374,18 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 		if (button == MouseButton.LEFT)
 			isPressed = false;
 		return super.onButtonRelease(x, y, button);
+	}
+
+	@Override
+	public boolean onKeyTyped(char keyChar, int keyCode)
+	{
+		if (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_NUMPADENTER)
+		{
+			executeAction();
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
