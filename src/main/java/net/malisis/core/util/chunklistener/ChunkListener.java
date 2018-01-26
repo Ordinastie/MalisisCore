@@ -53,7 +53,7 @@ public class ChunkListener
 	public ChunkListener()
 	{
 		MalisisRegistry.onPreSetBlock(preRegistry::processCallbacks, CallbackOption.of());
-		MalisisRegistry.onPreSetBlock(postRegistry::processCallbacks, CallbackOption.of());
+		MalisisRegistry.onPostSetBlock(postRegistry::processCallbacks, CallbackOption.of());
 		preRegistry.registerCallback(this::callPreListener, CallbackOption.of(this::isValidPreListener));
 		postRegistry.registerCallback(this::callPostListener, CallbackOption.of(this::isValidPostListener));
 	}
@@ -142,8 +142,7 @@ public class ChunkListener
 		@Override
 		public default CallbackResult<Void> call(Chunk chunk, BlockPos listener, Object... params)
 		{
-			return call(chunk, listener, (BlockPos) params[0], (IBlockState) params[1], (IBlockState) params[2])
-																														? CallbackResult.noResult()
+			return call(chunk, listener, (BlockPos) params[0], (IBlockState) params[1], (IBlockState) params[2])	? CallbackResult.noResult()
 																													: CANCELLED;
 		}
 
