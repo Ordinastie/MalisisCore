@@ -145,16 +145,12 @@ public class UISlot extends UIComponent<UISlot>
 		if (container == null)
 			return;
 
-		ItemStack itemStack = slot.getItemStack().copy();
-		ItemStack draggedItemStack = slot.getDraggedItemStack();
-
-		// if dragged slots contains an itemStack for this slot, add the stack size
+		ItemStack itemStack = slot.getItemStack();
 		TextFormatting format = null;
-		if (itemStack.isEmpty())
-			itemStack = draggedItemStack;
-		else if (!draggedItemStack.isEmpty())
+		//if dragged slots contains an itemStack for this slot, draw it instead
+		if (!slot.getDraggedItemStack().isEmpty())
 		{
-			itemStack.grow(draggedItemStack.getCount());
+			itemStack = slot.getDraggedItemStack();
 			if (itemStack.getCount() == itemStack.getMaxStackSize())
 				format = TextFormatting.YELLOW;
 		}
@@ -163,7 +159,7 @@ public class UISlot extends UIComponent<UISlot>
 			renderer.drawItemStack(itemStack, 1, 1, new Style().setColor(format));
 
 		// draw the white shade over the slot
-		if (hovered || !draggedItemStack.isEmpty())
+		if (hovered || !slot.getDraggedItemStack().isEmpty())
 		{
 			renderer.disableTextures();
 			//	GlStateManager.disableLighting();

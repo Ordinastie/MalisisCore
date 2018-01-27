@@ -714,8 +714,8 @@ public class MalisisInventoryContainer extends Container
 					//should never be empty
 					if (!s.getDraggedItemStack().isEmpty())
 					{
-						amountMerged += s.getDraggedItemStack().getCount();
-						s.insert(s.getDraggedItemStack());
+						amountMerged += s.getDraggedItemStack().getCount() - s.getItemStack().getCount();
+						s.setItemStack(s.getDraggedItemStack());
 						s.setDraggedItemStack(ItemStack.EMPTY);
 					}
 				}
@@ -763,6 +763,10 @@ public class MalisisInventoryContainer extends Container
 		if (!slot.isState(PLAYER_INSERT))
 			return pickedItemStack;
 
+		//dragged slot already contains something else
+		//		if (!slot.isEmpty() && !ItemUtils.areItemStacksStackable(slot.getItemStack(), pickedItemStack))
+		//			return pickedItemStack;
+
 		//add the current slot to the list of dragged slots
 		draggedSlots.add(slot);
 
@@ -780,29 +784,24 @@ public class MalisisInventoryContainer extends Container
 		if (draggedSlots.size() <= 1) // do not start spreading before it's dragged at least over two slots
 			return pickedItemStack;
 		int amountPerSlot = dragType == DRAG_TYPE_SPREAD ? Math.max(draggedAmount / draggedSlots.size(), 1) : 1;
-		int amountTotal = 0;
+		//int amountTotal = 0;
+
+		pickedItemStack.setCount(draggedAmount);
 
 		for (MalisisSlot s : draggedSlots)
 		{
 			if (s.isItemValid(pickedItemStack))
 			{
-				// work on a copy because we alter pickedItemStack only in the end
-				ItemStack itemStack = ItemUtils.copy(pickedItemStack);
-				itemStack.setCount(draggedAmount);
 				ItemStack slotStack = s.getItemStack();
 				if (!slotStack.isEmpty()) //work on a copy because we don't want to alter the slot itemStack
 					slotStack = slotStack.copy();
 
-				ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(itemStack, slotStack);
+				ItemUtils.ItemStacksMerger ism = new ItemStacksMerger(pickedItemStack, slotStack);
 				ism.merge(amountPerSlot, s.getSlotStackLimit());
-				ism.merge.shrink(s.getItemStack().getCount());
 				s.setDraggedItemStack(ism.into);
-
-				amountTotal += ism.nbMerged;
 			}
 		}
 
-		pickedItemStack.setCount(draggedAmount - amountTotal);
 		return pickedItemStack;
 	}
 
