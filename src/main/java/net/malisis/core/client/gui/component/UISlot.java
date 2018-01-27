@@ -223,7 +223,7 @@ public class UISlot extends UIComponent<UISlot>
 		if (container.getPickedItemStack().isEmpty() || !buttonRelased)
 		{
 			buttonRelased = true;
-			return super.onButtonPress(x, y, button);
+			return super.onButtonRelease(x, y, button);
 		}
 
 		if (button == MouseButton.LEFT)
@@ -263,7 +263,7 @@ public class UISlot extends UIComponent<UISlot>
 
 		ActionType action = GuiScreen.isShiftKeyDown() ? ActionType.DOUBLE_SHIFT_LEFT_CLICK : ActionType.DOUBLE_LEFT_CLICK;
 		MalisisGui.sendAction(action, slot, button.getCode());
-		buttonRelased = false;
+		buttonRelased = true;
 		return true;
 	}
 

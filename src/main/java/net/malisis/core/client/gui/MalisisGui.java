@@ -412,13 +412,16 @@ public abstract class MalisisGui extends GuiScreen
 			UIComponent<?> component = getComponentAt(x, y);
 			if (component != null && component.isEnabled())
 			{
+				boolean regularClick = true;
 				//double click
-				if (button == lastClickButton && time - lastClickTime < 250)
+				if (button == lastClickButton && time - lastClickTime < 250 && component == focusedComponent)
 				{
-					component.onDoubleClick(x, y, MouseButton.getButton(button));
+					regularClick = !component.onDoubleClick(x, y, MouseButton.getButton(button));
 					lastClickTime = 0;
 				}
-				else //do not trigger onButtonPress when double clicked (fixed shift-double click issue in inventory)
+
+				//do not trigger onButtonPress when double clicked (fixed shift-double click issue in inventory)
+				if (regularClick)
 				{
 					component.onButtonPress(x, y, MouseButton.getButton(button));
 					if (draggedComponent == null)
