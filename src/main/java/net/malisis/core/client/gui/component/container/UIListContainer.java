@@ -79,7 +79,6 @@ public class UIListContainer<S> extends UIContainer<UIListContainer<S>>
 
 	protected void buildElementComponents()
 	{
-
 		removeAll();
 
 		int y = 0;
