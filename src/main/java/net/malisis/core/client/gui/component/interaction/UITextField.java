@@ -672,9 +672,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			else
 			{
 				lines = font.wrapText(text.toString(), getWidth() - 4, fontOptions);
-
-				if (text.charAt(text.length() - 1) == '\n')
-					lines.add("");
 			}
 		}
 
@@ -809,6 +806,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 */
 	protected void onCursorUpdated()
 	{
+		if (getParent() == null && getWidth() == INHERITED)
+			return;
+
 		if (!multiLine)
 		{
 			if (cursorPosition.character < charOffset)

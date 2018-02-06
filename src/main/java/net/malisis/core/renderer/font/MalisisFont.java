@@ -404,7 +404,7 @@ public class MalisisFont
 	 */
 	public String processString(String str, FontOptions options)
 	{
-		str = str.replaceAll("\r?\n", "");
+		//str = str.replaceAll("\r?\n", "");
 		if (!options.shouldTranslate())
 			return str;
 		Pair<String, String> p = FontOptions.getStartFormat(str);
@@ -601,32 +601,17 @@ public class MalisisFont
 	 */
 	public List<String> wrapText(String str, int maxWidth, FontOptions options)
 	{
+		str.replace("\r?(?<=\n)", "\r");
+
 		List<String> lines = Lists.newArrayList();
-		String[] texts = str.split("\r?(?<=\n)");
-		if (texts.length > 1)
-		{
-			for (String t : texts)
-				lines.addAll(wrapText(t, maxWidth, options));
-			return lines;
-		}
 
 		StringBuilder line = new StringBuilder();
 		StringBuilder word = new StringBuilder();
 		//FontRenderOptions fro = new FontRenderOptions();
 
 		maxWidth -= 4;
-		//maxWidth /= (fro != null ? fro.fontScale : 1); //factor the position instead of the char widths
 		float lineWidth = 0;
 		float wordWidth = 0;
-
-		str = processString(str, options);
-		texts = str.split("\\\\r?\\\\n");
-		if (texts.length > 1)
-		{
-			for (String t : texts)
-				lines.addAll(wrapText(t, maxWidth, options));
-			return lines;
-		}
 
 		StringWalker walker = new StringWalker(str, this, options);
 		walker.skipChars(false);
@@ -636,22 +621,17 @@ public class MalisisFont
 			char c = walker.getChar();
 			lineWidth += walker.getWidth();
 			wordWidth += walker.getWidth();
-			//			if (walker.isFormatting())
-			//			{
-			//				word.append(walker.getFormatting());
-			//				continue;
-			//			}
-			//			else
+
 			word.append(c);
 
 			//we just ended a new word, add it to the current line
-			if (c == ' ' || c == '-' || c == '.')
+			if (Character.isWhitespace(c) || c == '-' || c == '.')
 			{
 				line.append(word);
 				word.setLength(0);
 				wordWidth = 0;
 			}
-			if (lineWidth >= maxWidth)
+			if (lineWidth >= maxWidth || c == '\n')
 			{
 				//the first word on the line is too large, split anyway
 				if (line.length() == 0)
@@ -660,6 +640,7 @@ public class MalisisFont
 					word.setLength(0);
 					wordWidth = 0;
 				}
+
 				//make a new line
 				lines.add(line.toString());
 				line.setLength(0);
