@@ -6,6 +6,8 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.minecraft.client.gui.GuiScreen;
 
+import java.util.function.Function;
+
 /**
  * The Class UIPasswordField.
  */
@@ -86,19 +88,19 @@ public class UIPasswordField extends UITextField
 		if (selectingText)
 			deleteSelectedText();
 
-		int position = cursorPosition.textPosition;
-		String oldValue = password.toString();
-		String newValue = new StringBuilder(oldValue).insert(position, text).toString();
+		final StringBuilder oldText = this.password;
+		final String oldValue = oldText.toString();
+		String newValue = oldText.insert(this.cursorPosition.textPosition, text).toString();
 
-		if (!validateText(newValue))
-			return;
+		if (this.filterFunction != null)
+			newValue = this.filterFunction.apply(newValue);
 
 		if (!fireEvent(new ComponentEvent.ValueChange<>(this, oldValue, newValue)))
 			return;
 
-		password.insert(position, text);
-		cursorPosition.jumpBy(text.length());
-		updateText();
+		this.password = new StringBuilder(newValue);
+		this.cursorPosition.jumpBy(text.length());
+		this.updateText();
 	}
 
 	/**
@@ -109,8 +111,8 @@ public class UIPasswordField extends UITextField
 	@Override
 	public void setText(String text)
 	{
-		if (!validateText(text))
-			return;
+		if (filterFunction != null)
+			text = filterFunction.apply(text);
 
 		password.setLength(0);
 		password.append(text);
@@ -118,6 +120,12 @@ public class UIPasswordField extends UITextField
 		if (focused)
 			cursorPosition.jumpToEnd();
 		updateText();
+	}
+
+	@Override
+	public void setFilter(Function<String, String> filterFunction) {
+		this.filterFunction = filterFunction;
+		this.password = new StringBuilder(this.filterFunction.apply(this.password.toString()));
 	}
 
 	/**

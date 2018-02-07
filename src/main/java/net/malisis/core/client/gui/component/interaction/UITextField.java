@@ -26,13 +26,12 @@ package net.malisis.core.client.gui.component.interaction;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.GuiRenderer;
@@ -77,8 +76,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	protected List<String> lines = new LinkedList<>();
 	/** Whether this {@link UITextField} handles multiline text. */
 	protected boolean multiLine = false;
-	/** Validator **/
-	protected Predicate<String> validator = Predicates.alwaysTrue();
+	protected Function<String, String> filterFunction;
 
 	//text space
 	/** Number of character offset out of this {@link UITextField} when drawn. */
@@ -267,8 +265,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 */
 	public void setText(String text)
 	{
-		if (!validateText(text))
-			return;
+		if (this.filterFunction != null)
+			text = this.filterFunction.apply(text);
 
 		this.text.setLength(0);
 		this.text.append(text);
@@ -505,25 +503,21 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	/**
-	 * Gets the predicate used to validate input text.
-	 *
-	 * @return the predicate
+	 * Sets the function that applies to all incoming text. Immediately applies filter
+	 * to current text.
+	 * @param filterFunction the function
 	 */
-	public Predicate<String> getValidator()
-	{
-		return validator;
+	public void setFilter(Function<String, String> filterFunction) {
+		this.filterFunction = filterFunction;
+		this.text = new StringBuilder(this.filterFunction.apply(this.text.toString()));
 	}
 
 	/**
-	 * Sets the predicate used to validate input text.
-	 *
-	 * @param validator the validator
-	 * @return the UI text field
+	 * Gets the function applied to all incoming text
+	 * @return the filter function
 	 */
-	public UITextField setValidator(Predicate<String> validator)
-	{
-		this.validator = validator;
-		return this;
+	public Function<String, String> getFilter() {
+		return this.filterFunction;
 	}
 
 	// #end Getters/Setters
@@ -679,17 +673,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	/**
-	 * Checks against if text is valid.
-	 *
-	 * @param text the text
-	 * @return true, if input is valid
-	 */
-	protected boolean validateText(String text)
-	{
-		return validator.apply(text);
-	}
-
-	/**
 	 * Adds text at current cursor position. If some text is selected, it's deleted first.
 	 *
 	 * @param str the text
@@ -699,18 +682,17 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (selectingText)
 			deleteSelectedText();
 
-		int position = cursorPosition.textPosition;
+		final StringBuilder oldText = this.text;
+		final String oldValue = this.text.toString();
+		String newValue = oldText.insert(this.cursorPosition.textPosition, str).toString();
 
-		String oldValue = this.text.toString();
-		String newValue = new StringBuilder(oldValue).insert(position, str).toString();
-
-		if (!validateText(newValue))
-			return;
+		if (this.filterFunction != null)
+			newValue = this.filterFunction.apply(newValue);
 
 		if (!fireEvent(new ComponentEvent.ValueChange<>(this, oldValue, newValue)))
 			return;
 
-		text.insert(position, str);
+		this.text = new StringBuilder(newValue);
 		buildLines();
 		cursorPosition.jumpBy(str.length());
 	}
