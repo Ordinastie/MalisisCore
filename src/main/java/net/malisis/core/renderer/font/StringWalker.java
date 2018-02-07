@@ -241,11 +241,11 @@ public class StringWalker
 
 		//Walk next line
 		str = lines.get(++currentLine);
-		c = 0;
 		index = 0;
 		endIndex = str.length();
 		width = 0;
-		return true;
+
+		return walk();
 	}
 
 	private boolean walkLine()
