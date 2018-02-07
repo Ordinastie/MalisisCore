@@ -32,7 +32,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -764,9 +763,9 @@ public class MalisisFont
 	//#region Font load
 	public static Font load(ResourceLocation rl, FontGeneratorOptions options)
 	{
-		try
+		try (InputStream is = Minecraft.getMinecraft().getResourceManager().getResource(rl).getInputStream())
 		{
-			return load(Minecraft.getMinecraft().getResourceManager().getResource(rl).getInputStream(), options);
+			return load(is, options);
 		}
 		catch (IOException e)
 		{
@@ -777,11 +776,11 @@ public class MalisisFont
 
 	public static Font load(File file, FontGeneratorOptions options)
 	{
-		try
+		try (InputStream is = new FileInputStream(file))
 		{
-			return load(new FileInputStream(file), options);
+			return load(is, options);
 		}
-		catch (FileNotFoundException e)
+		catch (IOException e)
 		{
 			MalisisCore.log.error("[MalisiFont] Couldn't load font from File.", e);
 			return null;
