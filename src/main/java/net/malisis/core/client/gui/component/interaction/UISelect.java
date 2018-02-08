@@ -602,8 +602,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		optionsHeight = 10 * Math.min(options.size(), maxDisplayedOptions) + 2;
 		if (optionsHeight < 10)
 			optionsHeight = 10;
-		if (selectedOption != null)
-			select(selectedOption.getKey());
 
 		//draw regular select
 		arrowShape.resetState();
