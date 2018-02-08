@@ -22,10 +22,11 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.component.container;
+package net.malisis.core.client.gui.render;
 
 import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.renderer.RenderParameters;
@@ -36,8 +37,10 @@ import net.malisis.core.renderer.element.Face;
  * @author Ordinastie
  *
  */
-public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> implements ITransformable.Color
+public class ColoredBackground implements ITransformable.Color, IGuiRender
 {
+	protected GuiShape shape = new SimpleGuiShape();
+	protected RenderParameters rp = new RenderParameters();
 	/** Top left corner color **/
 	protected int topLeftColor = -1;
 	/** Top right corner color **/
@@ -61,65 +64,24 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	/** Border alpha **/
 	protected int borderAlpha = 0;
 
-	/**
-	 * Default constructor, creates the components list.
-	 *
-	 * @param gui the gui
-	 */
-	public UIBackgroundContainer(MalisisGui gui)
+	public ColoredBackground(int color, int borderSize, int borderColor)
 	{
-		super(gui);
+		setColor(color);
+		setBorder(borderColor, borderSize, 255);
+	}
 
-		shape = new SimpleGuiShape();
+	public ColoredBackground(int color)
+	{
+		setColor(color);
 	}
 
 	/**
-	 * Instantiates a new {@link UIBackgroundContainer}.
-	 *
-	 * @param gui the gui
-	 * @param title the title
-	 */
-	public UIBackgroundContainer(MalisisGui gui, String title)
-	{
-		this(gui);
-		setTitle(title);
-	}
-
-	/**
-	 * Instantiates a new {@link UIBackgroundContainer}.
-	 *
-	 * @param gui the gui
-	 * @param width the width
-	 * @param height the height
-	 */
-	public UIBackgroundContainer(MalisisGui gui, int width, int height)
-	{
-		this(gui);
-		setSize(width, height);
-	}
-
-	/**
-	 * Instantiates a new {@link UIBackgroundContainer}.
-	 *
-	 * @param gui the gui
-	 * @param title the title
-	 * @param width the width
-	 * @param height the height
-	 */
-	public UIBackgroundContainer(MalisisGui gui, String title, int width, int height)
-	{
-		this(gui);
-		setTitle(title);
-		setSize(width, height);
-	}
-
-	/**
-	 * Sets the border size and color for this {@link UIBackgroundContainer}.
+	 * Sets the border size and color for this {@link ColoredBackground}.
 	 *
 	 * @param color the color
 	 * @param size the size
 	 */
-	public UIBackgroundContainer setBorder(int color, int size, int alpha)
+	public ColoredBackground setBorder(int color, int size, int alpha)
 	{
 		borderColor = color;
 		borderSize = size;
@@ -128,7 +90,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 			shape = new XYResizableGuiShape(size);
 		else
 			shape = new SimpleGuiShape();
-		return self();
+		return this;
 	}
 
 	/**
@@ -146,7 +108,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param topLeftColor the new top left color
 	 */
-	public UIBackgroundContainer setTopLeftColor(int topLeftColor)
+	public ColoredBackground setTopLeftColor(int topLeftColor)
 	{
 		this.topLeftColor = topLeftColor;
 		return this;
@@ -167,7 +129,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param topRightColor the new top right color
 	 */
-	public UIBackgroundContainer setTopRightColor(int topRightColor)
+	public ColoredBackground setTopRightColor(int topRightColor)
 	{
 		this.topRightColor = topRightColor;
 		return this;
@@ -188,7 +150,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param bottomLeftColor the new bottom left color
 	 */
-	public UIBackgroundContainer setBottomLeftColor(int bottomLeftColor)
+	public ColoredBackground setBottomLeftColor(int bottomLeftColor)
 	{
 		this.bottomLeftColor = bottomLeftColor;
 		return this;
@@ -209,7 +171,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param bottomRightColor the new bottom right color
 	 */
-	public UIBackgroundContainer setBottomRightColor(int bottomRightColor)
+	public ColoredBackground setBottomRightColor(int bottomRightColor)
 	{
 		this.bottomRightColor = bottomRightColor;
 		return this;
@@ -220,7 +182,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param color the new top color
 	 */
-	public UIBackgroundContainer setTopColor(int color)
+	public ColoredBackground setTopColor(int color)
 	{
 		setTopLeftColor(color);
 		setTopRightColor(color);
@@ -232,7 +194,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param color the new bottom color
 	 */
-	public UIBackgroundContainer setBottomColor(int color)
+	public ColoredBackground setBottomColor(int color)
 	{
 		setBottomLeftColor(color);
 		setBottomRightColor(color);
@@ -244,7 +206,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param color the new left color
 	 */
-	public UIBackgroundContainer setLeftColor(int color)
+	public ColoredBackground setLeftColor(int color)
 	{
 		setTopLeftColor(color);
 		setBottomLeftColor(color);
@@ -256,7 +218,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param color the new right color
 	 */
-	public UIBackgroundContainer setRightColor(int color)
+	public ColoredBackground setRightColor(int color)
 	{
 		setTopRightColor(color);
 		setBottomRightColor(color);
@@ -264,7 +226,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	}
 
 	/**
-	 * Sets the color of this {@link UIBackgroundContainer}.
+	 * Sets the color of this {@link ColoredBackground}.
 	 *
 	 * @param color the new color
 	 */
@@ -290,7 +252,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param topLeftAlpha the new top left alpha
 	 */
-	public UIBackgroundContainer setTopLeftAlpha(int topLeftAlpha)
+	public ColoredBackground setTopLeftAlpha(int topLeftAlpha)
 	{
 		this.topLeftAlpha = topLeftAlpha;
 		return this;
@@ -311,7 +273,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param topRightAlpha the new top right alpha
 	 */
-	public UIBackgroundContainer setTopRightAlpha(int topRightAlpha)
+	public ColoredBackground setTopRightAlpha(int topRightAlpha)
 	{
 		this.topRightAlpha = topRightAlpha;
 		return this;
@@ -332,7 +294,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param bottomLeftAlpha the new bottom left alpha
 	 */
-	public UIBackgroundContainer setBottomLeftAlpha(int bottomLeftAlpha)
+	public ColoredBackground setBottomLeftAlpha(int bottomLeftAlpha)
 	{
 		this.bottomLeftAlpha = bottomLeftAlpha;
 		return this;
@@ -353,7 +315,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param bottomRightAlpha the new bottom right alpha
 	 */
-	public UIBackgroundContainer setBottomRightAlpha(int bottomRightAlpha)
+	public ColoredBackground setBottomRightAlpha(int bottomRightAlpha)
 	{
 		this.bottomRightAlpha = bottomRightAlpha;
 		return this;
@@ -364,7 +326,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param alpha the new top alpha
 	 */
-	public UIBackgroundContainer setTopAlpha(int alpha)
+	public ColoredBackground setTopAlpha(int alpha)
 	{
 		setTopLeftAlpha(alpha);
 		setTopRightAlpha(alpha);
@@ -376,7 +338,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param alpha the new bottom alpha
 	 */
-	public UIBackgroundContainer setBottomAlpha(int alpha)
+	public ColoredBackground setBottomAlpha(int alpha)
 	{
 		setBottomLeftAlpha(alpha);
 		setBottomRightAlpha(alpha);
@@ -388,7 +350,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param alpha the new left alpha
 	 */
-	public UIBackgroundContainer setLeftAlpha(int alpha)
+	public ColoredBackground setLeftAlpha(int alpha)
 	{
 		setTopLeftAlpha(alpha);
 		setBottomLeftAlpha(alpha);
@@ -400,7 +362,7 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	 *
 	 * @param alpha the new right alpha
 	 */
-	public UIBackgroundContainer setRightAlpha(int alpha)
+	public ColoredBackground setRightAlpha(int alpha)
 	{
 		setTopRightAlpha(alpha);
 		setBottomRightAlpha(alpha);
@@ -408,11 +370,11 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	}
 
 	/**
-	 * Sets the alpha background of this {@link UIBackgroundContainer}.
+	 * Sets the alpha background of this {@link ColoredBackground}.
 	 *
 	 * @param alpha the new alpha
 	 */
-	public UIBackgroundContainer setBackgroundAlpha(int alpha)
+	public ColoredBackground setBackgroundAlpha(int alpha)
 	{
 		setTopAlpha(alpha);
 		setBottomAlpha(alpha);
@@ -420,13 +382,8 @@ public class UIBackgroundContainer extends UIContainer<UIBackgroundContainer> im
 	}
 
 	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	public void render(UIComponent<?> component, GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (alpha == 0)
-			return;
-
-		renderer.enableBlending();
-
 		Face f = shape.getFaces()[0];
 		if (borderSize != 0)
 		{
