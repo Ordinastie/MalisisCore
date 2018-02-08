@@ -36,7 +36,7 @@ import net.malisis.core.renderer.icon.provider.GuiIconProvider;
  * @author Ordinastie
  *
  */
-public class BackgroundTexture implements IGuiRender
+public class BackgroundTexture implements IGuiRenderer
 {
 	protected final MalisisGui gui;
 	protected final GuiShape shape = new XYResizableGuiShape();

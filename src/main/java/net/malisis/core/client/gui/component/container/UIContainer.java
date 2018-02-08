@@ -44,7 +44,7 @@ import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
-import net.malisis.core.client.gui.render.IGuiRender;
+import net.malisis.core.client.gui.render.IGuiRenderer;
 import net.minecraft.client.gui.GuiScreen;
 
 /**
@@ -61,7 +61,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	/** List of {@link UIComponent} inside this {@link UIContainer}. */
 	protected final Set<UIComponent<?>> components;
 	/** Rendering for the background of this {@link UIContainer}. */
-	protected IGuiRender backgroundRenderer;
+	protected IGuiRenderer backgroundRenderer;
 
 	/** Top padding to apply to this {@link UIContainer}. */
 	private int topPadding;
@@ -139,7 +139,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	}
 
 	// #region getters/setters
-	public void setBackground(IGuiRender render)
+	public void setBackground(IGuiRenderer render)
 	{
 		this.backgroundRenderer = render;
 		setPadding(render.getPadding(), render.getPadding());

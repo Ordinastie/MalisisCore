@@ -31,7 +31,7 @@ import net.malisis.core.client.gui.component.UIComponent;
  * @author Ordinastie
  *
  */
-public interface IGuiRender
+public interface IGuiRenderer
 {
 	public default int getPadding()
 	{

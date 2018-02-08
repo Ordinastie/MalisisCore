@@ -37,7 +37,7 @@ import net.malisis.core.renderer.element.Face;
  * @author Ordinastie
  *
  */
-public class ColoredBackground implements ITransformable.Color, IGuiRender
+public class ColoredBackground implements ITransformable.Color, IGuiRenderer
 {
 	protected GuiShape shape = new SimpleGuiShape();
 	protected RenderParameters rp = new RenderParameters();
