@@ -113,10 +113,10 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 */
 	public GuiIcon getIcons()
 	{
-		if (attachedContainer instanceof UIWindow)
-			return windowIcons[tabPosition.ordinal()];
-		else
-			return panelIcons[tabPosition.ordinal()];
+		//if (attachedContainer instanceof UIWindow)
+		//	return windowIcons[tabPosition.ordinal()];
+		//else
+		return panelIcons[tabPosition.ordinal()];
 	}
 
 	/**

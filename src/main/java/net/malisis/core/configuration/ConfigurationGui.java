@@ -38,11 +38,11 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.component.container.UIPanel;
-import net.malisis.core.client.gui.component.container.UIWindow;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UIButton;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
+import net.malisis.core.client.gui.render.BackgroundTexture.PanelBackground;
+import net.malisis.core.client.gui.render.BackgroundTexture.WindowBackground;
 import net.malisis.core.configuration.setting.Setting;
 import net.malisis.core.renderer.font.FontOptions;
 
@@ -54,7 +54,7 @@ public class ConfigurationGui extends MalisisGui
 {
 	private IMalisisMod mod;
 	private Settings settings;
-	protected ArrayList<UIPanel> pannels = new ArrayList<>();
+	protected ArrayList<UIContainer<?>> pannels = new ArrayList<>();
 	protected HashMap<UIComponent<?>, Setting<?>> componentSettings = new HashMap<>();
 
 	protected int windowWidth = 400;
@@ -80,7 +80,8 @@ public class ConfigurationGui extends MalisisGui
 			//TODO: build tabs
 		}
 
-		UIWindow window = new UIWindow(this, mod.getName() + " {malisiscore.config.title}", 400, UIComponent.INHERITED);
+		UIContainer<?> window = new UIContainer<>(this, mod.getName() + " {malisiscore.config.title}", 400, UIComponent.INHERITED);
+		window.setBackground(new WindowBackground(this));
 
 		for (String category : categories)
 		{
@@ -92,8 +93,8 @@ public class ConfigurationGui extends MalisisGui
 
 		comment = new UILabel(this, true);
 		comment.setFontOptions(FontOptions.builder().color(0xFFFFFF).shadow().build());
-		UIPanel panelComment = new UIPanel(this, 140, -35).setPosition(0, 0, Anchor.RIGHT);
-		panelComment.setBackgroundColor(0xCCCCCC);
+		UIContainer<?> panelComment = new UIContainer<>(this, 140, -35).setPosition(0, 0, Anchor.RIGHT);
+		panelComment.setBackground(new PanelBackground(this, 0xCCCCCC));
 		panelComment.add(comment);
 
 		btnCancel = new UIButton(this, "gui.cancel").setPosition(-32, 0, Anchor.BOTTOM | Anchor.CENTER).register(this);
