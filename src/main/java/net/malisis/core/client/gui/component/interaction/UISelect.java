@@ -51,8 +51,8 @@ import net.malisis.core.client.gui.component.interaction.UISelect.Option;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
+import net.malisis.core.client.gui.render.BackgroundTexture.BoxBackground;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
@@ -138,6 +138,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	{
 		super(gui);
 
+		setBackground(new BoxBackground(gui));
 		setSize(width, 12);
 		setOptions(values);
 
@@ -146,9 +147,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		arrowShape.setSize(7, 4);
 		arrowShape.storeState();
 
-		iconProvider = new GuiIconProvider(	gui.getGuiTexture().getXResizableIcon(200, 30, 9, 12, 3),
-											null,
-											gui.getGuiTexture().getXResizableIcon(200, 42, 9, 12, 3));
 		arrowIcon = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 48, 7, 4));
 
 		optionsContainer = new OptionsContainer(gui);
@@ -591,13 +589,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	}
 
 	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		rp.colorMultiplier.set(bgColor);
-		renderer.drawShape(shape, rp);
-	}
-
-	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		optionsHeight = 10 * Math.min(options.size(), maxDisplayedOptions) + 2;
@@ -688,13 +679,8 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 		/** Shape used to draw the {@link Option options} box */
 		protected GuiShape optionsShape;
-		/** Shape used to draw the hovered {@link Option} background **/
-		protected GuiShape optionBackground;
 		/** Icon used to draw the option container. */
 		protected GuiIconProvider iconsExpanded;
-
-		/** The padding of this {@link OptionsContainer}. */
-		protected Padding padding = Padding.of(1);
 
 		public OptionsContainer(MalisisGui gui)
 		{
@@ -703,17 +689,14 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 			setZIndex(300);
 
-			hide();
+			setBackground(new BoxBackground(gui));
 
-			shape = new XYResizableGuiShape(1);
-			optionBackground = new SimpleGuiShape();
+			hide();
 
 			scrollbar = new UISlimScrollbar(gui, this, UIScrollBar.Type.VERTICAL);
 			scrollbar.setFade(false);
 			scrollbar.setAutoHide(true);
 			scrollbar.setOffset(0, 0);
-
-			iconsExpanded = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1));
 		}
 
 		@Override
@@ -835,20 +818,10 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		@Override
 		public Padding getPadding()
 		{
-			return padding;
+			return backgroundRenderer.getPadding();
 		}
 
 		//#end IScrollable
-
-		@Override
-		public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-		{
-			rp.iconProvider.set(iconsExpanded);
-			rp.colorMultiplier.set(bgColor);
-
-			renderer.drawShape(shape, rp);
-			renderer.next();
-		}
 
 		@Override
 		public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)

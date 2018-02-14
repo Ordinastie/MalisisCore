@@ -33,13 +33,14 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.renderer.RenderParameters;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
  * @author Ordinastie
  *
  */
-public class BackgroundTexture implements IGuiRenderer
+public class BackgroundTexture implements IGuiRenderer, ITransformable.Color
 {
 	protected final MalisisGui gui;
 	protected final GuiShape shape = new XYResizableGuiShape();
@@ -57,10 +58,10 @@ public class BackgroundTexture implements IGuiRenderer
 		this(gui, iconProvider, 0xFFFFFF);
 	}
 
-	public BackgroundTexture setColor(int color)
+	@Override
+	public void setColor(int color)
 	{
 		rp.colorMultiplier.set(color);
-		return this;
 	}
 
 	@Override
@@ -119,10 +120,14 @@ public class BackgroundTexture implements IGuiRenderer
 	public static class BoxBackground extends BackgroundTexture
 	{
 		private final Padding padding = Padding.of(1);
+		private final GuiIconProvider iconProvider;
+		private final GuiIconProvider iconProviderDisabled;
 
 		public BoxBackground(MalisisGui gui, int color)
 		{
-			super(gui, new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1)), color);
+			super(gui, null, color);
+			iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 5));
+			iconProviderDisabled = new GuiIconProvider(gui.getGuiTexture().getXResizableIcon(200, 42, 9, 12, 5));
 		}
 
 		public BoxBackground(MalisisGui gui)
@@ -135,6 +140,13 @@ public class BackgroundTexture implements IGuiRenderer
 		public Padding getPadding()
 		{
 			return padding;
+		}
+
+		@Override
+		public void render(UIComponent<?> component, GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+		{
+			rp.iconProvider.set(component.isEnabled() ? iconProvider : iconProviderDisabled);
+			super.render(component, renderer, mouseX, mouseY, partialTick);
 		}
 	}
 

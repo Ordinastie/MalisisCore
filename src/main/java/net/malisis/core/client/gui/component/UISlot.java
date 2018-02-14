@@ -33,8 +33,8 @@ import com.google.common.eventbus.Subscribe;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
+import net.malisis.core.client.gui.render.BackgroundTexture.BoxBackground;
 import net.malisis.core.inventory.InventoryEvent;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
@@ -74,16 +74,10 @@ public class UISlot extends UIComponent<UISlot>
 	{
 		super(gui);
 		this.slot = slot;
-		this.width = 18;
-		this.height = 18;
+		setSize(18, 18);
+		setBackground(new BoxBackground(gui));
+
 		slot.register(this);
-
-		shape = new SimpleGuiShape();
-
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 30, 18, 18));
-		iconLeftProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 30, 1, 18));
-		iconTopProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 30, 18, 1));
-
 	}
 
 	/**
@@ -127,15 +121,6 @@ public class UISlot extends UIComponent<UISlot>
 			lines.set(i, TextFormatting.GRAY + lines.get(i));
 
 		tooltip = new UITooltip(getGui()).setText(lines);
-	}
-
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		shape.resetState();
-		shape.setSize(18, 18);
-		renderer.drawShape(shape, rp);
-		renderer.next();
 	}
 
 	@Override

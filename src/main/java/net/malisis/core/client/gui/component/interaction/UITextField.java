@@ -44,16 +44,15 @@ import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
 import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
+import net.malisis.core.client.gui.render.BackgroundTexture.BoxBackground;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.Link;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.font.StringWalker;
 import net.malisis.core.renderer.icon.GuiIcon;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
@@ -109,8 +108,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	protected UISlimScrollbar scrollBar;
 
 	//options
-	/** Background color of this {@link UITextField}. */
-	protected int bgColor = 0xFFFFFF;
 	/** Cursor color for this {@link UITextField}. */
 	protected int cursorColor = 0xD0D0D0;
 	/** Selection color for this {@link UITextField}. */
@@ -150,13 +147,10 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (!multiLine)
 			setSize(100, 12);
 
-		shape = new XYResizableGuiShape(1);
+		setBackground(new BoxBackground(gui));
+
 		cursorShape = new SimpleGuiShape();
 		selectShape = new SimpleGuiShape();
-
-		iconProvider = new GuiIconProvider(	gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1),
-											null,
-											gui.getGuiTexture().getXYResizableIcon(200, 42, 9, 12, 1));
 
 		if (multiLine)
 			scrollBar = new UISlimScrollbar(gui, this, Type.VERTICAL);
@@ -355,7 +349,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 */
 	public UITextField setOptions(int bgColor, int cursorColor, int selectColor)
 	{
-		this.bgColor = bgColor;
+		setColor(bgColor);
 		this.cursorColor = cursorColor;
 		this.selectColor = selectColor;
 
@@ -1079,23 +1073,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	//#end Input
-
-	/**
-	 * Draws the background.
-	 *
-	 * @param renderer the renderer
-	 * @param mouseX the mouse x
-	 * @param mouseY the mouse y
-	 * @param partialTick the partial tick
-	 */
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		rp.useTexture.reset();
-		rp.colorMultiplier.reset();
-		rp.colorMultiplier.set(bgColor);
-		renderer.drawShape(shape, rp);
-	}
 
 	/**
 	 * Draws the foreground.

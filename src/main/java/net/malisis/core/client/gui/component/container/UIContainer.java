@@ -45,7 +45,7 @@ import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
-import net.malisis.core.client.gui.render.IGuiRenderer;
+import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.minecraft.client.gui.GuiScreen;
 
 /**
@@ -57,12 +57,11 @@ import net.minecraft.client.gui.GuiScreen;
  * @author Ordinastie, PaleoCrafter
  * @param <T> type of UIContainer
  */
-public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implements IClipable, IScrollable, ICloseable
+public class UIContainer<T extends UIContainer<T>> extends UIComponent<T>
+		implements IClipable, IScrollable, ICloseable, ITransformable.Color
 {
 	/** List of {@link UIComponent} inside this {@link UIContainer}. */
 	protected final Set<UIComponent<?>> components;
-	/** Rendering for the background of this {@link UIContainer}. */
-	protected IGuiRenderer backgroundRenderer;
 
 	/** Padding used by this {@link UIContainer}.? */
 	protected Padding padding;
@@ -135,11 +134,6 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	}
 
 	// #region getters/setters
-	public void setBackground(IGuiRenderer render)
-	{
-		this.backgroundRenderer = render;
-	}
-
 	/**
 	 * Sets the visible.
 	 *
@@ -549,21 +543,6 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	{
 		if (getParent() instanceof UIContainer)
 			((UIContainer<?>) getParent()).remove(this);
-	}
-
-	/**
-	 * Draws the background.
-	 *
-	 * @param renderer the renderer
-	 * @param mouseX the mouse x
-	 * @param mouseY the mouse y
-	 * @param partialTick the partial tick
-	 */
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		if (backgroundRenderer != null)
-			backgroundRenderer.render(this, renderer, mouseX, mouseY, partialTick);
 	}
 
 	/**

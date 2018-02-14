@@ -52,6 +52,7 @@ import net.malisis.core.client.gui.event.component.StateChangeEvent.DisabledStat
 import net.malisis.core.client.gui.event.component.StateChangeEvent.FocusStateChange;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
+import net.malisis.core.client.gui.render.IGuiRenderer;
 import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.icon.GuiIcon;
@@ -69,7 +70,7 @@ import net.minecraft.client.renderer.GlStateManager;
  * @param <T> the type of <code>UIComponent</code>
  */
 public abstract class UIComponent<T extends UIComponent<T>>
-		implements ITransformable.Position<T>, ITransformable.Size<T>, ITransformable.Alpha, IKeyListener
+		implements ITransformable.Position<T>, ITransformable.Size<T>, ITransformable.Color, ITransformable.Alpha, IKeyListener
 {
 	/** The Constant INHERITED. */
 	public final static int INHERITED = 0;
@@ -104,6 +105,9 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	protected boolean hovered = false;
 	/** Focus state of this {@link UIComponent}. */
 	protected boolean focused = false;
+
+	/** Rendering for the background of this {@link UIComponent}. */
+	protected IGuiRenderer backgroundRenderer;
 	/** GuiShape used to draw this {@link UIComponent}. */
 	protected GuiShape shape;
 	/** {@link RenderParameters} used to draw this {@link UIComponent}. */
@@ -583,6 +587,13 @@ public abstract class UIComponent<T extends UIComponent<T>>
 		return self();
 	}
 
+	@Override
+	public void setColor(int color)
+	{
+		if (backgroundRenderer instanceof ITransformable.Color)
+			((ITransformable.Color) backgroundRenderer).setColor(color);
+	}
+
 	/**
 	 * Sets the alpha transparency for this {@link UIComponent}.
 	 *
@@ -605,6 +616,16 @@ public abstract class UIComponent<T extends UIComponent<T>>
 			return alpha;
 
 		return Math.min(alpha, parent.getAlpha());
+	}
+
+	/**
+	 * Sets the background for this {@link UIComponent}.
+	 *
+	 * @param render the new background
+	 */
+	public void setBackground(IGuiRenderer render)
+	{
+		this.backgroundRenderer = render;
 	}
 
 	public void attachData(Object data)
@@ -1094,7 +1115,11 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 * @param mouseY the mouse y
 	 * @param partialTick the partial tick
 	 */
-	public abstract void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
+	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	{
+		if (backgroundRenderer != null)
+			backgroundRenderer.render(this, renderer, mouseX, mouseY, partialTick);
+	}
 
 	/**
 	 * Called last when drawing this {@link UIComponent}.

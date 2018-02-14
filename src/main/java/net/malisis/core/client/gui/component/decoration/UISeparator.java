@@ -66,12 +66,11 @@ public class UISeparator extends UIComponent<UISeparator>
 	 * Sets the color for this {@link UISeparator}.
 	 *
 	 * @param color the color
-	 * @return this {@link UISeparator}
 	 */
-	public UISeparator setColor(int color)
+	@Override
+	public void setColor(int color)
 	{
 		this.color = color;
-		return this;
 	}
 
 	/**
