@@ -543,7 +543,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	{
 		for (UIComponent<?> component : components)
 		{
-			if (component != null)
+			if (component != null && component != this)
 			{
 				this.components.add(component);
 				component.setParent(this);
