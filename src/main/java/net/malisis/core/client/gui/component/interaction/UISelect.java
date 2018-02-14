@@ -40,6 +40,7 @@ import com.google.common.collect.Iterables;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
@@ -692,6 +693,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		/** Icon used to draw the option container. */
 		protected GuiIconProvider iconsExpanded;
 
+		/** The padding of this {@link OptionsContainer}. */
+		protected Padding padding = Padding.of(1);
+
 		public OptionsContainer(MalisisGui gui)
 		{
 			super(gui);
@@ -829,27 +833,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		}
 
 		@Override
-		public int getLeftPadding()
+		public Padding getPadding()
 		{
-			return 1;
-		}
-
-		@Override
-		public int getRightPadding()
-		{
-			return 1;
-		}
-
-		@Override
-		public int getTopPadding()
-		{
-			return 1;
-		}
-
-		@Override
-		public int getBottomPadding()
-		{
-			return 1;
+			return padding;
 		}
 
 		//#end IScrollable

@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.render;
 
 import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
@@ -64,6 +65,8 @@ public class ColoredBackground implements ITransformable.Color, IGuiRenderer
 	/** Border alpha **/
 	protected int borderAlpha = 0;
 
+	protected Padding padding = Padding.NO_PADDING;
+
 	public ColoredBackground(int color, int borderSize, int borderColor)
 	{
 		setColor(color);
@@ -90,7 +93,15 @@ public class ColoredBackground implements ITransformable.Color, IGuiRenderer
 			shape = new XYResizableGuiShape(size);
 		else
 			shape = new SimpleGuiShape();
+
+		padding = borderSize == 0 ? Padding.NO_PADDING : Padding.of(borderSize);
 		return this;
+	}
+
+	@Override
+	public Padding getPadding()
+	{
+		return padding;
 	}
 
 	/**
@@ -384,6 +395,9 @@ public class ColoredBackground implements ITransformable.Color, IGuiRenderer
 	@Override
 	public void render(UIComponent<?> component, GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		shape.resetState();
+		shape.setSize(component.getWidth(), component.getHeight());
+
 		Face f = shape.getFaces()[0];
 		if (borderSize != 0)
 		{

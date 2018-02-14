@@ -24,6 +24,7 @@
 
 package net.malisis.core.client.gui.component.control;
 
+import net.malisis.core.client.gui.Padding.IPadding;
 import net.malisis.core.client.gui.component.UIComponent;
 
 /**
@@ -32,7 +33,7 @@ import net.malisis.core.client.gui.component.UIComponent;
  * @author Ordinastie
  *
  */
-public interface IScrollable
+public interface IScrollable extends IPadding
 {
 	/**
 	 * Gets the width of the scrollable content. It should count the total content size to be displayed when not clipped.
@@ -86,32 +87,4 @@ public interface IScrollable
 	 * @return the scroll step
 	 */
 	public float getScrollStep();
-
-	/**
-	 * Gets the padding for the top.
-	 *
-	 * @return the top padding
-	 */
-	int getTopPadding();
-
-	/**
-	 * Gets the padding for the bottom.
-	 *
-	 * @return the bottom padding
-	 */
-	int getBottomPadding();
-
-	/**
-	 * Gets the padding for the left.
-	 *
-	 * @return the left padding
-	 */
-	int getLeftPadding();
-
-	/**
-	 * Gets the padding for the right.
-	 *
-	 * @return the right padding
-	 */
-	int getRightPadding();
 }

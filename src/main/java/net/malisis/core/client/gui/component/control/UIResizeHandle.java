@@ -40,7 +40,9 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 {
 	public enum Type
 	{
-		BOTH, HORIZONTAL, VERTICAL
+		BOTH,
+		HORIZONTAL,
+		VERTICAL
 	}
 
 	private Type type;
@@ -54,8 +56,8 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		int y = -1;
 		if (parent instanceof UIContainer)
 		{
-			x += ((UIContainer<?>) parent).getRightPadding();
-			y += ((UIContainer<?>) parent).getBottomPadding();
+			x += ((UIContainer<?>) parent).getPadding().right;
+			y += ((UIContainer<?>) parent).getPadding().bottom;
 		}
 
 		setPosition(x, y, Anchor.BOTTOM | Anchor.RIGHT);

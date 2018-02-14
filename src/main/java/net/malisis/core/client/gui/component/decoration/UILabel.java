@@ -33,6 +33,7 @@ import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
@@ -283,27 +284,9 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	}
 
 	@Override
-	public int getLeftPadding()
+	public Padding getPadding()
 	{
-		return 0;
-	}
-
-	@Override
-	public int getRightPadding()
-	{
-		return 0;
-	}
-
-	@Override
-	public int getTopPadding()
-	{
-		return 0;
-	}
-
-	@Override
-	public int getBottomPadding()
-	{
-		return 0;
+		return Padding.NO_PADDING;
 	}
 
 	//#end IScrollable

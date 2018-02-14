@@ -37,6 +37,7 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.Padding.IPadding;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.control.IControlComponent;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
@@ -325,11 +326,8 @@ public abstract class UIComponent<T extends UIComponent<T>>
 
 		//if width < 0 consider it relative to parent container
 		int w = parent.getWidth() + width;
-		if (parent instanceof UIContainer)
-		{
-			final UIContainer<?> parentContainer = (UIContainer<?>) parent;
-			w -= parentContainer.getLeftPadding() + parentContainer.getRightPadding();
-		}
+		if (parent instanceof IPadding)
+			w -= ((IPadding) parent).getPadding().horizontal;
 
 		return w;
 	}
@@ -369,12 +367,8 @@ public abstract class UIComponent<T extends UIComponent<T>>
 
 		//if height < 0 consider it relative to parent container
 		int h = parent.getHeight() + height;
-		if (parent instanceof UIContainer)
-		{
-			final UIContainer<?> parentContainer = (UIContainer<?>) parent;
-			h -= parentContainer.getTopPadding() + parentContainer.getBottomPadding();
-		}
-
+		if (parent instanceof IPadding)
+			h -= ((IPadding) parent).getPadding().vertical;
 		return h;
 	}
 

@@ -22,25 +22,58 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.render;
+package net.malisis.core.client.gui;
 
 import javax.annotation.Nonnull;
-
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.Padding;
-import net.malisis.core.client.gui.component.UIComponent;
 
 /**
  * @author Ordinastie
  *
  */
-public interface IGuiRenderer
+public class Padding
 {
-	@Nonnull
-	public default Padding getPadding()
+	public static final Padding NO_PADDING = Padding.of(0);
+
+	public final int top;
+	public final int bottom;
+	public final int left;
+	public final int right;
+
+	public final int horizontal;
+	public final int vertical;
+
+	private Padding(int top, int bottom, int left, int right)
 	{
-		return Padding.NO_PADDING;
+		this.top = top;
+		this.bottom = bottom;
+		this.left = left;
+		this.right = right;
+
+		horizontal = left + right;
+		vertical = top + bottom;
 	}
 
-	public void render(UIComponent<?> component, GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
+	public static Padding of(int padding)
+	{
+		return new Padding(padding, padding, padding, padding);
+	}
+
+	public static Padding of(int horizontal, int vertical)
+	{
+		return new Padding(vertical, vertical, horizontal, horizontal);
+	}
+
+	public static Padding of(int top, int bottom, int left, int right)
+	{
+		return new Padding(top, bottom, left, right);
+	}
+
+	public interface IPadding
+	{
+		@Nonnull
+		public default Padding getPadding()
+		{
+			return NO_PADDING;
+		}
+	}
 }

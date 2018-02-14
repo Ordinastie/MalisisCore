@@ -24,8 +24,11 @@
 
 package net.malisis.core.client.gui.render;
 
+import javax.annotation.Nonnull;
+
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
@@ -71,23 +74,33 @@ public class BackgroundTexture implements IGuiRenderer
 
 	public static class WindowBackground extends BackgroundTexture
 	{
+		private final Padding padding = Padding.of(5);
+
+		public WindowBackground(MalisisGui gui, int color)
+		{
+			super(gui, new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 0, 15, 15, 5)), color);
+		}
+
 		public WindowBackground(MalisisGui gui)
 		{
-			super(gui, new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 0, 15, 15, 5)));
+			this(gui, 0xFFFFFF);
 		}
 
 		@Override
-		public int getPadding()
+		@Nonnull
+		public Padding getPadding()
 		{
-			return 5;
+			return padding;
 		}
 	}
 
 	public static class PanelBackground extends BackgroundTexture
 	{
+		private final Padding padding = Padding.of(3);
+
 		public PanelBackground(MalisisGui gui, int color)
 		{
-			super(gui, new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 15, 15, 15, 5)));
+			super(gui, new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 15, 15, 15, 5)), color);
 		}
 
 		public PanelBackground(MalisisGui gui)
@@ -96,9 +109,33 @@ public class BackgroundTexture implements IGuiRenderer
 		}
 
 		@Override
-		public int getPadding()
+		@Nonnull
+		public Padding getPadding()
 		{
-			return 3;
+			return padding;
 		}
 	}
+
+	public static class BoxBackground extends BackgroundTexture
+	{
+		private final Padding padding = Padding.of(1);
+
+		public BoxBackground(MalisisGui gui, int color)
+		{
+			super(gui, new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 1)), color);
+		}
+
+		public BoxBackground(MalisisGui gui)
+		{
+			this(gui, 0xFFFFFF);
+		}
+
+		@Override
+		@Nonnull
+		public Padding getPadding()
+		{
+			return padding;
+		}
+	}
+
 }

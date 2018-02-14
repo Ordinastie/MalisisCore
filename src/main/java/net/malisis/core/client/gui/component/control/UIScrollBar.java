@@ -35,6 +35,7 @@ import com.google.common.eventbus.Subscribe;
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
@@ -111,10 +112,11 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 */
 	protected void setPosition()
 	{
+		Padding p = getScrollable().getPadding();
 		if (type == Type.HORIZONTAL)
-			setPosition(getScrollable().getLeftPadding() + offsetX, -getScrollable().getBottomPadding() + offsetY, Anchor.BOTTOM);
+			setPosition(p.left + offsetX, -p.bottom + offsetY, Anchor.BOTTOM);
 		else
-			setPosition(-getScrollable().getRightPadding() + offsetX, getScrollable().getTopPadding() + offsetY, Anchor.RIGHT);
+			setPosition(-p.right + offsetX, p.top + offsetY, Anchor.RIGHT);
 	}
 
 	/**
@@ -209,7 +211,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 			return scrollThickness;
 
 		int w = parent.getWidth();
-		w -= getScrollable().getLeftPadding() + getScrollable().getRightPadding();
+		w -= getScrollable().getPadding().horizontal;
 		if (hasVisibleOtherScrollbar())
 			w -= scrollThickness;
 		return w;
@@ -222,7 +224,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 			return scrollThickness;
 
 		int h = getParent().getHeight();
-		h -= getScrollable().getTopPadding() + getScrollable().getBottomPadding();
+		h -= getScrollable().getPadding().vertical;
 		if (hasVisibleOtherScrollbar())
 			h -= scrollThickness;
 		return h;

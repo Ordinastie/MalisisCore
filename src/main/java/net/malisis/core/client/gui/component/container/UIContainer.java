@@ -35,6 +35,7 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.ICloseable;
@@ -63,14 +64,9 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	/** Rendering for the background of this {@link UIContainer}. */
 	protected IGuiRenderer backgroundRenderer;
 
-	/** Top padding to apply to this {@link UIContainer}. */
-	private int topPadding;
-	/** Bottom padding to apply to this {@link UIContainer}. */
-	private int bottomPadding;
-	/** Left padding to apply to this {@link UIContainer}. */
-	private int leftPadding;
-	/** Right padding to apply to this {@link UIContainer}. */
-	private int rightPadding;
+	/** Padding used by this {@link UIContainer}.? */
+	protected Padding padding;
+
 	/** Label for the title of this {@link UIContainer}. */
 	protected UILabel titleLabel;
 	//IClipable
@@ -142,7 +138,6 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	public void setBackground(IGuiRenderer render)
 	{
 		this.backgroundRenderer = render;
-		setPadding(render.getPadding(), render.getPadding());
 	}
 
 	/**
@@ -193,64 +188,25 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	/**
 	 * Set the padding for this {@link UIContainer}.
 	 *
-	 * @param horizontalPadding the padding to apply to left and right
-	 * @param verticalPadding the padding to apply to top and bottom
+	 * @param padding the padding
+	 * @return the t
 	 */
-	public T setPadding(int horizontalPadding, int verticalPadding)
+	public T setPadding(Padding padding)
 	{
-		this.leftPadding = horizontalPadding;
-		this.rightPadding = horizontalPadding;
-		this.topPadding = verticalPadding;
-		this.bottomPadding = verticalPadding;
+		this.padding = padding;
 		return self();
 	}
 
 	@Override
-	public int getTopPadding()
+	public Padding getPadding()
 	{
-		return this.topPadding;
-	}
+		if (padding != null)
+			return padding;
 
-	public T setTopPadding(int topPadding)
-	{
-		this.topPadding = topPadding;
-		return self();
-	}
+		if (backgroundRenderer != null)
+			return backgroundRenderer.getPadding();
 
-	@Override
-	public int getBottomPadding()
-	{
-		return this.bottomPadding;
-	}
-
-	public T setBottomPadding(int bottomPadding)
-	{
-		this.bottomPadding = bottomPadding;
-		return self();
-	}
-
-	@Override
-	public int getLeftPadding()
-	{
-		return this.leftPadding;
-	}
-
-	public T setLeftPadding(int leftPadding)
-	{
-		this.leftPadding = leftPadding;
-		return self();
-	}
-
-	@Override
-	public int getRightPadding()
-	{
-		return this.rightPadding;
-	}
-
-	public T setRightPadding(int rightPadding)
-	{
-		this.rightPadding = rightPadding;
-		return self();
+		return Padding.NO_PADDING;
 	}
 
 	/**
@@ -297,9 +253,9 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 		int x = super.componentX(component);
 		int a = Anchor.horizontal(component.getAnchor());
 		if (a == Anchor.LEFT || a == Anchor.NONE)
-			x += getLeftPadding();
+			x += getPadding().left;
 		else if (a == Anchor.RIGHT)
-			x -= getRightPadding();
+			x -= getPadding().right;
 
 		if (!(component instanceof IControlComponent))
 			x -= xOffset;
@@ -319,9 +275,9 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 		int y = super.componentY(component);
 		int a = Anchor.vertical(component.getAnchor());
 		if (a == Anchor.TOP || a == Anchor.NONE)
-			y += getTopPadding();
+			y += getPadding().top;
 		else if (a == Anchor.BOTTOM)
-			y -= getBottomPadding();
+			y -= getPadding().bottom;
 
 		if (!(component instanceof IControlComponent))
 			y -= yOffset;
@@ -445,8 +401,8 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 			}
 		}
 
-		this.contentHeight = contentHeight + getBottomPadding();
-		this.contentWidth = contentWidth + getRightPadding();
+		this.contentHeight = contentHeight + getPadding().bottom;
+		this.contentWidth = contentWidth + getPadding().right;
 	}
 
 	//#region IClipable

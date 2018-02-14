@@ -40,7 +40,9 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 {
 	public enum Type
 	{
-		BOTH, HORIZONTAL, VERTICAL
+		BOTH,
+		HORIZONTAL,
+		VERTICAL
 	}
 
 	private Type type;
@@ -54,8 +56,8 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 		int y = 1;
 		if (parent instanceof UIContainer)
 		{
-			x -= ((UIContainer<?>) parent).getLeftPadding();
-			y -= ((UIContainer<?>) parent).getTopPadding();
+			x -= ((UIContainer<?>) parent).getPadding().left;
+			y -= ((UIContainer<?>) parent).getPadding().top;
 		}
 		setPosition(x, y);
 		setSize(5, 5);

@@ -36,6 +36,7 @@ import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
@@ -124,6 +125,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	protected GuiIcon iconTextfield;
 	/** Icon used to draw this {@link UITextField} when disabled. */
 	protected GuiIcon iconTextfieldDisabled;
+
+	/** The padding of this {@link UITextField}. */
+	protected Padding padding = Padding.of(1);
 
 	/**
 	 * Instantiates a new {@link UITextField}.
@@ -503,20 +507,23 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	/**
-	 * Sets the function that applies to all incoming text. Immediately applies filter
-	 * to current text.
+	 * Sets the function that applies to all incoming text. Immediately applies filter to current text.
+	 *
 	 * @param filterFunction the function
 	 */
-	public void setFilter(Function<String, String> filterFunction) {
+	public void setFilter(Function<String, String> filterFunction)
+	{
 		this.filterFunction = filterFunction;
 		this.text = new StringBuilder(this.filterFunction.apply(this.text.toString()));
 	}
 
 	/**
 	 * Gets the function applied to all incoming text
+	 *
 	 * @return the filter function
 	 */
-	public Function<String, String> getFilter() {
+	public Function<String, String> getFilter()
+	{
 		return this.filterFunction;
 	}
 
@@ -606,27 +613,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	@Override
-	public int getLeftPadding()
+	public Padding getPadding()
 	{
-		return 1;
-	}
-
-	@Override
-	public int getRightPadding()
-	{
-		return 1;
-	}
-
-	@Override
-	public int getTopPadding()
-	{
-		return 1;
-	}
-
-	@Override
-	public int getBottomPadding()
-	{
-		return 1;
+		return padding;
 	}
 
 	//#end IScrollable

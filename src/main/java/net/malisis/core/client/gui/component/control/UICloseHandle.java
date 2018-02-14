@@ -45,8 +45,8 @@ public class UICloseHandle extends UIComponent<UICloseHandle> implements IContro
 		int y = 1;
 		if (parent instanceof UIContainer)
 		{
-			x += ((UIContainer<?>) parent).getRightPadding();
-			y -= ((UIContainer<?>) parent).getTopPadding();
+			x += ((UIContainer<?>) parent).getPadding().right;
+			y -= ((UIContainer<?>) parent).getPadding().top;
 		}
 		setPosition(x, y, Anchor.RIGHT);
 		setSize(5, 5);
