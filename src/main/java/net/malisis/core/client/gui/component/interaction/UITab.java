@@ -37,7 +37,6 @@ import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
-import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.Icon;
@@ -315,7 +314,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	}
 
 	/**
-	 * Sets the baground color for this {@link UITab}.<br>
+	 * Sets the background color for this {@link UITab}.<br>
 	 * Also sets the bacground color for its {@link #container}.
 	 *
 	 * @param color the color
@@ -325,11 +324,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	{
 		this.bgColor = color;
 		if (parent != null)
-		{
-			UIContainer<?> cont = ((UITabGroup) parent).getAttachedContainer();
-			if (cont instanceof ITransformable.Color)
-				((Color) cont).setColor(color);
-		}
+			((UITabGroup) parent).getAttachedContainer().setColor(color);
 		return this;
 	}
 
