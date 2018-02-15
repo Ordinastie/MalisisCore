@@ -34,13 +34,10 @@ public class Padding
 {
 	public static final Padding NO_PADDING = Padding.of(0);
 
-	public final int top;
-	public final int bottom;
-	public final int left;
-	public final int right;
-
-	public final int horizontal;
-	public final int vertical;
+	protected final int top;
+	protected final int bottom;
+	protected final int left;
+	protected final int right;
 
 	private Padding(int top, int bottom, int left, int right)
 	{
@@ -48,24 +45,51 @@ public class Padding
 		this.bottom = bottom;
 		this.left = left;
 		this.right = right;
+	}
 
-		horizontal = left + right;
-		vertical = top + bottom;
+	public int left()
+	{
+		return left;
+	}
+
+	public int right()
+	{
+		return right;
+	}
+
+	public int bottom()
+	{
+		return bottom;
+	}
+
+	public int top()
+	{
+		return top;
+	}
+
+	public int horizontal()
+	{
+		return left() + right();
+	}
+
+	public int vertical()
+	{
+		return top() + bottom();
 	}
 
 	public static Padding of(int padding)
 	{
-		return new Padding(padding, padding, padding, padding);
+		return Padding.of(padding, padding, padding, padding);
 	}
 
 	public static Padding of(int horizontal, int vertical)
 	{
-		return new Padding(vertical, vertical, horizontal, horizontal);
+		return Padding.of(vertical, vertical, horizontal, horizontal);
 	}
 
 	public static Padding of(int top, int bottom, int left, int right)
 	{
-		return new Padding(top, bottom, left, right);
+		return top == 0 && bottom == 0 && left == 0 && right == 0 ? NO_PADDING : new Padding(top, bottom, left, right);
 	}
 
 	public interface IPadding

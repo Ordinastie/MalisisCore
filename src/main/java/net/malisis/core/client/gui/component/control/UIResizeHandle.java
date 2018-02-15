@@ -56,8 +56,8 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		int y = -1;
 		if (parent instanceof UIContainer)
 		{
-			x += ((UIContainer<?>) parent).getPadding().right;
-			y += ((UIContainer<?>) parent).getPadding().bottom;
+			x += ((UIContainer<?>) parent).getPadding().right();
+			y += ((UIContainer<?>) parent).getPadding().bottom();
 		}
 
 		setPosition(x, y, Anchor.BOTTOM | Anchor.RIGHT);

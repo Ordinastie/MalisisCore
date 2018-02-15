@@ -114,9 +114,9 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	{
 		Padding p = getScrollable().getPadding();
 		if (type == Type.HORIZONTAL)
-			setPosition(p.left + offsetX, -p.bottom + offsetY, Anchor.BOTTOM);
+			setPosition(p.left() + offsetX, -p.bottom() + offsetY, Anchor.BOTTOM);
 		else
-			setPosition(-p.right + offsetX, p.top + offsetY, Anchor.RIGHT);
+			setPosition(-p.right() + offsetX, p.top() + offsetY, Anchor.RIGHT);
 	}
 
 	/**
@@ -211,7 +211,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 			return scrollThickness;
 
 		int w = parent.getWidth();
-		w -= getScrollable().getPadding().horizontal;
+		w -= getScrollable().getPadding().horizontal();
 		if (hasVisibleOtherScrollbar())
 			w -= scrollThickness;
 		return w;
@@ -224,7 +224,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 			return scrollThickness;
 
 		int h = getParent().getHeight();
-		h -= getScrollable().getPadding().vertical;
+		h -= getScrollable().getPadding().vertical();
 		if (hasVisibleOtherScrollbar())
 			h -= scrollThickness;
 		return h;

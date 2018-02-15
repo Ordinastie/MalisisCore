@@ -331,7 +331,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 		//if width < 0 consider it relative to parent container
 		int w = parent.getWidth() + width;
 		if (parent instanceof IPadding)
-			w -= ((IPadding) parent).getPadding().horizontal;
+			w -= ((IPadding) parent).getPadding().horizontal();
 
 		return w;
 	}
@@ -372,7 +372,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 		//if height < 0 consider it relative to parent container
 		int h = parent.getHeight() + height;
 		if (parent instanceof IPadding)
-			h -= ((IPadding) parent).getPadding().vertical;
+			h -= ((IPadding) parent).getPadding().vertical();
 		return h;
 	}
 

@@ -247,9 +247,9 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T>
 		int x = super.componentX(component);
 		int a = Anchor.horizontal(component.getAnchor());
 		if (a == Anchor.LEFT || a == Anchor.NONE)
-			x += getPadding().left;
+			x += getPadding().left();
 		else if (a == Anchor.RIGHT)
-			x -= getPadding().right;
+			x -= getPadding().right();
 
 		if (!(component instanceof IControlComponent))
 			x -= xOffset;
@@ -269,9 +269,9 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T>
 		int y = super.componentY(component);
 		int a = Anchor.vertical(component.getAnchor());
 		if (a == Anchor.TOP || a == Anchor.NONE)
-			y += getPadding().top;
+			y += getPadding().top();
 		else if (a == Anchor.BOTTOM)
-			y -= getPadding().bottom;
+			y -= getPadding().bottom();
 
 		if (!(component instanceof IControlComponent))
 			y -= yOffset;
@@ -395,8 +395,8 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T>
 			}
 		}
 
-		this.contentHeight = contentHeight + getPadding().bottom;
-		this.contentWidth = contentWidth + getPadding().right;
+		this.contentHeight = contentHeight + getPadding().bottom();
+		this.contentWidth = contentWidth + getPadding().right();
 	}
 
 	//#region IClipable
