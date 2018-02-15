@@ -40,20 +40,20 @@ import net.malisis.core.renderer.icon.provider.GuiIconProvider;
  * @author Ordinastie
  *
  */
-public class BackgroundTexture implements IGuiRenderer, ITransformable.Color
+public class TexturedBackground implements IGuiRenderer, ITransformable.Color, ITransformable.Alpha
 {
 	protected final MalisisGui gui;
 	protected final GuiShape shape = new XYResizableGuiShape();
 	protected final RenderParameters rp = new RenderParameters();
 
-	public BackgroundTexture(MalisisGui gui, GuiIconProvider iconProvider, int color)
+	public TexturedBackground(MalisisGui gui, GuiIconProvider iconProvider, int color)
 	{
 		this.gui = gui;
 		rp.iconProvider.set(iconProvider);
 		rp.colorMultiplier.set(color);
 	}
 
-	public BackgroundTexture(MalisisGui gui, GuiIconProvider iconProvider)
+	public TexturedBackground(MalisisGui gui, GuiIconProvider iconProvider)
 	{
 		this(gui, iconProvider, 0xFFFFFF);
 	}
@@ -65,6 +65,12 @@ public class BackgroundTexture implements IGuiRenderer, ITransformable.Color
 	}
 
 	@Override
+	public void setAlpha(int alpha)
+	{
+		rp.alpha.set(alpha);
+	}
+
+	@Override
 	public void render(UIComponent<?> component, GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		shape.resetState();
@@ -73,7 +79,7 @@ public class BackgroundTexture implements IGuiRenderer, ITransformable.Color
 		renderer.drawShape(shape, rp);
 	}
 
-	public static class WindowBackground extends BackgroundTexture
+	public static class WindowBackground extends TexturedBackground
 	{
 		private final Padding padding = Padding.of(5);
 
@@ -95,7 +101,7 @@ public class BackgroundTexture implements IGuiRenderer, ITransformable.Color
 		}
 	}
 
-	public static class PanelBackground extends BackgroundTexture
+	public static class PanelBackground extends TexturedBackground
 	{
 		private final Padding padding = Padding.of(3);
 
@@ -117,7 +123,7 @@ public class BackgroundTexture implements IGuiRenderer, ITransformable.Color
 		}
 	}
 
-	public static class BoxBackground extends BackgroundTexture
+	public static class BoxBackground extends TexturedBackground
 	{
 		private final Padding padding = Padding.of(1);
 		private final GuiIconProvider iconProvider;

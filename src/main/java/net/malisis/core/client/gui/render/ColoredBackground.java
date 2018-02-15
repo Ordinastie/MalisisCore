@@ -38,7 +38,7 @@ import net.malisis.core.renderer.element.Face;
  * @author Ordinastie
  *
  */
-public class ColoredBackground implements ITransformable.Color, IGuiRenderer
+public class ColoredBackground implements IGuiRenderer, ITransformable.Color, ITransformable.Alpha
 {
 	protected GuiShape shape = new SimpleGuiShape();
 	protected RenderParameters rp = new RenderParameters();
@@ -385,11 +385,11 @@ public class ColoredBackground implements ITransformable.Color, IGuiRenderer
 	 *
 	 * @param alpha the new alpha
 	 */
-	public ColoredBackground setBackgroundAlpha(int alpha)
+	@Override
+	public void setAlpha(int alpha)
 	{
 		setTopAlpha(alpha);
 		setBottomAlpha(alpha);
-		return this;
 	}
 
 	@Override
