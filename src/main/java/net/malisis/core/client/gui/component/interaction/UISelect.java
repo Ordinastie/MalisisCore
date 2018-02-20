@@ -47,7 +47,7 @@ import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
 import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.element.Padding;
-import net.malisis.core.client.gui.component.element.IPosition;
+import net.malisis.core.client.gui.component.element.Position.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.component.interaction.UISelect.Option;
 import net.malisis.core.client.gui.element.GuiShape;
@@ -83,7 +83,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public static int SELECT_WIDTH = -2;
 
 	/** The {@link Option options} of this {@link UISelect}. */
-	protected FluentIterable<Option<T>> options;
+	protected FluentIterable<Option<T>> options = FluentIterable.from(Collections.emptyList());;
 	/** Currently selected option index. */
 	protected Option<T> selectedOption = null;
 	/** Max width of the option container. */
@@ -652,7 +652,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			super(gui);
 			gui.addToScreen(this);
 			//TODO: place it above if room below is too small
-			setPosition(IPosition.of(this).below(UISelect.this, 0));
+			setPosition(new OptionContainerPosition());
 			setSize(new OptionContainerSize());
 
 			setZIndex(300);
@@ -973,6 +973,25 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		public boolean equals(Object obj)
 		{
 			return obj != null && obj instanceof Option && key.equals(((Option<?>) obj).key);
+		}
+	}
+
+	public class OptionContainerPosition implements IPosition
+	{
+		@Override
+		public void setOwner(UIComponent<?> component)
+		{}
+
+		@Override
+		public int x()
+		{
+			return UISelect.this.screenX();
+		}
+
+		@Override
+		public int y()
+		{
+			return UISelect.this.screenY() + UISelect.this.size().height();
 		}
 	}
 

@@ -24,7 +24,11 @@
 
 package net.malisis.core.client.gui.component.element;
 
+import static com.google.common.base.Preconditions.*;
+
 import java.util.function.ToIntFunction;
+
+import javax.annotation.Nonnull;
 
 import net.malisis.core.client.gui.component.UIComponent;
 
@@ -58,9 +62,9 @@ public class Position
 
 		//call from component.setPosition()
 		@Override
-		public void setOwner(UIComponent<?> component)
+		public void setOwner(@Nonnull UIComponent<?> component)
 		{
-			this.owner = component;
+			this.owner = checkNotNull(component);
 		}
 
 		@Override

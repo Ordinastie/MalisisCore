@@ -32,7 +32,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
-import net.malisis.core.client.gui.component.element.IPosition;
+import net.malisis.core.client.gui.component.element.Position;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
@@ -66,6 +66,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		cbIconProvider = new GuiIconProvider(	gui.getGuiTexture().getIcon(242, 52, 12, 10),
 												gui.getGuiTexture().getIcon(254, 42, 12, 10),
 												gui.getGuiTexture().getIcon(242, 42, 12, 10));
+		setSize(new CheckBoxSize());
 	}
 
 	public UICheckBox(MalisisGui gui)
@@ -97,7 +98,10 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	{
 		this.label = label;
 		if (label != null)
-			label.setPosition(IPosition.of(14, 2));
+		{
+			label.setPosition(Position.of(14, 2));
+			label.setParent(this);
+		}
 		return this;
 	}
 

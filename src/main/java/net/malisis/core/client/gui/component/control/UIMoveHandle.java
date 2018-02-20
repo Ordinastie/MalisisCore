@@ -28,7 +28,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.component.element.IPosition;
+import net.malisis.core.client.gui.component.element.Position;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
@@ -60,7 +60,7 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 			x -= ((UIContainer<?>) parent).getPadding().left();
 			y -= ((UIContainer<?>) parent).getPadding().top();
 		}
-		setPosition(IPosition.of(x, y));
+		setPosition(Position.of(x, y));
 		setSize(Size.of(5, 5));
 		setZIndex(10);
 		register(this);
@@ -97,7 +97,7 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 			py = 0;
 		//TODO: check x + w against screen size
 
-		getParent().setPosition(IPosition.of(x, y));
+		getParent().setPosition(Position.of(x, y));
 		return true;
 	}
 

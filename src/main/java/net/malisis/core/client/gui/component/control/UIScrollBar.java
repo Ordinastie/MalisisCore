@@ -35,7 +35,7 @@ import com.google.common.eventbus.Subscribe;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.IPosition;
+import net.malisis.core.client.gui.component.element.Position.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
@@ -437,6 +437,10 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 
 	private class ScrollbarPosition implements IPosition
 	{
+		@Override
+		public void setOwner(UIComponent<?> component)
+		{}
+
 		@Override
 		public int x()
 		{

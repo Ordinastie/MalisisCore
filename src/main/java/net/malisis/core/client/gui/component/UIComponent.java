@@ -84,7 +84,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	/** Position of this {@link UIComponent}. */
 	protected IPosition position = Position.zero();
 	/** Size of this {@link UIComponent}. */
-	protected Size size = Size.ZERO;
+	protected Size size = Size.of(this).relativeWidth(1.0f).relativeHeight(1.0F).build();
 	/** Z index of the component. */
 	protected int zIndex = INHERITED;
 	/** Event bus on which event listeners are registered. */
@@ -131,6 +131,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 		controlComponents = new LinkedHashSet<>();
 		rp = new RenderParameters();
 		shape = new SimpleGuiShape();
+		setPosition(Position.zero());
 	}
 
 	// #region getters/setters
@@ -168,6 +169,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	public void setPosition(@Nonnull IPosition position)
 	{
 		//if(fireEvent(this, this.position, position);
+		position.setOwner(this);
 		this.position = position;
 	}
 
@@ -872,7 +874,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	 */
 	public String getPropertyString()
 	{
-		return size() + "@" + position() + " | S=" + screenX() + "," + screenY();
+		return size().width() + "x" + size().height() + "@" + position().x() + "x" + position().y() + " | S=" + screenX() + "," + screenY();
 	}
 
 	/**

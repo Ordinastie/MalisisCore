@@ -35,7 +35,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
-import net.malisis.core.client.gui.component.element.IPosition;
+import net.malisis.core.client.gui.component.element.Position;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
@@ -61,6 +61,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 		super(gui);
 		this.name = name;
 		setText(text);
+		setSize(new RadioButtonSize());
 
 		shape = new SimpleGuiShape();
 
@@ -101,7 +102,10 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 	{
 		this.label = label;
 		if (label != null)
-			label.setPosition(IPosition.of(14, 2));
+		{
+			label.setPosition(Position.of(14, 0));
+			label.setParent(this);
+		}
 		return this;
 	}
 

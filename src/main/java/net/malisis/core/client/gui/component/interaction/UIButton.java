@@ -26,14 +26,14 @@ package net.malisis.core.client.gui.component.interaction;
 
 import org.lwjgl.input.Keyboard;
 
-import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Position.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.component.element.IPosition.AlignedPosition;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.renderer.font.FontOptions;
@@ -176,7 +176,7 @@ public class UIButton extends UIComponent<UIButton>
 	{
 		this.content = content;
 		content.setParent(this);
-		content.setPosition(new ContentPosition(content));
+		content.setPosition(new ContentPosition());
 
 		//store the fontOptions, to be able to revert back from hoveredOptions
 		if (content instanceof UILabel)
@@ -383,23 +383,26 @@ public class UIButton extends UIComponent<UIButton>
 		}
 	}
 
-	private class ContentPosition extends AlignedPosition
+	private class ContentPosition implements IPosition
 	{
-		public ContentPosition(UIComponent<?> owner)
+		private IPosition pos = Position.centered().middleAligned();
+
+		@Override
+		public void setOwner(UIComponent<?> component)
 		{
-			super(owner, Anchor.CENTER | Anchor.MIDDLE, 1, 1);
+			pos.setOwner(component);
 		}
 
 		@Override
 		public int x()
 		{
-			return super.x() + (isPressed ? 1 : 0);
+			return pos.x() + offsetX + (isPressed ? 1 : 0);
 		}
 
 		@Override
 		public int y()
 		{
-			return super.y() + (isPressed ? 1 : 0);
+			return pos.y() + offsetY + (isPressed ? 1 : 0);
 		}
 	}
 

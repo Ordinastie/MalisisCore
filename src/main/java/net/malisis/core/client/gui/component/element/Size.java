@@ -119,6 +119,8 @@ public interface Size
 				if (c instanceof IPadded) //assume size without padding if available
 					p = ((IPadded) c).getPadding().vertical();
 			}
+			if (c == null)
+				return 0;
 			return (int) ((c.size().height() - p) * relativeHeight);
 		}
 	}
