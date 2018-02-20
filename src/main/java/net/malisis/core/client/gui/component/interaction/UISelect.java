@@ -162,6 +162,12 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		this(gui, width, null);
 	}
 
+	@Override
+	public void onAddedToScreen()
+	{
+		getGui().addToScreen(optionsContainer);
+	}
+
 	//#region Getters/Setters
 	@Override
 	public void setSize(ISize size)
@@ -651,7 +657,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		public OptionsContainer(MalisisGui gui)
 		{
 			super(gui);
-			gui.addToScreen(this);
 			//TODO: place it above if room below is too small
 			setPosition(new OptionContainerPosition());
 			setSize(new OptionContainerSize());
