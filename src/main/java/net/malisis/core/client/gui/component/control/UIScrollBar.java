@@ -438,10 +438,6 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	private class ScrollbarPosition implements IPosition
 	{
 		@Override
-		public void setOwner(UIComponent<?> component)
-		{}
-
-		@Override
 		public int x()
 		{
 			if (isHorizontal())

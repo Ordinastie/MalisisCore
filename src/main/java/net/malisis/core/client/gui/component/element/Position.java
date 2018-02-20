@@ -41,7 +41,8 @@ public class Position
 {
 	public interface IPosition
 	{
-		public void setOwner(UIComponent<?> component);
+		public default void setOwner(UIComponent<?> component)
+		{}
 
 		public int x();
 

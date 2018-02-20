@@ -980,10 +980,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public class OptionContainerPosition implements IPosition
 	{
 		@Override
-		public void setOwner(UIComponent<?> component)
-		{}
-
-		@Override
 		public int x()
 		{
 			return UISelect.this.screenX();
