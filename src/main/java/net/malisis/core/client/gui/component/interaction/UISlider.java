@@ -35,6 +35,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
@@ -84,7 +85,7 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 		this.converter = checkNotNull(converter);
 		this.value = converter.convert(0F);
 
-		setSize(width, 20);
+		setSize(Size.of(width, 20));
 
 		shape = new XYResizableGuiShape();
 		sliderShape = new XYResizableGuiShape(3);
@@ -195,7 +196,7 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 	 */
 	public void slideTo(int x)
 	{
-		int l = getWidth() - SLIDER_WIDTH;
+		int l = size().width() - SLIDER_WIDTH;
 		int pos = relativeX(x);
 		pos = MathHelper.clamp(pos - SLIDER_WIDTH / 2, 0, l);
 		slideTo((float) pos / l);
@@ -225,10 +226,10 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		zIndex = 0;
-		float factor = getHeight() / 20F;
-		int ox = (int) (offset * (getWidth() - SLIDER_WIDTH * factor));
+		float factor = size().height() / 20F;
+		int ox = (int) (offset * (size().width() - SLIDER_WIDTH * factor));
 		sliderShape.resetState();
-		sliderShape.setSize((int) (8 * factor), getHeight());
+		sliderShape.setSize((int) (8 * factor), size().height());
 		sliderShape.setPosition(ox, 0);
 
 		rp.iconProvider.set(sliderIcon);
@@ -242,8 +243,8 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 			String str = Silenced.get(() -> String.format(text, value));
 			if (str == null)
 				str = ChatFormatting.ITALIC + "Format error";
-			int x = (int) ((getWidth() - font.getStringWidth(str, fontOptions)) / 2);
-			int y = (int) Math.ceil((getHeight() - font.getStringHeight(fontOptions)) / 2);
+			int x = (int) ((size().width() - font.getStringWidth(str, fontOptions)) / 2);
+			int y = (int) Math.ceil((size().height() - font.getStringHeight(fontOptions)) / 2);
 
 			renderer.drawText(font, str, x, y, 0, isHovered() ? hoveredFontOptions : fontOptions);
 		}

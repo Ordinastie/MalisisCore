@@ -24,9 +24,12 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
+import javax.annotation.Nonnull;
+
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
@@ -39,6 +42,7 @@ public class UISeparator extends UIComponent<UISeparator>
 	/** Color multiplier. */
 	protected int color = -1;
 	protected boolean vertical;
+	private SeparatorSize separatorSize = new SeparatorSize();
 
 	public UISeparator(MalisisGui gui, boolean vertical)
 	{
@@ -47,8 +51,6 @@ public class UISeparator extends UIComponent<UISeparator>
 
 		shape = new XYResizableGuiShape(1);
 		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 15, 15, 15, 3));
-
-		setSize(0, 0);
 	}
 
 	public UISeparator(MalisisGui gui)
@@ -57,9 +59,10 @@ public class UISeparator extends UIComponent<UISeparator>
 	}
 
 	@Override
-	public UISeparator setSize(int width, int height)
+	@Nonnull
+	public Size size()
 	{
-		return super.setSize(vertical ? 1 : width, vertical ? height : 1);
+		return separatorSize;
 	}
 
 	/**
@@ -95,4 +98,20 @@ public class UISeparator extends UIComponent<UISeparator>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{}
+
+	private class SeparatorSize implements Size
+	{
+		@Override
+		public int width()
+		{
+			return vertical ? size.width() : 1;
+		}
+
+		@Override
+		public int height()
+		{
+			return vertical ? 1 : size.height();
+		}
+	}
+
 }

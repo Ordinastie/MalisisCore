@@ -43,6 +43,7 @@ import net.malisis.core.client.gui.component.IKeyListener;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.client.gui.component.container.UIContainer;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
@@ -241,7 +242,7 @@ public abstract class MalisisGui extends GuiScreen
 		width = renderer.isIgnoreScale() ? displayWidth : resolution.getScaledWidth();
 		height = renderer.isIgnoreScale() ? displayHeight : resolution.getScaledHeight();
 
-		screen.setSize(width, height);
+		screen.setSize(Size.of(width, height));
 	}
 
 	/**

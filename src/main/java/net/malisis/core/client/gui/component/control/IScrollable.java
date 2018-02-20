@@ -24,8 +24,8 @@
 
 package net.malisis.core.client.gui.component.control;
 
-import net.malisis.core.client.gui.Padding.IPadding;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.element.Padding.IPadded;
 
 /**
  * This interface allows scrollbars to be added to the {@link UIComponent} implementer.
@@ -33,7 +33,7 @@ import net.malisis.core.client.gui.component.UIComponent;
  * @author Ordinastie
  *
  */
-public interface IScrollable extends IPadding
+public interface IScrollable extends IPadded
 {
 	/**
 	 * Gets the width of the scrollable content. It should count the total content size to be displayed when not clipped.

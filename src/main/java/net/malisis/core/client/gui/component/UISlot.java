@@ -33,8 +33,9 @@ import com.google.common.eventbus.Subscribe;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
-import net.malisis.core.client.gui.render.BackgroundTexture.BoxBackground;
+import net.malisis.core.client.gui.render.TexturedBackground.BoxBackground;
 import net.malisis.core.inventory.InventoryEvent;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
@@ -74,7 +75,7 @@ public class UISlot extends UIComponent<UISlot>
 	{
 		super(gui);
 		this.slot = slot;
-		setSize(18, 18);
+		setSize(Size.of(18, 18));
 		setBackground(new BoxBackground(gui));
 
 		slot.register(this);

@@ -31,9 +31,9 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.renderer.animation.Animation;
-import net.malisis.core.renderer.animation.transformation.AlphaTransform;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
@@ -59,13 +59,12 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 	public UITooltip(MalisisGui gui)
 	{
 		super(gui);
-		setSize(16, 16);
 		zIndex = 300;
 
 		shape = new XYResizableGuiShape();
 		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(227, 31, 15, 15, 5));
 
-		animation = new Animation<>(this, new AlphaTransform(0, 255).forTicks(2));
+		//animation = new Animation<>(this, new AlphaTransform(0, 255).forTicks(2));
 	}
 
 	public UITooltip(MalisisGui gui, String text)
@@ -156,11 +155,8 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 
 	protected void calculateSize()
 	{
-
-		width = Math.max(16, (int) font.getMaxStringWidth(lines, fontOptions));
-		width += padding * 2;
-		height = (int) (lines.size() > 1 ? font.getStringHeight(fontOptions) * lines.size() : 8);
-		height += padding * 2;
+		setSize(Size.of((int) font.getMaxStringWidth(lines, fontOptions) + padding * 2,
+						(int) (lines.size() > 1 ? font.getStringHeight(fontOptions) * lines.size() : 8) + padding * 2));
 	}
 
 	public void animate()
@@ -169,7 +165,7 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 			return;
 
 		setAlpha(0);
-		getGui().animate(animation, delay);
+		//getGui().animate(animation, delay);
 	}
 
 	@Override
@@ -194,5 +190,4 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 			i++;
 		}
 	}
-
 }

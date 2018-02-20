@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component;
 
 import net.malisis.core.client.gui.ClipArea;
+import net.malisis.core.client.gui.component.element.Size;
 
 /**
  * ICipable indicates an object (usually {@link UIComponent}) that they need to provide a ClipArea.<br>
@@ -71,18 +72,11 @@ public interface IClipable
 	public int screenY();
 
 	/**
-	 * Gets the with of this {@link IClipable}. See {@link UIComponent#getWidth()}.
+	 * Gets the size of the {@link IClipable}.
 	 *
-	 * @return the width
+	 * @return the size
 	 */
-	public int getWidth();
-
-	/**
-	 * Gets the with of this {@link IClipable}. See {@link UIComponent#getHeight()}.
-	 *
-	 * @return the height
-	 */
-	public int getHeight();
+	public Size size();
 
 	/**
 	 * Gets the parent {@link UIComponent} of this {@link IClipable}.

@@ -24,18 +24,18 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.minecraft.client.renderer.OpenGlHelper;
 
@@ -44,14 +44,10 @@ import net.minecraft.client.renderer.OpenGlHelper;
  *
  * @author PaleoCrafter
  */
-public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICheckBox>
+public class UICheckBox extends UIComponent<UICheckBox>
 {
-	/** The {@link MalisisFont} to use for this {@link UICheckBox}. */
-	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontOptions} to use for this {@link UICheckBox}. */
-	protected FontOptions fontOptions = FontOptions.builder().color(0x444444).build();
-	/** Text to draw beside the checkbox. **/
-	private String text;
+	/** {@link UILabel} to draw besides the checkbox. **/
+	private UILabel label;
 	/** Whether this {@link UICheckBox} is checked. */
 	private boolean checked;
 
@@ -78,34 +74,6 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	}
 
 	//#region Getters/Setters
-	@Override
-	public MalisisFont getFont()
-	{
-		return font;
-	}
-
-	@Override
-	public UICheckBox setFont(MalisisFont font)
-	{
-		this.font = font;
-		calculateSize();
-		return this;
-	}
-
-	@Override
-	public FontOptions getFontOptions()
-	{
-		return fontOptions;
-	}
-
-	@Override
-	public UICheckBox setFontOptions(FontOptions options)
-	{
-		this.fontOptions = options;
-		calculateSize();
-		return this;
-	}
-
 	/**
 	 * Sets the text for this {@link UICheckBox}.
 	 *
@@ -113,32 +81,27 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	 */
 	public UICheckBox setText(String text)
 	{
-		this.text = text;
-		calculateSize();
+		if (Strings.isEmpty(text))
+			setLabel(null);
+		setLabel(new UILabel(getGui(), text));
 		return this;
 	}
 
 	/**
-	 * Gets the text for this {@link UICheckBox}.
+	 * Sets the {@link UILabel} for this {@link UICheckBox}.
 	 *
-	 * @return the text
+	 * @param label the label
+	 * @return the UI check box
 	 */
-	public String getText()
+	public UICheckBox setLabel(UILabel label)
 	{
-		return text;
+		this.label = label;
+		if (label != null)
+			label.setPosition(Position.of(14, 2));
+		return this;
 	}
 
 	//#end Getters/Setters
-
-	/**
-	 * Calculates the size for this {@link UICheckBox}.
-	 */
-	private void calculateSize()
-	{
-		int w = StringUtils.isEmpty(text) ? 0 : (int) font.getStringWidth(text, fontOptions);
-		setSize(w + 11, 10);
-	}
-
 	/**
 	 * Checks if this {@link UICheckBox} is checked.
 	 *
@@ -218,14 +181,14 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 			GL11.glEnable(GL11.GL_ALPHA_TEST);
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
-
-		if (!StringUtils.isEmpty(text))
-			renderer.drawText(font, text, 14, 2, 0, fontOptions);
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		if (label != null)
+			label.draw(renderer, mouseX, mouseY, partialTick);
+
 		if (checked)
 		{
 			if (isHovered() && isEnabled())
@@ -244,7 +207,22 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IGuiText<UICh
 	@Override
 	public String getPropertyString()
 	{
-		return "text=" + text + " | checked=" + this.checked + " | " + super.getPropertyString();
+		return "text=" + label.getText() + " | checked=" + this.checked + " | " + super.getPropertyString();
+	}
+
+	public class CheckBoxSize implements Size
+	{
+		@Override
+		public int width()
+		{
+			return 11 + (label != null ? label.size().width() : 0);
+		}
+
+		@Override
+		public int height()
+		{
+			return 10;
+		}
 	}
 
 	/**

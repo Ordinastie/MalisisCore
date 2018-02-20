@@ -26,17 +26,17 @@ package net.malisis.core.client.gui.component.interaction;
 
 import org.lwjgl.input.Keyboard;
 
+import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.component.decoration.UILabel;
-import net.malisis.core.client.gui.component.decoration.UITooltip;
+import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Position.AlignedPosition;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.GuiIcon;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
@@ -47,18 +47,18 @@ import net.minecraft.init.SoundEvents;
  *
  * @author Ordinastie, PaleoCrafter
  */
-public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton>
+public class UIButton extends UIComponent<UIButton>
 {
-	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
-	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontOptions} to use for this {@link UITooltip}. */
-	protected FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
-	/** The {@link FontOptions} to use for this {@link UITooltip} when hovered. */
+	private final Size AUTO_SIZE = new AutoSize();
+
+	/** The {@link FontOptions} to use by default for the {@link UILabel} content. */
+	protected FontOptions defaultFontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
+	/** The base {@link FontOptions} of the {@link UILabel} content. */
+	protected FontOptions fontOptions = FontOptions.builder().color(0xFFFFA0).shadow().build();
+	/** The {@link FontOptions} to use for the {@link UILabel} content when hovered. */
 	protected FontOptions hoveredFontOptions = FontOptions.builder().color(0xFFFFA0).shadow().build();
-	/** Text used for this {@link UIButton}. Exclusive with {@link #image}. */
-	protected String text;
-	/** Image used for this {@link UIButton}. Exclusive with {@link #text}. */
-	protected UIImage image;
+	/** Content used for this {@link UIButton}. */
+	protected UIComponent<?> content;
 	/** Whether the size of this {@link UIButton} is automatically calculated based on its contents. */
 	protected boolean autoSize = true;
 	/** Whether this {@link UIButton} is currently being pressed. */
@@ -71,6 +71,7 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 
 	protected GuiIconProvider iconPressedProvider;
 
+	/** Action to execute when the button is clicked. */
 	protected Runnable action;
 
 	/**
@@ -82,6 +83,7 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	{
 		super(gui);
 
+		setSize(AUTO_SIZE);
 		shape = new XYResizableGuiShape();
 		iconProvider = new GuiIconProvider(	gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5),
 											gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5),
@@ -91,7 +93,7 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	}
 
 	/**
-	 * Instantiates a new {@link UIButton}.
+	 * Instantiates a new {@link UIButton} with specified label.
 	 *
 	 * @param gui the gui
 	 * @param text the text
@@ -103,48 +105,21 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	}
 
 	/**
-	 * Instantiates a new {@link UIButton}.
+	 * Instantiates a new {@link UIButton} with specified content.
 	 *
 	 * @param gui the gui
-	 * @param image the image
+	 * @param content the content
 	 */
-	public UIButton(MalisisGui gui, UIImage image)
+	public UIButton(MalisisGui gui, UIComponent<?> content)
 	{
 		this(gui);
-		setImage(image);
+		setContent(content);
 	}
 
 	//#region Getters/Setters
-	@Override
-	public MalisisFont getFont()
-	{
-		return font;
-	}
-
-	@Override
-	public UIButton setFont(MalisisFont font)
-	{
-		this.font = font;
-		setSize(width, height);
-		return this;
-	}
-
-	@Override
-	public FontOptions getFontOptions()
-	{
-		return fontOptions;
-	}
-
-	@Override
-	public UIButton setFontOptions(FontOptions options)
-	{
-		this.fontOptions = options;
-		setSize(width, height);
-		return this;
-	}
-
 	/**
-	 * Gets the {@link FontOptions} used for this {@link UILabel} when hovered.
+	 * Gets the {@link FontOptions} used when this {@link UIButton} is hovered.<br>
+	 * Only used if the content is a {@link UILabel}.
 	 *
 	 * @return the hovered font options
 	 */
@@ -154,7 +129,8 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	}
 
 	/**
-	 * Sets the {@link FontOptions} used for this {@link UILabel} when hovered.
+	 * Sets the {@link FontOptions} used when this {@link UIButton} is hovered.<br>
+	 * Only used if the content is a {@link UILabel}.
 	 *
 	 * @param hoveredOptions the hovered options to set
 	 * @return this {@link UIButton}
@@ -166,119 +142,67 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	}
 
 	/**
-	 * Gets the text of this {@link UIButton}.
-	 *
-	 * @return the text of this {@link UIButton}.
-	 */
-	public String getText()
-	{
-		return text;
-	}
-
-	/**
-	 * Sets the text of this {@link UIButton}.
+	 * Sets the text of this {@link UIButton}.<br>
+	 * Create a label for this button.
 	 *
 	 * @param text the text
 	 * @return this {@link UIButton}
 	 */
 	public UIButton setText(String text)
 	{
-		this.text = text;
-		setSize(width, height);
-		image = null;
+		UILabel label = new UILabel(getGui(), text);
+		label.setFontOptions(defaultFontOptions);
+		setContent(label);
 		return this;
 	}
 
 	/**
-	 * Gets the {@link UIImage} of this {@link UIButton}.
+	 * Gets the {@link UIComponent} used as content for this {@link UIButton}.
 	 *
-	 * @return the image
+	 * @return the content component
 	 */
-	public UIImage getImage()
+	public UIComponent<?> getContent()
 	{
-		return this.image;
+		return content;
 	}
 
 	/**
 	 * Sets the {@link UIImage} for this {@link UIButton}. If a width of 0 was previously set, it will be recalculated for this image.
 	 *
-	 * @param image the image
+	 * @param content the content
 	 * @return this {@link UIButton}
 	 */
-	public UIButton setImage(UIImage image)
+	public UIButton setContent(UIComponent<?> content)
 	{
-		this.image = image;
-		image.setParent(this);
-		setSize(width, height);
-		text = null;
-		return this;
-	}
+		this.content = content;
+		content.setParent(this);
+		content.setPosition(new ContentPosition(content));
 
-	/**
-	 * Sets the width of this {@link UIButton} with a default height of 20px.
-	 *
-	 * @param width the width
-	 * @return this {@link UIButton}
-	 */
-	public UIButton setSize(int width)
-	{
-		return setSize(width, 20);
-	}
-
-	/**
-	 * Sets the size of this {@link UIButton}.
-	 *
-	 * @param width the width
-	 * @param height the height
-	 * @return this {@link UIButton}
-	 */
-	@Override
-	public UIButton setSize(int width, int height)
-	{
-		if (autoSize)
-		{
-			if (image != null)
-			{
-				int w = image.getRawWidth();
-				int h = image.getRawHeight();
-				width = Math.max(width, w + 2);
-				height = Math.max(height, h + 2);
-			}
-			else
-			{
-				int w = (int) font.getStringWidth(text, fontOptions);
-				int h = (int) font.getStringHeight(fontOptions);
-				width = Math.max(width, w + 6);
-				height = Math.max(height, h + 6);
-			}
-		}
-
-		this.width = width;
-		this.height = height;
-
+		//store the fontOptions, to be able to revert back from hoveredOptions
+		if (content instanceof UILabel)
+			fontOptions = ((UILabel) content).getFontOptions();
 		return this;
 	}
 
 	/**
 	 * Checks if is width is automatically calculated.<br>
-	 * If true, this {@link UIButton} cannot be smaller that its contents.
+	 * If true, the size of this {@link UIButton} will match it's contents
 	 *
 	 * @return the autoWidth
 	 */
 	public boolean isAutoSize()
 	{
-		return autoSize;
+		return size() == AUTO_SIZE;
 	}
 
 	/**
 	 * Sets whether the size of this {@link UIButton} should be calculated automatically.
 	 *
-	 * @param autoSize the autoSize to set
+	 * @return the UI button
 	 */
-	public UIButton setAutoSize(boolean autoSize)
+	public UIButton setAutoSize()
 	{
-		this.autoSize = autoSize;
-		setSize(width, height);
+		setSize(AUTO_SIZE);
 		return this;
 	}
 
@@ -401,51 +325,19 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int w = 0;
-		int h = 0;
-		if (image != null)
-		{
-			w = image.getWidth();
-			h = image.getHeight();
-		}
-		else
-		{
-			w = (int) font.getStringWidth(text, fontOptions);
-			h = (int) font.getStringHeight(fontOptions);
-		}
+		if (content == null)
+			return;
 
-		int x = (getWidth() - w) / 2;
-		int y = (getHeight() - h) / 2;
-		if (x == 0)
-			x = 1;
-		if (y == 0)
-			y = 1;
-		if (isPressed && isHovered())
-		{
-			x += 1;
-			y += 1;
-		}
+		if (content instanceof UILabel)
+			((UILabel) content).setFontOptions(isHovered() ? hoveredFontOptions : fontOptions);
 
-		x += offsetX;
-		y += offsetY;
-
-		if (image != null)
-		{
-			image.setPosition(x, y);
-			image.setZIndex(zIndex);
-			image.draw(renderer, mouseX, mouseY, partialTick);
-		}
-		else
-		{
-			renderer.drawText(font, text, x, y, 0, isHovered() ? hoveredFontOptions : fontOptions);
-		}
-
+		content.draw(renderer, mouseX, mouseY, partialTick);
 	}
 
 	@Override
 	public String getPropertyString()
 	{
-		return (image != null ? "{" + image + "}" : text) + " | " + super.getPropertyString();
+		return content + " | " + super.getPropertyString();
 	}
 
 	/**
@@ -489,7 +381,41 @@ public class UIButton extends UIComponent<UIButton> implements IGuiText<UIButton
 		{
 			return y;
 		}
+	}
 
+	private class ContentPosition extends AlignedPosition
+	{
+		public ContentPosition(UIComponent<?> owner)
+		{
+			super(owner, Anchor.CENTER | Anchor.MIDDLE, 1, 1);
+		}
+
+		@Override
+		public int x()
+		{
+			return super.x() + (isPressed ? 1 : 0);
+		}
+
+		@Override
+		public int y()
+		{
+			return super.y() + (isPressed ? 1 : 0);
+		}
+	}
+
+	private class AutoSize implements Size
+	{
+		@Override
+		public int width()
+		{
+			return content.size().width() + (content instanceof UILabel ? 6 : 2);
+		}
+
+		@Override
+		public int height()
+		{
+			return content.size().height() + (content instanceof UILabel ? 6 : 2);
+		}
 	}
 
 }

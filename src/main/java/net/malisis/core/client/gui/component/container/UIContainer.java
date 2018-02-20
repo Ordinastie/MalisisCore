@@ -31,21 +31,19 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.eventbus.Subscribe;
 
-import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.ICloseable;
-import net.malisis.core.client.gui.component.control.IControlComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.component.element.Padding;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
-import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.minecraft.client.gui.GuiScreen;
 
 /**
@@ -57,8 +55,7 @@ import net.minecraft.client.gui.GuiScreen;
  * @author Ordinastie, PaleoCrafter
  * @param <T> type of UIContainer
  */
-public class UIContainer<T extends UIContainer<T>> extends UIComponent<T>
-		implements IClipable, IScrollable, ICloseable, ITransformable.Color
+public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implements IClipable, IScrollable, ICloseable
 {
 	/** List of {@link UIComponent} inside this {@link UIContainer}. */
 	protected final Set<UIComponent<?>> components;
@@ -109,13 +106,12 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T>
 	 * Instantiates a new {@link UIContainer}.
 	 *
 	 * @param gui the gui
-	 * @param width the width
-	 * @param height the height
+	 * @param size the size
 	 */
-	public UIContainer(MalisisGui gui, int width, int height)
+	public UIContainer(MalisisGui gui, Size size)
 	{
 		this(gui);
-		setSize(width, height);
+		setSize(size);
 	}
 
 	/**
@@ -123,14 +119,13 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T>
 	 *
 	 * @param gui the gui
 	 * @param title the title
-	 * @param width the width
-	 * @param height the height
+	 * @param size the size
 	 */
-	public UIContainer(MalisisGui gui, String title, int width, int height)
+	public UIContainer(MalisisGui gui, String title, Size size)
 	{
 		this(gui);
 		setTitle(title);
-		setSize(width, height);
+		setSize(size);
 	}
 
 	// #region getters/setters
@@ -234,50 +229,6 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T>
 	}
 
 	// #end getters/setters
-
-	/**
-	 * Gets the relative position of the specified {@link UIComponent} inside this {@link UIContainer}.
-	 *
-	 * @param component the component
-	 * @return the coordinate
-	 */
-	@Override
-	public int componentX(UIComponent<?> component)
-	{
-		int x = super.componentX(component);
-		int a = Anchor.horizontal(component.getAnchor());
-		if (a == Anchor.LEFT || a == Anchor.NONE)
-			x += getPadding().left();
-		else if (a == Anchor.RIGHT)
-			x -= getPadding().right();
-
-		if (!(component instanceof IControlComponent))
-			x -= xOffset;
-
-		return x;
-	}
-
-	/**
-	 * Gets the relative position of the specified {@link UIComponent} inside this {@link UIContainer}.
-	 *
-	 * @param component the component
-	 * @return the coordinate
-	 */
-	@Override
-	public int componentY(UIComponent<?> component)
-	{
-		int y = super.componentY(component);
-		int a = Anchor.vertical(component.getAnchor());
-		if (a == Anchor.TOP || a == Anchor.NONE)
-			y += getPadding().top();
-		else if (a == Anchor.BOTTOM)
-			y -= getPadding().bottom();
-
-		if (!(component instanceof IControlComponent))
-			y -= yOffset;
-		return y;
-	}
-
 	/**
 	 * Gets the {@link UIComponent} matching the specified name.
 	 *
@@ -390,8 +341,8 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T>
 		{
 			if (c.isVisible())
 			{
-				contentWidth = Math.max(contentWidth, c.parentX() + c.getWidth() + xOffset);
-				contentHeight = Math.max(contentHeight, c.parentY() + c.getHeight() + yOffset);
+				contentWidth = Math.max(contentWidth, c.position().x() + c.size().width());
+				contentHeight = Math.max(contentHeight, c.position().y() + c.size().height());
 			}
 		}
 
@@ -451,29 +402,29 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T>
 	@Override
 	public float getOffsetX()
 	{
-		if (getContentWidth() < getWidth())
+		if (getContentWidth() < size().width())
 			return 0;
-		return (float) xOffset / (getContentWidth() - getWidth());
+		return (float) xOffset / (getContentWidth() - size().width());
 	}
 
 	@Override
 	public void setOffsetX(float offsetX, int delta)
 	{
-		this.xOffset = Math.round((getContentWidth() - getWidth() + delta) * offsetX);
+		this.xOffset = Math.round((getContentWidth() - size().width() + delta) * offsetX);
 	}
 
 	@Override
 	public float getOffsetY()
 	{
-		if (getContentHeight() < getHeight())
+		if (getContentHeight() < size().height())
 			return 0;
-		return (float) yOffset / (getContentHeight() - getHeight());
+		return (float) yOffset / (getContentHeight() - size().height());
 	}
 
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
-		this.yOffset = Math.round((getContentHeight() - getHeight() + delta) * offsetY);
+		this.yOffset = Math.round((getContentHeight() - size().height() + delta) * offsetY);
 	}
 
 	@Override

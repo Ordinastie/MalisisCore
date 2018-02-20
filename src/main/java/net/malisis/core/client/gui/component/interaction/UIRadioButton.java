@@ -28,35 +28,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.lwjgl.opengl.GL11;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.renderer.RenderParameters;
-import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
  * @author Ordinastie
  *
  */
-public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiText<UIRadioButton>
+public class UIRadioButton extends UIComponent<UIRadioButton>
 {
 	private static HashMap<String, List<UIRadioButton>> radioButtons = new HashMap<>();
 
-	/** The {@link MalisisFont} to use for this {@link UIRadioButton}. */
-	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontOptions} to use for this {@link UIRadioButton}. */
-	protected FontOptions fontOptions = FontOptions.builder().color(0x444444).build();
-
 	private String name;
-	private String text;
+	private UILabel label;
 	private boolean selected;
 
 	private GuiIconProvider rbIconProvider;
@@ -70,8 +65,9 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 		shape = new SimpleGuiShape();
 
 		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(200, 54, 8, 8), null, gui.getGuiTexture().getIcon(200, 62, 8, 8));
-		rbIconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(214, 54, 6, 6), gui.getGuiTexture().getIcon(220, 54, 6, 6),
-				gui.getGuiTexture().getIcon(208, 54, 6, 6));
+		rbIconProvider = new GuiIconProvider(	gui.getGuiTexture().getIcon(214, 54, 6, 6),
+												gui.getGuiTexture().getIcon(220, 54, 6, 6),
+												gui.getGuiTexture().getIcon(208, 54, 6, 6));
 
 		addRadioButton(this);
 	}
@@ -82,54 +78,31 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 	}
 
 	//#region Getters/Setters
-	@Override
-	public MalisisFont getFont()
-	{
-		return font;
-	}
-
-	@Override
-	public UIRadioButton setFont(MalisisFont font)
-	{
-		this.font = font != null ? font : MalisisFont.minecraftFont;
-		calculateSize();
-		return this;
-	}
-
-	@Override
-	public FontOptions getFontOptions()
-	{
-		return fontOptions;
-	}
-
-	@Override
-	public UIRadioButton setFontOptions(FontOptions options)
-	{
-		this.fontOptions = options;
-		calculateSize();
-		return this;
-	}
-
 	/**
-	 * Sets the text for this {@link UIRadioButton}.
+	 * Sets the text for this {@link UICheckBox}.
 	 *
 	 * @param text the new text
 	 */
 	public UIRadioButton setText(String text)
 	{
-		this.text = text;
-		calculateSize();
+		if (Strings.isEmpty(text))
+			setLabel(null);
+		setLabel(new UILabel(getGui(), text));
 		return this;
 	}
 
 	/**
-	 * Gets the text for this {@link UICheckBox}.
+	 * Sets the {@link UILabel} for this {@link UIRadioButton}.
 	 *
-	 * @return the text
+	 * @param label the label
+	 * @return the UI radio button
 	 */
-	public String getText()
+	public UIRadioButton setLabel(UILabel label)
 	{
-		return text;
+		this.label = label;
+		if (label != null)
+			label.setPosition(Position.of(14, 2));
+		return this;
 	}
 
 	/**
@@ -159,14 +132,6 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 	}
 
 	//#end Getters/Setters
-	/**
-	 * Calculates the size for this {@link UIRadioButton}.
-	 */
-	private void calculateSize()
-	{
-		int w = StringUtils.isEmpty(text) ? 0 : (int) font.getStringWidth(text, fontOptions);
-		setSize(w + 11, 10);
-	}
 
 	@Override
 	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
@@ -202,14 +167,14 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
 
-		if (text != null)
-			renderer.drawText(font, text, 12, 0, 0, fontOptions);
-
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
+		if (label != null)
+			label.draw(renderer, mouseX, mouseY, partialTick);
+
 		if (selected)
 		{
 			GL11.glEnable(GL11.GL_BLEND);
@@ -253,6 +218,21 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IGuiTex
 	public static UIRadioButton getSelected(UIRadioButton rb)
 	{
 		return getSelected(rb.name);
+	}
+
+	public class RadioButtonSize implements Size
+	{
+		@Override
+		public int width()
+		{
+			return 11 + (label != null ? label.size().width() : 0);
+		}
+
+		@Override
+		public int height()
+		{
+			return 10;
+		}
 	}
 
 	/**

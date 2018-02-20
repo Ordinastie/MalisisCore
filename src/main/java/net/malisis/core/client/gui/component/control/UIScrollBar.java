@@ -32,11 +32,11 @@ import org.lwjgl.input.Keyboard;
 
 import com.google.common.eventbus.Subscribe;
 
-import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
@@ -87,7 +87,8 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		parent.register(this);
 
 		addScrollbar(parent, this);
-		setPosition();
+		setPosition(new ScrollbarPosition());
+		setSize(new ScrollbarSize());
 		updateScrollbar();
 
 		createShape(gui);
@@ -104,19 +105,6 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		scrollThickness = thickness;
 		scrollHeight = height;
 		createShape(getGui());
-	}
-
-	/**
-	 * Sets the scrollbar position.<br>
-	 * The position is relative its parent component.
-	 */
-	protected void setPosition()
-	{
-		Padding p = getScrollable().getPadding();
-		if (type == Type.HORIZONTAL)
-			setPosition(p.left() + offsetX, -p.bottom() + offsetY, Anchor.BOTTOM);
-		else
-			setPosition(-p.right() + offsetX, p.top() + offsetY, Anchor.RIGHT);
 	}
 
 	/**
@@ -204,32 +192,6 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		return getParent() != null ? getParent().getZIndex() + 5 : 0;
 	}
 
-	@Override
-	public int getWidth()
-	{
-		if (!isHorizontal())
-			return scrollThickness;
-
-		int w = parent.getWidth();
-		w -= getScrollable().getPadding().horizontal();
-		if (hasVisibleOtherScrollbar())
-			w -= scrollThickness;
-		return w;
-	}
-
-	@Override
-	public int getHeight()
-	{
-		if (isHorizontal())
-			return scrollThickness;
-
-		int h = getParent().getHeight();
-		h -= getScrollable().getPadding().vertical();
-		if (hasVisibleOtherScrollbar())
-			h -= scrollThickness;
-		return h;
-	}
-
 	/**
 	 * Gets the length of this {@link UIScrollBar} (width if {@link Type#HORIZONTAL}, height if {@link Type#VERTICAL}.
 	 *
@@ -237,7 +199,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 */
 	public int getLength()
 	{
-		return isHorizontal() ? getWidth() : getHeight();
+		return isHorizontal() ? size().width() : size().height();
 	}
 
 	/**
@@ -261,7 +223,6 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	{
 		this.offsetX = x;
 		this.offsetY = y;
-		setPosition();
 		return this;
 	}
 
@@ -301,7 +262,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	 */
 	public void updateScrollbar()
 	{
-		UIComponent<?> component = getParent();
+		UIComponent<?> parent = getParent();
 		IScrollable scrollable = getScrollable();
 		int delta = hasVisibleOtherScrollbar() ? scrollThickness : 0;
 		boolean hide = false;
@@ -309,14 +270,14 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		if (isHorizontal())
 		{
 			offset = scrollable.getOffsetX();
-			if (scrollable.getContentWidth() <= component.getWidth() - delta)
+			if (scrollable.getContentWidth() <= parent.size().width() - delta)
 				hide = true;
 
 		}
 		else
 		{
 			offset = scrollable.getOffsetY();
-			if (scrollable.getContentHeight() <= component.getHeight() - delta)
+			if (scrollable.getContentHeight() <= parent.size().height() - delta)
 				hide = true;
 		}
 
@@ -472,6 +433,57 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		}
 
 		bars.put(scrollbar.type, scrollbar);
+	}
+
+	private class ScrollbarPosition implements Position
+	{
+		@Override
+		public int x()
+		{
+			if (isHorizontal())
+				return getScrollable().getPadding().left() + offsetX;
+			else
+				return getParent().size().width() - size().width() + offsetX;
+		}
+
+		@Override
+		public int y()
+		{
+			if (isHorizontal())
+				return getParent().size().height() - size().height() + offsetY;
+			else
+				return getScrollable().getPadding().right() + offsetY;
+		}
+	}
+
+	private class ScrollbarSize implements Size
+	{
+		@Override
+		public int width()
+		{
+			if (!isHorizontal())
+				return scrollThickness;
+
+			int w = getParent().size().width();
+			w -= getScrollable().getPadding().horizontal();
+			if (hasVisibleOtherScrollbar())
+				w -= scrollThickness;
+			return w;
+		}
+
+		@Override
+		public int height()
+		{
+			if (isHorizontal())
+				return scrollThickness;
+
+			int h = getParent().size().height();
+			h -= getScrollable().getPadding().vertical();
+			if (hasVisibleOtherScrollbar())
+				h -= scrollThickness;
+			return h;
+
+		}
 	}
 
 }

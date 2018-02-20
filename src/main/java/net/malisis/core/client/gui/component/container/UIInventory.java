@@ -26,24 +26,24 @@ package net.malisis.core.client.gui.component.container;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UISlot;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisSlot;
 
 public class UIInventory extends UIContainer<UIInventory>
 {
-	@SuppressWarnings("unused")
 	private MalisisInventory inventory;
 	private int numCols;
 	private boolean hasTitle;
 
 	public UIInventory(MalisisGui gui, String title, MalisisInventory inventory, int numCols)
 	{
-		super(gui, title != null ? title : inventory.getName(), 0, 0);
+		super(gui, title != null ? title : inventory.getName());
 		this.hasTitle = title != null || inventory.hasCustomName();
 		this.inventory = inventory;
 		this.numCols = numCols;
-		this.width = Math.min(inventory.getSize() * 18, numCols * 18);
-		this.height = (int) Math.ceil((float) inventory.getSize() / numCols) * 18 + (hasTitle ? 11 : 0);
+		setSize(new InventorySize());
 		for (int i = 0; i < inventory.getSize(); i++)
 			addSlot(gui, inventory.getSlot(i), i);
 	}
@@ -70,8 +70,23 @@ public class UIInventory extends UIContainer<UIInventory>
 
 		int row = number / numCols;
 		int col = number % numCols;
-		uislot.setPosition(col * 18, row * 18 + (hasTitle ? 11 : 0));
+		uislot.setPosition(Position.of(col * 18, row * 18 + (hasTitle ? 11 : 0)));
 
 		add(uislot);
+	}
+
+	public class InventorySize implements Size
+	{
+		@Override
+		public int width()
+		{
+			return Math.min(inventory.getSize() * 18, numCols * 18);
+		}
+
+		@Override
+		public int height()
+		{
+			return (int) Math.ceil((float) inventory.getSize() / numCols) * 18 + (hasTitle ? 11 : 0);
+		}
 	}
 }

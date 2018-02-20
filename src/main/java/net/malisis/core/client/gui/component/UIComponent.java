@@ -27,27 +27,27 @@ package net.malisis.core.client.gui.component;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 
 import com.google.common.eventbus.EventBus;
 
 import net.malisis.core.ExceptionHandler;
-import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.Padding.IPadding;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.control.IControlComponent;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.GuiEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
-import net.malisis.core.client.gui.event.component.SpaceChangeEvent.PositionChangeEvent;
-import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.DisabledStateChange;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.FocusStateChange;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
@@ -69,8 +69,7 @@ import net.minecraft.client.renderer.GlStateManager;
  * @author Ordinastie, PaleoCrafter
  * @param <T> the type of <code>UIComponent</code>
  */
-public abstract class UIComponent<T extends UIComponent<T>>
-		implements ITransformable.Position<T>, ITransformable.Size<T>, ITransformable.Color, ITransformable.Alpha, IKeyListener
+public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListener
 {
 	/** The Constant INHERITED. */
 	public final static int INHERITED = 0;
@@ -82,13 +81,11 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	/** List of {@link UIComponent components} controlling this {@link UIContainer}. */
 	private final Set<IControlComponent> controlComponents;
 	/** Position of this {@link UIComponent}. */
-	protected int x, y;
+	protected Position position = Position.ZERO;
+	/** Size of this {@link UIComponent}. */
+	protected Size size = Size.ZERO;
 	/** Z index of the component. */
 	protected int zIndex = INHERITED;
-	/** Position anchor for this {@link UIComponent}. See {@link Anchor} */
-	protected int anchor = Anchor.NONE;
-	/** Size of this {@link UIComponent}. */
-	protected int width = INHERITED, height = INHERITED;
 	/** Event bus on which event listeners are registered. */
 	private EventBus bus;
 	/** The parent {@link UIComponent} of this <code>UIComponent</code>. */
@@ -165,65 +162,45 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	/**
 	 * Sets the position of this {@link UIComponent}.
 	 *
-	 * @param x the x
-	 * @param y the y
-	 * @return this {@link UIComponent}
+	 * @param position the new position
 	 */
-	@Override
-	public T setPosition(int x, int y)
+	public void setPosition(@Nonnull Position position)
 	{
-		return setPosition(x, y, anchor);
+		//if(fireEvent(this, this.position, position);
+		this.position = position;
 	}
 
 	/**
-	 * Sets the position of this {@link UIComponent} relative to an anchor.
+	 * Gets the position of this {@link UIComponent}.
 	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param anchor the anchor
-	 * @return this {@link UIComponent}
+	 * @return the position
 	 */
-	public T setPosition(int x, int y, int anchor)
+	@Nonnull
+	public Position position()
 	{
-		//backup values
-		int oldX = this.x;
-		int oldY = this.y;
-		int oldAnchor = this.anchor;
-
-		this.x = x;
-		this.y = y;
-		this.anchor = anchor;
-
-		if (!fireEvent(new PositionChangeEvent<>(self(), x, y, anchor)))
-		{
-			//event is cancelled, restore old values
-			this.x = oldX;
-			this.y = oldY;
-			this.anchor = oldAnchor;
-			return self();
-		}
-
-		return self();
+		return position;
 	}
 
 	/**
-	 * Gets the X coordinate of this {@link UIComponent}'s position.
+	 * Sets the size of this {@link UIComponent}.
 	 *
-	 * @return the coordinate
+	 * @param size the new size
 	 */
-	public int getX()
+	public void setSize(@Nonnull Size size)
 	{
-		return x;
+		//if(fireEvent(this, this.size, size)
+		this.size = size;
 	}
 
 	/**
-	 * Gets the Y coordinate of this {@link UIComponent}'s position.
+	 * Gets the size of this {@link UIComponent}.
 	 *
-	 * @return the coordinate
+	 * @return the size
 	 */
-	public int getY()
+	@Nonnull
+	public Size size()
 	{
-		return y;
+		return size;
 	}
 
 	/**
@@ -246,144 +223,6 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	public int getZIndex()
 	{
 		return zIndex == INHERITED ? (parent != null ? parent.getZIndex() : 0) : zIndex;
-	}
-
-	/**
-	 * Sets the anchor for this {@link UIComponent}'s position.
-	 *
-	 * @param anchor the anchor
-	 * @return this {@link UIComponent}
-	 */
-	public T setAnchor(int anchor)
-	{
-		int oldAnchor = this.anchor;
-		this.anchor = anchor;
-
-		if (!fireEvent(new PositionChangeEvent<>(self(), x, y, anchor)))
-		{
-			//event is cancelled, restore old values
-			this.anchor = oldAnchor;
-			return self();
-		}
-		return self();
-	}
-
-	/**
-	 * Gets the anchor.
-	 *
-	 * @return the anchor of this {@link UIComponent}'s position
-	 */
-	public int getAnchor()
-	{
-		return anchor;
-	}
-
-	/**
-	 * Sets the size of this {@link UIComponent}.
-	 *
-	 * @param width the width
-	 * @param height the height
-	 * @return this {@link UIComponent}
-	 */
-	@Override
-	public T setSize(int width, int height)
-	{
-		int oldWidth = this.width;
-		int oldHeight = this.height;
-
-		this.width = width;
-		this.height = height;
-
-		if (!fireEvent(new SizeChangeEvent<>(self(), width, height)))
-		{
-			//event is cancelled, restore old values
-			this.width = oldWidth;
-			this.height = oldHeight;
-			return self();
-		}
-
-		return self();
-	}
-
-	/**
-	 * Gets the raw width of this {@link UIComponent}.
-	 *
-	 * @return the width
-	 */
-	public int getRawWidth()
-	{
-		return width;
-	}
-
-	/**
-	 * Gets the width of this {@link UIComponent}.
-	 *
-	 * @return the width, or 0 for relative width without a parent
-	 */
-	public int getWidth()
-	{
-		if (width > 0)
-			return width;
-
-		if (parent == null)
-			return 0;
-
-		//if width < 0 consider it relative to parent container
-		int w = parent.getWidth() + width;
-		if (parent instanceof IPadding)
-			w -= ((IPadding) parent).getPadding().horizontal();
-
-		return w;
-	}
-
-	/**
-	 * Checks if the width of this {@link UIComponent} is relative to its parent <code>UIComponent</code>.
-	 *
-	 * @return true, if the width is relative
-	 */
-	public boolean isRelativeWidth()
-	{
-		return width <= 0;
-	}
-
-	/**
-	 * Gets the raw height of this {@link UIComponent}.
-	 *
-	 * @return the height
-	 */
-	public int getRawHeight()
-	{
-		return height;
-	}
-
-	/**
-	 * Gets the height of this {@link UIComponent}.
-	 *
-	 * @return the height, or 0 for relative width without a parent
-	 */
-	public int getHeight()
-	{
-		if (height > 0)
-			return height;
-
-		if (parent == null)
-			return 0;
-
-		//if height < 0 consider it relative to parent container
-		int h = parent.getHeight() + height;
-		if (parent instanceof IPadding)
-			h -= ((IPadding) parent).getPadding().vertical();
-		return h;
-	}
-
-	/**
-	 * Checks if the height of this {@link UIComponent} is relative to its parent <code>UIComponent</code>.
-	 *
-	 * @return true, if the height is relative
-	 */
-	public boolean isRelativeHeight()
-	{
-		return height <= 0;
 	}
 
 	/**
@@ -587,7 +426,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 		return self();
 	}
 
-	@Override
+	//@Override
 	public void setColor(int color)
 	{
 		if (backgroundRenderer instanceof ITransformable.Color)
@@ -599,7 +438,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 *
 	 * @param alpha the new alpha
 	 */
-	@Override
+	//@Override
 	public void setAlpha(int alpha)
 	{
 		this.alpha = alpha;
@@ -842,7 +681,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	{
 		if (!isVisible())
 			return false;
-		return x >= screenX() && x <= screenX() + getWidth() && y >= screenY() && y <= screenY() + getHeight();
+		return x >= screenX() && x <= screenX() + size().width() && y >= screenY() && y <= screenY() + size().height();
 	}
 
 	/**
@@ -889,69 +728,13 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	}
 
 	/**
-	 * Gets the X coordinate of a {@link UIComponent} inside this <code>UIComponent</code>.
-	 *
-	 * @param component the component
-	 * @return the coordinate
-	 */
-	public int componentX(UIComponent<?> component)
-	{
-		int x = component.getX();
-		int w = getWidth() - component.getWidth();
-		int a = Anchor.horizontal(component.getAnchor());
-		if (a == Anchor.CENTER)
-			x += w / 2;
-		else if (a == Anchor.RIGHT)
-			x += w;
-		return x;
-	}
-
-	/**
-	 * Gets the Y coordinate of a {@link UIComponent} inside this <code>UIComponent</code>.
-	 *
-	 * @param component the component
-	 * @return the coordinate
-	 */
-	public int componentY(UIComponent<?> component)
-	{
-		int y = component.getY();
-		int h = getHeight() - component.getHeight();
-		int a = Anchor.vertical(component.getAnchor());
-		if (a == Anchor.MIDDLE)
-			y += h / 2;
-		else if (a == Anchor.BOTTOM)
-			y += h;
-		return y;
-	}
-
-	/**
-	 * Gets the X coordinate of this {@link UIComponent} relative to its parent.
-	 *
-	 * @return the coordinate
-	 */
-	public int parentX()
-	{
-		return getParent() != null ? getParent().componentX(this) : getX();
-	}
-
-	/**
-	 * Get the Y coordinate of this {@link UIComponent} relative to its parent.
-	 *
-	 * @return the coordinate
-	 */
-	public int parentY()
-	{
-		return getParent() != null ? getParent().componentY(this) : getY();
-	}
-
-	/**
 	 * Gets the X coordinate of this {@link UIComponent} relative to the screen.
 	 *
 	 * @return the the coordinate
 	 */
 	public int screenX()
 	{
-		int x = parentX();
+		int x = position().x();
 		if (getParent() != null)
 			x += getParent().screenX();
 		return x;
@@ -964,7 +747,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 */
 	public int screenY()
 	{
-		int y = parentY();
+		int y = position().y();
 		if (getParent() != null)
 			y += getParent().screenY();
 		return y;
@@ -1006,14 +789,10 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	}
 
 	/**
-	 * Called when this {@link UIComponent} is added to screen.<br>
-	 * Triggers a {@link SizeChangeEvent} if this component size is relative.
+	 * Called when this {@link UIComponent} is added to screen.
 	 */
 	public void onAddedToScreen()
-	{
-		if (isRelativeWidth() || isRelativeHeight())
-			fireEvent(new SizeChangeEvent<>(self(), getWidth(), getHeight()));
-	}
+	{}
 
 	/**
 	 * Draws this {@link UIComponent} Called by {@link #parent} component.<br>
@@ -1034,7 +813,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 		if (shape != null)
 		{
 			shape.resetState();
-			shape.setSize(getWidth(), getHeight());
+			shape.setSize(size().width(), size().height());
 		}
 		if (rp != null)
 			rp.reset();
@@ -1092,8 +871,7 @@ public abstract class UIComponent<T extends UIComponent<T>>
 	 */
 	public String getPropertyString()
 	{
-		return "P=" + (parent != null ? parent.getClass().getSimpleName() : "null") + " | " + width + "x" + height + "@" + x + "," + y
-				+ " | C=" + parentX() + "," + parentY() + " | S=" + screenX() + "," + screenY();
+		return size() + "@" + position() + " | S=" + screenX() + "," + screenY();
 	}
 
 	/**

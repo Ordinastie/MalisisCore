@@ -40,19 +40,21 @@ import com.google.common.collect.Iterables;
 import net.malisis.core.client.gui.ClipArea;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.IClipable;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
 import net.malisis.core.client.gui.component.control.UISlimScrollbar;
+import net.malisis.core.client.gui.component.element.Padding;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.component.interaction.UISelect.Option;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.client.gui.render.BackgroundTexture.BoxBackground;
+import net.malisis.core.client.gui.render.TexturedBackground.BoxBackground;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
@@ -92,10 +94,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	protected boolean expanded = false;
 	/** Container holding the {@link Option}. */
 	protected OptionsContainer optionsContainer;
-	/** Width of displayed {@link Option} box */
-	protected int optionsWidth = 0;
-	/** Height of displayed {@link Option} box */
-	protected int optionsHeight = 0;
 	/** Pattern to use for options labels. */
 	protected String labelPattern;
 	/** Function for option creation **/
@@ -138,8 +136,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	{
 		super(gui);
 
+		optionsContainer = new OptionsContainer(gui);
 		setBackground(new BoxBackground(gui));
-		setSize(width, 12);
+		setSize(Size.of(width, 12));
 		setOptions(values);
 
 		shape = new XResizableGuiShape(3);
@@ -149,7 +148,6 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 		arrowIcon = new GuiIconProvider(gui.getGuiTexture().getIcon(209, 48, 7, 4));
 
-		optionsContainer = new OptionsContainer(gui);
 	}
 
 	/**
@@ -165,11 +163,10 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 	//#region Getters/Setters
 	@Override
-	public UISelect<T> setSize(int width, int height)
+	public void setSize(Size size)
 	{
-		super.setSize(width, height);
-		calcOptionsSize();
-		return this;
+		super.setSize(size);
+		optionsContainer.updateSize();
 	}
 
 	@Override
@@ -182,7 +179,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public UISelect<T> setFont(MalisisFont font)
 	{
 		this.font = font;
-		calcOptionsSize();
+		optionsContainer.updateSize();
 		return this;
 	}
 
@@ -196,7 +193,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public UISelect<T> setFontOptions(FontOptions options)
 	{
 		this.fontOptions = options;
-		calcOptionsSize();
+		optionsContainer.updateSize();
 		return this;
 	}
 
@@ -304,7 +301,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public UISelect<T> setLabelFunction(Function<T, String> func)
 	{
 		this.labelFunction = func;
-		calcOptionsSize();
+		optionsContainer.updateSize();
 		return this;
 	}
 
@@ -327,7 +324,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public UISelect<T> setLabelPattern(String labelPattern)
 	{
 		this.labelPattern = labelPattern;
-		calcOptionsSize();
+		optionsContainer.updateSize();
 		return this;
 	}
 
@@ -343,35 +340,8 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		if (optionWidth <= 0 && optionWidth != LONGEST_OPTION && optionWidth != SELECT_WIDTH)
 			throw new IllegalArgumentException("OptionWidth must be positive or LONGEST_OPTION or SELECT_WIDTH");
 		maxOptionsWidth = optionWidth;
-		calcOptionsSize();
+		optionsContainer.updateSize();
 		return this;
-	}
-
-	/**
-	 * Calculates the size of this container base on the options. TODO : handle maximum display options
-	 */
-	private void calcOptionsSize()
-	{
-		if (options == null)
-			return;
-
-		if (maxOptionsWidth == SELECT_WIDTH)
-		{
-			optionsWidth = getWidth();
-			return;
-		}
-
-		optionsWidth = getWidth() - 4;
-		for (Option<?> option : this)
-			optionsWidth = Math.max(optionsWidth,
-									(int) MalisisFont.minecraftFont.getStringWidth(option.getLabel(labelPattern), fontOptions));
-		optionsWidth += 4;
-
-		if (maxOptionsWidth == LONGEST_OPTION)
-			return;
-
-		if (maxOptionsWidth >= getWidth())
-			optionsWidth = Math.min(maxOptionsWidth, optionsWidth);
 	}
 
 	/**
@@ -383,7 +353,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 	public UISelect<T> maxDisplayedOptions(int amount)
 	{
 		maxDisplayedOptions = amount;
-		calcOptionsSize();
+		optionsContainer.updateSize();
 		return this;
 	}
 
@@ -399,8 +369,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			values = Collections.emptyList();
 
 		options = FluentIterable.from(values).transform(toOption);
-
-		calcOptionsSize();
+		optionsContainer.updateSize();
 		return this;
 	}
 
@@ -585,19 +554,15 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		if (!expanded || !isVisible())
 			return false;
 
-		return x >= screenX() && x <= screenX() + optionsWidth && y >= screenY() + 12 && y <= screenY() + 12 + optionsHeight;
+		return optionsContainer.isInsideBounds(x, y);
 	}
 
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		optionsHeight = 10 * Math.min(options.size(), maxDisplayedOptions) + 2;
-		if (optionsHeight < 10)
-			optionsHeight = 10;
-
 		//draw regular select
 		arrowShape.resetState();
-		arrowShape.setPosition(getWidth() - 9, 4);
+		arrowShape.setPosition(size().width() - 9, 4);
 		if (isHovered() || expanded)
 			rp.colorMultiplier.set(0xBEC8FF);
 		else
@@ -686,6 +651,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		{
 			super(gui);
 			gui.addToScreen(this);
+			//TODO: place it above if room below is too small
+			setPosition(Position.of(this).below(UISelect.this, 0));
+			setSize(new OptionContainerSize());
 
 			setZIndex(300);
 
@@ -699,30 +667,18 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			scrollbar.setOffset(0, 0);
 		}
 
-		@Override
-		public int getWidth()
+		@SuppressWarnings("unchecked")
+		private void updateSize()
 		{
-			return optionsWidth;// Math.max(UISelect.this.getWidth(), maxExpandedWidth);
-		}
-
-		@Override
-		public int getHeight()
-		{
-			int h = 0;
-			for (int i = optionOffset; i < Math.min(optionOffset + maxDisplayedOptions, options.size()); i++)
-				h += options.get(i).getHeight(UISelect.this);
-			return h + 2;
+			((OptionContainerSize) size()).update();
 		}
 
 		private void display()
 		{
-			setVisible(true);
-			//place the container just below the UISelect
-			//TODO: place it above if room below is too small
-			setPosition(UISelect.this.screenX(), UISelect.this.screenY() + UISelect.this.getHeight());
 			optionOffset = Math.max(0, Math.min(options.size() - maxDisplayedOptions, getSelectedIndex()));
 			scrollbar.updateScrollbar();
 			setFocused(true);
+			setVisible(true);
 			expanded = true;
 		}
 
@@ -994,11 +950,12 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			if (StringUtils.isEmpty(text))
 				return;
 
+			int width = select.optionsContainer.size().width();
 			if (hovered && !disabled)
-				renderer.drawRectangle(x + 1, y - 1, z + 2, select.optionsWidth - 2, getHeight(select), select.getHoverBgColor(), 255);
+				renderer.drawRectangle(x + 1, y - 1, z + 2, width - 2, getHeight(select), select.getHoverBgColor(), 255);
 
 			if (isTop)
-				text = MalisisFont.minecraftFont.clipString(text, select.getWidth() - 15, select.fontOptions);
+				text = MalisisFont.minecraftFont.clipString(text, select.size().width() - 15, select.fontOptions);
 
 			FontOptions options = select.getFontOptions();
 			if (equals(select.getSelectedOption()) && !isTop)
@@ -1016,6 +973,51 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		public boolean equals(Object obj)
 		{
 			return obj != null && obj instanceof Option && key.equals(((Option<?>) obj).key);
+		}
+	}
+
+	public class OptionContainerSize implements Size
+	{
+		private int width;
+		private int height;
+
+		private void update()
+		{
+			if (options == null)
+				return;
+
+			//calculate height
+			int offset = UISelect.this.optionsContainer.optionOffset;
+			height = 2;
+			for (int i = offset; i < Math.min(offset + maxDisplayedOptions, options.size()); i++)
+				height += options.get(i).getHeight(UISelect.this);
+
+			//calculate width
+			width = UISelect.this.size().width();
+			if (maxOptionsWidth == SELECT_WIDTH)
+				return;
+
+			width -= 4;
+			for (Option<?> option : UISelect.this)
+				width = Math.max(width, (int) MalisisFont.minecraftFont.getStringWidth(option.getLabel(labelPattern), fontOptions));
+			width += 4;
+			if (width == LONGEST_OPTION)
+				return;
+
+			if (maxOptionsWidth >= UISelect.this.size().width())
+				width = Math.min(maxOptionsWidth, width);
+		}
+
+		@Override
+		public int width()
+		{
+			return width;
+		}
+
+		@Override
+		public int height()
+		{
+			return height;
 		}
 	}
 

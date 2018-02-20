@@ -28,6 +28,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.GuiTexture;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
@@ -40,6 +41,8 @@ import net.minecraft.item.ItemStack;
  */
 public class UIImage extends UIComponent<UIImage>
 {
+	/** Fixed size of ItemStack UIImages. */
+	private final Size ITEMSTACK_SIZE = Size.of(16, 16);
 	/** {@link GuiTexture} to use for the icon. */
 	private GuiTexture texture;
 	/** {@link Icon} to use for the texture. */
@@ -57,11 +60,9 @@ public class UIImage extends UIComponent<UIImage>
 	public UIImage(MalisisGui gui, GuiTexture texture, Icon icon)
 	{
 		super(gui);
-
 		iconProvider = new GuiIconProvider(null);
-
 		setIcon(texture, icon);
-		setSize(16, 16);
+		setSize(ITEMSTACK_SIZE);
 
 		shape = new SimpleGuiShape();
 		iconProvider = new GuiIconProvider(null);
@@ -80,7 +81,7 @@ public class UIImage extends UIComponent<UIImage>
 		iconProvider = new GuiIconProvider(null);
 
 		setItemStack(itemStack);
-		setSize(16, 16);
+		setSize(ITEMSTACK_SIZE);
 
 		shape = new SimpleGuiShape();
 	}
@@ -124,7 +125,7 @@ public class UIImage extends UIComponent<UIImage>
 		this.icon = null;
 		this.texture = null;
 		this.itemStack = itemStack;
-		setSize(16, 16);
+		setSize(ITEMSTACK_SIZE);
 		return this;
 	}
 
@@ -162,19 +163,15 @@ public class UIImage extends UIComponent<UIImage>
 	 * Sets the size for this {@link UIImage}.<br>
 	 * Has no effect if rendering an {@link ItemStack}.
 	 *
-	 * @param width the width
-	 * @param height the height
-	 * @return the UI image
+	 * @param size the new size
 	 */
 	@Override
-	public UIImage setSize(int width, int height)
+	public void setSize(Size size)
 	{
+		//UIImage for itemStack have a fixed 16*16 size
 		if (itemStack != null)
-		{
-			width = 16;//UIImage for itemStack have a fixed 16*16 size
-			height = 16;
-		}
-		return super.setSize(width, height);
+			size = ITEMSTACK_SIZE;
+		super.setSize(size);
 	}
 
 	@Override

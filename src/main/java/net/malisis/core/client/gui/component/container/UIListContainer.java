@@ -33,6 +33,8 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 
 /**
@@ -63,34 +65,24 @@ public class UIListContainer<S> extends UIContainer<UIListContainer<S>>
 		scrollbar.setAutoHide(true);
 	}
 
-	public UIListContainer(MalisisGui gui, int width, int height)
+	public UIListContainer(MalisisGui gui, Size size)
 	{
 		this(gui);
-		setSize(width, height);
-	}
-
-	@Override
-	public UIListContainer<S> setSize(int width, int height)
-	{
-		super.setSize(width, height);
-		scrollbar.updateScrollbar();
-		return self();
+		setSize(size);
 	}
 
 	protected void buildElementComponents()
 	{
 		removeAll();
 
-		int y = 0;
+		UIComponent<?> lastComp = null;
 		for (S element : elements)
 		{
 			UIComponent<?> comp = elementComponentFactory.apply(getGui(), element);
 			comp.attachData(element);
-			comp.setPosition(0, y);
-
+			comp.setPosition(lastComp != null ? Position.builder().below(lastComp, elementSpacing).build() : Position.zero());
 			add(comp);
-
-			y += comp.getHeight() + elementSpacing;
+			lastComp = comp;
 		}
 		elementsSize = elements.size();
 	}

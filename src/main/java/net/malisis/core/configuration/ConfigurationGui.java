@@ -41,8 +41,8 @@ import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UIButton;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
-import net.malisis.core.client.gui.render.BackgroundTexture.PanelBackground;
-import net.malisis.core.client.gui.render.BackgroundTexture.WindowBackground;
+import net.malisis.core.client.gui.render.TexturedBackground.PanelBackground;
+import net.malisis.core.client.gui.render.TexturedBackground.WindowBackground;
 import net.malisis.core.configuration.setting.Setting;
 import net.malisis.core.renderer.font.FontOptions;
 

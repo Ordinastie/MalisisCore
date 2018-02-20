@@ -28,8 +28,8 @@ import javax.annotation.Nonnull;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.element.Padding;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.renderer.RenderParameters;
@@ -74,7 +74,7 @@ public class TexturedBackground implements IGuiRenderer, ITransformable.Color, I
 	public void render(UIComponent<?> component, GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		shape.resetState();
-		shape.setSize(component.getWidth(), component.getHeight());
+		shape.setSize(component.size().width(), component.size().height());
 		//rp.reset();
 		renderer.drawShape(shape, rp);
 	}

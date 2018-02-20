@@ -24,11 +24,12 @@
 
 package net.malisis.core.client.gui.component.control;
 
-import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.container.UIContainer;
+import net.malisis.core.client.gui.component.element.Padding;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 
@@ -52,16 +53,9 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		super(gui);
 		this.type = type != null ? type : Type.BOTH;
 
-		int x = -1;
-		int y = -1;
-		if (parent instanceof UIContainer)
-		{
-			x += ((UIContainer<?>) parent).getPadding().right();
-			y += ((UIContainer<?>) parent).getPadding().bottom();
-		}
-
-		setPosition(x, y, Anchor.BOTTOM | Anchor.RIGHT);
-		setSize(5, 5);
+		Padding padding = Padding.of(parent);
+		setPosition(Position.builder().rightAligned(-padding.right()).bottomAligned(-padding.bottom()).build());
+		setSize(Size.of(5, 5));
 		register(this);
 
 		parent.addControlComponent(this);
@@ -80,12 +74,8 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		if (button != MouseButton.LEFT)
 			return super.onDrag(lastX, lastY, x, y, button);
 
-		UIComponent<?> p = getParent();
-		if (p.getAnchor() != Anchor.NONE)
-			p.setPosition(p.parentX(), p.parentY(), Anchor.NONE);
-
-		int w = parent.getWidth();
-		int h = parent.getHeight();
+		int w = getParent().size().width();
+		int h = getParent().size().height();
 		if (type == Type.BOTH || type == Type.HORIZONTAL)
 			w += x - lastX;
 		if (type == Type.BOTH || type == Type.VERTICAL)
@@ -95,7 +85,7 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		if (h < 10)
 			h = 10;
 
-		getParent().setSize(w, h);
+		getParent().setSize(Size.of(w, h));
 
 		return true;
 	}

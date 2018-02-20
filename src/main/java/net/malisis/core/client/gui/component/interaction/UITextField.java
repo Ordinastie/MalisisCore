@@ -36,18 +36,19 @@ import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
+import net.malisis.core.client.gui.component.element.Padding;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
-import net.malisis.core.client.gui.render.BackgroundTexture.BoxBackground;
+import net.malisis.core.client.gui.render.TexturedBackground.BoxBackground;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.Link;
 import net.malisis.core.renderer.font.MalisisFont;
@@ -143,9 +144,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (text != null)
 			this.setText(text);
 
-		//default size to prevent single line INHERITED height
 		if (!multiLine)
-			setSize(100, 12);
+			setSize(Size.of(100, 12));
 
 		setBackground(new BoxBackground(gui));
 
@@ -360,16 +360,13 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 * Sets the size of this {@link UITextField}.<br>
 	 * If {@link #multiLine} is <code>false</code>, <b>height</b> is forced to 12.
 	 *
-	 * @param width the width
-	 * @param height the height
-	 * @return the UI text field
+	 * @param size the new size
 	 */
 	@Override
-	public UITextField setSize(int width, int height)
+	public void setSize(Size size)
 	{
-		super.setSize(width, multiLine ? height : 12);
+		super.setSize(size);
 		buildLines();
-		return this;
 	}
 
 	/**
@@ -533,7 +530,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public int getContentWidth()
 	{
-		return getWidth();
+		return size().width();
 	}
 
 	/**
@@ -544,7 +541,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public int getContentHeight()
 	{
-		return multiLine ? lines.size() * getLineHeight() + 4 : 12;
+		return multiLine ? lines.size() * getLineHeight() + 4 : size().height();
 	}
 
 	/**
@@ -621,7 +618,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 */
 	public int getVisibleLines()
 	{
-		return multiLine ? (getHeight() - 4) / getLineHeight() : 1;
+		return multiLine ? (size().height() - 4) / getLineHeight() : 1;
 	}
 
 	/**
@@ -648,7 +645,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 				lines.add(text.toString());
 			else
 			{
-				lines = font.wrapText(text.toString(), getWidth() - 4, fontOptions);
+				lines = font.wrapText(text.toString(), size().width() - 4, fontOptions);
 			}
 		}
 
@@ -771,7 +768,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 */
 	protected void onCursorUpdated()
 	{
-		if (getParent() == null && getWidth() == INHERITED)
+		if (getParent() == null)
 			return;
 
 		if (!multiLine)
@@ -789,8 +786,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 
 				//reset walker index (0 because string already starts at charOffset)
 				walker.startIndex(0);
-				if (cursorCoord - getWidth() + 4 > 0)
-					charOffset += walker.walkToCoord(cursorCoord - getWidth() + 4) + 1;
+				if (cursorCoord - size().width() + 4 > 0)
+					charOffset += walker.walkToCoord(cursorCoord - size().width() + 4) + 1;
 			}
 		}
 		else
@@ -1105,7 +1102,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		{
 			if (charOffset > text.length())
 				return;
-			String t = font.clipString(text.substring(charOffset, text.length()), getWidth() - 4, options);
+			String t = font.clipString(text.substring(charOffset, text.length()), size().width() - 4, options);
 			renderer.drawText(font, t, 2, 2, 0, options);
 		}
 		else
@@ -1168,7 +1165,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 					X = last.getXOffset();
 
 				selectShape.resetState();
-				selectShape.setSize(Math.min(getWidth() - 2, X) - x, getLineHeight());
+				selectShape.setSize(Math.min(size().width() - 2, X) - x, getLineHeight());
 				selectShape.setPosition(x + 2, y + 1);
 
 				rp.useTexture.set(false);

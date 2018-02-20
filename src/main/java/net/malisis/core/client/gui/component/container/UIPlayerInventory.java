@@ -24,18 +24,17 @@
 
 package net.malisis.core.client.gui.component.container;
 
-import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UISlot;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.player.PlayerInventorySlot;
 
 public class UIPlayerInventory extends UIContainer<UIPlayerInventory>
 {
-	/** Width required for player inventory */
-	public static final int INVENTORY_WIDTH = 162;
-	/** Height required for player inventory (including title) */
-	public static final int INVENTORY_HEIGHT = 87;
+	/** Size required for player inventory */
+	public static final Size INVENTORY_SIZE = Size.of(162, 87);
 
 	/** {@link MalisisInventory} used for this {@link UIPlayerInventory} **/
 	@SuppressWarnings("unused")
@@ -43,13 +42,13 @@ public class UIPlayerInventory extends UIContainer<UIPlayerInventory>
 
 	public UIPlayerInventory(MalisisGui gui, MalisisInventory inventory)
 	{
-		super(gui, "container.inventory", INVENTORY_WIDTH, INVENTORY_HEIGHT);
+		super(gui, "container.inventory", INVENTORY_SIZE);
 		this.inventory = inventory;
 
 		for (int i = 0; i < inventory.getSize(); i++)
 			addSlot(gui, (PlayerInventorySlot) inventory.getSlot(i), i);
 
-		setPosition(0, 0, Anchor.BOTTOM | Anchor.CENTER);
+		setPosition(Position.builder().centered().bottomAligned().build());
 	}
 
 	/**
@@ -63,12 +62,12 @@ public class UIPlayerInventory extends UIContainer<UIPlayerInventory>
 	{
 		UISlot uislot = new UISlot(gui, slot);
 		if (number < 9)
-			uislot.setPosition(number * 18, 69);
+			uislot.setPosition(Position.of(number * 18, 69));
 		else if (number < 36)
 		{
 			int row = (number - 9) / 9;
 			int col = number % 9;
-			uislot.setPosition(col * 18, 11 + row * 18);
+			uislot.setPosition(Position.of(col * 18, 11 + row * 18));
 		}
 		else
 			return;

@@ -31,9 +31,6 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
-import net.malisis.core.renderer.animation.Animation;
-import net.malisis.core.renderer.animation.transformation.AlphaTransform;
-import net.malisis.core.renderer.animation.transformation.ITransformable;
 
 /**
  * @author Ordinastie
@@ -83,6 +80,7 @@ public class UISlimScrollbar extends UIScrollBar
 	 *
 	 * @param scrollColor the new color
 	 */
+	@Override
 	public void setColor(int scrollColor)
 	{
 		setColor(scrollColor, backgroundColor);
@@ -135,11 +133,11 @@ public class UISlimScrollbar extends UIScrollBar
 		if (isFocused() && !event.getState())
 			return;
 
-		int from = event.getState() ? 0 : 255;
-		int to = event.getState() ? 255 : 0;
+		//int from = event.getState() ? 0 : 255;
+		//int to = event.getState() ? 255 : 0;
 
-		Animation<ITransformable.Alpha> anim = new Animation<>(this, new AlphaTransform(from, to).forTicks(5));
+		//Animation<ITransformable.Alpha> anim = new Animation<>(this, new AlphaTransform(from, to).forTicks(5));
 
-		event.getComponent().getGui().animate(anim);
+		//event.getComponent().getGui().animate(anim);
 	}
 }

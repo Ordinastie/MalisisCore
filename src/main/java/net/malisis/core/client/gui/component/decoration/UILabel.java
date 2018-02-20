@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component.decoration;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,21 +34,19 @@ import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.Padding;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
 import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
+import net.malisis.core.client.gui.component.element.Padding;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.util.bbcode.BBString;
-import net.malisis.core.util.bbcode.render.BBCodeRenderer;
-import net.malisis.core.util.bbcode.render.IBBCodeRenderer;
 import net.minecraft.client.gui.GuiScreen;
 
 /**
@@ -55,7 +54,7 @@ import net.minecraft.client.gui.GuiScreen;
  *
  * @author Ordinastie
  */
-public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiText<UILabel>, IBBCodeRenderer<UILabel>
+public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiText<UILabel>
 {
 	/** The {@link MalisisFont} to use for this {@link UILabel}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
@@ -63,10 +62,6 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	protected FontOptions fontOptions = FontOptions.builder().color(0x444444).build();
 	/** Text of this {@link UILabel}. */
 	protected String text;
-	/** BBCode for this {@link UILabel}. */
-	protected BBString bbText;
-	/** BBCode renderer **/
-	protected BBCodeRenderer bbRenderer;
 	/** List of strings making the text of this {@link UILabel}. */
 	protected List<String> lines = Lists.newArrayList();
 	/** Whether this {@link UITextField} handles multiline text. */
@@ -99,19 +94,6 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		super(gui);
 		this.setText(text);
 		this.multiLine = multiLine;
-	}
-
-	/**
-	 * Instantiates a new {@link UILabel}.
-	 *
-	 * @param gui the gui
-	 * @param text the text
-	 */
-	public UILabel(MalisisGui gui, BBString text)
-	{
-		this(gui);
-		this.setText(text);
-		this.multiLine = true;
 	}
 
 	/**
@@ -167,11 +149,11 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	 */
 	public UILabel setText(String text)
 	{
-		if (text == this.text || (text != null && text.equals(this.text)))
+		//text didn't change, skip
+		if (Objects.equals(this.text, text))
 			return this;
 
 		this.text = text;
-		this.bbText = null;
 		if (multiLine)
 			buildLines();
 		else
@@ -224,15 +206,14 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		return this;
 	}
 
-	/**
-	 * Gets the font scale for this {@link UILabel}.
-	 *
-	 * @return the font scale
-	 */
-	@Override
-	public float getFontScale()
+	public int getVisibleLines()
 	{
-		return fontOptions.getFontScale();
+		return size().height() / getLineHeight();
+	}
+
+	public int getLineHeight()
+	{
+		return (int) (font.getStringHeight(fontOptions) + lineSpacing);
 	}
 
 	// #end getters/setters
@@ -241,7 +222,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	@Override
 	public int getContentWidth()
 	{
-		return getWidth();
+		return size.width();
 	}
 
 	@Override
@@ -290,53 +271,6 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	}
 
 	//#end IScrollable
-
-	//#region IBBStringRenderer
-
-	/**
-	 * Gets the BB text of this {@link UILabel}.
-	 *
-	 * @return the BB text
-	 */
-	@Override
-	public BBString getBBText()
-	{
-		return bbText;
-	}
-
-	@Override
-	public UILabel setText(BBString str)
-	{
-		if (!multiLine)
-			throw new IllegalArgumentException("Can only set BBString for multi line labels.");
-
-		setText(str.getRawText());
-		bbText = str;
-		bbText.buildRenderLines(lines);
-
-		return this;
-	}
-
-	@Override
-	public int getStartLine()
-	{
-		return lineOffset;
-	}
-
-	@Override
-	public int getVisibleLines()
-	{
-		return getHeight() / getLineHeight();
-	}
-
-	@Override
-	public int getLineHeight()
-	{
-		return (int) (font.getStringHeight(fontOptions) + lineSpacing);
-	}
-
-	//#end IBBStringRenderer
-
 	/**
 	 * Gets the component at.
 	 *
@@ -361,9 +295,9 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		if (!StringUtils.isEmpty(text))
 		{
 			UIScrollBar sc = UIScrollBar.getScrollbar(this, Type.VERTICAL);
-			int width = getWidth();
+			int width = size().width();
 			if (sc != null && sc.isVisible())
-				width -= sc.getWidth();
+				width -= sc.size().width();
 			lines = font.wrapText(text, width, fontOptions);
 		}
 
@@ -380,7 +314,8 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 
 		this.textWidth = (int) font.getStringWidth(text, fontOptions);
 		this.textHeight = (int) font.getStringHeight(fontOptions);
-		setSize(textWidth, textHeight);
+		//TODO: custom Size ?
+		setSize(Size.of(textWidth, textHeight));
 	}
 
 	/**
@@ -406,12 +341,6 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (bbText != null)
-		{
-			bbText.render(renderer, screenX(), screenY(), getZIndex(), this);
-			return;
-		}
-
 		if (multiLine)
 		{
 			font.render(renderer,
@@ -439,5 +368,4 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	{
 		return "text=" + text + " | " + super.getPropertyString();
 	}
-
 }

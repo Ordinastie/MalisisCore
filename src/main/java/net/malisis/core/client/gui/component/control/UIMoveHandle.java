@@ -24,11 +24,12 @@
 
 package net.malisis.core.client.gui.component.control;
 
-import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 
@@ -59,8 +60,8 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 			x -= ((UIContainer<?>) parent).getPadding().left();
 			y -= ((UIContainer<?>) parent).getPadding().top();
 		}
-		setPosition(x, y);
-		setSize(5, 5);
+		setPosition(Position.of(x, y));
+		setSize(Size.of(5, 5));
 		setZIndex(10);
 		register(this);
 
@@ -84,18 +85,19 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 		if (parentCont == null)
 			return super.onDrag(lastX, lastY, x, y, button);
 
-		int px = parent.getX();
+		int px = parent.position().x();
 		if (type == Type.BOTH || type == Type.HORIZONTAL)
 			px = parentCont.relativeX(x /*- parentCont.getHorizontalPadding()*/);
-		int py = parent.getY();
+		int py = parent.position().y();
 		if (type == Type.BOTH || type == Type.VERTICAL)
 			py = parentCont.relativeY(y /*- parentCont.getVerticalPadding()*/);
 		if (px < 0)
 			px = 0;
 		if (py < 0)
 			py = 0;
+		//TODO: check x + w against screen size
 
-		getParent().setPosition(px, py, Anchor.NONE);
+		getParent().setPosition(Position.of(x, y));
 		return true;
 	}
 

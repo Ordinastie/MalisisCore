@@ -28,6 +28,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.GuiTexture;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.VanillaIcon;
@@ -50,7 +51,7 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	public UIProgressBar(MalisisGui gui)
 	{
 		super(gui);
-		setSize(22, 16);
+		setSize(Size.of(22, 26));
 
 		shape = new SimpleGuiShape();
 		texture = getGui().getGuiTexture();
@@ -58,10 +59,10 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 		filledIcon = texture.createIcon(246, 16, 22, 16);
 	}
 
-	public UIProgressBar(MalisisGui gui, int width, int height, GuiTexture texture, Icon backgroundIcon, Icon filledIcon)
+	public UIProgressBar(MalisisGui gui, Size size, GuiTexture texture, Icon backgroundIcon, Icon filledIcon)
 	{
 		super(gui);
-		setSize(width, height);
+		setSize(size);
 
 		shape = new SimpleGuiShape();
 		this.texture = texture;
@@ -102,7 +103,7 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 		renderer.bindTexture(texture);
 		rp.icon.set(backgroundIcon.flip(!vertical && reversed, vertical && reversed));
 		shape.resetState();
-		shape.setSize(getWidth(), getHeight());
+		shape.setSize(size().width(), size().height());
 		renderer.drawShape(shape, rp);
 	}
 
@@ -110,8 +111,8 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		renderer.bindTexture(texture);
-		int width = getWidth();
-		int height = getHeight();
+		int width = size().width();
+		int height = size().height();
 		int length = (int) ((vertical ? width : height) * progress);
 
 		Icon icon = filledIcon;

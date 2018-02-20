@@ -22,25 +22,15 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.render;
+package net.malisis.core.client.gui.component.element;
 
-import javax.annotation.Nonnull;
-
-import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Padding;
 
 /**
  * @author Ordinastie
  *
  */
-public interface IGuiRenderer
+public interface IComponentElement
 {
-	@Nonnull
-	public default Padding getPadding()
-	{
-		return Padding.NO_PADDING;
-	}
-
-	public void render(UIComponent<?> component, GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
+	public void setOwner(UIComponent<?> component);
 }

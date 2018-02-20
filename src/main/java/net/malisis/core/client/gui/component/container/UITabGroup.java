@@ -25,12 +25,13 @@
 package net.malisis.core.client.gui.component.container;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.component.interaction.UITab;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
@@ -44,7 +45,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 {
 
 	/** The list of {@link UITab} added to this {@link UITabGroup}. */
-	protected Map<UITab, UIContainer<?>> listTabs = new LinkedHashMap<>();
+	protected LinkedHashMap<UITab, UIContainer<?>> listTabs = new LinkedHashMap<>();
 	/** The currently active {@link UITab}. */
 	protected UITab activeTab;
 	/** The position of this {@link UITabGroup} relative to its {@link #attachedContainer}. */
@@ -71,7 +72,6 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		super(gui);
 		this.tabPosition = tabPosition;
 		clipContent = false;
-		setSize(0, 0);
 
 		//@formatter:off
 		windowIcons = new GuiIcon[] {	gui.getGuiTexture().getXYResizableIcon(0, 60, 15, 15, 5),
@@ -202,38 +202,35 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 */
 	protected void calculateTabPosition()
 	{
-		int w = 0;
-		int h = 0;
 		int s = 0;
+		boolean isHorizontal = tabPosition == ComponentPosition.TOP || tabPosition == ComponentPosition.BOTTOM;
+		UITab lastTab = null;
 
 		for (UITab tab : listTabs.keySet())
 		{
-			int sa = tab.isActive() ? 2 : 0;
-			if (tabPosition == ComponentPosition.TOP || tabPosition == ComponentPosition.BOTTOM)
+			if (isHorizontal)
 			{
-				tab.setPosition(w + offset + s, 1);
-				w += tab.getWidth() + s;
-				h = Math.max(h, tab.getHeight() - sa);
+				Position p = lastTab != null ? Position.of(tab).rightOf(lastTab, spacing) : Position.of(offset, 1);
+				tab.setPosition(p);
+				s = Math.max(s, tab.size().height() - (tab.isActive() ? 2 : 0));
 			}
 			else
 			{
-				tab.setPosition(1, h + offset + s);
-				w = Math.max(w, tab.getWidth() - sa);
-				h += tab.getHeight() + s;
+				Position p = lastTab != null ? Position.of(tab).below(lastTab, spacing) : Position.of(1, offset);
+				tab.setPosition(p);
+				s = Math.max(s, tab.size().width() - (tab.isActive() ? 2 : 0));
+
 			}
-			s = spacing;
+			lastTab = tab;
 		}
 
-		boolean isHorizontal = tabPosition == ComponentPosition.TOP || tabPosition == ComponentPosition.BOTTOM;
 		for (UITab tab : listTabs.keySet())
-			tab.setSize(isHorizontal ? 0 : w, isHorizontal ? h : 0);
+			tab.setSize(isHorizontal ? 0 : s, isHorizontal ? s : 0);
 
 		if (isHorizontal)
-			w += offset * 2;
+			setSize(Size.of(this).relativeWidth(1.0F, attachedContainer).height(s).build());
 		else
-			h += offset * 2;
-
-		setSize(w + 2, h + 2);
+			setSize(Size.of(this).width(s).relativeHeight(1.0F, attachedContainer).build());
 	}
 
 	public void setActiveTab(String tabName)
@@ -269,6 +266,11 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		tab.setActive(true);
 		if (attachedContainer instanceof ITransformable.Color)
 			((ITransformable.Color) attachedContainer).setColor(tab.getBgColor());
+
+	}
+
+	private class ContainerSize implements Size
+	{
 
 	}
 

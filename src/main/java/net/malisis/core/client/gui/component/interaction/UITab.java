@@ -82,7 +82,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	{
 		super(gui);
 
-		setSize(0, 0);
+		//setSize(0, 0);
 		setLabel(label);
 
 		shape = new XYResizableGuiShape();

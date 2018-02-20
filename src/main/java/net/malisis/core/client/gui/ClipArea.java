@@ -46,8 +46,9 @@ public class ClipArea
 
 	public ClipArea(IClipable container, int clipPadding, boolean intersect)
 	{
-		this(container, container.screenX() + clipPadding, container.screenY() + clipPadding, container.screenX() + container.getWidth()
-				- clipPadding, container.screenY() + container.getHeight() - clipPadding, intersect);
+		this(container, container.screenX() + clipPadding, container.screenY() + clipPadding,
+				container.screenX() + container.size().width() - clipPadding, container.screenY() + container.size().height() - clipPadding,
+				intersect);
 	}
 
 	public ClipArea(IClipable container, int x, int y, int X, int Y, boolean intersect)
