@@ -33,7 +33,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
-import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 
@@ -80,7 +80,7 @@ public class UIListContainer<S> extends UIContainer<UIListContainer<S>>
 		{
 			UIComponent<?> comp = elementComponentFactory.apply(getGui(), element);
 			comp.attachData(element);
-			comp.setPosition(lastComp != null ? Position.builder().below(lastComp, elementSpacing).build() : Position.zero());
+			comp.setPosition(lastComp != null ? IPosition.builder().below(lastComp, elementSpacing).build() : IPosition.zero());
 			add(comp);
 			lastComp = comp;
 		}

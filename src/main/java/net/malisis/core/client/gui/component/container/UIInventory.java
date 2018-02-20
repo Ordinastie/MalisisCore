@@ -26,7 +26,7 @@ package net.malisis.core.client.gui.component.container;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UISlot;
-import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisSlot;
@@ -70,7 +70,7 @@ public class UIInventory extends UIContainer<UIInventory>
 
 		int row = number / numCols;
 		int col = number % numCols;
-		uislot.setPosition(Position.of(col * 18, row * 18 + (hasTitle ? 11 : 0)));
+		uislot.setPosition(IPosition.of(col * 18, row * 18 + (hasTitle ? 11 : 0)));
 
 		add(uislot);
 	}

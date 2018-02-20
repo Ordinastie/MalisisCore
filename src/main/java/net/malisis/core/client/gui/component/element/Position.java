@@ -32,15 +32,19 @@ import net.malisis.core.client.gui.component.UIComponent;
  * @author Ordinastie
  *
  */
-public interface Position extends IComponentElement
+
+public class Position
 {
-	public static final Position ZERO = Position.of(0, 0);
+	public interface IPosition
+	{
+		public void setOwner(UIComponent<?> component);
 
-	public int x();
+		public int x();
 
-	public int y();
+		public int y();
+	}
 
-	public static class DynamicPosition implements Position
+	public static class DynamicPosition implements IPosition
 	{
 		private final ToIntFunction<UIComponent<?>> x;
 		private final ToIntFunction<UIComponent<?>> y;
@@ -72,189 +76,124 @@ public interface Position extends IComponentElement
 		}
 	}
 
-	public static Position zero()
+	public static IPosition zero()
 	{
 		return Position.of(0, 0);
 	}
 
-	public static Position of(int x, int y)
+	//absolute position
+	public static IPosition of(int x, int y)
 	{
-		return new PositionFactory().x(x).y(y).build();
+		return x(x).y(y);
 	}
 
-	public static PositionFactory builder()
+	public static PositionFactory x(int x)
 	{
-		return new PositionFactory();
+		return new PositionFactory(owner -> {
+			return Padding.of(owner.getParent()).left() + x;
+		});
 	}
-	/*
-		public static class AbsolutePosition implements Position
-		{
-			protected final int x, y;
-	
-			protected AbsolutePosition(int x, int y, int anchor)
-			{
-				Position.of(x, y);
-				Position.x().y().get();
-				Position.this.x = x;
-				this.y = y;
-			}
-	
-			@Override
-			public int x()
-			{
-				return x;
-			}
-	
-			@Override
-			public int y()
-			{
-				return y;
-			}
-		}
-	
-		public static class AlignedPosition implements Position
-		{
-			protected final UIComponent<?> owner;
-			protected final int anchor;
-			protected final int xOffset, yOffset;
-	
-			protected AlignedPosition(UIComponent<?> component, int anchor, int xOffset, int yOffset)
-			{
-				this.owner = component;
-				this.anchor = anchor;
-				this.xOffset = xOffset;
-				this.yOffset = yOffset;
-			}
-	
-			@Override
-			public int x()
-			{
-				int x = xOffset;
-				int w = owner.getParent().size().width() - owner.size().width();
-				int a = Anchor.horizontal(anchor);
-				if (a == Anchor.CENTER)
-					x += w / 2;
-				else if (a == Anchor.RIGHT)
-					x += w;
-				return x;
-			}
-	
-			@Override
-			public int y()
-			{
-				int y = yOffset;
-				int h = owner.getParent().size().height() - owner.size().height();
-				int a = Anchor.vertical(anchor);
-				if (a == Anchor.MIDDLE)
-					y += h / 2;
-				else if (a == Anchor.BOTTOM)
-					y += h;
-				return y;
-			}
-	
-			public int anchor()
-			{
-				return anchor;
-			}
-	
-		}
-	
-		public static class RelativePosition implements Position
-		{
-			static enum Direction
-			{
-				ABOVE,
-				BELOW,
-				LEFT,
-				RIGHT
-			}
-	
-			private final UIComponent<?> owner;
-			private final UIComponent<?> other;
-			private final Direction direction;
-			private final int spacing;
-	
-			public RelativePosition(UIComponent<?> owner, UIComponent<?> other, Direction direction, int spacing)
-			{
-				this.owner = owner;
-				this.other = other;
-				this.direction = direction;
-				this.spacing = spacing;
-			}
-	
-			@Override
-			public int x()
-			{
-				switch (direction)
-				{
-					case LEFT:
-						return other.position().x() - owner.size().width() - spacing;
-					case RIGHT:
-						return other.position().x() + other.size().width() + spacing;
-					default:
-						return other.position().x();
-				}
-			}
-	
-			@Override
-			public int y()
-			{
-				switch (direction)
-				{
-					case ABOVE:
-						return other.position().y() - owner.size().height() - spacing;
-					case BELOW:
-						return other.position().y() + owner.size().height() + spacing;
-					default:
-						return other.position().y();
-				}
-			}
-		}
-	
-		public static Position of(int x, int y)
-		{
-			return new AbsolutePosition(x, y, 0);
-		}
-	
-		public static PositionFactory of(UIComponent<?> owner)
-		{
-			return new PositionFactory(owner);
-		}
-	
-		public static class PositionFactory
-		{
-			private UIComponent<?> owner;
-	
-			public PositionFactory(UIComponent<?> owner)
-			{
-				this.owner = owner;
-			}
-	
-			public Position align(int anchor, int xOffset, int yOffset)
-			{
-				return new AlignedPosition(owner, anchor, xOffset, yOffset);
-			}
-	
-			public Position above(UIComponent<?> component, int ySpacing)
-			{
-				return new RelativePosition(owner, component, Direction.ABOVE, ySpacing);
-			}
-	
-			public Position below(UIComponent<?> component, int ySpacing)
-			{
-				return new RelativePosition(owner, component, Direction.BELOW, ySpacing);
-			}
-	
-			public Position leftOf(UIComponent<?> component, int xSpacing)
-			{
-				return new RelativePosition(owner, component, Direction.LEFT, xSpacing);
-			}
-	
-			public Position rightOf(UIComponent<?> component, int xSpacing)
-			{
-				return new RelativePosition(owner, component, Direction.RIGHT, xSpacing);
-			}
-		}
-	
-		*/
+
+	//relative position
+	public static PositionFactory leftOf(UIComponent<?> component)
+	{
+		return leftOf(component, 0);
+	}
+
+	public static PositionFactory leftOf(UIComponent<?> component, int spacing)
+	{
+		return new PositionFactory(owner -> {
+			return component.position().x() - owner.size().width() - spacing;
+		});
+	}
+
+	public static PositionFactory rightOf(UIComponent<?> component)
+	{
+		return rightOf(component, 0);
+	}
+
+	public static PositionFactory rightOf(UIComponent<?> component, int spacing)
+	{
+		return new PositionFactory(owner -> {
+			return component.position().x() + component.size().width() + spacing;
+		});
+	}
+
+	//aligned inside parent container
+	public static PositionFactory leftAligned()
+	{
+		return leftAligned(0);
+	}
+
+	public static PositionFactory leftAligned(int spacing)
+	{
+		return x(0);
+	}
+
+	public static PositionFactory rightAligned()
+	{
+		return rightAligned(0);
+	}
+
+	public static PositionFactory rightAligned(int spacing)
+	{
+		return new PositionFactory(owner -> {
+			UIComponent<?> parent = owner.getParent();
+			if (parent == null)
+				return 0;
+			return parent.size().width() - owner.size().width() - Padding.of(parent).right() - spacing;
+		});
+	}
+
+	public static PositionFactory centered()
+	{
+		return centered(0);
+	}
+
+	public static PositionFactory centered(int offset)
+	{
+		return new PositionFactory(owner -> {
+			UIComponent<?> parent = owner.getParent();
+			if (parent == null)
+				return 0;
+			return (parent.size().width() - Padding.of(parent).horizontal() - owner.size().width()) / 2 + offset;
+		});
+	}
+
+	//aligned relative to another component
+	public PositionFactory leftAlignedTo(UIComponent<?> other)
+	{
+		return leftAlignedTo(other, 0);
+	}
+
+	public PositionFactory leftAlignedTo(UIComponent<?> other, int offset)
+	{
+		return new PositionFactory(owner -> {
+			return other.position().x() + offset;
+		});
+	}
+
+	public PositionFactory rightAlignedTo(UIComponent<?> other)
+	{
+		return rightAlignedTo(other, 0);
+	}
+
+	public PositionFactory rightAlignedTo(UIComponent<?> other, int offset)
+	{
+		return new PositionFactory(owner -> {
+			return other.position().x() + other.size().width() - owner.size().width() + offset;
+		});
+	}
+
+	public PositionFactory centeredTo(UIComponent<?> other)
+	{
+		return centeredTo(other, 0);
+	}
+
+	public PositionFactory centeredTo(UIComponent<?> other, int offset)
+	{
+		return new PositionFactory(owner -> {
+			return other.position().x() + (other.size().width() - owner.size().width()) / 2 + offset;
+		});
+	}
 }

@@ -26,7 +26,7 @@ package net.malisis.core.client.gui.component.container;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UISlot;
-import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.player.PlayerInventorySlot;
@@ -48,7 +48,7 @@ public class UIPlayerInventory extends UIContainer<UIPlayerInventory>
 		for (int i = 0; i < inventory.getSize(); i++)
 			addSlot(gui, (PlayerInventorySlot) inventory.getSlot(i), i);
 
-		setPosition(Position.builder().centered().bottomAligned().build());
+		setPosition(IPosition.builder().centered().bottomAligned().build());
 	}
 
 	/**
@@ -62,12 +62,12 @@ public class UIPlayerInventory extends UIContainer<UIPlayerInventory>
 	{
 		UISlot uislot = new UISlot(gui, slot);
 		if (number < 9)
-			uislot.setPosition(Position.of(number * 18, 69));
+			uislot.setPosition(IPosition.of(number * 18, 69));
 		else if (number < 36)
 		{
 			int row = (number - 9) / 9;
 			int col = number % 9;
-			uislot.setPosition(Position.of(col * 18, 11 + row * 18));
+			uislot.setPosition(IPosition.of(col * 18, 11 + row * 18));
 		}
 		else
 			return;

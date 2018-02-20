@@ -47,7 +47,7 @@ import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
 import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.element.Padding;
-import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.component.interaction.UISelect.Option;
 import net.malisis.core.client.gui.element.GuiShape;
@@ -652,7 +652,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 			super(gui);
 			gui.addToScreen(this);
 			//TODO: place it above if room below is too small
-			setPosition(Position.of(this).below(UISelect.this, 0));
+			setPosition(IPosition.of(this).below(UISelect.this, 0));
 			setSize(new OptionContainerSize());
 
 			setZIndex(300);

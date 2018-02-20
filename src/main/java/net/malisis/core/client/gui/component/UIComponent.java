@@ -42,6 +42,7 @@ import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.control.IControlComponent;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Position.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
@@ -81,7 +82,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	/** List of {@link UIComponent components} controlling this {@link UIContainer}. */
 	private final Set<IControlComponent> controlComponents;
 	/** Position of this {@link UIComponent}. */
-	protected Position position = Position.ZERO;
+	protected IPosition position = Position.zero();
 	/** Size of this {@link UIComponent}. */
 	protected Size size = Size.ZERO;
 	/** Z index of the component. */
@@ -164,7 +165,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	 *
 	 * @param position the new position
 	 */
-	public void setPosition(@Nonnull Position position)
+	public void setPosition(@Nonnull IPosition position)
 	{
 		//if(fireEvent(this, this.position, position);
 		this.position = position;
@@ -176,7 +177,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	 * @return the position
 	 */
 	@Nonnull
-	public Position position()
+	public IPosition position()
 	{
 		return position;
 	}

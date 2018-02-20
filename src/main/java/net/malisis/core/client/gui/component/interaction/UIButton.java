@@ -33,7 +33,7 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.component.element.Position.AlignedPosition;
+import net.malisis.core.client.gui.component.element.IPosition.AlignedPosition;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.renderer.font.FontOptions;

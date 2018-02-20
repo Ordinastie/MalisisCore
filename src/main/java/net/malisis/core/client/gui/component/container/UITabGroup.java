@@ -30,7 +30,7 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.component.interaction.UITab;
 import net.malisis.core.client.gui.event.ComponentEvent;
@@ -210,13 +210,13 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		{
 			if (isHorizontal)
 			{
-				Position p = lastTab != null ? Position.of(tab).rightOf(lastTab, spacing) : Position.of(offset, 1);
+				IPosition p = lastTab != null ? IPosition.of(tab).rightOf(lastTab, spacing) : IPosition.of(offset, 1);
 				tab.setPosition(p);
 				s = Math.max(s, tab.size().height() - (tab.isActive() ? 2 : 0));
 			}
 			else
 			{
-				Position p = lastTab != null ? Position.of(tab).below(lastTab, spacing) : Position.of(1, offset);
+				IPosition p = lastTab != null ? IPosition.of(tab).below(lastTab, spacing) : IPosition.of(1, offset);
 				tab.setPosition(p);
 				s = Math.max(s, tab.size().width() - (tab.isActive() ? 2 : 0));
 

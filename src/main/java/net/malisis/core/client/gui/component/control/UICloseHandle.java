@@ -28,7 +28,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.element.Padding;
-import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
@@ -44,7 +44,7 @@ public class UICloseHandle extends UIComponent<UICloseHandle> implements IContro
 
 		Padding padding = Padding.of(parent);
 
-		setPosition(Position.builder().rightAligned(-padding.right()).topAligned(-padding.top()).build());
+		setPosition(IPosition.builder().rightAligned(-padding.right()).topAligned(-padding.top()).build());
 		setSize(Size.of(5, 5));
 		setZIndex(parent.getZIndex() + 10);
 		register(this);
