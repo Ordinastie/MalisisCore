@@ -40,9 +40,10 @@ import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
+import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.element.Padding;
 import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.component.control.UISlimScrollbar;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
@@ -363,7 +364,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 * @param size the new size
 	 */
 	@Override
-	public void setSize(Size size)
+	public void setSize(ISize size)
 	{
 		super.setSize(size);
 		buildLines();

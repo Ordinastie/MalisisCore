@@ -27,7 +27,7 @@ package net.malisis.core.client.gui.component.container;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisSlot;
 
@@ -75,7 +75,7 @@ public class UIInventory extends UIContainer<UIInventory>
 		add(uislot);
 	}
 
-	public class InventorySize implements Size
+	public class InventorySize implements ISize
 	{
 		@Override
 		public int width()

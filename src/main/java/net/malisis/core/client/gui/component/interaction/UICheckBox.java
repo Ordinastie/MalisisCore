@@ -33,7 +33,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
@@ -214,7 +214,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		return "text=" + label.getText() + " | checked=" + this.checked + " | " + super.getPropertyString();
 	}
 
-	public class CheckBoxSize implements Size
+	public class CheckBoxSize implements ISize
 	{
 		@Override
 		public int width()

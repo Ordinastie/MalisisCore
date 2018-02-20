@@ -34,7 +34,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
 import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 
 /**
@@ -65,7 +65,7 @@ public class UIListContainer<S> extends UIContainer<UIListContainer<S>>
 		scrollbar.setAutoHide(true);
 	}
 
-	public UIListContainer(MalisisGui gui, Size size)
+	public UIListContainer(MalisisGui gui, ISize size)
 	{
 		this(gui);
 		setSize(size);

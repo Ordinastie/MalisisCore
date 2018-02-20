@@ -36,7 +36,7 @@ import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.element.Position.IPosition;
-import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
@@ -460,7 +460,7 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		}
 	}
 
-	private class ScrollbarSize implements Size
+	private class ScrollbarSize implements ISize
 	{
 		@Override
 		public int width()

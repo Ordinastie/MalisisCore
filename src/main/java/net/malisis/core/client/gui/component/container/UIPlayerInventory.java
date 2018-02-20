@@ -28,13 +28,14 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.client.gui.component.element.Position;
 import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.player.PlayerInventorySlot;
 
 public class UIPlayerInventory extends UIContainer<UIPlayerInventory>
 {
 	/** Size required for player inventory */
-	public static final Size INVENTORY_SIZE = Size.of(162, 87);
+	public static final ISize INVENTORY_SIZE = Size.of(162, 87);
 
 	/** {@link MalisisInventory} used for this {@link UIPlayerInventory} **/
 	@SuppressWarnings("unused")

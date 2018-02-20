@@ -44,6 +44,7 @@ import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.component.element.Position;
 import net.malisis.core.client.gui.component.element.Position.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
@@ -84,7 +85,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	/** Position of this {@link UIComponent}. */
 	protected IPosition position = Position.zero();
 	/** Size of this {@link UIComponent}. */
-	protected Size size = Size.of(this).relativeWidth(1.0f).relativeHeight(1.0F).build();
+	protected ISize size = Size.inherited();
 	/** Z index of the component. */
 	protected int zIndex = INHERITED;
 	/** Event bus on which event listeners are registered. */
@@ -129,9 +130,11 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 		bus = new EventBus(ExceptionHandler.instance);
 		bus.register(this);
 		controlComponents = new LinkedHashSet<>();
+		position.setOwner(this);
+		size.setOwner(this);
+
 		rp = new RenderParameters();
 		shape = new SimpleGuiShape();
-		setPosition(Position.zero());
 	}
 
 	// #region getters/setters
@@ -189,10 +192,11 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	 *
 	 * @param size the new size
 	 */
-	public void setSize(@Nonnull Size size)
+	public void setSize(@Nonnull ISize size)
 	{
 		//if(fireEvent(this, this.size, size)
 		this.size = size;
+		size.setOwner(this);
 	}
 
 	/**
@@ -201,7 +205,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	 * @return the size
 	 */
 	@Nonnull
-	public Size size()
+	public ISize size()
 	{
 		return size;
 	}

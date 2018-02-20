@@ -99,25 +99,27 @@ public class Position
 	}
 
 	//relative position
-	public static PositionFactory leftOf(UIComponent<?> component)
+	public static PositionFactory leftOf(@Nonnull UIComponent<?> component)
 	{
 		return leftOf(component, 0);
 	}
 
-	public static PositionFactory leftOf(UIComponent<?> component, int spacing)
+	public static PositionFactory leftOf(@Nonnull UIComponent<?> component, int spacing)
 	{
+		checkNotNull(component);
 		return new PositionFactory(owner -> {
 			return component.position().x() - owner.size().width() - spacing;
 		});
 	}
 
-	public static PositionFactory rightOf(UIComponent<?> component)
+	public static PositionFactory rightOf(@Nonnull UIComponent<?> component)
 	{
 		return rightOf(component, 0);
 	}
 
-	public static PositionFactory rightOf(UIComponent<?> component, int spacing)
+	public static PositionFactory rightOf(@Nonnull UIComponent<?> component, int spacing)
 	{
+		checkNotNull(component);
 		return new PositionFactory(owner -> {
 			return component.position().x() + component.size().width() + spacing;
 		});
@@ -165,37 +167,40 @@ public class Position
 	}
 
 	//aligned relative to another component
-	public PositionFactory leftAlignedTo(UIComponent<?> other)
+	public PositionFactory leftAlignedTo(@Nonnull UIComponent<?> other)
 	{
 		return leftAlignedTo(other, 0);
 	}
 
-	public PositionFactory leftAlignedTo(UIComponent<?> other, int offset)
+	public PositionFactory leftAlignedTo(@Nonnull UIComponent<?> other, int offset)
 	{
+		checkNotNull(other);
 		return new PositionFactory(owner -> {
 			return other.position().x() + offset;
 		});
 	}
 
-	public PositionFactory rightAlignedTo(UIComponent<?> other)
+	public PositionFactory rightAlignedTo(@Nonnull UIComponent<?> other)
 	{
 		return rightAlignedTo(other, 0);
 	}
 
-	public PositionFactory rightAlignedTo(UIComponent<?> other, int offset)
+	public PositionFactory rightAlignedTo(@Nonnull UIComponent<?> other, int offset)
 	{
+		checkNotNull(other);
 		return new PositionFactory(owner -> {
 			return other.position().x() + other.size().width() - owner.size().width() + offset;
 		});
 	}
 
-	public PositionFactory centeredTo(UIComponent<?> other)
+	public PositionFactory centeredTo(@Nonnull UIComponent<?> other)
 	{
 		return centeredTo(other, 0);
 	}
 
-	public PositionFactory centeredTo(UIComponent<?> other, int offset)
+	public PositionFactory centeredTo(@Nonnull UIComponent<?> other, int offset)
 	{
+		checkNotNull(other);
 		return new PositionFactory(owner -> {
 			return other.position().x() + (other.size().width() - owner.size().width()) / 2 + offset;
 		});

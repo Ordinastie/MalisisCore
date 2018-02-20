@@ -24,8 +24,13 @@
 
 package net.malisis.core.client.gui.component.element;
 
+import static com.google.common.base.Preconditions.*;
+
+import java.util.function.ToIntFunction;
+
+import javax.annotation.Nonnull;
+
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Padding.IPadded;
 
 /**
  * @author Ordinastie
@@ -33,170 +38,77 @@ import net.malisis.core.client.gui.component.element.Padding.IPadded;
  */
 public interface Size
 {
-	public static final Size ZERO = Size.of(0, 0);
-
-	public int width();
-
-	public int height();
-
-	public static class FixedSize implements Size
+	public interface ISize
 	{
-		private final int width;
-		private final int height;
+		public default void setOwner(UIComponent<?> owner)
+		{}
 
-		public FixedSize(int width, int height)
+		public int width();
+
+		public int height();
+	}
+
+	public static class DynamicSize implements ISize
+	{
+		private final ToIntFunction<UIComponent<?>> width;
+		private final ToIntFunction<UIComponent<?>> height;
+		private UIComponent<?> owner;
+
+		public DynamicSize(ToIntFunction<UIComponent<?>> width, ToIntFunction<UIComponent<?>> height)
 		{
 			this.width = width;
 			this.height = height;
+		}
+
+		@Override
+		public void setOwner(@Nonnull UIComponent<?> owner)
+		{
+			this.owner = checkNotNull(owner);
 		}
 
 		@Override
 		public int width()
 		{
-			return width;
+			return width.applyAsInt(owner);
 		}
 
 		@Override
 		public int height()
 		{
-			return height;
+			return height.applyAsInt(owner);
 		}
 	}
 
-	public static class RelativeSize implements Size
+	public static ISize of(int width, int height)
 	{
-		private final UIComponent<?> owner;
-		private int width;
-		private int height;
-		private UIComponent<?> relCompWidth;
-		private UIComponent<?> relCompHeight;
-		private float relativeWidth;
-		private float relativeHeight;
+		return width(width).height(height);
+	}
 
-		public RelativeSize(UIComponent<?> owner, int width, int height, UIComponent<?> relCompWidth, float relativeWidth, UIComponent<?> relCompHeight, float relativeHeight)
-		{
-			this.owner = owner;
-			this.width = width;
-			this.height = height;
-			this.relCompWidth = relCompWidth;
-			this.relativeWidth = relativeWidth;
-			this.relCompHeight = relCompHeight;
-			this.relativeHeight = relativeHeight;
-		}
+	public static ISize inherited()
+	{
+		return relativeWidth(1.0F).relativeHeight(1.0F);
+	}
 
-		@Override
-		public int width()
-		{
-			if (relativeWidth == 0)
-				return width;
+	public static SizeFactory width(int width)
+	{
+		return new SizeFactory(owner -> width);
+	}
 
-			UIComponent<?> c = relCompWidth;
-			int p = 0;
-
-			if (c == null) //use parent if relative comp is null
-			{
-				c = owner.getParent();
-				if (c instanceof IPadded) //assume size without padding if available
-					p = ((IPadded) c).getPadding().horizontal();
-			}
-			if (c == null)
+	public static SizeFactory relativeWidth(float width)
+	{
+		return new SizeFactory(owner -> {
+			UIComponent<?> parent = owner.getParent();
+			if (parent == null)
 				return 0;
-			return (int) ((c.size().width() - p) * relativeWidth);
-		}
-
-		@Override
-		public int height()
-		{
-			if (relativeHeight == 0)
-				return height;
-
-			UIComponent<?> c = relCompHeight;
-			int p = 0;
-
-			if (c == null) //use parent if relative comp is null
-			{
-				c = owner.getParent();
-				if (c instanceof IPadded) //assume size without padding if available
-					p = ((IPadded) c).getPadding().vertical();
-			}
-			if (c == null)
-				return 0;
-			return (int) ((c.size().height() - p) * relativeHeight);
-		}
+			return (int) ((parent.size().width() - Padding.of(parent).horizontal()) * width);
+		});
 	}
 
-	public static Size of(int width, int height)
+	public static SizeFactory widthRelativeTo(float width, @Nonnull UIComponent<?> other)
 	{
-		return new FixedSize(width, height);
-	}
-
-	public static SizeBuilder of(UIComponent<?> owner)
-	{
-		return new SizeBuilder(owner);
-	}
-
-	public static class SizeBuilder
-	{
-		private final UIComponent<?> owner;
-		private int width;
-		private int height;
-		private UIComponent<?> relCompWidth;
-		private UIComponent<?> relCompHeight;
-		private float relativeWidth;
-		private float relativeHeight;
-
-		public SizeBuilder(UIComponent<?> owner)
-		{
-			this.owner = owner;
-		}
-
-		public SizeBuilder width(int width)
-		{
-			this.width = width;
-			return this;
-		}
-
-		public SizeBuilder height(int height)
-		{
-			this.height = height;
-			return this;
-		}
-
-		public SizeBuilder relativeWidth(float width)
-		{
-			return relativeWidth(width, null);
-		}
-
-		public SizeBuilder relativeWidth(float width, UIComponent<?> relativeTo)
-		{
-			this.relativeWidth = width;
-			this.relCompWidth = relativeTo;
-			return this;
-		}
-
-		public SizeBuilder relativeHeight(float height)
-		{
-			return relativeHeight(height, null);
-		}
-
-		public SizeBuilder relativeHeight(float height, UIComponent<?> relativeTo)
-		{
-			this.relativeHeight = height;
-			this.relCompHeight = relativeTo;
-			return this;
-		}
-
-		public Size build()
-		{
-			if (relativeWidth == 0 && relativeHeight == 0)
-				return new FixedSize(width, height);
-
-			return new RelativeSize(owner, width, height, relCompWidth, relativeWidth, relCompHeight, relativeHeight);
-		}
-	}
-
-	public interface ISized
-	{
-		public Size getSize();
+		checkNotNull(other);
+		return new SizeFactory(owner -> {
+			return (int) (other.size().width() * width);
+		});
 	}
 }

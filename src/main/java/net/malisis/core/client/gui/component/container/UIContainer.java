@@ -40,7 +40,7 @@ import net.malisis.core.client.gui.component.control.ICloseable;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.element.Padding;
-import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
@@ -108,7 +108,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	 * @param gui the gui
 	 * @param size the size
 	 */
-	public UIContainer(MalisisGui gui, Size size)
+	public UIContainer(MalisisGui gui, ISize size)
 	{
 		this(gui);
 		setSize(size);
@@ -121,7 +121,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	 * @param title the title
 	 * @param size the size
 	 */
-	public UIContainer(MalisisGui gui, String title, Size size)
+	public UIContainer(MalisisGui gui, String title, ISize size)
 	{
 		this(gui);
 		setTitle(title);

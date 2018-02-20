@@ -33,7 +33,7 @@ import net.malisis.core.client.gui.component.decoration.UIImage;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.element.Position;
 import net.malisis.core.client.gui.component.element.Position.IPosition;
-import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.renderer.font.FontOptions;
@@ -49,7 +49,7 @@ import net.minecraft.init.SoundEvents;
  */
 public class UIButton extends UIComponent<UIButton>
 {
-	private final Size AUTO_SIZE = new AutoSize();
+	private final ISize AUTO_SIZE = new AutoSize();
 
 	/** The {@link FontOptions} to use by default for the {@link UILabel} content. */
 	protected FontOptions defaultFontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
@@ -406,7 +406,7 @@ public class UIButton extends UIComponent<UIButton>
 		}
 	}
 
-	private class AutoSize implements Size
+	private class AutoSize implements ISize
 	{
 		@Override
 		public int width()

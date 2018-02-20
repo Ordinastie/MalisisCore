@@ -29,7 +29,7 @@ import javax.annotation.Nonnull;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
@@ -60,7 +60,7 @@ public class UISeparator extends UIComponent<UISeparator>
 
 	@Override
 	@Nonnull
-	public Size size()
+	public ISize size()
 	{
 		return separatorSize;
 	}
@@ -99,7 +99,7 @@ public class UISeparator extends UIComponent<UISeparator>
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{}
 
-	private class SeparatorSize implements Size
+	private class SeparatorSize implements ISize
 	{
 		@Override
 		public int width()

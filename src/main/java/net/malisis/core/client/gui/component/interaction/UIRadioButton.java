@@ -36,7 +36,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.renderer.RenderParameters;
@@ -224,7 +224,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 		return getSelected(rb.name);
 	}
 
-	public class RadioButtonSize implements Size
+	public class RadioButtonSize implements ISize
 	{
 		@Override
 		public int width()

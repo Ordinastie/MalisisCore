@@ -229,9 +229,9 @@ public class UITabGroup extends UIContainer<UITabGroup>
 			tab.setSize(isHorizontal ? 0 : s, isHorizontal ? s : 0);
 
 		if (isHorizontal)
-			setSize(Size.of(this).relativeWidth(1.0F, attachedContainer).height(s).build());
+			setSize(Size.widthRelativeTo(1.0F, attachedContainer).height(s));
 		else
-			setSize(Size.of(this).width(s).relativeHeight(1.0F, attachedContainer).build());
+			setSize(Size.width(s).heightRelativeTo(1.0F, attachedContainer));
 	}
 
 	public void setActiveTab(String tabName)

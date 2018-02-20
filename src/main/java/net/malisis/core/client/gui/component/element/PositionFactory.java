@@ -24,7 +24,11 @@
 
 package net.malisis.core.client.gui.component.element;
 
+import static com.google.common.base.Preconditions.*;
+
 import java.util.function.ToIntFunction;
+
+import javax.annotation.Nonnull;
 
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.element.Position.DynamicPosition;
@@ -54,26 +58,28 @@ public class PositionFactory
 	}
 
 	//relative postion
-	public IPosition above(UIComponent<?> component)
+	public IPosition above(@Nonnull UIComponent<?> component)
 	{
 		return above(component, 0);
 	}
 
-	public IPosition above(UIComponent<?> component, int spacing)
+	public IPosition above(@Nonnull UIComponent<?> component, int spacing)
 	{
+		checkNotNull(component);
 		yFunction = owner -> {
 			return component.position().y() - owner.size().height() - spacing;
 		};
 		return build();
 	}
 
-	public IPosition below(UIComponent<?> component)
+	public IPosition below(@Nonnull UIComponent<?> component)
 	{
 		return below(component, 0);
 	}
 
-	public IPosition below(UIComponent<?> component, int spacing)
+	public IPosition below(@Nonnull UIComponent<?> component, int spacing)
 	{
+		checkNotNull(component);
 		yFunction = owner -> {
 			return component.position().y() + component.size().height() + spacing;
 		};
@@ -123,39 +129,42 @@ public class PositionFactory
 	}
 
 	//aligned relative to another component
-	public IPosition topAlignedTo(UIComponent<?> other)
+	public IPosition topAlignedTo(@Nonnull UIComponent<?> other)
 	{
 		return topAlignedTo(other, 0);
 	}
 
-	public IPosition topAlignedTo(UIComponent<?> other, int offset)
+	public IPosition topAlignedTo(@Nonnull UIComponent<?> other, int offset)
 	{
+		checkNotNull(other);
 		yFunction = owner -> {
 			return other.position().y() + offset;
 		};
 		return build();
 	}
 
-	public IPosition bottomAlignedTo(UIComponent<?> other)
+	public IPosition bottomAlignedTo(@Nonnull UIComponent<?> other)
 	{
 		return bottomAlignedTo(other, 0);
 	}
 
-	public IPosition bottomAlignedTo(UIComponent<?> other, int offset)
+	public IPosition bottomAlignedTo(@Nonnull UIComponent<?> other, int offset)
 	{
+		checkNotNull(other);
 		yFunction = owner -> {
 			return other.position().y() + other.size().height() - owner.size().height() + offset;
 		};
 		return build();
 	}
 
-	public IPosition middleAlignedTo(UIComponent<?> other)
+	public IPosition middleAlignedTo(@Nonnull UIComponent<?> other)
 	{
 		return middleAlignedTo(other, 0);
 	}
 
-	public IPosition middleAlignedTo(UIComponent<?> other, int offset)
+	public IPosition middleAlignedTo(@Nonnull UIComponent<?> other, int offset)
 	{
+		checkNotNull(other);
 		yFunction = owner -> {
 			return other.position().y() + (other.size().height() - owner.size().height()) / 2 + offset;
 		};

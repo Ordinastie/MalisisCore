@@ -29,6 +29,7 @@ import net.malisis.core.client.gui.GuiTexture;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
@@ -42,7 +43,7 @@ import net.minecraft.item.ItemStack;
 public class UIImage extends UIComponent<UIImage>
 {
 	/** Fixed size of ItemStack UIImages. */
-	private final Size ITEMSTACK_SIZE = Size.of(16, 16);
+	private final ISize ITEMSTACK_SIZE = Size.of(16, 16);
 	/** {@link GuiTexture} to use for the icon. */
 	private GuiTexture texture;
 	/** {@link Icon} to use for the texture. */
@@ -166,7 +167,7 @@ public class UIImage extends UIComponent<UIImage>
 	 * @param size the new size
 	 */
 	@Override
-	public void setSize(Size size)
+	public void setSize(ISize size)
 	{
 		//UIImage for itemStack have a fixed 16*16 size
 		if (itemStack != null)

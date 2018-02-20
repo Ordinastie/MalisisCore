@@ -29,6 +29,7 @@ import net.malisis.core.client.gui.GuiTexture;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.VanillaIcon;
@@ -59,7 +60,7 @@ public class UIProgressBar extends UIComponent<UIProgressBar>
 		filledIcon = texture.createIcon(246, 16, 22, 16);
 	}
 
-	public UIProgressBar(MalisisGui gui, Size size, GuiTexture texture, Icon backgroundIcon, Icon filledIcon)
+	public UIProgressBar(MalisisGui gui, ISize size, GuiTexture texture, Icon backgroundIcon, Icon filledIcon)
 	{
 		super(gui);
 		setSize(size);

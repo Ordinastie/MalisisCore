@@ -49,6 +49,7 @@ import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.element.Padding;
 import net.malisis.core.client.gui.component.element.Position.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.component.interaction.UISelect.Option;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
@@ -163,7 +164,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 	//#region Getters/Setters
 	@Override
-	public void setSize(Size size)
+	public void setSize(ISize size)
 	{
 		super.setSize(size);
 		optionsContainer.updateSize();
@@ -995,7 +996,7 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		}
 	}
 
-	public class OptionContainerSize implements Size
+	public class OptionContainerSize implements ISize
 	{
 		private int width;
 		private int height;
