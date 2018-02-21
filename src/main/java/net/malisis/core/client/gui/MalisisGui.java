@@ -27,10 +27,7 @@ package net.malisis.core.client.gui;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -39,6 +36,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
 import net.malisis.core.MalisisCore;
+import net.malisis.core.client.gui.component.DebugComponent;
 import net.malisis.core.client.gui.component.IKeyListener;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.UISlot;
@@ -48,10 +46,8 @@ import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
 import net.malisis.core.inventory.message.InventoryActionMessage;
-import net.malisis.core.renderer.RenderType;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.AnimationRenderer;
-import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.util.ItemUtils;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.Minecraft;
@@ -118,8 +114,7 @@ public abstract class MalisisGui extends GuiScreen
 	/** List of {@link IKeyListener} registered. */
 	protected Set<IKeyListener> keyListeners = new HashSet<>();
 	/** Debug **/
-	private boolean debug = false;
-	private HashMap<String, Supplier<String>> debugMap = new LinkedHashMap<>();
+	private final DebugComponent debugComponent = new DebugComponent(this);
 
 	protected MalisisGui()
 	{
@@ -146,8 +141,7 @@ public abstract class MalisisGui extends GuiScreen
 		{
 			if (!constructed)
 			{
-				debugMap.clear();
-				addDefaultDebug();
+				setDefaultDebug();
 				construct();
 				constructed = true;
 			}
@@ -548,7 +542,7 @@ public abstract class MalisisGui extends GuiScreen
 					construct();
 				}
 				if (keyCode == Keyboard.KEY_D)
-					debug = !debug;
+					debugComponent.toggle();
 			}
 		}
 		catch (Exception e)
@@ -581,8 +575,6 @@ public abstract class MalisisGui extends GuiScreen
 
 		renderer.drawScreen(screen, mouseX, mouseY, partialTicks);
 
-		renderDebug(mouseX, mouseY, partialTicks);
-
 		if (inventoryContainer != null)
 		{
 			ItemStack itemStack = inventoryContainer.getPickedItemStack();
@@ -596,7 +588,7 @@ public abstract class MalisisGui extends GuiScreen
 	}
 
 	//#region Debug
-	private void addDefaultDebug()
+	private void setDefaultDebug()
 	{
 		addDebug("Focus", () -> String.valueOf(focusedComponent));
 		addDebug("Hover", () -> String.valueOf(hoveredComponent));
@@ -605,48 +597,10 @@ public abstract class MalisisGui extends GuiScreen
 			addDebug("Picked", () -> ItemUtils.toString(inventoryContainer.getPickedItemStack()));
 	}
 
-	public void addDebug(String name, String value)
-	{
-		addDebug(name, () -> value);
-	}
-
 	public void addDebug(String name, Supplier<String> supplier)
 	{
-		debugMap.put(name, supplier);
+		debugComponent.addDebug(name, supplier);
 	}
-
-	public void removeDebug(String name)
-	{
-		debugMap.remove(name);
-	}
-
-	private void renderDebug(int mouseX, int mouseY, float partialTicks)
-	{
-		if (debug)
-		{
-			renderer.set(mouseX, mouseY, partialTicks);
-			renderer.prepare(RenderType.GUI);
-
-			int dy = 0, oy = 5;
-			FontOptions fro = FontOptions.builder().color(0xFFFFFF).shadow().build();
-			//hard code mouse
-			renderer.drawText(null, "Mouse : " + mouseX + "," + mouseY, 5, dy++ * 10 + oy, 0, fro, false);
-			if (hoveredComponent != null)
-				renderer.drawText(	null,
-									"(" + hoveredComponent.relativeX(mouseX) + ", " + hoveredComponent.relativeY(mouseY) + ")",
-									100,
-									(dy - 1) * 10 + oy,
-									0,
-									fro,
-									false);
-			for (Entry<String, Supplier<String>> entry : debugMap.entrySet())
-				renderer.drawText(null, entry.getKey() + " : " + entry.getValue().get(), 5, dy++ * 10 + oy, 0, fro, false);
-
-			renderer.clean();
-		}
-
-	}
-
 	//#end Debug
 
 	/**

@@ -24,57 +24,53 @@
 
 package net.malisis.core.client.gui.component.element;
 
-import java.util.function.ToIntFunction;
+import static com.google.common.base.Preconditions.*;
+
+import javax.annotation.Nonnull;
 
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Size.DynamicSize;
-import net.malisis.core.client.gui.component.element.Size.ISize;
+import net.malisis.core.client.gui.component.element.Size.HeightFunction;
+import net.malisis.core.client.gui.component.element.Size.WidthFunction;
 
 /**
  * @author Ordinastie
  *
  */
-public class SizeFactory
+public class Sizes
 {
-	private ToIntFunction<UIComponent<?>> widthFunction;
-	private ToIntFunction<UIComponent<?>> heightFunction;
-
-	public SizeFactory(ToIntFunction<UIComponent<?>> widthFunction)
+	public static WidthFunction relativeWidth(float width)
 	{
-		this.widthFunction = widthFunction;
+		return owner -> {
+			UIComponent<?> parent = owner.getParent();
+			if (parent == null)
+				return 0;
+			return (int) ((parent.size().width() - Padding.of(parent).horizontal()) * width);
+		};
 	}
 
-	public ISize height(int height)
+	public static WidthFunction widthRelativeTo(float width, @Nonnull UIComponent<?> other)
 	{
-		heightFunction = owner -> height;
-		return build();
+		checkNotNull(other);
+		return owner -> {
+			return (int) (other.size().width() * width);
+		};
 	}
 
-	public ISize relativeHeight(float height)
+	public static HeightFunction relativeHeight(float height)
 	{
-		heightFunction = owner -> {
+		return owner -> {
 			UIComponent<?> parent = owner.getParent();
 			if (parent == null)
 				return 0;
 			return (int) ((parent.size().height() - Padding.of(parent).vertical()) * height);
 		};
-		return build();
 	}
 
-	public ISize heightRelativeTo(float height, UIComponent<?> other)
+	public static HeightFunction heightRelativeTo(float height, @Nonnull UIComponent<?> other)
 	{
-		heightFunction = owner -> {
-			if (other == null)
-				return 0;
+		checkNotNull(other);
+		return owner -> {
 			return (int) (other.size().height() * height);
 		};
-
-		return build();
 	}
-
-	private ISize build()
-	{
-		return new DynamicSize(widthFunction, heightFunction);
-	}
-
 }

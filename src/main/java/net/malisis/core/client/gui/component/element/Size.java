@@ -48,16 +48,24 @@ public interface Size
 		public int height();
 	}
 
+	public interface WidthFunction extends ToIntFunction<UIComponent<?>>
+	{
+	}
+
+	public interface HeightFunction extends ToIntFunction<UIComponent<?>>
+	{
+	}
+
 	public static class DynamicSize implements ISize
 	{
-		private final ToIntFunction<UIComponent<?>> width;
-		private final ToIntFunction<UIComponent<?>> height;
+		private final WidthFunction width;
+		private final HeightFunction height;
 		private UIComponent<?> owner;
 
-		public DynamicSize(ToIntFunction<UIComponent<?>> width, ToIntFunction<UIComponent<?>> height)
+		public DynamicSize(@Nonnull WidthFunction width, @Nonnull HeightFunction height)
 		{
-			this.width = width;
-			this.height = height;
+			this.width = checkNotNull(width);
+			this.height = checkNotNull(height);
 		}
 
 		@Override
@@ -89,6 +97,12 @@ public interface Size
 		return relativeWidth(1.0F).relativeHeight(1.0F);
 	}
 
+	public static ISize matches(@Nonnull UIComponent<?> other)
+	{
+		checkNotNull(other);
+		return widthRelativeTo(1.0F, other).heightRelativeTo(1.0F, other);
+	}
+
 	public static SizeFactory width(int width)
 	{
 		return new SizeFactory(owner -> width);
@@ -96,19 +110,47 @@ public interface Size
 
 	public static SizeFactory relativeWidth(float width)
 	{
-		return new SizeFactory(owner -> {
-			UIComponent<?> parent = owner.getParent();
-			if (parent == null)
-				return 0;
-			return (int) ((parent.size().width() - Padding.of(parent).horizontal()) * width);
-		});
+		return new SizeFactory(Sizes.relativeWidth(width));
 	}
 
 	public static SizeFactory widthRelativeTo(float width, @Nonnull UIComponent<?> other)
 	{
-		checkNotNull(other);
-		return new SizeFactory(owner -> {
-			return (int) (other.size().width() * width);
-		});
+
+		return new SizeFactory(Sizes.widthRelativeTo(width, other));
+	}
+
+	public class SizeFactory
+	{
+		private WidthFunction widthFunction;
+		private HeightFunction heightFunction;
+
+		public SizeFactory(WidthFunction widthFunction)
+		{
+			this.widthFunction = widthFunction;
+		}
+
+		public ISize height(int height)
+		{
+			heightFunction = owner -> height;
+			return build();
+		}
+
+		public ISize relativeHeight(float height)
+		{
+			heightFunction = Sizes.relativeHeight(height);
+			return build();
+		}
+
+		public ISize heightRelativeTo(float height, UIComponent<?> other)
+		{
+			heightFunction = Sizes.heightRelativeTo(height, other);
+			return build();
+		}
+
+		private ISize build()
+		{
+			return new DynamicSize(widthFunction, heightFunction);
+		}
+
 	}
 }
