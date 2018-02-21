@@ -27,9 +27,14 @@ package net.malisis.core.client.gui.component;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
+
+import org.lwjgl.opengl.GL11;
+
+import com.google.common.collect.Sets;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.GuiRenderer;
@@ -137,6 +142,9 @@ public class DebugComponent extends UIComponent<DebugComponent> implements IPadd
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		UIComponent<?> hoveredComponent = MalisisGui.getHoveredComponent();
+
+		drawHierarchy(renderer, hoveredComponent);
+
 		//hard code mouse
 		int dy = 1, oy = getPadding().top();
 		MalisisFont font = MalisisFont.minecraftFont;
@@ -154,5 +162,46 @@ public class DebugComponent extends UIComponent<DebugComponent> implements IPadd
 								0,
 								fontOptions,
 								false);
+	}
+
+	public void drawHierarchy(GuiRenderer renderer, UIComponent<?> component)
+	{
+		if (component == null || !GuiScreen.isAltKeyDown())
+			return;
+
+		Set<UIComponent<?>> components = Sets.newLinkedHashSet();
+		while (component != null)
+		{
+			if (component.getParent() != null) //don't add the screen component
+				components.add(component);
+			component = component.getParent();
+		}
+
+		//if only one component offset is never used
+		int offset = components.size() > 1 ? Math.min(100, 200 / (components.size() - 1)) : 0;
+		offset = 80;
+		//green/blue
+		int r = 255;
+		int g = 0;
+		int b = 0;
+		int z = 100;
+
+		renderer.next(GL11.GL_LINE_LOOP);
+		GL11.glLineWidth(3);
+		for (UIComponent<?> comp : components)
+		{
+			renderer.drawRectangle(	comp.screenX(),
+									comp.screenY(),
+									z--,
+									comp.size().width(),
+									comp.size().height(),
+									(r << 16) + (g << 8) + b,
+									255,
+									false);
+			r -= Math.max(offset, 0);
+			g = Math.min(g + offset, 255);
+			b = Math.min(b + 2 * offset, 255);
+		}
+		renderer.next(GL11.GL_QUADS);
 	}
 }
