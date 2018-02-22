@@ -168,12 +168,12 @@ public class Position
 	}
 
 	//aligned relative to another component
-	public PositionFactory leftAlignedTo(@Nonnull UIComponent<?> other)
+	public static PositionFactory leftAlignedTo(@Nonnull UIComponent<?> other)
 	{
 		return leftAlignedTo(other, 0);
 	}
 
-	public PositionFactory leftAlignedTo(@Nonnull UIComponent<?> other, int offset)
+	public static PositionFactory leftAlignedTo(@Nonnull UIComponent<?> other, int offset)
 	{
 		checkNotNull(other);
 		return new PositionFactory(owner -> {
@@ -181,12 +181,12 @@ public class Position
 		});
 	}
 
-	public PositionFactory rightAlignedTo(@Nonnull UIComponent<?> other)
+	public static PositionFactory rightAlignedTo(@Nonnull UIComponent<?> other)
 	{
 		return rightAlignedTo(other, 0);
 	}
 
-	public PositionFactory rightAlignedTo(@Nonnull UIComponent<?> other, int offset)
+	public static PositionFactory rightAlignedTo(@Nonnull UIComponent<?> other, int offset)
 	{
 		checkNotNull(other);
 		return new PositionFactory(owner -> {
@@ -194,12 +194,12 @@ public class Position
 		});
 	}
 
-	public PositionFactory centeredTo(@Nonnull UIComponent<?> other)
+	public static PositionFactory centeredTo(@Nonnull UIComponent<?> other)
 	{
 		return centeredTo(other, 0);
 	}
 
-	public PositionFactory centeredTo(@Nonnull UIComponent<?> other, int offset)
+	public static PositionFactory centeredTo(@Nonnull UIComponent<?> other, int offset)
 	{
 		checkNotNull(other);
 		return new PositionFactory(owner -> {
