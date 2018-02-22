@@ -26,13 +26,13 @@ package net.malisis.core.client.gui.component.container;
 
 import java.util.LinkedHashMap;
 
-import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.element.Position;
 import net.malisis.core.client.gui.component.element.Position.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.component.interaction.UITab;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
@@ -191,10 +191,41 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		tab.setContainer(container);
 		tab.setActive(false);
 		listTabs.put(tab, container);
+		updateSize();
 
-		calculateTabPosition();
-
+		if (attachedContainer != null)
+		{
+			setupTabContainer(container);
+			calculateTabPosition();
+		}
 		return tab;
+	}
+
+	private void setupTabContainer(UIContainer<?> container)
+	{
+		attachedContainer.add(container);
+		container.setPosition(Position.zero());
+		container.setSize(Size.inherited());
+	}
+
+	private void updateSize()
+	{
+		int width = offset;
+		int height = offset;
+		for (UITab tab : listTabs.keySet())
+		{
+			if (tabPosition == ComponentPosition.TOP || tabPosition == ComponentPosition.BOTTOM)
+			{
+				width += tab.size().width() + spacing;
+				height = Math.max(height, tab.size().height());
+			}
+			else
+			{
+				width = Math.max(width, tab.size().width());
+				height += tab.size().height() + spacing;
+			}
+		}
+		setSize(Size.of(width, height));
 	}
 
 	/**
@@ -203,7 +234,6 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 */
 	protected void calculateTabPosition()
 	{
-		int s = 0;
 		boolean isHorizontal = tabPosition == ComponentPosition.TOP || tabPosition == ComponentPosition.BOTTOM;
 		UITab lastTab = null;
 
@@ -213,25 +243,17 @@ public class UITabGroup extends UIContainer<UITabGroup>
 			{
 				IPosition p = lastTab != null ? Position.rightOf(lastTab, spacing).y(0) : Position.of(offset, 1);
 				tab.setPosition(p);
-				s = Math.max(s, tab.size().height() - (tab.isActive() ? 2 : 0));
 			}
 			else
 			{
 				IPosition p = lastTab != null ? Position.x(0).below(lastTab, spacing) : Position.of(1, offset);
 				tab.setPosition(p);
-				s = Math.max(s, tab.size().width() - (tab.isActive() ? 2 : 0));
-
 			}
 			lastTab = tab;
 		}
 
-		for (UITab tab : listTabs.keySet())
-			tab.setSize(isHorizontal ? 0 : s, isHorizontal ? s : 0);
-
-		if (isHorizontal)
-			setSize(Size.widthRelativeTo(1.0F, attachedContainer).height(s));
-		else
-			setSize(Size.width(s).heightRelativeTo(1.0F, attachedContainer));
+		//		for (UITab tab : listTabs.keySet())
+		//			tab.setSize(isHorizontal ? 0 : s, isHorizontal ? s : 0);
 	}
 
 	public void setActiveTab(String tabName)
@@ -265,14 +287,6 @@ public class UITabGroup extends UIContainer<UITabGroup>
 			return;
 
 		tab.setActive(true);
-		if (attachedContainer instanceof ITransformable.Color)
-			((ITransformable.Color) attachedContainer).setColor(tab.getBgColor());
-
-	}
-
-	private class ContainerSize implements Size
-	{
-
 	}
 
 	/**
@@ -288,53 +302,26 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		if (activeTab != null && attachedContainer instanceof ITransformable.Color)
 			((ITransformable.Color) attachedContainer).setColor(activeTab.getBgColor());
 
-		if (!displace)
+		switch (tabPosition)
 		{
-			if (activeTab != null)
-			{
-				UITab tab = activeTab;
-				activeTab = null;
-				setActiveTab(tab);
-			}
-
-			return this;
+			case TOP:
+				setPosition(Position.leftAlignedTo(container).above(container, -2));
+				break;
+			case BOTTOM:
+				setPosition(Position.leftAlignedTo(container).below(container, 2));
+				break;
+			case LEFT:
+				setPosition(Position.leftOf(container, -2).topAlignedTo(container));
+				break;
+			case RIGHT:
+				setPosition(Position.rightOf(container, 2).topAlignedTo(container));
+				break;
 		}
 
-		int cx = container.getX();
-		int cy = container.getY();
-		int cw = container.getRawWidth();
-		int ch = container.getRawHeight();
-		int av = Anchor.vertical(container.getAnchor());
-		int ah = Anchor.horizontal(container.getAnchor());
+		for (UIContainer<?> tabContainer : listTabs.values())
+			setupTabContainer(tabContainer);
 
-		if (tabPosition == ComponentPosition.TOP)
-		{
-			if (av == Anchor.TOP || av == Anchor.NONE)
-				cy += getHeight() - 1;
-			ch = container.getRawHeight() - getHeight();
-		}
-		else if (tabPosition == ComponentPosition.BOTTOM)
-		{
-			if (av == Anchor.BOTTOM)
-				cy -= getHeight() - 1;
-			ch = container.getRawHeight() - getHeight() + 1;
-		}
-		else if (tabPosition == ComponentPosition.LEFT)
-		{
-			if (ah == Anchor.LEFT || ah == Anchor.NONE)
-				cx += getWidth() - 1;
-			cw = container.getRawWidth() - getWidth();
-		}
-		else if (tabPosition == ComponentPosition.RIGHT)
-		{
-			if (ah == Anchor.RIGHT)
-				cx -= getWidth() - 1;
-			cw = container.getRawWidth() - getWidth() + 1;
-		}
-
-		//tab.setSize(w, h);
-		container.setSize(cw, ch);
-		container.setPosition(cx, cy);
+		calculateTabPosition();
 
 		if (activeTab != null)
 		{
@@ -342,52 +329,98 @@ public class UITabGroup extends UIContainer<UITabGroup>
 			activeTab = null;
 			setActiveTab(tab);
 		}
+		if (displace)
+		{
+			attachedContainer.setPosition(new AttachedContainerPosition(attachedContainer.position()));
+			attachedContainer.setSize(new AttachedContainerSize(attachedContainer.size()));
+		}
+
 		return this;
+		//		int cx = container.getX();
+		//		int cy = container.getY();
+		//		int cw = container.getRawWidth();
+		//		int ch = container.getRawHeight();
+		//		int av = Anchor.vertical(container.getAnchor());
+		//		int ah = Anchor.horizontal(container.getAnchor());
+		//
+		//		if (tabPosition == ComponentPosition.TOP)
+		//		{
+		//			if (av == Anchor.TOP || av == Anchor.NONE)
+		//				cy += getHeight() - 1;
+		//			ch = container.getRawHeight() - getHeight();
+		//		}
+		//		else if (tabPosition == ComponentPosition.BOTTOM)
+		//		{
+		//			if (av == Anchor.BOTTOM)
+		//				cy -= getHeight() - 1;
+		//			ch = container.getRawHeight() - getHeight() + 1;
+		//		}
+		//		else if (tabPosition == ComponentPosition.LEFT)
+		//		{
+		//			if (ah == Anchor.LEFT || ah == Anchor.NONE)
+		//				cx += getWidth() - 1;
+		//			cw = container.getRawWidth() - getWidth();
+		//		}
+		//		else if (tabPosition == ComponentPosition.RIGHT)
+		//		{
+		//			if (ah == Anchor.RIGHT)
+		//				cx -= getWidth() - 1;
+		//			cw = container.getRawWidth() - getWidth() + 1;
+		//		}
+		//
+		//		//tab.setSize(w, h);
+		//		container.setSize(cw, ch);
+		//		container.setPosition(cx, cy);
 	}
 
-	@Override
-	public int screenX()
+	private class AttachedContainerPosition implements IPosition
 	{
-		if (attachedContainer == null)
-			return super.screenX();
+		private final IPosition originalPosition;
 
-		int x = this.x + attachedContainer.screenX();
-		switch (tabPosition)
+		public AttachedContainerPosition(IPosition position)
 		{
-			case LEFT:
-				x += offset - getWidth();
-				break;
-			case RIGHT:
-				x += attachedContainer.getWidth() - offset;
-				break;
-			default:
-				break;
-
+			originalPosition = position;
 		}
 
-		return x;
+		@Override
+		public int x()
+		{
+			return originalPosition.x() + (tabPosition == ComponentPosition.LEFT ? size().width() : 0);
+		}
+
+		@Override
+		public int y()
+		{
+			return originalPosition.y() + (tabPosition == ComponentPosition.TOP ? size().height() : 0);
+		}
 	}
 
-	@Override
-	public int screenY()
+	private class AttachedContainerSize implements ISize
 	{
-		if (attachedContainer == null)
-			return super.screenY();
+		private final ISize originalSize;
 
-		int y = this.y + attachedContainer.screenY();
-		switch (tabPosition)
+		public AttachedContainerSize(ISize size)
 		{
-			case TOP:
-				y += offset - getHeight();
-				break;
-			case BOTTOM:
-				y += attachedContainer.getHeight() - offset;
-				break;
-			default:
-				break;
-
+			originalSize = size;
 		}
-		return y;
+
+		@Override
+		public int width()
+		{
+			if (tabPosition == ComponentPosition.TOP || tabPosition == ComponentPosition.BOTTOM)
+				return originalSize.width();
+
+			return originalSize.width() - size().width();
+		}
+
+		@Override
+		public int height()
+		{
+			if (tabPosition == ComponentPosition.LEFT || tabPosition == ComponentPosition.RIGHT)
+				return originalSize.height();
+
+			return originalSize.height() - size().height();
+		}
 	}
 
 	/**

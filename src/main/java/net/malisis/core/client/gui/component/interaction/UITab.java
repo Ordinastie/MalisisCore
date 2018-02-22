@@ -34,7 +34,10 @@ import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UITabGroup;
 import net.malisis.core.client.gui.component.container.UITabGroup.TabChangeEvent;
 import net.malisis.core.client.gui.component.decoration.UIImage;
+import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
 import net.malisis.core.renderer.font.FontOptions;
@@ -48,6 +51,8 @@ import net.malisis.core.renderer.icon.provider.GuiIconProvider;
  */
 public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 {
+	private final ISize AUTO_SIZE = new AutoSize();
+
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontOptions} to use for this {@link UITooltip}. */
@@ -56,8 +61,8 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	protected FontOptions activeFontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
 	/** The {@link FontOptions} to use for this {@link UITooltip} when hovered. */
 	protected FontOptions hoveredFontOptions = FontOptions.builder().color(0xFFFFA0).build();
-	/** Label for this {@link UITab}. */
-	protected String label;
+	/** {@link UITab} for this {@link UITab}. */
+	protected UILabel label;
 	/** Image for this {@link UITab}. */
 	protected UIImage image;
 	/** Whether the width of this {@link UITab} is calculated based on the {@link #label} or {@link #image} . */
@@ -81,8 +86,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	public UITab(MalisisGui gui, String label)
 	{
 		super(gui);
-
-		//setSize(0, 0);
+		setAutoSize();
 		setLabel(label);
 
 		shape = new XYResizableGuiShape();
@@ -98,7 +102,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	public UITab(MalisisGui gui, UIImage image)
 	{
 		super(gui);
-		setSize(0, 0);
+		setAutoSize();
 		setImage(image);
 
 		shape = new XYResizableGuiShape();
@@ -106,6 +110,11 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	}
 
 	//#region Getters/Setters
+	public UITabGroup tabGroup()
+	{
+		return (UITabGroup) getParent();
+	}
+
 	@Override
 	public MalisisFont getFont()
 	{
@@ -116,10 +125,6 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	public UITab setFont(MalisisFont font)
 	{
 		this.font = font;
-		if (autoWidth)
-			width = calcAutoWidth();
-		if (autoHeight)
-			height = calcAutoHeight();
 		return this;
 	}
 
@@ -133,10 +138,6 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	public UITab setFontOptions(FontOptions options)
 	{
 		this.fontOptions = options;
-		if (autoWidth)
-			width = calcAutoWidth();
-		if (autoHeight)
-			height = calcAutoHeight();
 		return this;
 	}
 
@@ -189,17 +190,15 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	 * Removes the image if previously set.<br>
 	 * Recalculates the width if {@link #autoWidth} is true, the height if {@link #autoHeight} is true.
 	 *
-	 * @param label the label
+	 * @param text the text
 	 * @return this {@link UITab}
 	 */
-	public UITab setLabel(String label)
+	public UITab setLabel(String text)
 	{
-		this.image = null;
-		this.label = label;
-		if (autoWidth)
-			width = calcAutoWidth();
-		if (autoHeight)
-			height = calcAutoHeight();
+		image = null;
+		label = new UILabel(getGui(), text);
+		label.setPosition(Position.centered().middleAligned());
+		label.setParent(this);
 		return this;
 	}
 
@@ -208,18 +207,15 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	 * Removes the label if previously set.<br>
 	 * Recalculates the width if {@link #autoWidth} is true, the height if {@link #autoHeight} is true.
 	 *
-	 * @param image the image
+	 * @param img the img
 	 * @return this {@link UITab}
 	 */
-	public UITab setImage(UIImage image)
+	public UITab setImage(UIImage img)
 	{
-		this.label = null;
-		this.image = image;
-		if (autoWidth)
-			width = calcAutoWidth();
-		if (autoHeight)
-			height = calcAutoHeight();
-
+		label = null;
+		image = img;
+		image.setPosition(Position.centered().middleAligned());
+		image.setParent(this);
 		return this;
 	}
 
@@ -238,27 +234,9 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 		super.setParent(parent);
 	}
 
-	/**
-	 * Sets the size of this {@link UITab}.<br>
-	 * If width or height is 0, it will be automatically calculated base on {@link #label} or {@link #image}.
-	 *
-	 * @param width the width
-	 * @param height the height
-	 * @return this {@link UITab}
-	 */
-	@Override
-	public UITab setSize(int width, int height)
+	public void setAutoSize()
 	{
-		this.autoWidth = width == 0;
-		this.width = autoWidth ? calcAutoWidth() : width;
-
-		this.autoHeight = height == 0;
-		this.height = autoHeight ? calcAutoHeight() : height;
-
-		if (shape != null)
-			shape.setSize(this.width, this.height);
-
-		return this;
+		setSize(AUTO_SIZE);
 	}
 
 	/**
@@ -300,7 +278,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	 */
 	public ComponentPosition getTabPosition()
 	{
-		return ((UITabGroup) parent).getTabPosition();
+		return tabGroup().getTabPosition();
 	}
 
 	/**
@@ -323,8 +301,8 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	public UITab setBgColor(int color)
 	{
 		this.bgColor = color;
-		if (parent != null)
-			((UITabGroup) parent).getAttachedContainer().setColor(color);
+		if (tabGroup().getAttachedContainer() != null)
+			tabGroup().getAttachedContainer().setColor(color);
 		return this;
 	}
 
@@ -348,27 +326,30 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 			return this;
 		}
 
-		if (this.active != active)
-		{
-			switch (getTabPosition())
-			{
-				case TOP:
-				case BOTTOM:
-					this.y += active ? -1 : 1;
-					this.height += active ? 2 : -2;
-					break;
-				case LEFT:
-				case RIGHT:
-					this.x += active ? -1 : 1;
-					this.width += active ? 2 : -2;
-					break;
-			}
-		}
+		//		if (this.active != active)
+		//		{
+		//			switch (getTabPosition())
+		//			{
+		//				case TOP:
+		//				case BOTTOM:
+		//					this.y += active ? -1 : 1;
+		//					this.height += active ? 2 : -2;
+		//					break;
+		//				case LEFT:
+		//				case RIGHT:
+		//					this.x += active ? -1 : 1;
+		//					this.width += active ? 2 : -2;
+		//					break;
+		//			}
+		//		}
 
 		this.active = active;
 		this.container.setVisible(active);
 		this.container.setEnabled(active);
 		this.zIndex = container.getZIndex() + (active ? 1 : 0);
+
+		//applies current color to attached container
+		setBgColor(bgColor);
 
 		fireEvent(new ActiveStateChange<>(this, active));
 		return this;
@@ -400,36 +381,6 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 		return pos == ComponentPosition.TOP || pos == ComponentPosition.BOTTOM;
 	}
 
-	/**
-	 * Calculates the width of this {@link UITab} based on its contents.
-	 *
-	 * @return the width
-	 */
-	private int calcAutoWidth()
-	{
-		if (label != null)
-			return (int) (font.getStringWidth(label, fontOptions) + (isHorizontal() ? 10 : 8));
-		else if (image != null)
-			return image.getWidth() + 10;
-		else
-			return 8;
-	}
-
-	/**
-	 * Calculates the height of this {@link UITab} base on its contents.
-	 *
-	 * @return the height
-	 */
-	private int calcAutoHeight()
-	{
-		if (label != null)
-			return (int) (font.getStringHeight(fontOptions) + (isHorizontal() ? 8 : 10));
-		else if (image != null)
-			return image.getHeight() + 10;
-		else
-			return 8;
-	}
-
 	@Override
 	public boolean onClick(int x, int y)
 	{
@@ -454,40 +405,53 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		int w = label != null ? (int) font.getStringWidth(label, fontOptions) : image.getWidth();
-		int h = label != null ? (int) font.getStringHeight(fontOptions) : image.getHeight();
-		int x = (getWidth() - w) / 2;
-		int y = (getHeight() - h) / 2 + 1;
-
-		if (active)
-		{
-			switch (getTabPosition())
-			{
-				case TOP:
-					y -= 1;
-					break;
-				case BOTTOM:
-					y += 1;
-					break;
-				case LEFT:
-					x -= 1;
-					break;
-				case RIGHT:
-					x += 1;
-					break;
-			}
-		}
+		//		if (active)
+		//		{
+		//			switch (getTabPosition())
+		//			{
+		//				case TOP:
+		//					y -= 1;
+		//					break;
+		//				case BOTTOM:
+		//					y += 1;
+		//					break;
+		//				case LEFT:
+		//					x -= 1;
+		//					break;
+		//				case RIGHT:
+		//					x += 1;
+		//					break;
+		//			}
+		//		}
 
 		if (label != null)
-		{
-			FontOptions options = isHovered() ? hoveredFontOptions : (active ? activeFontOptions : this.fontOptions);
-			renderer.drawText(font, label, x, y, 1, options);
-		}
+			label.draw(renderer, mouseX, mouseY, partialTick);
 		else if (image != null)
-		{
-			image.setPosition(screenX() + x, screenY() + y);
-			image.setZIndex(zIndex);
 			image.draw(renderer, mouseX, mouseY, partialTick);
+	}
+
+	public class AutoSize implements ISize
+	{
+		@Override
+		public int width()
+		{
+			if (label != null)
+				return label.size().width() + (isHorizontal() ? 10 : 8);
+			else if (image != null)
+				return image.size().width() + 10;
+			else
+				return 8;
+		}
+
+		@Override
+		public int height()
+		{
+			if (label != null)
+				return label.size().height() + (isHorizontal() ? 8 : 10);
+			else if (image != null)
+				return image.size().height() + 10;
+			else
+				return 8;
 		}
 	}
 
