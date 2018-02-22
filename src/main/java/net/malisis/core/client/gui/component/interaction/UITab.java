@@ -301,7 +301,7 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 	public UITab setBgColor(int color)
 	{
 		this.bgColor = color;
-		if (tabGroup().getAttachedContainer() != null)
+		if (tabGroup() != null && tabGroup().getAttachedContainer() != null)
 			tabGroup().getAttachedContainer().setColor(color);
 		return this;
 	}
