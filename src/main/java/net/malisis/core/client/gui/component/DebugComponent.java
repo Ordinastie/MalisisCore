@@ -58,11 +58,11 @@ public class DebugComponent extends UIComponent<DebugComponent> implements IPadd
 	private HashMap<String, Supplier<String>> debugMap = new LinkedHashMap<>();
 	private FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
 	private Padding padding = Padding.of(5, 5);
-	private boolean enabled = false;
 
 	public DebugComponent(MalisisGui gui)
 	{
 		super(gui);
+		enabled = false;
 
 		setSize(new DynamicSize(Sizes.relativeWidth(1.0f), owner -> {
 			return (int) ((debugMap.size() + 1) * MalisisFont.minecraftFont.getStringHeight()) + padding.vertical();
@@ -79,14 +79,19 @@ public class DebugComponent extends UIComponent<DebugComponent> implements IPadd
 		return padding;
 	}
 
-	public void toggle()
+	@Override
+	public DebugComponent setEnabled(boolean enabled)
 	{
-		enabled = !enabled;
-
 		if (enabled)
 			getGui().addToScreen(this);
 		else
 			getGui().removeFromScreen(this);
+		return super.setEnabled(enabled);
+	}
+
+	public void toggle()
+	{
+		setEnabled(!isEnabled());
 	}
 
 	public void clear()

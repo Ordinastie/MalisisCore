@@ -540,6 +540,7 @@ public abstract class MalisisGui extends GuiScreen
 					clearScreen();
 					setResolution();
 					construct();
+					debugComponent.setEnabled(debugComponent.isEnabled());
 				}
 				if (keyCode == Keyboard.KEY_D)
 					debugComponent.toggle();
