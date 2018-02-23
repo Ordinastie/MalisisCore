@@ -45,10 +45,13 @@ public class TexturedBackground implements IGuiRenderer, ITransformable.Color, I
 	protected final MalisisGui gui;
 	protected final GuiShape shape = new XYResizableGuiShape();
 	protected final RenderParameters rp = new RenderParameters();
+	protected final GuiIconProvider iconProvider;
+	protected Padding padding = Padding.NO_PADDING;
 
 	public TexturedBackground(MalisisGui gui, GuiIconProvider iconProvider, int color)
 	{
 		this.gui = gui;
+		this.iconProvider = iconProvider;
 		rp.iconProvider.set(iconProvider);
 		rp.colorMultiplier.set(color);
 	}
@@ -71,6 +74,13 @@ public class TexturedBackground implements IGuiRenderer, ITransformable.Color, I
 	}
 
 	@Override
+	@Nonnull
+	public Padding getPadding()
+	{
+		return padding;
+	}
+
+	@Override
 	public void render(UIComponent<?> component, GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		shape.resetState();
@@ -81,11 +91,10 @@ public class TexturedBackground implements IGuiRenderer, ITransformable.Color, I
 
 	public static class WindowBackground extends TexturedBackground
 	{
-		private final Padding padding = Padding.of(5);
-
 		public WindowBackground(MalisisGui gui, int color)
 		{
 			super(gui, new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 0, 15, 15, 5)), color);
+			padding = Padding.of(5);
 		}
 
 		public WindowBackground(MalisisGui gui)
@@ -103,56 +112,33 @@ public class TexturedBackground implements IGuiRenderer, ITransformable.Color, I
 
 	public static class PanelBackground extends TexturedBackground
 	{
-		private final Padding padding = Padding.of(3);
-
 		public PanelBackground(MalisisGui gui, int color)
 		{
 			super(gui, new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 15, 15, 15, 5)), color);
+			padding = Padding.of(3);
 		}
 
 		public PanelBackground(MalisisGui gui)
 		{
 			this(gui, 0xFFFFFF);
 		}
-
-		@Override
-		@Nonnull
-		public Padding getPadding()
-		{
-			return padding;
-		}
 	}
 
 	public static class BoxBackground extends TexturedBackground
 	{
-		private final Padding padding = Padding.of(1);
-		private final GuiIconProvider iconProvider;
-		private final GuiIconProvider iconProviderDisabled;
-
 		public BoxBackground(MalisisGui gui, int color)
 		{
-			super(gui, null, color);
-			iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 5));
-			iconProviderDisabled = new GuiIconProvider(gui.getGuiTexture().getXResizableIcon(200, 42, 9, 12, 5));
+			super(gui,
+					new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 30, 9, 12, 5),
+										null,
+										gui.getGuiTexture().getXResizableIcon(200, 42, 9, 12, 5)),
+					color);
+			padding = Padding.of(1);
 		}
 
 		public BoxBackground(MalisisGui gui)
 		{
 			this(gui, 0xFFFFFF);
-		}
-
-		@Override
-		@Nonnull
-		public Padding getPadding()
-		{
-			return padding;
-		}
-
-		@Override
-		public void render(UIComponent<?> component, GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-		{
-			rp.iconProvider.set(component.isEnabled() ? iconProvider : iconProviderDisabled);
-			super.render(component, renderer, mouseX, mouseY, partialTick);
 		}
 	}
 

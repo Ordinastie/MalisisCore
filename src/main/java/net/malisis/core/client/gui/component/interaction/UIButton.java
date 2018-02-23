@@ -34,11 +34,9 @@ import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.element.Position;
 import net.malisis.core.client.gui.component.element.Position.IPosition;
 import net.malisis.core.client.gui.component.element.Size.ISize;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.render.ButtonBackground;
 import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.icon.GuiIcon;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.init.SoundEvents;
 
@@ -59,18 +57,11 @@ public class UIButton extends UIComponent<UIButton>
 	protected FontOptions hoveredFontOptions = FontOptions.builder().color(0xFFFFA0).shadow().build();
 	/** Content used for this {@link UIButton}. */
 	protected UIComponent<?> content;
-	/** Whether the size of this {@link UIButton} is automatically calculated based on its contents. */
-	protected boolean autoSize = true;
 	/** Whether this {@link UIButton} is currently being pressed. */
 	protected boolean isPressed = false;
 
-	/** The background color of this {@link UIButton}. */
-	protected int bgColor = 0xFFFFFF;
 	/** Offset for the contents */
 	protected int offsetX, offsetY;
-
-	protected GuiIconProvider iconPressedProvider;
-
 	/** Action to execute when the button is clicked. */
 	protected Runnable action;
 
@@ -82,14 +73,8 @@ public class UIButton extends UIComponent<UIButton>
 	public UIButton(MalisisGui gui)
 	{
 		super(gui);
-
 		setSize(AUTO_SIZE);
-		shape = new XYResizableGuiShape();
-		iconProvider = new GuiIconProvider(	gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5),
-											gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5),
-											gui.getGuiTexture().getXYResizableIcon(0, 0, 200, 20, 5));
-
-		iconPressedProvider = new GuiIconProvider((GuiIcon) gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5).flip(true, true));
+		setBackground(new ButtonBackground(gui));
 	}
 
 	/**
@@ -185,6 +170,16 @@ public class UIButton extends UIComponent<UIButton>
 	}
 
 	/**
+	 * Checks if this {@link UIButton} is currently being pressed.
+	 *
+	 * @return true, if is pressed
+	 */
+	public boolean isPressed()
+	{
+		return isPressed;
+	}
+
+	/**
 	 * Checks if is width is automatically calculated.<br>
 	 * If true, the size of this {@link UIButton} will match it's contents
 	 *
@@ -203,28 +198,6 @@ public class UIButton extends UIComponent<UIButton>
 	public UIButton setAutoSize()
 	{
 		setSize(AUTO_SIZE);
-		return this;
-	}
-
-	/**
-	 * Gets the background color of this {@link UIButton}.
-	 *
-	 * @return the bg color
-	 */
-	public int getBgColor()
-	{
-		return bgColor;
-	}
-
-	/**
-	 * Sets the background color of this {@link UIButton}.
-	 *
-	 * @param bgColor the bg color
-	 * @return the UI button
-	 */
-	public UIButton setBgColor(int bgColor)
-	{
-		this.bgColor = bgColor;
 		return this;
 	}
 
@@ -310,16 +283,6 @@ public class UIButton extends UIComponent<UIButton>
 		}
 
 		return false;
-	}
-
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		if (isPressed && isHovered())
-			rp.iconProvider.set(iconPressedProvider);
-
-		rp.colorMultiplier.set(bgColor);
-		renderer.drawShape(shape, rp);
 	}
 
 	@Override
