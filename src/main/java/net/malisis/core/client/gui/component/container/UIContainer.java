@@ -403,7 +403,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	@Override
 	public float getOffsetX()
 	{
-		if (getContentWidth() < size().width())
+		if (getContentWidth() <= size().width())
 			return 0;
 		return (float) xOffset / (getContentWidth() - size().width());
 	}
@@ -417,7 +417,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	@Override
 	public float getOffsetY()
 	{
-		if (getContentHeight() < size().height())
+		if (getContentHeight() <= size().height())
 			return 0;
 		return (float) yOffset / (getContentHeight() - size().height());
 	}
@@ -435,6 +435,18 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	}
 
 	//#end IScrollable
+
+	@Override
+	public int parentX()
+	{
+		return screenX() - xOffset;
+	}
+
+	@Override
+	public int parentY()
+	{
+		return screenY() - yOffset;
+	}
 
 	/**
 	 * Adds components to this {@link UIContainer}.

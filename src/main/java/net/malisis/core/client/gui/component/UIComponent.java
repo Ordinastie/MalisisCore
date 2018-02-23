@@ -734,6 +734,16 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 		return y - screenY();
 	}
 
+	public int parentX()
+	{
+		return screenX();
+	}
+
+	public int parentY()
+	{
+		return screenY();
+	}
+
 	/**
 	 * Gets the X coordinate of this {@link UIComponent} relative to the screen.
 	 *
@@ -743,7 +753,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	{
 		int x = position().x();
 		if (getParent() != null)
-			x += getParent().screenX();
+			x += this instanceof IControlComponent ? getParent().screenX() : getParent().parentX();
 		return x;
 	}
 
@@ -756,7 +766,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	{
 		int y = position().y();
 		if (getParent() != null)
-			y += getParent().screenY();
+			y += this instanceof IControlComponent ? getParent().screenY() : getParent().parentY();
 		return y;
 	}
 
