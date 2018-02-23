@@ -40,10 +40,12 @@ import net.malisis.core.client.gui.component.control.ICloseable;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.element.Padding;
+import net.malisis.core.client.gui.component.element.Position;
 import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.VisibleStateChange;
+import net.malisis.core.client.gui.render.TexturedBackground.WindowBackground;
 import net.minecraft.client.gui.GuiScreen;
 
 /**
@@ -531,5 +533,13 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	public void onComponentSpaceChange(SpaceChangeEvent<T> event)
 	{
 		onContentUpdate();
+	}
+
+	public static UIContainer<?> window(MalisisGui gui, ISize size)
+	{
+		UIContainer<?> container = new UIContainer<>(gui, size);
+		container.setBackground(new WindowBackground(gui));
+		container.setPosition(Position.centered().middleAligned());
+		return container;
 	}
 }
