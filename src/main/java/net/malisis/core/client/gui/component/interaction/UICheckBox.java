@@ -37,7 +37,6 @@ import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
-import net.minecraft.client.renderer.OpenGlHelper;
 
 /**
  * UICheckBox
@@ -163,28 +162,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 
 		// draw the white shade over the slot
 		if (hovered)
-		{
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glDisable(GL11.GL_ALPHA_TEST);
-			OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-			GL11.glShadeModel(GL11.GL_SMOOTH);
-
-			rp.colorMultiplier.set(0xFFFFFF);
-			rp.alpha.set(80);
-			rp.useTexture.set(false);
-
-			shape.resetState();
-			shape.setSize(8, 8);
-			shape.setPosition(2, 1);
-			renderer.drawShape(shape, rp);
-			renderer.next();
-
-			GL11.glShadeModel(GL11.GL_FLAT);
-			GL11.glDisable(GL11.GL_BLEND);
-			GL11.glEnable(GL11.GL_ALPHA_TEST);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-		}
+			renderer.drawRectangle(2, 1, 0, 8, 8, 0xFFFFFF, 80);
 	}
 
 	@Override
