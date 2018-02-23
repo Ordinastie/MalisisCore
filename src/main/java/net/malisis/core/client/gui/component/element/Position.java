@@ -49,13 +49,21 @@ public class Position
 		public int y();
 	}
 
+	public interface XFunction extends ToIntFunction<UIComponent<?>>
+	{
+	}
+
+	public interface YFunction extends ToIntFunction<UIComponent<?>>
+	{
+	}
+
 	public static class DynamicPosition implements IPosition
 	{
-		private final ToIntFunction<UIComponent<?>> x;
-		private final ToIntFunction<UIComponent<?>> y;
+		private final XFunction x;
+		private final YFunction y;
 		private UIComponent<?> owner;
 
-		public DynamicPosition(ToIntFunction<UIComponent<?>> x, ToIntFunction<UIComponent<?>> y)
+		public DynamicPosition(XFunction x, YFunction y)
 		{
 			this.x = x;
 			this.y = y;
@@ -94,9 +102,7 @@ public class Position
 
 	public static PositionFactory x(int x)
 	{
-		return new PositionFactory(owner -> {
-			return Padding.of(owner.getParent()).left() + x;
-		});
+		return new PositionFactory(Positions.x(x));
 	}
 
 	//relative position
@@ -107,10 +113,7 @@ public class Position
 
 	public static PositionFactory leftOf(@Nonnull UIComponent<?> component, int spacing)
 	{
-		checkNotNull(component);
-		return new PositionFactory(owner -> {
-			return component.position().x() - owner.size().width() - spacing;
-		});
+		return new PositionFactory(Positions.leftOf(component, spacing));
 	}
 
 	public static PositionFactory rightOf(@Nonnull UIComponent<?> component)
@@ -120,10 +123,7 @@ public class Position
 
 	public static PositionFactory rightOf(@Nonnull UIComponent<?> component, int spacing)
 	{
-		checkNotNull(component);
-		return new PositionFactory(owner -> {
-			return component.position().x() + component.size().width() + spacing;
-		});
+		return new PositionFactory(Positions.rightOf(component, spacing));
 	}
 
 	//aligned inside parent container
@@ -144,12 +144,7 @@ public class Position
 
 	public static PositionFactory rightAligned(int spacing)
 	{
-		return new PositionFactory(owner -> {
-			UIComponent<?> parent = owner.getParent();
-			if (parent == null)
-				return 0;
-			return parent.size().width() - owner.size().width() - Padding.of(parent).right() - spacing;
-		});
+		return new PositionFactory(Positions.rightAligned(spacing));
 	}
 
 	public static PositionFactory centered()
@@ -159,12 +154,7 @@ public class Position
 
 	public static PositionFactory centered(int offset)
 	{
-		return new PositionFactory(owner -> {
-			UIComponent<?> parent = owner.getParent();
-			if (parent == null)
-				return 0;
-			return (parent.size().width() - Padding.of(parent).horizontal() - owner.size().width()) / 2 + offset;
-		});
+		return new PositionFactory(Positions.centered(offset));
 	}
 
 	//aligned relative to another component
@@ -176,9 +166,7 @@ public class Position
 	public static PositionFactory leftAlignedTo(@Nonnull UIComponent<?> other, int offset)
 	{
 		checkNotNull(other);
-		return new PositionFactory(owner -> {
-			return other.position().x() + offset;
-		});
+		return new PositionFactory(Positions.leftAlignedTo(other, offset));
 	}
 
 	public static PositionFactory rightAlignedTo(@Nonnull UIComponent<?> other)
@@ -189,9 +177,7 @@ public class Position
 	public static PositionFactory rightAlignedTo(@Nonnull UIComponent<?> other, int offset)
 	{
 		checkNotNull(other);
-		return new PositionFactory(owner -> {
-			return other.position().x() + other.size().width() - owner.size().width() + offset;
-		});
+		return new PositionFactory(Positions.rightAlignedTo(other, offset));
 	}
 
 	public static PositionFactory centeredTo(@Nonnull UIComponent<?> other)
@@ -202,8 +188,118 @@ public class Position
 	public static PositionFactory centeredTo(@Nonnull UIComponent<?> other, int offset)
 	{
 		checkNotNull(other);
-		return new PositionFactory(owner -> {
-			return other.position().x() + (other.size().width() - owner.size().width()) / 2 + offset;
-		});
+		return new PositionFactory(Positions.centeredTo(other, offset));
+	}
+
+	public static class PositionFactory
+	{
+		private XFunction xFunction;
+		private YFunction yFunction;
+
+		public PositionFactory(XFunction xFunction)
+		{
+			this.xFunction = xFunction;
+		}
+
+		//absolute position
+		public IPosition y(int y)
+		{
+			yFunction = Positions.y(y);
+			return build();
+		}
+
+		//relative postion
+		public IPosition above(@Nonnull UIComponent<?> component)
+		{
+			return above(component, 0);
+		}
+
+		public IPosition above(@Nonnull UIComponent<?> component, int spacing)
+		{
+			yFunction = Positions.above(component, spacing);
+			return build();
+		}
+
+		public IPosition below(@Nonnull UIComponent<?> component)
+		{
+			return below(component, 0);
+		}
+
+		public IPosition below(@Nonnull UIComponent<?> component, int spacing)
+		{
+			yFunction = Positions.below(component, spacing);
+			return build();
+		}
+
+		public IPosition topAligned()
+		{
+			return topAligned(0);
+		}
+
+		public IPosition topAligned(int spacing)
+		{
+			return y(0);
+		}
+
+		public IPosition bottomAligned()
+		{
+			return bottomAligned(0);
+		}
+
+		public IPosition bottomAligned(int spacing)
+		{
+			yFunction = Positions.bottomAligned(spacing);
+			return build();
+		}
+
+		public IPosition middleAligned()
+		{
+			return middleAligned(0);
+		}
+
+		public IPosition middleAligned(int offset)
+		{
+			yFunction = Positions.middleAligned(offset);
+			return build();
+		}
+
+		//aligned relative to another component
+		public IPosition topAlignedTo(@Nonnull UIComponent<?> other)
+		{
+			return topAlignedTo(other, 0);
+		}
+
+		public IPosition topAlignedTo(@Nonnull UIComponent<?> other, int offset)
+		{
+			yFunction = Positions.topAlignedTo(other, offset);
+			return build();
+		}
+
+		public IPosition bottomAlignedTo(@Nonnull UIComponent<?> other)
+		{
+			return bottomAlignedTo(other, 0);
+		}
+
+		public IPosition bottomAlignedTo(@Nonnull UIComponent<?> other, int offset)
+		{
+			yFunction = Positions.bottomAlignedTo(other, offset);
+			return build();
+		}
+
+		public IPosition middleAlignedTo(@Nonnull UIComponent<?> other)
+		{
+			return middleAlignedTo(other, 0);
+		}
+
+		public IPosition middleAlignedTo(@Nonnull UIComponent<?> other, int offset)
+		{
+			yFunction = Positions.middleAlignedTo(other, offset);
+			return build();
+		}
+
+		public IPosition build()
+		{
+			return new DynamicPosition(xFunction, yFunction);
+		}
 	}
 }
