@@ -30,7 +30,6 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
@@ -39,12 +38,11 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
 import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
+import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.element.Padding;
 import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
-import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.minecraft.client.gui.GuiScreen;
@@ -126,6 +124,12 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	public UILabel(MalisisGui gui)
 	{
 		this(gui, (String) null, false);
+	}
+
+	@Override
+	public void onAddedToScreen()
+	{
+		buildLines();
 	}
 
 	// #region getters/setters
@@ -253,7 +257,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
-		lineOffset = Math.round(offsetY / getScrollStep());
+		lineOffset = Math.round(offsetY * (lines.size() - getVisibleLines()));
 		lineOffset = Math.max(0, Math.min(lines.size(), lineOffset));
 	}
 
@@ -271,20 +275,6 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	}
 
 	//#end IScrollable
-	/**
-	 * Gets the component at.
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @return the component at
-	 */
-	@Override
-	public UIComponent<?> getComponentAt(int x, int y)
-	{
-		//make single line label non interactible
-		return multiLine ? super.getComponentAt(x, y) : null;
-	}
-
 	/**
 	 * Builds the lines for this {@link UILabel}. Only used if {@link #multiLine} is true.
 	 */
@@ -355,12 +345,6 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		}
 		else
 			renderer.drawText(font, text, fontOptions);
-	}
-
-	@Subscribe
-	public void onSizeChange(SizeChangeEvent<UILabel> event)
-	{
-		buildLines();
 	}
 
 	@Override

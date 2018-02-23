@@ -588,7 +588,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
-		lineOffset = Math.round(offsetY / getScrollStep());
+		lineOffset = Math.round(offsetY * (lines.size() - getVisibleLines()));
 		lineOffset = Math.max(0, Math.min(lines.size(), lineOffset));
 	}
 
