@@ -26,10 +26,12 @@ package net.malisis.core.client.gui.component.mceditor;
 
 import com.google.common.eventbus.Subscribe;
 
-import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.container.UIContainer;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.component.interaction.UICheckBox;
 import net.malisis.core.client.gui.component.interaction.UISelect;
 import net.malisis.core.client.gui.component.interaction.UITextField;
@@ -54,20 +56,22 @@ public class MCEditor extends UIContainer<MCEditor> implements IGuiText<MCEditor
 	{
 		super(gui);
 		tf = new UITextField(gui, true);
-		tf.setSize(0, -14).setAnchor(Anchor.BOTTOM);
+		tf.setPosition(Position.x(0).bottomAligned());
+		tf.setSize(Size.relativeWidth(1.0f).relativeHeight(0.9f));
 
 		sel = new EcfSelect(gui, this);
 
 		cb = new UICheckBox(gui, "Use litteral formatting");
-		cb.setPosition(85, 0).register(this);
+		cb.setPosition(Position.of(85, 0));
+		cb.register(this);
 
 		add(tf, sel, cb);
 	}
 
-	public MCEditor(MalisisGui gui, int width, int height)
+	public MCEditor(MalisisGui gui, ISize size)
 	{
 		this(gui);
-		setSize(width, height);
+		setSize(size);
 	}
 
 	public UITextField getTextfield()
