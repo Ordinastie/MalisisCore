@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.logging.log4j.util.Strings;
-import org.lwjgl.opengl.GL11;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
@@ -39,7 +38,6 @@ import net.malisis.core.client.gui.component.element.Position;
 import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.renderer.RenderParameters;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
@@ -103,7 +101,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 		this.label = label;
 		if (label != null)
 		{
-			label.setPosition(Position.of(14, 0));
+			label.setPosition(Position.of(12, 1));
 			label.setParent(this);
 		}
 		return this;
@@ -142,35 +140,8 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 	{
 		shape.resetState();
 		shape.setSize(8, 8);
-		shape.translate(1, 0, 0);
+		shape.translate(1, 1, 0);
 		renderer.drawShape(shape, rp);
-
-		renderer.next();
-
-		// draw the white shade over the slot
-		if (hovered)
-		{
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glDisable(GL11.GL_ALPHA_TEST);
-			renderer.enableBlending();
-
-			rp = new RenderParameters();
-			rp.colorMultiplier.set(0xFFFFFF);
-			rp.alpha.set(80);
-			rp.useTexture.set(false);
-
-			shape.resetState();
-			shape.setSize(6, 6);
-			shape.setPosition(2, 1);
-			renderer.drawShape(shape, rp);
-			renderer.next();
-
-			GL11.glShadeModel(GL11.GL_FLAT);
-			GL11.glDisable(GL11.GL_BLEND);
-			GL11.glEnable(GL11.GL_ALPHA_TEST);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-		}
-
 	}
 
 	@Override
@@ -181,14 +152,18 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 
 		if (selected)
 		{
-			GL11.glEnable(GL11.GL_BLEND);
 			rp.reset();
 			shape.resetState();
 			shape.setSize(6, 6);
-			shape.setPosition(2, 1);
+			shape.setPosition(2, 2);
 			rp.iconProvider.set(rbIconProvider);
 			renderer.drawShape(shape, rp);
 		}
+
+		renderer.next();
+		// draw the white shade over the slot
+		if (hovered)
+			renderer.drawRectangle(2, 2, 0, 6, 6, 0xFFFFFF, 80);
 	}
 
 	@Override
@@ -229,7 +204,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 		@Override
 		public int width()
 		{
-			return 11 + (label != null ? label.size().width() : 0);
+			return 12 + (label != null ? label.size().width() : 0);
 		}
 
 		@Override
