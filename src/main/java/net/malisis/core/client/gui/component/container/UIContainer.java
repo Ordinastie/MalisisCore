@@ -288,12 +288,17 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	@Override
 	public UIComponent<?> getComponentAt(int x, int y)
 	{
+		if (!isEnabled() || !isVisible())
+			return null;
+
+		//super impl will return control components or itself
+		//control components take precedence over child components
 		UIComponent<?> superComp = super.getComponentAt(x, y);
 		if (superComp != null && superComp != this)
 			return superComp;
 
-		if (!isEnabled() || !isVisible())
-			return null;
+		if (shouldClipContent() && !getClipArea().isInside(x, y))
+			return superComp;
 
 		Set<UIComponent<?>> list = new LinkedHashSet<>();
 		for (UIComponent<?> c : components)
@@ -304,7 +309,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 		}
 
 		if (list.size() == 0)
-			return superComp;
+			return this;
 
 		UIComponent<?> component = superComp;
 		for (UIComponent<?> c : list)
@@ -312,12 +317,6 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 			if (component != null && (component.getZIndex() <= c.getZIndex()))
 				component = c;
 		}
-
-		//		if (component instanceof IClipable && ((IClipable) component).shouldClipContent())
-		//			return component;
-
-		if (shouldClipContent() && !getClipArea().isInside(x, y))
-			return null;
 
 		return component != null && component.isEnabled() ? component : superComp;
 	}
@@ -535,6 +534,13 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 		onContentUpdate();
 	}
 
+	/**
+	 * Creates a centered {@link UIContainer} with a {@link WindowBackground} background.
+	 *
+	 * @param gui the gui
+	 * @param size the size
+	 * @return the UI container
+	 */
 	public static UIContainer<?> window(MalisisGui gui, ISize size)
 	{
 		UIContainer<?> container = new UIContainer<>(gui, size);
