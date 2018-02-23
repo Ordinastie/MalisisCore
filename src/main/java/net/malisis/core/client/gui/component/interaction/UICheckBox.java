@@ -99,7 +99,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		this.label = label;
 		if (label != null)
 		{
-			label.setPosition(Position.of(14, 2));
+			label.setPosition(Position.of(14, 1));
 			label.setParent(this);
 		}
 		return this;
@@ -219,7 +219,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		@Override
 		public int width()
 		{
-			return 11 + (label != null ? label.size().width() : 0);
+			return 14 + (label != null ? label.size().width() : 0);
 		}
 
 		@Override
