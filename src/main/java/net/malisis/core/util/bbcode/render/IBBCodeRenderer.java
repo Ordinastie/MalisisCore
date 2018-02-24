@@ -24,6 +24,7 @@
 
 package net.malisis.core.util.bbcode.render;
 
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.util.bbcode.BBString;
 
 /**
@@ -36,9 +37,7 @@ public interface IBBCodeRenderer<T>
 
 	public BBString getBBText();
 
-	public int getWidth();
-
-	public int getHeight();
+	public ISize size();
 
 	public int getStartLine();
 

@@ -34,15 +34,15 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.IMalisisMod;
-import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.component.interaction.UIButton;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.client.gui.render.TexturedBackground.PanelBackground;
-import net.malisis.core.client.gui.render.TexturedBackground.WindowBackground;
 import net.malisis.core.configuration.setting.Setting;
 import net.malisis.core.renderer.font.FontOptions;
 
@@ -57,8 +57,7 @@ public class ConfigurationGui extends MalisisGui
 	protected ArrayList<UIContainer<?>> pannels = new ArrayList<>();
 	protected HashMap<UIComponent<?>, Setting<?>> componentSettings = new HashMap<>();
 
-	protected int windowWidth = 400;
-	protected int windowHeight = 120;
+	protected UIContainer<?> window;
 
 	protected UILabel comment;
 	protected UIButton btnCancel;
@@ -80,12 +79,12 @@ public class ConfigurationGui extends MalisisGui
 			//TODO: build tabs
 		}
 
-		UIContainer<?> window = new UIContainer<>(this, mod.getName() + " {malisiscore.config.title}", 400, UIComponent.INHERITED);
-		window.setBackground(new WindowBackground(this));
+		window = UIContainer.window(this, Size.of(400, 300));
+		UILabel title = new UILabel(this, mod.getName() + " {malisiscore.config.title}");
+		window.add(title);
 
 		for (String category : categories)
 		{
-			windowHeight = Math.max(windowHeight, (settings.getSettings(category).size() * 14 + 40));
 			window.add(createSettingContainer(category));
 		}
 
@@ -93,12 +92,18 @@ public class ConfigurationGui extends MalisisGui
 
 		comment = new UILabel(this, true);
 		comment.setFontOptions(FontOptions.builder().color(0xFFFFFF).shadow().build());
-		UIContainer<?> panelComment = new UIContainer<>(this, 140, -35).setPosition(0, 0, Anchor.RIGHT);
+		UIContainer<?> panelComment = new UIContainer<>(this);
 		panelComment.setBackground(new PanelBackground(this, 0xCCCCCC));
+		panelComment.setPosition(Position.rightAligned().topAligned());
+		panelComment.setSize(Size.width(140).relativeHeight(1.0F, -35));
 		panelComment.add(comment);
 
-		btnCancel = new UIButton(this, "gui.cancel").setPosition(-32, 0, Anchor.BOTTOM | Anchor.CENTER).register(this);
-		btnSave = new UIButton(this, "gui.done").setPosition(32, 0, Anchor.BOTTOM | Anchor.CENTER).register(this);
+		btnCancel = new UIButton(this, "gui.cancel");
+		btnCancel.setPosition(Position.centered(-32).bottomAligned());
+		btnCancel.register(this);
+		btnSave = new UIButton(this, "gui.done");
+		btnSave.setPosition(Position.centered(32).bottomAligned());
+		btnSave.register(this);
 
 		window.add(panelComment);
 		window.add(btnCancel);
@@ -110,18 +115,19 @@ public class ConfigurationGui extends MalisisGui
 	private UIContainer<?> createSettingContainer(String category)
 	{
 		List<Setting<?>> categorySettings = settings.getSettings(category);
-		UIContainer<?> container = new UIContainer<>(this, windowWidth - 105, windowHeight - 35).setPosition(5, 12);
+		UIContainer<?> container = new UIContainer<>(this);
+		container.setPosition(Position.of(5, 12));
+		container.setSize(Size.widthRelativeTo(1.0F, window, -105).heightRelativeTo(1.0F, window, -35));
 
-		int y = 0;
+		UIComponent<?> last = null;
 		for (Setting<?> setting : categorySettings)
 		{
 			UIComponent<?> component = setting.getComponent(this);
-			component.setPosition(0, y);
+			component.setPosition(last != null ? Position.x(0).below(last, 2) : Position.zero());
 			component.register(this);
 			container.add(component);
 			componentSettings.put(component, setting);
-
-			y += component.getHeight() + 2;
+			last = component;
 		}
 
 		return container;

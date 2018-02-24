@@ -34,6 +34,8 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.container.UIContainer;
+import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.component.interaction.UIButton;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.util.bbcode.BBString;
@@ -52,8 +54,14 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 {
 	enum Tag
 	{
-		BOLD(new BBStyleNode("b")), ITALIC(new BBStyleNode("i")), UNDERLINE(new BBStyleNode("u")), STRIKETHOUGH(new BBStyleNode("s")), SHADOW(
-				new BBShadowNode()), COLOR(new BBColorNode("color")), BGCOLOR(new BBColorNode("bgcolor")), ITEM(new BBItemNode(""));
+		BOLD(new BBStyleNode("b")),
+		ITALIC(new BBStyleNode("i")),
+		UNDERLINE(new BBStyleNode("u")),
+		STRIKETHOUGH(new BBStyleNode("s")),
+		SHADOW(new BBShadowNode()),
+		COLOR(new BBColorNode("color")),
+		BGCOLOR(new BBColorNode("bgcolor")),
+		ITEM(new BBItemNode(""));
 
 		public BBNode node;
 
@@ -105,10 +113,10 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 		setWysiwyg(true);
 	}
 
-	public BBCodeEditor(MalisisGui gui, int width, int height)
+	public BBCodeEditor(MalisisGui gui, ISize size)
 	{
 		this(gui);
-		setSize(width, height);
+		setSize(size);
 	}
 
 	//#region Getters/Setters
@@ -177,17 +185,38 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 
 	protected void createButtons(MalisisGui gui)
 	{
-		int s = 10;
-		btnBold = new UIButton(gui, "B").setAutoSize(false).setSize(s, s).setTooltip("Bold").register(this);
-		btnItalic = new UIButton(gui, "I").setAutoSize(false).setSize(s, s).setTooltip("Italic").register(this);
-		btnUnderline = new UIButton(gui, "U").setAutoSize(false).setSize(s, s).setTooltip("Underline").register(this);
-		btnStrikethrough = new UIButton(gui, "S").setAutoSize(false).setSize(s, s).setTooltip("Strikethrough").register(this);
+		ISize size = Size.of(10, 10);
+		btnBold = new UIButton(gui, "B");
+		btnBold.setSize(size);
+		btnBold.setTooltip("Bold").register(this);
 
-		btnColor = new UIButton(gui, "C").setAutoSize(false).setSize(s, s).setTooltip("Color").register(this);
-		btnBgColor = new UIButton(gui, "BC").setAutoSize(false).setSize(16, s).setTooltip("Background Color").register(this);
-		btnItem = new UIButton(gui, "Item").setAutoSize(false).setSize(22, s).setTooltip("Item").register(this);
+		btnItalic = new UIButton(gui, "I");
+		btnItalic.setSize(size);
+		btnItalic.setTooltip("Italic").register(this);
 
-		btnWysiwyg = new UIButton(gui, "WYSIWYG").setAutoSize(false).setSize(45, s).register(this);
+		btnUnderline = new UIButton(gui, "U");
+		btnUnderline.setSize(size);
+		btnUnderline.setTooltip("Underline").register(this);
+
+		btnStrikethrough = new UIButton(gui, "S");
+		btnStrikethrough.setSize(size);
+		btnStrikethrough.setTooltip("Strikethrough").register(this);
+
+		btnColor = new UIButton(gui, "C");
+		btnStrikethrough.setSize(size);
+		btnStrikethrough.setTooltip("Color").register(this);
+
+		btnBgColor = new UIButton(gui, "BC");
+		btnBgColor.setSize(Size.of(16, 10));
+		btnBgColor.setTooltip("Background Color").register(this);
+
+		btnItem = new UIButton(gui, "Item");
+		btnItem.setSize(Size.of(22, 10));
+		btnItem.setTooltip("Item").register(this);
+
+		btnWysiwyg = new UIButton(gui, "WYSIWYG");
+		btnWysiwyg.setSize(Size.of(45, 10));
+		btnWysiwyg.register(this);
 
 		menu.add(btnBold);
 		menu.add(btnItalic);
@@ -224,7 +253,7 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 				break;
 		}
 
-		bbTexfield.setPosition(x, y).setSize(w, h);
+		//	bbTexfield.setPosition(x, y).setSize(w, h);
 	}
 
 	protected void calculateMenuPosition()
@@ -249,7 +278,7 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 				break;
 		}
 
-		menu.setPosition(x, y, a).setSize(w, h);
+		//	menu.setPosition(x, y, a).setSize(w, h);
 
 		calculateButtonPositions();
 	}
@@ -270,16 +299,16 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 		if (Anchor.horizontal(a) == Anchor.RIGHT)
 			x *= -1;
 
-		btnBold.setPosition(0 * x, 0 * y, a);
-		btnItalic.setPosition(11 * x, 11 * y, a);
-		btnUnderline.setPosition(22 * x, 22 * y, a);
-		btnStrikethrough.setPosition(33 * x, 33 * y, a);
-
-		btnColor.setPosition(44 * x + 2 * x, 44 * y + 2 * y, a);
-		btnBgColor.setPosition(55 * x + 2 * x, 55 * y + 2 * y, a);
-		btnItem.setPosition(72 * x + 2 * x, 66 * y + 2 * y, a);
-
-		btnWysiwyg.setPosition(100 * x + 2 * x, 66 * y + 2 * y, a);
+		//		btnBold.setPosition(0 * x, 0 * y, a);
+		//		btnItalic.setPosition(11 * x, 11 * y, a);
+		//		btnUnderline.setPosition(22 * x, 22 * y, a);
+		//		btnStrikethrough.setPosition(33 * x, 33 * y, a);
+		//
+		//		btnColor.setPosition(44 * x + 2 * x, 44 * y + 2 * y, a);
+		//		btnBgColor.setPosition(55 * x + 2 * x, 55 * y + 2 * y, a);
+		//		btnItem.setPosition(72 * x + 2 * x, 66 * y + 2 * y, a);
+		//
+		//		btnWysiwyg.setPosition(100 * x + 2 * x, 66 * y + 2 * y, a);
 	}
 
 	public boolean isStyleActive(Tag s)
@@ -356,7 +385,7 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 		if (button != null)
 		{
 			//button.setTextColor(active ? 0x66CC77 : defaultColor);
-			button.setBgColor(active ? 0xBBFFCC : defaultColor);
+			//button.setBgColor(active ? 0xBBFFCC : defaultColor);
 		}
 
 		return true;
