@@ -110,13 +110,23 @@ public interface Size
 
 	public static SizeFactory relativeWidth(float width)
 	{
-		return new SizeFactory(Sizes.relativeWidth(width));
+		return relativeWidth(width, 0);
+	}
+
+	public static SizeFactory relativeWidth(float width, int offset)
+	{
+		return new SizeFactory(Sizes.relativeWidth(width, offset));
 	}
 
 	public static SizeFactory widthRelativeTo(float width, @Nonnull UIComponent<?> other)
 	{
+		return widthRelativeTo(width, other, 0);
+	}
 
-		return new SizeFactory(Sizes.widthRelativeTo(width, other));
+	public static SizeFactory widthRelativeTo(float width, @Nonnull UIComponent<?> other, int offset)
+	{
+
+		return new SizeFactory(Sizes.widthRelativeTo(width, other, offset));
 	}
 
 	public class SizeFactory
@@ -137,13 +147,23 @@ public interface Size
 
 		public ISize relativeHeight(float height)
 		{
-			heightFunction = Sizes.relativeHeight(height);
+			return relativeHeight(height, 0);
+		}
+
+		public ISize relativeHeight(float height, int offset)
+		{
+			heightFunction = Sizes.relativeHeight(height, offset);
 			return build();
 		}
 
 		public ISize heightRelativeTo(float height, UIComponent<?> other)
 		{
-			heightFunction = Sizes.heightRelativeTo(height, other);
+			return heightRelativeTo(height, other, 0);
+		}
+
+		public ISize heightRelativeTo(float height, UIComponent<?> other, int offset)
+		{
+			heightFunction = Sizes.heightRelativeTo(height, other, offset);
 			return build();
 		}
 

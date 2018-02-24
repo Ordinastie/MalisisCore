@@ -38,39 +38,39 @@ import net.malisis.core.client.gui.component.element.Size.WidthFunction;
  */
 public class Sizes
 {
-	public static WidthFunction relativeWidth(float width)
+	public static WidthFunction relativeWidth(float width, int offset)
 	{
 		return owner -> {
 			UIComponent<?> parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return (int) ((parent.size().width() - Padding.of(parent).horizontal()) * width);
+			return (int) ((parent.size().width() - Padding.of(parent).horizontal()) * width) + offset;
 		};
 	}
 
-	public static WidthFunction widthRelativeTo(float width, @Nonnull UIComponent<?> other)
+	public static WidthFunction widthRelativeTo(float width, @Nonnull UIComponent<?> other, int offset)
 	{
 		checkNotNull(other);
 		return owner -> {
-			return (int) (other.size().width() * width);
+			return (int) (other.size().width() * width) + offset;
 		};
 	}
 
-	public static HeightFunction relativeHeight(float height)
+	public static HeightFunction relativeHeight(float height, int offset)
 	{
 		return owner -> {
 			UIComponent<?> parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return (int) ((parent.size().height() - Padding.of(parent).vertical()) * height);
+			return (int) ((parent.size().height() - Padding.of(parent).vertical()) * height) + offset;
 		};
 	}
 
-	public static HeightFunction heightRelativeTo(float height, @Nonnull UIComponent<?> other)
+	public static HeightFunction heightRelativeTo(float height, @Nonnull UIComponent<?> other, int offset)
 	{
 		checkNotNull(other);
 		return owner -> {
-			return (int) (other.size().height() * height);
+			return (int) (other.size().height() * height) + offset;
 		};
 	}
 }
