@@ -31,7 +31,7 @@ import net.malisis.core.util.cacheddata.ICachedData;
  * @author Ordinastie
  *
  */
-public class CachedSlot implements ICachedData
+public class CachedSlot implements ICachedData<MalisisSlot>
 {
 	private MalisisSlot slot;
 	private CachedItemStack cachedItemStack;
@@ -44,7 +44,8 @@ public class CachedSlot implements ICachedData
 		cachedDraggedItemStack = new CachedItemStack(slot::getItemStack);
 	}
 
-	public MalisisSlot getSlot()
+	@Override
+	public MalisisSlot get()
 	{
 		return slot;
 	}
