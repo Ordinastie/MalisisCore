@@ -73,9 +73,6 @@ import net.minecraft.client.renderer.GlStateManager;
  */
 public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListener
 {
-	/** The Constant INHERITED. */
-	public final static int INHERITED = 0;
-
 	/** Reference to the {@link MalisisGui} this {@link UIComponent} was added to. */
 	private final MalisisGui gui;
 	/** Reference to the {@link GuiRenderer} that will draw this {@link UIComponent}. */
@@ -87,7 +84,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	/** Size of this {@link UIComponent}. */
 	protected ISize size = Size.inherited();
 	/** Z index of the component. */
-	protected int zIndex = INHERITED;
+	protected int zIndex = 0;
 	/** Event bus on which event listeners are registered. */
 	private EventBus bus;
 	/** The parent {@link UIComponent} of this <code>UIComponent</code>. */
@@ -229,7 +226,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	 */
 	public int getZIndex()
 	{
-		return zIndex == INHERITED ? (parent != null ? parent.getZIndex() : 0) : zIndex;
+		return zIndex == 0 ? (parent != null ? parent.getZIndex() : 0) : zIndex;
 	}
 
 	/**
