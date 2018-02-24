@@ -435,6 +435,18 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		bars.put(scrollbar.type, scrollbar);
 	}
 
+	public static int xOffset(UIComponent<?> component)
+	{
+		UIScrollBar scrollbar = getScrollbar(component, Type.VERTICAL);
+		return scrollbar != null ? scrollbar.size().width() : 0;
+	}
+
+	public static int yOffset(UIComponent<?> component)
+	{
+		UIScrollBar scrollbar = getScrollbar(component, Type.HORIZONTAL);
+		return scrollbar != null ? scrollbar.size().height() : 0;
+	}
+
 	private class ScrollbarPosition implements IPosition
 	{
 		@Override

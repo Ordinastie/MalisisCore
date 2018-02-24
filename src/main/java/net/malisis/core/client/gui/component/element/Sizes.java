@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.*;
 import javax.annotation.Nonnull;
 
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.control.UIScrollBar;
 import net.malisis.core.client.gui.component.element.Size.HeightFunction;
 import net.malisis.core.client.gui.component.element.Size.WidthFunction;
 
@@ -44,7 +45,7 @@ public class Sizes
 			UIComponent<?> parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return (int) ((parent.size().width() - Padding.of(parent).horizontal()) * width) + offset;
+			return (int) ((parent.size().width() - Padding.of(parent).horizontal() - UIScrollBar.xOffset(parent)) * width) + offset;
 		};
 	}
 
@@ -62,7 +63,7 @@ public class Sizes
 			UIComponent<?> parent = owner.getParent();
 			if (parent == null)
 				return 0;
-			return (int) ((parent.size().height() - Padding.of(parent).vertical()) * height) + offset;
+			return (int) ((parent.size().height() - Padding.of(parent).vertical() - UIScrollBar.yOffset(parent)) * height) + offset;
 		};
 	}
 
