@@ -64,7 +64,7 @@ public class DebugComponent extends UIComponent<DebugComponent> implements IPadd
 		super(gui);
 		enabled = false;
 
-		setSize(new DynamicSize(Sizes.relativeWidth(1.0f), owner -> {
+		setSize(new DynamicSize(Sizes.relativeWidth(1.0f, 0), owner -> {
 			return (int) ((debugMap.size() + 1) * MalisisFont.minecraftFont.getStringHeight()) + padding.vertical();
 		}));
 		ColoredBackground background = new ColoredBackground(0x000000);
