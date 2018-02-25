@@ -24,27 +24,21 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
-import java.util.List;
-import java.util.Objects;
+import static com.google.common.base.Preconditions.*;
 
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.Lists;
+import javax.annotation.Nonnull;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
-import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
 import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.element.Padding;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.component.interaction.UITextField;
-import net.malisis.core.client.gui.event.component.ContentUpdateEvent;
+import net.malisis.core.client.gui.component.element.Size.ISize;
+import net.malisis.core.client.gui.text.GuiText;
+import net.malisis.core.client.gui.text.IGuiTextProxy;
 import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.font.MalisisFont;
 import net.minecraft.client.gui.GuiScreen;
 
 /**
@@ -52,24 +46,13 @@ import net.minecraft.client.gui.GuiScreen;
  *
  * @author Ordinastie
  */
-public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiText<UILabel>
+public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTextProxy
 {
-	/** The {@link MalisisFont} to use for this {@link UILabel}. */
-	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontOptions} to use for this {@link UILabel}. */
-	protected FontOptions fontOptions = FontOptions.builder().color(0x444444).build();
-	/** Text of this {@link UILabel}. */
-	protected String text;
-	/** List of strings making the text of this {@link UILabel}. */
-	protected List<String> lines = Lists.newArrayList();
-	/** Whether this {@link UITextField} handles multiline text. */
-	protected boolean multiLine = false;
+	protected GuiText text = null;
 
 	//text space
 	/** Number of line offset out of this {@link UILabel} when drawn. Always 0 if {@link #multiLine} is false. */
 	protected int lineOffset = 0;
-	/** Space used between each line. */
-	protected int lineSpacing = 1;
 
 	//interaction
 	/** Scrollbar of the textfield **/
@@ -90,8 +73,10 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	public UILabel(MalisisGui gui, String text, boolean multiLine)
 	{
 		super(gui);
-		this.setText(text);
-		this.multiLine = multiLine;
+		setText(text);
+		setMultiline(multiLine);
+		setFontOptions(FontOptions.builder().color(0x444444)/*.shadow()*/.build());
+
 	}
 
 	/**
@@ -113,7 +98,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	 */
 	public UILabel(MalisisGui gui, boolean multiLine)
 	{
-		this(gui, (String) null, multiLine);
+		this(gui, "", multiLine);
 	}
 
 	/**
@@ -123,91 +108,36 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	 */
 	public UILabel(MalisisGui gui)
 	{
-		this(gui, (String) null, false);
+		this(gui, "", false);
 	}
 
 	@Override
 	public void onAddedToScreen()
 	{
-		buildLines();
+		text.setWrapSize(size.width() - UIScrollBar.xOffset(this));
 	}
 
 	// #region getters/setters
 	/**
-	 * Gets the text of this {@link UILabel}.
+	 * Sets the {@link GuiText} used by this {@link UILabel}.
+	 *
+	 * @param text the new text
+	 */
+	@Override
+	public void setGuiText(GuiText text)
+	{
+		this.text = checkNotNull(text);
+	}
+
+	/**
+	 * Gets the {@link GuiText} used by this {@link UILabel}.
 	 *
 	 * @return the text
 	 */
-	public String getText()
+	@Override
+	public GuiText getGuiText()
 	{
 		return text;
-	}
-
-	/**
-	 * Sets the text of this {@link UILabel}.<br>
-	 * If {@link #multiLine} is false, the width is recalculated.<br>
-	 * If {@link #multiLine} is true, the {@link #lines} will be recreated.
-	 *
-	 * @param text the text
-	 * @return this {@link UILabel}
-	 */
-	public UILabel setText(String text)
-	{
-		//text didn't change, skip
-		if (Objects.equals(this.text, text))
-			return this;
-
-		this.text = text;
-		if (multiLine)
-			buildLines();
-		else
-			calculateSize();
-
-		return this;
-	}
-
-	/**
-	 * Gets the {@link MalisisFont} used for this {@link UILabel}.
-	 *
-	 * @return the font
-	 */
-	@Override
-	public MalisisFont getFont()
-	{
-		return font;
-	}
-
-	@Override
-	public UILabel setFont(MalisisFont font)
-	{
-		this.font = font;
-		calculateSize();
-		return this;
-	}
-
-	/**
-	 * Gets the {@link FontOptions} used for this {@link UILabel}.
-	 *
-	 * @return the font renderer options
-	 */
-	@Override
-	public FontOptions getFontOptions()
-	{
-		return fontOptions;
-	}
-
-	/**
-	 * Sets the {@link MalisisFont} and {@link FontOptions} to use for this {@link UILabel}.
-	 *
-	 * @param fro the fro
-	 * @return this {@link UILabel}
-	 */
-	@Override
-	public UILabel setFontOptions(FontOptions fro)
-	{
-		this.fontOptions = fro;
-		calculateSize();
-		return this;
 	}
 
 	public int getVisibleLines()
@@ -217,22 +147,36 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 
 	public int getLineHeight()
 	{
-		return (int) (font.getStringHeight(fontOptions) + lineSpacing);
+		return text.getLineHeight();
 	}
 
+	@Override
+	public void setSize(ISize size)
+	{
+		super.setSize(size);
+		text.setWrapSize(size.width() - UIScrollBar.xOffset(this));
+	}
+
+	@Override
+	@Nonnull
+	public ISize size()
+	{
+		//a single line label size should match the text
+		return text.isMultiLine() ? super.size() : text.size();
+	}
 	// #end getters/setters
 
 	//#region IScrollable
 	@Override
 	public int getContentWidth()
 	{
-		return size.width();
+		return size().width();
 	}
 
 	@Override
 	public int getContentHeight()
 	{
-		return lines.size() * getLineHeight();
+		return text.lines().size() * getLineHeight();
 	}
 
 	@Override
@@ -248,23 +192,23 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	@Override
 	public float getOffsetY()
 	{
-		if (lines.size() < getVisibleLines())
+		if (text.lines().size() < getVisibleLines())
 			return 0;
 
-		return (float) lineOffset / (lines.size() - getVisibleLines());
+		return (float) lineOffset / (text.lines().size() - getVisibleLines());
 	}
 
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
-		lineOffset = Math.round(offsetY * (lines.size() - getVisibleLines()));
-		lineOffset = Math.max(0, Math.min(lines.size(), lineOffset));
+		lineOffset = Math.round(offsetY * (text.lines().size() - getVisibleLines()));
+		lineOffset = Math.max(0, Math.min(text.lines().size(), lineOffset));
 	}
 
 	@Override
 	public float getScrollStep()
 	{
-		float step = (float) 1 / (lines.size() - getVisibleLines());
+		float step = (float) 1 / (text.lines().size() - getVisibleLines());
 		return (GuiScreen.isCtrlKeyDown() ? 5 * step : step);
 	}
 
@@ -276,51 +220,6 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 
 	//#end IScrollable
 	/**
-	 * Builds the lines for this {@link UILabel}. Only used if {@link #multiLine} is true.
-	 */
-	protected void buildLines()
-	{
-		lines.clear();
-
-		if (!StringUtils.isEmpty(text))
-		{
-			UIScrollBar sc = UIScrollBar.getScrollbar(this, Type.VERTICAL);
-			int width = size().width();
-			if (sc != null && sc.isVisible())
-				width -= sc.size().width();
-			lines = font.wrapText(text, width, fontOptions);
-		}
-
-		fireEvent(new ContentUpdateEvent<>(this));
-	}
-
-	/**
-	 * Calculate the size of this {@link UILabel}.
-	 */
-	protected void calculateSize()
-	{
-		if (multiLine)
-			return;
-
-		this.textWidth = (int) font.getStringWidth(text, fontOptions);
-		this.textHeight = (int) font.getStringHeight(fontOptions);
-		//TODO: custom Size ?
-		setSize(Size.of(textWidth, textHeight));
-	}
-
-	/**
-	 * Draws the background.
-	 *
-	 * @param renderer the renderer
-	 * @param mouseX the mouse x
-	 * @param mouseY the mouse y
-	 * @param partialTick the partial tick
-	 */
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{}
-
-	/**
 	 * Draws the foreground.
 	 *
 	 * @param renderer the renderer
@@ -331,20 +230,10 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (multiLine)
-		{
-			font.render(renderer,
-						lines,
-						lineOffset,
-						lineOffset + getVisibleLines(),
-						screenX(),
-						screenY(),
-						getZIndex(),
-						lineSpacing,
-						fontOptions);
-		}
-		else
-			renderer.drawText(font, text, fontOptions);
+		text.render(renderer, lineOffset, lineOffset + getVisibleLines(), screenX(), screenY(), getZIndex());
+
+		//debug
+		//renderer.drawRectangle(0, 0, 0, size().width(), size().height(), 0x3399FF, 100);
 	}
 
 	@Override

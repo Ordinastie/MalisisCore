@@ -91,6 +91,8 @@ public class MalisisFont
 	protected boolean drawingShadow = false;
 	protected float zIndex = 0f;
 
+	private boolean loaded = false;
+
 	public MalisisFont(File fontFile)
 	{
 		this(load(fontFile, FontGeneratorOptions.DEFAULT), null);
@@ -126,7 +128,12 @@ public class MalisisFont
 			this.fontGeneratorOptions = options;
 
 		loadCharacterData();
-		loadTexture(false);
+		loaded = loadTexture(false);
+	}
+
+	public boolean isLoaded()
+	{
+		return loaded;
 	}
 
 	public ResourceLocation getResourceLocation()
@@ -589,71 +596,6 @@ public class MalisisFont
 		walker.skipChars(true);
 		return walker.walkToCoord(position);
 	}
-
-	/**
-	 * Splits the string in multiple lines to fit in the specified maxWidth using the specified fontScale.
-	 *
-	 * @param str the str
-	 * @param maxWidth the max width
-	 * @param options the options
-	 * @return list of lines that won't exceed maxWidth limit
-	 */
-	public List<String> wrapText(String str, int maxWidth, FontOptions options)
-	{
-		str.replace("\r?(?<=\n)", "\r");
-
-		List<String> lines = Lists.newArrayList();
-
-		StringBuilder line = new StringBuilder();
-		StringBuilder word = new StringBuilder();
-		//FontRenderOptions fro = new FontRenderOptions();
-
-		maxWidth -= 4;
-		float lineWidth = 0;
-		float wordWidth = 0;
-
-		StringWalker walker = new StringWalker(str, this, options);
-		walker.skipChars(false);
-		walker.applyStyles(true);
-		while (walker.walk())
-		{
-			char c = walker.getChar();
-			lineWidth += walker.getWidth();
-			wordWidth += walker.getWidth();
-
-			word.append(c);
-
-			//we just ended a new word, add it to the current line
-			if (Character.isWhitespace(c) || c == '-' || c == '.')
-			{
-				line.append(word);
-				word.setLength(0);
-				wordWidth = 0;
-			}
-			if (lineWidth >= maxWidth || c == '\n')
-			{
-				//the first word on the line is too large, split anyway
-				if (line.length() == 0)
-				{
-					line.append(word);
-					word.setLength(0);
-					wordWidth = 0;
-				}
-
-				//make a new line
-				lines.add(line.toString());
-				line.setLength(0);
-
-				lineWidth = wordWidth;
-			}
-		}
-
-		line.append(word);
-		lines.add(line.toString());
-
-		return lines;
-	}
-
 	//#end String processing
 
 	//#region Load font
@@ -691,7 +633,7 @@ public class MalisisFont
 		return r + 1;
 	}
 
-	protected void loadTexture(boolean forceGenerate)
+	protected boolean loadTexture(boolean forceGenerate)
 	{
 		File textureFile = new File("fonts/" + font.getName() + ".png");
 		File uvFile = new File("fonts/" + font.getName() + ".bin");
@@ -709,13 +651,14 @@ public class MalisisFont
 		}
 
 		if (img == null)
-			return;
+			return false;
 
 		if (textureRl != null)
 			Minecraft.getMinecraft().getTextureManager().deleteTexture(textureRl);
 
 		DynamicTexture dynTex = new DynamicTexture(img);
 		textureRl = Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation(font.getName(), dynTex);
+		return true;
 	}
 
 	protected BufferedImage readTextureFile(File textureFile)

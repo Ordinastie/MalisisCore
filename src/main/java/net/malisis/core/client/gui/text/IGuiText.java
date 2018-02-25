@@ -22,9 +22,10 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.component;
+package net.malisis.core.client.gui.text;
 
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 

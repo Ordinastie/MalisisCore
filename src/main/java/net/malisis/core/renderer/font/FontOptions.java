@@ -41,6 +41,8 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class FontOptions
 {
+	public static final FontOptions EMPTY = FontOptions.builder().build();
+
 	/** Map of TextFormatting **/
 	private static Map<Character, TextFormatting> charFormats = new HashMap<>();
 	/** List of ECF colors **/

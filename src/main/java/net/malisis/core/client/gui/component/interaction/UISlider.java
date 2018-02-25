@@ -33,12 +33,12 @@ import com.mojang.realmsclient.gui.ChatFormatting;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.text.IGuiText;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;

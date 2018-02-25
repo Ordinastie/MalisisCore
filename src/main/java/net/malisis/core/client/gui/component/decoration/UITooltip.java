@@ -29,10 +29,10 @@ import java.util.List;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.IGuiText;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.client.gui.text.IGuiText;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.font.FontOptions;
