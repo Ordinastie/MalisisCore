@@ -214,6 +214,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 *
 	 * @return the text
 	 */
+	@Override
 	public String getText()
 	{
 		return text.toString();
@@ -1123,7 +1124,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public String getPropertyString()
 	{
-		return text + " | " + super.getPropertyString();
+		return text + " | " + cursorPosition + " | " + super.getPropertyString();
 	}
 
 	//#region CursorPosition

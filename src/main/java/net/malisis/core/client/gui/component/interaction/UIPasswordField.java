@@ -1,12 +1,12 @@
 package net.malisis.core.client.gui.component.interaction;
 
+import java.util.function.Function;
+
 import org.lwjgl.input.Keyboard;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.minecraft.client.gui.GuiScreen;
-
-import java.util.function.Function;
 
 /**
  * The Class UIPasswordField.
@@ -75,6 +75,7 @@ public class UIPasswordField extends UITextField
 	{
 		this.text.setLength(0);
 		this.text.append(password.toString().replaceAll("(?s).", String.valueOf(passwordChar)));
+		guiText.setText(text.toString());
 	}
 
 	/**
@@ -99,8 +100,8 @@ public class UIPasswordField extends UITextField
 			return;
 
 		this.password = new StringBuilder(newValue);
-		this.cursorPosition.jumpBy(text.length());
 		this.updateText();
+		this.cursorPosition.jumpBy(text.length());
 	}
 
 	/**
@@ -111,19 +112,23 @@ public class UIPasswordField extends UITextField
 	@Override
 	public void setText(String text)
 	{
+		if (password == null) //called from parent ctor
+			return;
 		if (filterFunction != null)
 			text = filterFunction.apply(text);
 
 		password.setLength(0);
 		password.append(text);
+		updateText();
 		selectingText = false;
 		if (focused)
 			cursorPosition.jumpToEnd();
-		updateText();
+
 	}
 
 	@Override
-	public void setFilter(Function<String, String> filterFunction) {
+	public void setFilter(Function<String, String> filterFunction)
+	{
 		this.filterFunction = filterFunction;
 		this.password = new StringBuilder(this.filterFunction.apply(this.password.toString()));
 	}
@@ -141,9 +146,9 @@ public class UIPasswordField extends UITextField
 		int end = Math.max(selectionPosition.textPosition, cursorPosition.textPosition);
 
 		password.delete(start, end);
+		updateText();
 		selectingText = false;
 		cursorPosition.jumpTo(start);
-		updateText();
 	}
 
 	/**
@@ -156,5 +161,11 @@ public class UIPasswordField extends UITextField
 	protected boolean handleCtrlKeyDown(int keyCode)
 	{
 		return GuiScreen.isCtrlKeyDown() && !(keyCode == Keyboard.KEY_C || keyCode == Keyboard.KEY_X) && super.handleCtrlKeyDown(keyCode);
+	}
+
+	@Override
+	public String getPropertyString()
+	{
+		return password + " > " + super.getPropertyString();
 	}
 }
