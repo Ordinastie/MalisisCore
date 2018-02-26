@@ -78,12 +78,20 @@ public class GuiText
 	/** Space between each line. */
 	private int lineSpacing = 2;
 	/** Whether this text is multiline. */
-	private boolean multiLine = true;
+	private boolean multiLine = false;
 
 	private ISize size = new DynamicSize(o -> getMaxWidth(), o -> getLineHeight() * lines().size());
 
 	private boolean buildLines = true;
 	private boolean buildCache = true;
+
+	/**
+	 * Instantiates a new {@link GuiText}.
+	 */
+	public GuiText()
+	{
+
+	}
 
 	/**
 	 * Instantiates a new {@link GuiText}.
@@ -273,10 +281,9 @@ public class GuiText
 		return multiLine;
 	}
 
-	//TODO: calc max width of lines (to use for content width ?)
 	public int getMaxWidth()
 	{
-		return (int) font.getStringWidth(getText(), fontOptions);
+		return lines().stream().mapToInt(l -> (int) font.getStringWidth(l, fontOptions)).max().orElse(0);
 	}
 
 	/**
@@ -514,10 +521,11 @@ public class GuiText
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder();
-		lines.forEach(str -> {
+		lines().forEach(str -> {
 			sb.append(str);
 			sb.append("\n");
 		});
+		sb.deleteCharAt(sb.length() - 1);
 		return sb.toString();
 	}
 

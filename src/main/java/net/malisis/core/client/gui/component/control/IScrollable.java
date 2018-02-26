@@ -24,6 +24,7 @@
 
 package net.malisis.core.client.gui.component.control;
 
+import net.malisis.core.client.gui.component.IContentSize;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.element.Padding.IPadded;
 
@@ -33,22 +34,8 @@ import net.malisis.core.client.gui.component.element.Padding.IPadded;
  * @author Ordinastie
  *
  */
-public interface IScrollable extends IPadded
+public interface IScrollable extends IPadded, IContentSize
 {
-	/**
-	 * Gets the width of the scrollable content. It should count the total content size to be displayed when not clipped.
-	 *
-	 * @return the content width
-	 */
-	public int getContentWidth();
-
-	/**
-	 * Gets the height of the scrollable content. It should count the total content size to be displayed when not clipped.
-	 *
-	 * @return the content height
-	 */
-	public int getContentHeight();
-
 	/**
 	 * Gets the offset from 0 to 1 of the scrollable content. Only used for {@link UIScrollBar.Type#HORIZONTAL} scrollbars.
 	 *

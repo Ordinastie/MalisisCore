@@ -4,13 +4,13 @@
  * Copyright (c) 2018 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
+ * of  software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
+ * The above copyright notice and  permission notice shall be included in
  * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -29,36 +29,22 @@ import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 
 /**
- * Interface for classes that use GuiText.<br>
+ * Convenience interface for classes that use GuiText and want to extend {@link IGuiText}.<br>
  * Proxies GuiText setters and getters to the implementing class.
  *
  * @author Ordinastie
  *
  */
-public interface IGuiTextProxy
+public interface IGuiTextProxy extends IGuiText
 {
 	/**
-	 * Sets the {@link GuiText}.
-	 *
-	 * @param text the new text
-	 */
-	public void setGuiText(GuiText text);
-
-	/**
-	 * Gets the {@link GuiText}.
-	 *
-	 * @return the text
-	 */
-	public GuiText getGuiText();
-
-	/**
-	 * Sets the text of this {@link UILabel}.<br>
+	 * Sets the text of {@link UILabel}.<br>
 	 *
 	 * @param text the new text
 	 */
 	public default void setText(String text)
 	{
-		safeGetText(this).setText(text);
+		getOrCreate().setText(text);
 	}
 
 	/**
@@ -68,7 +54,7 @@ public interface IGuiTextProxy
 	 */
 	public default String getText()
 	{
-		return safeGetText(this).getText();
+		return getOrCreate().getText();
 	}
 
 	/**
@@ -78,7 +64,7 @@ public interface IGuiTextProxy
 	 */
 	public default void setTranslated(boolean translate)
 	{
-		safeGetText(this).setTranslated(translate);
+		getOrCreate().setTranslated(translate);
 	}
 
 	/**
@@ -88,18 +74,18 @@ public interface IGuiTextProxy
 	 */
 	public default boolean isTranslated()
 	{
-		return safeGetText(this).isTranslated();
+		return getOrCreate().isTranslated();
 	}
 
 	/**
 	 * Sets the wrap size for the text.<br>
-	 * Has no effect if this {@link GuiText} is not multilines.
+	 * Has no effect if {@link GuiText} is not multilines.
 	 *
 	 * @param wrapSize the new wrap size
 	 */
 	public default void setWrapSize(int wrapSize)
 	{
-		safeGetText(this).setWrapSize(wrapSize);
+		getOrCreate().setWrapSize(wrapSize);
 	}
 
 	/**
@@ -109,12 +95,12 @@ public interface IGuiTextProxy
 	 */
 	public default int getWrapSize()
 	{
-		return safeGetText(this).getWrapSize();
+		return getOrCreate().getWrapSize();
 	}
 
 	public default void setLineSpacing(int spacing)
 	{
-		safeGetText(this).setLineSpacing(spacing);
+		getOrCreate().setLineSpacing(spacing);
 	}
 
 	/**
@@ -124,7 +110,7 @@ public interface IGuiTextProxy
 	 */
 	public default int getLineSpacing()
 	{
-		return safeGetText(this).getLineSpacing();
+		return getOrCreate().getLineSpacing();
 	}
 
 	/**
@@ -134,7 +120,7 @@ public interface IGuiTextProxy
 	 */
 	public default void setFont(MalisisFont font)
 	{
-		safeGetText(this).setFont(font);
+		getOrCreate().setFont(font);
 	}
 
 	/**
@@ -144,7 +130,7 @@ public interface IGuiTextProxy
 	 */
 	public default MalisisFont getFont()
 	{
-		return safeGetText(this).getFont();
+		return getOrCreate().getFont();
 	}
 
 	/**
@@ -154,7 +140,7 @@ public interface IGuiTextProxy
 	 */
 	public default void setFontOptions(FontOptions fontOptions)
 	{
-		safeGetText(this).setFontOptions(fontOptions);
+		getOrCreate().setFontOptions(fontOptions);
 	}
 
 	/**
@@ -164,7 +150,7 @@ public interface IGuiTextProxy
 	 */
 	public default FontOptions getFontOptions()
 	{
-		return safeGetText(this).getFontOptions();
+		return getOrCreate().getFontOptions();
 	}
 
 	/**
@@ -174,7 +160,7 @@ public interface IGuiTextProxy
 	 */
 	public default void setMultiline(boolean multiLine)
 	{
-		safeGetText(this).setMultiline(multiLine);
+		getOrCreate().setMultiline(multiLine);
 	}
 
 	/**
@@ -184,18 +170,14 @@ public interface IGuiTextProxy
 	 */
 	public default boolean isMultiLine()
 	{
-		return safeGetText(this).isMultiLine();
+		return getOrCreate().isMultiLine();
 	}
 
-	static GuiText safeGetText(IGuiTextProxy proxy)
+	public default GuiText getOrCreate()
 	{
-		GuiText gt = proxy.getGuiText();
-		if (gt == null)
-		{
-			gt = new GuiText("");
-			proxy.setGuiText(gt);
-		}
-		return gt;
+		if (getGuiText() == null)
+			setGuiText(new GuiText());
+		return getGuiText();
 	}
 
 }

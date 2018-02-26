@@ -38,8 +38,7 @@ public class UIPlayerInventory extends UIContainer<UIPlayerInventory>
 	public static final ISize INVENTORY_SIZE = Size.of(162, 87);
 
 	/** {@link MalisisInventory} used for this {@link UIPlayerInventory} **/
-	@SuppressWarnings("unused")
-	private MalisisInventory inventory;
+	protected MalisisInventory inventory;
 
 	public UIPlayerInventory(MalisisGui gui, MalisisInventory inventory)
 	{

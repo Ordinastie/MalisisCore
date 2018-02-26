@@ -270,14 +270,13 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 		if (isHorizontal())
 		{
 			offset = scrollable.getOffsetX();
-			if (scrollable.getContentWidth() <= parent.size().width() - delta)
+			if (scrollable.contentSize().width() <= parent.size().width() - delta)
 				hide = true;
-
 		}
 		else
 		{
 			offset = scrollable.getOffsetY();
-			if (scrollable.getContentHeight() <= parent.size().height() - delta)
+			if (scrollable.contentSize().height() <= parent.size().height() - delta)
 				hide = true;
 		}
 
@@ -398,7 +397,8 @@ public class UIScrollBar extends UIComponent<UIScrollBar> implements IControlCom
 	@Override
 	public String getPropertyString()
 	{
-		return type + " | O=" + getOffset() + "(" + getScrollable().getContentHeight() + ") | " + super.getPropertyString();
+		ISize cs = getScrollable().contentSize();
+		return type + " | O=" + getOffset() + "(" + (isHorizontal() ? cs.width() : cs.height()) + ") | " + super.getPropertyString();
 	}
 
 	/**

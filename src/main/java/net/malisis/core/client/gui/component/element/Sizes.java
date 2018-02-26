@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.*;
 
 import javax.annotation.Nonnull;
 
+import net.malisis.core.client.gui.component.IContentSize;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.UIScrollBar;
 import net.malisis.core.client.gui.component.element.Size.HeightFunction;
@@ -57,6 +58,15 @@ public class Sizes
 		};
 	}
 
+	public static WidthFunction contentWidth(int offset)
+	{
+		return owner -> {
+			if (!(owner instanceof IContentSize))
+				return 0;
+			return ((IContentSize) owner).contentSize().width() + offset;
+		};
+	}
+
 	public static HeightFunction relativeHeight(float height, int offset)
 	{
 		return owner -> {
@@ -72,6 +82,15 @@ public class Sizes
 		checkNotNull(other);
 		return owner -> {
 			return (int) (other.size().height() * height) + offset;
+		};
+	}
+
+	public static HeightFunction contentHeight(int offset)
+	{
+		return owner -> {
+			if (!(owner instanceof IContentSize))
+				return 0;
+			return ((IContentSize) owner).contentSize().height() + offset;
 		};
 	}
 }

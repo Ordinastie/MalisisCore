@@ -69,7 +69,7 @@ public class UISlimScrollbar extends UIScrollBar
 
 		//background shape
 		shape = new SimpleGuiShape();
-		//scroller shape
+		//scroll shape
 		scrollShape = new SimpleGuiShape();
 		scrollShape.setSize(w, h);
 		scrollShape.storeState();

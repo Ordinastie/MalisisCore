@@ -30,23 +30,24 @@ import org.lwjgl.opengl.GL11;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IContentComponent;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size.ISize;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
+import net.malisis.core.client.gui.text.IGuiTextProxy;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
  * UICheckBox
  *
- * @author PaleoCrafter
+ * @author Ordinastie
  */
-public class UICheckBox extends UIComponent<UICheckBox>
+public class UICheckBox extends UIComponent<UICheckBox> implements IContentComponent
 {
-	/** {@link UILabel} to draw besides the checkbox. **/
-	private UILabel label;
+	/** The content for this {@link UICheckBox}. */
+	UIComponent<?> content;
 	/** Whether this {@link UICheckBox} is checked. */
 	private boolean checked;
 
@@ -56,6 +57,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	{
 		super(gui);
 		setText(text);
+		setSize(Size.contentSize(14, 4));
 
 		shape = new SimpleGuiShape();
 
@@ -65,7 +67,7 @@ public class UICheckBox extends UIComponent<UICheckBox>
 		cbIconProvider = new GuiIconProvider(	gui.getGuiTexture().getIcon(242, 52, 12, 10),
 												gui.getGuiTexture().getIcon(254, 42, 12, 10),
 												gui.getGuiTexture().getIcon(242, 42, 12, 10));
-		setSize(new CheckBoxSize());
+
 	}
 
 	public UICheckBox(MalisisGui gui)
@@ -74,34 +76,32 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	}
 
 	//#region Getters/Setters
+
+	@Override
+	public UIComponent<?> getContent()
+	{
+		return content;
+	}
+
+	@Override
+	public void setContent(UIComponent<?> content)
+	{
+		this.content = content;
+	}
+
 	/**
 	 * Sets the text for this {@link UICheckBox}.
 	 *
 	 * @param text the new text
 	 */
-	public UICheckBox setText(String text)
+	@Override
+	public void setText(String text)
 	{
 		if (Strings.isEmpty(text))
-			setLabel(null);
-		setLabel(new UILabel(getGui(), text));
-		return this;
-	}
-
-	/**
-	 * Sets the {@link UILabel} for this {@link UICheckBox}.
-	 *
-	 * @param label the label
-	 * @return the UI check box
-	 */
-	public UICheckBox setLabel(UILabel label)
-	{
-		this.label = label;
-		if (label != null)
-		{
-			label.setPosition(Position.of(14, 1));
-			label.setParent(this);
-		}
-		return this;
+			setContent(null);
+		IContentComponent.super.setText(text);
+		content.setPosition(Position.of(14, 2));
+		content.setParent(this);
 	}
 
 	//#end Getters/Setters
@@ -168,8 +168,8 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (label != null)
-			label.draw(renderer, mouseX, mouseY, partialTick);
+		if (content != null)
+			content.draw(renderer, mouseX, mouseY, partialTick);
 
 		if (checked)
 		{
@@ -189,28 +189,18 @@ public class UICheckBox extends UIComponent<UICheckBox>
 	@Override
 	public String getPropertyString()
 	{
-		return "text=" + label.getText() + " | checked=" + this.checked + " | " + super.getPropertyString();
-	}
-
-	public class CheckBoxSize implements ISize
-	{
-		@Override
-		public int width()
-		{
-			return 14 + (label != null ? label.size().width() : 0);
-		}
-
-		@Override
-		public int height()
-		{
-			return 10;
-		}
+		String str = "";
+		if (content instanceof IGuiTextProxy)
+			str += ((IGuiTextProxy) content).getText() + " | ";
+		else if (content != null)
+			str += content.getClass().getSimpleName() + " | ";
+		return str + "checked=" + this.checked + " | " + super.getPropertyString();
 	}
 
 	/**
 	 * Event fired when a {@link UICheckBox} is checked or unchecked.<br>
 	 * When catching the event, the state is not applied to the {@code UICheckbox} yet.<br>
-	 * Cancelling the event will prevent the state to be set for the {@code UICheckbox} .
+	 * Canceling the event will prevent the state to be set for the {@code UICheckbox} .
 	 */
 	public static class CheckEvent extends ValueChange<UICheckBox, Boolean>
 	{

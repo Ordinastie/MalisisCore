@@ -27,12 +27,14 @@ package net.malisis.core.renderer.font;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
 
+import net.malisis.core.client.gui.text.PredicatedFontOptions;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -44,9 +46,9 @@ public class FontOptions
 	public static final FontOptions EMPTY = FontOptions.builder().build();
 
 	/** Map of TextFormatting **/
-	private static Map<Character, TextFormatting> charFormats = new HashMap<>();
+	protected static Map<Character, TextFormatting> charFormats = new HashMap<>();
 	/** List of ECF colors **/
-	private static int[] colors = new int[32];
+	protected static int[] colors = new int[32];
 	static
 	{
 		//could reflect to get TextFormatting.formattingCodeMapping instead
@@ -69,27 +71,27 @@ public class FontOptions
 	}
 
 	/** Scale for the font **/
-	private float fontScale = 1;
+	protected float fontScale = 1;
 	/** Color of the text **/
-	private int color = 0x000000; //black
+	protected int color = 0x000000; //black
 	/** Draw with shadow **/
-	private boolean shadow = false;
+	protected boolean shadow = false;
 	/** Use bold font **/
-	private boolean bold;
+	protected boolean bold;
 	/** Use italic font **/
-	private boolean italic;
+	protected boolean italic;
 	/** Underline the text **/
-	private boolean underline;
+	protected boolean underline;
 	/** Strike through the text **/
-	private boolean strikethrough;
+	protected boolean strikethrough;
 	/** Obfuscated text */
-	private boolean obfuscated = false;
+	protected boolean obfuscated = false;
 	/** Disable ECF so char are actually drawn **/
-	private boolean formattingDisabled = false;
+	protected boolean formattingDisabled = false;
 	/** Translate the text before display */
-	private boolean translate = true;
+	protected boolean translate = true;
 
-	private FontOptions(float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, boolean translate)
+	protected FontOptions(float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, boolean translate)
 	{
 		this.fontScale = fontScale;
 		this.color = color;
@@ -209,6 +211,7 @@ public class FontOptions
 	 */
 	public int getShadowColor()
 	{
+		int color = getColor(); //make sure we use the right color
 		if (color == 0) //black
 			return 0x222222;
 		if (color == 0xFFAA00) //gold
@@ -360,15 +363,19 @@ public class FontOptions
 
 	public static class FontOptionsBuilder
 	{
-		private float fontScale = 1;
-		private int color = 0x000000; //black
-		private boolean shadow = false;
-		private boolean bold = false;
-		private boolean italic = false;
-		private boolean underline = false;
-		private boolean strikethrough = false;
-		private boolean obfuscated = false;
-		private boolean translate = true;
+		protected FontOptions base;
+		protected BooleanSupplier currentSupplier;
+		protected List<Pair<BooleanSupplier, FontOptions>> suppliers = Lists.newArrayList();
+
+		protected float fontScale = 1;
+		protected int color = 0x000000; //black
+		protected boolean shadow = false;
+		protected boolean bold = false;
+		protected boolean italic = false;
+		protected boolean underline = false;
+		protected boolean strikethrough = false;
+		protected boolean obfuscated = false;
+		protected boolean translate = true;
 
 		public FontOptionsBuilder()
 		{}
@@ -508,9 +515,29 @@ public class FontOptions
 			return this;
 		}
 
-		public FontOptions build()
+		public FontOptionsBuilder when(BooleanSupplier supplier)
+		{
+			if (currentSupplier == null)
+				base = build();
+			else
+			{
+				suppliers.add(Pair.of(currentSupplier, buildBase()));
+				from(base);
+			}
+			currentSupplier = supplier;
+			return this;
+		}
+
+		private FontOptions buildBase()
 		{
 			return new FontOptions(fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated, translate);
+		}
+
+		public FontOptions build()
+		{
+			if (base != null) //predicated
+				return new PredicatedFontOptions(base, suppliers);
+			return buildBase();
 		}
 
 	}

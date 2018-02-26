@@ -26,6 +26,7 @@ package net.malisis.core.client.gui.component.element;
 
 import static com.google.common.base.Preconditions.*;
 
+import java.util.function.IntSupplier;
 import java.util.function.ToIntFunction;
 
 import javax.annotation.Nonnull;
@@ -97,15 +98,35 @@ public interface Size
 		return relativeWidth(1.0F).relativeHeight(1.0F);
 	}
 
+	public static ISize contentSize()
+	{
+		return new DynamicSize(Sizes.contentWidth(0), Sizes.contentHeight(0));
+	}
+
+	public static ISize contentSize(int widthOffset, int heightOffset)
+	{
+		return new DynamicSize(Sizes.contentWidth(widthOffset), Sizes.contentHeight(heightOffset));
+	}
+
 	public static ISize matches(@Nonnull UIComponent<?> other)
 	{
 		checkNotNull(other);
 		return widthRelativeTo(1.0F, other).heightRelativeTo(1.0F, other);
 	}
 
+	public static SizeFactory width(WidthFunction widthFunction)
+	{
+		return new SizeFactory(widthFunction);
+	}
+
 	public static SizeFactory width(int width)
 	{
-		return new SizeFactory(owner -> width);
+		return width(owner -> width);
+	}
+
+	public static SizeFactory width(IntSupplier supplier)
+	{
+		return width(owner -> supplier.getAsInt());
 	}
 
 	public static SizeFactory relativeWidth(float width)
@@ -115,7 +136,7 @@ public interface Size
 
 	public static SizeFactory relativeWidth(float width, int offset)
 	{
-		return new SizeFactory(Sizes.relativeWidth(width, offset));
+		return width(Sizes.relativeWidth(width, offset));
 	}
 
 	public static SizeFactory widthRelativeTo(float width, @Nonnull UIComponent<?> other)
@@ -126,7 +147,7 @@ public interface Size
 	public static SizeFactory widthRelativeTo(float width, @Nonnull UIComponent<?> other, int offset)
 	{
 
-		return new SizeFactory(Sizes.widthRelativeTo(width, other, offset));
+		return width(Sizes.widthRelativeTo(width, other, offset));
 	}
 
 	public class SizeFactory
@@ -139,10 +160,20 @@ public interface Size
 			this.widthFunction = widthFunction;
 		}
 
+		public ISize height(HeightFunction heightFunction)
+		{
+			this.heightFunction = heightFunction;
+			return build();
+		}
+
 		public ISize height(int height)
 		{
-			heightFunction = owner -> height;
-			return build();
+			return height(owner -> height);
+		}
+
+		public ISize height(IntSupplier supplier)
+		{
+			return height(owner -> supplier.getAsInt());
 		}
 
 		public ISize relativeHeight(float height)
@@ -152,8 +183,7 @@ public interface Size
 
 		public ISize relativeHeight(float height, int offset)
 		{
-			heightFunction = Sizes.relativeHeight(height, offset);
-			return build();
+			return height(Sizes.relativeHeight(height, offset));
 		}
 
 		public ISize heightRelativeTo(float height, UIComponent<?> other)
@@ -163,14 +193,12 @@ public interface Size
 
 		public ISize heightRelativeTo(float height, UIComponent<?> other, int offset)
 		{
-			heightFunction = Sizes.heightRelativeTo(height, other, offset);
-			return build();
+			return height(Sizes.heightRelativeTo(height, other, offset));
 		}
 
 		private ISize build()
 		{
 			return new DynamicSize(widthFunction, heightFunction);
 		}
-
 	}
 }

@@ -32,10 +32,10 @@ import org.apache.logging.log4j.util.Strings;
 
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IContentComponent;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size.ISize;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
@@ -44,12 +44,12 @@ import net.malisis.core.renderer.icon.provider.GuiIconProvider;
  * @author Ordinastie
  *
  */
-public class UIRadioButton extends UIComponent<UIRadioButton>
+public class UIRadioButton extends UIComponent<UIRadioButton> implements IContentComponent
 {
 	private static HashMap<String, List<UIRadioButton>> radioButtons = new HashMap<>();
 
+	private UIComponent<?> content;
 	private String name;
-	private UILabel label;
 	private boolean selected;
 
 	private GuiIconProvider rbIconProvider;
@@ -59,7 +59,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 		super(gui);
 		this.name = name;
 		setText(text);
-		setSize(new RadioButtonSize());
+		setSize(Size.contentSize(14, 4));
 
 		shape = new SimpleGuiShape();
 
@@ -77,34 +77,31 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 	}
 
 	//#region Getters/Setters
+	@Override
+	public UIComponent<?> getContent()
+	{
+		return content;
+	}
+
+	@Override
+	public void setContent(UIComponent<?> content)
+	{
+		this.content = content;
+	}
+
 	/**
 	 * Sets the text for this {@link UICheckBox}.
 	 *
 	 * @param text the new text
 	 */
-	public UIRadioButton setText(String text)
+	@Override
+	public void setText(String text)
 	{
 		if (Strings.isEmpty(text))
-			setLabel(null);
-		setLabel(new UILabel(getGui(), text));
-		return this;
-	}
-
-	/**
-	 * Sets the {@link UILabel} for this {@link UIRadioButton}.
-	 *
-	 * @param label the label
-	 * @return the UI radio button
-	 */
-	public UIRadioButton setLabel(UILabel label)
-	{
-		this.label = label;
-		if (label != null)
-		{
-			label.setPosition(Position.of(12, 1));
-			label.setParent(this);
-		}
-		return this;
+			setContent(null);
+		IContentComponent.super.setText(text);
+		content.setPosition(Position.of(12, 1));
+		content.setParent(this);
 	}
 
 	/**
@@ -147,8 +144,8 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		if (label != null)
-			label.draw(renderer, mouseX, mouseY, partialTick);
+		if (content != null)
+			content.draw(renderer, mouseX, mouseY, partialTick);
 
 		if (selected)
 		{
@@ -197,21 +194,6 @@ public class UIRadioButton extends UIComponent<UIRadioButton>
 	public static UIRadioButton getSelected(UIRadioButton rb)
 	{
 		return getSelected(rb.name);
-	}
-
-	public class RadioButtonSize implements ISize
-	{
-		@Override
-		public int width()
-		{
-			return 12 + (label != null ? label.size().width() : 0);
-		}
-
-		@Override
-		public int height()
-		{
-			return 10;
-		}
 	}
 
 	/**

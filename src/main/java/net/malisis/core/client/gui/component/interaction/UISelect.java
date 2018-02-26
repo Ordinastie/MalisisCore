@@ -48,6 +48,7 @@ import net.malisis.core.client.gui.component.control.UISlimScrollbar;
 import net.malisis.core.client.gui.component.element.Padding;
 import net.malisis.core.client.gui.component.element.Position.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.element.Size.DynamicSize;
 import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.component.interaction.UISelect.Option;
 import net.malisis.core.client.gui.element.GuiShape;
@@ -55,7 +56,6 @@ import net.malisis.core.client.gui.element.SimpleGuiShape;
 import net.malisis.core.client.gui.element.XResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.render.TexturedBackground.BoxBackground;
-import net.malisis.core.client.gui.text.IGuiText;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
@@ -65,7 +65,7 @@ import net.malisis.core.renderer.icon.provider.GuiIconProvider;
  *
  * @author Ordinastie
  */
-public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Option<T>>, IGuiText<UISelect<T>>
+public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Option<T>>
 {
 	/** The {@link MalisisFont} to use for this {@link UISelect}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
@@ -176,32 +176,26 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		optionsContainer.updateSize();
 	}
 
-	@Override
 	public MalisisFont getFont()
 	{
 		return font;
 	}
 
-	@Override
-	public UISelect<T> setFont(MalisisFont font)
+	public void setFont(MalisisFont font)
 	{
 		this.font = font;
 		optionsContainer.updateSize();
-		return this;
 	}
 
-	@Override
 	public FontOptions getFontOptions()
 	{
 		return fontOptions;
 	}
 
-	@Override
-	public UISelect<T> setFontOptions(FontOptions options)
+	public void setFontOptions(FontOptions options)
 	{
 		this.fontOptions = options;
 		optionsContainer.updateSize();
-		return this;
 	}
 
 	/**
@@ -654,6 +648,11 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 		/** Icon used to draw the option container. */
 		protected GuiIconProvider iconsExpanded;
 
+		protected ISize contentSize = new DynamicSize(	o -> 0,
+														o -> UISelect.this.options	.stream()
+																					.mapToInt(opt -> opt.getHeight(UISelect.this))
+																					.sum());
+
 		public OptionsContainer(MalisisGui gui)
 		{
 			super(gui);
@@ -732,18 +731,9 @@ public class UISelect<T> extends UIComponent<UISelect<T>> implements Iterable<Op
 
 		//#region IScrollable
 		@Override
-		public int getContentHeight()
+		public ISize contentSize()
 		{
-			int h = 0;
-			for (Option<T> option : UISelect.this)
-				h += option.getHeight(UISelect.this);
-			return h;
-		}
-
-		@Override
-		public int getContentWidth()
-		{
-			return 0;
+			return contentSize;
 		}
 
 		@Override

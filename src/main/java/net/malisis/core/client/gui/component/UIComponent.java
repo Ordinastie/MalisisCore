@@ -895,7 +895,8 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	 */
 	public String getPropertyString()
 	{
-		return size().width() + "x" + size().height() + "@" + position().x() + "x" + position().y() + " | S=" + screenX() + "," + screenY();
+		return position().x() + "x" + position().y() + "@" + size().width() + "x" + size().height() + " | Screen=" + screenX() + ","
+				+ screenY();
 	}
 
 	/**

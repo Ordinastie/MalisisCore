@@ -75,8 +75,7 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 		super(gui);
 		setText(text);
 		setMultiline(multiLine);
-		setFontOptions(FontOptions.builder().color(0x444444)/*.shadow()*/.build());
-
+		setFontOptions(FontOptions.builder().color(0x444444).build());
 	}
 
 	/**
@@ -168,15 +167,9 @@ public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTe
 
 	//#region IScrollable
 	@Override
-	public int getContentWidth()
+	public ISize contentSize()
 	{
-		return size().width();
-	}
-
-	@Override
-	public int getContentHeight()
-	{
-		return text.lines().size() * getLineHeight();
+		return text.size();
 	}
 
 	@Override

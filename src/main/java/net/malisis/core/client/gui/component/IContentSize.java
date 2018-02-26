@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Ordinastie
+ * Copyright (c) 2018 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,30 +22,15 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.text;
+package net.malisis.core.client.gui.component;
 
-import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.element.Size.ISize;
 
 /**
- * Defines a {@link UIComponent} that uses text to be rendered on the {@link MalisisGui}.
- *
  * @author Ordinastie
  *
  */
-public interface IGuiText
+public interface IContentSize
 {
-	/**
-	 * Sets the {@link GuiText}.
-	 *
-	 * @param text the new text
-	 */
-	public void setGuiText(GuiText text);
-
-	/**
-	 * Gets the {@link GuiText}.
-	 *
-	 * @return the text
-	 */
-	public GuiText getGuiText();
+	public ISize contentSize();
 }

@@ -38,7 +38,6 @@ import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.GuiShape;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.ComponentEvent;
-import net.malisis.core.client.gui.text.IGuiText;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
@@ -50,7 +49,7 @@ import net.minecraft.util.math.MathHelper;
  * @author Ordinastie
  *
  */
-public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UISlider<T>>
+public class UISlider<T> extends UIComponent<UISlider<T>>
 {
 	public static int SLIDER_WIDTH = 8;
 
@@ -100,26 +99,23 @@ public class UISlider<T> extends UIComponent<UISlider<T>> implements IGuiText<UI
 	//	}
 
 	//#region Getters/Setters
-	@Override
+
 	public MalisisFont getFont()
 	{
 		return font;
 	}
 
-	@Override
 	public UISlider<T> setFont(MalisisFont font)
 	{
 		this.font = font;
 		return this;
 	}
 
-	@Override
 	public FontOptions getFontOptions()
 	{
 		return fontOptions;
 	}
 
-	@Override
 	public UISlider<T> setFontOptions(FontOptions fro)
 	{
 		this.fontOptions = fro;

@@ -302,7 +302,9 @@ public class MalisisRenderer<T extends TileEntity> extends TileEntitySpecialRend
 	 */
 	public void set(T te, float partialTick)
 	{
-		set(te.getWorld(), te.getBlockType(), te.getPos(), te.getWorld().getBlockState(te.getPos()));
+		//don't use te.getBlockType() because it can be desynced from world
+		IBlockState state = te.getWorld().getBlockState(te.getPos());
+		set(te.getWorld(), state.getBlock(), te.getPos(), state);
 		this.partialTick = partialTick;
 		this.tileEntity = te;
 	}

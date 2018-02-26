@@ -62,10 +62,6 @@ public class UICloseHandle extends UIComponent<UICloseHandle> implements IContro
 	}
 
 	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{}
-
-	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		renderer.drawShape(shape, rp);

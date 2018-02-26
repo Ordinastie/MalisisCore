@@ -71,10 +71,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	/** Determines whether this {@link UIContainer} should clip its contents to its drawn area. */
 	protected boolean clipContent = true;
 	//IScrollable
-	/** Width of the contents of this {@link UIContainer}. */
-	protected int contentWidth;
-	/** Height of the contents of this {@link UIContainer}. */
-	protected int contentHeight;
+	public final ContentSize contentSize = new ContentSize();
 	/** X Offset for the contents of this {@link UIContainer} from 0 to 1. */
 	protected int xOffset;
 	/** Y Offset for the contents of this {@link UIContainer} from 0 to 1. */
@@ -230,6 +227,12 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 		return titleLabel != null ? titleLabel.getText() : null;
 	}
 
+	@Override
+	public ISize contentSize()
+	{
+		return contentSize;
+	}
+
 	// #end getters/setters
 	/**
 	 * Gets the {@link UIComponent} matching the specified name.
@@ -326,29 +329,8 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	 */
 	public void onContentUpdate()
 	{
-		calculateContentSize();
+		contentSize.update();
 		fireEvent(new ContentUpdateEvent<>(self()));
-	}
-
-	/**
-	 * Calculates content size.
-	 */
-	public void calculateContentSize()
-	{
-		int contentWidth = 0;
-		int contentHeight = 0;
-
-		for (UIComponent<?> c : components)
-		{
-			if (c.isVisible())
-			{
-				contentWidth = Math.max(contentWidth, c.position().x() + c.size().width());
-				contentHeight = Math.max(contentHeight, c.position().y() + c.size().height());
-			}
-		}
-
-		this.contentHeight = contentHeight + getPadding().bottom();
-		this.contentWidth = contentWidth + getPadding().right();
 	}
 
 	//#region IClipable
@@ -389,43 +371,31 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 
 	//#region IScrollable
 	@Override
-	public int getContentWidth()
-	{
-		return contentWidth;
-	}
-
-	@Override
-	public int getContentHeight()
-	{
-		return contentHeight;
-	}
-
-	@Override
 	public float getOffsetX()
 	{
-		if (getContentWidth() <= size().width())
+		if (contentSize().width() <= size().width())
 			return 0;
-		return (float) xOffset / (getContentWidth() - size().width());
+		return (float) xOffset / (contentSize.width() - size().width());
 	}
 
 	@Override
 	public void setOffsetX(float offsetX, int delta)
 	{
-		this.xOffset = Math.round((getContentWidth() - size().width() + delta) * offsetX);
+		this.xOffset = Math.round((contentSize().width() - size().width() + delta) * offsetX);
 	}
 
 	@Override
 	public float getOffsetY()
 	{
-		if (getContentHeight() <= size().height())
+		if (contentSize().height() <= size().height())
 			return 0;
-		return (float) yOffset / (getContentHeight() - size().height());
+		return (float) yOffset / (contentSize().height() - size().height());
 	}
 
 	@Override
 	public void setOffsetY(float offsetY, int delta)
 	{
-		this.yOffset = Math.round((getContentHeight() - size().height() + delta) * offsetY);
+		this.yOffset = Math.round((contentSize().height() - size().height() + delta) * offsetY);
 	}
 
 	@Override
@@ -559,5 +529,30 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 		container.setBackground(new WindowBackground(gui));
 		container.setPosition(Position.centered().middleAligned());
 		return container;
+	}
+
+	public class ContentSize implements ISize
+	{
+		private int width;
+		private int height;
+
+		private void update()
+		{
+			width = components.stream().filter(UIComponent::isVisible).mapToInt(c -> c.position().x() + c.size().width()).max().orElse(0);
+			height = components.stream().filter(UIComponent::isVisible).mapToInt(c -> c.position().y() + c.size().height()).max().orElse(0);
+		}
+
+		@Override
+		public int width()
+		{
+			return width;
+		}
+
+		@Override
+		public int height()
+		{
+			return height;
+		}
+
 	}
 }

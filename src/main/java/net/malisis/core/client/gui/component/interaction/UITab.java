@@ -39,7 +39,6 @@ import net.malisis.core.client.gui.component.element.Position;
 import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
-import net.malisis.core.client.gui.text.IGuiText;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.Icon;
@@ -49,7 +48,7 @@ import net.malisis.core.renderer.icon.provider.GuiIconProvider;
  * @author Ordinastie
  *
  */
-public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
+public class UITab extends UIComponent<UITab>
 {
 	private final ISize AUTO_SIZE = new AutoSize();
 
@@ -115,26 +114,22 @@ public class UITab extends UIComponent<UITab> implements IGuiText<UITab>
 		return (UITabGroup) getParent();
 	}
 
-	@Override
 	public MalisisFont getFont()
 	{
 		return font;
 	}
 
-	@Override
 	public UITab setFont(MalisisFont font)
 	{
 		this.font = font;
 		return this;
 	}
 
-	@Override
 	public FontOptions getFontOptions()
 	{
 		return fontOptions;
 	}
 
-	@Override
 	public UITab setFontOptions(FontOptions options)
 	{
 		this.fontOptions = options;

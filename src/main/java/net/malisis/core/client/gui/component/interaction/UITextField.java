@@ -70,6 +70,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	protected StringBuilder text = new StringBuilder();
 	protected Function<String, String> filterFunction;
 
+	protected ISize contentSize = Size	.width(o -> size().width())
+										.height(o -> getGuiText().isMultiLine() ? getGuiText().size().height() : size().height());
+
 	//text space
 	/** Number of character offset out of this {@link UITextField} when drawn. */
 	protected int charOffset = 0;
@@ -476,27 +479,10 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	// #end Getters/Setters
 
 	//#region IScrollable
-
-	/**
-	 * Gets the content width.
-	 *
-	 * @return the content width
-	 */
 	@Override
-	public int getContentWidth()
+	public ISize contentSize()
 	{
-		return size().width();
-	}
-
-	/**
-	 * Gets the content height.
-	 *
-	 * @return the content height
-	 */
-	@Override
-	public int getContentHeight()
-	{
-		return guiText.isMultiLine() ? guiText.lines().size() * getLineHeight() : size().height();
+		return contentSize;
 	}
 
 	/**
@@ -1085,7 +1071,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			{
 				int x = 0;
 				int y = (i - lineOffset) * getLineHeight();
-				int X = getContentWidth();
+				int X = contentSize().width();
 
 				if (i == first.line)
 					x = first.getXOffset();

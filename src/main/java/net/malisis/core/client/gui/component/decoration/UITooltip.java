@@ -32,7 +32,6 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
-import net.malisis.core.client.gui.text.IGuiText;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.font.FontOptions;
@@ -44,7 +43,7 @@ import net.malisis.core.renderer.icon.provider.GuiIconProvider;
  *
  * @author PaleoCrafter
  */
-public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITooltip>
+public class UITooltip extends UIComponent<UITooltip>
 {
 	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
 	protected MalisisFont font = MalisisFont.minecraftFont;
@@ -87,34 +86,6 @@ public class UITooltip extends UIComponent<UITooltip> implements IGuiText<UITool
 	}
 
 	//#region Getters/Setters
-	@Override
-	public MalisisFont getFont()
-	{
-		return font;
-	}
-
-	@Override
-	public UITooltip setFont(MalisisFont font)
-	{
-		this.font = font;
-		calculateSize();
-		return this;
-	}
-
-	@Override
-	public FontOptions getFontOptions()
-	{
-		return fontOptions;
-	}
-
-	@Override
-	public UITooltip setFontOptions(FontOptions fro)
-	{
-		this.fontOptions = fro;
-		calculateSize();
-		return this;
-	}
-
 	public UITooltip setText(String text)
 	{
 		lines = Arrays.asList(text.split("\\n"));

@@ -102,10 +102,6 @@ public class UIMoveHandle extends UIComponent<UIMoveHandle> implements IControlC
 	}
 
 	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{}
-
-	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		renderer.drawShape(shape, rp);

@@ -82,7 +82,6 @@ public class UIImage extends UIComponent<UIImage>
 		iconProvider = new GuiIconProvider(null);
 
 		setItemStack(itemStack);
-		setSize(ITEMSTACK_SIZE);
 
 		shape = new SimpleGuiShape();
 	}
@@ -176,10 +175,6 @@ public class UIImage extends UIComponent<UIImage>
 	}
 
 	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{}
-
-	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		if (icon != null)
@@ -197,7 +192,8 @@ public class UIImage extends UIComponent<UIImage>
 	@Override
 	public String getPropertyString()
 	{
-		return (itemStack != null ? itemStack : ("texture : " + this.texture + ", " + " icon : " + icon)) + super.getPropertyString();
+		return (itemStack != null ? itemStack + " | " : ("texture : " + this.texture + ", " + " icon : " + icon))
+				+ super.getPropertyString();
 	}
 
 }

@@ -91,10 +91,6 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 	}
 
 	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{}
-
-	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
 		renderer.drawShape(shape, rp);
