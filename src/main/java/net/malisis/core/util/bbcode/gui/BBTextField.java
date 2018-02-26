@@ -77,12 +77,6 @@ public class BBTextField extends UITextField implements IBBCodeRenderer<BBTextFi
 		return this;
 	}
 
-	@Override
-	public float getFontScale()
-	{
-		return fontOptions.getFontScale();
-	}
-
 	public boolean isWysiwyg()
 	{
 		return isWysiwyg;
@@ -102,14 +96,6 @@ public class BBTextField extends UITextField implements IBBCodeRenderer<BBTextFi
 	public int getStartLine()
 	{
 		return lineOffset;
-	}
-
-	@Override
-	public void buildLines()
-	{
-		super.buildLines();
-		if (isWysiwyg())
-			bbText.buildRenderLines(lines);
 	}
 
 	@Override
@@ -135,7 +121,6 @@ public class BBTextField extends UITextField implements IBBCodeRenderer<BBTextFi
 
 		text.setLength(0);
 		text.append(bbText.getRawText());
-		buildLines();
 
 		getCursorPosition().jumpBy(str.length());
 
@@ -166,7 +151,6 @@ public class BBTextField extends UITextField implements IBBCodeRenderer<BBTextFi
 
 		text.setLength(0);
 		text.append(bbText.getRawText());
-		buildLines();
 
 		selectingText = false;
 		getCursorPosition().jumpTo(start);
@@ -198,7 +182,6 @@ public class BBTextField extends UITextField implements IBBCodeRenderer<BBTextFi
 			selectWord();
 
 		bbText.insertNode(tag.node.copy(), start, end);
-		buildLines();
 
 		getCursorPosition().jumpTo(p);
 		selectingText = false;
@@ -211,5 +194,11 @@ public class BBTextField extends UITextField implements IBBCodeRenderer<BBTextFi
 			super.drawText(renderer);
 		else
 			bbText.render(renderer, 2, 2, 0, this);
+	}
+
+	@Override
+	public float getFontScale()
+	{
+		return guiText.getFontOptions().getFontScale();
 	}
 }
