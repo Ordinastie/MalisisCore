@@ -50,30 +50,20 @@ public interface IContentComponent extends IGuiTextProxy, IContentSize
 	 */
 	public UIComponent<?> getContent();
 
-	/**
-	 * Checks if content is text based.
-	 *
-	 * @return true, if is gui text
-	 */
-	public default boolean isContentGuiText()
-	{
-		return getContent() instanceof IGuiText;
-	}
-
 	@Override
 	public default void setGuiText(GuiText text)
 	{
 		UIComponent<?> content = getContent();
-		if (!isContentGuiText())
+		if (!(content instanceof IGuiText))
 			throw new IllegalStateException("Component doesn't have GuiText capable content");
-		((IGuiTextProxy) content).setGuiText(text);
+		((IGuiText) content).setGuiText(text);
 	}
 
 	@Override
 	public default GuiText getGuiText()
 	{
 		UIComponent<?> content = getContent();
-		if (!isContentGuiText())
+		if (!(content instanceof IGuiText))
 			throw new IllegalStateException("Component doesn't have GuiText capable content");
 		return ((IGuiText) content).getGuiText();
 	}
@@ -89,7 +79,6 @@ public interface IContentComponent extends IGuiTextProxy, IContentSize
 	{
 		if (getContent() == null)
 			setContent(new UILabel(((UIComponent<?>) this).getGui()));
-
 		return getGuiText();
 	}
 }
