@@ -343,13 +343,23 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	}
 
 	/**
-	 * Checks if this {@link UIComponent} is disabled.
+	 * Checks if this {@link UIComponent} is enabled.
 	 *
-	 * @return true if disabled
+	 * @return true if enabled
 	 */
 	public boolean isEnabled()
 	{
 		return enabled && (parent == null || parent.isEnabled());
+	}
+
+	/**
+	 * Checks if this {@link UIComponent} is disabled.
+	 *
+	 * @return true, if is disabled
+	 */
+	public boolean isDisabled()
+	{
+		return !isEnabled();
 	}
 
 	/**
