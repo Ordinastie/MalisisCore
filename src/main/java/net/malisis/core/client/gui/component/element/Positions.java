@@ -124,7 +124,7 @@ public class Positions
 			UIComponent<?> parent = owner.getParent();
 			if (owner.getParent() == null)
 				return 0;
-			return (parent.size().height() - Padding.of(parent).vertical() - owner.size().height()) / 2 + offset;
+			return (int) (Math.ceil(((float) parent.size().height() - Padding.of(parent).vertical() - owner.size().height()) / 2) + offset);
 		};
 
 	}
@@ -176,7 +176,7 @@ public class Positions
 	{
 		checkNotNull(other);
 		return owner -> {
-			return other.position().y() + (other.size().height() - owner.size().height()) / 2 + offset;
+			return (int) (other.position().y() + Math.ceil(((float) other.size().height() - owner.size().height()) / 2) + offset);
 		};
 
 	}
