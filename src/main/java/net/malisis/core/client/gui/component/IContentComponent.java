@@ -75,10 +75,16 @@ public interface IContentComponent extends IGuiTextProxy, IContentSize
 	}
 
 	@Override
+	default void createGuiText()
+	{
+		setContent(new UILabel(((UIComponent<?>) this).getGui()));
+	}
+
+	@Override
 	public default GuiText getOrCreate()
 	{
 		if (getContent() == null)
-			setContent(new UILabel(((UIComponent<?>) this).getGui()));
+			createGuiText();
 		return getGuiText();
 	}
 }

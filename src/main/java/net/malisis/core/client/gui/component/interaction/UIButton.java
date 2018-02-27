@@ -36,7 +36,6 @@ import net.malisis.core.client.gui.component.element.Position.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.render.ButtonBackground;
-import net.malisis.core.client.gui.text.IGuiText;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.init.SoundEvents;
@@ -108,19 +107,12 @@ public class UIButton extends UIComponent<UIButton> implements IContentComponent
 	}
 
 	//#region Getters/Setters
-	/**
-	 * Sets the text of this {@link UIButton}.<br>
-	 * Create a {@link UILabel} for this button.
-	 *
-	 * @param text the text
-	 */
 	@Override
-	public void setText(String text)
+	public void createGuiText()
 	{
-		boolean setOptions = !(content instanceof IGuiText);
-		IContentComponent.super.setText(text);
-		if (setOptions)
-			setFontOptions(fontOptions);
+		IContentComponent.super.createGuiText();
+		//apply default fontOptions when GuiText is automatically created by setText()
+		setFontOptions(fontOptions);
 	}
 
 	/**
@@ -277,7 +269,7 @@ public class UIButton extends UIComponent<UIButton> implements IContentComponent
 	@Override
 	public String getPropertyString()
 	{
-		return "" + TextFormatting.GREEN + content + TextFormatting.RESET + " | " + super.getPropertyString();
+		return "[" + TextFormatting.GREEN + content + TextFormatting.RESET + "] " + super.getPropertyString();
 	}
 
 	/**

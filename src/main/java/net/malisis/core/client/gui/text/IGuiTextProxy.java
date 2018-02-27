@@ -173,10 +173,15 @@ public interface IGuiTextProxy extends IGuiText
 		return getOrCreate().isMultiLine();
 	}
 
+	public default void createGuiText()
+	{
+		setGuiText(new GuiText());
+	}
+
 	public default GuiText getOrCreate()
 	{
 		if (getGuiText() == null)
-			setGuiText(new GuiText());
+			createGuiText();
 		return getGuiText();
 	}
 
