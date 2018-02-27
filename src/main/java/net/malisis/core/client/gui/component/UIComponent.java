@@ -907,7 +907,7 @@ public abstract class UIComponent<T extends UIComponent<T>> implements IKeyListe
 	@Override
 	public String toString()
 	{
-		return (this.name == null ? getClass().getSimpleName() : this.name) + " [" + getPropertyString() + "]";
+		return (this.name == null ? getClass().getSimpleName() : this.name) + " " + getPropertyString();
 	}
 
 	/**
