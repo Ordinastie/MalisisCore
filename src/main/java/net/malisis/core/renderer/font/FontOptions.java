@@ -520,10 +520,7 @@ public class FontOptions
 			if (currentSupplier == null)
 				base = build();
 			else
-			{
-				suppliers.add(Pair.of(currentSupplier, buildBase()));
-				from(base);
-			}
+				buildSupplier();
 			currentSupplier = supplier;
 			return this;
 		}
@@ -533,10 +530,21 @@ public class FontOptions
 			return new FontOptions(fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated, translate);
 		}
 
+		private void buildSupplier()
+		{
+			if (currentSupplier == null)
+				return;
+			suppliers.add(Pair.of(currentSupplier, buildBase()));
+			from(base);
+		}
+
 		public FontOptions build()
 		{
 			if (base != null) //predicated
+			{
+				buildSupplier();
 				return new PredicatedFontOptions(base, suppliers);
+			}
 			return buildBase();
 		}
 
