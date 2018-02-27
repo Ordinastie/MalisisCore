@@ -36,6 +36,7 @@ import net.malisis.core.client.gui.component.element.Position.IPosition;
 import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.render.ButtonBackground;
+import net.malisis.core.client.gui.text.IGuiText;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.init.SoundEvents;
@@ -57,6 +58,8 @@ public class UIButton extends UIComponent<UIButton> implements IContentComponent
 													.when(this::isDisabled)
 													.color(0xCCCCCC)
 													.build();
+
+	protected IPosition contentPosition = new ContentPosition(Position.centered().middleAligned());
 
 	/** Content used for this {@link UIButton}. */
 	protected UIComponent<?> content;
@@ -107,20 +110,23 @@ public class UIButton extends UIComponent<UIButton> implements IContentComponent
 	//#region Getters/Setters
 	/**
 	 * Sets the text of this {@link UIButton}.<br>
-	 * Create a label for this button.
+	 * Create a {@link UILabel} for this button.
 	 *
 	 * @param text the text
 	 */
 	@Override
 	public void setText(String text)
 	{
+		boolean setOptions = !(content instanceof IGuiText);
 		IContentComponent.super.setText(text);
-		setFontOptions(fontOptions);
-		content.setPosition(new ContentPosition(Position.centered().middleAligned()));
+		if (setOptions)
+			setFontOptions(fontOptions);
 	}
 
 	/**
-	 * Sets the content for this {@link UIButton}. If a width of 0 was previously set, it will be recalculated for this image.
+	 * Sets the content for this {@link UIButton}.<br>
+	 * Note that the position of the content is overwritten with {@link #contentPosition}. For custom content position, use
+	 * {@link #setContentPosition(IPosition)}.
 	 *
 	 * @param content the content
 	 */
@@ -129,8 +135,7 @@ public class UIButton extends UIComponent<UIButton> implements IContentComponent
 	{
 		this.content = content;
 		content.setParent(this);
-		//special position because pressed button offset content
-		content.setPosition(new ContentPosition(content.position()));
+		content.setPosition(contentPosition);
 	}
 
 	/**
@@ -142,6 +147,18 @@ public class UIButton extends UIComponent<UIButton> implements IContentComponent
 	public UIComponent<?> getContent()
 	{
 		return content;
+	}
+
+	/**
+	 * Sets the position for the content.
+	 *
+	 * @param position the new content position
+	 */
+	public void setContentPosition(IPosition position)
+	{
+		contentPosition = new ContentPosition(position);
+		if (content != null)
+			content.setPosition(contentPosition);
 	}
 
 	/**
@@ -161,7 +178,7 @@ public class UIButton extends UIComponent<UIButton> implements IContentComponent
 	 */
 	public UIButton setAutoSize()
 	{
-		setSize(Size.contentSize());
+		setSize(Size.contentSize(4, 4));
 		return this;
 	}
 
@@ -260,7 +277,7 @@ public class UIButton extends UIComponent<UIButton> implements IContentComponent
 	@Override
 	public String getPropertyString()
 	{
-		return "" + TextFormatting.DARK_GREEN + content + TextFormatting.RESET + " | " + super.getPropertyString();
+		return "" + TextFormatting.GREEN + content + TextFormatting.RESET + " | " + super.getPropertyString();
 	}
 
 	/**
