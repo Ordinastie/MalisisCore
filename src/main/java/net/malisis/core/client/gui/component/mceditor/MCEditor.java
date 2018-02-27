@@ -34,7 +34,6 @@ import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.component.interaction.UICheckBox;
 import net.malisis.core.client.gui.component.interaction.UISelect;
 import net.malisis.core.client.gui.component.interaction.UITextField;
-import net.malisis.core.client.gui.text.IGuiText;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.minecraft.util.text.TextFormatting;
@@ -43,7 +42,7 @@ import net.minecraft.util.text.TextFormatting;
  * @author Ordinastie
  *
  */
-public class MCEditor extends UIContainer<MCEditor> implements IGuiText<MCEditor>
+public class MCEditor extends UIContainer<MCEditor>
 {
 	private UITextField tf;
 	private EcfSelect sel;
@@ -85,26 +84,22 @@ public class MCEditor extends UIContainer<MCEditor> implements IGuiText<MCEditor
 	}
 
 	//#region IGuiText
-	@Override
 	public MalisisFont getFont()
 	{
 		return font;
 	}
 
-	@Override
 	public MCEditor setFont(MalisisFont font)
 	{
 		this.font = font;
 		return this;
 	}
 
-	@Override
 	public FontOptions getFontOptions()
 	{
 		return fontOptions;
 	}
 
-	@Override
 	public MCEditor setFontOptions(FontOptions fro)
 	{
 		this.fontOptions = fro;
