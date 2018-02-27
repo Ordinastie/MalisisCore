@@ -216,13 +216,13 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		{
 			if (tabPosition == ComponentPosition.TOP || tabPosition == ComponentPosition.BOTTOM)
 			{
-				width += tab.size().width() + spacing;
-				height = Math.max(height, tab.size().height());
+				width += tab.contentSize().width() + spacing;
+				height = Math.max(height, tab.contentSize().height());
 			}
 			else
 			{
-				width = Math.max(width, tab.size().width());
-				height += tab.size().height() + spacing;
+				width = Math.max(width, tab.contentSize().width());
+				height += tab.contentSize().height() + spacing;
 			}
 		}
 		setSize(Size.of(width, height));
@@ -241,12 +241,12 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		{
 			if (isHorizontal)
 			{
-				IPosition p = lastTab != null ? Position.rightOf(lastTab, spacing).y(0) : Position.of(offset, 1);
+				IPosition p = lastTab != null ? Position.rightOf(lastTab, spacing).y(0) : Position.of(offset, 0);
 				tab.setPosition(p);
 			}
 			else
 			{
-				IPosition p = lastTab != null ? Position.x(0).below(lastTab, spacing) : Position.of(1, offset);
+				IPosition p = lastTab != null ? Position.x(0).below(lastTab, spacing) : Position.of(0, offset);
 				tab.setPosition(p);
 			}
 			lastTab = tab;
@@ -308,13 +308,13 @@ public class UITabGroup extends UIContainer<UITabGroup>
 				setPosition(Position.leftAlignedTo(container).above(container, -2));
 				break;
 			case BOTTOM:
-				setPosition(Position.leftAlignedTo(container).below(container, 2));
+				setPosition(Position.leftAlignedTo(container).below(container, -2));
 				break;
 			case LEFT:
 				setPosition(Position.leftOf(container, -2).topAlignedTo(container));
 				break;
 			case RIGHT:
-				setPosition(Position.rightOf(container, 2).topAlignedTo(container));
+				setPosition(Position.rightOf(container, -2).topAlignedTo(container));
 				break;
 		}
 
@@ -329,6 +329,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 			activeTab = null;
 			setActiveTab(tab);
 		}
+
 		if (displace)
 		{
 			attachedContainer.setPosition(new AttachedContainerPosition(attachedContainer.position()));

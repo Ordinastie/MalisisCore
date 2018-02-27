@@ -28,42 +28,44 @@ package net.malisis.core.client.gui.component.interaction;
 import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
+import net.malisis.core.client.gui.component.IContentComponent;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UITabGroup;
 import net.malisis.core.client.gui.component.container.UITabGroup.TabChangeEvent;
-import net.malisis.core.client.gui.component.decoration.UIImage;
-import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
 import net.malisis.core.client.gui.component.element.Position;
+import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.element.XYResizableGuiShape;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
 import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.icon.Icon;
 import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * @author Ordinastie
  *
  */
-public class UITab extends UIComponent<UITab>
+public class UITab extends UIComponent<UITab> implements IContentComponent
 {
-	private final ISize AUTO_SIZE = new AutoSize();
+	protected final ISize AUTO_SIZE = Size	.width(o -> isHorizontal() ? contentSize().width() : parent.size().width())
+											.height(o -> isHorizontal() ? parent.size().height() : contentSize().height());
 
-	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
-	protected MalisisFont font = MalisisFont.minecraftFont;
 	/** The {@link FontOptions} to use for this {@link UITooltip}. */
-	protected FontOptions fontOptions = FontOptions.builder().color(0x444444).build();
-	/** The {@link FontOptions} to use for this {@link UITooltip} when active. */
-	protected FontOptions activeFontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
-	/** The {@link FontOptions} to use for this {@link UITooltip} when hovered. */
-	protected FontOptions hoveredFontOptions = FontOptions.builder().color(0xFFFFA0).build();
-	/** {@link UITab} for this {@link UITab}. */
-	protected UILabel label;
-	/** Image for this {@link UITab}. */
-	protected UIImage image;
+	protected FontOptions fontOptions = FontOptions	.builder()
+													.color(0x444444)
+													.when(this::isActive)
+													.color(0xFFFFFF)
+													.shadow()
+													.when(this::isHovered)
+													.color(0xFFFFA0)
+													.build();
+	/** Content to use for this {@link UITab}. */
+	protected UIComponent<?> content;
+
+	protected ISize contentSize = Size.width(o -> content.size().width() + 6).height(o -> content.size().height() + 6);
 	/** Whether the width of this {@link UITab} is calculated based on the {@link #label} or {@link #image} . */
 	protected boolean autoWidth = false;
 	/** Whether the height of this {@link UITab} is calculated based on the {@link #label} or {@link #image} . */
@@ -80,138 +82,83 @@ public class UITab extends UIComponent<UITab>
 	 * Instantiates a new {@link UITab}.
 	 *
 	 * @param gui the gui
-	 * @param label the label
+	 * @param text the label
 	 */
-	public UITab(MalisisGui gui, String label)
+	public UITab(MalisisGui gui, String text)
 	{
 		super(gui);
+		contentSize.setOwner(this);
 		setAutoSize();
-		setLabel(label);
+		setText(text);
 
 		shape = new XYResizableGuiShape();
 		iconProvider = new GuiIconProvider(null);
+
+		fontOptions = FontOptions	.builder()
+									.color(0x444444)
+									.when(this::isActive)
+									.color(0xFFFFFF)
+									.shadow()
+									.when(this::isHovered)
+									.color(0xFFFFA0)
+									.build();
 	}
 
 	/**
 	 * Instantiates a new {@link UITab}.
 	 *
 	 * @param gui the gui
-	 * @param image the image
+	 * @param content the content
 	 */
-	public UITab(MalisisGui gui, UIImage image)
+	public UITab(MalisisGui gui, UIComponent<?> content)
 	{
 		super(gui);
+		contentSize.setOwner(this);
 		setAutoSize();
-		setImage(image);
+		setContent(content);
 
 		shape = new XYResizableGuiShape();
 		iconProvider = new GuiIconProvider(null);
 	}
 
 	//#region Getters/Setters
+	@Override
+	public void createGuiText()
+	{
+		IContentComponent.super.createGuiText();
+		//apply default fontOptions when GuiText is automatically created by setText()
+		setFontOptions(fontOptions);
+		content.setPosition(Position.centered().middleAligned());
+	}
+
+	@Override
+	public UIComponent<?> getContent()
+	{
+		return content;
+	}
+
+	@Override
+	public void setContent(UIComponent<?> content)
+	{
+		this.content = content;
+		content.setParent(this);
+		content.setPosition(Position.centered().middleAligned());
+	}
+
+	public void setAutoSize()
+	{
+		setSize(AUTO_SIZE);
+	}
+
+	@Override
+	public ISize contentSize()
+	{
+		return contentSize;
+	}
+
 	public UITabGroup tabGroup()
 	{
 		return (UITabGroup) getParent();
-	}
-
-	public MalisisFont getFont()
-	{
-		return font;
-	}
-
-	public UITab setFont(MalisisFont font)
-	{
-		this.font = font;
-		return this;
-	}
-
-	public FontOptions getFontOptions()
-	{
-		return fontOptions;
-	}
-
-	public UITab setFontOptions(FontOptions options)
-	{
-		this.fontOptions = options;
-		return this;
-	}
-
-	/**
-	 * Gets the active {@link FontOptions}.
-	 *
-	 * @return the activeFontOptions
-	 */
-	public FontOptions getActiveFontOptions()
-	{
-		return activeFontOptions;
-	}
-
-	/**
-	 * Sets the active {@link FontOptions}.
-	 *
-	 * @param options the options
-	 * @return the UI tab
-	 */
-	public UITab setActiveFontOptions(FontOptions options)
-	{
-		this.activeFontOptions = options;
-		return this;
-	}
-
-	/**
-	 * Gets the hovered {@link FontOptions}.
-	 *
-	 * @return the hoveredFontOptions
-	 */
-	public FontOptions getHoveredFontOptions()
-	{
-		return hoveredFontOptions;
-	}
-
-	/**
-	 * Sets the hovered {@link FontOptions}.
-	 *
-	 * @param options the options
-	 * @return the UI tab
-	 */
-	public UITab setHoveredFontOptions(FontOptions options)
-	{
-		this.hoveredFontOptions = options;
-		return this;
-	}
-
-	/**
-	 * Sets the label for this {@link UITab}.<br>
-	 * Removes the image if previously set.<br>
-	 * Recalculates the width if {@link #autoWidth} is true, the height if {@link #autoHeight} is true.
-	 *
-	 * @param text the text
-	 * @return this {@link UITab}
-	 */
-	public UITab setLabel(String text)
-	{
-		image = null;
-		label = new UILabel(getGui(), text);
-		label.setPosition(Position.centered().middleAligned());
-		label.setParent(this);
-		return this;
-	}
-
-	/**
-	 * Sets the image {@link UITab}.<br>
-	 * Removes the label if previously set.<br>
-	 * Recalculates the width if {@link #autoWidth} is true, the height if {@link #autoHeight} is true.
-	 *
-	 * @param img the img
-	 * @return this {@link UITab}
-	 */
-	public UITab setImage(UIImage img)
-	{
-		label = null;
-		image = img;
-		image.setPosition(Position.centered().middleAligned());
-		image.setParent(this);
-		return this;
 	}
 
 	/**
@@ -227,11 +174,6 @@ public class UITab extends UIComponent<UITab>
 			throw new IllegalArgumentException("UITabs can only be added to UITabGroup");
 
 		super.setParent(parent);
-	}
-
-	public void setAutoSize()
-	{
-		setSize(AUTO_SIZE);
 	}
 
 	/**
@@ -400,59 +342,14 @@ public class UITab extends UIComponent<UITab>
 	@Override
 	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
 	{
-		//		if (active)
-		//		{
-		//			switch (getTabPosition())
-		//			{
-		//				case TOP:
-		//					y -= 1;
-		//					break;
-		//				case BOTTOM:
-		//					y += 1;
-		//					break;
-		//				case LEFT:
-		//					x -= 1;
-		//					break;
-		//				case RIGHT:
-		//					x += 1;
-		//					break;
-		//			}
-		//		}
-
-		if (label != null)
-			label.draw(renderer, mouseX, mouseY, partialTick);
-		else if (image != null)
-			image.draw(renderer, mouseX, mouseY, partialTick);
-	}
-
-	public class AutoSize implements ISize
-	{
-		@Override
-		public int width()
-		{
-			if (label != null)
-				return label.size().width() + (isHorizontal() ? 10 : 8);
-			else if (image != null)
-				return image.size().width() + 10;
-			else
-				return 8;
-		}
-
-		@Override
-		public int height()
-		{
-			if (label != null)
-				return label.size().height() + (isHorizontal() ? 8 : 10);
-			else if (image != null)
-				return image.size().height() + 10;
-			else
-				return 8;
-		}
+		if (content == null)
+			return;
+		content.draw(renderer, mouseX, mouseY, partialTick);
 	}
 
 	@Override
 	public String getPropertyString()
 	{
-		return "label : " + label + " | " + super.getPropertyString();
+		return "[" + TextFormatting.GREEN + content + TextFormatting.RESET + "] " + super.getPropertyString();
 	}
 }
