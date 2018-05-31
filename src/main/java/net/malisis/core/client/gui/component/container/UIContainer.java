@@ -401,7 +401,7 @@ public class UIContainer<T extends UIContainer<T>> extends UIComponent<T> implem
 	@Override
 	public float getScrollStep()
 	{
-		return (GuiScreen.isCtrlKeyDown() ? 0.125F : 0.025F);
+		return (GuiScreen.isCtrlKeyDown() ? 0.125F : 0.25F);
 	}
 
 	//#end IScrollable
