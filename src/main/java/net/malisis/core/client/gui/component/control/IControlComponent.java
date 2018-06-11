@@ -24,8 +24,8 @@
 
 package net.malisis.core.client.gui.component.control;
 
-import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.render.IGuiRenderer;
 
 /**
  * IControlledComponent are special components designed to affect other {@link UIComponent}.
@@ -33,21 +33,21 @@ import net.malisis.core.client.gui.component.UIComponent;
  * @author Ordinastie
  *
  */
-public interface IControlComponent
+public interface IControlComponent extends IGuiRenderer
 {
 	/**
 	 * Sets the {@link UIComponent} controlled by this {@link IControlComponent}.
 	 *
 	 * @param component the parent
 	 */
-	public void setParent(UIComponent<?> component);
+	public void setParent(UIComponent component);
 
 	/**
 	 * Gets the {@link UIComponent} controlled by this {@link IControlComponent}.
 	 *
 	 * @return the parent
 	 */
-	public UIComponent<?> getParent();
+	public UIComponent getParent();
 
 	/**
 	 * Gets the component at the specified coordinates. See {@link UIComponent#getComponentAt(int, int)}.
@@ -56,7 +56,7 @@ public interface IControlComponent
 	 * @param y the y
 	 * @return the component at
 	 */
-	public UIComponent<?> getComponentAt(int x, int y);
+	public UIComponent getComponentAt(int x, int y);
 
 	/**
 	 * Called when a key is pressed when this {@link IControlComponent} or its parent is focused or hovered.<br>
@@ -70,22 +70,10 @@ public interface IControlComponent
 
 	/**
 	 * Called when the scrollwheel is used when this {@link IControlComponent} or its parent is focused or hovered.<br>
-	 * See {@link UIComponent#onScrollWheel(int, int, int)}
+	 * See {@link UIComponent#onScrollWheel(int)}
 	 *
-	 * @param x the x
-	 * @param y the y
 	 * @param delta the delta
 	 * @return true, if successful
 	 */
-	public boolean onScrollWheel(int x, int y, int delta);
-
-	/**
-	 * Draws this {@link IControlComponent}. See {@link UIComponent#draw(GuiRenderer, int, int, float)}.
-	 *
-	 * @param renderer the renderer
-	 * @param mouseX the mouse x
-	 * @param mouseY the mouse y
-	 * @param partialTick the partial tick
-	 */
-	public void draw(GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
+	public boolean onScrollWheel(int delta);
 }

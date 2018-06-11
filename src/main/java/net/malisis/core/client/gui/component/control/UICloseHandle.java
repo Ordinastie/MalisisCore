@@ -24,46 +24,34 @@
 
 package net.malisis.core.client.gui.component.control;
 
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Padding;
-import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.client.gui.element.Padding;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.position.Position;
+import net.malisis.core.client.gui.render.GuiIcon;
+import net.malisis.core.client.gui.render.shape.GuiShape;
 
 /**
  * @author Ordinastie
  *
  */
-public class UICloseHandle extends UIComponent<UICloseHandle> implements IControlComponent
+public class UICloseHandle extends UIComponent implements IControlComponent
 {
-	public <T extends UIComponent<T> & ICloseable> UICloseHandle(MalisisGui gui, T parent)
+	public <T extends UIComponent & ICloseable> UICloseHandle(T parent)
 	{
-		super(gui);
-
 		Padding padding = Padding.of(parent);
-
-		setPosition(Position.rightAligned(-padding.right()).topAligned(-padding.top()));
+		setPosition(Position.of(this).rightAligned(-padding.right()).topAligned(-padding.top()).build());
 		setSize(Size.of(5, 5));
 		setZIndex(parent.getZIndex() + 10);
-		register(this);
-
 		parent.addControlComponent(this);
 
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(268, 30, 15, 15));
+		setForeground(GuiShape.builder(this).icon(GuiIcon.CLOSE).build());
 	}
 
 	@Override
-	public boolean onClick(int x, int y)
+	public boolean onClick()
 	{
 		((ICloseable) getParent()).onClose();
 		return true;
-	}
-
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		renderer.drawShape(shape, rp);
 	}
 }

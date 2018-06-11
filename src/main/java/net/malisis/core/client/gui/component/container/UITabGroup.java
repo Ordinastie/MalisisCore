@@ -27,74 +27,52 @@ package net.malisis.core.client.gui.component.container;
 import java.util.LinkedHashMap;
 
 import net.malisis.core.client.gui.ComponentPosition;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Position.IPosition;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.component.interaction.UITab;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.position.Position;
+import net.malisis.core.client.gui.element.position.Position.IPosition;
 import net.malisis.core.client.gui.event.ComponentEvent;
-import net.malisis.core.renderer.animation.transformation.ITransformable;
-import net.malisis.core.renderer.icon.GuiIcon;
+import net.malisis.core.client.gui.render.GuiIcon;
 
 /**
  * @author Ordinastie
  *
  */
-public class UITabGroup extends UIContainer<UITabGroup>
+public class UITabGroup extends UIContainer
 {
+	public static enum Type
+	{
+		WINDOW,
+		PANEL;
+	}
 
 	/** The list of {@link UITab} added to this {@link UITabGroup}. */
-	protected LinkedHashMap<UITab, UIContainer<?>> listTabs = new LinkedHashMap<>();
+	protected LinkedHashMap<UITab, UIContainer> listTabs = new LinkedHashMap<>();
 	/** The currently active {@link UITab}. */
 	protected UITab activeTab;
 	/** The position of this {@link UITabGroup} relative to its {@link #attachedContainer}. */
 	protected ComponentPosition tabPosition = ComponentPosition.TOP;
+	/** The position of this {@link UITabGroup} relative to its {@link #attachedContainer}. */
+	protected Type type = Type.WINDOW;
 	/** The {@link UIContainer} this {@link UITabGroup} is attached to. */
-	protected UIContainer<?> attachedContainer;
+	protected UIContainer attachedContainer;
 	/** Number of pixels this {@link UITabGroup} is offset to the border of the {@link #attachedContainer}. */
 	protected int offset = 3;
 	/** Number of pixels between each tab. */
 	protected int spacing = 0;
-	/** Icons to use if this {@link UITabGroup} is attached to a {@link UIWindow}. */
-	protected GuiIcon[] windowIcons;
-	/** Icons to use if this {@link UITabGroup} is attached to a {@link UIPanel}. */
-	protected GuiIcon[] panelIcons;
 
 	/**
 	 * Instantiates a new {@link UITabGroup}.
-	 *
-	 * @param gui the gui
+	 * 
 	 * @param tabPosition the tab position
 	 */
-	public UITabGroup(MalisisGui gui, ComponentPosition tabPosition)
+	public UITabGroup(ComponentPosition tabPosition, Type type)
 	{
-		super(gui);
 		this.tabPosition = tabPosition;
+		this.type = type;
 		clipContent = false;
-
-		//@formatter:off
-		windowIcons = new GuiIcon[] {	gui.getGuiTexture().getXYResizableIcon(0, 60, 15, 15, 5),
-										gui.getGuiTexture().getXYResizableIcon(15, 60, 15, 15, 5),
-										gui.getGuiTexture().getXYResizableIcon(0, 75, 15, 15, 5),
-										gui.getGuiTexture().getXYResizableIcon(15, 75, 15, 15, 5)};
-
-		panelIcons = new GuiIcon[] {	gui.getGuiTexture().getXYResizableIcon(30, 60, 15, 15, 5),
-										gui.getGuiTexture().getXYResizableIcon(45, 60, 15, 15, 5),
-										gui.getGuiTexture().getXYResizableIcon(30, 75, 15, 15, 5),
-										gui.getGuiTexture().getXYResizableIcon(45, 75, 15, 15, 5)};
-		//@formatter:on
-	}
-
-	/**
-	 * Instantiates a new {@link UITabGroup}.
-	 *
-	 * @param gui the gui
-	 */
-	public UITabGroup(MalisisGui gui)
-	{
-		this(gui, ComponentPosition.TOP);
 	}
 
 	/**
@@ -112,12 +90,37 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 *
 	 * @return the icons
 	 */
-	public GuiIcon getIcons()
+	public GuiIcon getIcon()
 	{
-		//if (attachedContainer instanceof UIWindow)
-		//	return windowIcons[tabPosition.ordinal()];
-		//else
-		return panelIcons[tabPosition.ordinal()];
+		if (type == Type.WINDOW)
+		{
+			switch (tabPosition)
+			{
+				case TOP:
+					return GuiIcon.TAB_WINDOW_TOP;
+				case BOTTOM:
+					return GuiIcon.TAB_WINDOW_BOTTOM;
+				case LEFT:
+					return GuiIcon.TAB_WINDOW_LEFT;
+				case RIGHT:
+					return GuiIcon.TAB_WINDOW_RIGHT;
+			}
+		}
+		if (type == Type.PANEL)
+		{
+			switch (tabPosition)
+			{
+				case TOP:
+					return GuiIcon.TAB_PANEL_TOP;
+				case BOTTOM:
+					return GuiIcon.TAB_PANEL_BOTTOM;
+				case LEFT:
+					return GuiIcon.TAB_PANEL_LEFT;
+				case RIGHT:
+					return GuiIcon.TAB_PANEL_RIGHT;
+			}
+		}
+		return GuiIcon.FULL;
 	}
 
 	/**
@@ -125,7 +128,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 *
 	 * @return the attached container
 	 */
-	public UIContainer<?> getAttachedContainer()
+	public UIContainer getAttachedContainer()
 	{
 		return attachedContainer;
 	}
@@ -182,7 +185,7 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 * @param container {@link UIContainer} linked to the {@link UITab}
 	 * @return this {@link UITab}
 	 */
-	public UITab addTab(UITab tab, UIContainer<?> container)
+	public UITab addTab(UITab tab, UIContainer container)
 	{
 		if (tab.isActive())
 			activeTab = tab;
@@ -201,11 +204,11 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		return tab;
 	}
 
-	private void setupTabContainer(UIContainer<?> container)
+	private void setupTabContainer(UIContainer container)
 	{
 		attachedContainer.add(container);
-		container.setPosition(Position.zero());
-		container.setSize(Size.inherited());
+		container.setPosition(Position.zero(container));
+		container.setSize(Size.inherited(container));
 	}
 
 	private void updateSize()
@@ -241,24 +244,21 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		{
 			if (isHorizontal)
 			{
-				IPosition p = lastTab != null ? Position.rightOf(lastTab, spacing).y(0) : Position.of(offset, 0);
+				IPosition p = lastTab != null ? Position.rightOf(this, lastTab, spacing) : Position.of(offset, 0);
 				tab.setPosition(p);
 			}
 			else
 			{
-				IPosition p = lastTab != null ? Position.x(0).below(lastTab, spacing) : Position.of(0, offset);
+				IPosition p = lastTab != null ? Position.below(this, lastTab, spacing) : Position.of(0, offset);
 				tab.setPosition(p);
 			}
 			lastTab = tab;
 		}
-
-		//		for (UITab tab : listTabs.keySet())
-		//			tab.setSize(isHorizontal ? 0 : s, isHorizontal ? s : 0);
 	}
 
 	public void setActiveTab(String tabName)
 	{
-		UIComponent<?> comp = getComponent(tabName);
+		UIComponent comp = getComponent(tabName);
 		if (comp instanceof UITab)
 			setActiveTab((UITab) comp);
 	}
@@ -296,29 +296,29 @@ public class UITabGroup extends UIContainer<UITabGroup>
 	 * @param displace if true, moves and resize the UIContainer to make place for the UITabGroup
 	 * @return this {@link UITab}
 	 */
-	public UITabGroup attachTo(UIContainer<?> container, boolean displace)
+	public UITabGroup attachTo(UIContainer container, boolean displace)
 	{
 		attachedContainer = container;
-		if (activeTab != null && attachedContainer instanceof ITransformable.Color)
-			((ITransformable.Color) attachedContainer).setColor(activeTab.getBgColor());
+		if (activeTab != null)
+			activeTab.setActive(true);
 
 		switch (tabPosition)
 		{
 			case TOP:
-				setPosition(Position.leftAlignedTo(container).above(container, -2));
+				setPosition(Position.above(this, container, -2));
 				break;
 			case BOTTOM:
-				setPosition(Position.leftAlignedTo(container).below(container, -2));
+				setPosition(Position.below(this, container, -2));
 				break;
 			case LEFT:
-				setPosition(Position.leftOf(container, -2).topAlignedTo(container));
+				setPosition(Position.leftOf(this, container, -2));
 				break;
 			case RIGHT:
-				setPosition(Position.rightOf(container, -2).topAlignedTo(container));
+				setPosition(Position.rightOf(this, container, -2));
 				break;
 		}
 
-		for (UIContainer<?> tabContainer : listTabs.values())
+		for (UIContainer tabContainer : listTabs.values())
 			setupTabContainer(tabContainer);
 
 		calculateTabPosition();
@@ -337,41 +337,6 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		}
 
 		return this;
-		//		int cx = container.getX();
-		//		int cy = container.getY();
-		//		int cw = container.getRawWidth();
-		//		int ch = container.getRawHeight();
-		//		int av = Anchor.vertical(container.getAnchor());
-		//		int ah = Anchor.horizontal(container.getAnchor());
-		//
-		//		if (tabPosition == ComponentPosition.TOP)
-		//		{
-		//			if (av == Anchor.TOP || av == Anchor.NONE)
-		//				cy += getHeight() - 1;
-		//			ch = container.getRawHeight() - getHeight();
-		//		}
-		//		else if (tabPosition == ComponentPosition.BOTTOM)
-		//		{
-		//			if (av == Anchor.BOTTOM)
-		//				cy -= getHeight() - 1;
-		//			ch = container.getRawHeight() - getHeight() + 1;
-		//		}
-		//		else if (tabPosition == ComponentPosition.LEFT)
-		//		{
-		//			if (ah == Anchor.LEFT || ah == Anchor.NONE)
-		//				cx += getWidth() - 1;
-		//			cw = container.getRawWidth() - getWidth();
-		//		}
-		//		else if (tabPosition == ComponentPosition.RIGHT)
-		//		{
-		//			if (ah == Anchor.RIGHT)
-		//				cx -= getWidth() - 1;
-		//			cw = container.getRawWidth() - getWidth() + 1;
-		//		}
-		//
-		//		//tab.setSize(w, h);
-		//		container.setSize(cw, ch);
-		//		container.setPosition(cx, cy);
 	}
 
 	private class AttachedContainerPosition implements IPosition
@@ -393,6 +358,12 @@ public class UITabGroup extends UIContainer<UITabGroup>
 		public int y()
 		{
 			return originalPosition.y() + (tabPosition == ComponentPosition.TOP ? size().height() : 0);
+		}
+
+		@Override
+		public String toString()
+		{
+			return x() + "," + y();
 		}
 	}
 
@@ -421,6 +392,12 @@ public class UITabGroup extends UIContainer<UITabGroup>
 				return originalSize.height();
 
 			return originalSize.height() - size().height();
+		}
+
+		@Override
+		public String toString()
+		{
+			return width() + "x" + height();
 		}
 	}
 

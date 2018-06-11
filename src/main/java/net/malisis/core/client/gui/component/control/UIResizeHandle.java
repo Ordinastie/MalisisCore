@@ -24,20 +24,20 @@
 
 package net.malisis.core.client.gui.component.control;
 
-import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Padding;
-import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.client.gui.element.Padding;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.position.Position;
+import net.malisis.core.client.gui.render.GuiIcon;
+import net.malisis.core.client.gui.render.shape.GuiShape;
 import net.malisis.core.util.MouseButton;
 
 /**
  * @author Ordinastie
  *
  */
-public class UIResizeHandle extends UIComponent<UIResizeHandle> implements IControlComponent
+public class UIResizeHandle extends UIComponent implements IControlComponent
 {
 	public enum Type
 	{
@@ -48,38 +48,35 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 
 	private Type type;
 
-	public UIResizeHandle(MalisisGui gui, UIComponent<?> parent, Type type)
+	public UIResizeHandle(UIComponent parent, Type type)
 	{
-		super(gui);
 		this.type = type != null ? type : Type.BOTH;
 
 		Padding padding = Padding.of(parent);
-		setPosition(Position.rightAligned(-padding.right()).bottomAligned(-padding.bottom()));
+		setPosition(Position.of(this).rightAligned(-padding.right()).bottomAligned(-padding.bottom()).build());
 		setSize(Size.of(5, 5));
-		register(this);
-
 		parent.addControlComponent(this);
 
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(268, 0, 15, 15));
+		setForeground(GuiShape.builder(this).icon(GuiIcon.RESIZE).build());
 	}
 
-	public UIResizeHandle(MalisisGui gui, UIComponent<?> parent)
+	public UIResizeHandle(UIComponent parent)
 	{
-		this(gui, parent, Type.BOTH);
+		this(parent, Type.BOTH);
 	}
 
 	@Override
-	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
+	public boolean onDrag(MouseButton button)
 	{
 		if (button != MouseButton.LEFT)
-			return super.onDrag(lastX, lastY, x, y, button);
+			return super.onDrag(button);
 
 		int w = getParent().size().width();
 		int h = getParent().size().height();
 		if (type == Type.BOTH || type == Type.HORIZONTAL)
-			w += x - lastX;
+			w += MalisisGui.MOUSE_POSITION.dragged().x();
 		if (type == Type.BOTH || type == Type.VERTICAL)
-			h += y - lastY;
+			h += MalisisGui.MOUSE_POSITION.dragged().y();
 		if (w < 10)
 			w = 10;
 		if (h < 10)
@@ -88,11 +85,5 @@ public class UIResizeHandle extends UIComponent<UIResizeHandle> implements ICont
 		getParent().setSize(Size.of(w, h));
 
 		return true;
-	}
-
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		renderer.drawShape(shape, rp);
 	}
 }

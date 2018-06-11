@@ -24,23 +24,19 @@
 
 package net.malisis.core.client.gui.render;
 
-import javax.annotation.Nonnull;
-
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Padding;
-
 /**
  * @author Ordinastie
  *
  */
 public interface IGuiRenderer
 {
-	@Nonnull
-	public default Padding getPadding()
-	{
-		return Padding.NO_PADDING;
-	}
+	public void render(GuiRenderer renderer);
 
-	public void render(UIComponent<?> component, GuiRenderer renderer, int mouseX, int mouseY, float partialTick);
+	public default IGuiRenderer and(IGuiRenderer other)
+	{
+		return other == null ? this : r -> {
+			render(r);
+			other.render(r);
+		};
+	}
 }

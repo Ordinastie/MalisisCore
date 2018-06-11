@@ -24,69 +24,88 @@
 
 package net.malisis.core.client.gui.component.interaction;
 
-import org.apache.logging.log4j.util.Strings;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.IContentComponent;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.component.content.IContentHolder;
+import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.client.gui.text.IGuiTextProxy;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.client.gui.render.GuiIcon;
+import net.malisis.core.client.gui.render.shape.GuiShape;
+import net.malisis.core.renderer.font.FontOptions;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * UICheckBox
  *
  * @author Ordinastie
  */
-public class UICheckBox extends UIComponent<UICheckBox> implements IContentComponent
+public class UICheckBox extends UIComponent implements IContentHolder<UIComponent>
 {
+	protected final FontOptions fontOptions = FontOptions	.builder()
+															.color(0x444444)
+															.when(this::isHovered)
+															.color(0x777777)
+															.when(this::isDisabled)
+															.color(0xCCCCCC)
+															.build();
 	/** The content for this {@link UICheckBox}. */
-	UIComponent<?> content;
+	protected UIComponent content;
 	/** Whether this {@link UICheckBox} is checked. */
-	private boolean checked;
+	protected boolean checked;
 
-	private GuiIconProvider cbIconProvider;
-
-	public UICheckBox(MalisisGui gui, String text)
+	public UICheckBox(String text)
 	{
-		super(gui);
 		setText(text);
-		setSize(Size.contentSize(14, 4));
+		setSize(Size.sizeOfContent(this, 14, 4));
 
-		shape = new SimpleGuiShape();
+		//Background
+		GuiShape bg = GuiShape.builder(this).position().x(1).back().size(12, 12).icon(GuiIcon.CHECKBOX_BG).build();
+		GuiShape overlay = GuiShape.builder().position().x(2).y(1).back().size(10, 10).color(0xFFFFFF).alpha(80).build();
 
-		iconProvider = new GuiIconProvider(	gui.getGuiTexture().getIcon(242, 32, 10, 10),
-											null,
-											gui.getGuiTexture().getIcon(252, 32, 10, 10));
-		cbIconProvider = new GuiIconProvider(	gui.getGuiTexture().getIcon(242, 52, 12, 10),
-												gui.getGuiTexture().getIcon(254, 42, 12, 10),
-												gui.getGuiTexture().getIcon(242, 42, 12, 10));
+		setBackground(r -> {
+			bg.render(r);
+			if (isHovered())
+				overlay.render(r);
+		});
 
+		//Foreground
+		GuiShape check = GuiShape	.builder()
+									.position()
+									.x(1)
+									.y(1)
+									.back()
+									.size(12, 10)
+									.icon(GuiIcon.forComponent(this, GuiIcon.CHECKBOX, GuiIcon.CHECKBOX_HOVER, GuiIcon.CHECKBOX_DISABLED))
+									.build();
+
+		setForeground(r -> {
+			if (isChecked())
+				check.render(r);
+			if (content() != null)
+				content().render(r);
+		});
 	}
 
-	public UICheckBox(MalisisGui gui)
+	public UICheckBox()
 	{
-		this(gui, null);
+		this(null);
 	}
 
 	//#region Getters/Setters
-
-	@Override
-	public UIComponent<?> getContent()
+	public void setContent(UIComponent content)
 	{
-		return content;
+		this.content = content;
+		content.setParent(this);
+		content.setPosition(Position.of(content, 14, 2));
 	}
 
 	@Override
-	public void setContent(UIComponent<?> content)
+	public UIComponent content()
 	{
-		this.content = content;
+		return content;
 	}
 
 	/**
@@ -94,14 +113,17 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IContentCompo
 	 *
 	 * @param text the new text
 	 */
-	@Override
 	public void setText(String text)
 	{
-		if (Strings.isEmpty(text))
-			setContent(null);
-		IContentComponent.super.setText(text);
-		content.setPosition(Position.of(14, 2));
-		content.setParent(this);
+		if (content() instanceof UILabel)
+		{
+			((UILabel) content()).setText(text);
+			return;
+		}
+
+		UILabel label = new UILabel(text);
+		label.setFontOptions(fontOptions);
+		setContent(label);
 	}
 
 	//#end Getters/Setters
@@ -128,7 +150,7 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IContentCompo
 	}
 
 	@Override
-	public boolean onClick(int x, int y)
+	public boolean onClick()
 	{
 		if (fireEvent(new CheckEvent(this, !checked)))
 			checked = !checked;
@@ -151,50 +173,9 @@ public class UICheckBox extends UIComponent<UICheckBox> implements IContentCompo
 	}
 
 	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		shape.resetState();
-		shape.setSize(10, 10);
-		shape.setPosition(1, 0);
-		renderer.drawShape(shape, rp);
-
-		renderer.next();
-
-		// draw the white shade over the slot
-		if (hovered)
-			renderer.drawRectangle(2, 1, 0, 8, 8, 0xFFFFFF, 80);
-	}
-
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		if (content != null)
-			content.draw(renderer, mouseX, mouseY, partialTick);
-
-		if (checked)
-		{
-			if (isHovered() && isEnabled())
-				GL11.glEnable(GL11.GL_BLEND);
-			rp.reset();
-			shape.resetState();
-			shape.setSize(12, 10);
-			rp.iconProvider.set(cbIconProvider);
-			renderer.drawShape(shape, rp);
-			renderer.next();
-			if (isHovered() && isEnabled())
-				GL11.glDisable(GL11.GL_BLEND);
-		}
-	}
-
-	@Override
 	public String getPropertyString()
 	{
-		String str = "";
-		if (content instanceof IGuiTextProxy)
-			str += ((IGuiTextProxy) content).getText() + " | ";
-		else if (content != null)
-			str += content.getClass().getSimpleName() + " | ";
-		return str + "checked=" + this.checked + " | " + super.getPropertyString();
+		return (checked ? "checked" : "") + "[" + TextFormatting.GREEN + content + TextFormatting.RESET + "] " + super.getPropertyString();
 	}
 
 	/**

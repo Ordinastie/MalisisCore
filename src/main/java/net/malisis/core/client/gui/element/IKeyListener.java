@@ -22,25 +22,24 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui;
+package net.malisis.core.client.gui.element;
 
-public class Anchor
+import net.malisis.core.client.gui.MalisisGui;
+
+/**
+ * That interfaces allows implementing classes to handle key strokes within a {@link MalisisGui}.<br>
+ * {@link IKeyListener} can be registered with {@link MalisisGui#registerKeyListener(IKeyListener)} so they will always receive key typed.
+ *
+ * @author Ordinastie
+ */
+public interface IKeyListener
 {
-	public static int NONE = 0;
-	public static int TOP = 1;
-	public static int BOTTOM = 2;
-	public static int MIDDLE = TOP | BOTTOM;
-	public static int LEFT = 4;
-	public static int RIGHT = 8;
-	public static int CENTER = LEFT | RIGHT;
-
-	public static int horizontal(int anchor)
-	{
-		return anchor & 12;
-	}
-
-	public static int vertical(int anchor)
-	{
-		return anchor & 3;
-	}
+	/**
+	 * Called when a key is typed inside {@link MalisisGui}.
+	 *
+	 * @param keyChar the key char
+	 * @param keyCode the key code
+	 * @return true, to prevent parents and gui to handle the key typed
+	 */
+	public boolean onKeyTyped(char keyChar, int keyCode);
 }

@@ -32,7 +32,7 @@ import net.malisis.core.client.gui.component.UIComponent;
  * @author Ordinastie, PaleoCrafter
  * @param <T> Type of the <code>UIComponent</code> firing this Event
  */
-public abstract class ComponentEvent<T extends UIComponent<T>> extends GuiEvent
+public abstract class ComponentEvent<T extends UIComponent> extends GuiEvent
 {
 	/** {@link UIComponent} firing this {@link ComponentEvent} */
 	protected T component;
@@ -75,7 +75,7 @@ public abstract class ComponentEvent<T extends UIComponent<T>> extends GuiEvent
 	 * @param <T> the type of <code>UIComponent</code> that fired this event.
 	 * @param <S> the type of the value being changed.
 	 */
-	public static class ValueChange<T extends UIComponent<T>, S> extends ComponentEvent<T>
+	public static class ValueChange<T extends UIComponent, S> extends ComponentEvent<T>
 	{
 		/** The old value. */
 		protected S oldValue;

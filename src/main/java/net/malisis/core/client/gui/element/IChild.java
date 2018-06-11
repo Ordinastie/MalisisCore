@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Ordinastie
+ * Copyright (c) 2018 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,35 +24,11 @@
 
 package net.malisis.core.client.gui.element;
 
-import net.malisis.core.renderer.element.Face;
-
 /**
  * @author Ordinastie
  *
  */
-public class SimpleGuiShape extends GuiShape
+public interface IChild<T>
 {
-	public SimpleGuiShape(Face face)
-	{
-		super(face);
-		storeState();
-	}
-
-	public SimpleGuiShape()
-	{
-		this(new GuiFace());
-	}
-
-	@Override
-	public void setSize(int width, int height)
-	{
-		faces[0].scale(width, height, 0);
-	}
-
-	@Override
-	public void scale(float x, float y)
-	{
-		super.scale(x, y, 0);
-		applyMatrix();
-	}
+	public T getParent();
 }

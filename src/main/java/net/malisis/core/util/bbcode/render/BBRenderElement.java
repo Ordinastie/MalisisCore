@@ -26,7 +26,7 @@ package net.malisis.core.util.bbcode.render;
 
 import java.util.EnumSet;
 
-import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.render.GuiRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 

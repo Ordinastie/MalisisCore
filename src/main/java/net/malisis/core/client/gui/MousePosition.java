@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Ordinastie
+ * Copyright (c) 2018 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,69 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.component;
+package net.malisis.core.client.gui;
 
-import net.malisis.core.client.gui.MalisisGui;
+import org.lwjgl.input.Mouse;
+
+import net.malisis.core.client.gui.element.position.Position;
+import net.malisis.core.client.gui.element.position.Position.IPosition;
 
 /**
- * That interfaces allows implementing classes to handle key strokes within a {@link MalisisGui}.<br>
- * {@link IKeyListener} can be registered with {@link MalisisGui#registerKeyListener(IKeyListener)} so they will always receive key typed.
- *
  * @author Ordinastie
+ *
  */
-public interface IKeyListener
+public class MousePosition implements IPosition
 {
-	/**
-	 * Called when a key is typed inside {@link MalisisGui}.
-	 *
-	 * @param keyChar the key char
-	 * @param keyCode the key code
-	 * @return true, to prevent parents and gui to handle the key typed
-	 */
-	public boolean onKeyTyped(char keyChar, int keyCode);
+	private int x = 0;
+	private int y = 0;
+	/** Last known position of the mouse. */
+	protected int xPrevious, yPrevious;
+
+	public void udpate(MalisisGui gui)
+	{
+		//if we ignore scaling, use real mouse position on screen
+		if (gui.renderer.isIgnoreScale())
+		{
+			x = Mouse.getX();
+			y = gui.height - Mouse.getY() - 1;
+		}
+		else
+		{
+			x = Mouse.getX() * gui.width / gui.mc.displayWidth;
+			y = gui.height - Mouse.getY() * gui.height / gui.mc.displayHeight - 1;
+		}
+	}
+
+	@Override
+	public int y()
+	{
+		return y;
+	}
+
+	@Override
+	public int x()
+	{
+		return x;
+	}
+
+	public boolean hasChanged()
+	{
+		return x != xPrevious || y != yPrevious;
+	}
+
+	public IPosition previous()
+	{
+		return Position.of(x, y);
+	}
+
+	public IPosition dragged()
+	{
+		return Position.of(x - xPrevious, y - yPrevious);
+	}
+
+	@Override
+	public String toString()
+	{
+		return x() + "," + y();
+	}
 }

@@ -60,7 +60,7 @@ public class BooleanSetting extends Setting<Boolean>
 	@Override
 	public UICheckBox getComponent(MalisisGui gui)
 	{
-		checkbox = new UICheckBox(gui, key).setChecked(value);
+		checkbox = new UICheckBox(key).setChecked(value);
 		return checkbox;
 	}
 

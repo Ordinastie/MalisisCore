@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.component.element;
-
-import javax.annotation.Nonnull;
-
-import net.malisis.core.client.gui.component.UIComponent;
+package net.malisis.core.client.gui.element;
 
 /**
  * @author Ordinastie
@@ -136,9 +132,9 @@ public interface Padding
 		return top == 0 && bottom == 0 && left == 0 && right == 0 ? NO_PADDING : new FixedPadding(top, bottom, left, right);
 	}
 
-	public static Padding of(UIComponent<?> component)
+	public static Padding of(Object component)
 	{
-		return component instanceof IPadded ? ((IPadded) component).getPadding() : Padding.NO_PADDING;
+		return component instanceof IPadded ? ((IPadded) component).padding() : Padding.NO_PADDING;
 	}
 
 	/**
@@ -146,8 +142,7 @@ public interface Padding
 	 */
 	public interface IPadded
 	{
-		@Nonnull
-		public default Padding getPadding()
+		public default Padding padding()
 		{
 			return NO_PADDING;
 		}

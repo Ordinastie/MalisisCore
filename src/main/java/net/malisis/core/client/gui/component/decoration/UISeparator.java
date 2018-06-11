@@ -26,36 +26,45 @@ package net.malisis.core.client.gui.component.decoration;
 
 import javax.annotation.Nonnull;
 
-import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Size.ISize;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.render.GuiIcon;
+import net.malisis.core.client.gui.render.shape.GuiShape;
 
 /**
  * @author Ordinastie
  *
  */
-public class UISeparator extends UIComponent<UISeparator>
+public class UISeparator extends UIComponent
 {
 	/** Color multiplier. */
-	protected int color = -1;
-	protected boolean vertical;
-	private SeparatorSize separatorSize = new SeparatorSize();
+	protected int color = 0xFFFFFF;
+	/** Whether the separator is vertical or horizontal. */
+	protected final boolean vertical;
+	/** Separator size. */
+	private final ISize separatorSize = Size.of(() -> (isVertical() ? size.width() : 1), () -> (isVertical() ? 1 : size.height()));
 
-	public UISeparator(MalisisGui gui, boolean vertical)
+	public UISeparator(boolean vertical)
 	{
-		super(gui);
 		this.vertical = vertical;
-
-		shape = new XYResizableGuiShape(1);
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(200, 15, 15, 15, 3));
+		setForeground(GuiShape.builder(this).icon(GuiIcon.SEPARATOR).color(this::getColor).build());
 	}
 
 	public UISeparator(MalisisGui gui)
 	{
-		this(gui, false);
+		this(false);
+	}
+
+	/**
+	 * Checks if this {@link UISeparator} is vertical.
+	 *
+	 * @return true, if is vertical
+	 */
+	public boolean isVertical()
+	{
+		return vertical;
 	}
 
 	@Override
@@ -81,37 +90,9 @@ public class UISeparator extends UIComponent<UISeparator>
 	 *
 	 * @return the color for this {@link UISeparator}.
 	 */
+	@Override
 	public int getColor()
 	{
 		return color;
 	}
-
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		rp.useTexture.set(true);
-		rp.alpha.set(255);
-		rp.colorMultiplier.set(getColor());
-		renderer.drawShape(shape, rp);
-	}
-
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{}
-
-	private class SeparatorSize implements ISize
-	{
-		@Override
-		public int width()
-		{
-			return vertical ? size.width() : 1;
-		}
-
-		@Override
-		public int height()
-		{
-			return vertical ? 1 : size.height();
-		}
-	}
-
 }

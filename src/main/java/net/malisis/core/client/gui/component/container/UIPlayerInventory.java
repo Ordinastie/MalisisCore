@@ -24,15 +24,14 @@
 
 package net.malisis.core.client.gui.component.container;
 
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UISlot;
-import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.component.element.Size.ISize;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.inventory.MalisisInventory;
-import net.malisis.core.inventory.player.PlayerInventorySlot;
+import net.malisis.core.inventory.MalisisSlot;
 
-public class UIPlayerInventory extends UIContainer<UIPlayerInventory>
+public class UIPlayerInventory extends UIInventory
 {
 	/** Size required for player inventory */
 	public static final ISize INVENTORY_SIZE = Size.of(162, 87);
@@ -40,27 +39,27 @@ public class UIPlayerInventory extends UIContainer<UIPlayerInventory>
 	/** {@link MalisisInventory} used for this {@link UIPlayerInventory} **/
 	protected MalisisInventory inventory;
 
-	public UIPlayerInventory(MalisisGui gui, MalisisInventory inventory)
+	public UIPlayerInventory(MalisisInventory inventory)
 	{
-		super(gui, "container.inventory", INVENTORY_SIZE);
-		this.inventory = inventory;
+		super("container.inventory", inventory, 9);
 
+		setSize(INVENTORY_SIZE);
 		for (int i = 0; i < inventory.getSize(); i++)
-			addSlot(gui, (PlayerInventorySlot) inventory.getSlot(i), i);
+			addSlot(inventory.getSlot(i), i);
 
-		setPosition(Position.centered().bottomAligned());
+		setPosition(Position.of(this).centered().bottomAligned().build());
 	}
 
 	/**
 	 * Creates and adds <code>UISlot</code> into this <code>UIPlayerInventory</code>.
 	 *
-	 * @param gui the gui
 	 * @param slot the slot
 	 * @param number the number
 	 */
-	protected void addSlot(MalisisGui gui, PlayerInventorySlot slot, int number)
+	@Override
+	protected void addSlot(MalisisSlot slot, int number)
 	{
-		UISlot uislot = new UISlot(gui, slot);
+		UISlot uislot = new UISlot(slot);
 		if (number < 9)
 			uislot.setPosition(Position.of(number * 18, 69));
 		else if (number < 36)

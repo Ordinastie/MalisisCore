@@ -34,9 +34,9 @@ import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.component.interaction.UIButton;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.Size.ISize;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.util.bbcode.BBString;
 import net.malisis.core.util.bbcode.node.BBColorNode;
@@ -175,7 +175,7 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 
 	protected void createMenu(MalisisGui gui)
 	{
-		menu = new UIContainer<>(gui);
+		menu = new UIContainer<>();
 		menu.setParent(this);
 
 		createButtons(gui);
@@ -186,35 +186,35 @@ public class BBCodeEditor extends UIContainer<BBCodeEditor>
 	protected void createButtons(MalisisGui gui)
 	{
 		ISize size = Size.of(10, 10);
-		btnBold = new UIButton(gui, "B");
+		btnBold = new UIButton("B");
 		btnBold.setSize(size);
 		btnBold.setTooltip("Bold").register(this);
 
-		btnItalic = new UIButton(gui, "I");
+		btnItalic = new UIButton("I");
 		btnItalic.setSize(size);
 		btnItalic.setTooltip("Italic").register(this);
 
-		btnUnderline = new UIButton(gui, "U");
+		btnUnderline = new UIButton("U");
 		btnUnderline.setSize(size);
 		btnUnderline.setTooltip("Underline").register(this);
 
-		btnStrikethrough = new UIButton(gui, "S");
+		btnStrikethrough = new UIButton("S");
 		btnStrikethrough.setSize(size);
 		btnStrikethrough.setTooltip("Strikethrough").register(this);
 
-		btnColor = new UIButton(gui, "C");
+		btnColor = new UIButton("C");
 		btnStrikethrough.setSize(size);
 		btnStrikethrough.setTooltip("Color").register(this);
 
-		btnBgColor = new UIButton(gui, "BC");
+		btnBgColor = new UIButton("BC");
 		btnBgColor.setSize(Size.of(16, 10));
 		btnBgColor.setTooltip("Background Color").register(this);
 
-		btnItem = new UIButton(gui, "Item");
+		btnItem = new UIButton("Item");
 		btnItem.setSize(Size.of(22, 10));
 		btnItem.setTooltip("Item").register(this);
 
-		btnWysiwyg = new UIButton(gui, "WYSIWYG");
+		btnWysiwyg = new UIButton("WYSIWYG");
 		btnWysiwyg.setSize(Size.of(45, 10));
 		btnWysiwyg.register(this);
 

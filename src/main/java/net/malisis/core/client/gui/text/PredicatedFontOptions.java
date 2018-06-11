@@ -24,12 +24,9 @@
 
 package net.malisis.core.client.gui.text;
 
-import java.util.List;
-import java.util.function.BooleanSupplier;
-
-import org.apache.commons.lang3.tuple.Pair;
-
+import net.malisis.core.client.gui.IPredicatedSupplier;
 import net.malisis.core.renderer.font.FontOptions;
+import net.malisis.core.renderer.font.MalisisFont;
 
 /**
  * @author Ordinastie
@@ -37,19 +34,26 @@ import net.malisis.core.renderer.font.FontOptions;
  */
 public class PredicatedFontOptions extends FontOptions
 {
-	protected final FontOptions base;
-	protected final List<Pair<BooleanSupplier, FontOptions>> suppliers;
+	private FontOptions base;
+	private IPredicatedSupplier<FontOptions> supplier;
 
-	public PredicatedFontOptions(FontOptions base, List<Pair<BooleanSupplier, FontOptions>> suppliers)
+	public PredicatedFontOptions(FontOptions base, IPredicatedSupplier<FontOptions> supplier)
 	{
-		super(0, 0, false, false, false, false, false, false, false);
+		super(null, 0, 0, false, false, false, false, false, false, 0);
 		this.base = base;
-		this.suppliers = suppliers;
+		this.supplier = supplier;
 	}
 
 	private FontOptions get()
 	{
-		return suppliers.stream().filter(p -> p.getLeft().getAsBoolean()).map(Pair::getRight).findFirst().orElse(base);
+		FontOptions opt = supplier.get();
+		return opt != null ? opt : base;
+	}
+
+	@Override
+	public MalisisFont getFont()
+	{
+		return get().getFont();
 	}
 
 	/**
@@ -139,27 +143,4 @@ public class PredicatedFontOptions extends FontOptions
 	{
 		return get().getColor();
 	}
-
-	/**
-	 * Checks if formatting is disabled (formatting character are renderer literally).
-	 *
-	 * @return true, if is formatting disabled
-	 */
-	@Override
-	public boolean isFormattingDisabled()
-	{
-		return get().isFormattingDisabled();
-	}
-
-	/**
-	 * Checks if the text should be translated before rendering.
-	 *
-	 * @return true, if successful
-	 */
-	@Override
-	public boolean shouldTranslate()
-	{
-		return get().shouldTranslate();
-	}
-
 }

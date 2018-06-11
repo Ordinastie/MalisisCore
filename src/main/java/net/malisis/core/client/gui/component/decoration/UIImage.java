@@ -24,15 +24,15 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.GuiTexture;
-import net.malisis.core.client.gui.MalisisGui;
+import org.apache.commons.lang3.ObjectUtils;
+
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.component.element.Size.ISize;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.render.GuiIcon;
+import net.malisis.core.client.gui.render.IGuiRenderer;
+import net.malisis.core.client.gui.render.shape.GuiShape;
 import net.malisis.core.renderer.icon.Icon;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.minecraft.item.ItemStack;
 
 /**
@@ -40,50 +40,37 @@ import net.minecraft.item.ItemStack;
  *
  * @author Ordinastie
  */
-public class UIImage extends UIComponent<UIImage>
+public class UIImage extends UIComponent
 {
 	/** Fixed size of ItemStack UIImages. */
 	private final ISize ITEMSTACK_SIZE = Size.of(16, 16);
-	/** {@link GuiTexture} to use for the icon. */
-	private GuiTexture texture;
-	/** {@link Icon} to use for the texture. */
-	private Icon icon = null;
+	/** {@link GuiIcon} to use for the texture. */
+	private GuiIcon icon = null;
 	/** {@link ItemStack} to render. */
 	private ItemStack itemStack;
 
+	private final IGuiRenderer ICON_RENDER = GuiShape.builder(this).icon(this::getIcon).build();
+	private final IGuiRenderer IS_RENDER = (r) -> r.drawItemStack(itemStack);
+
 	/**
 	 * Instantiates a new {@link UIImage}.
-	 *
-	 * @param gui the gui
-	 * @param texture the texture
+	 * 
 	 * @param icon the icon
 	 */
-	public UIImage(MalisisGui gui, GuiTexture texture, Icon icon)
+	public UIImage(GuiIcon icon)
 	{
-		super(gui);
-		iconProvider = new GuiIconProvider(null);
-		setIcon(texture, icon);
+		setIcon(icon);
 		setSize(ITEMSTACK_SIZE);
-
-		shape = new SimpleGuiShape();
-		iconProvider = new GuiIconProvider(null);
 	}
 
 	/**
 	 * Instantiates a new {@link UIImage}.
-	 *
-	 * @param gui the gui
+	 * 
 	 * @param itemStack the item stack
 	 */
-	public UIImage(MalisisGui gui, ItemStack itemStack)
+	public UIImage(ItemStack itemStack)
 	{
-		super(gui);
-
-		iconProvider = new GuiIconProvider(null);
-
 		setItemStack(itemStack);
-
-		shape = new SimpleGuiShape();
 	}
 
 	/**
@@ -92,25 +79,11 @@ public class UIImage extends UIComponent<UIImage>
 	 * @param icon the icon
 	 * @return this UIImage
 	 */
-	public UIImage setIcon(Icon icon)
+	public UIImage setIcon(GuiIcon icon)
 	{
 		this.itemStack = null;
-		this.icon = icon != null ? icon : new Icon();
-		return this;
-	}
-
-	/**
-	 * Sets the icon for this {@link UIImage} to be used with the specified {@link GuiTexture}.
-	 *
-	 * @param texture the texture
-	 * @param icon the icon
-	 * @return this UIImage
-	 */
-	public UIImage setIcon(GuiTexture texture, Icon icon)
-	{
-		this.itemStack = null;
-		this.icon = icon != null ? icon : new Icon();
-		this.texture = texture;
+		this.icon = icon;
+		setForeground(ICON_RENDER);
 		return this;
 	}
 
@@ -123,9 +96,9 @@ public class UIImage extends UIComponent<UIImage>
 	public UIImage setItemStack(ItemStack itemStack)
 	{
 		this.icon = null;
-		this.texture = null;
 		this.itemStack = itemStack;
 		setSize(ITEMSTACK_SIZE);
+		setForeground(IS_RENDER);
 		return this;
 	}
 
@@ -134,19 +107,9 @@ public class UIImage extends UIComponent<UIImage>
 	 *
 	 * @return the icon
 	 */
-	public Icon getIcon()
+	public GuiIcon getIcon()
 	{
-		return iconProvider.getIcon();
-	}
-
-	/**
-	 * Gets the {@link GuiTexture} for this {@link UIImage}.
-	 *
-	 * @return the texture
-	 */
-	public GuiTexture getTexture()
-	{
-		return texture;
+		return icon;
 	}
 
 	/**
@@ -175,25 +138,9 @@ public class UIImage extends UIComponent<UIImage>
 	}
 
 	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		if (icon != null)
-		{
-			((GuiIconProvider) iconProvider).setIcon(icon);
-			renderer.bindTexture(texture);
-			renderer.drawShape(shape, rp);
-		}
-		else if (itemStack != null)
-		{
-			renderer.drawItemStack(itemStack);
-		}
-	}
-
-	@Override
 	public String getPropertyString()
 	{
-		return (itemStack != null ? itemStack + " | " : ("texture : " + this.texture + ", " + " icon : " + icon))
-				+ super.getPropertyString();
+		return ObjectUtils.firstNonNull(itemStack, icon) + " " + super.getPropertyString();
 	}
 
 }

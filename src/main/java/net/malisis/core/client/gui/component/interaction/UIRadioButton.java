@@ -28,80 +28,112 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.logging.log4j.util.Strings;
-
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.IContentComponent;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.component.content.IContentHolder;
+import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.client.gui.render.GuiIcon;
+import net.malisis.core.client.gui.render.shape.GuiShape;
+import net.malisis.core.renderer.font.FontOptions;
 
 /**
  * @author Ordinastie
  *
  */
-public class UIRadioButton extends UIComponent<UIRadioButton> implements IContentComponent
+public class UIRadioButton extends UIComponent implements IContentHolder<UIComponent>
 {
-	private static HashMap<String, List<UIRadioButton>> radioButtons = new HashMap<>();
+	//TODO:needs to cleared at some point
+	private final static HashMap<String, List<UIRadioButton>> radioButtons = new HashMap<>();
 
-	private UIComponent<?> content;
+	protected final FontOptions fontOptions = FontOptions	.builder()
+															.color(0x444444)
+															.when(this::isHovered)
+															.color(0x777777)
+															.when(this::isDisabled)
+															.color(0xCCCCCC)
+															.build();
+
+	private UIComponent content;
 	private String name;
 	private boolean selected;
 
-	private GuiIconProvider rbIconProvider;
-
-	public UIRadioButton(MalisisGui gui, String name, String text)
+	public UIRadioButton(String name, String text)
 	{
-		super(gui);
 		this.name = name;
 		setText(text);
-		setSize(Size.contentSize(14, 4));
+		setSize(Size.sizeOfContent(this, 14, 0));
 
-		shape = new SimpleGuiShape();
+		//Background
+		setBackground(GuiShape	.builder(this)
+								.position()
+								.x(1)
+								.y(1)
+								.back()
+								.size(8, 8)
+								.icon(GuiIcon.forComponent(this, GuiIcon.RADIO_BG, null, GuiIcon.RADIO_DISABLED_BG))
+								.build());
 
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getIcon(200, 54, 8, 8), null, gui.getGuiTexture().getIcon(200, 62, 8, 8));
-		rbIconProvider = new GuiIconProvider(	gui.getGuiTexture().getIcon(214, 54, 6, 6),
-												gui.getGuiTexture().getIcon(220, 54, 6, 6),
-												gui.getGuiTexture().getIcon(208, 54, 6, 6));
+		//Foreground
+		GuiShape radio = GuiShape	.builder(this)
+									.position()
+									.x(2)
+									.y(2)
+									.back()
+									.size(6, 6)
+									.icon(GuiIcon.forComponent(this, GuiIcon.RADIO, GuiIcon.RADIO_HOVER, GuiIcon.RADIO_DISABLED))
+									.build();
+		//Overlay
+		GuiShape overlay = GuiShape.builder(this).position().x(2).y(2).back().size(6, 6).alpha(80).build();
+
+		setForeground(r -> {
+			if (isSelected())
+				radio.render(r);
+			if (isHovered())
+				overlay.render(r);
+			if (content() != null)
+				content().render(r);
+		});
 
 		addRadioButton(this);
 	}
 
-	public UIRadioButton(MalisisGui gui, String name)
+	public UIRadioButton(String name)
 	{
-		this(gui, name, null);
+		this(name, null);
 	}
 
 	//#region Getters/Setters
+	public void setContent(UIComponent content)
+	{
+		this.content = content;
+		content.setParent(this);
+		content.setPosition(Position.of(content, 12, 1));
+	}
+
 	@Override
-	public UIComponent<?> getContent()
+	public UIComponent content()
 	{
 		return content;
 	}
 
-	@Override
-	public void setContent(UIComponent<?> content)
-	{
-		this.content = content;
-	}
-
 	/**
-	 * Sets the text for this {@link UICheckBox}.
+	 * Sets the text for this {@link UIRadioButton}.
 	 *
 	 * @param text the new text
 	 */
-	@Override
 	public void setText(String text)
 	{
-		if (Strings.isEmpty(text))
-			setContent(null);
-		IContentComponent.super.setText(text);
-		content.setPosition(Position.of(12, 1));
-		content.setParent(this);
+		if (content() instanceof UILabel)
+		{
+			((UILabel) content()).setText(text);
+			return;
+		}
+
+		UILabel label = new UILabel(text);
+		label.setFontOptions(fontOptions);
+		setContent(label);
 	}
 
 	/**
@@ -116,7 +148,7 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IConten
 
 	/**
 	 * Sets state of this {@link UIRadioButton} to selected.<br>
-	 * If a radiobutton with the same name is currently selected, unselects it.<br>
+	 * If a radio button with the same name is currently selected, unselects it.<br>
 	 * Does not fire {@link SelectEvent}.
 	 *
 	 * @return the UI radio button
@@ -131,40 +163,8 @@ public class UIRadioButton extends UIComponent<UIRadioButton> implements IConten
 	}
 
 	//#end Getters/Setters
-
 	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		shape.resetState();
-		shape.setSize(8, 8);
-		shape.translate(1, 1, 0);
-		renderer.drawShape(shape, rp);
-	}
-
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		if (content != null)
-			content.draw(renderer, mouseX, mouseY, partialTick);
-
-		if (selected)
-		{
-			rp.reset();
-			shape.resetState();
-			shape.setSize(6, 6);
-			shape.setPosition(2, 2);
-			rp.iconProvider.set(rbIconProvider);
-			renderer.drawShape(shape, rp);
-		}
-
-		renderer.next();
-		// draw the white shade over the slot
-		if (hovered)
-			renderer.drawRectangle(2, 2, 0, 6, 6, 0xFFFFFF, 80);
-	}
-
-	@Override
-	public boolean onClick(int x, int y)
+	public boolean onClick()
 	{
 		if (fireEvent(new UIRadioButton.SelectEvent(this)))
 			setSelected();

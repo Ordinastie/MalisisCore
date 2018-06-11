@@ -38,9 +38,9 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UILabel;
-import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
 import net.malisis.core.client.gui.component.interaction.UIButton;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.client.gui.render.TexturedBackground.PanelBackground;
 import net.malisis.core.configuration.setting.Setting;
@@ -79,8 +79,8 @@ public class ConfigurationGui extends MalisisGui
 			//TODO: build tabs
 		}
 
-		window = UIContainer.window(this, Size.of(400, 300));
-		UILabel title = new UILabel(this, mod.getName() + " {malisiscore.config.title}");
+		window = UIContainer.window(Size.of(400, 300));
+		UILabel title = new UILabel(mod.getName() + " {malisiscore.config.title}");
 		window.add(title);
 
 		for (String category : categories)
@@ -90,18 +90,18 @@ public class ConfigurationGui extends MalisisGui
 
 		//window.setSize(windowWidth, windowHeight);
 
-		comment = new UILabel(this, true);
+		comment = new UILabel(true);
 		comment.setFontOptions(FontOptions.builder().color(0xFFFFFF).shadow().build());
-		UIContainer<?> panelComment = new UIContainer<>(this);
+		UIContainer<?> panelComment = new UIContainer<>();
 		panelComment.setBackground(new PanelBackground(this, 0xCCCCCC));
 		panelComment.setPosition(Position.rightAligned().topAligned());
-		panelComment.setSize(Size.width(140).relativeHeight(1.0F, -35));
+		panelComment.setSize(Size.width(140).parentHeight(1.0F, -35));
 		panelComment.add(comment);
 
-		btnCancel = new UIButton(this, "gui.cancel");
+		btnCancel = new UIButton("gui.cancel");
 		btnCancel.setPosition(Position.centered(-32).bottomAligned());
 		btnCancel.register(this);
-		btnSave = new UIButton(this, "gui.done");
+		btnSave = new UIButton("gui.done");
 		btnSave.setPosition(Position.centered(32).bottomAligned());
 		btnSave.register(this);
 
@@ -115,7 +115,7 @@ public class ConfigurationGui extends MalisisGui
 	private UIContainer<?> createSettingContainer(String category)
 	{
 		List<Setting<?>> categorySettings = settings.getSettings(category);
-		UIContainer<?> container = new UIContainer<>(this);
+		UIContainer<?> container = new UIContainer<>();
 		container.setPosition(Position.of(5, 12));
 		container.setSize(Size.widthRelativeTo(1.0F, window, -105).heightRelativeTo(1.0F, window, -35));
 
@@ -123,7 +123,7 @@ public class ConfigurationGui extends MalisisGui
 		for (Setting<?> setting : categorySettings)
 		{
 			UIComponent<?> component = setting.getComponent(this);
-			component.setPosition(last != null ? Position.x(0).below(last, 2) : Position.zero());
+			component.setPosition(last != null ? Position.x(0).below(last, 2) : Position.paddedZero());
 			component.register(this);
 			container.add(component);
 			componentSettings.put(component, setting);

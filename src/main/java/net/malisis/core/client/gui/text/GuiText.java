@@ -27,92 +27,107 @@ import static com.google.common.base.Preconditions.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.component.element.Size.DynamicSize;
-import net.malisis.core.client.gui.component.element.Size.ISize;
+import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.content.IContent;
+import net.malisis.core.client.gui.element.IChild;
+import net.malisis.core.client.gui.element.IClipable;
+import net.malisis.core.client.gui.element.IClipable.ClipArea;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.position.Position;
+import net.malisis.core.client.gui.element.position.Position.IPosition;
+import net.malisis.core.client.gui.element.position.PositionBuilder;
+import net.malisis.core.client.gui.render.GuiRenderer;
+import net.malisis.core.client.gui.render.IGuiRenderer;
 import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.font.MalisisFont;
 import net.malisis.core.renderer.font.StringWalker;
 import net.malisis.core.util.cacheddata.CachedData;
 import net.malisis.core.util.cacheddata.FixedData;
 import net.malisis.core.util.cacheddata.ICachedData;
+import net.malisis.core.util.cacheddata.IntCachedData;
+import net.malisis.core.util.cacheddata.IntCachedData.IntFixedData;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.math.MathHelper;
 
 /**
  * The Class GuiString represents a String to be used and displayed in a GUI.<br>
  * It can be translated, and used with fixed or dynamic named parameters.<br>
  * Parameters are used with {key} markers in the text.<br>
- * {@link GuiText#setWrapSize(int)} will automatically split the text in lines, then the rendering can be done for only some of those lines.
+ * The text will be automatically split in lines based on the wrap size.
  *
  * @author Ordinastie
  */
-public class GuiText
+public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 {
+	public static int MULTILINE = 1;
+	public static int TRANSLATED = 2;
+	public static int LITTERAL = 4;
+
 	/** Pattern for named parameters. */
 	private static final Pattern pattern = Pattern.compile("\\{(?<key>.*?)\\}");
 
 	/** Base text to be translated and parameterized. */
 	private String base = "";
 	/** Lines composing the text. */
-	private final List<String> lines = Lists.newArrayList();
+	private final List<LineInfo> lines = Lists.newArrayList();
 	/** Parameters. */
-	private final Map<String, ICachedData<?>> parameters = Maps.newHashMap();
+	private final Map<String, ICachedData<?>> parameters;
 
-	/** The font to use to render. */
-	private MalisisFont font = MalisisFont.minecraftFont;
 	/** The base font options to use to render. */
 	private FontOptions fontOptions = FontOptions.EMPTY;
 	/** Translated text with resolved parameters. */
 	private String cache = null;
-	/** Whether the text should be translated. */
-	private boolean translated = true;
-	/** Text wrap size. 0 means do not wrap. */
-	private int wrapSize = 0;
-	/** Space between each line. */
-	private int lineSpacing = 2;
-	/** Whether this text is multiline. */
-	private boolean multiLine = false;
 
-	private ISize size = new DynamicSize(o -> getMaxWidth(), o -> getLineHeight() * lines().size());
+	/** Whether this text is multiLine. */
+	private final boolean multiLine;
+	/** Whether the text should be translated. */
+	private final boolean translated;
+	/** Whether the text should handle styles. */
+	private final boolean literal;
+
+	/** Text wrap size. 0 means do not wrap. */
+	private IntCachedData wrapSize;
+
+	private IPosition position;
+	private final IPosition screenPosition = new Position.ScreenPosition(this);
+	private ISize size = Size.ZERO;
+	private IntSupplier zIndex = () -> 0;
 
 	private boolean buildLines = true;
 	private boolean buildCache = true;
 
-	/**
-	 * Instantiates a new {@link GuiText}.
-	 */
-	public GuiText()
-	{
+	private UIComponent parent;
 
+	public GuiText(String text, Map<String, ICachedData<?>> parameters, PositionBuilder<GuiText, Builder> positionBuilder, IntSupplier zIndex, UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
+	{
+		this.base = text;
+		this.parameters = parameters;
+		this.position = positionBuilder != null ? positionBuilder.build(this) : Position.ZERO;
+		this.zIndex = zIndex != null ? zIndex : () -> 0;
+		this.parent = parent;
+		this.fontOptions = fontOptions;
+		this.multiLine = multiLine;
+		this.translated = translated;
+		this.literal = literal;
+		this.wrapSize = wrapSize != null ? new IntCachedData(wrapSize) : new IntFixedData(0);
+		this.parent = parent;
 	}
 
-	/**
-	 * Instantiates a new {@link GuiText}.
-	 *
-	 * @param text the text
-	 */
-	public GuiText(String text)
+	@Override
+	public UIComponent getParent()
 	{
-		setText(text);
-	}
-
-	/**
-	 * Sets the text for this {@link GuiText}.<br>
-	 * Generates the cache and resolves parameters.
-	 *
-	 * @param text the new text
-	 */
-	public void setText(String text)
-	{
-		this.base = text != null ? text : "";
-		buildCache = true;
+		return parent;
 	}
 
 	/**
@@ -137,27 +152,70 @@ public class GuiText
 	}
 
 	/**
+	 * Sets the text for this {@link GuiText}.<br>
+	 * Generates the cache and resolves parameters.
+	 *
+	 * @param text the new text
+	 */
+	public void setText(String text)
+	{
+		this.base = text != null ? text : "";
+		buildCache = true;
+	}
+
+	public void setParameters(Map<String, ICachedData<?>> params)
+	{
+		parameters.clear();
+		parameters.putAll(checkNotNull(params));
+	}
+
+	public void setWrapSize(int size)
+	{
+		wrapSize = new IntFixedData(size);
+		buildLines = true;
+	}
+
+	public void setWrapSize(IntSupplier supplier)
+	{
+		wrapSize = new IntCachedData(checkNotNull(supplier));
+		buildLines = true;
+	}
+
+	/**
 	 * Gets the different lines.
 	 *
 	 * @return the list
 	 */
-	public List<String> lines()
+	public List<LineInfo> lines()
 	{
 		update();
 		return lines;
 	}
 
-	/**
-	 * Sets whether the text should be translated.
-	 *
-	 * @param translate the translate
-	 */
-	public void setTranslated(boolean translate)
+	public int length()
 	{
-		if (translated == translate) //no change, no rebuild
-			return;
-		translated = translate;
-		buildCache = true;
+		update();
+		return cache.length();
+	}
+
+	/**
+	 * Gets the line count of this text.
+	 *
+	 * @return the int
+	 */
+	public int lineCount()
+	{
+		return lines.size();
+	}
+
+	/**
+	 * Checks if the text is multiLine.
+	 *
+	 * @return true, if is multiLine
+	 */
+	public boolean isMultiLine()
+	{
+		return multiLine;
 	}
 
 	/**
@@ -171,19 +229,13 @@ public class GuiText
 	}
 
 	/**
-	 * Sets the wrap size for the text.<br>
-	 * Has no effect if this {@link GuiText} is not multilines.
+	 * Checks if the text should be rendered without styles.
 	 *
-	 * @param wrapSize the new wrap size
+	 * @return true, if is literal
 	 */
-	public void setWrapSize(int wrapSize)
+	public boolean isLitteral()
 	{
-		if (this.wrapSize == wrapSize)//no change, no rebuild
-			return;
-		if (!multiLine)
-			wrapSize = 0;
-		this.wrapSize = wrapSize;
-		buildLines = true;
+		return literal;
 	}
 
 	/**
@@ -193,61 +245,7 @@ public class GuiText
 	 */
 	public int getWrapSize()
 	{
-		return wrapSize;
-	}
-
-	/**
-	 * Sets the line spacing for the text.
-	 *
-	 * @param spacing the new line spacing
-	 */
-	public void setLineSpacing(int spacing)
-	{
-		lineSpacing = spacing;
-	}
-
-	/**
-	 * Gets the line spacing for the text.
-	 *
-	 * @return the line spacing
-	 */
-	public int getLineSpacing()
-	{
-		return lineSpacing;
-	}
-
-	/**
-	 * Sets the font to use to render.
-	 *
-	 * @param font the new font
-	 */
-	public void setFont(MalisisFont font)
-	{
-		if (this.font == font) //no changes, no rebuild
-			return;
-		this.font = checkNotNull(font);
-		buildLines = true;
-	}
-
-	/**
-	 * Gets the font used to render the text.
-	 *
-	 * @return the font
-	 */
-	public MalisisFont getFont()
-	{
-		return font;
-	}
-
-	/**
-	 * Sets the font options to use to render.
-	 *
-	 * @param fontOptions the new font options
-	 */
-	public void setFontOptions(FontOptions fontOptions)
-	{
-		this.fontOptions = checkNotNull(fontOptions);
-		buildLines = this.fontOptions.isBold() != fontOptions.isBold() || this.fontOptions.getFontScale() != fontOptions.getFontScale();
+		return wrapSize.get();
 	}
 
 	/**
@@ -261,87 +259,39 @@ public class GuiText
 	}
 
 	/**
-	 * Sets whether the text is multiline.
+	 * Sets the font options to use to render.
 	 *
-	 * @param multiLine the new multiline
+	 * @param fontOptions the new font options
 	 */
-	public void setMultiline(boolean multiLine)
+	public void setFontOptions(FontOptions fontOptions)
 	{
-		this.multiLine = multiLine;
-		buildLines = true;
+		checkNotNull(fontOptions);
+		buildLines = this.fontOptions.isBold() != fontOptions.isBold() || this.fontOptions.getFontScale() != fontOptions.getFontScale();
+		this.fontOptions = fontOptions;
 	}
 
-	/**
-	 * Checks if the text is multiline.
-	 *
-	 * @return true, if is multiline
-	 */
-	public boolean isMultiLine()
+	@Override
+	public IPosition position()
 	{
-		return multiLine;
+		return position;
 	}
 
-	public int getMaxWidth()
+	public void setPosition(IPosition position)
 	{
-		return lines().stream().mapToInt(l -> (int) font.getStringWidth(l, fontOptions)).max().orElse(0);
+		this.position = position;
 	}
 
 	/**
 	 * Gets the size of the text.<br>
-	 * Width matches longest line, height is number of lines multiplied by line height.
+	 * Width matches longest line, height is the sum of each line height
 	 *
 	 * @return the i size
 	 */
+	@Override
 	public ISize size()
 	{
+		update(); //make sure to update cache
 		return size;
-	}
-
-	/**
-	 * Gets the line height.
-	 *
-	 * @return the line height
-	 */
-	public int getLineHeight()
-	{
-		return (int) (font.getStringHeight(fontOptions) + (multiLine ? lineSpacing : 0));
-	}
-
-	/**
-	 * Binds a fixed value to the specified parameter.
-	 *
-	 * @param <T> the generic type
-	 * @param key the key
-	 * @param value the value
-	 */
-	public <T> void bind(String key, T value)
-	{
-		bind(key, new FixedData<>(value));
-	}
-
-	/**
-	 * Binds supplier to the specified parameter.
-	 *
-	 * @param <T> the generic type
-	 * @param key the key
-	 * @param supplier the supplier
-	 */
-	public <T> void bind(String key, Supplier<T> supplier)
-	{
-		bind(key, new CachedData<>(supplier));
-	}
-
-	/**
-	 * Binds {@link ICachedData} to the specified parameter.
-	 *
-	 * @param <T> the generic type
-	 * @param key the key
-	 * @param data the data
-	 */
-	public <T> void bind(String key, ICachedData<T> data)
-	{
-		parameters.put(key, data);
-		buildCache = true;
 	}
 
 	/**
@@ -353,7 +303,9 @@ public class GuiText
 	private String resolveParameter(String key)
 	{
 		ICachedData<?> o = parameters.get(key);
-		return o != null && o.get() != null ? o.get().toString() : "";
+		if (o == null) //not actual parameter : translate it
+			return translated ? I18n.format(key) : key;
+		return Objects.toString(o.get()).replace("$", "\\$");
 	}
 
 	/**
@@ -363,13 +315,14 @@ public class GuiText
 	 */
 	private boolean hasParametersChanged()
 	{
+		boolean changed = false;
 		for (ICachedData<?> data : parameters.values())
 		{
 			data.update();
 			if (data.hasChanged())
-				return true;
+				changed |= true; //can't return early, we need to call update on each data
 		}
-		return false;
+		return changed;
 	}
 
 	/**
@@ -384,8 +337,25 @@ public class GuiText
 
 	private void update()
 	{
+		if (StringUtils.isEmpty(base))
+		{
+			cache = "";
+			return;
+		}
+
 		generateCache();
 		buildLines();
+	}
+
+	private void updateSize()
+	{
+		int w = 0, h = 0;
+		for (LineInfo info : lines)
+		{
+			w = Math.max(info.width(), w);
+			h += info.height() + fontOptions.lineSpacing();
+		}
+		size = Size.of(w, h);
 	}
 
 	/**
@@ -399,8 +369,6 @@ public class GuiText
 			return;
 
 		String str = base;
-		if (translated)
-			str = I18n.format(str);
 		str = applyParameters(str);
 		cache = str;
 		buildCache = false;
@@ -421,7 +389,8 @@ public class GuiText
 		while (matcher.find())
 			matcher.appendReplacement(sb, resolveParameter(matcher.group("key")));
 		matcher.appendTail(sb);
-		return sb.toString();
+		str = sb.toString();
+		return translated ? I18n.format(str) : str;
 	}
 
 	/**
@@ -431,35 +400,33 @@ public class GuiText
 	 */
 	private void buildLines()
 	{
+		wrapSize.update();
+		buildLines |= wrapSize.hasChanged();
 		if (!buildLines)
 			return;
 
 		lines.clear();
-		if (!multiLine)
-		{
-			lines.add(cache);
-			buildLines = false;
-			return;
-		}
 
-		String str = cache.replace("\r?(?<=\n)", "\r");
+		String str = cache.replace("\r?(?<=\n)", "\n");
 
 		StringBuilder line = new StringBuilder();
 		StringBuilder word = new StringBuilder();
 		//FontRenderOptions fro = new FontRenderOptions();
 
-		int maxWidth = wrapSize - 4;
+		int maxWidth = multiLine ? getWrapSize() : -1;
 		float lineWidth = 0;
 		float wordWidth = 0;
+		float lineHeight = 0;
 
-		StringWalker walker = new StringWalker(str, font, fontOptions);
+		StringWalker walker = new StringWalker(str, fontOptions);
 		walker.skipChars(false);
 		walker.applyStyles(true);
 		while (walker.walk())
 		{
 			char c = walker.getChar();
-			lineWidth += walker.getWidth();
-			wordWidth += walker.getWidth();
+			lineWidth += walker.width();
+			wordWidth += walker.width();
+			lineHeight = Math.max(lineHeight, walker.height());
 
 			word.append(c);
 
@@ -470,7 +437,7 @@ public class GuiText
 				word.setLength(0);
 				wordWidth = 0;
 			}
-			if (lineWidth >= maxWidth || c == '\n')
+			if (isMultiLine() && ((maxWidth > 0 && lineWidth >= maxWidth) || c == '\n'))
 			{
 				//the first word on the line is too large, split anyway
 				if (line.length() == 0)
@@ -480,8 +447,13 @@ public class GuiText
 					wordWidth = 0;
 				}
 
-				//make a new line
-				lines.add(line.toString());
+				//remove current word from last line
+				lineWidth -= wordWidth;
+				//new line -> no justification
+				float extra = c == '\n' ? 0 : maxWidth - lineWidth;
+
+				//add the new line
+				lines.add(new LineInfo(line.toString(), MathHelper.ceil(lineWidth), MathHelper.ceil(lineHeight), extra));
 				line.setLength(0);
 
 				lineWidth = wordWidth;
@@ -489,22 +461,51 @@ public class GuiText
 		}
 
 		line.append(word);
-		lines.add(line.toString());
+		lines.add(new LineInfo(line.toString(), MathHelper.ceil(lineWidth), MathHelper.ceil(lineHeight), 0));
 
 		buildLines = false;
+		updateSize();
 	}
 
 	/**
-	 * Renders this {@link GuiText} at the specified coordinates.
+	 * Renders all the text based on its set position.
 	 *
+	 * @param renderer the renderer
+	 */
+	@Override
+	public void render(GuiRenderer renderer)
+	{
+		update();
+		if (StringUtils.isEmpty(cache))
+			return;
+
+		int x = screenPosition.x();
+		int y = screenPosition.y();
+		int z = zIndex.getAsInt();
+		ClipArea area = null;
+		if (parent instanceof UIComponent)
+			z += parent.getZIndex();
+		if (parent instanceof IClipable)
+			area = ((IClipable) parent).getClipArea();
+		render(renderer, x, y, z, area);
+	}
+
+	/**
+	 * Renders lines between startLine and endLine of this {@link GuiText} at the coordinates.
+	 *
+	 * @param renderer the renderer
 	 * @param x the x
 	 * @param y the y
 	 * @param z the z
+	 * @param area the area
 	 */
-	public void render(GuiRenderer renderer, int startLine, int endLine, int x, int y, int z)
+	public void render(GuiRenderer renderer, int x, int y, int z, ClipArea area)
 	{
-		MalisisFont font = this.font.isLoaded() ? this.font : MalisisFont.minecraftFont;
-		font.render(renderer, lines, startLine, endLine, x, y, z, lineSpacing, fontOptions);
+		if (StringUtils.isEmpty(cache))
+			return;
+
+		fontOptions.getFont().render(renderer, this, x, y, z, fontOptions, area);
+		renderer.forceRebind();
 	}
 
 	/**
@@ -514,19 +515,224 @@ public class GuiText
 	 */
 	public StringWalker walker()
 	{
-		return new StringWalker(lines, font, fontOptions);
+		return new StringWalker(this, fontOptions);
 	}
 
 	@Override
 	public String toString()
 	{
-		StringBuilder sb = new StringBuilder();
-		lines().forEach(str -> {
-			sb.append(str);
-			sb.append("\n");
-		});
-		sb.deleteCharAt(sb.length() - 1);
-		return sb.toString();
+		String str = position + "@" + size;
+		if (isMultiLine())
+			str += " (wrap: " + getWrapSize() + ")";
+		return str;
+		//return lines().stream().map(LineInfo::getText).collect(Collectors.joining());
+	}
+
+	public static Builder of(UIComponent parent)
+	{
+		return new Builder().parent(parent);
+	}
+
+	public static Builder of(String text)
+	{
+		return new Builder().text(text);
+	}
+
+	public static class Builder
+	{
+		private String text;
+		private final Map<String, ICachedData<?>> parameters = Maps.newHashMap();
+		private FontOptions fontOptions = FontOptions.EMPTY;
+		private IntSupplier zIndex;
+		private UIComponent parent;
+		private boolean multiLine = false;
+		private boolean translated = true;
+		private boolean literal = false;
+		private IntSupplier wrapSize;
+
+		private PositionBuilder<GuiText, Builder> positionBuilder;;
+
+		public Builder()
+		{
+
+		}
+
+		public Builder text(String text)
+		{
+			this.text = text;
+			if (text.contains("\r") || text.contains("\n"))
+				multiLine = true;
+			return this;
+		}
+
+		public Builder text(Supplier<String> supplier)
+		{
+			this.text = "{text}";
+			return bind("text", supplier);
+		}
+
+		public PositionBuilder<GuiText, Builder> position()
+		{
+			positionBuilder = new PositionBuilder<>(this, true);
+			return positionBuilder;
+		}
+
+		public Builder zIndex(int zIndex)
+		{
+			return zIndex(() -> zIndex);
+		}
+
+		public Builder zIndex(IntSupplier zIndex)
+		{
+			this.zIndex = zIndex;
+			return this;
+		}
+
+		public Builder parent(UIComponent parent)
+		{
+			this.parent = parent;
+			return this;
+		}
+
+		/**
+		 * Binds a fixed value to the specified parameter.
+		 *
+		 * @param <T> the generic type
+		 * @param key the key
+		 * @param value the value
+		 */
+		public <T> Builder bind(String key, T value)
+		{
+			return bind(key, new FixedData<>(value));
+		}
+
+		/**
+		 * Binds supplier to the specified parameter.
+		 *
+		 * @param <T> the generic type
+		 * @param key the key
+		 * @param supplier the supplier
+		 */
+		public <T> Builder bind(String key, Supplier<T> supplier)
+		{
+			return bind(key, new CachedData<>(supplier));
+		}
+
+		/**
+		 * Binds {@link ICachedData} to the specified parameter.
+		 *
+		 * @param <T> the generic type
+		 * @param key the key
+		 * @param data the data
+		 */
+		public <T> Builder bind(String key, ICachedData<T> data)
+		{
+			parameters.put(key, data);
+			return this;
+		}
+
+		public Builder fontOptions(FontOptions fontOptions)
+		{
+			this.fontOptions = fontOptions;
+			return this;
+		}
+
+		public Builder multiLine(boolean multiLine)
+		{
+			this.multiLine = multiLine;
+			return this;
+		}
+
+		public Builder multiLine()
+		{
+			multiLine = true;
+			return this;
+		}
+
+		public Builder translated(boolean translated)
+		{
+			this.translated = translated;
+			return this;
+		}
+
+		public Builder translated()
+		{
+			translated = true;
+			return this;
+		}
+
+		public Builder literal(boolean literal)
+		{
+			this.literal = literal;
+			return this;
+		}
+
+		public Builder literal()
+		{
+			literal = true;
+			return this;
+		}
+
+		public Builder wrapSize(int size)
+		{
+			wrapSize = () -> size;
+			return this;
+		}
+
+		public Builder wrapSize(IntSupplier supplier)
+		{
+			wrapSize = checkNotNull(supplier);
+			return this;
+		}
+
+		public GuiText build()
+		{
+			if (parent != null && multiLine && wrapSize == null)
+				wrapSize = () -> parent.innerSize().width();
+			if (parent != null && zIndex == null)
+				zIndex = parent::getZIndex;
+
+			return new GuiText(text, parameters, positionBuilder, zIndex, parent, fontOptions, multiLine, translated, literal, wrapSize);
+		}
+
+	}
+
+	public static class LineInfo implements ISize
+	{
+		private final String text;
+		private final int width;
+		private final int height;
+		private final float spaceWidth;
+
+		private LineInfo(String text, int width, int height, float spaceWidth)
+		{
+			this.text = text;
+			this.width = width;
+			this.height = height;
+			this.spaceWidth = spaceWidth;
+		}
+
+		public String text()
+		{
+			return text;
+		}
+
+		@Override
+		public int width()
+		{
+			return width;
+		}
+
+		@Override
+		public int height()
+		{
+			return height;
+		}
+
+		public float spaceWidth()
+		{
+			return spaceWidth;
+		}
 	}
 
 }

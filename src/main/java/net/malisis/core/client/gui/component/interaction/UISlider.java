@@ -26,44 +26,31 @@ package net.malisis.core.client.gui.component.interaction;
 
 import static com.google.common.base.Preconditions.*;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.base.Converter;
-import com.mojang.realmsclient.gui.ChatFormatting;
 
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.element.GuiShape;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.client.gui.component.content.ITextHolder;
+import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.render.GuiIcon;
+import net.malisis.core.client.gui.render.shape.GuiShape;
+import net.malisis.core.client.gui.text.GuiText;
 import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.malisis.core.util.MouseButton;
-import net.malisis.core.util.Silenced;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * @author Ordinastie
  *
  */
-public class UISlider<T> extends UIComponent<UISlider<T>>
+public class UISlider<T> extends UIComponent implements ITextHolder
 {
-	public static int SLIDER_WIDTH = 8;
-
-	protected GuiIconProvider sliderIcon;
-
-	/** The {@link MalisisFont} to use for this {@link UISlider}. */
-	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontOptions} to use for this {@link UISlider}. */
-	protected FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
-	/** The {@link FontOptions} to use for this {@link UISlider} when hovered. */
-	protected FontOptions hoveredFontOptions = FontOptions.builder().color(0xFFFFA0).shadow().build();
+	private static int SLIDER_WIDTH = 8;
 
 	/** Text to display over the slider. */
-	protected String text;
+	protected final GuiText text;
+
 	/** Current value. */
 	protected T value;
 	/** Position offset of the slider. */
@@ -75,51 +62,41 @@ public class UISlider<T> extends UIComponent<UISlider<T>>
 	/** Converter from float (0-1 offset) to the value. */
 	protected Converter<Float, T> converter;
 
-	protected GuiShape sliderShape;
-
-	public UISlider(MalisisGui gui, int width, Converter<Float, T> converter, String text)
+	public UISlider(int width, Converter<Float, T> converter, String text)
 	{
-		super(gui);
-		this.text = text;
 		this.converter = checkNotNull(converter);
 		this.value = converter.convert(0F);
 
+		this.text = GuiText	.of(this)
+							.text(text)
+							.position()
+							.x(this::textPosition)
+							.middleAligned()
+							.back()
+							.bind("value", this::getValue)
+							.zIndex(this::getZIndex)
+							.fontOptions(FontOptions.builder().color(0xFFFFFF).shadow().when(this::isHovered).color(0xFFFFA0).build())
+							.build();
+
 		setSize(Size.of(width, 20));
 
-		shape = new XYResizableGuiShape();
-		sliderShape = new XYResizableGuiShape(3);
-
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(0, 0, 200, 20, 5));
-		sliderIcon = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(227, 46, 8, 20, 3));
+		GuiShape sliderShape = GuiShape	.builder(this)
+										.position()
+										.x(this::scrollPosition)
+										.back()
+										.size(Size.of(SLIDER_WIDTH, () -> size().height()))
+										.icon(GuiIcon.SLIDER)
+										.border(5)
+										.build();
+		setBackground(GuiShape.builder(this).icon(GuiIcon.SLIDER_BG).build());
+		setForeground(this.text.and(sliderShape));
 	}
-
-	//	public UISlider(MalisisGui gui, int width, float min, float max)
-	//	{
-	//		this(gui, width, null, null);
-	//	}
 
 	//#region Getters/Setters
-
-	public MalisisFont getFont()
+	@Override
+	public GuiText content()
 	{
-		return font;
-	}
-
-	public UISlider<T> setFont(MalisisFont font)
-	{
-		this.font = font;
-		return this;
-	}
-
-	public FontOptions getFontOptions()
-	{
-		return fontOptions;
-	}
-
-	public UISlider<T> setFontOptions(FontOptions fro)
-	{
-		this.fontOptions = fro;
-		return this;
+		return text;
 	}
 
 	/**
@@ -150,6 +127,36 @@ public class UISlider<T> extends UIComponent<UISlider<T>>
 		return value;
 	}
 
+	public void setFontOptions(FontOptions fontOptions)
+	{
+		text.setFontOptions(fontOptions);
+	}
+
+	public int scrollPosition()
+	{
+		return (int) (offset * (size().width() - SLIDER_WIDTH));
+	}
+
+	public int textPosition()
+	{
+		int w = size().width(); //width
+		int tw = text.size().width(); //text width
+		int tx = (w - tw) / 2; //text x
+		int sx = scrollPosition(); //scroll x
+
+		if (sx > w / 2)
+		{
+			if (tx + tw + 2 > sx)
+				return sx - tw - 2;
+		}
+		else
+		{
+			if (sx + SLIDER_WIDTH + 2 > tx)
+				return sx + SLIDER_WIDTH + 2;
+		}
+		return tx;
+	}
+
 	/**
 	 * Sets the amount of offset to scroll with the wheel.
 	 *
@@ -163,38 +170,34 @@ public class UISlider<T> extends UIComponent<UISlider<T>>
 	}
 
 	//#end Getters/Setters
-
 	@Override
-	public boolean onClick(int x, int y)
+	public boolean onClick()
 	{
-		slideTo(x);
+		slideTo();
 		return true;
 	}
 
 	@Override
-	public boolean onScrollWheel(int x, int y, int delta)
+	public boolean onScrollWheel(int delta)
 	{
 		slideTo(offset + delta * scrollStep);
 		return true;
 	}
 
 	@Override
-	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
+	public boolean onDrag(MouseButton button)
 	{
-		slideTo(x);
+		slideTo();
 		return true;
 	}
 
 	/**
 	 * Slides the slider to the specified pixel position.<br>
-	 *
-	 * @param x the x
 	 */
-	public void slideTo(int x)
+	public void slideTo()
 	{
 		int l = size().width() - SLIDER_WIDTH;
-		int pos = relativeX(x);
-		pos = MathHelper.clamp(pos - SLIDER_WIDTH / 2, 0, l);
+		int pos = MathHelper.clamp(mousePosition().x() - SLIDER_WIDTH / 2, 0, l);
 		slideTo((float) pos / l);
 	}
 
@@ -213,37 +216,9 @@ public class UISlider<T> extends UIComponent<UISlider<T>>
 	}
 
 	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	public String getPropertyString()
 	{
-		renderer.drawShape(shape, rp);
+		return "[" + TextFormatting.GREEN + text + " | " + text.position() + "@" + text.size() + TextFormatting.RESET + "] "
+				+ super.getPropertyString();
 	}
-
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		zIndex = 0;
-		float factor = size().height() / 20F;
-		int ox = (int) (offset * (size().width() - SLIDER_WIDTH * factor));
-		sliderShape.resetState();
-		sliderShape.setSize((int) (8 * factor), size().height());
-		sliderShape.setPosition(ox, 0);
-
-		rp.iconProvider.set(sliderIcon);
-		renderer.drawShape(sliderShape, rp);
-
-		renderer.next();
-		//zIndex = 1;
-
-		if (!StringUtils.isEmpty(text))
-		{
-			String str = Silenced.get(() -> String.format(text, value));
-			if (str == null)
-				str = ChatFormatting.ITALIC + "Format error";
-			int x = (int) ((size().width() - font.getStringWidth(str, fontOptions)) / 2);
-			int y = (int) Math.ceil((size().height() - font.getStringHeight(fontOptions)) / 2);
-
-			renderer.drawText(font, str, x, y, 0, isHovered() ? hoveredFontOptions : fontOptions);
-		}
-	}
-
 }

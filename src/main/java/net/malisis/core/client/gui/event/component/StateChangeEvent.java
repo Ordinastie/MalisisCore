@@ -32,9 +32,9 @@ import net.malisis.core.client.gui.event.ComponentEvent;
  *
  * @author Ordinastie
  *
- * @param <T> the type of <code>UIComponent</code> that fired this event.
+ * @param <T> the type of <code>UIComponent that fired this event.
  */
-public abstract class StateChangeEvent<T extends UIComponent<T>> extends ComponentEvent<T>
+public abstract class StateChangeEvent<T extends UIComponent> extends ComponentEvent<T>
 {
 	protected boolean state;
 
@@ -57,9 +57,9 @@ public abstract class StateChangeEvent<T extends UIComponent<T>> extends Compone
 	 *
 	 * @author Ordinastie
 	 *
-	 * @param <T> the type of <code>UIComponent</code> that fired this event.
+	 * @param <T> the type of <code>UIComponent that fired this event.
 	 */
-	public static class HoveredStateChange<T extends UIComponent<T>> extends StateChangeEvent<T>
+	public static class HoveredStateChange<T extends UIComponent> extends StateChangeEvent<T>
 	{
 		public HoveredStateChange(T component, boolean hovered)
 		{
@@ -72,9 +72,9 @@ public abstract class StateChangeEvent<T extends UIComponent<T>> extends Compone
 	 *
 	 * @author Ordinastie
 	 *
-	 * @param <T> the type of <code>UIComponent</code> that fired this event.
+	 * @param <T> the type of <code>UIComponent that fired this event.
 	 */
-	public static class FocusStateChange<T extends UIComponent<T>> extends StateChangeEvent<T>
+	public static class FocusStateChange<T extends UIComponent> extends StateChangeEvent<T>
 	{
 		public FocusStateChange(T component, boolean focused)
 		{
@@ -87,9 +87,9 @@ public abstract class StateChangeEvent<T extends UIComponent<T>> extends Compone
 	 *
 	 * @author Ordinastie
 	 *
-	 * @param <T> the type of <code>UIComponent</code> that fired this event.
+	 * @param <T> the type of <code>UIComponent that fired this event.
 	 */
-	public static class ActiveStateChange<T extends UIComponent<T>> extends StateChangeEvent<T>
+	public static class ActiveStateChange<T extends UIComponent> extends StateChangeEvent<T>
 	{
 		public ActiveStateChange(T component, boolean active)
 		{
@@ -102,9 +102,9 @@ public abstract class StateChangeEvent<T extends UIComponent<T>> extends Compone
 	 *
 	 * @author Ordinastie
 	 *
-	 * @param <T> the type of <code>UIComponent</code> that fired this event.
+	 * @param <T> the type of <code>UIComponent that fired this event.
 	 */
-	public static class VisibleStateChange<T extends UIComponent<T>> extends StateChangeEvent<T>
+	public static class VisibleStateChange<T extends UIComponent> extends StateChangeEvent<T>
 	{
 		public VisibleStateChange(T component, boolean visible)
 		{
@@ -117,9 +117,9 @@ public abstract class StateChangeEvent<T extends UIComponent<T>> extends Compone
 	 *
 	 * @author Ordinastie
 	 *
-	 * @param <T> the type of <code>UIComponent</code> that fired this event.
+	 * @param <T> the type of <code>UIComponent that fired this event.
 	 */
-	public static class DisabledStateChange<T extends UIComponent<T>> extends StateChangeEvent<T>
+	public static class DisabledStateChange<T extends UIComponent> extends StateChangeEvent<T>
 	{
 		public DisabledStateChange(T component, boolean disabled)
 		{

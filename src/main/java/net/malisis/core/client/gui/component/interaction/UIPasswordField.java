@@ -4,7 +4,6 @@ import java.util.function.Function;
 
 import org.lwjgl.input.Keyboard;
 
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.minecraft.client.gui.GuiScreen;
 
@@ -22,23 +21,20 @@ public class UIPasswordField extends UITextField
 
 	/**
 	 * Instantiates a new {@link UIPasswordField}.
-	 *
-	 * @param gui the gui
 	 */
-	public UIPasswordField(MalisisGui gui)
+	public UIPasswordField()
 	{
-		super(gui, null, false);
+		super();
 	}
 
 	/**
 	 * Instantiates a new {@link UIPasswordField}
 	 *
-	 * @param gui the gui
 	 * @param passwordChar the password char
 	 */
-	public UIPasswordField(MalisisGui gui, char passwordChar)
+	public UIPasswordField(char passwordChar)
 	{
-		this(gui);
+		this();
 		this.passwordChar = passwordChar;
 	}
 
@@ -91,7 +87,7 @@ public class UIPasswordField extends UITextField
 
 		final StringBuilder oldText = this.password;
 		final String oldValue = oldText.toString();
-		String newValue = oldText.insert(this.cursorPosition.textPosition, text).toString();
+		String newValue = oldText.insert(this.cursor.index, text).toString();
 
 		if (this.filterFunction != null)
 			newValue = this.filterFunction.apply(newValue);
@@ -101,7 +97,7 @@ public class UIPasswordField extends UITextField
 
 		this.password = new StringBuilder(newValue);
 		this.updateText();
-		this.cursorPosition.jumpBy(text.length());
+		this.cursor.jumpBy(text.length());
 	}
 
 	/**
@@ -122,7 +118,7 @@ public class UIPasswordField extends UITextField
 		updateText();
 		selectingText = false;
 		if (focused)
-			cursorPosition.jumpToEnd();
+			cursor.jumpToEnd();
 
 	}
 
@@ -142,13 +138,13 @@ public class UIPasswordField extends UITextField
 		if (!selectingText)
 			return;
 
-		int start = Math.min(selectionPosition.textPosition, cursorPosition.textPosition);
-		int end = Math.max(selectionPosition.textPosition, cursorPosition.textPosition);
+		int start = Math.min(selectionCursor.index, cursor.index);
+		int end = Math.max(selectionCursor.index, cursor.index);
 
 		password.delete(start, end);
 		updateText();
 		selectingText = false;
-		cursorPosition.jumpTo(start);
+		cursor.jumpTo(start);
 	}
 
 	/**

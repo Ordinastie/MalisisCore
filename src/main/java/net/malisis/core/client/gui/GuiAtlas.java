@@ -33,7 +33,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.malisis.core.MalisisCore;
-import net.malisis.core.renderer.icon.GuiIcon;
+import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.renderer.icon.Icon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.StitcherException;

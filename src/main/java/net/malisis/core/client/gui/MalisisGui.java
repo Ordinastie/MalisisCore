@@ -37,25 +37,26 @@ import org.lwjgl.opengl.Display;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.component.DebugComponent;
-import net.malisis.core.client.gui.component.IKeyListener;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.element.IKeyListener;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.render.GuiRenderer;
+import net.malisis.core.client.gui.render.GuiTexture;
 import net.malisis.core.inventory.MalisisInventoryContainer;
 import net.malisis.core.inventory.MalisisInventoryContainer.ActionType;
 import net.malisis.core.inventory.MalisisSlot;
 import net.malisis.core.inventory.message.InventoryActionMessage;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.AnimationRenderer;
-import net.malisis.core.util.ItemUtils;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -69,7 +70,12 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
  */
 public abstract class MalisisGui extends GuiScreen
 {
-	public static GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+	public static final GuiTexture BLOCK_TEXTURE = new GuiTexture(TextureMap.LOCATION_BLOCKS_TEXTURE, 1, 1);
+	public static final GuiTexture VANILLAGUI_TEXTURE = new GuiTexture(	new ResourceLocation("malisiscore", "textures/gui/gui.png"),
+																		300,
+																		100);
+
+	public static final MousePosition MOUSE_POSITION = new MousePosition();
 
 	/** Whether or not to cancel the next gui close event. */
 	public static boolean cancelClose = false;
@@ -85,11 +91,9 @@ public abstract class MalisisGui extends GuiScreen
 	/** The resolution for the GUI **/
 	protected ScaledResolution resolution;
 	/** Top level container which hold the user components. Spans across the whole screen. */
-	private UIContainer<?> screen;
+	private UIContainer screen;
 	/** Determines if the screen should be darkened when the GUI is opened. */
 	protected boolean guiscreenBackground = true;
-	/** Last known position of the mouse. */
-	protected int lastMouseX, lastMouseY;
 	/** Last clicked button */
 	protected long lastClickButton = -1;
 	/** How long since last click. */
@@ -102,19 +106,21 @@ public abstract class MalisisGui extends GuiScreen
 	/** {@link AnimationRenderer} */
 	private AnimationRenderer ar;
 	/** Currently hovered child component. */
-	protected UIComponent<?> hoveredComponent;
+	protected UIComponent hoveredComponent;
 	/** Currently focused child component. */
-	protected UIComponent<?> focusedComponent;
+	protected UIComponent focusedComponent;
 	/** Currently dragged child component. */
-	protected UIComponent<?> draggedComponent;
+	protected UIComponent draggedComponent;
 	/** Component for which to display the tooltip (can be disabled and not receive events). */
-	protected UIComponent<?> tooltipComponent;
+	protected UIComponent tooltip;
 	/** Whether this GUI has been constructed. */
 	protected boolean constructed = false;
 	/** List of {@link IKeyListener} registered. */
 	protected Set<IKeyListener> keyListeners = new HashSet<>();
 	/** Debug **/
-	private final DebugComponent debugComponent = new DebugComponent(this);
+	private DebugComponent debugComponent;
+
+	public static boolean debug = false;
 
 	protected MalisisGui()
 	{
@@ -122,11 +128,14 @@ public abstract class MalisisGui extends GuiScreen
 		this.itemRender = mc.getRenderItem();
 		this.fontRenderer = mc.fontRenderer;
 		this.renderer = new GuiRenderer();
-		this.screen = new UIContainer<>(this).setName("Screen");
+		this.screen = new UIContainer();
+		screen.setName("Screen");
 		this.ar = new AnimationRenderer();
 		this.ar.autoClearAnimations();
 		this.screen.setClipContent(false);
 		Keyboard.enableRepeatEvents(true);
+
+		debug = false;
 	}
 
 	/**
@@ -141,7 +150,8 @@ public abstract class MalisisGui extends GuiScreen
 		{
 			if (!constructed)
 			{
-				setDefaultDebug();
+				screen.onAddedToScreen(this);
+				debugComponent = new DebugComponent(this);
 				construct();
 				constructed = true;
 			}
@@ -176,19 +186,9 @@ public abstract class MalisisGui extends GuiScreen
 	}
 
 	/**
-	 * Gets the {@link MalisisInventoryContainer} for this {@link MalisisGui}.
+	 * Gets the {@link GuiTexture} used by the {@link GuiRenderer}.
 	 *
-	 * @return inventory container
-	 */
-	public MalisisInventoryContainer getInventoryContainer()
-	{
-		return inventoryContainer;
-	}
-
-	/**
-	 * Gets the default {@link GuiTexture} used by the {@link GuiRenderer}.
-	 *
-	 * @return the defaultGuiTexture
+	 * @return the GuiTexture
 	 */
 	public GuiTexture getGuiTexture()
 	{
@@ -254,10 +254,10 @@ public abstract class MalisisGui extends GuiScreen
 	 *
 	 * @param component the component
 	 */
-	public void addToScreen(UIComponent<?> component)
+	public void addToScreen(UIComponent component)
 	{
 		screen.add(component);
-		component.onAddedToScreen();
+		component.onAddedToScreen(this);
 	}
 
 	/**
@@ -265,7 +265,7 @@ public abstract class MalisisGui extends GuiScreen
 	 *
 	 * @param component the component
 	 */
-	public void removeFromScreen(UIComponent<?> component)
+	public void removeFromScreen(UIComponent component)
 	{
 		screen.remove(component);
 	}
@@ -305,10 +305,10 @@ public abstract class MalisisGui extends GuiScreen
 	 * @param y the y coordinate
 	 * @return the component, null if component is {@link #screen}
 	 */
-	public UIComponent<?> getComponentAt(int x, int y)
+	public UIComponent getComponentAt(int x, int y)
 	{
-		UIComponent<?> component = screen.getComponentAt(x, y);
-		return component == screen ? null : component;
+		UIComponent component = screen.getComponentAt(x, y);
+		return component == screen || component == debugComponent ? null : component;
 	}
 
 	/**
@@ -319,15 +319,8 @@ public abstract class MalisisGui extends GuiScreen
 	{
 		try
 		{
-			int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
-			int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
-			//if we ignore scaling, use real mouse position on screen
-			if (renderer.isIgnoreScale())
-			{
-				mouseX = Mouse.getX();
-				mouseY = this.height - Mouse.getY() - 1;
-			}
-
+			MOUSE_POSITION.udpate(this);
+			UIComponent component = getComponentAt(MOUSE_POSITION.x(), MOUSE_POSITION.y());
 			int button = Mouse.getEventButton();
 
 			if (Mouse.getEventButtonState())
@@ -337,7 +330,7 @@ public abstract class MalisisGui extends GuiScreen
 
 				this.eventButton = button;
 				this.lastMouseEvent = Minecraft.getSystemTime();
-				this.mouseClicked(mouseX, mouseY, this.eventButton);
+				this.mousePressed(component, this.eventButton);
 			}
 			else if (button != -1)
 			{
@@ -345,33 +338,28 @@ public abstract class MalisisGui extends GuiScreen
 					return;
 
 				this.eventButton = -1;
-				this.mouseReleased(mouseX, mouseY, button);
+				this.mouseReleased(component, button);
 				this.draggedComponent = null;
 			}
 			else if (this.eventButton != -1 && this.lastMouseEvent > 0L)
 			{
-				long l = Minecraft.getSystemTime() - this.lastMouseEvent;
-				this.mouseClickMove(mouseX, mouseY, this.eventButton, l);
+				this.mouseDragged(this.eventButton);
 			}
 
-			if (lastMouseX != mouseX || lastMouseY != mouseY)
+			if (MOUSE_POSITION.hasChanged())
 			{
-				UIComponent<?> component = getComponentAt(mouseX, mouseY);
 				if (component != null)
 				{
-					tooltipComponent = component;
+					tooltip = component.getTooltip();
 					if (component.isEnabled())
 					{
-						component.onMouseMove(lastMouseX, lastMouseY, mouseX, mouseY);
+						component.onMouseMove();
 						component.setHovered(true);
 					}
 				}
 				else
 					setHoveredComponent(null, false);
 			}
-
-			lastMouseX = mouseX;
-			lastMouseY = mouseY;
 
 			int delta = Mouse.getEventDWheel();
 			if (delta == 0)
@@ -381,10 +369,9 @@ public abstract class MalisisGui extends GuiScreen
 			else if (delta < -1)
 				delta = -1;
 
-			UIComponent<?> component = getComponentAt(mouseX, mouseY);
 			if (component != null && component.isEnabled())
 			{
-				component.onScrollWheel(mouseX, mouseY, delta);
+				component.onScrollWheel(delta);
 			}
 		}
 		catch (Exception e)
@@ -397,28 +384,25 @@ public abstract class MalisisGui extends GuiScreen
 	/**
 	 * Called when a mouse button is pressed down.
 	 */
-	@Override
-	protected void mouseClicked(int x, int y, int button)
+	protected void mousePressed(UIComponent component, int button)
 	{
 		try
 		{
 			long time = System.currentTimeMillis();
-
-			UIComponent<?> component = getComponentAt(x, y);
 			if (component != null && component.isEnabled())
 			{
 				boolean regularClick = true;
 				//double click
 				if (button == lastClickButton && time - lastClickTime < 250 && component == focusedComponent)
 				{
-					regularClick = !component.onDoubleClick(x, y, MouseButton.getButton(button));
+					regularClick = !component.onDoubleClick(MouseButton.getButton(button));
 					lastClickTime = 0;
 				}
 
 				//do not trigger onButtonPress when double clicked (fixed shift-double click issue in inventory)
 				if (regularClick)
 				{
-					component.onButtonPress(x, y, MouseButton.getButton(button));
+					component.onButtonPress(MouseButton.getButton(button));
 					if (draggedComponent == null)
 						draggedComponent = component;
 				}
@@ -448,13 +432,12 @@ public abstract class MalisisGui extends GuiScreen
 	/**
 	 * Called when the mouse is moved while a button is pressed.
 	 */
-	@Override
-	protected void mouseClickMove(int x, int y, int button, long timer)
+	protected void mouseDragged(int button)
 	{
 		try
 		{
 			if (draggedComponent != null)
-				draggedComponent.onDrag(lastMouseX, lastMouseY, x, y, MouseButton.getButton(button));
+				draggedComponent.onDrag(MouseButton.getButton(button));
 		}
 		catch (Exception e)
 		{
@@ -467,8 +450,7 @@ public abstract class MalisisGui extends GuiScreen
 	/**
 	 * Called when a mouse button is released.
 	 */
-	@Override
-	protected void mouseReleased(int x, int y, int button)
+	protected void mouseReleased(UIComponent component, int button)
 	{
 		try
 		{
@@ -487,18 +469,17 @@ public abstract class MalisisGui extends GuiScreen
 				}
 			}
 
-			UIComponent<?> component = getComponentAt(x, y);
 			if (component != null && component.isEnabled())
 			{
 				MouseButton mb = MouseButton.getButton(button);
 				if (draggedComponent != null)
-					draggedComponent.onButtonRelease(x, y, mb);
+					draggedComponent.onButtonRelease(mb);
 				if (component == focusedComponent)
 				{
 					if (mb == MouseButton.LEFT)
-						component.onClick(x, y);
+						component.onClick();
 					else if (mb == MouseButton.RIGHT)
-						component.onRightClick(x, y);
+						component.onRightClick();
 				}
 			}
 		}
@@ -533,17 +514,22 @@ public abstract class MalisisGui extends GuiScreen
 			if (isGuiCloseKey(keyCode) && mc.currentScreen == this)
 				close();
 
-			if (!MalisisCore.isObfEnv && isCtrlKeyDown() && (currentGui() != null || isOverlay))
+			if (!MalisisCore.isObfEnv && isCtrlKeyDown() && (current() != null || isOverlay))
 			{
 				if (keyCode == Keyboard.KEY_R)
 				{
 					clearScreen();
 					setResolution();
-					construct();
-					debugComponent.setEnabled(debugComponent.isEnabled());
+					setHoveredComponent(null, true);
+					setFocusedComponent(null, true);
+					constructed = false;
+					doConstruct();
 				}
 				if (keyCode == Keyboard.KEY_D)
-					debugComponent.toggle();
+				{
+					debug = !debug;
+					debugComponent.setEnabled(debug);
+				}
 			}
 		}
 		catch (Exception e)
@@ -558,46 +544,39 @@ public abstract class MalisisGui extends GuiScreen
 	 * Draws this {@link MalisisGui}.
 	 */
 	@Override
-	public void drawScreen(int mouseX, int mouseY, float partialTicks)
+	public void drawScreen(int mouseX, int mouseY, float partialTick)
 	{
 		ar.animate();
 
-		//if we ignore scaling, use real mouse position on screen
-		if (renderer.isIgnoreScale())
+		renderer.setup(partialTick);
+
+		try
 		{
-			mouseX = Mouse.getX();
-			mouseY = this.height - Mouse.getY() - 1;
+			update();
+
+			if (guiscreenBackground)
+				drawWorldBackground(1);
+
+			screen.render(renderer);
+
+			//don't draw tooltip if mouse has itemStack
+			boolean renderTooltip = tooltip != null;
+			if (inventoryContainer != null)
+				renderTooltip &= !renderer.renderPickedItemStack(inventoryContainer.getPickedItemStack());
+
+			if (renderTooltip)
+				tooltip.render(renderer);
+		}
+		catch (Exception e)
+		{
+			MalisisCore.message("A problem occured while rendering screen : " + getClass().getSimpleName() + ": " + e.getMessage());
+			MalisisCore.log.error("A problem occured while rendering " + getClass().getSimpleName(), e);
 		}
 
-		update(mouseX, mouseY, partialTicks);
-
-		if (guiscreenBackground)
-			drawWorldBackground(1);
-
-		renderer.drawScreen(screen, mouseX, mouseY, partialTicks);
-
-		if (inventoryContainer != null)
-		{
-			ItemStack itemStack = inventoryContainer.getPickedItemStack();
-			if (!itemStack.isEmpty())
-				renderer.renderPickedItemStack(itemStack);
-			else if (tooltipComponent != null)
-				renderer.drawTooltip(tooltipComponent.getTooltip());
-		}
-		else if (tooltipComponent != null)
-			renderer.drawTooltip(tooltipComponent.getTooltip());
+		renderer.clean();
 	}
 
 	//#region Debug
-	private void setDefaultDebug()
-	{
-		addDebug("Focus", () -> String.valueOf(focusedComponent));
-		addDebug("Hover", () -> String.valueOf(hoveredComponent));
-		addDebug("Dragged", () -> String.valueOf(draggedComponent));
-		if (inventoryContainer != null)
-			addDebug("Picked", () -> ItemUtils.toString(inventoryContainer.getPickedItemStack()));
-	}
-
 	public void addDebug(String name, Supplier<String> supplier)
 	{
 		debugComponent.addDebug(name, supplier);
@@ -606,12 +585,8 @@ public abstract class MalisisGui extends GuiScreen
 
 	/**
 	 * Called every frame.
-	 *
-	 * @param mouseX the mouse x
-	 * @param mouseY the mouse y
-	 * @param partialTick the partial tick
 	 */
-	public void update(int mouseX, int mouseY, float partialTick)
+	public void update()
 	{}
 
 	/**
@@ -731,9 +706,9 @@ public abstract class MalisisGui extends GuiScreen
 	 *
 	 * @return null if no GUI being displayed or if not a {@link MalisisGui}
 	 */
-	public static MalisisGui currentGui()
+	public static MalisisGui current()
 	{
-		return currentGui(MalisisGui.class);
+		return current(MalisisGui.class);
 	}
 
 	/**
@@ -744,7 +719,7 @@ public abstract class MalisisGui extends GuiScreen
 	 * @param type the type
 	 * @return the t
 	 */
-	public static <T extends MalisisGui> T currentGui(Class<T> type)
+	public static <T extends MalisisGui> T current(Class<T> type)
 	{
 		GuiScreen gui = Minecraft.getMinecraft().currentScreen;
 		if (gui == null || !(gui instanceof MalisisGui))
@@ -768,34 +743,34 @@ public abstract class MalisisGui extends GuiScreen
 	 */
 	public static void sendAction(ActionType action, MalisisSlot slot, int code)
 	{
-		if (action == null || currentGui() == null || currentGui().inventoryContainer == null)
+		if (action == null || current() == null || current().inventoryContainer == null)
 			return;
 
 		int inventoryId = slot != null ? slot.getInventoryId() : 0;
 		int slotNumber = slot != null ? slot.getSlotIndex() : 0;
 
-		currentGui().inventoryContainer.handleAction(action, inventoryId, slotNumber, code);
+		current().inventoryContainer.handleAction(action, inventoryId, slotNumber, code);
 		InventoryActionMessage.sendAction(action, inventoryId, slotNumber, code);
 	}
 
 	/**
 	 * @return the currently hovered {@link UIComponent}. null if there is no current GUI.
 	 */
-	public static UIComponent<?> getHoveredComponent()
+	public static UIComponent getHoveredComponent()
 	{
-		return currentGui() != null ? currentGui().hoveredComponent : null;
+		return current() != null ? current().hoveredComponent : null;
 	}
 
 	/**
-	 * Sets the hovered state for a {@link UIComponent}. If a <code>UIComponent</code> is currently hovered, it will be "unhovered" first.
+	 * Sets the hovered state for a {@link UIComponent}. If a <code>UIComponent is currently hovered, it will be "unhovered" first.
 	 *
 	 * @param component the component that gets his state changed
 	 * @param hovered the hovered state
 	 * @return true, if the state was changed
 	 */
-	public static boolean setHoveredComponent(UIComponent<?> component, boolean hovered)
+	public static boolean setHoveredComponent(UIComponent component, boolean hovered)
 	{
-		MalisisGui gui = currentGui();
+		MalisisGui gui = current();
 		if (gui == null)
 			return false;
 
@@ -818,7 +793,11 @@ public abstract class MalisisGui extends GuiScreen
 		}
 
 		if (component == null)
+		{
+			if (gui.hoveredComponent != null)
+				gui.hoveredComponent.setHovered(false);
 			gui.hoveredComponent = null;
+		}
 
 		return true;
 	}
@@ -828,14 +807,14 @@ public abstract class MalisisGui extends GuiScreen
 	 *
 	 * @return the component
 	 */
-	public static UIComponent<?> getFocusedComponent()
+	public static UIComponent getFocusedComponent()
 	{
-		return currentGui() != null ? currentGui().focusedComponent : null;
+		return current() != null ? current().focusedComponent : null;
 	}
 
-	public static boolean setFocusedComponent(UIComponent<?> component, boolean focused)
+	public static boolean setFocusedComponent(UIComponent component, boolean focused)
 	{
-		MalisisGui gui = currentGui();
+		MalisisGui gui = current();
 		if (gui == null)
 			return false;
 
@@ -859,6 +838,22 @@ public abstract class MalisisGui extends GuiScreen
 		return true;
 	}
 
+	public static UIComponent getDraggedComponent()
+	{
+		return current() != null ? current().draggedComponent : null;
+	}
+
+	/**
+	 * Gets the {@link MalisisInventoryContainer} for the current {@link MalisisGui}.
+	 *
+	 * @return inventory container
+	 */
+	public static MalisisInventoryContainer getInventoryContainer()
+	{
+		return current() != null ? current().inventoryContainer : null;
+
+	}
+
 	public static void playSound(SoundEvent sound)
 	{
 		playSound(sound, 1.0F);
@@ -871,7 +866,7 @@ public abstract class MalisisGui extends GuiScreen
 
 	public static boolean isGuiCloseKey(int keyCode)
 	{
-		MalisisGui gui = currentGui();
+		MalisisGui gui = current();
 		return keyCode == Keyboard.KEY_ESCAPE
 				|| (gui != null && gui.inventoryContainer != null && keyCode == gui.mc.gameSettings.keyBindInventory.getKeyCode());
 	}

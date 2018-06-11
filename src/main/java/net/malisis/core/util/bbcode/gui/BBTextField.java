@@ -24,11 +24,11 @@
 
 package net.malisis.core.util.bbcode.gui;
 
-import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.client.gui.event.ComponentEvent;
+import net.malisis.core.client.gui.render.GuiRenderer;
 import net.malisis.core.util.bbcode.BBString;
 import net.malisis.core.util.bbcode.render.IBBCodeRenderer;
 
@@ -46,7 +46,7 @@ public class BBTextField extends UITextField implements IBBCodeRenderer<BBTextFi
 
 	public BBTextField(MalisisGui gui, BBCodeEditor editor, BBString bbText)
 	{
-		super(gui, true);
+		super(true);
 		this.editor = editor;
 		setText(bbText);
 	}

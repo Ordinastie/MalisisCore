@@ -26,34 +26,31 @@ M,
 package net.malisis.core.client.gui.component.interaction;
 
 import net.malisis.core.client.gui.ComponentPosition;
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.IContentComponent;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UITabGroup;
 import net.malisis.core.client.gui.component.container.UITabGroup.TabChangeEvent;
-import net.malisis.core.client.gui.component.decoration.UITooltip;
-import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.component.element.Size.ISize;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.client.gui.component.content.IContentHolder;
+import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
+import net.malisis.core.client.gui.render.GuiIcon;
+import net.malisis.core.client.gui.render.shape.GuiShape;
 import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.icon.Icon;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 import net.minecraft.util.text.TextFormatting;
 
 /**
  * @author Ordinastie
  *
  */
-public class UITab extends UIComponent<UITab> implements IContentComponent
+public class UITab extends UIComponent implements IContentHolder<UIComponent>
 {
-	protected final ISize AUTO_SIZE = Size	.width(o -> isHorizontal() ? contentSize().width() : parent.size().width())
-											.height(o -> isHorizontal() ? parent.size().height() : contentSize().height());
+	protected final ISize AUTO_SIZE = Size.of(	() -> isHorizontal() ? contentSize().width() : parent.size().width(),
+												() -> isHorizontal() ? parent.size().height() : contentSize().height());
 
-	/** The {@link FontOptions} to use for this {@link UITooltip}. */
+	/** The default {@link FontOptions} to use for this {@link UITab}. */
 	protected FontOptions fontOptions = FontOptions	.builder()
 													.color(0x444444)
 													.when(this::isActive)
@@ -63,86 +60,74 @@ public class UITab extends UIComponent<UITab> implements IContentComponent
 													.color(0xFFFFA0)
 													.build();
 	/** Content to use for this {@link UITab}. */
-	protected UIComponent<?> content;
-
-	protected ISize contentSize = Size.width(o -> content.size().width() + 6).height(o -> content.size().height() + 6);
-	/** Whether the width of this {@link UITab} is calculated based on the {@link #label} or {@link #image} . */
-	protected boolean autoWidth = false;
-	/** Whether the height of this {@link UITab} is calculated based on the {@link #label} or {@link #image} . */
-	protected boolean autoHeight = false;
+	protected UIComponent content;
+	/** Size calculated based on content. */
+	protected ISize contentSize = Size.ZERO;
 	/** The container this {@link UITab} is linked to. */
-	protected UIContainer<?> container;
+	protected UIContainer container;
 	/** Whether this {@link UITab} is currently active. */
 	protected boolean active = false;
 
 	/** Background color for this {@link UITab}. */
 	protected int bgColor = 0xFFFFFF;
 
-	/**
-	 * Instantiates a new {@link UITab}.
-	 *
-	 * @param gui the gui
-	 * @param text the label
-	 */
-	public UITab(MalisisGui gui, String text)
+	public UITab()
 	{
-		super(gui);
-		contentSize.setOwner(this);
 		setAutoSize();
-		setText(text);
 
-		shape = new XYResizableGuiShape();
-		iconProvider = new GuiIconProvider(null);
-
-		fontOptions = FontOptions	.builder()
-									.color(0x444444)
-									.when(this::isActive)
-									.color(0xFFFFFF)
-									.shadow()
-									.when(this::isHovered)
-									.color(0xFFFFA0)
-									.build();
+		setBackground(GuiShape.builder(this).icon(this::getIcon).color(this::getColor).border(3).build());
+		setForeground(this::content);
 	}
 
 	/**
 	 * Instantiates a new {@link UITab}.
 	 *
-	 * @param gui the gui
+	 * @param text the label
+	 */
+	public UITab(String text)
+	{
+		this();
+		setText(text);
+	}
+
+	/**
+	 * Instantiates a new {@link UITab}.
+	 *
 	 * @param content the content
 	 */
-	public UITab(MalisisGui gui, UIComponent<?> content)
+	public UITab(UIComponent content)
 	{
-		super(gui);
-		contentSize.setOwner(this);
-		setAutoSize();
+		this();
 		setContent(content);
-
-		shape = new XYResizableGuiShape();
-		iconProvider = new GuiIconProvider(null);
 	}
 
 	//#region Getters/Setters
-	@Override
-	public void createGuiText()
+	public void setContent(UIComponent content)
 	{
-		IContentComponent.super.createGuiText();
-		//apply default fontOptions when GuiText is automatically created by setText()
-		setFontOptions(fontOptions);
-		content.setPosition(Position.centered().middleAligned());
+		this.content = content;
+		content.setParent(this);
+		content.setPosition(Position.centered(content));
+		//TODO: padding ?
+		contentSize = content.size().plus(Size.of(6, 6));
 	}
 
 	@Override
-	public UIComponent<?> getContent()
+	public UIComponent content()
 	{
 		return content;
 	}
 
-	@Override
-	public void setContent(UIComponent<?> content)
+	public void setText(String text)
 	{
-		this.content = content;
-		content.setParent(this);
-		content.setPosition(Position.centered().middleAligned());
+		if (content() instanceof UILabel)
+		{
+			((UILabel) content()).setText(text);
+			return;
+		}
+
+		UILabel label = new UILabel(text);
+		label.setFontOptions(fontOptions);
+		setContent(label);
 	}
 
 	public void setAutoSize()
@@ -168,7 +153,7 @@ public class UITab extends UIComponent<UITab> implements IContentComponent
 	 * @exception IllegalArgumentException if the parent is not a {@link UITabGroup}
 	 */
 	@Override
-	public void setParent(UIComponent<?> parent)
+	public void setParent(UIComponent parent)
 	{
 		if (!(parent instanceof UITabGroup))
 			throw new IllegalArgumentException("UITabs can only be added to UITabGroup");
@@ -177,32 +162,12 @@ public class UITab extends UIComponent<UITab> implements IContentComponent
 	}
 
 	/**
-	 * Checks if the width is calculated automatically.
-	 *
-	 * @return true if the width is calculated automatically.
-	 */
-	public boolean isAutoWidth()
-	{
-		return autoWidth;
-	}
-
-	/**
-	 * Checks if height is calculated automatically.
-	 *
-	 * @return true if the height is calculated automatically.
-	 */
-	public boolean isAutoHeight()
-	{
-		return autoHeight;
-	}
-
-	/**
 	 * Set the {@link UIContainer} linked with this {@link UITab}.
 	 *
 	 * @param container the container
 	 * @return this {@link UITab}
 	 */
-	public UITab setContainer(UIContainer<?> container)
+	public UITab setContainer(UIContainer container)
 	{
 		this.container = container;
 		return this;
@@ -218,32 +183,37 @@ public class UITab extends UIComponent<UITab> implements IContentComponent
 		return tabGroup().getTabPosition();
 	}
 
-	/**
-	 * Gets the background color for this {@link UITab}.
-	 *
-	 * @return the color of this {@link UITab}.
-	 */
-	public int getBgColor()
+	public UIContainer attachedContainer()
 	{
-		return bgColor;
+		return tabGroup() != null ? tabGroup().getAttachedContainer() : null;
 	}
 
 	/**
 	 * Sets the background color for this {@link UITab}.<br>
-	 * Also sets the bacground color for its {@link #container}.
+	 * Also sets the color for its {@link #container}.
 	 *
 	 * @param color the color
-	 * @return this {@link UITab}
 	 */
-	public UITab setBgColor(int color)
+	@Override
+	public void setColor(int color)
 	{
-		this.bgColor = color;
-		if (tabGroup() != null && tabGroup().getAttachedContainer() != null)
-			tabGroup().getAttachedContainer().setColor(color);
-		return this;
+		this.color = color;
+		UIContainer attachedContainer = attachedContainer();
+		if (attachedContainer != null)
+			attachedContainer.setColor(color);
 	}
 
-	//#end Getters/Setters
+	@Override
+	public int getColor()
+	{
+		UIContainer attachedContainer = attachedContainer();
+		return attachedContainer != null && active ? attachedContainer.getColor() : color;
+	}
+
+	public GuiIcon getIcon()
+	{
+		return tabGroup() != null ? tabGroup().getIcon() : GuiIcon.FULL;
+	}
 
 	public boolean isActive()
 	{
@@ -286,23 +256,10 @@ public class UITab extends UIComponent<UITab> implements IContentComponent
 		this.zIndex = container.getZIndex() + (active ? 1 : 0);
 
 		//applies current color to attached container
-		setBgColor(bgColor);
+		setColor(this.color);
 
 		fireEvent(new ActiveStateChange<>(this, active));
 		return this;
-	}
-
-	/**
-	 * Gets the {@link Icon} to use for this {@link UITab}.
-	 *
-	 * @return the icons to render.
-	 */
-	private Icon getIcon()
-	{
-		if (parent == null)
-			return null;
-
-		return ((UITabGroup) parent).getIcons();
 	}
 
 	/**
@@ -317,34 +274,19 @@ public class UITab extends UIComponent<UITab> implements IContentComponent
 		ComponentPosition pos = ((UITabGroup) parent).getTabPosition();
 		return pos == ComponentPosition.TOP || pos == ComponentPosition.BOTTOM;
 	}
+	//#end Getters/Setters
 
 	@Override
-	public boolean onClick(int x, int y)
+	public boolean onClick()
 	{
 		if (!(parent instanceof UITabGroup))
-			return super.onClick(x, y);
+			return super.onClick();
 
 		if (!fireEvent(new TabChangeEvent((UITabGroup) parent, this)))
-			return super.onClick(x, y);
+			return super.onClick();
 
-		((UITabGroup) parent).setActiveTab(this);
+		tabGroup().setActiveTab(this);
 		return true;
-	}
-
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		rp.colorMultiplier.set(bgColor);
-		((GuiIconProvider) iconProvider).setIcon(getIcon());
-		renderer.drawShape(shape, rp);
-	}
-
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		if (content == null)
-			return;
-		content.draw(renderer, mouseX, mouseY, partialTick);
 	}
 
 	@Override

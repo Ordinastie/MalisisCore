@@ -34,6 +34,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
 
+import net.malisis.core.client.gui.IPredicatedSupplier;
+import net.malisis.core.client.gui.IPredicatedSupplier.PredicatedSupplier;
 import net.malisis.core.client.gui.text.PredicatedFontOptions;
 import net.minecraft.util.text.TextFormatting;
 
@@ -70,29 +72,29 @@ public class FontOptions
 		}
 	}
 
+	protected final MalisisFont font;
 	/** Scale for the font **/
-	protected float fontScale = 1;
+	protected final float fontScale;
 	/** Color of the text **/
-	protected int color = 0x000000; //black
+	protected final int color; //black
 	/** Draw with shadow **/
-	protected boolean shadow = false;
+	protected final boolean shadow;
 	/** Use bold font **/
-	protected boolean bold;
+	protected final boolean bold;
 	/** Use italic font **/
-	protected boolean italic;
+	protected final boolean italic;
 	/** Underline the text **/
-	protected boolean underline;
+	protected final boolean underline;
 	/** Strike through the text **/
-	protected boolean strikethrough;
+	protected final boolean strikethrough;
 	/** Obfuscated text */
-	protected boolean obfuscated = false;
-	/** Disable ECF so char are actually drawn **/
-	protected boolean formattingDisabled = false;
-	/** Translate the text before display */
-	protected boolean translate = true;
+	protected final boolean obfuscated;
+	/** Space between each line. */
+	protected final int lineSpacing;
 
-	protected FontOptions(float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, boolean translate)
+	protected FontOptions(MalisisFont font, float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, int lineSpacing)
 	{
+		this.font = font;
 		this.fontScale = fontScale;
 		this.color = color;
 		this.shadow = shadow;
@@ -101,7 +103,13 @@ public class FontOptions
 		this.underline = underline;
 		this.strikethrough = strikethrough;
 		this.obfuscated = obfuscated;
-		this.translate = translate;
+		this.lineSpacing = lineSpacing;
+	}
+
+	public MalisisFont getFont()
+	{
+		MalisisFont font = this.font.isLoaded() ? this.font : MalisisFont.minecraftFont;
+		return font;
 	}
 
 	/**
@@ -185,23 +193,13 @@ public class FontOptions
 	}
 
 	/**
-	 * Checks if formatting is disabled (formatting character are renderer literally).
+	 * Space between each line.
 	 *
-	 * @return true, if is formatting disabled
+	 * @return the space
 	 */
-	public boolean isFormattingDisabled()
+	public int lineSpacing()
 	{
-		return formattingDisabled;
-	}
-
-	/**
-	 * Checks if the text should be translated before rendering.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean shouldTranslate()
-	{
-		return translate;
+		return lineSpacing;
 	}
 
 	/**
@@ -323,25 +321,6 @@ public class FontOptions
 	}
 
 	/**
-	 * Get a non translation version of this {@link FontOptions}
-	 *
-	 * @return the font options
-	 */
-	public FontOptions notTranslated()
-	{
-		return builder().scale(fontScale)
-						.color(color)
-						.shadow(shadow)
-						.bold(bold)
-						.italic(italic)
-						.underline(underline)
-						.strikethrough(strikethrough)
-						.obfuscated(obfuscated)
-						.disableTranslation()
-						.build();
-	}
-
-	/**
 	 * Create a {@link FontOptionsBuilder} with the values from {@code this}.
 	 *
 	 * @return the font options builder
@@ -365,8 +344,9 @@ public class FontOptions
 	{
 		protected FontOptions base;
 		protected BooleanSupplier currentSupplier;
-		protected List<Pair<BooleanSupplier, FontOptions>> suppliers = Lists.newArrayList();
+		protected IPredicatedSupplier<FontOptions> supplier;
 
+		protected MalisisFont font = MalisisFont.minecraftFont;
 		protected float fontScale = 1;
 		protected int color = 0x000000; //black
 		protected boolean shadow = false;
@@ -375,7 +355,7 @@ public class FontOptions
 		protected boolean underline = false;
 		protected boolean strikethrough = false;
 		protected boolean obfuscated = false;
-		protected boolean translate = true;
+		protected int lineSpacing = 1;
 
 		public FontOptionsBuilder()
 		{}
@@ -458,9 +438,9 @@ public class FontOptions
 			return this;
 		}
 
-		public FontOptionsBuilder disableTranslation()
+		public FontOptionsBuilder lineSpacing(int spacing)
 		{
-			this.translate = false;
+			this.lineSpacing = spacing;
 			return this;
 		}
 
@@ -503,6 +483,7 @@ public class FontOptions
 
 		public FontOptionsBuilder from(FontOptions options)
 		{
+			font = options.font;
 			fontScale = options.fontScale;
 			color = options.color;
 			shadow = options.shadow;
@@ -511,6 +492,7 @@ public class FontOptions
 			underline = options.underline;
 			strikethrough = options.strikethrough;
 			obfuscated = options.obfuscated;
+			lineSpacing = options.lineSpacing;
 
 			return this;
 		}
@@ -520,22 +502,20 @@ public class FontOptions
 			if (currentSupplier == null)
 				base = build();
 			else
-				buildSupplier();
+				this.supplier = buildSupplier();
 			currentSupplier = supplier;
 			return this;
 		}
 
 		private FontOptions buildBase()
 		{
-			return new FontOptions(fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated, translate);
+			return new FontOptions(font, fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated, lineSpacing);
 		}
 
-		private void buildSupplier()
+		private IPredicatedSupplier<FontOptions> buildSupplier()
 		{
-			if (currentSupplier == null)
-				return;
-			suppliers.add(Pair.of(currentSupplier, buildBase()));
-			from(base);
+			IPredicatedSupplier<FontOptions> ps = new PredicatedSupplier<>(currentSupplier, buildBase());
+			return supplier == null ? ps : supplier.or(ps);
 		}
 
 		public FontOptions build()
@@ -543,7 +523,7 @@ public class FontOptions
 			if (base != null) //predicated
 			{
 				buildSupplier();
-				return new PredicatedFontOptions(base, suppliers);
+				return new PredicatedFontOptions(base, buildSupplier());
 			}
 			return buildBase();
 		}

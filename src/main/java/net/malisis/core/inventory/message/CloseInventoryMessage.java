@@ -58,8 +58,8 @@ public class CloseInventoryMessage implements IMalisisMessageHandler<CloseInvent
 	@Override
 	public void process(Packet message, MessageContext ctx)
 	{
-		if (MalisisGui.currentGui() != null)
-			MalisisGui.currentGui().close();
+		if (MalisisGui.current() != null)
+			MalisisGui.current().close();
 	}
 
 	/**

@@ -22,38 +22,51 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.render;
+package net.malisis.core.client.gui.component.layout;
 
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
+import static com.google.common.base.Preconditions.*;
+
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.interaction.UIButton;
-import net.malisis.core.renderer.icon.GuiIcon;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
+import net.malisis.core.client.gui.component.container.UIContainer;
+import net.malisis.core.client.gui.element.position.Position;
+import net.malisis.core.client.gui.element.position.Position.IPosition;
 
 /**
  * @author Ordinastie
  *
  */
-public class ButtonBackground extends TexturedBackground
+public class RowLayout
 {
-	private final GuiIconProvider iconPressedProvider;
+	protected final UIContainer parent;
+	protected final IPosition offset;
+	protected final int spacing;
+	protected UIComponent last;
 
-	public ButtonBackground(MalisisGui gui)
+	public RowLayout(UIContainer parent, int spacing, IPosition offset)
 	{
-		super(gui,
-				new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(0, 20, 200, 20, 5),
-									gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5),
-									gui.getGuiTexture().getXYResizableIcon(0, 0, 200, 20, 5)));
-
-		iconPressedProvider = new GuiIconProvider((GuiIcon) gui.getGuiTexture().getXYResizableIcon(0, 40, 200, 20, 5).flip(true, true));
+		this.parent = checkNotNull(parent);
+		this.offset = offset;
+		this.spacing = spacing;
 	}
 
-	@Override
-	public void render(UIComponent<?> component, GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	public RowLayout(UIContainer parent)
 	{
-		boolean pressed = component instanceof UIButton ? ((UIButton) component).isPressed() : false;
-		rp.iconProvider.set(pressed ? iconPressedProvider : iconProvider);
-		super.render(component, renderer, mouseX, mouseY, partialTick);
+		this(checkNotNull(parent), 0, null);
+	}
+
+	public RowLayout(UIContainer parent, int spacing)
+	{
+		this(checkNotNull(parent), spacing, null);
+	}
+
+	public void add(UIComponent component)
+	{
+		checkNotNull(component);
+		parent.add(component);
+		if (last == null)
+			component.setPosition(offset != null ? offset : Position.zero(component));
+		else
+			component.setPosition(Position.below(component, last, spacing));
+		last = component;
 	}
 }

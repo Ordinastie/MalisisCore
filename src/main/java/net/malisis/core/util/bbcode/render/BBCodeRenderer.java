@@ -27,7 +27,7 @@ package net.malisis.core.util.bbcode.render;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.render.GuiRenderer;
 import net.malisis.core.util.bbcode.BBString;
 import net.malisis.core.util.bbcode.node.BBNode;
 

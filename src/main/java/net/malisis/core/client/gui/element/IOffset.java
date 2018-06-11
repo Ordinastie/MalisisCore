@@ -22,15 +22,18 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.component;
+package net.malisis.core.client.gui.element;
 
-import net.malisis.core.client.gui.component.element.Size.ISize;
+import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.element.position.Position.IPosition;
 
 /**
+ * Interface to indicate a {@link UIComponent} that it should render its content with an offset.
+ *
  * @author Ordinastie
  *
  */
-public interface IContentSize
+public interface IOffset
 {
-	public ISize contentSize();
+	public IPosition offset();
 }

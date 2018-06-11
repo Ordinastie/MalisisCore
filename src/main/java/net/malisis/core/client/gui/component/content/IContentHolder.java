@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Ordinastie
+ * Copyright (c) 2018 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,42 +22,26 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.element;
+package net.malisis.core.client.gui.component.content;
+
+import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.position.Position.IPosition;
 
 /**
  * @author Ordinastie
  *
  */
-public class XResizableGuiShape extends GuiShape
+public interface IContentHolder<T extends IContent>
 {
-	protected int sideWidth;
+	public T content();
 
-	public XResizableGuiShape(int sideWidth)
+	public default IPosition contentPosition()
 	{
-		super(3);
-		this.sideWidth = sideWidth;
-		storeState();
+		return content().position();
 	}
 
-	public XResizableGuiShape()
+	public default ISize contentSize()
 	{
-		this(5);
+		return content().size();
 	}
-
-	@Override
-	public void setSize(int w, int h)
-	{
-		w = Math.max(w - 2 * sideWidth, 0);
-
-		faces[0].scale(sideWidth, h, 0);
-		faces[1].scale(w, h, 0);
-		faces[2].scale(sideWidth, h, 0);
-
-		faces[1].translate(sideWidth, 0, 0);
-		faces[2].translate(sideWidth + w, 0, 0);
-	}
-
-	@Override
-	public void scale(float x, float y)
-	{}
 }

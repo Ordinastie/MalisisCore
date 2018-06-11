@@ -31,76 +31,67 @@ import org.lwjgl.opengl.GL11;
 
 import com.google.common.eventbus.Subscribe;
 
-import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.control.IScrollable;
-import net.malisis.core.client.gui.component.control.UIScrollBar;
-import net.malisis.core.client.gui.component.control.UIScrollBar.Type;
-import net.malisis.core.client.gui.component.control.UISlimScrollbar;
-import net.malisis.core.client.gui.component.element.Padding;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.component.element.Size.ISize;
-import net.malisis.core.client.gui.element.GuiShape;
-import net.malisis.core.client.gui.element.SimpleGuiShape;
+import net.malisis.core.client.gui.component.content.ITextHolder;
+import net.malisis.core.client.gui.element.IClipable;
+import net.malisis.core.client.gui.element.IOffset;
+import net.malisis.core.client.gui.element.Padding;
+import net.malisis.core.client.gui.element.Padding.IPadded;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.position.Position;
+import net.malisis.core.client.gui.element.position.Position.IPosition;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
-import net.malisis.core.client.gui.render.TexturedBackground.BoxBackground;
+import net.malisis.core.client.gui.render.GuiIcon;
+import net.malisis.core.client.gui.render.GuiRenderer;
+import net.malisis.core.client.gui.render.shape.GuiShape;
 import net.malisis.core.client.gui.text.GuiText;
-import net.malisis.core.client.gui.text.IGuiTextProxy;
 import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.font.Link;
 import net.malisis.core.renderer.font.StringWalker;
-import net.malisis.core.renderer.icon.GuiIcon;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * UITextField.
  *
  * @author Ordinastie
  */
-public class UITextField extends UIComponent<UITextField> implements IScrollable, IGuiTextProxy
+public class UITextField extends UIComponent implements ITextHolder, IClipable, IOffset, IPadded
 {
-	protected GuiText guiText = new GuiText("");
+	protected final GuiText guiText;
 	/** The {@link FontOptions} to use for this {@link UITextField} when disabled. */
-	protected FontOptions disabledFontOptions = FontOptions.builder().disableTranslation().build();
 	/** Current text of this {@link UITextField}. */
 	protected StringBuilder text = new StringBuilder();
 	protected Function<String, String> filterFunction;
 
-	protected ISize contentSize = Size	.width(o -> size().width())
-										.height(o -> getGuiText().isMultiLine() ? getGuiText().size().height() : size().height());
+	/** The padding of this {@link UITextField}. */
+	protected Padding padding = Padding.of(1);
 
-	//text space
-	/** Number of character offset out of this {@link UITextField} when drawn. */
-	protected int charOffset = 0;
-	/** Number of line offset out of this {@link UITextField} when drawn. Always 0 if {@link #multiLine} is false */
-	protected int lineOffset = 0;
-	/** Space used between each line. */
-	protected int lineSpacing = 1;
+	private int xOffset = 0;
+	protected IPosition offset = Position.of(this).x(this::xOffset).y(0).build();
 
 	//cursors
 	/** Whether currently selecting text. */
 	protected boolean selectingText = false;
 	/** Current cursor position. */
-	protected CursorPosition cursorPosition;
+	protected Cursor cursor = new Cursor();
 	/** Current selection cursor position. */
-	protected CursorPosition selectionPosition;
+	protected Cursor selectionCursor = new Cursor();
 	/** Cursor blink timer. */
 	protected long startTimer;
 
 	//interaction
 	/** Whether this {@link UITextField} should select the text when release left mouse button. */
-	private boolean selectAllOnRelease = false;
+	protected boolean selectAllOnRelease = false;
 	/** Whether this {@link UITextField} should auto select the text when gaining focus. */
 	protected boolean autoSelectOnFocus = false;
 	/** Whether this {@link UITextField} is editable. */
 	protected boolean editable = true;
-
-	/** Scrollbar of the textfield *. */
-	protected UISlimScrollbar scrollBar;
 
 	//options
 	/** Cursor color for this {@link UITextField}. */
@@ -110,73 +101,58 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 
 	//drawing
 	/** Shape used to draw the cursor of this {@link UITextField}. */
-	protected GuiShape cursorShape;
-	/** Shape used to draw the selection box. */
-	protected GuiShape selectShape;
-	/** Icon used to draw this {@link UITextField}. */
-	protected GuiIcon iconTextfield;
-	/** Icon used to draw this {@link UITextField} when disabled. */
-	protected GuiIcon iconTextfieldDisabled;
+	protected GuiShape cursorShape = GuiShape	.builder(this)
+												.position()
+												.set(cursor)
+												.back()
+												.fixed(false)
+												.size(Size.of(1, cursor::height))
+												.color(this::getCursorColor)
+												.icon(GuiIcon.NONE)
+												.build();
 
-	/** The padding of this {@link UITextField}. */
-	protected Padding padding = Padding.of(1);
+	protected UITextField(boolean multiLine)
+	{
+		this.guiText = GuiText	.of(this)
+								.text(this::getText)
+								.multiLine(multiLine)
+								.translated(false)
+								.literal(true)
+								.position()
+								.x(3)
+								.y(3)
+								.back()
+								.fontOptions(FontOptions.builder().color(0xFFFFFF).shadow().build())
+								.build();
+		setSize(Size.of(100, 14));
+
+		GuiShape background = GuiShape	.builder(this)
+										.icon(GuiIcon.forComponent(this, GuiIcon.TEXTFIELD, null, GuiIcon.TEXTFIELD_DISABLED))
+										.border(1)
+										.build();
+		setBackground(background);
+		setForeground(guiText.and(this::drawCursor).and(this::drawSelectionBox));
+	}
 
 	/**
 	 * Instantiates a new {@link UITextField}.
-	 *
-	 * @param gui the gui
-	 * @param text the text
-	 * @param multiLine whether the textfield handles multiple lines
 	 */
-	public UITextField(MalisisGui gui, String text, boolean multiLine)
+	public UITextField()
 	{
-		super(gui);
+		this(false);
+	}
+
+	public UITextField(String text)
+	{
+		this();
 		setText(text);
-		setMultiline(multiLine);
-		setFontOptions(FontOptions.builder().color(0xFFFFFF).shadow().disableTranslation().build());
-
-		cursorPosition = new CursorPosition();
-		selectionPosition = new CursorPosition();
-
-		if (!multiLine)
-			setSize(Size.of(100, 12));
-
-		setBackground(new BoxBackground(gui));
-
-		cursorShape = new SimpleGuiShape();
-		selectShape = new SimpleGuiShape();
-
-		if (multiLine)
-			scrollBar = new UISlimScrollbar(gui, this, Type.VERTICAL);
-	}
-
-	/**
-	 * Instantiates a new single lined {@link UITextField}.
-	 *
-	 * @param gui the gui
-	 * @param text the text
-	 */
-	public UITextField(MalisisGui gui, String text)
-	{
-		this(gui, text, false);
-	}
-
-	/**
-	 * Instantiates a new empty {@link UITextField}.
-	 *
-	 * @param gui the gui
-	 * @param multiLine the multi line
-	 */
-	public UITextField(MalisisGui gui, boolean multiLine)
-	{
-		this(gui, null, multiLine);
 	}
 
 	@Override
-	public void setParent(UIComponent<?> parent)
+	public void setParent(UIComponent parent)
 	{
 		if (parent != null)
-			register(parent);
+			register(parent); //for size change
 		else
 			unregister(this.parent);
 		super.setParent(parent);
@@ -184,63 +160,17 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	@Override
-	public void onAddedToScreen()
+	public void onAddedToScreen(MalisisGui gui)
 	{
-		guiText.setWrapSize(size.width() - UIScrollBar.xOffset(this));
+		this.gui = gui;
 	}
 
 	// #region Getters/Setters
-	/**
-	 * Gets the {@link FontOptions} used when disabled.
-	 *
-	 * @return the disabled font renderer options
-	 */
-	public FontOptions getDisabledFontOptions()
-	{
-		return disabledFontOptions;
-	}
-
-	/**
-	 * Sets the {@link FontOptions} to use when disabled.
-	 *
-	 * @param options the options
-	 * @return this {@link UITextField}
-	 */
-	public UITextField setDisabledFontOptions(FontOptions options)
-	{
-		this.disabledFontOptions = options.notTranslated();
-		return this;
-	}
-
-	/**
-	 * Gets the text of this {@link UITextField}.
-	 *
-	 * @return the text
-	 */
-	@Override
-	public String getText()
-	{
-		return text.toString();
-	}
-
-	@Override
-	public GuiText getGuiText()
-	{
-		return guiText;
-	}
-
-	@Override
-	public void setGuiText(GuiText text)
-	{
-		throw new UnsupportedOperationException();
-	}
-
 	/**
 	 * Sets the text of this {@link UITextField} and place the cursor at the end.
 	 *
 	 * @param text the new text
 	 */
-	@Override
 	public void setText(String text)
 	{
 		if (this.filterFunction != null)
@@ -253,11 +183,26 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		guiText.setText(text);
 
 		selectingText = false;
-		charOffset = 0;
-		lineOffset = 0;
+		xOffset = 0;
 		if (focused)
-			cursorPosition.jumpToEnd();
+			cursor.jumpToEnd();
 		// fireEvent(new TextChanged(this));
+	}
+
+	/**
+	 * Gets the text of this {@link UITextField}.
+	 *
+	 * @return the text
+	 */
+	public String getText()
+	{
+		return text.toString();
+	}
+
+	@Override
+	public GuiText content()
+	{
+		return guiText;
 	}
 
 	/**
@@ -270,10 +215,21 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (!selectingText)
 			return "";
 
-		int start = Math.min(selectionPosition.textPosition, cursorPosition.textPosition);
-		int end = Math.max(selectionPosition.textPosition, cursorPosition.textPosition);
+		int start = Math.min(selectionCursor.index, cursor.index);
+		int end = Math.max(selectionCursor.index, cursor.index);
 
 		return this.text.substring(start, end);
+	}
+
+	@Override
+	public Padding padding()
+	{
+		return padding;
+	}
+
+	private int xOffset()
+	{
+		return xOffset;
 	}
 
 	/**
@@ -328,7 +284,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 * @param selectColor the select color
 	 * @return the UI text field
 	 */
-	public UITextField setOptions(int bgColor, int cursorColor, int selectColor)
+	public UITextField setColors(int bgColor, int cursorColor, int selectColor)
 	{
 		setColor(bgColor);
 		this.cursorColor = cursorColor;
@@ -346,7 +302,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	public void setSize(ISize size)
 	{
 		super.setSize(size);
-		guiText.setWrapSize(size.width() - UIScrollBar.xOffset(this));
 	}
 
 	/**
@@ -367,25 +322,13 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	/**
-	 * Sets the line offset.
-	 *
-	 * @param line the new line offset
-	 */
-	public void setLineOffset(int line)
-	{
-		if (line < 0)
-			line = 0;
-		this.lineOffset = line;
-	}
-
-	/**
 	 * Gets the current cursor position.
 	 *
 	 * @return the position of the cursor.
 	 */
-	public CursorPosition getCursorPosition()
+	public Cursor getCursorPosition()
 	{
-		return cursorPosition;
+		return cursor;
 	}
 
 	/**
@@ -393,22 +336,9 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 *
 	 * @return the selection position
 	 */
-	public CursorPosition getSelectionPosition()
+	public Cursor getSelectionPosition()
 	{
-		return selectionPosition;
-	}
-
-	/**
-	 * Sets the position of the cursor at the specified coordinates.
-	 *
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 */
-	public void setCursorPosition(int x, int y)
-	{
-		cursorPosition.setPosition(x, y);
-
-		startTimer = System.currentTimeMillis();
+		return selectionCursor;
 	}
 
 	/**
@@ -446,16 +376,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	/**
-	 * Gets the {@link UISlimScrollbar} of this {@link UITextField}.
-	 *
-	 * @return the scrollbar
-	 */
-	public UISlimScrollbar getScrollbar()
-	{
-		return scrollBar;
-	}
-
-	/**
 	 * Sets the function that applies to all incoming text. Immediately applies filter to current text.
 	 *
 	 * @param filterFunction the function
@@ -477,102 +397,18 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	}
 
 	// #end Getters/Setters
-
-	//#region IScrollable
 	@Override
-	public ISize contentSize()
+	public IPosition offset()
 	{
-		return contentSize;
-	}
-
-	/**
-	 * Gets the offset x.
-	 *
-	 * @return the offset x
-	 */
-	@Override
-	public float getOffsetX()
-	{
-		return 0;
-	}
-
-	/**
-	 * Sets the offset x.
-	 *
-	 * @param offsetX the offset x
-	 * @param delta the delta
-	 */
-	@Override
-	public void setOffsetX(float offsetX, int delta)
-	{}
-
-	/**
-	 * Gets the offset y.
-	 *
-	 * @return the offset y
-	 */
-	@Override
-	public float getOffsetY()
-	{
-		if (guiText.lines().size() < getVisibleLines())
-			return 0;
-		return (float) lineOffset / (guiText.lines().size() - getVisibleLines());
-	}
-
-	/**
-	 * Sets the offset y.
-	 *
-	 * @param offsetY the offset y
-	 * @param delta the delta
-	 */
-	@Override
-	public void setOffsetY(float offsetY, int delta)
-	{
-		lineOffset = Math.round(offsetY * (guiText.lines().size() - getVisibleLines()));
-		lineOffset = Math.max(0, Math.min(guiText.lines().size(), lineOffset));
-	}
-
-	/**
-	 * Gets the scroll step.
-	 *
-	 * @return the scroll step
-	 */
-	@Override
-	public float getScrollStep()
-	{
-		float step = (float) 1 / (guiText.lines().size() - getVisibleLines());
-		return (GuiScreen.isCtrlKeyDown() ? 5 * step : step);
+		return offset;
 	}
 
 	@Override
-	public Padding getPadding()
+	public ClipArea getClipArea()
 	{
-		return padding;
+		return ClipArea.from(this);
 	}
 
-	//#end IScrollable
-
-	/**
-	 * Gets the number of visible lines inside this {@link UITextField}.
-	 *
-	 * @return the int
-	 */
-	public int getVisibleLines()
-	{
-		return guiText.isMultiLine() ? (size().height() - getPadding().vertical()) / getLineHeight() : 1;
-	}
-
-	/**
-	 * Gets the line height of this {@link UITextField}.
-	 *
-	 * @return the line height
-	 */
-	public int getLineHeight()
-	{
-		return guiText.getLineHeight();
-	}
-
-	//#end IBBSRenderer
 	/**
 	 * Adds text at current cursor position. If some text is selected, it's deleted first.
 	 *
@@ -585,7 +421,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 
 		final StringBuilder oldText = this.text;
 		final String oldValue = this.text.toString();
-		String newValue = oldText.insert(this.cursorPosition.textPosition, str).toString();
+		String newValue = oldText.insert(this.cursor.index, str).toString();
 
 		if (this.filterFunction != null)
 			newValue = this.filterFunction.apply(newValue);
@@ -596,7 +432,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		this.text = new StringBuilder(newValue);
 		guiText.setText(newValue);
 
-		cursorPosition.jumpBy(str.length());
+		cursor.jumpBy(str.length());
 	}
 
 	/**
@@ -607,8 +443,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (!selectingText)
 			return;
 
-		int start = Math.min(selectionPosition.textPosition, cursorPosition.textPosition);
-		int end = Math.max(selectionPosition.textPosition, cursorPosition.textPosition);
+		int start = Math.min(selectionCursor.index, cursor.index);
+		int end = Math.max(selectionCursor.index, cursor.index);
 
 		String oldValue = this.text.toString();
 		String newValue = new StringBuilder(oldValue).delete(start, end).toString();
@@ -619,7 +455,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		this.text = new StringBuilder(newValue);
 		guiText.setText(newValue);
 		selectingText = false;
-		cursorPosition.jumpTo(start);
+		cursor.jumpTo(start);
 	}
 
 	/**
@@ -633,8 +469,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (!selectingText)
 		{
 			selectingText = true;
-			selectionPosition.set(cursorPosition);
-			selectionPosition.jumpBy(amount);
+			selectionCursor.from(cursor);
+			selectionCursor.jumpBy(amount);
 		}
 		deleteSelectedText();
 	}
@@ -649,8 +485,8 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (!selectingText)
 		{
 			selectingText = true;
-			selectionPosition.set(cursorPosition);
-			cursorPosition.jumpToNextSpace(backwards);
+			selectionCursor.from(cursor);
+			cursor.jumpToNextSpace(backwards);
 		}
 		deleteSelectedText();
 	}
@@ -660,7 +496,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	 */
 	public void selectWord()
 	{
-		selectWord(cursorPosition.textPosition);
+		selectWord(cursor.index);
 	}
 
 	/**
@@ -675,13 +511,13 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 
 		selectingText = true;
 
-		selectionPosition.jumpTo(position);
-		selectionPosition.jumpToNextSpace(true);
-		if (Character.isWhitespace(text.charAt(selectionPosition.textPosition)))
-			selectionPosition.shiftRight();
+		selectionCursor.jumpTo(position);
+		selectionCursor.jumpToNextSpace(true);
+		if (Character.isWhitespace(text.charAt(selectionCursor.index)))
+			selectionCursor.shiftRight();
 
-		cursorPosition.jumpTo(position);
-		cursorPosition.jumpToNextSpace(false);
+		cursor.jumpTo(position);
+		cursor.jumpToNextSpace(false);
 	}
 
 	/**
@@ -693,34 +529,16 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (getParent() == null)
 			return;
 
-		if (!guiText.isMultiLine())
-		{
-			if (cursorPosition.character < charOffset)
-				charOffset = cursorPosition.character;
-			else if (text.length() != 0)
-			{
-				StringWalker walker = guiText.walker();
-				walker.startIndex(charOffset);
-				float cursorCoord = 0;
-				//cursor coord in string
-				while (walker.getIndex() < cursorPosition.textPosition - charOffset && walker.walk())
-					cursorCoord += walker.getWidth();
-
-				//move the charOffset so that cursor is visible
-				walker.startIndex(charOffset);
-				if (cursorCoord - size().width() + 4 > 0)
-					charOffset += walker.walkToCoord(cursorCoord - size().width() + 4) + 1;
-			}
-		}
-		else
-		{
-			if (cursorPosition.line < lineOffset)
-				setLineOffset(cursorPosition.line);
-			else if (cursorPosition.line > lineOffset + getVisibleLines() - 1)
-				setLineOffset(cursorPosition.line - getVisibleLines() + 1);
-		}
-
 		startTimer = System.currentTimeMillis();
+		//- 4 because Padding.of(2) for clipping
+		if (text.length() == 0)
+			xOffset = 0;
+		else if (cursor.x <= -xOffset)
+			xOffset = -cursor.x;
+		else if (cursor.x >= innerSize().width() - xOffset)
+			xOffset = Math.min(innerSize().width() - cursor.x - 4, 0);
+		else if (guiText.size().width() <= innerSize().width() - xOffset - 5)
+			xOffset = Math.min(innerSize().width() - guiText.size().width() - 4, 0);
 	}
 
 	/**
@@ -732,7 +550,7 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		if (GuiScreen.isShiftKeyDown())
 		{
 			if (!selectingText)
-				selectionPosition.set(cursorPosition);
+				selectionCursor.from(cursor);
 			selectingText = true;
 		}
 		else
@@ -741,121 +559,59 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 
 	//#region Input
 
-	/**
-	 * On button press.
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param button the button
-	 * @return true, if successful
-	 */
 	@Override
-	public boolean onButtonPress(int x, int y, MouseButton button)
+	public boolean onButtonPress(MouseButton button)
 	{
 		if (button != MouseButton.LEFT)
-			return super.onButtonRelease(x, y, button);
-		x = relativeX(x);
-		y = relativeY(y);
+			return super.onButtonRelease(button);
 		if (GuiScreen.isShiftKeyDown())
 		{
 			if (!selectingText)
 			{
 				selectingText = true;
-				selectionPosition.set(cursorPosition);
+				selectionCursor.from(cursor);
 			}
 		}
 		else
 			selectingText = false;
 
-		cursorPosition.setPosition(x, y);
+		cursor.fromMouse();
 
 		return true;
 	}
 
-	/**
-	 * On button release.
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param button the button
-	 * @return true, if successful
-	 */
 	@Override
-	public boolean onButtonRelease(int x, int y, MouseButton button)
+	public boolean onButtonRelease(MouseButton button)
 	{
 		if (!autoSelectOnFocus || !selectAllOnRelease || button != MouseButton.LEFT)
-			return super.onButtonRelease(x, y, button);
+			return super.onButtonRelease(button);
 
 		selectingText = true;
-		selectionPosition.jumpTo(0);
-		cursorPosition.jumpTo(text.length());
+		selectionCursor.jumpTo(0);
+		cursor.jumpTo(text.length());
 
 		selectAllOnRelease = false;
 		return true;
 	}
 
-	/**
-	 * On drag.
-	 *
-	 * @param lastX the last x
-	 * @param lastY the last y
-	 * @param x the x
-	 * @param y the y
-	 * @param button the button
-	 * @return true, if successful
-	 */
 	@Override
-	public boolean onDrag(int lastX, int lastY, int x, int y, MouseButton button)
+	public boolean onDrag(MouseButton button)
 	{
 		if (!isFocused() || button != MouseButton.LEFT)
-			return super.onDrag(lastX, lastY, x, y, button);
+			return super.onDrag(button);
 
 		if (!selectingText)
 		{
 			selectingText = true;
-			selectionPosition.set(cursorPosition);
+			selectionCursor.from(cursor);
 		}
 
-		x = relativeX(x);
-		y = relativeY(y);
-		cursorPosition.setPosition(x, y);
+		cursor.fromMouse();
 
 		selectAllOnRelease = false;
 		return true;
 	}
 
-	/**
-	 * On double click.
-	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param button the button
-	 * @return true, if successful
-	 */
-	@Override
-	public boolean onDoubleClick(int x, int y, MouseButton button)
-	{
-		if (button != MouseButton.LEFT)
-			return super.onDoubleClick(x, y, button);
-
-		Link link = cursorPosition.getLink();
-		if (link != null)
-		{
-			link.click();
-			return true;
-		}
-
-		selectWord();
-		return true;
-	}
-
-	/**
-	 * On key typed.
-	 *
-	 * @param keyChar the key char
-	 * @param keyCode the key code
-	 * @return true, if successful
-	 */
 	@Override
 	public boolean onKeyTyped(char keyChar, int keyCode)
 	{
@@ -875,61 +631,41 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		{
 			case Keyboard.KEY_LEFT:
 				startSelecting();
-				cursorPosition.shiftLeft();
-				break;
+				cursor.shiftLeft();
+				return true;
 			case Keyboard.KEY_RIGHT:
 				startSelecting();
-				cursorPosition.shiftRight();
-				break;
-			case Keyboard.KEY_UP:
-				if (guiText.isMultiLine())
-				{
-					startSelecting();
-					cursorPosition.jumpLine(true);
-				}
-				break;
-			case Keyboard.KEY_DOWN:
-				if (guiText.isMultiLine())
-				{
-					startSelecting();
-					cursorPosition.jumpLine(false);
-				}
-				break;
+				cursor.shiftRight();
+				return true;
 			case Keyboard.KEY_HOME:
 				startSelecting();
-				cursorPosition.jumpToLineStart();
-				break;
+				cursor.jumpToLineStart();
+				return true;
 			case Keyboard.KEY_END:
 				startSelecting();
-				cursorPosition.jumpToLineEnd();
-				break;
+				cursor.jumpToLineEnd();
+				return true;
 			case Keyboard.KEY_BACK:
 				if (isEditable())
 					this.deleteFromCursor(-1);
-				break;
+				return true;
 			case Keyboard.KEY_DELETE:
 				if (isEditable())
 					this.deleteFromCursor(1);
-				break;
-			case Keyboard.KEY_RETURN:
-				if (guiText.isMultiLine() && isEditable())
-					this.addText("\n");
-				break;
+				return true;
 			case Keyboard.KEY_TAB:
 				if (isEditable())
 					addText("\t");
-				break;
+				return true;
 			default:
 				if ((ChatAllowedCharacters.isAllowedCharacter(keyChar) || keyChar == '\u00a7') && isEditable())
 				{
 					this.addText(Character.toString(keyChar));
-					break;
+					return true;
 				}
 				else
 					return super.onKeyTyped(keyChar, keyCode);
-
 		}
-		return true;
 	}
 
 	/**
@@ -947,32 +683,24 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		{
 			case Keyboard.KEY_LEFT:
 				startSelecting();
-				cursorPosition.jumpToNextSpace(true);
+				cursor.jumpToNextSpace(true);
 				return true;
 			case Keyboard.KEY_RIGHT:
 				startSelecting();
-				cursorPosition.jumpToNextSpace(false);
+				cursor.jumpToNextSpace(false);
 				return true;
 			case Keyboard.KEY_BACK:
 				if (isEditable())
 					this.deleteWord(true);
 				return true;
-			case Keyboard.KEY_DELETE:
-				if (isEditable())
-					this.deleteWord(false);
-				return true;
-			case Keyboard.KEY_HOME:
-				startSelecting();
-				cursorPosition.jumpToBeginning();
-				return true;
 			case Keyboard.KEY_END:
 				startSelecting();
-				cursorPosition.jumpToEnd();
+				cursor.jumpToEnd();
 				return true;
 			case Keyboard.KEY_A:
 				selectingText = true;
-				selectionPosition.jumpToBeginning();
-				cursorPosition.jumpToEnd();
+				selectionCursor.jumpToStart();
+				cursor.jumpToEnd();
 				return true;
 			case Keyboard.KEY_C:
 				GuiScreen.setClipboardString(getSelectedText());
@@ -991,103 +719,49 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 		}
 	}
 
+	/**
+	 * Draws the cursor for this {@link UITextField}.
+	 *
+	 * @param renderer the renderer
+	 */
 	//#end Input
-
-	/**
-	 * Draws the foreground.
-	 *
-	 * @param renderer the renderer
-	 * @param mouseX the mouse x
-	 * @param mouseY the mouse y
-	 * @param partialTick the partial tick
-	 */
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		if (text.length() != 0)
-			drawText(renderer);
-		if (selectingText && selectionPosition.textPosition != cursorPosition.textPosition)
-			drawSelectionBox(renderer);
-		if (focused)
-			drawCursor(renderer);
-	}
-
-	/**
-	 * Draws the text of this {@link UITextField}.
-	 *
-	 * @param renderer the renderer
-	 */
-	public void drawText(GuiRenderer renderer)
-	{
-		FontOptions options = isEnabled() ? getFontOptions() : disabledFontOptions;
-		if (!guiText.isMultiLine())
-		{
-			if (charOffset > text.length())
-				return;
-			String t = getFont().clipString(text.substring(charOffset, text.length()), size().width() - 4, options);
-			renderer.drawText(getFont(), t, 2, 2, 0, options);
-		}
-		else
-		{
-			guiText.render(renderer, lineOffset, lineOffset + getVisibleLines(), screenX() + 2, screenY() + 2, getZIndex());
-		}
-	}
-
-	/**
-	 * Draws the cursor of this {@link UITextField}.
-	 *
-	 * @param renderer the renderer
-	 */
 	public void drawCursor(GuiRenderer renderer)
 	{
+		if (!isFocused())
+			return;
+
 		long elaspedTime = startTimer - System.currentTimeMillis();
 		if ((elaspedTime / 500) % 2 != 0)
 			return;
-
-		if (cursorPosition.line < lineOffset || cursorPosition.line >= lineOffset + getVisibleLines())
-			return;
-
-		renderer.drawRectangle(cursorPosition.getXOffset()
-				+ 1, cursorPosition.getYOffset() + 1, getZIndex(), 1, getLineHeight(), cursorColor, 255, true);
+		cursorShape.render(renderer);
 	}
 
 	/**
-	 * Draw the selection box of this {@link UITextField}.
+	 * Draws the selection box of this {@link UITextField}.
 	 *
 	 * @param renderer the renderer
 	 */
 	public void drawSelectionBox(GuiRenderer renderer)
 	{
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		if (!selectingText || selectionCursor.index == cursor.index)
+			return;
+
+		renderer.next();
 		GL11.glEnable(GL11.GL_COLOR_LOGIC_OP);
 		GL11.glLogicOp(GL11.GL_OR_REVERSE);
 
-		CursorPosition first = cursorPosition.textPosition < selectionPosition.textPosition ? cursorPosition : selectionPosition;
-		CursorPosition last = cursorPosition == first ? selectionPosition : cursorPosition;
+		Cursor first = cursor.index < selectionCursor.index ? cursor : selectionCursor;
+		Cursor last = cursor == first ? selectionCursor : cursor;
 
-		for (int i = first.line; i <= last.line; i++)
-		{
-			if (i >= lineOffset && i < lineOffset + getVisibleLines() && i < guiText.lines().size())
-			{
-				int x = 0;
-				int y = (i - lineOffset) * getLineHeight();
-				int X = contentSize().width();
-
-				if (i == first.line)
-					x = first.getXOffset();
-				if (i == last.line)
-					X = last.getXOffset();
-
-				selectShape.resetState();
-				selectShape.setSize(Math.min(size().width() - 2, X) - x, getLineHeight());
-				selectShape.setPosition(x + 2, y + 1);
-
-				rp.useTexture.set(false);
-				rp.colorMultiplier.set(selectColor);
-
-				renderer.drawShape(selectShape, rp);
-			}
-		}
+		GuiShape s = GuiShape	.builder(this)
+								.position()
+								.set(first)
+								.back()
+								.fixed(false)
+								.size(last.x() - first.x(), cursor.height())
+								.color(selectColor)
+								.build();
+		s.render(renderer);
 
 		renderer.next();
 
@@ -1099,7 +773,6 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	public void onResize(SizeChangeEvent<UITextField> event)
 	{
 		onCursorUpdated();
-		cursorPosition.updateTextPosition();
 	}
 
 	/**
@@ -1110,179 +783,243 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 	@Override
 	public String getPropertyString()
 	{
-		return text + " | " + cursorPosition + " | " + super.getPropertyString();
+		return "[" + TextFormatting.DARK_AQUA + guiText + TextFormatting.RESET + "] " + TextFormatting.DARK_PURPLE + cursor
+				+ TextFormatting.RESET + " | " + super.getPropertyString();
 	}
 
 	//#region CursorPosition
+
 	/**
-	 * This class determines a position inside the text divides in lines.
+	 * This class determines a position inside the text.
 	 */
-	public class CursorPosition
+	public class Cursor implements IPosition
 	{
 		/** The text position. */
-		protected int textPosition;
-		/** The character. */
-		protected int character;
-		/** The line. */
-		protected int line;
-		/** Last x offset **/
-		protected int lastOffset;
+		protected int index;
+		/** The char position in line. */
+		protected int charIndex;
+		/** The line number. */
+		protected int lineIndex;
+
+		/** The last x position. */
+		protected int lastX; //used when going up and down lines, if the new line is shorter than the previous one, we want to keep the correct offset for the other ones.
+		/** The x position in the text. */
+		protected int x;
+		/** The y position in the text. */
+		protected int y;
+		/** The height of the line. */
+		protected int height = 9;
 
 		/**
-		 * Sets this {@link CursorPosition} at the same position than <b>position</b>.
+		 * Gets the x offset from the left of this {@link Cursor} inside this {@link UITextField}.
 		 *
-		 * @param position the new position
+		 * @return the x offset
 		 */
-		public void set(CursorPosition position)
+		@Override
+		public int x()
 		{
-			this.textPosition = position.textPosition;
-			this.character = position.character;
-			this.line = position.line;
+			return x + 2;
 		}
 
 		/**
-		 * Gets the position of this {@link CursorPosition} in the text.
+		 * Gets the x offset from the left of this {@link Cursor} inside this {@link UITextField}.
 		 *
-		 * @return the position
+		 * @return the y offset
 		 */
-		public int getPosition()
+		@Override
+		public int y()
 		{
-			return textPosition;
+			return y + 2;
 		}
 
 		/**
-		 * Sets this {@link CursorPosition} at the specified position in the text.
+		 * Get the height of the cursor, should match the height of the current line.
 		 *
-		 * @param pos the new cursor position
+		 * @return the int
 		 */
-		public void jumpTo(int pos)
+		public int height()
 		{
-			if (text.length() == 0)
+			return height;
+		}
+
+		private StringWalker back(StringWalker walker)
+		{
+			//			if (walker.getChar() == '\n')
+			//			{
+			//				int i = walker.globalIndex();
+			//				walker = guiText.walker();
+			//				walker.walkToIndex(i - 1);
+			//			}
+			return walker;
+		}
+
+		/**
+		 * Sets this {@link Cursor} data based on walker current state.
+		 *
+		 * @param walker the walker
+		 */
+		private void set(StringWalker walker)
+		{
+			index = MathHelper.clamp(walker.globalIndex() + 1, 0, text.length()); //== globalIndex
+			charIndex = walker.charIndex();
+			lineIndex = walker.lineIndex();
+			x = (int) walker.lineWidth();
+			y = (int) walker.y(); //== 0
+			height = (int) Math.ceil(walker.lineHeight());
+			if (height < 9)
+				height = 9;
+
+			//if cursor after a \n, virtually set its position at the beginning of the next line.
+			if (guiText.isMultiLine() && walker.getChar() == '\n')
 			{
-				textPosition = 0;
-				line = 0;
-				character = 0;
-				onCursorUpdated();
+				x = 0;
+				y += height;
+			}
+
+			onCursorUpdated();
+		}
+
+		public void from(Cursor cursor)
+		{
+			index = cursor.index;
+			charIndex = cursor.charIndex;
+			lineIndex = cursor.lineIndex;
+			height = cursor.height;
+			x = cursor.x;
+			y = cursor.y;
+		}
+
+		/**
+		 * Updates this cursor based on mouse position.
+		 */
+		public void fromMouse()
+		{
+			StringWalker walker = guiText.walker();
+			if (!walker.walkToY(mousePosition().y()))
+			{
+				jumpToEnd();
+				lastX = x;
 				return;
 			}
 
-			if (pos < 0)
-				pos = 0;
-			if (pos >= text.length())
-			{
-				textPosition = text.length();
-				line = guiText.lines().size() - 1;
-				character = currentLineText().length();
-				onCursorUpdated();
-				return;
-			}
+			int x = mousePosition().x();
+			walker.walkToX(x);
+			walker = back(walker);
+			int i = walker.globalIndex();
+			if (x > walker.x() + walker.width() / 2)
+				i++;
+			jumpTo(i);
+			lastX = x;
+		}
 
-			textPosition = pos;
-			line = 0;
-			if (!guiText.isMultiLine())
-			{
-				character = pos;
-				onCursorUpdated();
-				return;
-			}
-
-			while (line < guiText.lines().size() && pos >= currentLineText().length())
-			{
-				pos -= currentLineText().length();
-				line++;
-			}
-			character = pos;
-			lastOffset = getXOffset();
+		/**
+		 * Sets this {@link Cursor} at the specified position in the text.
+		 *
+		 * @param index the new cursor position
+		 */
+		public void jumpTo(int index)
+		{
+			index = MathHelper.clamp(index, 0, text.length());
+			StringWalker walker = guiText.walker();
+			walker.walkToIndex(index - 1);
+			set(walker);
+			lastX = x;
 			onCursorUpdated();
 		}
 
 		/**
-		 * Moves this {@link CursorPosition} by a specified amount.
+		 * Moves this {@link Cursor} by a specified amount.
 		 *
 		 * @param amount the amount
 		 */
 		public void jumpBy(int amount)
 		{
-			jumpTo(textPosition + amount);
+			jumpTo(index + amount);
 		}
 
 		/**
-		 * Moves this {@link CursorPosition} to the beginning of the text.
+		 * Moves this {@link Cursor} to the beginning of the text.
 		 */
-		public void jumpToBeginning()
+		public void jumpToStart()
 		{
 			jumpTo(0);
 		}
 
 		/**
-		 * Moves this {@link CursorPosition} to the end of the text.
+		 * Moves this {@link Cursor} to the end of the text.
 		 */
 		public void jumpToEnd()
 		{
 			jumpTo(text.length());
 		}
 
-		/**
-		 * Moves this {@link CursorPosition} to the beginning of the current line.
-		 */
 		public void jumpToLineStart()
 		{
-			jumpBy(-character);
+			jumpTo(index - charIndex - 1);
 		}
 
-		/**
-		 * Moves this {@link CursorPosition} to the end of the current line.
-		 */
 		public void jumpToLineEnd()
 		{
-			textPosition -= character;
-			character = currentLineText().length() - (currentLineText().endsWith("\n") ? 1 : 0);
-			textPosition += character;
-			onCursorUpdated();
+			StringWalker walker = guiText.walker();
+			walker.walkToIndex(index);
+			walker.walkToEOL();
+			walker = back(walker);
+			set(walker);
 		}
 
 		/**
-		 * Moves this {@link CursorPosition} one step to the left. If the cursor is at the beginning of the line, it is moved to the end of
-		 * the previous line without changing the {@link #textPosition}.
+		 * Moves this {@link Cursor} one step to the left. If the cursor is at the beginning of the line, it is moved to the end of the
+		 * previous line without changing the {@link #index}.
 		 */
 		public void shiftLeft()
 		{
-			if (textPosition == 0)
-				return;
+			//if (index == 0)
+			//	return;
 
-			if (FontOptions.isFormatting(text.toString(), textPosition - 2))
+			if (FontOptions.isFormatting(text.toString(), index - 2))
 				jumpBy(-2);
 			else
 				jumpBy(-1);
-
-			onCursorUpdated();
 		}
 
 		/**
-		 * Moves this {@link CursorPosition} one step to the right. If the cursor is at the end of the line, it is moved to the start of the
-		 * next line whithout changing the {@link #textPosition}.
+		 * Moves this {@link Cursor} one step to the right. If the cursor is at the end of the line, it is moved to the start of the next
+		 * line whithout changing the {@link #index}.
 		 */
 		public void shiftRight()
 		{
-			if (textPosition == text.length())
+			if (index == text.length())
 				return;
 
-			if (FontOptions.isFormatting(text.toString(), textPosition))
+			if (FontOptions.isFormatting(text.toString(), index))
 				jumpBy(2);
 			else
 				jumpBy(1);
+		}
 
-			onCursorUpdated();
+		public void jumpLine(boolean backwards)
+		{
+			if (lineIndex == 0 && backwards)
+				return;
+			if (lineIndex == guiText.lineCount() - 1 && !backwards)
+				return;
+
+			StringWalker walker = guiText.walker();
+			walker.walkUntil(w -> w.lineIndex() == lineIndex + (backwards ? -1 : 1));
+			walker.walkToX(lastX);
+			//if (guiText.lines().get(walker.lineIndex()).text().length() == 1)
+			//	walker = back(walker);
+			set(walker);
 		}
 
 		/**
-		 * Moves this {@link CursorPosition} to the next space position.
+		 * Moves this {@link Cursor} to the next space position.
 		 *
 		 * @param backwards backwards whether to look left of the cursor
 		 */
 		public void jumpToNextSpace(boolean backwards)
 		{
-			int pos = textPosition;
+			int pos = index;
 			int step = backwards ? -1 : 1;
 
 			pos += step;
@@ -1292,130 +1029,11 @@ public class UITextField extends UIComponent<UITextField> implements IScrollable
 			jumpTo(pos);
 		}
 
-		/**
-		 * Moves this {@link CursorPosition} to the previous or next line.
-		 *
-		 * @param backwards if true, jump to the previous line, jump to the next otherwise
-		 */
-		public void jumpLine(boolean backwards)
-		{
-			if ((backwards && line == 0) || (!backwards && line == guiText.lines().size() - 1))
-				return;
-
-			if (backwards)
-				line = Math.max(0, line - 1);
-			else
-				line = Math.min(line + 1, guiText.lines().size() - 1);
-			//character = Math.min(character, currentLineText().length());
-			character = Math.round(getFont().getCharPosition(currentLineText(), getFontOptions(), lastOffset, charOffset));
-			updateTextPosition();
-		}
-
-		/**
-		 * Gets the text at the current line.
-		 *
-		 * @return the text
-		 */
-		private String currentLineText()
-		{
-			if (line < 0 || line >= guiText.lines().size())
-				return "";
-
-			return guiText.lines().get(line);
-		}
-
-		/**
-		 * Sets this {@link CursorPosition} line and character position based on coordinates inside this {@link UITextField}.
-		 *
-		 * @param x the X coordinate
-		 * @param y the Y coordinate
-		 */
-		public void setPosition(int x, int y)
-		{
-			line = lineFromY(y);
-			character = characterFromX(x);
-			updateTextPosition();
-			lastOffset = getXOffset();
-		}
-
-		/**
-		 * Update the text position based on {@link #character} and {@link #line}.
-		 */
-		private void updateTextPosition()
-		{
-			textPosition = character;
-			if (!guiText.isMultiLine())
-				return;
-
-			for (int i = 0; i < line && i < guiText.lines().size(); i++)
-				textPosition += guiText.lines().get(i).length();
-
-			onCursorUpdated();
-		}
-
-		/**
-		 * Determines the line for given Y coordinate.
-		 *
-		 * @param y the y coordinate
-		 * @return the line number
-		 */
-		private int lineFromY(int y)
-		{
-			return guiText.isMultiLine() ? Math.max(0, Math.min(y / getLineHeight() + lineOffset, guiText.lines().size() - 1)) : 0;
-		}
-
-		/**
-		 * Determines the character for a given X coordinate.
-		 *
-		 * @param x the x coordinate
-		 * @return position
-		 */
-		private int characterFromX(int x)
-		{
-			return (int) getFont().getCharPosition(currentLineText(), getFontOptions(), x, charOffset);
-		}
-
-		/**
-		 * Gets the x offset from the left of this {@link CursorPosition} inside this {@link UITextField}.
-		 *
-		 * @return the x offset
-		 */
-		public int getXOffset()
-		{
-			if (textPosition == text.length() && guiText.isMultiLine())
-				return (int) getFont().getStringWidth(currentLineText(), getFontOptions());
-
-			if (currentLineText().length() == 0)
-				return 0;
-			if (charOffset >= character || charOffset >= currentLineText().length())
-				return 0;
-
-			return (int) getFont().getStringWidth(currentLineText(), getFontOptions(), charOffset, character);
-		}
-
-		/**
-		 * Gets the x offset from the left of this {@link CursorPosition} inside this {@link UITextField}.
-		 *
-		 * @return the y offset
-		 */
-		public int getYOffset()
-		{
-			return (line - lineOffset) * getLineHeight();
-		}
-
-		public Link getLink()
-		{
-			return Link.getLink(currentLineText(), character);
-		}
-
 		@Override
 		public String toString()
 		{
-			return "Pos : " + textPosition + " (l" + line + " / c" + character + ") at " + getXOffset() + "," + getYOffset();
+			return "Index : " + index + " (L" + lineIndex + " C" + charIndex + ") at " + x() + "," + y() + " (offset: " + offset + ")";
 		}
-
 	}
-
 	//#end CursorPosition
-
 }

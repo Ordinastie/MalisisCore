@@ -28,12 +28,12 @@ import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.component.element.Size.ISize;
 import net.malisis.core.client.gui.component.interaction.UICheckBox;
 import net.malisis.core.client.gui.component.interaction.UISelect;
 import net.malisis.core.client.gui.component.interaction.UITextField;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
 import net.minecraft.util.text.TextFormatting;
@@ -54,13 +54,13 @@ public class MCEditor extends UIContainer<MCEditor>
 	public MCEditor(MalisisGui gui)
 	{
 		super(gui);
-		tf = new UITextField(gui, true);
+		tf = new UITextField(true);
 		tf.setPosition(Position.x(0).bottomAligned());
 		tf.setSize(Size.relativeWidth(1.0f).relativeHeight(0.9f));
 
 		sel = new EcfSelect(gui, this);
 
-		cb = new UICheckBox(gui, "Use litteral formatting");
+		cb = new UICheckBox("Use litteral formatting");
 		cb.setPosition(Position.of(85, 0));
 		cb.register(this);
 

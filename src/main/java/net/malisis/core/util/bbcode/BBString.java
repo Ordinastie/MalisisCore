@@ -30,7 +30,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import joptsimple.internal.Strings;
-import net.malisis.core.client.gui.GuiRenderer;
+import net.malisis.core.client.gui.render.GuiRenderer;
 import net.malisis.core.util.bbcode.node.BBNode;
 import net.malisis.core.util.bbcode.node.BBRootNode;
 import net.malisis.core.util.bbcode.node.BBTextNode;

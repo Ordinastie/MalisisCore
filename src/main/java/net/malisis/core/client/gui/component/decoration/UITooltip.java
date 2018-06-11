@@ -24,81 +24,92 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
-import java.util.Arrays;
-import java.util.List;
-
-import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.element.Size;
-import net.malisis.core.client.gui.element.XYResizableGuiShape;
+import net.malisis.core.client.gui.component.content.IContentHolder;
+import net.malisis.core.client.gui.element.Padding;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.position.Position;
+import net.malisis.core.client.gui.render.GuiIcon;
+import net.malisis.core.client.gui.render.shape.GuiShape;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.font.MalisisFont;
-import net.malisis.core.renderer.icon.provider.GuiIconProvider;
 
 /**
  * UITooltip
  *
  * @author PaleoCrafter
  */
-public class UITooltip extends UIComponent<UITooltip>
+public class UITooltip extends UIComponent implements IContentHolder<UIComponent>
 {
-	/** The {@link MalisisFont} to use for this {@link UITooltip}. */
-	protected MalisisFont font = MalisisFont.minecraftFont;
-	/** The {@link FontOptions} to use for this {@link UITooltip}. */
-	protected FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
-
-	protected List<String> lines;
-	protected int padding = 4;
+	protected Padding padding = Padding.of(4);
+	protected UIComponent content;
 	protected int delay = 0;
 	protected Animation<ITransformable.Alpha> animation;
+	/** The default {@link FontOptions} to use for this {@link UITooltip} when using text. */
+	protected FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
 
-	public UITooltip(MalisisGui gui)
+	private int xOffset = 8;
+	private int yOffset = -16;
+
+	public UITooltip()
 	{
-		super(gui);
-		zIndex = 300;
+		setZIndex(300);
 
-		shape = new XYResizableGuiShape();
-		iconProvider = new GuiIconProvider(gui.getGuiTexture().getXYResizableIcon(227, 31, 15, 15, 5));
+		setPosition(MalisisGui.MOUSE_POSITION.offset(xOffset, yOffset));
+		setSize(Size.sizeOfContent(this, 8, 4));
+
+		setBackground(GuiShape.builder(this).icon(GuiIcon.TOOLTIP).border(5).build());
+		setForeground(this::content);
 
 		//animation = new Animation<>(this, new AlphaTransform(0, 255).forTicks(2));
 	}
 
-	public UITooltip(MalisisGui gui, String text)
+	public UITooltip(String text)
 	{
-		this(gui);
+		this();
 		setText(text);
 	}
 
-	public UITooltip(MalisisGui gui, int delay)
+	public UITooltip(int delay)
 	{
-		this(gui);
+		this();
 		setDelay(delay);
 	}
 
-	public UITooltip(MalisisGui gui, String text, int delay)
+	public UITooltip(String text, int delay)
 	{
-		this(gui);
+		this();
 		setText(text);
 		setDelay(delay);
 	}
 
 	//#region Getters/Setters
-	public UITooltip setText(String text)
+	@Override
+	public UIComponent content()
 	{
-		lines = Arrays.asList(text.split("\\n"));
-		calculateSize();
-		return this;
-
+		return content;
 	}
 
-	public UITooltip setText(List<String> lines)
+	public void setContent(UIComponent content)
 	{
-		this.lines = lines;
-		calculateSize();
-		return this;
+		this.content = content;
+		content.setParent(this);
+		content.setPosition(Position.of(content).centered().middleAligned(2).build());
+	}
+
+	public void setText(String text)
+	{
+		if (content() instanceof UILabel)
+		{
+			((UILabel) content()).setText(text);
+			return;
+		}
+
+		UILabel label = new UILabel(text);
+		label.setFontOptions(fontOptions);
+		setContent(label);
 	}
 
 	public UITooltip setDelay(int delay)
@@ -123,13 +134,6 @@ public class UITooltip extends UIComponent<UITooltip>
 	}
 
 	//#end Getters/Setters
-
-	protected void calculateSize()
-	{
-		setSize(Size.of((int) font.getMaxStringWidth(lines, fontOptions) + padding * 2,
-						(int) (lines.size() > 1 ? font.getStringHeight(fontOptions) * lines.size() : 8) + padding * 2));
-	}
-
 	public void animate()
 	{
 		if (delay == 0)
@@ -137,28 +141,5 @@ public class UITooltip extends UIComponent<UITooltip>
 
 		setAlpha(0);
 		//getGui().animate(animation, delay);
-	}
-
-	@Override
-	public void drawBackground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		shape.setPosition(mouseX + getOffsetX(), mouseY + getOffsetY());
-		renderer.drawShape(shape, rp);
-	}
-
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		int x = mouseX + getOffsetX() + padding;
-		int y = mouseY + getOffsetY() + padding;
-		int i = 0;
-		for (String str : lines)
-		{
-			int sy = y;
-			if (i > 0)
-				sy += 2;
-			renderer.drawText(font, str, x, sy + font.getStringHeight(fontOptions) * i, zIndex + 1, fontOptions, false);
-			i++;
-		}
 	}
 }

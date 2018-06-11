@@ -24,50 +24,65 @@
 
 package net.malisis.core.client.gui.component.container;
 
-import net.malisis.core.client.gui.MalisisGui;
+import org.apache.commons.lang3.StringUtils;
+
 import net.malisis.core.client.gui.component.UISlot;
-import net.malisis.core.client.gui.component.element.Position;
-import net.malisis.core.client.gui.component.element.Size;
+import net.malisis.core.client.gui.component.decoration.UILabel;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisSlot;
 
-public class UIInventory extends UIContainer<UIInventory>
+public class UIInventory extends UIContainer
 {
+	protected UILabel label;
 	protected MalisisInventory inventory;
 	protected int numCols;
 	protected boolean hasTitle;
 
-	public UIInventory(MalisisGui gui, String title, MalisisInventory inventory, int numCols)
+	public UIInventory(String title, MalisisInventory inventory, int numCols)
 	{
-		super(gui, title != null ? title : inventory.getName());
-		this.hasTitle = title != null || inventory.hasCustomName();
+		if (!StringUtils.isEmpty(title))
+			label = new UILabel(title, false);
+		else if (inventory.hasCustomName())
+			label = new UILabel(inventory.getName(), false);
+
 		this.inventory = inventory;
 		this.numCols = numCols;
-		setSize(Size.width(o -> Math.min(inventory.getSize() * 18, numCols * 18))
-					.height(o -> (int) Math.ceil((float) inventory.getSize() / numCols) * 18 + (hasTitle ? 11 : 0)));
+		setSize(Size.of(() -> Math.min(inventory.getSize() * 18, numCols * 18),
+						() -> (int) Math.ceil((float) inventory.getSize() / numCols) * 18 + (hasTitle ? 11 : 0)));
+
+		if (label != null)
+			add(label);
+
 		for (int i = 0; i < inventory.getSize(); i++)
-			addSlot(gui, inventory.getSlot(i), i);
+			addSlot(inventory.getSlot(i), i);
 	}
 
-	public UIInventory(MalisisGui gui, MalisisInventory inventory, int numCols)
+	public UIInventory(MalisisInventory inventory, int numCols)
 	{
-		this(gui, null, inventory, numCols);
+		this(null, inventory, numCols);
 
 	}
 
-	public UIInventory(MalisisGui gui, String title, MalisisInventory inventory)
+	public UIInventory(String title, MalisisInventory inventory)
 	{
-		this(gui, title, inventory, 9);
+		this(title, inventory, 9);
 	}
 
-	public UIInventory(MalisisGui gui, MalisisInventory inventory)
+	public UIInventory(MalisisInventory inventory)
 	{
-		this(gui, null, inventory, 9);
+		this(null, inventory, 9);
 	}
 
-	protected void addSlot(MalisisGui gui, MalisisSlot slot, int number)
+	public UILabel getLabel()
 	{
-		UISlot uislot = new UISlot(gui, slot);
+		return label;
+	}
+
+	protected void addSlot(MalisisSlot slot, int number)
+	{
+		UISlot uislot = new UISlot(slot);
 
 		int row = number / numCols;
 		int col = number % numCols;

@@ -24,214 +24,143 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
-import static com.google.common.base.Preconditions.*;
-
 import javax.annotation.Nonnull;
 
-import net.malisis.core.client.gui.GuiRenderer;
-import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
-import net.malisis.core.client.gui.component.control.UIScrollBar;
-import net.malisis.core.client.gui.component.control.UISlimScrollbar;
-import net.malisis.core.client.gui.component.element.Padding;
-import net.malisis.core.client.gui.component.element.Size.ISize;
+import net.malisis.core.client.gui.component.scrolling.UIScrollBar;
+import net.malisis.core.client.gui.element.IClipable;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.position.Position.IPosition;
 import net.malisis.core.client.gui.text.GuiText;
-import net.malisis.core.client.gui.text.IGuiTextProxy;
 import net.malisis.core.renderer.font.FontOptions;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * UILabel.
  *
  * @author Ordinastie
  */
-public class UILabel extends UIComponent<UILabel> implements IScrollable, IGuiTextProxy
+public class UILabel extends UIComponent implements IScrollable<GuiText>, IClipable
 {
-	protected GuiText text = null;
+	protected final GuiText text;
 
-	//text space
-	/** Number of line offset out of this {@link UILabel} when drawn. Always 0 if {@link #multiLine} is false. */
-	protected int lineOffset = 0;
-
-	//interaction
-	/** Scrollbar of the textfield **/
-	protected UISlimScrollbar scrollBar;
-
-	/** Width of the text. */
-	protected int textWidth;
-	/** Height of the text. */
-	protected int textHeight;
+	protected final IPosition offset = UIScrollBar.scrollingOffset(this);
 
 	/**
 	 * Instantiates a new {@link UILabel}.
 	 *
-	 * @param gui the gui
 	 * @param text the text
-	 * @param multiLine the multi line
+	 * @param multiLine the multiLine
 	 */
-	public UILabel(MalisisGui gui, String text, boolean multiLine)
+	public UILabel(String text, boolean multiLine)
 	{
-		super(gui);
-		setText(text);
-		setMultiline(multiLine);
-		setFontOptions(FontOptions.builder().color(0x444444).build());
+		this.text = GuiText	.of(this)
+							.multiLine(multiLine)
+							.literal()
+							.translated(false)
+							.text(text)
+							.fontOptions(FontOptions.builder().color(0x444444).build())
+							.wrapSize(() -> multiLine ? size.width() - UIScrollBar.scrollbarWidth(this) - 2 : 0)
+							.build();
+		setAutoSize();
+
+		setForeground(this.text);
 	}
 
 	/**
 	 * Instantiates a new {@link UILabel}.
 	 *
-	 * @param gui the gui
 	 * @param text the text
 	 */
-	public UILabel(MalisisGui gui, String text)
+	public UILabel(String text)
 	{
-		this(gui, text, false);
+		this(text, text.contains("\r") || text.contains("\n"));
 	}
 
 	/**
 	 * Instantiates a new {@link UILabel}.
 	 *
-	 * @param gui the gui
 	 * @param multiLine the multi line
 	 */
-	public UILabel(MalisisGui gui, boolean multiLine)
+	public UILabel(boolean multiLine)
 	{
-		this(gui, "", multiLine);
+		this("", multiLine);
 	}
 
 	/**
 	 * Instantiates a new {@link UILabel}.
-	 *
-	 * @param gui the gui
 	 */
-	public UILabel(MalisisGui gui)
+	public UILabel()
 	{
-		this(gui, "", false);
-	}
-
-	@Override
-	public void onAddedToScreen()
-	{
-		text.setWrapSize(size.width() - UIScrollBar.xOffset(this));
+		this("", false);
 	}
 
 	// #region getters/setters
-	/**
-	 * Sets the {@link GuiText} used by this {@link UILabel}.
-	 *
-	 * @param text the new text
-	 */
-	@Override
-	public void setGuiText(GuiText text)
-	{
-		this.text = checkNotNull(text);
-	}
 
-	/**
-	 * Gets the {@link GuiText} used by this {@link UILabel}.
-	 *
-	 * @return the text
-	 */
 	@Override
-	public GuiText getGuiText()
+	public GuiText content()
 	{
 		return text;
 	}
 
-	public int getVisibleLines()
+	public void setText(String text)
 	{
-		return size().height() / getLineHeight();
+		this.text.setText(text);
 	}
 
-	public int getLineHeight()
+	public String getText()
 	{
-		return text.getLineHeight();
+		return text.getRawText();
+	}
+
+	public void setFontOptions(FontOptions fontOptions)
+	{
+		text.setFontOptions(fontOptions);
 	}
 
 	@Override
-	public void setSize(ISize size)
+	public IPosition contentPosition()
 	{
-		super.setSize(size);
-		text.setWrapSize(size.width() - UIScrollBar.xOffset(this));
+		return text.position();
 	}
 
-	@Override
-	@Nonnull
-	public ISize size()
-	{
-		//a single line label size should match the text
-		return text.isMultiLine() ? super.size() : text.size();
-	}
-	// #end getters/setters
-
-	//#region IScrollable
 	@Override
 	public ISize contentSize()
 	{
 		return text.size();
 	}
 
-	@Override
-	public float getOffsetX()
+	public void setAutoSize()
 	{
-		return 0;
+		super.setSize(Size.sizeOfContent(this, 0, 0));
 	}
 
 	@Override
-	public void setOffsetX(float offsetX, int delta)
-	{}
-
-	@Override
-	public float getOffsetY()
+	@Nonnull
+	public ISize size()
 	{
-		if (text.lines().size() < getVisibleLines())
-			return 0;
-
-		return (float) lineOffset / (text.lines().size() - getVisibleLines());
+		return size;
 	}
 
 	@Override
-	public void setOffsetY(float offsetY, int delta)
+	public IPosition offset()
 	{
-		lineOffset = Math.round(offsetY * (text.lines().size() - getVisibleLines()));
-		lineOffset = Math.max(0, Math.min(text.lines().size(), lineOffset));
+		return offset;
 	}
+	// #end getters/setters
 
 	@Override
-	public float getScrollStep()
+	public ClipArea getClipArea()
 	{
-		float step = (float) 1 / (text.lines().size() - getVisibleLines());
-		return (GuiScreen.isCtrlKeyDown() ? 5 * step : step);
-	}
-
-	@Override
-	public Padding getPadding()
-	{
-		return Padding.NO_PADDING;
-	}
-
-	//#end IScrollable
-	/**
-	 * Draws the foreground.
-	 *
-	 * @param renderer the renderer
-	 * @param mouseX the mouse x
-	 * @param mouseY the mouse y
-	 * @param partialTick the partial tick
-	 */
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
-	{
-		text.render(renderer, lineOffset, lineOffset + getVisibleLines(), screenX(), screenY(), getZIndex());
-
-		//debug
-		//renderer.drawRectangle(0, 0, 0, size().width(), size().height(), 0x3399FF, 100);
+		return ClipArea.from(this);
 	}
 
 	@Override
 	public String getPropertyString()
 	{
-		return "text=" + text + " | " + super.getPropertyString();
+		return "[" + TextFormatting.DARK_AQUA + text + TextFormatting.RESET + "] " + super.getPropertyString();
 	}
+
 }

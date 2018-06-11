@@ -69,7 +69,7 @@ public class CachedData<T> implements ICachedData<T>
 	 */
 	public CachedData(Supplier<T> getter)
 	{
-		this(getter, Objects::equals);
+		this(getter, (o1, o2) -> !Objects.equals(o1, o2));
 	}
 
 	/**

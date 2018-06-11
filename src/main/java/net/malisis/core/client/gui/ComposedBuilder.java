@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Ordinastie
+ * Copyright (c) 2018 Ordinastie
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,63 +22,23 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.renderer.icon.provider;
-
-import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.renderer.icon.GuiIcon;
-import net.malisis.core.renderer.icon.Icon;
+package net.malisis.core.client.gui;
 
 /**
  * @author Ordinastie
  *
  */
-public class GuiIconProvider implements IGuiIconProvider
+public class ComposedBuilder<T>
 {
-	protected Icon icon;
-	protected Icon hoveredIcon;
-	protected Icon disabledIcon;
+	protected T originalBuilder;
 
-	public GuiIconProvider(GuiIcon icon)
+	public ComposedBuilder(T originalBuilder)
 	{
-		setIcon(icon);
+		this.originalBuilder = originalBuilder;
 	}
 
-	public GuiIconProvider(Icon icon, Icon hoveredIcon, Icon disabledIcon)
+	public T back()
 	{
-		setIcon(icon);
-		setHoveredIcon(hoveredIcon);
-		setDisabledIcon(disabledIcon);
+		return originalBuilder;
 	}
-
-	public void setIcon(Icon icon)
-	{
-		this.icon = icon;
-	}
-
-	public void setHoveredIcon(Icon icon)
-	{
-		this.hoveredIcon = icon;
-	}
-
-	public void setDisabledIcon(Icon icon)
-	{
-		this.disabledIcon = icon;
-	}
-
-	@Override
-	public Icon getIcon()
-	{
-		return icon;
-	}
-
-	@Override
-	public Icon getIcon(UIComponent<?> component)
-	{
-		if (!component.isEnabled())
-			return disabledIcon != null ? disabledIcon : icon;
-		if (component.isHovered())
-			return hoveredIcon != null ? hoveredIcon : icon;
-		return icon;
-	}
-
 }

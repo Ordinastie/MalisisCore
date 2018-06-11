@@ -32,9 +32,9 @@ import net.malisis.core.client.gui.event.ComponentEvent;
  *
  * @author Ordinastie
  *
- * @param <T> the type of <code>UIComponent</code> that fired this event.
+ * @param <T> the type of <code>UIComponent that fired this event.
  */
-public abstract class SpaceChangeEvent<T extends UIComponent<T>> extends ComponentEvent<T>
+public abstract class SpaceChangeEvent<T extends UIComponent> extends ComponentEvent<T>
 {
 	public SpaceChangeEvent(T component)
 	{
@@ -46,9 +46,9 @@ public abstract class SpaceChangeEvent<T extends UIComponent<T>> extends Compone
 	 *
 	 * @author Ordinastie
 	 *
-	 * @param <T> the type of <code>UIComponent</code> that fired this event.
+	 * @param <T> the type of <code>UIComponent that fired this event.
 	 */
-	public static class PositionChangeEvent<T extends UIComponent<T>> extends SpaceChangeEvent<T>
+	public static class PositionChangeEvent<T extends UIComponent> extends SpaceChangeEvent<T>
 	{
 		protected int newX;
 		protected int newY;
@@ -92,9 +92,9 @@ public abstract class SpaceChangeEvent<T extends UIComponent<T>> extends Compone
 	 *
 	 * @author Ordinastie
 	 *
-	 * @param <T> the type of <code>UIComponent</code> that fired this event.
+	 * @param <T> the type of <code>UIComponent that fired this event.
 	 */
-	public static class SizeChangeEvent<T extends UIComponent<T>> extends SpaceChangeEvent<T>
+	public static class SizeChangeEvent<T extends UIComponent> extends SpaceChangeEvent<T>
 	{
 		protected int newWidth;
 		protected int newHeight;

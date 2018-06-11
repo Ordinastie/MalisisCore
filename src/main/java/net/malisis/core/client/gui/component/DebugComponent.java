@@ -26,26 +26,24 @@ package net.malisis.core.client.gui.component;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import org.lwjgl.opengl.GL11;
-
-import com.google.common.collect.Sets;
-
-import net.malisis.core.MalisisCore;
-import net.malisis.core.client.gui.GuiRenderer;
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.element.Padding;
-import net.malisis.core.client.gui.component.element.Padding.IPadded;
-import net.malisis.core.client.gui.component.element.Size.DynamicSize;
-import net.malisis.core.client.gui.component.element.Sizes;
-import net.malisis.core.client.gui.render.ColoredBackground;
+import net.malisis.core.client.gui.component.content.ITextHolder;
+import net.malisis.core.client.gui.element.Padding;
+import net.malisis.core.client.gui.element.Padding.IPadded;
+import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.render.GuiIcon;
+import net.malisis.core.client.gui.render.GuiRenderer;
+import net.malisis.core.client.gui.render.IGuiRenderer;
+import net.malisis.core.client.gui.render.shape.GuiShape;
+import net.malisis.core.client.gui.text.GuiText;
+import net.malisis.core.client.gui.text.GuiText.Builder;
 import net.malisis.core.renderer.font.FontOptions;
-import net.malisis.core.renderer.font.MalisisFont;
+import net.malisis.core.util.ItemUtils;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.math.MathHelper;
 
@@ -53,60 +51,112 @@ import net.minecraft.util.math.MathHelper;
  * @author Ordinastie
  *
  */
-public class DebugComponent extends UIComponent<DebugComponent> implements IPadded
+public class DebugComponent extends UIComponent implements IPadded, ITextHolder
 {
 	private HashMap<String, Supplier<String>> debugMap = new LinkedHashMap<>();
+	private GuiText text;
 	private FontOptions fontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
 	private Padding padding = Padding.of(5, 5);
+	private GuiShape borderShape = GuiShape	.builder()
+											.icon(GuiIcon.BORDER)
+											.color(this::hierarchyColor)
+											.zIndex(this::hierarchyZIndex)
+											.border(2)
+											.build();
+	private int hierarchyColor;
+	private int hierarchyZIndex;
 
 	public DebugComponent(MalisisGui gui)
 	{
-		super(gui);
+		this.gui = gui;
 		enabled = false;
 
-		setSize(new DynamicSize(Sizes.relativeWidth(1.0f, 0), owner -> {
-			return (int) ((debugMap.size() + 1) * MalisisFont.minecraftFont.getStringHeight()) + padding.vertical();
+		setAlpha(80);
+		setZIndex(-1);
+
+		setSize(Size.of(this).parentWidth(1.0F, 0).contentHeight(10).build());
+
+		setBackground(GuiShape.builder(this).color(0).alpha(this::getAlpha).build());
+		setForeground(((IGuiRenderer) this::drawHierarchy).and(r -> {
+			//			GuiText.of("Test").build().render(r);
+			text.render(r);
 		}));
-		ColoredBackground background = new ColoredBackground(0x000000);
-		background.setAlpha(0);
-		setBackground(background);
+
+		setDefaultDebug();
+		setEnabled(MalisisGui.debug);
+	}
+
+	private void setDefaultDebug()
+	{
+		debugMap.put(	"Mouse",
+						() -> MalisisGui.MOUSE_POSITION
+								+ (MalisisGui.getHoveredComponent() != null	? " (" + MalisisGui.getHoveredComponent().mousePosition() + ")"
+																			: ""));
+		debugMap.put("Focus", () -> String.valueOf(MalisisGui.getFocusedComponent()));
+		debugMap.put("Hover", () -> String.valueOf(MalisisGui.getHoveredComponent()));
+		debugMap.put("Dragged", () -> String.valueOf(MalisisGui.getDraggedComponent()));
+		if (MalisisGui.getInventoryContainer() != null)
+			debugMap.put("Picked", () -> ItemUtils.toString(MalisisGui.getInventoryContainer().getPickedItemStack()));
+		updateGuiText();
+	}
+
+	private void updateGuiText()
+	{
+		Builder tb = GuiText.of(this).multiLine().translated(false).fontOptions(fontOptions).position().x(2).y(2).back();
+
+		String str = debugMap	.entrySet()
+								.stream()
+								.peek(e -> tb.bind(e.getKey(), e.getValue()))
+								.map(e -> e.getKey() + " : {" + e.getKey() + "}")
+								.collect(Collectors.joining("\n"));
+		text = tb.text(str).build();
+	}
+
+	@Override
+	public GuiText content()
+	{
+		return text;
 	}
 
 	@Override
 	@Nonnull
-	public Padding getPadding()
+	public Padding padding()
 	{
 		return padding;
 	}
 
 	@Override
-	public DebugComponent setEnabled(boolean enabled)
+	public boolean isEnabled()
+	{
+		return MalisisGui.debug;
+	}
+
+	@Override
+	public void setEnabled(boolean enabled)
 	{
 		if (enabled)
 			getGui().addToScreen(this);
 		else
 			getGui().removeFromScreen(this);
-		return super.setEnabled(enabled);
-	}
-
-	public void toggle()
-	{
-		setEnabled(!isEnabled());
+		super.setEnabled(enabled);
 	}
 
 	public void clear()
 	{
 		debugMap.clear();
+		setDefaultDebug();
 	}
 
 	public void addDebug(String name, Supplier<String> supplier)
 	{
 		debugMap.put(name, supplier);
+		updateGuiText();
 	}
 
 	public void removeDebug(String name)
 	{
 		debugMap.remove(name);
+		updateGuiText();
 	}
 
 	@Override
@@ -116,97 +166,64 @@ public class DebugComponent extends UIComponent<DebugComponent> implements IPadd
 	}
 
 	@Override
-	public boolean onScrollWheel(int x, int y, int delta)
+	public boolean onScrollWheel(int delta)
 	{
 		if (!isHovered())
 			return false;
 
+		FontOptions fontOptions = text.getFontOptions();
 		if (GuiScreen.isCtrlKeyDown())
 		{
 			float scale = fontOptions.getFontScale();
 			scale += 1 / 3F * delta;
 			scale = MathHelper.clamp(scale, 1 / 3F, 1);
 
-			fontOptions = fontOptions.toBuilder().scale(scale).build();
-			MalisisCore.message(scale);
+			setFontOptions(fontOptions.toBuilder().scale(scale).build());
 		}
 		else if (GuiScreen.isShiftKeyDown())
 		{
-			ColoredBackground background = (ColoredBackground) backgroundRenderer;
-			int alpha = background.getTopLeftAlpha();
 			alpha += 25 * delta;
 			alpha = MathHelper.clamp(alpha, 0, 255);
-
-			background.setAlpha(alpha);
 		}
 
 		return true;
 	}
 
-	@Override
-	public void drawForeground(GuiRenderer renderer, int mouseX, int mouseY, float partialTick)
+	private int hierarchyColor()
 	{
-		UIComponent<?> hoveredComponent = MalisisGui.getHoveredComponent();
-
-		drawHierarchy(renderer, hoveredComponent);
-
-		//hard code mouse
-		int dy = 1, oy = getPadding().top();
-		MalisisFont font = MalisisFont.minecraftFont;
-
-		String mouseText = "Mouse : " + mouseX + "," + mouseY;
-		if (hoveredComponent != null)
-			mouseText += "(" + hoveredComponent.relativeX(mouseX) + ", " + hoveredComponent.relativeY(mouseY) + ")";
-
-		renderer.drawText(null, mouseText, getPadding().left(), getPadding().top(), 0, fontOptions, false);
-		for (Entry<String, Supplier<String>> entry : debugMap.entrySet())
-			renderer.drawText(	null,
-								entry.getKey() + " : " + entry.getValue().get(),
-								5,
-								dy++ * font.getStringHeight(fontOptions) + oy,
-								0,
-								fontOptions,
-								false);
+		return hierarchyColor;
 	}
 
-	public void drawHierarchy(GuiRenderer renderer, UIComponent<?> component)
+	private int hierarchyZIndex()
 	{
+		return hierarchyZIndex;
+	}
+
+	public void drawHierarchy(GuiRenderer renderer)
+	{
+		UIComponent component = MalisisGui.getHoveredComponent();
 		if (component == null || !GuiScreen.isAltKeyDown())
 			return;
 
-		Set<UIComponent<?>> components = Sets.newLinkedHashSet();
+		int offset = 80;
+		hierarchyColor = 0xFF0000;
+		hierarchyZIndex = 200;
 		while (component != null)
 		{
-			if (component.getParent() != null) //don't add the screen component
-				components.add(component);
-			component = component.getParent();
-		}
+			hierarchyZIndex--;
+			borderShape.renderFor(renderer, component);
 
-		//if only one component offset is never used
-		int offset = components.size() > 1 ? Math.min(100, 200 / (components.size() - 1)) : 0;
-		offset = 80;
-		//green/blue
-		int r = 255;
-		int g = 0;
-		int b = 0;
-		int z = 100;
+			int r = (hierarchyColor >> 16) & 0xFF;
+			int g = (hierarchyColor >> 8) & 0xFF;
+			int b = (hierarchyColor) & 0xFF;
 
-		renderer.next(GL11.GL_LINE_LOOP);
-		GL11.glLineWidth(3);
-		for (UIComponent<?> comp : components)
-		{
-			renderer.drawRectangle(	comp.screenX(),
-									comp.screenY(),
-									z--,
-									comp.size().width(),
-									comp.size().height(),
-									(r << 16) + (g << 8) + b,
-									255,
-									false);
 			r -= Math.max(offset, 0);
 			g = Math.min(g + offset, 255);
 			b = Math.min(b + 2 * offset, 255);
+
+			hierarchyColor = (b << 16) + (g << 8) + r;
+
+			component = component.getParent();
 		}
-		renderer.next(GL11.GL_QUADS);
 	}
 }

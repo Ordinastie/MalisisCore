@@ -24,7 +24,7 @@
 
 package net.malisis.core.util.bbcode.render;
 
-import net.malisis.core.client.gui.component.element.Size.ISize;
+import net.malisis.core.client.gui.element.Size.ISize;
 import net.malisis.core.util.bbcode.BBString;
 
 /**
