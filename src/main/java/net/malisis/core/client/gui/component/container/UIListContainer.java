@@ -26,8 +26,11 @@ package net.malisis.core.client.gui.component.container;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+
+import com.google.common.collect.Maps;
 
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
@@ -44,6 +47,7 @@ public class UIListContainer<S> extends UIContainer
 {
 	protected int elementSpacing = 0;
 	protected Collection<S> elements = Collections.emptyList();
+	protected Map<S, UIComponent> componentElements = Maps.newHashMap();
 	protected int lastSize = 0;
 	protected Function<S, UIComponent> elementComponentFactory = e -> new UILabel(Objects.toString(e));
 	protected int elementsSize;
@@ -56,6 +60,7 @@ public class UIListContainer<S> extends UIContainer
 	protected void buildElementComponents()
 	{
 		removeAll();
+		componentElements.clear();
 
 		RowLayout layout = new RowLayout(this, elementSpacing);
 		for (S element : elements)
@@ -63,6 +68,7 @@ public class UIListContainer<S> extends UIContainer
 			UIComponent comp = elementComponentFactory.apply(element);
 			comp.attachData(element);
 			layout.add(comp);
+			componentElements.put(element, comp);
 		}
 		elementsSize = elements.size();
 	}
@@ -76,6 +82,11 @@ public class UIListContainer<S> extends UIContainer
 	public Collection<S> getElements()
 	{
 		return elements;
+	}
+
+	public UIComponent getElementComponent(S element)
+	{
+		return componentElements.get(element);
 	}
 
 	public UIListContainer<S> setComponentFactory(Function<S, UIComponent> factory)

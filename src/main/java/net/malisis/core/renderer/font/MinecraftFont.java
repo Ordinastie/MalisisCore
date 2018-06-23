@@ -185,8 +185,9 @@ public class MinecraftFont extends MalisisFont
 
 		public MCCharData(char c)
 		{
+			//§ => &
 			super(c == '\u00a7' ? '&' : c, 0, 0, 0);
-			this.pos = CHARLIST.indexOf(c);
+			this.pos = CHARLIST.indexOf(this.c);
 		}
 
 		@Override

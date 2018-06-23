@@ -689,8 +689,6 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		{
 			if (parent != null && multiLine && wrapSize == null)
 				wrapSize = () -> parent.innerSize().width();
-			if (parent != null && zIndex == null)
-				zIndex = parent::getZIndex;
 
 			return new GuiText(text, parameters, positionBuilder, zIndex, parent, fontOptions, multiLine, translated, literal, wrapSize);
 		}

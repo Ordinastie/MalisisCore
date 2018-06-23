@@ -184,6 +184,11 @@ public class Position
 		return new DynamicPosition(x, y, null, null);
 	}
 
+	public static IPosition of(IntSupplier x, IntSupplier y)
+	{
+		return new DynamicPosition(0, 0, x, y);
+	}
+
 	//position relative to parent
 	public static IPosition of(IChild<?> owner, int x, int y)
 	{

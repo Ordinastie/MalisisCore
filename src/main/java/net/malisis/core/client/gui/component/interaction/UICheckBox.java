@@ -59,31 +59,29 @@ public class UICheckBox extends UIComponent implements IContentHolder<UIComponen
 	public UICheckBox(String text)
 	{
 		setText(text);
-		setSize(Size.sizeOfContent(this, 14, 4));
+		setSize(Size.sizeOfContent(this, 14, 12));
 
 		//Background
-		GuiShape bg = GuiShape.builder(this).position().x(1).back().size(12, 12).icon(GuiIcon.CHECKBOX_BG).build();
-		GuiShape overlay = GuiShape.builder().position().x(2).y(1).back().size(10, 10).color(0xFFFFFF).alpha(80).build();
-
-		setBackground(r -> {
-			bg.render(r);
-			if (isHovered())
-				overlay.render(r);
-		});
+		setBackground(GuiShape.builder(this).position().x(1).back().size(12, 12).icon(GuiIcon.CHECKBOX_BG).build());
 
 		//Foreground
-		GuiShape check = GuiShape	.builder()
+		GuiShape overlay = GuiShape.builder(this).position().x(2).y(1).back().size(10, 10).color(0xFFFFFF).alpha(80).build();
+		GuiShape check = GuiShape	.builder(this)
 									.position()
 									.x(1)
 									.y(1)
 									.back()
 									.size(12, 10)
+									.zIndex(10)
 									.icon(GuiIcon.forComponent(this, GuiIcon.CHECKBOX, GuiIcon.CHECKBOX_HOVER, GuiIcon.CHECKBOX_DISABLED))
 									.build();
 
 		setForeground(r -> {
+			if (isHovered())
+				overlay.render(r);
 			if (isChecked())
 				check.render(r);
+			r.next();
 			if (content() != null)
 				content().render(r);
 		});
@@ -175,7 +173,7 @@ public class UICheckBox extends UIComponent implements IContentHolder<UIComponen
 	@Override
 	public String getPropertyString()
 	{
-		return (checked ? "checked" : "") + "[" + TextFormatting.GREEN + content + TextFormatting.RESET + "] " + super.getPropertyString();
+		return (checked ? "checked " : "") + "[" + TextFormatting.GREEN + content + TextFormatting.RESET + "] " + super.getPropertyString();
 	}
 
 	/**

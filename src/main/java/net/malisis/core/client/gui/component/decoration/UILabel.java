@@ -45,7 +45,7 @@ import net.minecraft.util.text.TextFormatting;
 public class UILabel extends UIComponent implements IScrollable<GuiText>, IClipable
 {
 	protected final GuiText text;
-
+	protected boolean autoSize = false;
 	protected final IPosition offset = UIScrollBar.scrollingOffset(this);
 
 	/**
@@ -58,11 +58,11 @@ public class UILabel extends UIComponent implements IScrollable<GuiText>, IClipa
 	{
 		this.text = GuiText	.of(this)
 							.multiLine(multiLine)
-							.literal()
-							.translated(false)
+							.literal(false)
+							.translated(true)
 							.text(text)
 							.fontOptions(FontOptions.builder().color(0x444444).build())
-							.wrapSize(() -> multiLine ? size.width() - UIScrollBar.scrollbarWidth(this) - 2 : 0)
+							.wrapSize(() -> autoSize ? 0 : innerSize().width())
 							.build();
 		setAutoSize();
 
@@ -134,7 +134,15 @@ public class UILabel extends UIComponent implements IScrollable<GuiText>, IClipa
 
 	public void setAutoSize()
 	{
-		super.setSize(Size.sizeOfContent(this, 0, 0));
+		setSize(Size.sizeOfContent(this, 0, 0));
+		autoSize = true;
+	}
+
+	@Override
+	public void setSize(@Nonnull ISize size)
+	{
+		super.setSize(size);
+		autoSize = false;
 	}
 
 	@Override

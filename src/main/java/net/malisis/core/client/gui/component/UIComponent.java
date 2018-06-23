@@ -85,7 +85,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	private final IPosition mousePosition = MalisisGui.MOUSE_POSITION.minus(screenPosition);
 	/** Size of this {@link UIComponent}. */
 	protected ISize size = Size.inherited(this);
-	/** Size available for content. TODO: move to IContentSize ? */
+	/** Size available for content. */
 	protected ISize innerSize = Size.of(Sizes.innerWidth(this), Sizes.innerHeight(this));
 	/** Z index of the component. */
 	protected int zIndex = 0;

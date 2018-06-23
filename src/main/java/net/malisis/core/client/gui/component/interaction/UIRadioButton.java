@@ -92,6 +92,7 @@ public class UIRadioButton extends UIComponent implements IContentHolder<UICompo
 				radio.render(r);
 			if (isHovered())
 				overlay.render(r);
+			r.next();
 			if (content() != null)
 				content().render(r);
 		});

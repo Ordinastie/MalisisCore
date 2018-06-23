@@ -61,6 +61,8 @@ public class UIPasswordField extends UITextField
 	@Override
 	public String getText()
 	{
+		if (password == null)
+			return "";
 		return password.toString();
 	}
 

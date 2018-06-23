@@ -46,8 +46,11 @@ import net.malisis.core.client.gui.component.scrolling.UISlimScrollbar;
 import net.malisis.core.client.gui.element.Padding;
 import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.element.position.Position;
+import net.malisis.core.client.gui.element.position.Position.IPosition;
+import net.malisis.core.client.gui.element.position.Positions;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.render.GuiIcon;
+import net.malisis.core.client.gui.render.GuiRenderer;
 import net.malisis.core.client.gui.render.shape.GuiShape;
 import net.malisis.core.renderer.font.FontOptions;
 
@@ -105,7 +108,17 @@ public class UISelect<T> extends UIComponent
 
 		setBackground(background);
 		setForeground(r -> {
-			//selectedText().render(r, screenPosition().x() + 2, screenPosition().y() + 2, getZIndex() + 2, IClipable.NOCLIP);;
+			UIComponent c = optionsContainer.getElementComponent(selected());
+			if (c != null)
+			{
+				IPosition old = c.position();
+				IPosition pos = Position.of(Positions.leftAligned(c, 1), Positions.middleAligned(c, 1));
+				c.setParent(this);
+				c.setPosition(pos);
+				((IOptionComponent) c).renderSelected(r);
+				c.setPosition(old);
+				c.setParent(optionsContainer);
+			}
 			arrowShape.render(r);
 		});
 	}
@@ -142,6 +155,12 @@ public class UISelect<T> extends UIComponent
 	public void setStringFunction(Function<T, String> stringFunction)
 	{
 		this.stringFunction = checkNotNull(stringFunction);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <U extends UIComponent & IOptionComponent> void setComponentFactory(Function<T, U> factory)
+	{
+		optionsContainer.setComponentFactory((Function<T, UIComponent>) factory);
 	}
 
 	//#end Getters/Setters
@@ -351,6 +370,14 @@ public class UISelect<T> extends UIComponent
 		}
 
 		//#end IScrollable
+		@Override
+		public void setFocused(boolean focused)
+		{
+			//			if (!focused && (MalisisGui.getFocusedComponent() == null || MalisisGui.getFocusedComponent().getParent() != this))
+			//				hide();
+			super.setFocused(focused);
+		}
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public boolean onClick()
@@ -392,40 +419,40 @@ public class UISelect<T> extends UIComponent
 		{
 			private int width;
 			private int height;
-	
+
 			private void update()
 			{
 				if (options == null)
 					return;
-	
+
 				//calculate height
 				int offset = UISelect.this.optionsContainer.optionOffset;
 				height = 2;
 				for (int i = offset; i < Math.min(offset + maxDisplayedOptions, options.size()); i++)
 					height += options.get(i).getHeight(UISelect.this);
-	
+
 				//calculate width
 				width = UISelect.this.size().width();
 				if (maxOptionsWidth == SELECT_WIDTH)
 					return;
-	
+
 				width -= 4;
 				for (Option<?> option : UISelect.this)
 					width = Math.max(width, (int) MalisisFont.minecraftFont.getStringWidth(option.getLabel(labelPattern), fontOptions));
 				width += 4;
 				if (width == LONGEST_OPTION)
 					return;
-	
+
 				if (maxOptionsWidth >= UISelect.this.size().width())
 					width = Math.min(maxOptionsWidth, width);
 			}
-	
+
 			@Override
 			public int width()
 			{
 				return width;
 			}
-	
+
 			@Override
 			public int height()
 			{
@@ -433,7 +460,7 @@ public class UISelect<T> extends UIComponent
 			}
 		}*/
 
-	public class Option extends UILabel
+	public class Option extends UILabel implements IOptionComponent
 	{
 		/** The default {@link FontOptions} to use for this {@link UISelect}. */
 		protected FontOptions fontOptions = FontOptions	.builder()
@@ -444,6 +471,8 @@ public class UISelect<T> extends UIComponent
 														.when(this::isSelected)
 														.color(0x9EA8DF)
 														.build();
+		protected FontOptions selectedfontOptions = FontOptions.builder().color(0xFFFFFF).shadow().build();
+
 		GuiShape background = GuiShape.builder(this).color(0x5E789F).alpha(() -> {
 			if (isHovered())
 				return 255;
@@ -469,6 +498,22 @@ public class UISelect<T> extends UIComponent
 		public boolean isSelected()
 		{
 			return Objects.equals(selected(), getData());
+		}
+
+		@Override
+		public void renderSelected(GuiRenderer renderer)
+		{
+			text.setFontOptions(selectedfontOptions);
+			text.render(renderer);
+			text.setFontOptions(fontOptions);
+		}
+	}
+
+	public interface IOptionComponent
+	{
+		public default void renderSelected(GuiRenderer renderer)
+		{
+			((UIComponent) this).render(renderer);
 		}
 	}
 

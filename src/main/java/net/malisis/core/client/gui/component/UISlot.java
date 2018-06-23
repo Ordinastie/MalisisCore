@@ -67,7 +67,7 @@ public class UISlot extends UIComponent
 											.y(1)
 											.back()
 											.color(0xFFFFFF)
-											.zIndex(200)
+											.zIndex(180)
 											.size(16, 16)
 											.alpha(0x80)
 											.build();

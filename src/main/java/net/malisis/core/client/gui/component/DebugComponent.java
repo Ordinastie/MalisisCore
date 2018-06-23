@@ -78,7 +78,6 @@ public class DebugComponent extends UIComponent implements IPadded, ITextHolder
 
 		setBackground(GuiShape.builder(this).color(0).alpha(this::getAlpha).build());
 		setForeground(((IGuiRenderer) this::drawHierarchy).and(r -> {
-			//			GuiText.of("Test").build().render(r);
 			text.render(r);
 		}));
 

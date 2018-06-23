@@ -24,7 +24,9 @@
 
 package net.malisis.core.client.gui.component.content;
 
+import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.element.position.Position.IPosition;
 
 /**
@@ -37,11 +39,11 @@ public interface IContentHolder<T extends IContent>
 
 	public default IPosition contentPosition()
 	{
-		return content().position();
+		return content() != null ? content().position() : Position.ZERO;
 	}
 
 	public default ISize contentSize()
 	{
-		return content().size();
+		return content() != null ? content().size() : Size.ZERO;
 	}
 }
