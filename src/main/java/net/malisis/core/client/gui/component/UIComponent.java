@@ -73,7 +73,7 @@ import net.malisis.core.util.MouseButton;
  */
 public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListener, IChild<UIComponent>
 {
-	/** Reference to the {@link MalisisGui} this {@link UIComponent} was added to. */
+	/** Reference to the {@link MalisisGui} this {@link UIComponent} was added to. Set when the component is added to screen. */
 	protected MalisisGui gui;
 	/** List of {@link UIComponent components} controlling this {@link UIContainer}. */
 	protected final Set<IControlComponent> controlComponents;
@@ -143,6 +143,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 *
 	 * @param position the new position
 	 */
+	@Override
 	public void setPosition(@Nonnull IPosition position)
 	{
 		//if(fireEvent(this, this.position, position);
@@ -295,6 +296,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	 *
 	 * @param parent the parent
 	 */
+	@Override
 	public void setParent(UIComponent parent)
 	{
 		this.parent = parent;

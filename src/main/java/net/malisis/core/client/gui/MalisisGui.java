@@ -185,6 +185,11 @@ public abstract class MalisisGui extends GuiScreen
 		this.inventoryContainer = container;
 	}
 
+	public MalisisInventoryContainer inventoryContainer()
+	{
+		return inventoryContainer;
+	}
+
 	/**
 	 * Gets the {@link GuiTexture} used by the {@link GuiRenderer}.
 	 *

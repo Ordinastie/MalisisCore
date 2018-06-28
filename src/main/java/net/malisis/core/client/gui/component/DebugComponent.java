@@ -94,8 +94,8 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 		debugMap.put("Focus", () -> String.valueOf(MalisisGui.getFocusedComponent()));
 		debugMap.put("Hover", () -> String.valueOf(MalisisGui.getHoveredComponent()));
 		debugMap.put("Dragged", () -> String.valueOf(MalisisGui.getDraggedComponent()));
-		if (MalisisGui.getInventoryContainer() != null)
-			debugMap.put("Picked", () -> ItemUtils.toString(MalisisGui.getInventoryContainer().getPickedItemStack()));
+		if (getGui().inventoryContainer() != null)
+			debugMap.put("Picked", () -> ItemUtils.toString(getGui().inventoryContainer().getPickedItemStack()));
 		updateGuiText();
 	}
 
