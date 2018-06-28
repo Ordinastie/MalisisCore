@@ -417,10 +417,12 @@ public class GuiRenderer
 		if (itemStack == null || itemStack == ItemStack.EMPTY)
 			return;
 
+		float z = itemRenderer.zLevel;
 		if (relative && currentComponent != null)
 		{
 			x += currentComponent.screenPosition().x();
 			y += currentComponent.screenPosition().y();
+			itemRenderer.zLevel = currentComponent.getZIndex();
 		}
 
 		FontRenderer fontRenderer = itemStack.getItem().getFontRenderer(itemStack);
@@ -447,6 +449,7 @@ public class GuiRenderer
 		RenderHelper.disableStandardItemLighting();
 		//GlStateManager.enableBlend(); //Forge commented blend reenabling
 
+		itemRenderer.zLevel = z;
 		currentTexture = null;
 		bindDefaultTexture();
 		startDrawing();

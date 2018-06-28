@@ -33,7 +33,6 @@ import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.container.UIContainer.ContainerContent;
 import net.malisis.core.client.gui.component.content.IContent;
 import net.malisis.core.client.gui.component.control.ICloseable;
 import net.malisis.core.client.gui.component.control.IScrollable;
@@ -60,7 +59,7 @@ import net.malisis.core.client.gui.render.shape.GuiShape;
  *
  * @author Ordinastie, PaleoCrafter
  */
-public class UIContainer extends UIComponent implements IClipable, IScrollable<ContainerContent>, ICloseable, IPadded
+public class UIContainer extends UIComponent implements IClipable, IScrollable, ICloseable, IPadded
 {
 	protected ContainerContent content = new ContainerContent();
 
@@ -398,6 +397,14 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable<C
 		protected final Set<UIComponent> components = new LinkedHashSet<>();
 		protected int width;
 		protected int height;
+
+		@Override
+		public void setParent(UIComponent parent)
+		{}
+
+		@Override
+		public void setPosition(IPosition position)
+		{}
 
 		@Override
 		public IPosition position()

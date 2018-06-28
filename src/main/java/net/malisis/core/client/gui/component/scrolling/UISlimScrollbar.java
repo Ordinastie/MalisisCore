@@ -21,7 +21,7 @@ public final class UISlimScrollbar extends UIScrollBar
 	/** Whether the scrollbar should fade in/out */
 	protected boolean fade = true;
 
-	public <T extends UIComponent & IScrollable<?>> UISlimScrollbar(T parent, Type type)
+	public <T extends UIComponent & IScrollable> UISlimScrollbar(T parent, Type type)
 	{
 		super(parent, type);
 

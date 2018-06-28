@@ -33,7 +33,7 @@ import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.content.ITextHolder;
+import net.malisis.core.client.gui.component.content.IContentHolder;
 import net.malisis.core.client.gui.element.IClipable;
 import net.malisis.core.client.gui.element.IOffset;
 import net.malisis.core.client.gui.element.Padding;
@@ -61,7 +61,7 @@ import net.minecraft.util.text.TextFormatting;
  *
  * @author Ordinastie
  */
-public class UITextField extends UIComponent implements ITextHolder, IClipable, IOffset, IPadded
+public class UITextField extends UIComponent implements IContentHolder, IClipable, IOffset, IPadded
 {
 	protected final GuiText guiText;
 	/** The {@link FontOptions} to use for this {@link UITextField} when disabled. */
@@ -113,7 +113,8 @@ public class UITextField extends UIComponent implements ITextHolder, IClipable, 
 
 	protected UITextField(boolean multiLine)
 	{
-		this.guiText = GuiText	.of(this)
+		this.guiText = GuiText	.builder()
+								.parent(this)
 								.text(this::getText)
 								.multiLine(multiLine)
 								.translated(false)

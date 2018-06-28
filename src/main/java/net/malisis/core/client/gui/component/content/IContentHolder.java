@@ -33,9 +33,9 @@ import net.malisis.core.client.gui.element.position.Position.IPosition;
  * @author Ordinastie
  *
  */
-public interface IContentHolder<T extends IContent>
+public interface IContentHolder
 {
-	public T content();
+	public IContent content();
 
 	public default IPosition contentPosition()
 	{

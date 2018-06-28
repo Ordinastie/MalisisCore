@@ -36,7 +36,6 @@ import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEv
 import net.malisis.core.client.gui.render.GuiRenderer;
 import net.malisis.core.client.gui.render.shape.GuiShape;
 import net.malisis.core.client.gui.render.shape.GuiShape.Builder;
-import net.malisis.core.client.gui.text.GuiText;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
 
@@ -45,7 +44,7 @@ import net.minecraft.util.ChatAllowedCharacters;
  *
  */
 
-public class UITextArea extends UITextField implements IScrollable<GuiText>
+public class UITextArea extends UITextField implements IScrollable
 {
 	private final UIScrollBar scrollbar;
 

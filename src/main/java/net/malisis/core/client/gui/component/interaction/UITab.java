@@ -30,14 +30,15 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.container.UITabGroup;
 import net.malisis.core.client.gui.component.container.UITabGroup.TabChangeEvent;
+import net.malisis.core.client.gui.component.content.IContent;
 import net.malisis.core.client.gui.component.content.IContentHolder;
-import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.element.Size.ISize;
 import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.ActiveStateChange;
 import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.client.gui.render.shape.GuiShape;
+import net.malisis.core.client.gui.text.GuiText;
 import net.malisis.core.renderer.font.FontOptions;
 import net.minecraft.util.text.TextFormatting;
 
@@ -45,7 +46,7 @@ import net.minecraft.util.text.TextFormatting;
  * @author Ordinastie
  *
  */
-public class UITab extends UIComponent implements IContentHolder<UIComponent>
+public class UITab extends UIComponent implements IContentHolder
 {
 	protected final ISize AUTO_SIZE = Size.of(	() -> isHorizontal() ? contentSize().width() : parent.size().width(),
 												() -> isHorizontal() ? parent.size().height() : contentSize().height());
@@ -60,7 +61,7 @@ public class UITab extends UIComponent implements IContentHolder<UIComponent>
 													.color(0xFFFFA0)
 													.build();
 	/** Content to use for this {@link UITab}. */
-	protected UIComponent content;
+	protected IContent content;
 	/** Size calculated based on content. */
 	protected ISize contentSize = Size.ZERO;
 	/** The container this {@link UITab} is linked to. */
@@ -95,39 +96,41 @@ public class UITab extends UIComponent implements IContentHolder<UIComponent>
 	 *
 	 * @param content the content
 	 */
-	public UITab(UIComponent content)
+	public UITab(IContent content)
 	{
 		this();
 		setContent(content);
 	}
 
 	//#region Getters/Setters
-	public void setContent(UIComponent content)
+	/**
+	 * Sets the content for this {@link UICheckBox}.
+	 *
+	 * @param content the content
+	 */
+	public void setContent(IContent content)
 	{
 		this.content = content;
 		content.setParent(this);
-		content.setPosition(Position.centered(content));
-		//TODO: padding ?
+		content.setPosition(Position.of(content).centered().middleAligned().build());
 		contentSize = content.size().plus(Size.of(6, 6));
-	}
-
-	@Override
-	public UIComponent content()
-	{
-		return content;
 	}
 
 	public void setText(String text)
 	{
-		if (content() instanceof UILabel)
-		{
-			((UILabel) content()).setText(text);
-			return;
-		}
+		GuiText gt = GuiText.of(text, fontOptions);
+		setContent(gt);
+	}
 
-		UILabel label = new UILabel(text);
-		label.setFontOptions(fontOptions);
-		setContent(label);
+	/**
+	 * Gets the {@link UIComponent} used as content for this {@link UICheckBox}.
+	 *
+	 * @return the content component
+	 */
+	@Override
+	public IContent content()
+	{
+		return content;
 	}
 
 	public void setAutoSize()

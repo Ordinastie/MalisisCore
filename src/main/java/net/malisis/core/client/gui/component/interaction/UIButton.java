@@ -30,13 +30,14 @@ import org.lwjgl.input.Keyboard;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.content.IContent;
 import net.malisis.core.client.gui.component.content.IContentHolder;
-import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.element.position.Position.IPosition;
 import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.client.gui.render.shape.GuiShape;
+import net.malisis.core.client.gui.text.GuiText;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.util.MouseButton;
 import net.minecraft.init.SoundEvents;
@@ -47,7 +48,7 @@ import net.minecraft.util.text.TextFormatting;
  *
  * @author Ordinastie, PaleoCrafter
  */
-public class UIButton extends UIComponent implements IContentHolder<UIComponent>
+public class UIButton extends UIComponent implements IContentHolder
 {
 	/** The {@link FontOptions} to use by default for the {@link UIButton} content. */
 	protected final FontOptions fontOptions = FontOptions	.builder()
@@ -63,7 +64,7 @@ public class UIButton extends UIComponent implements IContentHolder<UIComponent>
 	protected IPosition contentPosition = null;
 
 	/** Content used for this {@link UIButton}. */
-	protected UIComponent content;
+	protected IContent content;
 	/** Whether this {@link UIButton} is currently being pressed. */
 	protected boolean isPressed = false;
 
@@ -110,17 +111,21 @@ public class UIButton extends UIComponent implements IContentHolder<UIComponent>
 
 	//#region Getters/Setters
 	/**
-	 * Sets the content for this {@link UIButton}.<br>
-	 * Note that the position of the content is overwritten with {@link #contentPosition}. For custom content position, use
-	 * {@link #setContentPosition(IPosition)}.
+	 * Sets the content for this {@link UIButton}.
 	 *
 	 * @param content the content
 	 */
-	public void setContent(UIComponent content)
+	public void setContent(IContent content)
 	{
 		this.content = content;
 		content.setParent(this);
-		setContentPosition(contentPosition);
+		content.setPosition(Position.of(content).centered().middleAligned().build().plus(offsetPosition));
+	}
+
+	public void setText(String text)
+	{
+		GuiText gt = GuiText.of(text, fontOptions);
+		setContent(gt);
 	}
 
 	/**
@@ -129,36 +134,9 @@ public class UIButton extends UIComponent implements IContentHolder<UIComponent>
 	 * @return the content component
 	 */
 	@Override
-	public UIComponent content()
+	public IContent content()
 	{
 		return content;
-	}
-
-	public void setText(String text)
-	{
-		if (content() instanceof UILabel)
-		{
-			((UILabel) content()).setText(text);
-			return;
-		}
-
-		UILabel label = new UILabel(text);
-		label.setFontOptions(fontOptions);
-		setContent(label);
-	}
-
-	/**
-	 * Sets the position for the content.
-	 *
-	 * @param position the new content position
-	 */
-	public void setContentPosition(IPosition position)
-	{
-		UIComponent content = content();
-		if (position == null)
-			contentPosition = content != null ? Position.centered(content) : null;
-		if (content != null)
-			content.setPosition(contentPosition.plus(offsetPosition));
 	}
 
 	/**
@@ -178,7 +156,7 @@ public class UIButton extends UIComponent implements IContentHolder<UIComponent>
 	 */
 	public UIButton setAutoSize()
 	{
-		setSize(Size.sizeOfContent(this, 4, 4));
+		setSize(Size.sizeOfContent(this, 10, 10));
 		return this;
 	}
 
@@ -186,6 +164,11 @@ public class UIButton extends UIComponent implements IContentHolder<UIComponent>
 	{
 		this.action = action;
 		return this;
+	}
+
+	public FontOptions defaultFontOptions()
+	{
+		return fontOptions;
 	}
 
 	//#end Getters/Setters
@@ -236,4 +219,5 @@ public class UIButton extends UIComponent implements IContentHolder<UIComponent>
 	{
 		return "[" + TextFormatting.GREEN + content + TextFormatting.RESET + "] " + super.getPropertyString();
 	}
+
 }

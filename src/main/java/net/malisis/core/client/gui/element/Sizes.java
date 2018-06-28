@@ -93,7 +93,7 @@ public class Sizes
 		};
 	}
 
-	public static IntSupplier widthOfContent(IContentHolder<?> owner, int offset)
+	public static IntSupplier widthOfContent(IContentHolder owner, int offset)
 	{
 		checkNotNull(owner);
 		return () -> {
@@ -101,7 +101,7 @@ public class Sizes
 		};
 	}
 
-	public static IntSupplier heightOfContent(IContentHolder<?> owner, int offset)
+	public static IntSupplier heightOfContent(IContentHolder owner, int offset)
 	{
 		checkNotNull(owner);
 		return () -> {

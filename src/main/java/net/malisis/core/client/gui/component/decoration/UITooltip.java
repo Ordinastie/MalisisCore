@@ -26,12 +26,14 @@ package net.malisis.core.client.gui.component.decoration;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.content.IContent;
 import net.malisis.core.client.gui.component.content.IContentHolder;
 import net.malisis.core.client.gui.element.Padding;
 import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.client.gui.render.shape.GuiShape;
+import net.malisis.core.client.gui.text.GuiText;
 import net.malisis.core.renderer.animation.Animation;
 import net.malisis.core.renderer.animation.transformation.ITransformable;
 import net.malisis.core.renderer.font.FontOptions;
@@ -41,10 +43,10 @@ import net.malisis.core.renderer.font.FontOptions;
  *
  * @author PaleoCrafter
  */
-public class UITooltip extends UIComponent implements IContentHolder<UIComponent>
+public class UITooltip extends UIComponent implements IContentHolder
 {
 	protected Padding padding = Padding.of(4);
-	protected UIComponent content;
+	protected IContent content;
 	protected int delay = 0;
 	protected Animation<ITransformable.Alpha> animation;
 	/** The default {@link FontOptions} to use for this {@link UITooltip} when using text. */
@@ -87,29 +89,34 @@ public class UITooltip extends UIComponent implements IContentHolder<UIComponent
 
 	//#region Getters/Setters
 	@Override
-	public UIComponent content()
+	public IContent content()
 	{
 		return content;
 	}
 
-	public void setContent(UIComponent content)
+	public void setContent(IContent content)
 	{
 		this.content = content;
-		content.setParent(this);
-		content.setPosition(Position.of(content).centered().middleAligned(2).build());
+		if (content instanceof UIComponent)
+		{
+			UIComponent c = (UIComponent) content;
+			c.setParent(this);
+			c.setPosition(Position.of(c).centered().middleAligned(2).build());
+		}
 	}
 
 	public void setText(String text)
 	{
-		if (content() instanceof UILabel)
-		{
-			((UILabel) content()).setText(text);
-			return;
-		}
-
-		UILabel label = new UILabel(text);
-		label.setFontOptions(fontOptions);
-		setContent(label);
+		GuiText gt = GuiText.builder()
+							.parent(this)
+							.text(text)
+							.fontOptions(fontOptions)
+							.position()
+							.centered()
+							.middleAligned(2)
+							.back()
+							.build();
+		setContent(gt);
 	}
 
 	public UITooltip setDelay(int delay)

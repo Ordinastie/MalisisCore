@@ -42,7 +42,7 @@ import net.minecraft.util.text.TextFormatting;
  *
  * @author Ordinastie
  */
-public class UILabel extends UIComponent implements IScrollable<GuiText>, IClipable
+public class UILabel extends UIComponent implements IScrollable, IClipable
 {
 	protected final GuiText text;
 	protected boolean autoSize = false;
@@ -56,7 +56,8 @@ public class UILabel extends UIComponent implements IScrollable<GuiText>, IClipa
 	 */
 	public UILabel(String text, boolean multiLine)
 	{
-		this.text = GuiText	.of(this)
+		this.text = GuiText	.builder()
+							.parent(this)
 							.multiLine(multiLine)
 							.literal(false)
 							.translated(true)

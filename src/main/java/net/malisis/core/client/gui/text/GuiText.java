@@ -109,7 +109,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	private UIComponent parent;
 
-	public GuiText(String text, Map<String, ICachedData<?>> parameters, PositionBuilder<GuiText, Builder> positionBuilder, IntSupplier zIndex, UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
+	private GuiText(String text, Map<String, ICachedData<?>> parameters, PositionBuilder<GuiText, Builder> positionBuilder, IntSupplier zIndex, UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
 	{
 		this.base = text;
 		this.parameters = parameters;
@@ -125,9 +125,40 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 	}
 
 	@Override
+	public void setParent(UIComponent parent)
+	{
+		this.parent = parent;
+	}
+
+	@Override
 	public UIComponent getParent()
 	{
 		return parent;
+	}
+
+	@Override
+	public void setPosition(IPosition position)
+	{
+		this.position = position;
+	}
+
+	@Override
+	public IPosition position()
+	{
+		return position;
+	}
+
+	/**
+	 * Gets the size of the text.<br>
+	 * Width matches longest line, height is the sum of each line height
+	 *
+	 * @return the i size
+	 */
+	@Override
+	public ISize size()
+	{
+		update(); //make sure to update cache
+		return size;
 	}
 
 	/**
@@ -268,30 +299,6 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		checkNotNull(fontOptions);
 		buildLines = this.fontOptions.isBold() != fontOptions.isBold() || this.fontOptions.getFontScale() != fontOptions.getFontScale();
 		this.fontOptions = fontOptions;
-	}
-
-	@Override
-	public IPosition position()
-	{
-		return position;
-	}
-
-	public void setPosition(IPosition position)
-	{
-		this.position = position;
-	}
-
-	/**
-	 * Gets the size of the text.<br>
-	 * Width matches longest line, height is the sum of each line height
-	 *
-	 * @return the i size
-	 */
-	@Override
-	public ISize size()
-	{
-		update(); //make sure to update cache
-		return size;
 	}
 
 	/**
@@ -528,14 +535,19 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		//return lines().stream().map(LineInfo::getText).collect(Collectors.joining());
 	}
 
-	public static Builder of(UIComponent parent)
+	public static Builder builder()
 	{
-		return new Builder().parent(parent);
+		return new Builder();
 	}
 
-	public static Builder of(String text)
+	public static GuiText of(String text)
 	{
-		return new Builder().text(text);
+		return new Builder().text(text).build();
+	}
+
+	public static GuiText of(String text, FontOptions options)
+	{
+		return new Builder().text(text).fontOptions(options).build();
 	}
 
 	public static class Builder
@@ -687,9 +699,6 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 		public GuiText build()
 		{
-			if (parent != null && multiLine && wrapSize == null)
-				wrapSize = () -> parent.innerSize().width();
-
 			return new GuiText(text, parameters, positionBuilder, zIndex, parent, fontOptions, multiLine, translated, literal, wrapSize);
 		}
 

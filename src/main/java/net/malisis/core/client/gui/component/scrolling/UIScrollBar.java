@@ -63,8 +63,8 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 		VERTICAL
 	}
 
-	private static final Map<IScrollable<?>, UIScrollBar> verticalScrollbars = new WeakHashMap<>();
-	private static final Map<IScrollable<?>, UIScrollBar> horizontalScrollbars = new WeakHashMap<>();
+	private static final Map<IScrollable, UIScrollBar> verticalScrollbars = new WeakHashMap<>();
+	private static final Map<IScrollable, UIScrollBar> horizontalScrollbars = new WeakHashMap<>();
 
 	protected IPosition scrollPosition = new ScrollPosition();
 	protected ISize scrollSize = Size.of(5, 5);
@@ -76,7 +76,7 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 
 	public boolean autoHide = false;
 
-	public <T extends UIComponent & IScrollable<?>> UIScrollBar(T parent, Type type)
+	public <T extends UIComponent & IScrollable> UIScrollBar(T parent, Type type)
 	{
 		this.type = type;
 
@@ -92,7 +92,7 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends UIComponent & IScrollable<?>> T parent()
+	public <T extends UIComponent & IScrollable> T parent()
 	{
 		return (T) getParent();
 	}
@@ -102,9 +102,9 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	 *
 	 * @return the scrollable
 	 */
-	protected IScrollable<?> getScrollable()
+	protected IScrollable getScrollable()
 	{
-		return (IScrollable<?>) getParent();
+		return (IScrollable) getParent();
 	}
 
 	/**
@@ -239,7 +239,7 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 	public void updateScrollbar()
 	{
 		UIComponent parent = getParent();
-		IScrollable<?> scrollable = getScrollable();
+		IScrollable scrollable = getScrollable();
 		int delta = 0;// hasVisibleOtherScrollbar() ? scrollThickness() : 0;
 		boolean hide = false;
 		float offset = offset();

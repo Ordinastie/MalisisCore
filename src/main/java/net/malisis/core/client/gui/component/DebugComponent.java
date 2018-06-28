@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.component.content.ITextHolder;
+import net.malisis.core.client.gui.component.content.IContentHolder;
 import net.malisis.core.client.gui.element.Padding;
 import net.malisis.core.client.gui.element.Padding.IPadded;
 import net.malisis.core.client.gui.element.Size;
@@ -51,7 +51,7 @@ import net.minecraft.util.math.MathHelper;
  * @author Ordinastie
  *
  */
-public class DebugComponent extends UIComponent implements IPadded, ITextHolder
+public class DebugComponent extends UIComponent implements IPadded, IContentHolder
 {
 	private HashMap<String, Supplier<String>> debugMap = new LinkedHashMap<>();
 	private GuiText text;
@@ -101,7 +101,7 @@ public class DebugComponent extends UIComponent implements IPadded, ITextHolder
 
 	private void updateGuiText()
 	{
-		Builder tb = GuiText.of(this).multiLine().translated(false).fontOptions(fontOptions).position().x(2).y(2).back();
+		Builder tb = GuiText.builder().parent(this).multiLine().translated(false).fontOptions(fontOptions).position().x(2).y(2).back();
 
 		String str = debugMap	.entrySet()
 								.stream()
@@ -177,7 +177,7 @@ public class DebugComponent extends UIComponent implements IPadded, ITextHolder
 			scale += 1 / 3F * delta;
 			scale = MathHelper.clamp(scale, 1 / 3F, 1);
 
-			setFontOptions(fontOptions.toBuilder().scale(scale).build());
+			text.setFontOptions(fontOptions.toBuilder().scale(scale).build());
 		}
 		else if (GuiScreen.isShiftKeyDown())
 		{

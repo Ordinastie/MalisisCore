@@ -27,13 +27,14 @@ package net.malisis.core.client.gui.component.interaction;
 import org.lwjgl.input.Keyboard;
 
 import net.malisis.core.client.gui.component.UIComponent;
+import net.malisis.core.client.gui.component.content.IContent;
 import net.malisis.core.client.gui.component.content.IContentHolder;
-import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.client.gui.render.shape.GuiShape;
+import net.malisis.core.client.gui.text.GuiText;
 import net.malisis.core.renderer.font.FontOptions;
 import net.minecraft.util.text.TextFormatting;
 
@@ -42,7 +43,7 @@ import net.minecraft.util.text.TextFormatting;
  *
  * @author Ordinastie
  */
-public class UICheckBox extends UIComponent implements IContentHolder<UIComponent>
+public class UICheckBox extends UIComponent implements IContentHolder
 {
 	protected final FontOptions fontOptions = FontOptions	.builder()
 															.color(0x444444)
@@ -52,7 +53,7 @@ public class UICheckBox extends UIComponent implements IContentHolder<UIComponen
 															.color(0xCCCCCC)
 															.build();
 	/** The content for this {@link UICheckBox}. */
-	protected UIComponent content;
+	protected IContent content;
 	/** Whether this {@link UICheckBox} is checked. */
 	protected boolean checked;
 
@@ -93,35 +94,33 @@ public class UICheckBox extends UIComponent implements IContentHolder<UIComponen
 	}
 
 	//#region Getters/Setters
-	public void setContent(UIComponent content)
+	/**
+	 * Sets the content for this {@link UICheckBox}.
+	 *
+	 * @param content the content
+	 */
+	public void setContent(IContent content)
 	{
 		this.content = content;
 		content.setParent(this);
-		content.setPosition(Position.of(content, 14, 2));
+		content.setPosition(Position.of(14, 2));
 	}
 
-	@Override
-	public UIComponent content()
+	public void setText(String text)
 	{
-		return content;
+		GuiText gt = GuiText.of(text, fontOptions);
+		setContent(gt);
 	}
 
 	/**
-	 * Sets the text for this {@link UICheckBox}.
+	 * Gets the {@link UIComponent} used as content for this {@link UICheckBox}.
 	 *
-	 * @param text the new text
+	 * @return the content component
 	 */
-	public void setText(String text)
+	@Override
+	public IContent content()
 	{
-		if (content() instanceof UILabel)
-		{
-			((UILabel) content()).setText(text);
-			return;
-		}
-
-		UILabel label = new UILabel(text);
-		label.setFontOptions(fontOptions);
-		setContent(label);
+		return content;
 	}
 
 	//#end Getters/Setters

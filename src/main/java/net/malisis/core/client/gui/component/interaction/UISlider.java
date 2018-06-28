@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.*;
 import com.google.common.base.Converter;
 
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.content.ITextHolder;
+import net.malisis.core.client.gui.component.content.IContentHolder;
 import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.render.GuiIcon;
@@ -44,7 +44,7 @@ import net.minecraft.util.text.TextFormatting;
  * @author Ordinastie
  *
  */
-public class UISlider<T> extends UIComponent implements ITextHolder
+public class UISlider<T> extends UIComponent implements IContentHolder
 {
 	private static int SLIDER_WIDTH = 8;
 
@@ -67,7 +67,8 @@ public class UISlider<T> extends UIComponent implements ITextHolder
 		this.converter = checkNotNull(converter);
 		this.value = converter.convert(0F);
 
-		this.text = GuiText	.of(this)
+		this.text = GuiText	.builder()
+							.parent(this)
 							.text(text)
 							.position()
 							.x(this::textPosition)

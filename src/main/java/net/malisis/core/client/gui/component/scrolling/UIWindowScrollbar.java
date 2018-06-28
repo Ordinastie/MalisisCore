@@ -38,7 +38,7 @@ import net.malisis.core.client.gui.render.shape.GuiShape;
  */
 public final class UIWindowScrollbar extends UIScrollBar
 {
-	public <T extends UIComponent & IScrollable<?>> UIWindowScrollbar(T parent, UIScrollBar.Type type)
+	public <T extends UIComponent & IScrollable> UIWindowScrollbar(T parent, UIScrollBar.Type type)
 	{
 		super(parent, type);
 		Supplier<GuiIcon> scrollIcon;

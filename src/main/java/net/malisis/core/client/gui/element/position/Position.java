@@ -160,7 +160,7 @@ public class Position
 				if (fixed)
 					return y;
 				if (parent instanceof IScrollable)
-					y += ((IScrollable<?>) parent).offset().y();
+					y += ((IScrollable) parent).offset().y();
 			}
 			return y;
 		}

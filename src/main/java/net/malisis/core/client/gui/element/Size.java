@@ -241,12 +241,12 @@ public class Size
 		return new DynamicSize(Sizes.parentWidth(owner, 1.0F, 0), Sizes.parentHeight(owner, 1.0F, 0));
 	}
 
-	public static ISize sizeOfContent(IContentHolder<?> owner)
+	public static ISize sizeOfContent(IContentHolder owner)
 	{
 		return sizeOfContent(owner, 0, 0);
 	}
 
-	public static ISize sizeOfContent(IContentHolder<?> owner, int widthOffset, int heightOffset)
+	public static ISize sizeOfContent(IContentHolder owner, int widthOffset, int heightOffset)
 	{
 		return new DynamicSize(Sizes.widthOfContent(owner, widthOffset), Sizes.heightOfContent(owner, heightOffset));
 	}

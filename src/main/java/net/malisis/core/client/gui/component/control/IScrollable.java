@@ -25,7 +25,6 @@
 package net.malisis.core.client.gui.component.control;
 
 import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.content.IContent;
 import net.malisis.core.client.gui.component.content.IContentHolder;
 import net.malisis.core.client.gui.component.scrolling.UIScrollBar;
 import net.malisis.core.client.gui.element.IOffset;
@@ -37,7 +36,7 @@ import net.minecraft.client.gui.GuiScreen;
  * @author Ordinastie
  *
  */
-public interface IScrollable<T extends IContent> extends IContentHolder<T>, IOffset
+public interface IScrollable extends IContentHolder, IOffset
 {
 	public default void onScrollbarAdded(UIScrollBar scrollbar)
 	{
