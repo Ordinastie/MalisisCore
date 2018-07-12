@@ -448,7 +448,7 @@ public abstract class UIScrollBar extends UIComponent implements IControlCompone
 
 	public static <T extends ISized & IContent> IPosition scrollingOffset(T owner)
 	{
-		return Position.of(owner).x(UIScrollBar.horizontalScrolling(owner)).y(UIScrollBar.verticalScrolling(owner)).build();
+		return Position.of(UIScrollBar.horizontalScrolling(owner), UIScrollBar.verticalScrolling(owner));
 	}
 
 	public static <T extends ISized & IContent> IntSupplier verticalScrolling(T owner)

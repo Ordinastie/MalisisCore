@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.component.mceditor;
 
+import static net.malisis.core.client.gui.element.position.Positions.*;
+
 import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.MalisisGui;
@@ -33,6 +35,7 @@ import net.malisis.core.client.gui.component.interaction.UISelect;
 import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.Sizes;
 import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.renderer.font.MalisisFont;
@@ -42,7 +45,7 @@ import net.minecraft.util.text.TextFormatting;
  * @author Ordinastie
  *
  */
-public class MCEditor extends UIContainer<MCEditor>
+public class MCEditor extends UIContainer
 {
 	private UITextField tf;
 	private EcfSelect sel;
@@ -51,14 +54,14 @@ public class MCEditor extends UIContainer<MCEditor>
 	private MalisisFont font = MalisisFont.minecraftFont;
 	private FontOptions fontOptions = FontOptions.builder().build();
 
-	public MCEditor(MalisisGui gui)
+	public MCEditor()
 	{
-		super(gui);
+		super();
 		tf = new UITextField(true);
-		tf.setPosition(Position.x(0).bottomAligned());
-		tf.setSize(Size.relativeWidth(1.0f).relativeHeight(0.9f));
+		tf.setPosition(Position.of(0, bottomAligned(tf, 0)));
+		tf.setSize(Size.of(Sizes.parentWidth(tf, 1.0F, 0), Sizes.parentHeight(tf, 0.9f, 0)));
 
-		sel = new EcfSelect(gui, this);
+		sel = new EcfSelect(this);
 
 		cb = new UICheckBox("Use litteral formatting");
 		cb.setPosition(Position.of(85, 0));
@@ -69,7 +72,7 @@ public class MCEditor extends UIContainer<MCEditor>
 
 	public MCEditor(MalisisGui gui, ISize size)
 	{
-		this(gui);
+		this();
 		setSize(size);
 	}
 

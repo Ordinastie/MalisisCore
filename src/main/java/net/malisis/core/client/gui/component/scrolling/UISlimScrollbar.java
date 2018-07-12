@@ -28,7 +28,7 @@ public final class UISlimScrollbar extends UIScrollBar
 		scrollSize = isHorizontal() ? Size.of(15, 2) : Size.of(2, 15);
 
 		setBackground(GuiShape.builder(this).color(this::getBackgroundColor).build());
-		setForeground(GuiShape.builder(this).position().set(scrollPosition).back().size(scrollSize).color(this::scrollColor).build());
+		setForeground(GuiShape.builder(this).position(scrollPosition).size(scrollSize).color(this::scrollColor).build());
 
 	}
 

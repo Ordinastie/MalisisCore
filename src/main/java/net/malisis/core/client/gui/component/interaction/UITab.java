@@ -112,7 +112,7 @@ public class UITab extends UIComponent implements IContentHolder
 	{
 		this.content = content;
 		content.setParent(this);
-		content.setPosition(Position.of(content).centered().middleAligned().build());
+		content.setPosition(Position.middleCenter(content));
 		contentSize = content.size().plus(Size.of(6, 6));
 	}
 

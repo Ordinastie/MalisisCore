@@ -182,9 +182,7 @@ public class UITextArea extends UITextField implements IScrollable
 		Cursor last = cursor == first ? selectionCursor : cursor;
 
 		Builder builder = GuiShape	.builder(this)
-									.position()
-									.set(first)
-									.back()
+									.position(first)
 									.fixed(false)
 									.size(innerSize().width() - first.x(), cursor.height())
 									.color(selectColor);
@@ -193,16 +191,13 @@ public class UITextArea extends UITextField implements IScrollable
 		s.render(renderer);
 
 		//draw intermediate selection
-		s = builder	.position()
-					.x(padding().left())
-					.y(first.y() + first.height())
-					.back()
+		s = builder	.position(padding().left(), first.y() + first.height())
 					.size(innerSize().width(), last.y() - first.y() - first.height())
 					.build();
 		s.render(renderer);
 
 		//drawLastLine :
-		s = builder.position().x(padding().left()).y(last.y()).back().size(last.x(), last.height).build();
+		s = builder.position(padding().left(), last.y()).size(last.x(), last.height).build();
 		s.render(renderer);
 
 		renderer.next();

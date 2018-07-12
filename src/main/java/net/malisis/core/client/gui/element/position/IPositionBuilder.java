@@ -24,86 +24,83 @@
 
 package net.malisis.core.client.gui.element.position;
 
-import java.util.function.ToIntFunction;
+import static com.google.common.base.Preconditions.*;
 
-import net.malisis.core.client.gui.element.Size.ISized;
-import net.malisis.core.client.gui.element.position.Position.IPositioned;
+import java.util.function.Function;
+import java.util.function.IntSupplier;
+
+import net.malisis.core.client.gui.element.position.Position.IPosition;
 
 /**
  * @author Ordinastie
  *
  */
-public interface IPositionBuilder
+public interface IPositionBuilder<BUILDER, OWNER>
 {
-	public IPositionBuilder x(int x);
+	public BUILDER position(Function<OWNER, IPosition> func);
 
-	public IPositionBuilder y(int y);
+	public default BUILDER position(IPosition position)
+	{
+		return position(o -> position);
+	}
 
-	public IPositionBuilder x(ToIntFunction<?> xFunction);
+	public default BUILDER position(Function<OWNER, IntSupplier> x, Function<OWNER, IntSupplier> y)
+	{
+		checkNotNull(x);
+		checkNotNull(y);
+		return position(o -> Position.of(x.apply(o), y.apply(o)));
+	}
 
-	public IPositionBuilder y(ToIntFunction<?> yFunction);
+	public default BUILDER position(int x, Function<OWNER, IntSupplier> y)
+	{
+		checkNotNull(x);
+		checkNotNull(y);
+		return position(o -> Position.of(x, y.apply(o)));
+	}
 
-	public IPositionBuilder leftAligned();
+	public default BUILDER position(Function<OWNER, IntSupplier> x, int y)
+	{
+		checkNotNull(x);
+		checkNotNull(y);
+		return position(o -> Position.of(x.apply(o), y));
+	}
 
-	public IPositionBuilder leftAligned(int x);
+	public default BUILDER position(Function<OWNER, IntSupplier> x, IntSupplier y)
+	{
+		checkNotNull(x);
+		checkNotNull(y);
+		return position(o -> Position.of(x.apply(o), y));
+	}
 
-	public IPositionBuilder topAligned();
+	public default BUILDER position(IntSupplier x, Function<OWNER, IntSupplier> y)
+	{
+		checkNotNull(x);
+		checkNotNull(y);
+		return position(o -> Position.of(x, y.apply(o)));
+	}
 
-	public IPositionBuilder topAligned(int y);
+	public default BUILDER position(IntSupplier x, IntSupplier y)
+	{
+		checkNotNull(x);
+		checkNotNull(y);
+		return position(o -> Position.of(x, y));
+	}
 
-	public IPositionBuilder centered();
+	public default BUILDER position(int x, IntSupplier y)
+	{
+		checkNotNull(y);
+		return position(o -> Position.of(x, y));
+	}
 
-	public IPositionBuilder centered(int offset);
+	public default BUILDER position(IntSupplier x, int y)
+	{
+		checkNotNull(x);
+		return position(o -> Position.of(x, y));
+	}
 
-	public IPositionBuilder rightAligned();
+	public default BUILDER position(int x, int y)
+	{
+		return position(o -> Position.of(x, y));
+	}
 
-	public IPositionBuilder rightAligned(int spacing);
-
-	public IPositionBuilder middleAligned();
-
-	public IPositionBuilder middleAligned(int offset);
-
-	public IPositionBuilder bottomAligned();
-
-	public IPositionBuilder bottomAligned(int spacing);
-
-	public <T extends IPositioned & ISized> IPositionBuilder leftOf(T other);
-
-	public <T extends IPositioned & ISized> IPositionBuilder leftOf(T other, int spacing);
-
-	public <T extends IPositioned & ISized> IPositionBuilder rightOf(T other);
-
-	public <T extends IPositioned & ISized> IPositionBuilder rightOf(T other, int spacing);
-
-	public IPositionBuilder above(IPositioned other);
-
-	public IPositionBuilder above(IPositioned other, int spacing);
-
-	public <T extends IPositioned & ISized> IPositionBuilder below(T other);
-
-	public <T extends IPositioned & ISized> IPositionBuilder below(T other, int spacing);
-
-	public IPositionBuilder leftAlignedTo(IPositioned other);
-
-	public IPositionBuilder leftAlignedTo(IPositioned other, int offset);
-
-	public <T extends IPositioned & ISized> IPositionBuilder rightAlignedTo(T other);
-
-	public <T extends IPositioned & ISized> IPositionBuilder rightAlignedTo(T other, int offset);
-
-	public <T extends IPositioned & ISized> IPositionBuilder centeredTo(T other);
-
-	public <T extends IPositioned & ISized> IPositionBuilder centeredTo(T other, int offset);
-
-	public IPositionBuilder topAlignedTo(IPositioned other);
-
-	public IPositionBuilder topAlignedTo(IPositioned other, int offset);
-
-	public <T extends IPositioned & ISized> IPositionBuilder bottomAlignedTo(T other);
-
-	public <T extends IPositioned & ISized> IPositionBuilder bottomAlignedTo(T other, int offset);
-
-	public <T extends IPositioned & ISized> IPositionBuilder middleAlignedTo(T other);
-
-	public <T extends IPositioned & ISized> IPositionBuilder middleAlignedTo(T other, int offset);
 }

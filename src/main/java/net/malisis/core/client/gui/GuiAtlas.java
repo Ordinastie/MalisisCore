@@ -34,7 +34,6 @@ import com.google.common.collect.Sets;
 
 import net.malisis.core.MalisisCore;
 import net.malisis.core.client.gui.render.GuiIcon;
-import net.malisis.core.renderer.icon.Icon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.StitcherException;
 import net.minecraft.client.renderer.texture.PngSizeInfo;
@@ -75,7 +74,7 @@ public class GuiAtlas
 		for (Entry<ResourceLocation, GuiIcon> entry : registeredIcons.entrySet())
 		{
 			ResourceLocation rl = entry.getKey();
-			Icon icon = entry.getValue();
+			GuiIcon icon = entry.getValue();
 
 			//Keep custom loading ?
 			//if (icon.hasCustomLoader(resourceManager, rl) && icon.load(resourceManager, rl, l -> registeredIcons.get(l)))
@@ -84,14 +83,14 @@ public class GuiAtlas
 			try (IResource res = resourceManager.getResource(rl))
 			{
 				PngSizeInfo pngsizeinfo = PngSizeInfo.makeFromResource(resourceManager.getResource(rl));
-				icon.loadSprite(pngsizeinfo, res.getMetadata("animation") != null);
+				//	icon.loadSprite(pngsizeinfo, res.getMetadata("animation") != null);
 			}
 			catch (RuntimeException | IOException e)
 			{
 				MalisisCore.log.error("Failed to load texture for gui atlas : {}", rl, e);
 			}
 
-			stitcher.addSprite(icon);
+			//stitcher.addSprite(icon);
 		}
 
 		try

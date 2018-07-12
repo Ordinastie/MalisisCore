@@ -68,7 +68,7 @@ public class UIProgressBar extends UIComponent
 
 		//backgroundIcon = new GuiIcon(MalisisGui.BLOCK_TEXTURE, (float) 0, (float) 0, (float) 1, (float) 1);
 		setBackground(GuiShape.builder(this).icon(backgroundIcon).build());
-		setForeground(GuiShape.builder(this).position().x(xSupplier).y(ySupplier).back().size(fillSize).icon(fillIcon).build());
+		setForeground(GuiShape.builder(this).position(xSupplier, ySupplier).size(fillSize).icon(fillIcon).build());
 	}
 
 	//by default, use furnace arrows

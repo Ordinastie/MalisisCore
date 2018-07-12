@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.component.container;
 
+import static net.malisis.core.client.gui.element.position.Positions.*;
+
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.element.Size.ISize;
@@ -47,7 +49,7 @@ public class UIPlayerInventory extends UIInventory
 		for (int i = 0; i < inventory.getSize(); i++)
 			addSlot(inventory.getSlot(i), i);
 
-		setPosition(Position.of(this).centered().bottomAligned().build());
+		setPosition(Position.of(centered(this, 0), bottomAligned(this, 0)));
 	}
 
 	/**

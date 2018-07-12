@@ -358,7 +358,7 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		UIContainer container = new UIContainer();
 		container.setName("Window");
 		container.setBackground(GuiShape.builder(container).icon(GuiIcon.WINDOW).border(5).build());
-		container.setPosition(Position.centered(container));
+		container.setPosition(Position.middleCenter(container));
 		container.setPadding(Padding.of(5));
 		return container;
 	}
@@ -401,6 +401,12 @@ public class UIContainer extends UIComponent implements IClipable, IScrollable, 
 		@Override
 		public void setParent(UIComponent parent)
 		{}
+
+		@Override
+		public UIContainer getParent()
+		{
+			return UIContainer.this;
+		}
 
 		@Override
 		public void setPosition(IPosition position)

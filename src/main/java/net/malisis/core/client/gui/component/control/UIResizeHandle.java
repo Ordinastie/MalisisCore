@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.component.control;
 
+import static net.malisis.core.client.gui.element.position.Positions.*;
+
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.Padding;
@@ -53,7 +55,7 @@ public class UIResizeHandle extends UIComponent implements IControlComponent
 		this.type = type != null ? type : Type.BOTH;
 
 		Padding padding = Padding.of(parent);
-		setPosition(Position.of(this).rightAligned(-padding.right()).bottomAligned(-padding.bottom()).build());
+		setPosition(Position.of(rightAligned(this, -padding.right()), bottomAligned(this, -padding.bottom())));
 		setSize(Size.of(5, 5));
 		parent.addControlComponent(this);
 

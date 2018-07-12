@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.component.decoration;
 
+import static net.malisis.core.client.gui.element.position.Positions.*;
+
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.content.IContent;
@@ -101,7 +103,7 @@ public class UITooltip extends UIComponent implements IContentHolder
 		{
 			UIComponent c = (UIComponent) content;
 			c.setParent(this);
-			c.setPosition(Position.of(c).centered().middleAligned(2).build());
+			c.setPosition(Position.of(centered(c, 0), middleAligned(c, 2)));
 		}
 	}
 
@@ -111,10 +113,7 @@ public class UITooltip extends UIComponent implements IContentHolder
 							.parent(this)
 							.text(text)
 							.fontOptions(fontOptions)
-							.position()
-							.centered()
-							.middleAligned(2)
-							.back()
+							.position(o -> centered(o, 0), o -> middleAligned(o, 2))
 							.build();
 		setContent(gt);
 	}

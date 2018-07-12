@@ -122,6 +122,10 @@ public abstract class MalisisGui extends GuiScreen
 
 	public static boolean debug = false;
 
+	public static int counter = 0;
+	public static int xCounter = 0;
+	public static int xTotal = 0;
+
 	protected MalisisGui()
 	{
 		this.mc = Minecraft.getMinecraft();
@@ -136,6 +140,10 @@ public abstract class MalisisGui extends GuiScreen
 		Keyboard.enableRepeatEvents(true);
 
 		debug = false;
+
+		counter = 0;
+		xCounter = 0;
+		xTotal = 0;
 	}
 
 	/**
@@ -551,6 +559,10 @@ public abstract class MalisisGui extends GuiScreen
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTick)
 	{
+		counter++;
+		xCounter = 0;
+		xTotal = 0;
+
 		ar.animate();
 
 		renderer.setup(partialTick);

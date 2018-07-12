@@ -63,15 +63,12 @@ public class UICheckBox extends UIComponent implements IContentHolder
 		setSize(Size.sizeOfContent(this, 14, 12));
 
 		//Background
-		setBackground(GuiShape.builder(this).position().x(1).back().size(12, 12).icon(GuiIcon.CHECKBOX_BG).build());
+		setBackground(GuiShape.builder(this).position(1, 0).size(12, 12).icon(GuiIcon.CHECKBOX_BG).build());
 
 		//Foreground
-		GuiShape overlay = GuiShape.builder(this).position().x(2).y(1).back().size(10, 10).color(0xFFFFFF).alpha(80).build();
+		GuiShape overlay = GuiShape.builder(this).position(2, 1).size(10, 10).color(0xFFFFFF).alpha(80).build();
 		GuiShape check = GuiShape	.builder(this)
-									.position()
-									.x(1)
-									.y(1)
-									.back()
+									.position(1, 1)
 									.size(12, 10)
 									.zIndex(10)
 									.icon(GuiIcon.forComponent(this, GuiIcon.CHECKBOX, GuiIcon.CHECKBOX_HOVER, GuiIcon.CHECKBOX_DISABLED))

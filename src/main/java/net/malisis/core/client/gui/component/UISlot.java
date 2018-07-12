@@ -61,16 +61,7 @@ public class UISlot extends UIComponent
 	protected UITooltip defaultTooltip;
 
 	/** Shaped used for the hovered overlay. */
-	protected GuiShape overlay = GuiShape	.builder(this)
-											.position()
-											.x(1)
-											.y(1)
-											.back()
-											.color(0xFFFFFF)
-											.zIndex(180)
-											.size(16, 16)
-											.alpha(0x80)
-											.build();
+	protected GuiShape overlay = GuiShape.builder(this).position(1, 1).color(0xFFFFFF).zIndex(180).size(16, 16).alpha(0x80).build();
 
 	/**
 	 * Instantiates a new {@link UISlot}.

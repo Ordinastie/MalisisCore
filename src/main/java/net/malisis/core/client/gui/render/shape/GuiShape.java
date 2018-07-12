@@ -26,6 +26,7 @@ package net.malisis.core.client.gui.render.shape;
 
 import static com.google.common.base.Preconditions.*;
 
+import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.function.ToIntBiFunction;
@@ -37,11 +38,11 @@ import net.malisis.core.client.gui.element.IChild;
 import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.element.Size.ISize;
 import net.malisis.core.client.gui.element.Size.ISized;
+import net.malisis.core.client.gui.element.position.IPositionBuilder;
 import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.element.position.Position.IPosition;
 import net.malisis.core.client.gui.element.position.Position.IPositioned;
 import net.malisis.core.client.gui.element.position.Position.ScreenPosition;
-import net.malisis.core.client.gui.element.position.PositionBuilder;
 import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.client.gui.render.GuiRenderer;
 import net.malisis.core.client.gui.render.IGuiRenderer;
@@ -65,10 +66,10 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 	private final Supplier<GuiIcon> icon;
 	private final int border;
 
-	private GuiShape(UIComponent parent, PositionBuilder<GuiShape, ?> positionBuilder, IntSupplier zIndex, ISize size, ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha, Supplier<GuiIcon> icon, int border, boolean fixed)
+	private GuiShape(UIComponent parent, Function<GuiShape, IPosition> position, IntSupplier zIndex, ISize size, ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha, Supplier<GuiIcon> icon, int border, boolean fixed)
 	{
 		this.parent = parent;
-		this.position = positionBuilder != null ? positionBuilder.build(this) : Position.ZERO;
+		this.position = position.apply(this);
 		this.screenPosition = new ScreenPosition(this, fixed);
 		this.zIndex = zIndex;
 		this.size = size;
@@ -230,10 +231,11 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		return new Builder().forComponent(component);
 	}
 
-	public static class Builder
+	public static class Builder implements IPositionBuilder<Builder, GuiShape>
 	{
 		private UIComponent component;
 		private boolean fixed = true;
+		private Function<GuiShape, IPosition> position = s -> Position.ZERO;
 		private IntSupplier zIndex;
 		private ISize size = Size.of(5, 5);
 		private ToIntBiFunction<FacePosition, VertexPosition> color;
@@ -242,7 +244,6 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		private int borderColor;
 		private int borderAlpha;
 		private int borderSize;
-		private PositionBuilder<GuiShape, Builder> positionBuilder;
 
 		private Builder forComponent(UIComponent component)
 		{
@@ -253,10 +254,11 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 			return this;
 		}
 
-		public PositionBuilder<GuiShape, Builder> position()
+		@Override
+		public Builder position(Function<GuiShape, IPosition> func)
 		{
-			positionBuilder = new PositionBuilder<>(this, true);
-			return positionBuilder;
+			position = checkNotNull(func);
+			return this;
 		}
 
 		public Builder fixed(boolean fixed)
@@ -381,7 +383,7 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		{
 			if (icon == null)
 				icon = () -> GuiIcon.NONE;
-			GuiShape shape = new GuiShape(component, positionBuilder, zIndex, size, color, alpha, icon, borderSize, fixed);
+			GuiShape shape = new GuiShape(component, position, zIndex, size, color, alpha, icon, borderSize, fixed);
 
 			return shape;
 		}

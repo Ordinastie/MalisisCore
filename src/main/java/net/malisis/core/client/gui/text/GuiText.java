@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -45,9 +46,9 @@ import net.malisis.core.client.gui.element.IClipable;
 import net.malisis.core.client.gui.element.IClipable.ClipArea;
 import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.position.IPositionBuilder;
 import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.element.position.Position.IPosition;
-import net.malisis.core.client.gui.element.position.PositionBuilder;
 import net.malisis.core.client.gui.render.GuiRenderer;
 import net.malisis.core.client.gui.render.IGuiRenderer;
 import net.malisis.core.renderer.font.FontOptions;
@@ -109,11 +110,11 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 	private UIComponent parent;
 
-	private GuiText(String text, Map<String, ICachedData<?>> parameters, PositionBuilder<GuiText, Builder> positionBuilder, IntSupplier zIndex, UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
+	private GuiText(String text, Map<String, ICachedData<?>> parameters, Function<GuiText, IPosition> position, IntSupplier zIndex, UIComponent parent, FontOptions fontOptions, boolean multiLine, boolean translated, boolean literal, IntSupplier wrapSize)
 	{
 		this.base = text;
 		this.parameters = parameters;
-		this.position = positionBuilder != null ? positionBuilder.build(this) : Position.ZERO;
+		this.position = position.apply(this);
 		this.zIndex = zIndex != null ? zIndex : () -> 0;
 		this.parent = parent;
 		this.fontOptions = fontOptions;
@@ -550,19 +551,18 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		return new Builder().text(text).fontOptions(options).build();
 	}
 
-	public static class Builder
+	public static class Builder implements IPositionBuilder<Builder, GuiText>
 	{
 		private String text;
 		private final Map<String, ICachedData<?>> parameters = Maps.newHashMap();
 		private FontOptions fontOptions = FontOptions.EMPTY;
+		private Function<GuiText, IPosition> position = o -> Position.ZERO;
 		private IntSupplier zIndex;
 		private UIComponent parent;
 		private boolean multiLine = false;
 		private boolean translated = true;
 		private boolean literal = false;
 		private IntSupplier wrapSize;
-
-		private PositionBuilder<GuiText, Builder> positionBuilder;;
 
 		public Builder()
 		{
@@ -583,10 +583,11 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 			return bind("text", supplier);
 		}
 
-		public PositionBuilder<GuiText, Builder> position()
+		@Override
+		public Builder position(Function<GuiText, IPosition> func)
 		{
-			positionBuilder = new PositionBuilder<>(this, true);
-			return positionBuilder;
+			position = checkNotNull(func);
+			return this;
 		}
 
 		public Builder zIndex(int zIndex)
@@ -699,7 +700,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 		public GuiText build()
 		{
-			return new GuiText(text, parameters, positionBuilder, zIndex, parent, fontOptions, multiLine, translated, literal, wrapSize);
+			return new GuiText(text, parameters, position, zIndex, parent, fontOptions, multiLine, translated, literal, wrapSize);
 		}
 
 	}

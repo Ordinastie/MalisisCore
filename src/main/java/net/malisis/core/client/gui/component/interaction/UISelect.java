@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component.interaction;
 
 import static com.google.common.base.Preconditions.*;
+import static net.malisis.core.client.gui.element.position.Positions.*;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -97,10 +98,7 @@ public class UISelect<T> extends UIComponent
 										.build();
 		/** Shape used to draw the arrow. */
 		GuiShape arrowShape = GuiShape	.builder(this)
-										.position()
-										.rightAligned(2)
-										.middleAligned()
-										.back()
+										.position(o -> rightAligned(o, 2), o -> middleAligned(o, 0))
 										.size(7, 4)
 										.color(() -> (isHovered() || expanded ? 0xBEC8FF : 0xFFFFFF))
 										.icon(GuiIcon.SELECT_ARROW)
@@ -126,10 +124,9 @@ public class UISelect<T> extends UIComponent
 	/**
 	 * Instantiates a new {@link UISelect}.
 	 *
-	 * @param gui the gui
 	 * @param width the width
 	 */
-	public UISelect(MalisisGui gui, int width)
+	public UISelect(int width)
 	{
 		this(width, null);
 	}
@@ -329,10 +326,8 @@ public class UISelect<T> extends UIComponent
 		public OptionsContainer()
 		{
 			//TODO: place it above if room below is too small
-			setPosition(Position.of(this)
-								.x(() -> UISelect.this.screenPosition().x())
-								.y(() -> UISelect.this.screenPosition().y() + UISelect.this.size().height())
-								.build());
+			setPosition(Position.of(() -> UISelect.this.screenPosition().x(),
+									() -> UISelect.this.screenPosition().y() + UISelect.this.size().height()));
 			setSize(Size.of(this).widthRelativeTo(UISelect.this, 1.0F, 0).contentHeight(0).build());
 			setZIndex(300);
 			setBackground(GuiShape.builder(this).color(UISelect.this::getColor).icon(GuiIcon.SELECT_BOX).border(1).build());

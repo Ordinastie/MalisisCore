@@ -25,6 +25,7 @@
 package net.malisis.core.client.gui.component.interaction;
 
 import static com.google.common.base.Preconditions.*;
+import static net.malisis.core.client.gui.element.position.Positions.*;
 
 import com.google.common.base.Converter;
 
@@ -70,10 +71,7 @@ public class UISlider<T> extends UIComponent implements IContentHolder
 		this.text = GuiText	.builder()
 							.parent(this)
 							.text(text)
-							.position()
-							.x(this::textPosition)
-							.middleAligned()
-							.back()
+							.position(this::textPosition, o -> middleAligned(o, 0))
 							.bind("value", this::getValue)
 							.zIndex(this::getZIndex)
 							.fontOptions(FontOptions.builder().color(0xFFFFFF).shadow().when(this::isHovered).color(0xFFFFA0).build())
@@ -82,9 +80,7 @@ public class UISlider<T> extends UIComponent implements IContentHolder
 		setSize(Size.of(width, 20));
 
 		GuiShape sliderShape = GuiShape	.builder(this)
-										.position()
-										.x(this::scrollPosition)
-										.back()
+										.position(this::scrollPosition, 0)
 										.size(Size.of(SLIDER_WIDTH, () -> size().height()))
 										.icon(GuiIcon.SLIDER)
 										.border(5)

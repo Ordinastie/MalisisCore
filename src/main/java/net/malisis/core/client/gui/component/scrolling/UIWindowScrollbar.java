@@ -57,6 +57,6 @@ public final class UIWindowScrollbar extends UIScrollBar
 								.icon(GuiIcon.forComponent(this, GuiIcon.SCROLLBAR_BG, null, GuiIcon.SCROLLBAR_DISABLED_BG))
 								.border(3)
 								.build());
-		setForeground(GuiShape.builder(this).position().set(scrollPosition).back().size(scrollSize).icon(scrollIcon).build());
+		setForeground(GuiShape.builder(this).position(scrollPosition).size(scrollSize).icon(scrollIcon).build());
 	}
 }

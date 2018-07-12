@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.component.control;
 
+import static net.malisis.core.client.gui.element.position.Positions.*;
+
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.Padding;
 import net.malisis.core.client.gui.element.Size;
@@ -40,7 +42,7 @@ public class UICloseHandle extends UIComponent implements IControlComponent
 	public <T extends UIComponent & ICloseable> UICloseHandle(T parent)
 	{
 		Padding padding = Padding.of(parent);
-		setPosition(Position.of(this).rightAligned(-padding.right()).topAligned(-padding.top()).build());
+		setPosition(Position.of(rightAligned(this, -padding.right()), topAligned(this, -padding.top())));
 		setSize(Size.of(5, 5));
 		setZIndex(parent.getZIndex() + 10);
 		parent.addControlComponent(this);

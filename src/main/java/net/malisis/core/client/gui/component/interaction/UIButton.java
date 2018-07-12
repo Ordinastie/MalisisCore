@@ -60,7 +60,7 @@ public class UIButton extends UIComponent implements IContentHolder
 															.color(0xCCCCCC)
 															.build();
 
-	protected IPosition offsetPosition = Position.of(this).x(() -> isPressed() ? 1 : 0).y(() -> isPressed() ? 1 : 0).build();
+	protected IPosition offsetPosition = Position.of(() -> isPressed() ? 1 : 0, () -> isPressed() ? 1 : 0);
 	protected IPosition contentPosition = null;
 
 	/** Content used for this {@link UIButton}. */
@@ -119,7 +119,7 @@ public class UIButton extends UIComponent implements IContentHolder
 	{
 		this.content = content;
 		content.setParent(this);
-		content.setPosition(Position.of(content).centered().middleAligned().build().plus(offsetPosition));
+		content.setPosition(Position.middleCenter(content).plus(offsetPosition));
 	}
 
 	public void setText(String text)
@@ -156,7 +156,7 @@ public class UIButton extends UIComponent implements IContentHolder
 	 */
 	public UIButton setAutoSize()
 	{
-		setSize(Size.sizeOfContent(this, 10, 10));
+		setSize(Size.sizeOfContent(this, 6, 6));
 		return this;
 	}
 

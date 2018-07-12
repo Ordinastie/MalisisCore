@@ -73,7 +73,7 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 	protected Padding padding = Padding.of(1);
 
 	private int xOffset = 0;
-	protected IPosition offset = Position.of(this).x(this::xOffset).y(0).build();
+	protected IPosition offset = Position.of(this::xOffset, 0);
 
 	//cursors
 	/** Whether currently selecting text. */
@@ -102,16 +102,14 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 	//drawing
 	/** Shape used to draw the cursor of this {@link UITextField}. */
 	protected GuiShape cursorShape = GuiShape	.builder(this)
-												.position()
-												.set(cursor)
-												.back()
+												.position(cursor)
 												.fixed(false)
 												.size(Size.of(1, cursor::height))
 												.color(this::getCursorColor)
 												.icon(GuiIcon.NONE)
 												.build();
 
-	protected UITextField(boolean multiLine)
+	public UITextField(boolean multiLine)
 	{
 		this.guiText = GuiText	.builder()
 								.parent(this)
@@ -119,10 +117,7 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 								.multiLine(multiLine)
 								.translated(false)
 								.literal(true)
-								.position()
-								.x(3)
-								.y(3)
-								.back()
+								.position(3, 3)
 								.fontOptions(FontOptions.builder().color(0xFFFFFF).shadow().build())
 								.build();
 		setSize(Size.of(100, 14));
@@ -755,9 +750,7 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 		Cursor last = cursor == first ? selectionCursor : cursor;
 
 		GuiShape s = GuiShape	.builder(this)
-								.position()
-								.set(first)
-								.back()
+								.position(first)
 								.fixed(false)
 								.size(last.x() - first.x(), cursor.height())
 								.color(selectColor)

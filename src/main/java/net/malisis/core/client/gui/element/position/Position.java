@@ -24,8 +24,11 @@
 
 package net.malisis.core.client.gui.element.position;
 
+import static net.malisis.core.client.gui.element.position.Positions.*;
+
 import java.util.function.IntSupplier;
 
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.element.IChild;
@@ -39,6 +42,7 @@ import net.malisis.core.client.gui.element.Size.ISized;
 
 public class Position
 {
+	public static boolean CACHE_POSITION = true;
 	public static final IPosition ZERO = Position.of(0, 0);
 
 	public interface IPositioned
@@ -83,6 +87,12 @@ public class Position
 
 	public static class DynamicPosition implements IPosition
 	{
+		private int cachedX;
+		private int cachedY;
+
+		private int lastFrameX = -1;
+		private int lastFrameY = -1;
+
 		private int x;
 		private int y;
 		private IntSupplier xFunction;
@@ -96,16 +106,33 @@ public class Position
 			this.yFunction = yFunction;
 		}
 
+		private void update()
+		{
+			if (lastFrameX != MalisisGui.counter || !CACHE_POSITION) //new frame
+			{
+				cachedX = xFunction == null ? x : xFunction.getAsInt();
+				lastFrameX = MalisisGui.counter;
+			}
+			if (lastFrameY != MalisisGui.counter || !CACHE_POSITION)
+			{
+				cachedY = yFunction == null ? y : yFunction.getAsInt();
+				lastFrameY = MalisisGui.counter;
+			}
+		}
+
 		@Override
 		public int x()
 		{
-			return xFunction == null ? x : xFunction.getAsInt();
+
+			update();
+			return cachedX;
 		}
 
 		@Override
 		public int y()
 		{
-			return yFunction == null ? y : yFunction.getAsInt();
+			update();
+			return cachedY;
 		}
 
 		@Override
@@ -119,6 +146,12 @@ public class Position
 	{
 		private final IPositioned owner;
 		private final boolean fixed;
+
+		private int cachedX;
+		private int cachedY;
+
+		private int lastFrameX = -1;
+		private int lastFrameY = -1;
 
 		public ScreenPosition(IPositioned owner)
 		{
@@ -134,35 +167,44 @@ public class Position
 		@Override
 		public int x()
 		{
-			int x = owner.position().x();
-			if (owner instanceof IChild<?>)
-			{
-				Object parent = ((IChild<?>) owner).getParent();
-				if (parent instanceof UIComponent)
-					x += ((UIComponent) parent).screenPosition().x();
-				if (fixed)
-					return x;
-				if (parent instanceof IOffset)
-					x += ((IOffset) parent).offset().x();
-			}
-			return x;
+			if (lastFrameX != MalisisGui.counter || !CACHE_POSITION)
+				updateX();
+
+			return cachedX;
 		}
 
 		@Override
 		public int y()
 		{
-			int y = owner.position().y();
+			if (lastFrameY != MalisisGui.counter || !CACHE_POSITION)
+				updateY();
+			return cachedY;
+		}
+
+		public void updateX()
+		{
+			cachedX = owner.position().x();
 			if (owner instanceof IChild<?>)
 			{
 				Object parent = ((IChild<?>) owner).getParent();
 				if (parent instanceof UIComponent)
-					y += ((UIComponent) parent).screenPosition().y();
-				if (fixed)
-					return y;
-				if (parent instanceof IScrollable)
-					y += ((IScrollable) parent).offset().y();
+					cachedX += ((UIComponent) parent).screenPosition().x();
+				if (!fixed && parent instanceof IOffset)
+					cachedX += ((IOffset) parent).offset().x();
 			}
-			return y;
+		}
+
+		public void updateY()
+		{
+			cachedY = owner.position().y();
+			if (owner instanceof IChild<?>)
+			{
+				Object parent = ((IChild<?>) owner).getParent();
+				if (parent instanceof UIComponent)
+					cachedY += ((UIComponent) parent).screenPosition().y();
+				if (!fixed && parent instanceof IScrollable)
+					cachedY += ((IScrollable) parent).offset().y();
+			}
 		}
 
 		@Override
@@ -172,16 +214,20 @@ public class Position
 		}
 	}
 
-	//Builder
-	public static <T> PositionBuilder<T, ?> of(T owner)
-	{
-		return new PositionBuilder<>(owner);
-	}
-
 	//Position shortcuts
 	public static IPosition of(int x, int y)
 	{
 		return new DynamicPosition(x, y, null, null);
+	}
+
+	public static IPosition of(int x, IntSupplier y)
+	{
+		return new DynamicPosition(x, 0, null, y);
+	}
+
+	public static IPosition of(IntSupplier x, int y)
+	{
+		return new DynamicPosition(0, y, x, null);
 	}
 
 	public static IPosition of(IntSupplier x, IntSupplier y)
@@ -190,9 +236,9 @@ public class Position
 	}
 
 	//position relative to parent
-	public static IPosition of(IChild<?> owner, int x, int y)
+	public static IPosition inParent(IChild<?> owner, int x, int y)
 	{
-		return new DynamicPosition(0, 0, Positions.leftAligned(owner, x), Positions.topAligned(owner, y));
+		return new DynamicPosition(0, 0, leftAligned(owner, x), topAligned(owner, y));
 	}
 
 	/**
@@ -204,77 +250,37 @@ public class Position
 	 */
 	public static IPosition zero(IChild<?> owner)
 	{
-		return of(owner, 0, 0);
+		return inParent(owner, 0, 0);
 	}
 
-	public static IPosition leftAligned(Object owner)
+	public static <T extends ISized & IChild<U>, U extends ISized> IPosition middleCenter(T owner)
 	{
-		return leftAligned(owner, 0);
+		return of(centered(owner, 0), topAligned(owner, 0));
 	}
 
-	public static IPosition leftAligned(Object owner, int offset)
+	public static <T extends ISized & IChild<U>, U extends ISized> IPosition topRight(T owner)
 	{
-		return new PositionBuilder<>(owner).leftAligned(offset).build();
-	}
-
-	public static IPosition centered(Object owner)
-	{
-		return centered(owner, 0);
-	}
-
-	public static IPosition centered(Object owner, int offset)
-	{
-		return new PositionBuilder<>(owner).centered(offset).middleAligned().build();
-	}
-
-	public static IPosition rightAligned(Object owner)
-	{
-		return rightAligned(owner, 0);
-	}
-
-	public static IPosition rightAligned(Object owner, int offset)
-	{
-		return new PositionBuilder<>(owner).rightAligned(offset).build();
+		return of(Positions.rightAligned(owner, 0), topAligned(owner, 0));
 	}
 
 	//position relative to other
-	public static <T extends IPositioned & ISized> IPosition leftOf(Object owner, T other)
+	public static <T extends IPositioned & ISized, U extends IPositioned & ISized> IPosition leftOf(ISized owner, U other, int spacing)
 	{
-		return leftOf(owner, other, 0);
+		return of(Positions.leftOf(owner, other, spacing), middleAlignedTo(owner, other, 0));
 	}
 
-	public static <T extends IPositioned & ISized> IPosition leftOf(Object owner, T other, int spacing)
+	public static <T extends IPositioned & ISized> IPosition rightOf(ISized owner, T other, int spacing)
 	{
-		return new PositionBuilder<>(owner).leftOf(other, spacing).middleAlignedTo(other).build();
+		return of(Positions.rightOf(other, spacing), middleAlignedTo(owner, other, 0));
 	}
 
-	public static <T extends IPositioned & ISized> IPosition rightOf(Object owner, T other)
+	public static <T extends IPositioned & ISized, U extends IPositioned & ISized> IPosition above(T owner, U other, int spacing)
 	{
-		return rightOf(owner, other, 0);
-	}
-
-	public static <T extends IPositioned & ISized> IPosition rightOf(Object owner, T other, int spacing)
-	{
-		return new PositionBuilder<>(owner).rightOf(other, spacing).middleAlignedTo(other).build();
-	}
-
-	public static <T extends IPositioned & ISized> IPosition above(Object owner, T other)
-	{
-		return above(owner, other, 0);
-	}
-
-	public static <T extends IPositioned & ISized> IPosition above(Object owner, T other, int spacing)
-	{
-		return new PositionBuilder<>(owner).above(other, spacing).leftAlignedTo(other).build();
-	}
-
-	public static <T extends IPositioned & ISized> IPosition below(Object owner, T other)
-	{
-		return below(owner, other, 0);
+		return of(Positions.above(owner, other, spacing), leftAlignedTo(other, 0));
 	}
 
 	public static <T extends IPositioned & ISized> IPosition below(Object owner, T other, int spacing)
 	{
-		return new PositionBuilder<>(owner).below(other, spacing).leftAlignedTo(other).build();
+		return of(Positions.below(other, spacing), leftAlignedTo(other, 0));
 	}
 }

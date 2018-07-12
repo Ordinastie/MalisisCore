@@ -24,11 +24,13 @@
 
 package net.malisis.core.configuration.setting;
 
-import net.malisis.core.client.gui.MalisisGui;
+import static net.malisis.core.client.gui.element.position.Positions.*;
+
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UITextField;
 import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.Sizes;
 import net.malisis.core.client.gui.element.position.Position;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -60,15 +62,15 @@ public class StringSetting extends Setting<String>
 
 	@SideOnly(Side.CLIENT)
 	@Override
-	public UIContainer<?> getComponent(MalisisGui gui)
+	public UIContainer getComponent()
 	{
 		UILabel label = new UILabel(key);
 		textField = new UITextField(writeValue(value));
-		textField.setPosition(Position.rightOf(label, 2).y(0));
+		textField.setPosition(Position.of(rightOf(label, 2), 0));
 		textField.setSize(Size.of(50, 12));
 
-		UIContainer<?> container = new UIContainer<>();
-		container.setSize(Size.relativeWidth(1.0F).height(12));
+		UIContainer container = new UIContainer();
+		container.setSize(Size.of(Sizes.parentWidth(container, 1.0f, 0), 12));
 		container.add(label);
 		container.add(textField);
 

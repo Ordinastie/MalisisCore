@@ -101,7 +101,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 	private void updateGuiText()
 	{
-		Builder tb = GuiText.builder().parent(this).multiLine().translated(false).fontOptions(fontOptions).position().x(2).y(2).back();
+		Builder tb = GuiText.builder().parent(this).multiLine().translated(false).fontOptions(fontOptions).position(2, 2);
 
 		String str = debugMap	.entrySet()
 								.stream()
