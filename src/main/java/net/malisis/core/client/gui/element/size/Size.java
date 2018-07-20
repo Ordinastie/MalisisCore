@@ -37,7 +37,7 @@ import net.malisis.core.client.gui.element.IChild;
  */
 public class Size
 {
-	public static boolean CACHE_SIZE = true;
+	public static boolean CACHED = true;
 	public static final ISize ZERO = Size.of(0, 0);
 	public static final ISize DEFAULT = Size.of(16, 16);
 
@@ -104,18 +104,19 @@ public class Size
 
 		private void updateWidth()
 		{
-			if (lastFrameWidth == MalisisGui.counter && CACHE_SIZE)
+			if (lastFrameWidth == MalisisGui.counter && CACHED)
 				return;
-			cachedWidth = widthFunction.getAsInt();
 			lastFrameWidth = MalisisGui.counter;
+			cachedWidth = widthFunction.getAsInt();
+
 		}
 
 		private void updateHeight()
 		{
-			if (lastFrameHeight == MalisisGui.counter && CACHE_SIZE)
+			if (lastFrameHeight == MalisisGui.counter && CACHED)
 				return;
-			cachedHeight = heightFunction.getAsInt();
 			lastFrameHeight = MalisisGui.counter;
+			cachedHeight = heightFunction.getAsInt();
 		}
 
 		@Override

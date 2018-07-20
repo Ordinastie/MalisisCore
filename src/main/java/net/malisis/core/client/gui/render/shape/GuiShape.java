@@ -249,6 +249,7 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		private Builder forComponent(UIComponent component)
 		{
 			this.component = component;
+			this.size = s -> Size.relativeTo(component);
 			this.color = (fp, vp) -> component.getColor();
 			this.zIndex = component::getZIndex;
 			return this;

@@ -42,7 +42,7 @@ import net.malisis.core.client.gui.element.size.Size.ISized;
 
 public class Position
 {
-	public static boolean CACHE_POSITION = true;
+	public static boolean CACHED = true;
 	public static final IPosition ZERO = Position.of(0, 0);
 
 	public interface IPositioned
@@ -108,7 +108,7 @@ public class Position
 
 		private void updateX()
 		{
-			if (lastFrameX == MalisisGui.counter && CACHE_POSITION)
+			if (lastFrameX == MalisisGui.counter && CACHED)
 				return;
 			cachedX = xFunction.getAsInt();
 			lastFrameX = MalisisGui.counter;
@@ -116,7 +116,7 @@ public class Position
 
 		private void updateY()
 		{
-			if (lastFrameY == MalisisGui.counter && CACHE_POSITION)
+			if (lastFrameY == MalisisGui.counter && CACHED)
 				return;
 			cachedY = yFunction.getAsInt();
 			lastFrameY = MalisisGui.counter;
@@ -172,7 +172,7 @@ public class Position
 		@Override
 		public int x()
 		{
-			if (lastFrameX != MalisisGui.counter || !CACHE_POSITION)
+			if (lastFrameX != MalisisGui.counter || !CACHED)
 				updateX();
 			return cachedX;
 		}
@@ -180,7 +180,7 @@ public class Position
 		@Override
 		public int y()
 		{
-			if (lastFrameY != MalisisGui.counter || !CACHE_POSITION)
+			if (lastFrameY != MalisisGui.counter || !CACHED)
 				updateY();
 			return cachedY;
 		}
@@ -252,19 +252,49 @@ public class Position
 	 * @param owner the owner
 	 * @return the i position
 	 */
-	public static IPosition zero(IChild<?> owner)
+	public static IPosition topLeft(IChild<?> owner)
 	{
-		return inParent(owner, 0, 0);
+		return of(topAligned(owner, 0), leftAligned(owner, 0));
 	}
 
-	public static <T extends ISized & IChild<U>, U extends ISized> IPosition middleCenter(T owner)
+	public static <T extends ISized & IChild<U>, U extends ISized> IPosition topCenter(T owner)
 	{
-		return of(centered(owner, 0), topAligned(owner, 0));
+		return of(topAligned(owner, 0), centered(owner, 0));
 	}
 
 	public static <T extends ISized & IChild<U>, U extends ISized> IPosition topRight(T owner)
 	{
-		return of(Positions.rightAligned(owner, 0), topAligned(owner, 0));
+		return of(rightAligned(owner, 0), topAligned(owner, 0));
+	}
+
+	public static <T extends ISized & IChild<U>, U extends ISized> IPosition middleLeft(T owner)
+	{
+		return of(leftAligned(owner, 0), middleAligned(owner, 0));
+	}
+
+	public static <T extends ISized & IChild<U>, U extends ISized> IPosition middleCenter(T owner)
+	{
+		return of(centered(owner, 0), middleAligned(owner, 0));
+	}
+
+	public static <T extends ISized & IChild<U>, U extends ISized> IPosition middleRight(T owner)
+	{
+		return of(rightAligned(owner, 0), middleAligned(owner, 0));
+	}
+
+	public static <T extends ISized & IChild<U>, U extends ISized> IPosition bottomLeft(T owner)
+	{
+		return of(leftAligned(owner, 0), bottomAligned(owner, 0));
+	}
+
+	public static <T extends ISized & IChild<U>, U extends ISized> IPosition bottomCenter(T owner)
+	{
+		return of(centered(owner, 0), bottomAligned(owner, 0));
+	}
+
+	public static <T extends ISized & IChild<U>, U extends ISized> IPosition bottomRight(T owner)
+	{
+		return of(rightAligned(owner, 0), bottomAligned(owner, 0));
 	}
 
 	//position relative to other
@@ -280,11 +310,11 @@ public class Position
 
 	public static <T extends IPositioned & ISized, U extends IPositioned & ISized> IPosition above(T owner, U other, int spacing)
 	{
-		return of(Positions.above(owner, other, spacing), leftAlignedTo(other, 0));
+		return of(leftAlignedTo(other, 0), Positions.above(owner, other, spacing));
 	}
 
 	public static <T extends IPositioned & ISized> IPosition below(Object owner, T other, int spacing)
 	{
-		return of(Positions.below(other, spacing), leftAlignedTo(other, 0));
+		return of(leftAlignedTo(other, 0), Positions.below(other, spacing));
 	}
 }

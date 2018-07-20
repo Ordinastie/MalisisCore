@@ -604,6 +604,8 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		public Builder parent(UIComponent parent)
 		{
 			this.parent = parent;
+			//Assume default position to be top left in parent
+			position(s -> Position.topLeft(s));
 			return this;
 		}
 

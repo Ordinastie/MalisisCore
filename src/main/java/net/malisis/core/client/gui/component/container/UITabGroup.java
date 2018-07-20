@@ -207,7 +207,7 @@ public class UITabGroup extends UIContainer
 	private void setupTabContainer(UIContainer container)
 	{
 		attachedContainer.add(container);
-		container.setPosition(Position.zero(container));
+		container.setPosition(Position.topLeft(container));
 		container.setSize(Size.inherited(container));
 	}
 

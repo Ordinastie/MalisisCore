@@ -22,51 +22,47 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.component.layout;
+package net.malisis.core.util.cacheddata;
 
-import static com.google.common.base.Preconditions.*;
-
-import net.malisis.core.client.gui.component.UIComponent;
-import net.malisis.core.client.gui.component.container.UIContainer;
-import net.malisis.core.client.gui.element.position.Position;
-import net.malisis.core.client.gui.element.position.Position.IPosition;
+import java.util.function.BooleanSupplier;
 
 /**
  * @author Ordinastie
  *
  */
-public class RowLayout
+public class PredicatedData<T> implements ICachedData<T>
 {
-	protected final UIContainer parent;
-	protected final IPosition offset;
-	protected final int spacing;
-	protected UIComponent last;
+	private BooleanSupplier supplier;
+	private T trueValue;
+	private T falseValue;
 
-	public RowLayout(UIContainer parent, int spacing, IPosition offset)
+	private boolean lastResult;
+	private boolean currentResult;
+
+	public PredicatedData(BooleanSupplier supplier, T trueValue, T falseValue)
 	{
-		this.parent = checkNotNull(parent);
-		this.offset = offset;
-		this.spacing = spacing;
+		this.supplier = supplier;
+		this.trueValue = trueValue;
+		this.falseValue = falseValue;
 	}
 
-	public RowLayout(UIContainer parent)
+	@Override
+	public T get()
 	{
-		this(checkNotNull(parent), 0, null);
+		return currentResult ? trueValue : falseValue;
 	}
 
-	public RowLayout(UIContainer parent, int spacing)
+	@Override
+	public boolean hasChanged()
 	{
-		this(checkNotNull(parent), spacing, null);
+		return currentResult != lastResult;
 	}
 
-	public void add(UIComponent component)
+	@Override
+	public void update()
 	{
-		checkNotNull(component);
-		parent.add(component);
-		if (last == null)
-			component.setPosition(offset != null ? offset : Position.topLeft(component));
-		else
-			component.setPosition(Position.below(component, last, spacing));
-		last = component;
+		lastResult = currentResult;
+		currentResult = supplier.getAsBoolean();
 	}
+
 }

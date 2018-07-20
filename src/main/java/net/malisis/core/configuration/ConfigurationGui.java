@@ -129,7 +129,7 @@ public class ConfigurationGui extends MalisisGui
 		for (Setting<?> setting : categorySettings)
 		{
 			UIComponent component = setting.getComponent();
-			component.setPosition(last != null ? Position.below(component, last, 2) : Position.zero(component));
+			component.setPosition(last != null ? Position.below(component, last, 2) : Position.topLeft(component));
 			component.register(this);
 			container.add(component);
 			componentSettings.put(component, setting);

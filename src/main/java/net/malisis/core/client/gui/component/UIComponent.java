@@ -78,7 +78,7 @@ public abstract class UIComponent implements IContent, IGuiRenderer, IKeyListene
 	/** List of {@link UIComponent components} controlling this {@link UIContainer}. */
 	protected final Set<IControlComponent> controlComponents;
 	/** Position of this {@link UIComponent}. */
-	protected IPosition position = Position.zero(this);
+	protected IPosition position = Position.topLeft(this);
 	/** Position of this {@link UIComponent} on screen. */
 	private final IPosition screenPosition = new ScreenPosition(this, this instanceof IControlComponent);
 	/** Position of the mouse inside this {@link UIComponent}. */

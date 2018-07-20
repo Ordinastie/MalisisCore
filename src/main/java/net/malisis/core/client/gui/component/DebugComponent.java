@@ -33,10 +33,13 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import com.mojang.realmsclient.gui.ChatFormatting;
+
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.content.IContentHolder;
 import net.malisis.core.client.gui.element.Padding;
 import net.malisis.core.client.gui.element.Padding.IPadded;
+import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.element.size.Size;
 import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.client.gui.render.GuiRenderer;
@@ -46,6 +49,8 @@ import net.malisis.core.client.gui.text.GuiText;
 import net.malisis.core.client.gui.text.GuiText.Builder;
 import net.malisis.core.renderer.font.FontOptions;
 import net.malisis.core.util.ItemUtils;
+import net.malisis.core.util.cacheddata.PredicatedData;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.math.MathHelper;
 
@@ -65,6 +70,22 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 											.zIndex(this::hierarchyZIndex)
 											.border(2)
 											.build();
+
+	private GuiText cachedText = GuiText.builder()
+										.parent(this)
+										.text("FPS: {FPS}\n{POS}Position" + ChatFormatting.RESET + "\n{SIZE}Size")
+										.bind("FPS", Minecraft::getDebugFPS)
+										.bind(	"POS",
+												new PredicatedData<>(	() -> Position.CACHED,
+																		ChatFormatting.DARK_GREEN,
+																		ChatFormatting.DARK_RED))
+										.bind(	"SIZE",
+												new PredicatedData<>(() -> Size.CACHED, ChatFormatting.DARK_GREEN, ChatFormatting.DARK_RED))
+										.translated(false)
+										.fontOptions(fontOptions)
+										.position(s -> Position.topRight(s))
+										.build();
+
 	private int hierarchyColor;
 	private int hierarchyZIndex;
 
@@ -74,13 +95,14 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 		enabled = false;
 
 		setAlpha(80);
-		setZIndex(-1);
+		//setZIndex(-1);
 
-		setSize(Size.of(parentWidth(this, 1.0F, 0), heightOfContent(this, 10)));
+		setSize(Size.of(parentWidth(this, 1.0F, 0), heightOfContent(this, 0)));
 
 		setBackground(GuiShape.builder(this).color(0).alpha(this::getAlpha).build());
 		setForeground(((IGuiRenderer) this::drawHierarchy).and(r -> {
 			text.render(r);
+			cachedText.render(r);
 		}));
 
 		setDefaultDebug();
@@ -103,7 +125,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 	private void updateGuiText()
 	{
-		Builder tb = GuiText.builder().parent(this).multiLine().translated(false).fontOptions(fontOptions).position(2, 2);
+		Builder tb = GuiText.builder().parent(this).multiLine().translated(false).fontOptions(fontOptions);
 
 		String str = debugMap	.entrySet()
 								.stream()
@@ -180,6 +202,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 			scale = MathHelper.clamp(scale, 1 / 3F, 1);
 
 			text.setFontOptions(fontOptions.toBuilder().scale(scale).build());
+			cachedText.setFontOptions(fontOptions.toBuilder().scale(scale).build());
 		}
 		else if (GuiScreen.isShiftKeyDown())
 		{

@@ -41,6 +41,7 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.element.IKeyListener;
+import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.element.size.Size;
 import net.malisis.core.client.gui.render.GuiRenderer;
 import net.malisis.core.client.gui.render.GuiTexture;
@@ -321,7 +322,7 @@ public abstract class MalisisGui extends GuiScreen
 	public UIComponent getComponentAt(int x, int y)
 	{
 		UIComponent component = screen.getComponentAt(x, y);
-		return component == screen || component == debugComponent ? null : component;
+		return component == screen /*|| component == debugComponent*/ ? null : component;
 	}
 
 	/**
@@ -371,7 +372,10 @@ public abstract class MalisisGui extends GuiScreen
 					}
 				}
 				else
+				{
 					setHoveredComponent(null, false);
+					tooltip = null;
+				}
 			}
 
 			int delta = Mouse.getEventDWheel();
@@ -542,6 +546,14 @@ public abstract class MalisisGui extends GuiScreen
 				{
 					debug = !debug;
 					debugComponent.setEnabled(debug);
+				}
+				if (keyCode == Keyboard.KEY_P)
+				{
+					Position.CACHED = !Position.CACHED;
+				}
+				if (keyCode == Keyboard.KEY_S)
+				{
+					Size.CACHED = !Size.CACHED;
 				}
 			}
 		}

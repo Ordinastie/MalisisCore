@@ -48,8 +48,8 @@ public class UIProgressBar extends UIComponent
 	{
 		setSize(size);
 
-		IntSupplier xSupplier = null;
-		IntSupplier ySupplier = null;
+		IntSupplier xSupplier = () -> 0;
+		IntSupplier ySupplier = () -> 0;
 		ISize fillSize;
 		Supplier<GuiIcon> fillIcon;
 		if (vertical)
