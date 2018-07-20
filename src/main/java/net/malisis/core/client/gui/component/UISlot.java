@@ -33,7 +33,7 @@ import com.google.common.eventbus.Subscribe;
 
 import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.decoration.UITooltip;
-import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.size.Size;
 import net.malisis.core.client.gui.event.component.StateChangeEvent.HoveredStateChange;
 import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.client.gui.render.GuiRenderer;

@@ -35,14 +35,15 @@ import org.apache.commons.lang3.ObjectUtils;
 
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.IChild;
-import net.malisis.core.client.gui.element.Size;
-import net.malisis.core.client.gui.element.Size.ISize;
-import net.malisis.core.client.gui.element.Size.ISized;
 import net.malisis.core.client.gui.element.position.IPositionBuilder;
 import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.element.position.Position.IPosition;
 import net.malisis.core.client.gui.element.position.Position.IPositioned;
 import net.malisis.core.client.gui.element.position.Position.ScreenPosition;
+import net.malisis.core.client.gui.element.size.ISizeBuilder;
+import net.malisis.core.client.gui.element.size.Size;
+import net.malisis.core.client.gui.element.size.Size.ISize;
+import net.malisis.core.client.gui.element.size.Size.ISized;
 import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.client.gui.render.GuiRenderer;
 import net.malisis.core.client.gui.render.IGuiRenderer;
@@ -66,13 +67,13 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 	private final Supplier<GuiIcon> icon;
 	private final int border;
 
-	private GuiShape(UIComponent parent, Function<GuiShape, IPosition> position, IntSupplier zIndex, ISize size, ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha, Supplier<GuiIcon> icon, int border, boolean fixed)
+	private GuiShape(UIComponent parent, Function<GuiShape, IPosition> position, IntSupplier zIndex, Function<GuiShape, ISize> size, ToIntBiFunction<FacePosition, VertexPosition> color, ToIntBiFunction<FacePosition, VertexPosition> alpha, Supplier<GuiIcon> icon, int border, boolean fixed)
 	{
 		this.parent = parent;
 		this.position = position.apply(this);
 		this.screenPosition = new ScreenPosition(this, fixed);
 		this.zIndex = zIndex;
-		this.size = size;
+		this.size = size.apply(this);
 		this.color = color;
 		this.alpha = alpha;
 		this.icon = icon;
@@ -231,16 +232,16 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		return new Builder().forComponent(component);
 	}
 
-	public static class Builder implements IPositionBuilder<Builder, GuiShape>
+	public static class Builder implements IPositionBuilder<Builder, GuiShape>, ISizeBuilder<Builder, GuiShape>
 	{
 		private UIComponent component;
 		private boolean fixed = true;
 		private Function<GuiShape, IPosition> position = s -> Position.ZERO;
+		private Function<GuiShape, ISize> size = s -> Size.relativeTo(s);
 		private IntSupplier zIndex;
-		private ISize size = Size.of(5, 5);
 		private ToIntBiFunction<FacePosition, VertexPosition> color;
 		private ToIntBiFunction<FacePosition, VertexPosition> alpha;
-		private Supplier<GuiIcon> icon;
+		private Supplier<GuiIcon> icon = () -> GuiIcon.NONE;;
 		private int borderColor;
 		private int borderAlpha;
 		private int borderSize;
@@ -249,7 +250,6 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 		{
 			this.component = component;
 			this.color = (fp, vp) -> component.getColor();
-			size = Size.relativeTo(component);
 			this.zIndex = component::getZIndex;
 			return this;
 		}
@@ -279,14 +279,10 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 			return this;
 		}
 
-		public Builder size(int w, int h)
+		@Override
+		public Builder size(Function<GuiShape, ISize> func)
 		{
-			return size(Size.of(w, h));
-		}
-
-		public Builder size(ISize size)
-		{
-			this.size = checkNotNull(size);
+			size = checkNotNull(func);
 			return this;
 		}
 
@@ -381,11 +377,7 @@ public class GuiShape implements IGuiRenderer, IPositioned, ISized, IChild<UICom
 
 		public GuiShape build()
 		{
-			if (icon == null)
-				icon = () -> GuiIcon.NONE;
-			GuiShape shape = new GuiShape(component, position, zIndex, size, color, alpha, icon, borderSize, fixed);
-
-			return shape;
+			return new GuiShape(component, position, zIndex, size, color, alpha, icon, borderSize, fixed);
 		}
 	}
 }

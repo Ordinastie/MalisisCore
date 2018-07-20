@@ -36,7 +36,7 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.layout.RowLayout;
 import net.malisis.core.client.gui.element.IClipable;
-import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.size.Size;
 import net.malisis.core.client.gui.render.GuiRenderer;
 
 /**

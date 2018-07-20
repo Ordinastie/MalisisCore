@@ -24,6 +24,8 @@
 
 package net.malisis.core.client.gui.component;
 
+import static net.malisis.core.client.gui.element.size.Sizes.*;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.function.Supplier;
@@ -35,7 +37,7 @@ import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.content.IContentHolder;
 import net.malisis.core.client.gui.element.Padding;
 import net.malisis.core.client.gui.element.Padding.IPadded;
-import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.size.Size;
 import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.client.gui.render.GuiRenderer;
 import net.malisis.core.client.gui.render.IGuiRenderer;
@@ -74,7 +76,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 		setAlpha(80);
 		setZIndex(-1);
 
-		setSize(Size.of(this).parentWidth(1.0F, 0).contentHeight(10).build());
+		setSize(Size.of(parentWidth(this, 1.0F, 0), heightOfContent(this, 10)));
 
 		setBackground(GuiShape.builder(this).color(0).alpha(this::getAlpha).build());
 		setForeground(((IGuiRenderer) this::drawHierarchy).and(r -> {

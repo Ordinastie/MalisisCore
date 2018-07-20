@@ -31,7 +31,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import net.malisis.core.client.gui.MalisisGui;
-import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.size.Size.ISize;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;

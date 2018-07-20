@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.element;
+package net.malisis.core.client.gui.element.size;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -31,7 +31,9 @@ import java.util.function.IntSupplier;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.content.IContentHolder;
 import net.malisis.core.client.gui.component.scrolling.UIScrollBar;
-import net.malisis.core.client.gui.element.Size.ISized;
+import net.malisis.core.client.gui.element.IChild;
+import net.malisis.core.client.gui.element.Padding;
+import net.malisis.core.client.gui.element.size.Size.ISized;
 
 /**
  * @author Ordinastie

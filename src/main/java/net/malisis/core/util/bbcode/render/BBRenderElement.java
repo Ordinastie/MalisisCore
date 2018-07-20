@@ -99,8 +99,8 @@ public class BBRenderElement
 	{
 		if (itemStack != null)
 			renderer.drawItemStack(itemStack, x, y);
-		else
-			renderer.drawText(null, getFormattedText(), x, y, z, null);
+		//		else
+		//			renderer.drawText(null, getFormattedText(), x, y, z, null);
 	}
 
 	@Override

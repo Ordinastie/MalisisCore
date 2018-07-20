@@ -38,10 +38,10 @@ import net.malisis.core.client.gui.element.IClipable;
 import net.malisis.core.client.gui.element.IOffset;
 import net.malisis.core.client.gui.element.Padding;
 import net.malisis.core.client.gui.element.Padding.IPadded;
-import net.malisis.core.client.gui.element.Size;
-import net.malisis.core.client.gui.element.Size.ISize;
 import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.element.position.Position.IPosition;
+import net.malisis.core.client.gui.element.size.Size;
+import net.malisis.core.client.gui.element.size.Size.ISize;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.event.component.SpaceChangeEvent.SizeChangeEvent;
 import net.malisis.core.client.gui.render.GuiIcon;
@@ -803,6 +803,11 @@ public class UITextField extends UIComponent implements IContentHolder, IClipabl
 		protected int y;
 		/** The height of the line. */
 		protected int height = 9;
+
+		public int index()
+		{
+			return index;
+		}
 
 		/**
 		 * Gets the x offset from the left of this {@link Cursor} inside this {@link UITextField}.

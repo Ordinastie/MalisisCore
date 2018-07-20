@@ -28,12 +28,11 @@ import java.util.EnumSet;
 
 import org.lwjgl.input.Keyboard;
 
-import net.malisis.core.client.gui.Anchor;
 import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.interaction.UIButton;
-import net.malisis.core.client.gui.element.Size;
-import net.malisis.core.client.gui.element.Size.ISize;
+import net.malisis.core.client.gui.element.size.Size;
+import net.malisis.core.client.gui.element.size.Size.ISize;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.util.bbcode.BBString;
 import net.malisis.core.util.bbcode.node.BBColorNode;
@@ -84,7 +83,7 @@ public class BBCodeEditor extends UIContainer
 	protected BBTextField bbTexfield;
 
 	protected ComponentPosition menuPosition = ComponentPosition.TOP;
-	protected int buttonAnchor = Anchor.LEFT | Anchor.MIDDLE;
+	protected int buttonAnchor = 0;//Anchor.LEFT | Anchor.MIDDLE;
 
 	protected EnumSet<Tag> activeStyles = EnumSet.noneOf(Tag.class);
 

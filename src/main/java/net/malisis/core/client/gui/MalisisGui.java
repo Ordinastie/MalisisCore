@@ -41,7 +41,7 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.element.IKeyListener;
-import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.size.Size;
 import net.malisis.core.client.gui.render.GuiRenderer;
 import net.malisis.core.client.gui.render.GuiTexture;
 import net.malisis.core.inventory.MalisisInventoryContainer;

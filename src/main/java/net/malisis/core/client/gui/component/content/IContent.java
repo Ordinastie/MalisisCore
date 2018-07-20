@@ -26,9 +26,9 @@ package net.malisis.core.client.gui.component.content;
 
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.element.IChild;
-import net.malisis.core.client.gui.element.Size.ISized;
 import net.malisis.core.client.gui.element.position.Position.IPosition;
 import net.malisis.core.client.gui.element.position.Position.IPositioned;
+import net.malisis.core.client.gui.element.size.Size.ISized;
 import net.malisis.core.client.gui.render.IGuiRenderer;
 
 /**

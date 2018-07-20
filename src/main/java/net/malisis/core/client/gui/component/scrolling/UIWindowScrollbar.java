@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
-import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.size.Size;
 import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.client.gui.render.shape.GuiShape;
 

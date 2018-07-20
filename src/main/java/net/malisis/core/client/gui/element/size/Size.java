@@ -22,14 +22,14 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.client.gui.element;
-
-import static com.google.common.base.Preconditions.*;
+package net.malisis.core.client.gui.element.size;
 
 import java.util.function.IntSupplier;
 
+import net.malisis.core.client.gui.MalisisGui;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.content.IContentHolder;
+import net.malisis.core.client.gui.element.IChild;
 
 /**
  * @author Ordinastie
@@ -37,7 +37,9 @@ import net.malisis.core.client.gui.component.content.IContentHolder;
  */
 public class Size
 {
+	public static boolean CACHE_SIZE = true;
 	public static final ISize ZERO = Size.of(0, 0);
+	public static final ISize DEFAULT = Size.of(16, 16);
 
 	public interface ISized
 	{
@@ -79,117 +81,59 @@ public class Size
 		}
 	}
 
-	public static class FixedSize implements ISize
-	{
-		private int width;
-		private int height;
-
-		public FixedSize(int width, int height)
-		{
-			this.width = width;
-			this.height = height;
-		}
-
-		@Override
-		public int width()
-		{
-			return width;
-		}
-
-		@Override
-		public int height()
-		{
-			return height;
-		}
-
-		@Override
-		public String toString()
-		{
-			return width() + "x" + height();
-		}
-	}
-
-	public static class FixedWidthSize implements ISize
-	{
-		private int width;
-		private IntSupplier heightSupplier;
-
-		public FixedWidthSize(int width, IntSupplier heightSupplier)
-		{
-			this.width = width;
-			this.heightSupplier = heightSupplier;
-		}
-
-		@Override
-		public int width()
-		{
-			return width;
-		}
-
-		@Override
-		public int height()
-		{
-			return heightSupplier.getAsInt();
-		}
-
-		@Override
-		public String toString()
-		{
-			return width() + "," + height();
-		}
-	}
-
-	public static class FixedHeightSize implements ISize
-	{
-		private IntSupplier widthSupplier;
-		private int height;
-
-		public FixedHeightSize(IntSupplier widthSupplier, int height)
-		{
-			this.widthSupplier = widthSupplier;
-			this.height = height;
-		}
-
-		@Override
-		public int width()
-		{
-			return widthSupplier.getAsInt();
-		}
-
-		@Override
-		public int height()
-		{
-			return height;
-		}
-
-		@Override
-		public String toString()
-		{
-			return width() + "," + height();
-		}
-	}
-
 	public static class DynamicSize implements ISize
 	{
-		private final IntSupplier width;
-		private final IntSupplier height;
+		private int cachedWidth;
+		private int cachedHeight;
 
-		public DynamicSize(IntSupplier width, IntSupplier height)
+		private int lastFrameWidth = -1;
+		private int lastFrameHeight = -1;
+
+		private final int width;
+		private final int height;
+		private final IntSupplier widthFunction;
+		private final IntSupplier heightFunction;
+
+		DynamicSize(int width, int height, IntSupplier widthFunction, IntSupplier heightFunction)
 		{
-			this.width = checkNotNull(width);
-			this.height = checkNotNull(height);
+			this.width = width;
+			this.height = height;
+			this.widthFunction = widthFunction;
+			this.heightFunction = heightFunction;
+		}
+
+		private void updateWidth()
+		{
+			if (lastFrameWidth == MalisisGui.counter && CACHE_SIZE)
+				return;
+			cachedWidth = widthFunction.getAsInt();
+			lastFrameWidth = MalisisGui.counter;
+		}
+
+		private void updateHeight()
+		{
+			if (lastFrameHeight == MalisisGui.counter && CACHE_SIZE)
+				return;
+			cachedHeight = heightFunction.getAsInt();
+			lastFrameHeight = MalisisGui.counter;
 		}
 
 		@Override
 		public int width()
 		{
-			return width.getAsInt();
+			if (widthFunction == null)
+				return width;
+			updateWidth();
+			return cachedWidth;
 		}
 
 		@Override
 		public int height()
 		{
-			return height.getAsInt();
+			if (heightFunction == null)
+				return height;
+			updateHeight();
+			return cachedHeight;
 		}
 
 		@Override
@@ -197,48 +141,37 @@ public class Size
 		{
 			return width() + "x" + height();
 		}
-	}
-
-	//Builder
-	public static SizeBuilder builder()
-	{
-		return new SizeBuilder();
-	}
-
-	public static SizeBuilder of(UIComponent owner)
-	{
-		return new SizeBuilder(owner);
 	}
 
 	//Size shortcuts
-	public static ISize of(int x, int y)
+	public static ISize of(int width, int height)
 	{
-		return new FixedSize(x, y);
+		return new DynamicSize(width, height, null, null);
 	}
 
-	public static ISize of(int x, IntSupplier ySupplier)
+	public static ISize of(int width, IntSupplier heightSupplier)
 	{
-		return new FixedWidthSize(x, ySupplier);
+		return new DynamicSize(width, 0, null, heightSupplier);
 	}
 
-	public static ISize of(IntSupplier xSupplier, int y)
+	public static ISize of(IntSupplier widthSupplier, int height)
 	{
-		return new FixedHeightSize(xSupplier, y);
+		return new DynamicSize(0, height, widthSupplier, null);
 	}
 
-	public static ISize of(IntSupplier xSupplier, IntSupplier ySupplier)
+	public static ISize of(IntSupplier widthSupplier, IntSupplier heightSupplier)
 	{
-		return new DynamicSize(xSupplier, ySupplier);
+		return new DynamicSize(0, 0, widthSupplier, heightSupplier);
 	}
 
 	public static <T extends ISized & IChild<UIComponent>> ISize relativeTo(T other)
 	{
-		return new DynamicSize(Sizes.widthRelativeTo(other, 1.0F, 0), Sizes.heightRelativeTo(other, 1.0F, 0));
+		return new DynamicSize(0, 0, Sizes.widthRelativeTo(other, 1.0F, 0), Sizes.heightRelativeTo(other, 1.0F, 0));
 	}
 
 	public static <T extends ISized & IChild<UIComponent>> ISize inherited(T owner)
 	{
-		return new DynamicSize(Sizes.parentWidth(owner, 1.0F, 0), Sizes.parentHeight(owner, 1.0F, 0));
+		return new DynamicSize(0, 0, Sizes.parentWidth(owner, 1.0F, 0), Sizes.parentHeight(owner, 1.0F, 0));
 	}
 
 	public static ISize sizeOfContent(IContentHolder owner)
@@ -248,7 +181,7 @@ public class Size
 
 	public static ISize sizeOfContent(IContentHolder owner, int widthOffset, int heightOffset)
 	{
-		return new DynamicSize(Sizes.widthOfContent(owner, widthOffset), Sizes.heightOfContent(owner, heightOffset));
+		return new DynamicSize(0, 0, Sizes.widthOfContent(owner, widthOffset), Sizes.heightOfContent(owner, heightOffset));
 	}
 
 }

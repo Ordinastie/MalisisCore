@@ -27,9 +27,9 @@ package net.malisis.core.client.gui.component.container;
 import static net.malisis.core.client.gui.element.position.Positions.*;
 
 import net.malisis.core.client.gui.component.UISlot;
-import net.malisis.core.client.gui.element.Size;
-import net.malisis.core.client.gui.element.Size.ISize;
 import net.malisis.core.client.gui.element.position.Position;
+import net.malisis.core.client.gui.element.size.Size;
+import net.malisis.core.client.gui.element.size.Size.ISize;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisSlot;
 

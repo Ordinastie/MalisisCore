@@ -26,6 +26,7 @@ package net.malisis.core.client.gui.component.interaction;
 
 import static com.google.common.base.Preconditions.*;
 import static net.malisis.core.client.gui.element.position.Positions.*;
+import static net.malisis.core.client.gui.element.size.Sizes.*;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -45,10 +46,10 @@ import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.scrolling.UIScrollBar;
 import net.malisis.core.client.gui.component.scrolling.UISlimScrollbar;
 import net.malisis.core.client.gui.element.Padding;
-import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.element.position.Position.IPosition;
 import net.malisis.core.client.gui.element.position.Positions;
+import net.malisis.core.client.gui.element.size.Size;
 import net.malisis.core.client.gui.event.ComponentEvent.ValueChange;
 import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.client.gui.render.GuiRenderer;
@@ -328,7 +329,7 @@ public class UISelect<T> extends UIComponent
 			//TODO: place it above if room below is too small
 			setPosition(Position.of(() -> UISelect.this.screenPosition().x(),
 									() -> UISelect.this.screenPosition().y() + UISelect.this.size().height()));
-			setSize(Size.of(this).widthRelativeTo(UISelect.this, 1.0F, 0).contentHeight(0).build());
+			setSize(Size.of(widthRelativeTo(UISelect.this, 1.0F, 0), heightOfContent(this, 0)));
 			setZIndex(300);
 			setBackground(GuiShape.builder(this).color(UISelect.this::getColor).icon(GuiIcon.SELECT_BOX).border(1).build());
 
@@ -414,40 +415,40 @@ public class UISelect<T> extends UIComponent
 		{
 			private int width;
 			private int height;
-
+	
 			private void update()
 			{
 				if (options == null)
 					return;
-
+	
 				//calculate height
 				int offset = UISelect.this.optionsContainer.optionOffset;
 				height = 2;
 				for (int i = offset; i < Math.min(offset + maxDisplayedOptions, options.size()); i++)
 					height += options.get(i).getHeight(UISelect.this);
-
+	
 				//calculate width
 				width = UISelect.this.size().width();
 				if (maxOptionsWidth == SELECT_WIDTH)
 					return;
-
+	
 				width -= 4;
 				for (Option<?> option : UISelect.this)
 					width = Math.max(width, (int) MalisisFont.minecraftFont.getStringWidth(option.getLabel(labelPattern), fontOptions));
 				width += 4;
 				if (width == LONGEST_OPTION)
 					return;
-
+	
 				if (maxOptionsWidth >= UISelect.this.size().width())
 					width = Math.min(maxOptionsWidth, width);
 			}
-
+	
 			@Override
 			public int width()
 			{
 				return width;
 			}
-
+	
 			@Override
 			public int height()
 			{
@@ -484,7 +485,7 @@ public class UISelect<T> extends UIComponent
 
 			attachData(element);
 
-			setSize(Size.of(this).inheritedWidth().heightRelativeTo(text, 1.0F, 2).build());
+			setSize(Size.of(parentWidth(this, 1.0F, 0), heightRelativeTo(text, 1.0F, 2)));
 
 			setBackground(background);
 			setForeground(text);

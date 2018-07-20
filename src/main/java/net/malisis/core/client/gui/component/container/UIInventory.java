@@ -28,8 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import net.malisis.core.client.gui.component.UISlot;
 import net.malisis.core.client.gui.component.decoration.UILabel;
-import net.malisis.core.client.gui.element.Size;
 import net.malisis.core.client.gui.element.position.Position;
+import net.malisis.core.client.gui.element.size.Size;
 import net.malisis.core.inventory.MalisisInventory;
 import net.malisis.core.inventory.MalisisSlot;
 

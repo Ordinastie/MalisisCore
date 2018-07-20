@@ -95,30 +95,30 @@ public class BBCodeRenderer
 		}
 	}
 
-	public void render(GuiRenderer renderer, int x, int y, int z, IBBCodeRenderer<?> bbsr)
+	public void render(GuiRenderer renderer, int x, int y, int z)
 	{
-		int ox = x;
-		int oy = y;
-		int lineHeight = bbsr.getLineHeight();
-
-		for (BBRenderElement el : renderElements)
-		{
-			if (el.line > bbsr.getStartLine() + bbsr.getVisibleLines())
-				return;
-
-			if (el.line >= bbsr.getStartLine())
-			{
-				el.render(renderer, ox, oy, z);
-				if (el.newLine)
-				{
-					ox = x;
-					oy += lineHeight;
-				}
-				else
-				{
-					ox += el.width();
-				}
-			}
-		}
+		//		int ox = x;
+		//		int oy = y;
+		//		int lineHeight = bbsr.getLineHeight();
+		//
+		//		for (BBRenderElement el : renderElements)
+		//		{
+		//			if (el.line > bbsr.getStartLine() + bbsr.getVisibleLines())
+		//				return;
+		//
+		//			if (el.line >= bbsr.getStartLine())
+		//			{
+		//				el.render(renderer, ox, oy, z);
+		//				if (el.newLine)
+		//				{
+		//					ox = x;
+		//					oy += lineHeight;
+		//				}
+		//				else
+		//				{
+		//					ox += el.width();
+		//				}
+		//			}
+		//		}
 	}
 }

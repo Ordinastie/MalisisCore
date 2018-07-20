@@ -24,10 +24,10 @@
 
 package net.malisis.core.client.gui.component.content;
 
-import net.malisis.core.client.gui.element.Size;
-import net.malisis.core.client.gui.element.Size.ISize;
 import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.element.position.Position.IPosition;
+import net.malisis.core.client.gui.element.size.Size;
+import net.malisis.core.client.gui.element.size.Size.ISize;
 
 /**
  * @author Ordinastie

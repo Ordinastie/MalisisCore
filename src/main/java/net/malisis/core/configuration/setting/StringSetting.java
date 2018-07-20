@@ -29,9 +29,9 @@ import static net.malisis.core.client.gui.element.position.Positions.*;
 import net.malisis.core.client.gui.component.container.UIContainer;
 import net.malisis.core.client.gui.component.decoration.UILabel;
 import net.malisis.core.client.gui.component.interaction.UITextField;
-import net.malisis.core.client.gui.element.Size;
-import net.malisis.core.client.gui.element.Sizes;
 import net.malisis.core.client.gui.element.position.Position;
+import net.malisis.core.client.gui.element.size.Size;
+import net.malisis.core.client.gui.element.size.Sizes;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 

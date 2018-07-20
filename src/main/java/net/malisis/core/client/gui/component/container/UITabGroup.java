@@ -29,10 +29,10 @@ import java.util.LinkedHashMap;
 import net.malisis.core.client.gui.ComponentPosition;
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.interaction.UITab;
-import net.malisis.core.client.gui.element.Size;
-import net.malisis.core.client.gui.element.Size.ISize;
 import net.malisis.core.client.gui.element.position.Position;
 import net.malisis.core.client.gui.element.position.Position.IPosition;
+import net.malisis.core.client.gui.element.size.Size;
+import net.malisis.core.client.gui.element.size.Size.ISize;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.render.GuiIcon;
 

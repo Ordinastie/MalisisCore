@@ -31,7 +31,7 @@ import com.google.common.base.Converter;
 
 import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.content.IContentHolder;
-import net.malisis.core.client.gui.element.Size;
+import net.malisis.core.client.gui.element.size.Size;
 import net.malisis.core.client.gui.event.ComponentEvent;
 import net.malisis.core.client.gui.render.GuiIcon;
 import net.malisis.core.client.gui.render.shape.GuiShape;

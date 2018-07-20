@@ -33,7 +33,7 @@ import net.malisis.core.client.gui.component.UIComponent;
 import net.malisis.core.client.gui.component.control.IScrollable;
 import net.malisis.core.client.gui.element.IChild;
 import net.malisis.core.client.gui.element.IOffset;
-import net.malisis.core.client.gui.element.Size.ISized;
+import net.malisis.core.client.gui.element.size.Size.ISized;
 
 /**
  * @author Ordinastie
@@ -93,10 +93,10 @@ public class Position
 		private int lastFrameX = -1;
 		private int lastFrameY = -1;
 
-		private int x;
-		private int y;
-		private IntSupplier xFunction;
-		private IntSupplier yFunction;
+		private final int x;
+		private final int y;
+		private final IntSupplier xFunction;
+		private final IntSupplier yFunction;
 
 		DynamicPosition(int x, int y, IntSupplier xFunction, IntSupplier yFunction)
 		{
@@ -106,32 +106,37 @@ public class Position
 			this.yFunction = yFunction;
 		}
 
-		private void update()
+		private void updateX()
 		{
-			if (lastFrameX != MalisisGui.counter || !CACHE_POSITION) //new frame
-			{
-				cachedX = xFunction == null ? x : xFunction.getAsInt();
-				lastFrameX = MalisisGui.counter;
-			}
-			if (lastFrameY != MalisisGui.counter || !CACHE_POSITION)
-			{
-				cachedY = yFunction == null ? y : yFunction.getAsInt();
-				lastFrameY = MalisisGui.counter;
-			}
+			if (lastFrameX == MalisisGui.counter && CACHE_POSITION)
+				return;
+			cachedX = xFunction.getAsInt();
+			lastFrameX = MalisisGui.counter;
+		}
+
+		private void updateY()
+		{
+			if (lastFrameY == MalisisGui.counter && CACHE_POSITION)
+				return;
+			cachedY = yFunction.getAsInt();
+			lastFrameY = MalisisGui.counter;
 		}
 
 		@Override
 		public int x()
 		{
-
-			update();
+			if (xFunction == null)
+				return x;
+			updateX();
 			return cachedX;
 		}
 
 		@Override
 		public int y()
 		{
-			update();
+			if (yFunction == null)
+				return y;
+			updateY();
 			return cachedY;
 		}
 
@@ -169,7 +174,6 @@ public class Position
 		{
 			if (lastFrameX != MalisisGui.counter || !CACHE_POSITION)
 				updateX();
-
 			return cachedX;
 		}
 
