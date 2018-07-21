@@ -91,8 +91,10 @@ public class FontOptions
 	protected final boolean obfuscated;
 	/** Space between each line. */
 	protected final int lineSpacing;
+	/** Right aligned. */
+	protected final boolean rightAligned;
 
-	protected FontOptions(MalisisFont font, float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, int lineSpacing)
+	protected FontOptions(MalisisFont font, float fontScale, int color, boolean shadow, boolean bold, boolean italic, boolean underline, boolean strikethrough, boolean obfuscated, int lineSpacing, boolean rightAligned)
 	{
 		this.font = font;
 		this.fontScale = fontScale;
@@ -104,6 +106,7 @@ public class FontOptions
 		this.strikethrough = strikethrough;
 		this.obfuscated = obfuscated;
 		this.lineSpacing = lineSpacing;
+		this.rightAligned = rightAligned;
 	}
 
 	public MalisisFont getFont()
@@ -200,6 +203,16 @@ public class FontOptions
 	public int lineSpacing()
 	{
 		return lineSpacing;
+	}
+
+	/**
+	 * Checks whether the text is right aligned.
+	 *
+	 * @return true, if right aligned
+	 */
+	public boolean isRightAligned()
+	{
+		return rightAligned;
 	}
 
 	/**
@@ -356,6 +369,7 @@ public class FontOptions
 		protected boolean strikethrough = false;
 		protected boolean obfuscated = false;
 		protected int lineSpacing = 1;
+		protected boolean rightAligned = false;
 
 		public FontOptionsBuilder()
 		{}
@@ -444,6 +458,18 @@ public class FontOptions
 			return this;
 		}
 
+		public FontOptionsBuilder rightAligned()
+		{
+			this.rightAligned = true;
+			return this;
+		}
+
+		public FontOptionsBuilder leftAligned()
+		{
+			this.rightAligned = false;
+			return this;
+		}
+
 		public FontOptionsBuilder styles(String styles)
 		{
 			for (TextFormatting format : getFormattings(styles, 0))
@@ -493,6 +519,7 @@ public class FontOptions
 			strikethrough = options.strikethrough;
 			obfuscated = options.obfuscated;
 			lineSpacing = options.lineSpacing;
+			rightAligned = options.rightAligned;
 
 			return this;
 		}
@@ -509,7 +536,17 @@ public class FontOptions
 
 		private FontOptions buildBase()
 		{
-			return new FontOptions(font, fontScale, color, shadow, bold, italic, underline, strikethrough, obfuscated, lineSpacing);
+			return new FontOptions(	font,
+									fontScale,
+									color,
+									shadow,
+									bold,
+									italic,
+									underline,
+									strikethrough,
+									obfuscated,
+									lineSpacing,
+									rightAligned);
 		}
 
 		private IPredicatedSupplier<FontOptions> buildSupplier()

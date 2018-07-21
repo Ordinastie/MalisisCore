@@ -82,7 +82,7 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 										.bind(	"SIZE",
 												new PredicatedData<>(() -> Size.CACHED, ChatFormatting.DARK_GREEN, ChatFormatting.DARK_RED))
 										.translated(false)
-										.fontOptions(fontOptions)
+										.fontOptions(FontOptions.builder().color(0xFFFFFF).shadow().rightAligned().build())
 										.position(s -> Position.topRight(s))
 										.build();
 
@@ -249,5 +249,11 @@ public class DebugComponent extends UIComponent implements IPadded, IContentHold
 
 			component = component.getParent();
 		}
+	}
+
+	@Override
+	public String toString()
+	{
+		return "Debug Component";
 	}
 }

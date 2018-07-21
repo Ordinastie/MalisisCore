@@ -227,6 +227,8 @@ public class MalisisFont
 	{
 		if (area == null || area.noClip())
 			return true;
+		if (area.fullClip())
+			return false;
 
 		return area.isInside(x, y) || area.isInside(x + (int) Math.ceil(walker.width()), y + (int) Math.ceil(walker.height()));
 	}
@@ -249,22 +251,24 @@ public class MalisisFont
 
 			while (walker.walk())
 			{
+				rx = walker.x();
+				ry = walker.y();
 				if (isCharVisible((int) (x + rx), (int) (y + ry), walker, clipArea))
 				{
 					options = walker.currentStyle();
 					renderCharacter(walker.getChar(), rx, ry, options);
 				}
-				rx += walker.width();
+				//rx += walker.width();
 
 				//if justified
 				//LineInfo info = text.lines().get(walker.lineIndex);
 				//rx += info.spaceWidth() / info.text().length();
 
-				if (walker.isEOL())
-				{
-					ry += walker.lineHeight();
-					rx = 0;
-				}
+				//				if (walker.isEOL())
+				//				{
+				//					ry += walker.lineHeight();
+				//					rx = 0;
+				//				}
 			}
 		}
 		catch (Exception e)

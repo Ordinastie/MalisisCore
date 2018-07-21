@@ -60,7 +60,8 @@ public class UICheckBox extends UIComponent implements IContentHolder
 	public UICheckBox(String text)
 	{
 		setText(text);
-		setSize(Size.sizeOfContent(this, 14, 12));
+		//TODO: height = max(14, heightOfContent) ?
+		setSize(Size.sizeOfContent(this, 15, 4));
 
 		//Background
 		setBackground(GuiShape.builder(this).position(1, 0).size(12, 12).icon(GuiIcon.CHECKBOX_BG).build());
@@ -100,7 +101,7 @@ public class UICheckBox extends UIComponent implements IContentHolder
 	{
 		this.content = content;
 		content.setParent(this);
-		content.setPosition(Position.of(14, 2));
+		content.setPosition(Position.of(15, 2));
 	}
 
 	public void setText(String text)

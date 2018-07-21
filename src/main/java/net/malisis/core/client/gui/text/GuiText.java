@@ -364,6 +364,9 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 			h += info.height() + fontOptions.lineSpacing();
 		}
 		size = Size.of(w, h);
+
+		for (LineInfo info : lines)
+			info.spaceWidth = w;
 	}
 
 	/**
@@ -421,7 +424,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		StringBuilder word = new StringBuilder();
 		//FontRenderOptions fro = new FontRenderOptions();
 
-		int maxWidth = multiLine ? getWrapSize() : -1;
+		int wrapWidth = multiLine ? getWrapSize() : -1;
 		float lineWidth = 0;
 		float wordWidth = 0;
 		float lineHeight = 0;
@@ -445,7 +448,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 				word.setLength(0);
 				wordWidth = 0;
 			}
-			if (isMultiLine() && ((maxWidth > 0 && lineWidth >= maxWidth) || c == '\n'))
+			if (isMultiLine() && ((wrapWidth > 0 && lineWidth >= wrapWidth) || c == '\n'))
 			{
 				//the first word on the line is too large, split anyway
 				if (line.length() == 0)
@@ -457,11 +460,9 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 
 				//remove current word from last line
 				lineWidth -= wordWidth;
-				//new line -> no justification
-				float extra = c == '\n' ? 0 : maxWidth - lineWidth;
 
 				//add the new line
-				lines.add(new LineInfo(line.toString(), MathHelper.ceil(lineWidth), MathHelper.ceil(lineHeight), extra));
+				lines.add(new LineInfo(line.toString(), MathHelper.ceil(lineWidth), MathHelper.ceil(lineHeight), 0));
 				line.setLength(0);
 
 				lineWidth = wordWidth;
@@ -712,7 +713,7 @@ public class GuiText implements IGuiRenderer, IContent, IChild<UIComponent>
 		private final String text;
 		private final int width;
 		private final int height;
-		private final float spaceWidth;
+		private float spaceWidth;
 
 		private LineInfo(String text, int width, int height, float spaceWidth)
 		{

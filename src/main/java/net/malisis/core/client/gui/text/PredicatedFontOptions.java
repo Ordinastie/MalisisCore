@@ -39,7 +39,7 @@ public class PredicatedFontOptions extends FontOptions
 
 	public PredicatedFontOptions(FontOptions base, IPredicatedSupplier<FontOptions> supplier)
 	{
-		super(null, 0, 0, false, false, false, false, false, false, 0);
+		super(null, 0, 0, false, false, false, false, false, false, 0, false);
 		this.base = base;
 		this.supplier = supplier;
 	}
@@ -142,5 +142,11 @@ public class PredicatedFontOptions extends FontOptions
 	public int getColor()
 	{
 		return get().getColor();
+	}
+
+	@Override
+	public boolean isRightAligned()
+	{
+		return get().isRightAligned();
 	}
 }

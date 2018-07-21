@@ -48,13 +48,19 @@ public class StringWalker
 	protected List<LineInfo> lines = Lists.newArrayList();
 	/** Current text/line being walked through. */
 	protected String currentText;
-	/** Whether format character should be considered as regular characeters. */
+	/** Whether format character should be considered as regular characters. */
 	protected boolean litteral;
+	/**
+	 * Whether walking through the text automatically advances formatting. Should be set to true when rendering (don't show format
+	 * characters), and false when building lines (keeps formatting in lines).
+	 */
 	protected boolean skipChars = true;
 	/** Whether to apply styles for format characters. */
 	protected boolean applyStyles;
 	/** Space between each line. */
 	protected int lineSpacing;
+
+	protected boolean rightAligned = false;
 
 	/** Current global character index. */
 	protected int globalIndex = -1;
@@ -89,7 +95,6 @@ public class StringWalker
 		initLine(text);
 		this.lineSpacing = (options != null ? options.lineSpacing() : 2);
 		styles.add(options != null ? options : FontOptions.EMPTY);
-
 	}
 
 	public StringWalker(GuiText text, FontOptions options)
@@ -98,6 +103,7 @@ public class StringWalker
 		this.litteral = text.isLitteral();
 		this.lineSpacing = (options != null ? options.lineSpacing() : 2);
 		styles.add(options != null ? options : FontOptions.EMPTY);
+		this.rightAligned = options != null && options.isRightAligned();
 
 		if (lines.size() > 0)
 		{
@@ -213,6 +219,9 @@ public class StringWalker
 	 */
 	protected void checkFormatting()
 	{
+		//previous character was formatting, keep format field set
+		if (FontOptions.getFormatting(currentText, charIndex - 1) != null)
+			return;
 		format = FontOptions.getFormatting(currentText, charIndex);
 		if (format == null)
 			return;
@@ -256,6 +265,8 @@ public class StringWalker
 
 		//position
 		x = 0;
+		if (rightAligned && lines.size() >= lineIndex)
+			x += lines.get(lineIndex).spaceWidth() - lines.get(lineIndex).width();
 		//add last line height
 		height = 0;
 		width = 0;
@@ -264,7 +275,7 @@ public class StringWalker
 
 	private boolean nextLine()
 	{
-		if (this.lineIndex >= lines.size() - 1)
+		if (lineIndex >= lines.size() - 1)
 			return false;
 
 		globalIndex += endLineIndex - charIndex; //add line size
