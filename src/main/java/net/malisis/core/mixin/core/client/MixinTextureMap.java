@@ -22,44 +22,32 @@
  * THE SOFTWARE.
  */
 
-package net.malisis.core.asm.mixin.core;
+package net.malisis.core.mixin.core.client;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import net.malisis.core.registry.Registries;
-import net.malisis.core.util.callback.CallbackResult;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
+import net.malisis.core.renderer.icon.Icon;
+import net.minecraft.client.renderer.texture.Stitcher;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.resources.IResourceManager;
+import net.minecraftforge.fml.common.ProgressManager;
 
 /**
  * @author Ordinastie
  *
  */
-@Mixin(value = Chunk.class, priority = 1001)
-public class MixinChunk
+@Mixin(TextureMap.class)
+public abstract class MixinTextureMap
 {
-	private IBlockState oldState;
-
-	@Inject(method = "setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/state/IBlockState;",
-			at = @At("HEAD"),
-			cancellable = true)
-	private void preSetBlock(BlockPos pos, IBlockState newState, CallbackInfoReturnable<IBlockState> cir)
+	//capture atlas size
+	@Inject(method = "loadTextureAtlas", at = @At("RETURN"), locals = LocalCapture.CAPTURE_FAILSOFT)
+	private void onLoadTextureAtlas(IResourceManager resourceManager, CallbackInfo ci, int i, Stitcher stitcher, int j, int k, ProgressManager.ProgressBar bar)
 	{
-		Chunk chunk = (Chunk) (Object) this;
-		oldState = chunk.getBlockState(pos);
-		CallbackResult<Void> cb = Registries.processPreSetBlock(chunk, pos, oldState, newState);
-		if (cb.shouldReturn())
-			cir.cancel();
-	}
-
-	@Inject(method = "setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Lnet/minecraft/block/state/IBlockState;",
-			at = @At("TAIL"))
-	private void postSetBlock(BlockPos pos, IBlockState newState, CallbackInfoReturnable<IBlockState> cir)
-	{
-		Registries.processPostSetBlock((Chunk) (Object) this, pos, oldState, newState);
+		Icon.BLOCK_TEXTURE_WIDTH = stitcher.getCurrentWidth();
+		Icon.BLOCK_TEXTURE_HEIGHT = stitcher.getCurrentHeight();
 	}
 }
