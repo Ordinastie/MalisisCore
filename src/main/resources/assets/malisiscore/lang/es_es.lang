@@ -1,0 +1,11 @@
+#####Translation into Spanish by OdinsRagnarok#####
+
+malisiscore.commands.usage=Usar /malisis <config|version> [ModId] para mostrar la versión actual o la interfaz de configuración para el mod.
+malisiscore.commands.modversion=Versión actual para %s : %s.
+malisiscore.commands.modnotfound=Ningún mod registrado con id %s.
+malisiscore.commands.noconfiguration=Ninguna configuración disponible para %s.
+
+malisiscore.config.title=Configuración
+
+malisiscore.config.sortTileEntities=Habilitar ordenación de entidad de bloque
+malisiscore.config.sortTileEntities.comment=Habilite esta opción para ordenar las entidad de bloque antes de renderizar.\r\nEsto solucionará problemas de transparencia donde algunas entidades de bloque no se muestran correctamente cuando están detrás de otra.\r\nPuede afectar al rendimiento.
