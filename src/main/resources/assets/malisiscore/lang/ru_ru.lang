@@ -2,3 +2,8 @@ malisiscore.commands.usage=Используйте /malisis <config|version> [id 
 malisiscore.commands.modversion=Текущая версия для %s : %s.
 malisiscore.commands.modnotfound=Модификация с id %s не найден.
 malisiscore.commands.noconfiguration=Конфигурация для %s не доступна.
+
+malisiscore.config.title=Конфигурация
+
+malisiscore.config.sortTileEntities=Включить сортировку плиточных объектов
+malisiscore.config.sortTileEntities.comment=Включите эту опцию, чтобы отсортировать плиточные объекты перед рендерингом.\r\nЭто устранит проблемы с прозрачностью, когда некоторые плиточные объекты отображаются неправильно, если находятся позади других.\r\nМожет повлиять на производительность.
