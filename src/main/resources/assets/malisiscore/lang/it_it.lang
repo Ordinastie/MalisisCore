@@ -1,0 +1,9 @@
+malisiscore.commands.usage=Usa /malisis <configurazione|versione> [modid] per mostrare la versione attuale o l'interfaccia di configurazione per la mod.
+malisiscore.commands.modversion=Versione attuale della %s : %s.
+malisiscore.commands.modnotfound=Nessuna mod registrata con l'ID %s.
+malisiscore.commands.noconfiguration=Nessuna configurazione disponibile per la %s.
+
+malisiscore.config.title=Configurazione
+
+malisiscore.config.sortTileEntities=Attiva ordinamento per entità piatte
+malisiscore.config.sortTileEntities.comment=Attiva questa opzione per ordinare le entità piatte prima del rendering.\r\nQuesto risolve i problemi di trasparenze dove alcune entità piatte non vengono mostrate correttamente quando dietro ad altre.\r\nPuò influire sulle prestazioni.
